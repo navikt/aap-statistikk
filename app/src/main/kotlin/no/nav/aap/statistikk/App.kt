@@ -24,13 +24,13 @@ val logger = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 fun main() {
     logger.info("I started :).")
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
+    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
 }
 
 fun Application.module() {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            logger.info("")
+            logger.info("Noe gikk galt. %", cause)
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
@@ -57,6 +57,11 @@ fun Application.module() {
     }
 
     routing {
+        route("/") {
+            get {
+                call.respondText("Hello World!", contentType = ContentType.Text.Plain)
+            }
+        }
         route("/actuator") {
             get("/metrics") {
                 call.respond(prometheus.scrape())
