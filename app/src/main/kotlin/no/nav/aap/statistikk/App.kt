@@ -20,11 +20,12 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.slf4j.LoggerFactory
 import java.util.*
 
+val logger = LoggerFactory.getLogger("no.nav.aap.statistikk")
+
 fun main() {
+    logger.info("I started")
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
 }
-
-val logger = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 fun Application.module() {
     install(StatusPages) {
