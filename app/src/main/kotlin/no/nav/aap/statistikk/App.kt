@@ -23,7 +23,7 @@ import java.util.*
 val logger = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 fun main() {
-    logger.info("I started")
+    logger.info("I started :).")
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
 }
 
