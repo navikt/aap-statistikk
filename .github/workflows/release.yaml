@@ -1,0 +1,41 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      cluster:
+        description: Cluster
+        required: true
+        default: dev-gcp
+        type: choice
+        options:
+          - dev-gcp
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.github/**'
+
+jobs:
+  gradle:
+    ## push til main eller etter branch (e.g. dependabot) er merget
+    if: github.event.pull_request.merged || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+      actions: read
+      checks: write
+      id-token: write
+    uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
+    secrets: inherit
+
+  dev:
+    ## push til main eller etter branch (e.g. dependabot) er merget
+    if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'dev-gcp'
+    permissions:
+      contents: read
+      id-token: write
+    needs: gradle
+    uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
+    secrets: inherit
+    with:
+      cluster: dev-gcp
+      manifest: .nais/app-dev.yml
