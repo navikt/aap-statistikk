@@ -24,6 +24,7 @@ val logger = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 fun main() {
     logger.info("I started :).")
+    Thread.currentThread().setUncaughtExceptionHandler { _, e -> logger.error("Uhåndtert feil", e) }
     embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
 }
 
@@ -67,11 +68,15 @@ fun Application.module() {
                 call.respond(prometheus.scrape())
             }
             get("/live") {
+                // TODO: logic here
+                // https://www.reddit.com/r/kubernetes/comments/wayj42/what_should_readiness_liveness_probe_actually/
                 call.respond(HttpStatusCode.OK, "live")
             }
             get("/ready") {
+                // TODO: logic here
                 call.respond(HttpStatusCode.OK, "ready")
             }
         }
     }
+
 }
