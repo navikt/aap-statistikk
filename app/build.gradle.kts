@@ -7,6 +7,7 @@ plugins {
 }
 
 val ktorVersion = "2.3.12"
+val mockkVersion = "1.13.11"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -37,8 +38,11 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.6")
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
+    implementation("dev.forst:ktor-openapi-generator:0.6.1")
+
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
 }
 
 repositories {
