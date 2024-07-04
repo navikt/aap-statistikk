@@ -15,7 +15,6 @@ spec:
   strategy:
    type: Recreate
   port: 8080
-  ttl: 3h
   replicas:
     max: 1
     min: 1
