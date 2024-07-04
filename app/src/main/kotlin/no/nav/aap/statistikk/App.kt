@@ -28,9 +28,10 @@ import java.util.*
 val logger = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 fun main() {
-    logger.info("I started :).")
+    logger.info("I am starting :).")
     Thread.currentThread().setUncaughtExceptionHandler { _, e -> logger.error("Uhåndtert feil", e) }
 
+    val dbConfig = DbConfig.fraMiljøVariabler()
 
     val hendelsesRepository = object : HendelsesRepository {
         override fun lagreHendelse(hendelse: MottaStatistikkDTO) {
@@ -39,11 +40,11 @@ fun main() {
     }
 
     embeddedServer(Netty, port = 8080) {
-        module(hendelsesRepository)
+        module(dbConfig, hendelsesRepository)
     }.start(wait = true)
 }
 
-fun Application.module(hendelsesRepository: HendelsesRepository) {
+fun Application.module(dbConfig: DbConfig, hendelsesRepository: HendelsesRepository) {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             logger.info("Noe gikk galt. %", cause)
