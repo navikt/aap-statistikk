@@ -12,6 +12,8 @@ spec:
   ingresses:
     - https://aap-statistikk.intern.dev.nav.no  
   image: {{image}}
+  strategy:
+   type: Recreate
   port: 8080
   ttl: 3h
   replicas:
@@ -19,10 +21,10 @@ spec:
     min: 1
   resources:
     limits:
-      memory: 1024Mi
+      memory: 512Mi
     requests:
       cpu: 500m
-      memory: 1024Mi
+      memory: 256Mi
   observability:
     autoInstrumentation:
       enabled: true
