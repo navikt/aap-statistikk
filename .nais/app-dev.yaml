@@ -36,3 +36,8 @@ spec:
     inbound:
       rules:
         - application: behandlingsflyt
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_15
+        databases:
+          - name: hendelser
