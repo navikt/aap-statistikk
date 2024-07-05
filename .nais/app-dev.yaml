@@ -42,3 +42,8 @@ spec:
       - type: POSTGRES_15
         databases:
           - name: hendelser
+    bigQueryDatasets:
+      - name: tester
+        cascadingDelete: true  # false for produksjon. Nå kan sletting gjøres ved å slette denne linja
+        permission: READWRITE
+
