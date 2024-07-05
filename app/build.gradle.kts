@@ -40,10 +40,15 @@ dependencies {
 
     implementation("dev.forst:ktor-openapi-generator:0.6.1")
 
+    implementation("com.google.cloud:google-cloud-bigquery:2.41.0")
+
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
+    testImplementation("org.assertj:assertj-core:3.26.0")
     testImplementation("org.testcontainers:postgresql:1.19.8")
+    testImplementation("org.testcontainers:gcloud:1.19.8")
+
 }
 
 repositories {

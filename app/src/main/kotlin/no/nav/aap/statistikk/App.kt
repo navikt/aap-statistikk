@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk
 
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.route.apiRouting
 import io.ktor.http.*
@@ -22,22 +21,62 @@ import io.micrometer.prometheus.PrometheusMeterRegistry
 import no.nav.aap.statistikk.api.HendelsesRepository
 import no.nav.aap.statistikk.api.MottaStatistikkDTO
 import no.nav.aap.statistikk.api.mottaStatistikk
+import no.nav.aap.statistikk.bigquery.IBigQueryClient
 import org.slf4j.LoggerFactory
 import java.util.*
 
-val logger = LoggerFactory.getLogger("no.nav.aap.statistikk")
+
+val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 fun main() {
-    logger.info("I am starting :).")
-    Thread.currentThread().setUncaughtExceptionHandler { _, e -> logger.error("Uhåndtert feil", e) }
+    Thread.currentThread().setUncaughtExceptionHandler { _, e -> log.error("Uhåndtert feil", e) }
 
     val dbConfig = DbConfig.fraMiljøVariabler()
 
-    val hendelsesRepository = object : HendelsesRepository {
+    val hendelsesRepository = object : HendelsesRepository, ISubject<String> {
+        private val observers = mutableListOf<IObserver<String>>()
+
         override fun lagreHendelse(hendelse: MottaStatistikkDTO) {
-            logger.info("Skrev hendelse.")
+            log.info("Skrev hendelse.")
+        }
+
+        override fun registerObserver(observer: IObserver<String>) {
+            observers.add(observer)
+        }
+
+        override fun removeObserver(observer: IObserver<String>) {
+            observers.remove(observer)
+        }
+
+        override fun notifyObservers(data: String) {
+            for (observer in observers) {
+                observer.update(data)
+            }
         }
     }
+
+    // Dummy-implementasjon
+    val bigQueryClient = object  : IBigQueryClient, IObserver<String> {
+        override fun createIfNotExists(name: String): Boolean {
+            log.info("Lager...")
+            return true
+        }
+
+        override fun insertString(tableName: String, value: String) {
+            log.info("Setter inn $value i tabell: $tableName.")
+        }
+
+        override fun read(table: String): MutableList<String> {
+            log.info("Dummy-les")
+            return mutableListOf()
+        }
+
+        override fun update(data: String) {
+            insertString("my_table", data)
+        }
+    }
+
+    hendelsesRepository.registerObserver(bigQueryClient)
 
     embeddedServer(Netty, port = 8080) {
         module(dbConfig, hendelsesRepository)
@@ -47,7 +86,7 @@ fun main() {
 fun Application.module(dbConfig: DbConfig, hendelsesRepository: HendelsesRepository) {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            logger.info("Noe gikk galt. %", cause)
+            no.nav.aap.statistikk.log.info("Noe gikk galt. %", cause)
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }

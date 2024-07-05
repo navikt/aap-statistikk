@@ -4,7 +4,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.mockk
-import no.nav.aap.statistikk.aoi.testKlient
+import no.nav.aap.statistikk.api.testKlient
 import no.nav.aap.statistikk.api.HendelsesRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
