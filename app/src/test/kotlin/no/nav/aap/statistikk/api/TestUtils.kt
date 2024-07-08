@@ -1,15 +1,14 @@
 package no.nav.aap.statistikk.api
 
-import com.google.cloud.NoCredentials.getInstance
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
-import io.ktor.server.auth.AuthenticationFailedCause.*
 import io.ktor.server.testing.*
 import no.nav.aap.statistikk.DbConfig
+import no.nav.aap.statistikk.Flyway
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.module
 import org.testcontainers.containers.BigQueryEmulatorContainer
@@ -24,9 +23,11 @@ fun testKlient(hendelsesRepository: HendelsesRepository, test: suspend (HttpClie
     val dbConfig =
         DbConfig(database = "sss", url = postgres.jdbcUrl, password = postgres.password, username = postgres.username)
 
+    val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
+
     testApplication {
         application {
-            module(dbConfig, hendelsesRepository)
+            module(dataSource, hendelsesRepository)
         }
         val client = client.config {
             install(ContentNegotiation) {

@@ -38,6 +38,10 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.6")
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
+    implementation("org.flywaydb:flyway-database-postgresql:10.15.2")
+    runtimeOnly("org.postgresql:postgresql:42.7.3")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+
     implementation("dev.forst:ktor-openapi-generator:0.6.1")
 
     implementation("com.google.cloud:google-cloud-bigquery:2.41.0")
