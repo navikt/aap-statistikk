@@ -7,9 +7,9 @@ import javax.sql.DataSource
 class Flyway {
     fun createAndMigrateDataSource(config: DbConfig): DataSource {
         val dataSource = HikariDataSource().apply {
-            jdbcUrl = config.url        // Database URL
-            username = config.username  // Database brukernavn
-            password = config.password  // Database passord
+            jdbcUrl = config.jdbcUrl
+            username = config.userName
+            password = config.password
         }
 
         val flyway = Flyway
