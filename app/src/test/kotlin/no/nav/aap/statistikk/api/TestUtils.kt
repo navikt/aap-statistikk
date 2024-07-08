@@ -16,18 +16,13 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import java.time.Duration
 import java.time.temporal.ChronoUnit
+import javax.sql.DataSource
 
 
-fun testKlient(hendelsesRepository: HendelsesRepository, test: suspend (HttpClient) -> Unit) {
-    val postgres = postgreSQLContainer()
-
-    val dbConfig = DbConfig(jdbcUrl = postgres.jdbcUrl, userName = postgres.username, password = postgres.password)
-
-    val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
-
+fun testKlient(IHendelsesRepository: IHendelsesRepository, test: suspend (HttpClient) -> Unit) {
     testApplication {
         application {
-            module(dataSource, hendelsesRepository)
+            module(IHendelsesRepository)
         }
         val client = client.config {
             install(ContentNegotiation) {
@@ -39,11 +34,15 @@ fun testKlient(hendelsesRepository: HendelsesRepository, test: suspend (HttpClie
     }
 }
 
-private fun postgreSQLContainer(): PostgreSQLContainer<Nothing> {
+fun postgresDataSource(): DataSource {
     val postgres = PostgreSQLContainer<Nothing>("postgres:15")
     postgres.waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
     postgres.start()
-    return postgres
+
+    val dbConfig = DbConfig(jdbcUrl = postgres.jdbcUrl, userName = postgres.username, password = postgres.password)
+
+    val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
+    return dataSource
 }
 
 fun bigQueryContainer(): BigQueryConfig {

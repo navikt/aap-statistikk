@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 val log = LoggerFactory.getLogger("MottaStatistikk")
 
-fun NormalOpenAPIRoute.mottaStatistikk(hendelsesRepository: HendelsesRepository) {
+fun NormalOpenAPIRoute.mottaStatistikk(hendelsesRepository: IHendelsesRepository) {
     route("/motta") {
         post<Unit, String, MottaStatistikkDTO> { _, dto ->
             hendelsesRepository.lagreHendelse(dto)
