@@ -28,6 +28,8 @@ import java.util.*
 
 val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
+class App
+
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { _, e -> log.error("Uhåndtert feil", e) }
 
@@ -86,7 +88,7 @@ fun main() {
 fun Application.module(dbConfig: DbConfig, hendelsesRepository: HendelsesRepository) {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            no.nav.aap.statistikk.log.info("Noe gikk galt. %", cause)
+            LoggerFactory.getLogger(App::class.java).error("Noe gikk galt. %", cause)
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
