@@ -20,8 +20,8 @@ import java.time.temporal.ChronoUnit
 
 fun testKlient(hendelsesRepository: HendelsesRepository, test: suspend (HttpClient) -> Unit) {
     val postgres = postgreSQLContainer()
-    val dbConfig =
-        DbConfig(database = "sss", url = postgres.jdbcUrl, password = postgres.password, username = postgres.username)
+
+    val dbConfig = DbConfig(jdbcUrl = postgres.jdbcUrl, userName = postgres.username, password = postgres.password)
 
     val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
 
