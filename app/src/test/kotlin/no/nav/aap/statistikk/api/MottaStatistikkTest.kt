@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test
 class MottaStatistikkTest {
     @Test
     fun `hendelse blir lagret i repository`() {
-        val hendelsesRepository = mockk<HendelsesRepository>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns Unit
+        val IHendelsesRepository = mockk<IHendelsesRepository>()
+        every { IHendelsesRepository.lagreHendelse(any()) } returns Unit
 
-        testKlient(hendelsesRepository) { client ->
+        testKlient(IHendelsesRepository) { client ->
             val res = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 setBody(
@@ -29,7 +29,7 @@ class MottaStatistikkTest {
         }
 
         verify {
-            hendelsesRepository.lagreHendelse(
+            IHendelsesRepository.lagreHendelse(
                 MottaStatistikkDTO(
                     saksNummer = "123", status = "OPPRETTET",
                     behandlingsType = "Førstegangsbehandling"

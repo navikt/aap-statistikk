@@ -14,8 +14,8 @@ class Flyway {
 
         val flyway = Flyway
             .configure()
-            //.cleanDisabled(miljø != MiljøKode.LOKALT)
-            //.cleanOnValidationError(miljø == MiljøKode.LOKALT)
+            .cleanDisabled(false)
+            .cleanOnValidationError(true) // TODO: endre denne når skjema har stabilisert seg litt
             .dataSource(dataSource)
             .locations("migrering")
             .validateMigrationNaming(true)

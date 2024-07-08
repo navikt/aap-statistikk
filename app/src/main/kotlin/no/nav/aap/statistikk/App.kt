@@ -18,13 +18,13 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import no.nav.aap.statistikk.api.HendelsesRepository
+import no.nav.aap.statistikk.api.IHendelsesRepository
 import no.nav.aap.statistikk.api.MottaStatistikkDTO
 import no.nav.aap.statistikk.api.mottaStatistikk
 import no.nav.aap.statistikk.bigquery.IBigQueryClient
+import no.nav.aap.statistikk.hendelser.HendelsesRepository
 import org.slf4j.LoggerFactory
 import java.util.*
-import javax.sql.DataSource
 
 
 val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
@@ -40,30 +40,10 @@ fun main() {
     val flyway = Flyway()
     val dataSource = flyway.createAndMigrateDataSource(dbConfig)
 
-    val hendelsesRepository = object : HendelsesRepository, ISubject<String> {
-        private val observers = mutableListOf<IObserver<String>>()
-
-        override fun lagreHendelse(hendelse: MottaStatistikkDTO) {
-            log.info("Skrev hendelse: $hendelse")
-        }
-
-        override fun registerObserver(observer: IObserver<String>) {
-            observers.add(observer)
-        }
-
-        override fun removeObserver(observer: IObserver<String>) {
-            observers.remove(observer)
-        }
-
-        override fun notifyObservers(data: String) {
-            for (observer in observers) {
-                observer.update(data)
-            }
-        }
-    }
+    val hendelsesRepository = HendelsesRepository(dataSource)
 
     // Dummy-implementasjon
-    val bigQueryClient = object  : IBigQueryClient, IObserver<String> {
+    val bigQueryClient = object  : IBigQueryClient, IObserver<MottaStatistikkDTO> {
         override fun createIfNotExists(name: String): Boolean {
             log.info("Lager...")
             return true
@@ -78,19 +58,19 @@ fun main() {
             return mutableListOf()
         }
 
-        override fun update(data: String) {
-            insertString("my_table", data)
+        override fun update(data: MottaStatistikkDTO) {
+            insertString("my_table", data.toString())
         }
     }
 
     hendelsesRepository.registerObserver(bigQueryClient)
 
     embeddedServer(Netty, port = 8080) {
-        module(dataSource, hendelsesRepository)
+        module(hendelsesRepository)
     }.start(wait = true)
 }
 
-fun Application.module(dbConfig: DataSource, hendelsesRepository: HendelsesRepository) {
+fun Application.module(hendelsesRepository: IHendelsesRepository) {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             LoggerFactory.getLogger(App::class.java).error("Noe gikk galt. %", cause)
