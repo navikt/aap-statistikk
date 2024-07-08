@@ -10,6 +10,8 @@ class Flyway {
             jdbcUrl = config.url        // Database URL
             username = config.username  // Database brukernavn
             password = config.password  // Database passord
+            driverClassName = "org.postgresql.Driver"
+            connectionTestQuery = "SELECT 1"
         }
 
         val flyway = Flyway
