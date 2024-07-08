@@ -17,11 +17,24 @@ class MottaStatistikkTest {
         testKlient(hendelsesRepository) { client ->
             val res = client.post("/motta") {
                 contentType(ContentType.Application.Json)
-                setBody(MottaStatistikkDTO(sakId = "123"))
+                setBody(
+                    MottaStatistikkDTO(
+                        saksNummer = "123",
+                        status = "OPPRETTET",
+                        behandlingsType = "Førstegangsbehandling"
+                    )
+                )
             }
             Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
         }
 
-        verify { hendelsesRepository.lagreHendelse(MottaStatistikkDTO(sakId = "123")) }
+        verify {
+            hendelsesRepository.lagreHendelse(
+                MottaStatistikkDTO(
+                    saksNummer = "123", status = "OPPRETTET",
+                    behandlingsType = "Førstegangsbehandling"
+                )
+            )
+        }
     }
 }
