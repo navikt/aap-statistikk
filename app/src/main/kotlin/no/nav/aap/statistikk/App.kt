@@ -24,22 +24,27 @@ import no.nav.aap.statistikk.api.mottaStatistikk
 import no.nav.aap.statistikk.bigquery.IBigQueryClient
 import org.slf4j.LoggerFactory
 import java.util.*
+import javax.sql.DataSource
 
 
 val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 class App
 
+
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { _, e -> log.error("Uhåndtert feil", e) }
 
     val dbConfig = DbConfig.fraMiljøVariabler()
 
+    val flyway = Flyway()
+    val dataSource = flyway.createAndMigrateDataSource(dbConfig)
+
     val hendelsesRepository = object : HendelsesRepository, ISubject<String> {
         private val observers = mutableListOf<IObserver<String>>()
 
         override fun lagreHendelse(hendelse: MottaStatistikkDTO) {
-            log.info("Skrev hendelse.")
+            log.info("Skrev hendelse: $hendelse")
         }
 
         override fun registerObserver(observer: IObserver<String>) {
@@ -81,11 +86,11 @@ fun main() {
     hendelsesRepository.registerObserver(bigQueryClient)
 
     embeddedServer(Netty, port = 8080) {
-        module(dbConfig, hendelsesRepository)
+        module(dataSource, hendelsesRepository)
     }.start(wait = true)
 }
 
-fun Application.module(dbConfig: DbConfig, hendelsesRepository: HendelsesRepository) {
+fun Application.module(dbConfig: DataSource, hendelsesRepository: HendelsesRepository) {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             LoggerFactory.getLogger(App::class.java).error("Noe gikk galt. %", cause)
