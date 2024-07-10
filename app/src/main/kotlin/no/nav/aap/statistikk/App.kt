@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.route.apiRouting
 import io.ktor.http.*
@@ -43,7 +44,7 @@ fun main() {
     val hendelsesRepository = HendelsesRepository(dataSource)
 
     // Dummy-implementasjon
-    val bigQueryClient = object  : IBigQueryClient, IObserver<MottaStatistikkDTO> {
+    val bigQueryClient = object : IBigQueryClient, IObserver<MottaStatistikkDTO> {
         override fun createIfNotExists(name: String): Boolean {
             log.info("Lager...")
             return true
@@ -87,8 +88,9 @@ fun Application.module(hendelsesRepository: IHendelsesRepository) {
 
     install(ContentNegotiation) {
         // TODO sjekk om bør gjøre samme settings som behandlingsflyt
-        register(ContentType.Application.Json, JacksonConverter())
-        // jackson { disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
+        jackson {
+            registerModule(JavaTimeModule())
+        }
     }
     install(CallId) {
         retrieveFromHeader(HttpHeaders.XCorrelationId)
