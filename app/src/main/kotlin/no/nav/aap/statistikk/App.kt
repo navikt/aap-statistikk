@@ -98,6 +98,7 @@ fun Application.module(hendelsesRepository: IHendelsesRepository) {
     }
     install(CallLogging) {
         callIdMdc("callId")
+        disableDefaultColors()
         filter { call -> call.request.path().startsWith("/actuator").not() }
     }
 
@@ -107,7 +108,7 @@ fun Application.module(hendelsesRepository: IHendelsesRepository) {
         // this servers Swagger UI on /swagger-ui/index.html
         serveSwaggerUi = true
         info {
-            title = "AAP - Saksbehandling"
+            title = "AAP - Statistikk"
         }
     }
 
