@@ -31,6 +31,16 @@ spec:
   prometheus:
     enabled: true
     path: /actuator/metrics
+  liveness:
+    path: /actuator/live
+    initialDelay: 5
+    periodSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /actuator/ready
+    initialDelay: 5
+    periodSeconds: 3
+    failureThreshold: 3
   secureLogs:
     enabled: true
   accessPolicy:
