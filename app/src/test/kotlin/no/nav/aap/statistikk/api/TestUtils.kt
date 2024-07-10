@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.api
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
@@ -26,7 +27,9 @@ fun testKlient(IHendelsesRepository: IHendelsesRepository, test: suspend (HttpCl
         }
         val client = client.config {
             install(ContentNegotiation) {
-                jackson { }
+                jackson {
+                    registerModule(JavaTimeModule())
+                }
             }
         }
 
