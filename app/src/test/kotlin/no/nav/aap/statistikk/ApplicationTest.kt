@@ -6,7 +6,8 @@ import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.aap.statistikk.api.testKlient
-import no.nav.aap.statistikk.api.IHendelsesRepository
+import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -14,8 +15,9 @@ import org.junit.jupiter.api.Test
 class ApplicationTest {
     @Test
     fun testHelloWorld() {
-        val IHendelsesRepository = mockk<IHendelsesRepository>()
-        testKlient(IHendelsesRepository) { client ->
+        val iHendelsesRepository = mockk<IHendelsesRepository>()
+        val vilkårsResultatService = mockk<VilkårsResultatService>()
+        testKlient(iHendelsesRepository, vilkårsResultatService) { client ->
             val response = client.get("/")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             Assertions.assertEquals(response.body() as String, "Hello World!")
@@ -24,10 +26,11 @@ class ApplicationTest {
 
     @Test
     fun `kan poste ren json`() {
-        val IHendelsesRepository = mockk<IHendelsesRepository>()
-        every { IHendelsesRepository.lagreHendelse(any()) } returns Unit
+        val iHendelsesRepository = mockk<IHendelsesRepository>()
+        val vilkårsResultatService = mockk<VilkårsResultatService>()
+        every { iHendelsesRepository.lagreHendelse(any()) } returns Unit
 
-        testKlient(IHendelsesRepository) { client ->
+        testKlient(iHendelsesRepository, vilkårsResultatService) { client ->
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 setBody("""{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering"}""")

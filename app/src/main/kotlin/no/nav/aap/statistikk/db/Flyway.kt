@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.db
 
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway

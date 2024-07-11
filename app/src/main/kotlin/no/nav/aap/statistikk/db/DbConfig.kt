@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.db
 
 class DbConfig(
     val jdbcUrl: String,

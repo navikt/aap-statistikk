@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.api
+package no.nav.aap.statistikk.hendelser.api
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

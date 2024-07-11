@@ -2,9 +2,10 @@ package no.nav.aap.statistikk.api
 
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
+import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -13,9 +14,10 @@ class MottaStatistikkTest {
     @Test
     fun `hendelse blir lagret i repository`() {
         val hendelsesRepository = mockk<IHendelsesRepository>()
+        val vilkårsResultatService = mockk<VilkårsResultatService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns Unit
 
-        testKlient(hendelsesRepository) { client ->
+        testKlient(hendelsesRepository, vilkårsResultatService) { client ->
             val res = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 setBody(
@@ -59,8 +61,11 @@ class MottaStatistikkTest {
 }"""
 
         val hendelsesRepository = mockk<IHendelsesRepository>()
+        val vilkårsResultatService = mockk<VilkårsResultatService>()
 
-        testKlient(hendelsesRepository) { client ->
+        every { vilkårsResultatService.mottaVilkårsResultat(any()) } just runs
+
+        testKlient(hendelsesRepository, vilkårsResultatService) { client ->
             val res = client.post("/vilkarsresultat") {
                 contentType(ContentType.Application.Json)
                 setBody(
