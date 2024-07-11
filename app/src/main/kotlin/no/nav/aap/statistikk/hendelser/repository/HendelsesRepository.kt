@@ -1,9 +1,8 @@
-package no.nav.aap.statistikk.hendelser
+package no.nav.aap.statistikk.hendelser.repository
 
 import no.nav.aap.statistikk.IObserver
 import no.nav.aap.statistikk.ISubject
-import no.nav.aap.statistikk.api.IHendelsesRepository
-import no.nav.aap.statistikk.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import java.sql.Statement
 import javax.sql.DataSource
 

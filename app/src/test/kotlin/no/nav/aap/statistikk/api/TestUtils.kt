@@ -8,10 +8,12 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
-import no.nav.aap.statistikk.DbConfig
-import no.nav.aap.statistikk.Flyway
+import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
@@ -20,10 +22,14 @@ import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 
-fun testKlient(IHendelsesRepository: IHendelsesRepository, test: suspend (HttpClient) -> Unit) {
+fun testKlient(
+    iHendelsesRepository: IHendelsesRepository,
+    vilkårsResultatService: VilkårsResultatService,
+    test: suspend (HttpClient) -> Unit
+) {
     testApplication {
         application {
-            module(IHendelsesRepository)
+            module(iHendelsesRepository, vilkårsResultatService)
         }
         val client = client.config {
             install(ContentNegotiation) {

@@ -19,11 +19,15 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import no.nav.aap.statistikk.api.IHendelsesRepository
-import no.nav.aap.statistikk.api.MottaStatistikkDTO
-import no.nav.aap.statistikk.api.mottaStatistikk
+import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.bigquery.IBigQueryClient
-import no.nav.aap.statistikk.hendelser.HendelsesRepository
+import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.db.Flyway
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.vilkårsresultat.api.vilkårsResultat
+import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -66,12 +70,13 @@ fun main() {
 
     hendelsesRepository.registerObserver(bigQueryClient)
 
+    val vilkårsResultatService = VilkårsResultatService(dataSource)
     embeddedServer(Netty, port = 8080) {
-        module(hendelsesRepository)
+        module(hendelsesRepository, vilkårsResultatService)
     }.start(wait = true)
 }
 
-fun Application.module(hendelsesRepository: IHendelsesRepository) {
+fun Application.module(hendelsesRepository: IHendelsesRepository, vilkårsResultatService: VilkårsResultatService) {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             LoggerFactory.getLogger(App::class.java).error("Noe gikk galt. %", cause)
@@ -115,6 +120,7 @@ fun Application.module(hendelsesRepository: IHendelsesRepository) {
     routing {
         apiRouting {
             mottaStatistikk(hendelsesRepository)
+            vilkårsResultat(vilkårsResultatService)
         }
         route("/") {
             get {
