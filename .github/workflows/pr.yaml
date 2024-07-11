@@ -6,6 +6,6 @@ jobs:
     permissions:
       checks: write
       pull-requests: write
-      contents: read
+      contents: write
     uses: navikt/aap-workflows/.github/workflows/gradle-pr.yml@main
     secrets: inherit
