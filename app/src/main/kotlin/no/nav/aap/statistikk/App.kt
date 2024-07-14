@@ -19,11 +19,13 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
-import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
-import no.nav.aap.statistikk.bigquery.IBigQueryClient
+import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
+import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.vilkårsresultat.api.vilkårsResultat
@@ -32,90 +34,47 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 
-val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
+private val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
 class App
 
-
 fun main() {
-    Thread.currentThread().setUncaughtExceptionHandler { _, e -> log.error("Uhåndtert feil", e) }
-
-    val dbConfig = DbConfig.fraMiljøVariabler()
-
-    val flyway = Flyway()
-    val dataSource = flyway.createAndMigrateDataSource(dbConfig)
-
-    val hendelsesRepository = HendelsesRepository(dataSource)
-
-    // Dummy-implementasjon
-    val bigQueryClient = object : IBigQueryClient, IObserver<MottaStatistikkDTO> {
-        override fun createIfNotExists(name: String): Boolean {
-            log.info("Lager...")
-            return true
-        }
-
-        override fun insertString(tableName: String, value: String) {
-            log.info("Setter inn $value i tabell: $tableName.")
-        }
-
-        override fun read(table: String): MutableList<String> {
-            log.info("Dummy-les")
-            return mutableListOf()
-        }
-
-        override fun update(data: MottaStatistikkDTO) {
-            insertString("my_table", data.toString())
-        }
+    Thread.currentThread().setUncaughtExceptionHandler { _, e ->
+        log.error("Uhåndtert feil", e)
     }
+    val dbConfig = DbConfig.fraMiljøVariabler()
+    val bgConfig = BigQueryConfigFromEnv()
 
-    hendelsesRepository.registerObserver(bigQueryClient)
-
-    val vilkårsResultatService = VilkårsResultatService(dataSource)
     embeddedServer(Netty, port = 8080) {
-        module(hendelsesRepository, vilkårsResultatService)
+        startUp(dbConfig, bgConfig)
     }.start(wait = true)
 }
 
+fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
+    val flyway = Flyway()
+    val dataSource = flyway.createAndMigrateDataSource(dbConfig)
+
+    environment.monitor.subscribe(ApplicationStopped) {
+        log.info("Received shutdown event. Closing Hikari connection pool.")
+        dataSource.close()
+        environment.monitor.unsubscribe(ApplicationStopped) {}
+    }
+
+    val hendelsesRepository = HendelsesRepository(dataSource)
+
+    val bqClient = BigQueryClient(bqConfig)
+    val bqRepository = BQRepository(bqClient)
+    val vilkårsResultatService = VilkårsResultatService(dataSource, bqRepository)
+
+    module(hendelsesRepository, vilkårsResultatService)
+}
+
 fun Application.module(hendelsesRepository: IHendelsesRepository, vilkårsResultatService: VilkårsResultatService) {
-    install(StatusPages) {
-        exception<Throwable> { call, cause ->
-            LoggerFactory.getLogger(App::class.java).error("Noe gikk galt. %", cause)
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
-        }
-    }
-
-    val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-
-    install(MicrometerMetrics) {
-        registry = prometheus
-        meterBinders += LogbackMetrics()
-    }
-
-    install(ContentNegotiation) {
-        // TODO sjekk om bør gjøre samme settings som behandlingsflyt
-        jackson {
-            registerModule(JavaTimeModule())
-        }
-    }
-    install(CallId) {
-        retrieveFromHeader(HttpHeaders.XCorrelationId)
-        generate { UUID.randomUUID().toString() }
-    }
-    install(CallLogging) {
-        callIdMdc("callId")
-        disableDefaultColors()
-        filter { call -> call.request.path().startsWith("/actuator").not() }
-    }
-
-    install(OpenAPIGen) {
-        // this serves OpenAPI definition on /openapi.json
-        serveOpenApiJson = true
-        // this servers Swagger UI on /swagger-ui/index.html
-        serveSwaggerUi = true
-        info {
-            title = "AAP - Statistikk"
-        }
-    }
+    monitoring()
+    statusPages()
+    tracing()
+    contentNegotation()
+    swaggerDoc()
 
     routing {
         apiRouting {
@@ -127,6 +86,50 @@ fun Application.module(hendelsesRepository: IHendelsesRepository, vilkårsResult
                 call.respondText("Hello World!", contentType = ContentType.Text.Plain)
             }
         }
+    }
+
+}
+
+private fun Application.swaggerDoc() {
+    install(OpenAPIGen) {
+        // this serves OpenAPI definition on /openapi.json
+        serveOpenApiJson = true
+        // this serves Swagger UI on /swagger-ui/index.html
+        serveSwaggerUi = true
+        info {
+            title = "AAP - Statistikk"
+        }
+    }
+}
+
+private fun Application.contentNegotation() {
+    install(ContentNegotiation) {
+        // TODO sjekk om bør gjøre samme settings som behandlingsflyt
+        jackson {
+            registerModule(JavaTimeModule())
+        }
+    }
+}
+
+private fun Application.tracing() {
+    install(CallId) {
+        retrieveFromHeader(HttpHeaders.XCorrelationId)
+        generate { UUID.randomUUID().toString() }
+    }
+    install(CallLogging) {
+        callIdMdc("callId")
+        disableDefaultColors()
+        filter { call -> call.request.path().startsWith("/actuator").not() }
+    }
+}
+
+private fun Application.monitoring() {
+    val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    install(MicrometerMetrics) {
+        registry = prometheus
+        meterBinders += LogbackMetrics()
+    }
+    routing {
         route("/actuator") {
             get("/metrics") {
                 call.respond(prometheus.scrape())
@@ -138,9 +141,18 @@ fun Application.module(hendelsesRepository: IHendelsesRepository, vilkårsResult
             }
             get("/ready") {
                 // TODO: logic here
+                // Finn ut hvordan disse to kan konfigureres til å gi forskjellig resultat
                 call.respond(HttpStatusCode.OK, "ready")
             }
         }
     }
+}
 
+private fun Application.statusPages() {
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            LoggerFactory.getLogger(App::class.java).error("Noe gikk galt. %", cause)
+            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+        }
+    }
 }

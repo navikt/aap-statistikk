@@ -1,26 +1,22 @@
 package no.nav.aap.statistikk.bigquery
 
-import com.google.cloud.NoCredentials.getInstance
 import com.google.cloud.bigquery.BigQueryOptions
 
-data class BigQueryConfig(val dataset: String, val url: String, val projectId: String) {
-    companion object {
-        fun fromEnvironment(): BigQueryConfig {
-            val url = System.getenv("url")
-            val dataset = System.getenv("dataset")
-            val projectId = System.getenv("projectId")
+interface BigQueryConfig {
+    val dataset: String
+    fun bigQueryOptions(): BigQueryOptions
+}
 
-            return BigQueryConfig(dataset = dataset, url = url, projectId = projectId)
-        }
-    }
+class BigQueryConfigFromEnv : BigQueryConfig {
+    override val dataset: String
+        get() = System.getenv("tester")
 
-    fun bigQueryOptions(): BigQueryOptions {
+    override fun bigQueryOptions(): BigQueryOptions {
+        val projectId = System.getenv("GCP_TEAM_PROJECT_ID")
+        BigQueryOptions.DefaultBigQueryFactory()
         return BigQueryOptions
             .newBuilder()
             .setProjectId(projectId)
-            .setHost(url)
-            .setLocation(url)
-            .setCredentials(getInstance())
             .build()
     }
 }
