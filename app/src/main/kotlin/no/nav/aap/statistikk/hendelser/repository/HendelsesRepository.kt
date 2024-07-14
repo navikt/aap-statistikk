@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.hendelser.repository
 
 import no.nav.aap.statistikk.IObserver
 import no.nav.aap.statistikk.ISubject
+import no.nav.aap.statistikk.db.withinTransaction
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import java.sql.Statement
 import javax.sql.DataSource
@@ -11,7 +12,7 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
 
     override fun lagreHendelse(hendelse: MottaStatistikkDTO) {
         // TODO: bedre transaction-håndtering
-        dataSource.connection.use { connection ->
+        dataSource.withinTransaction { connection ->
             connection.prepareStatement(
                 "INSERT INTO motta_statistikk (saksnummer, status, behandlingstype) VALUES (?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
@@ -25,7 +26,7 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
     }
 
     override fun hentHendelser(): Collection<MottaStatistikkDTO> {
-        dataSource.connection.use { connection ->
+        return dataSource.withinTransaction { connection ->
             val rs = connection.prepareStatement(
                 "SELECT * FROM motta_statistikk", Statement.RETURN_GENERATED_KEYS
             ).executeQuery()
@@ -40,7 +41,7 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
                 hendelser.add(MottaStatistikkDTO(saksNummer, status, behandlingType))
             }
 
-            return hendelser
+            hendelser
         }
     }
 

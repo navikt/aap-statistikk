@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.db
 
-class DbConfig(
+data class DbConfig(
     val jdbcUrl: String,
     val userName: String,
     val password: String,

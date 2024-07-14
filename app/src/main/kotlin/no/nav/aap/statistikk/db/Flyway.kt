@@ -2,12 +2,11 @@ package no.nav.aap.statistikk.db
 
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
-import javax.sql.DataSource
 
 class Flyway {
-    fun createAndMigrateDataSource(config: DbConfig): DataSource {
+    fun createAndMigrateDataSource(config: DbConfig): HikariDataSource {
         val dataSource = HikariDataSource().apply {
-            jdbcUrl = config.jdbcUrl
+            jdbcUrl = config.jdbcUrl // .stripCredentials()
             username = config.userName
             password = config.password
         }

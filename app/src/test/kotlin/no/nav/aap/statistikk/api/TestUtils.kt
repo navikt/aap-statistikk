@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.api
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
@@ -14,6 +15,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
+import org.junit.ClassRule
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
@@ -23,13 +25,13 @@ import javax.sql.DataSource
 
 
 fun testKlient(
-    iHendelsesRepository: IHendelsesRepository,
+    hendelsesRepository: IHendelsesRepository,
     vilkårsResultatService: VilkårsResultatService,
     test: suspend (HttpClient) -> Unit
 ) {
     testApplication {
         application {
-            module(iHendelsesRepository, vilkårsResultatService)
+            module(hendelsesRepository, vilkårsResultatService)
         }
         val client = client.config {
             install(ContentNegotiation) {
@@ -61,7 +63,19 @@ fun bigQueryContainer(): BigQueryConfig {
     val url = container.emulatorHttpEndpoint
 
     val datasetInfo = DatasetInfo.newBuilder("my-dataset").build()
-    val config = BigQueryConfig(url = url, projectId = container.projectId, dataset = "my-dataset")
+    val config = object : BigQueryConfig {
+        override val dataset: String
+            get() = "my-dataset"
+
+        override fun bigQueryOptions(): BigQueryOptions {
+            return BigQueryOptions.newBuilder()
+                .setLocation(url)
+                .setProjectId(container.projectId)
+                .setHost(url)
+                .setCredentials(NoCredentials.getInstance())
+                .build()
+        }
+    }
 
     val bigQueryOptions: BigQueryOptions = config.bigQueryOptions()
     val bigQuery: BigQuery = bigQueryOptions.service

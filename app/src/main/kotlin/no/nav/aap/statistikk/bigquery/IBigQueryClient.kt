@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.bigquery
 
 interface IBigQueryClient {
-    fun createIfNotExists(name: String): Boolean
-    fun insertString(tableName: String, value: String)
-    fun read(table: String): MutableList<String>?
+    fun <E> create(table: BQTable<E>): Boolean
+    fun <E> insert(table: BQTable<E>, value: E)
+    fun <E> read(table: BQTable<E>): List<E>
 }

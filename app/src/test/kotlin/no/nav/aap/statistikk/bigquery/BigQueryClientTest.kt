@@ -1,8 +1,12 @@
 package no.nav.aap.statistikk.bigquery
 
 import no.nav.aap.statistikk.api.bigQueryContainer
+import no.nav.aap.statistikk.vilkårsresultat.Vilkår
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
+import java.time.LocalDate
 
 class BigQueryClientTest {
     @Test
@@ -10,12 +14,13 @@ class BigQueryClientTest {
         val options = bigQueryContainer()
         val client = BigQueryClient(options)
 
-        val res = client.createIfNotExists("my_table")
+        val vilkårsVurderingTabell = VilkårsVurderingTabell()
+        val res = client.create(vilkårsVurderingTabell)
         // Lag tabell før den eksisterer
         assertThat(res).isTrue()
 
         // Prøv igjen
-        val res2: Boolean = client.createIfNotExists("my_table")
+        val res2: Boolean = client.create(vilkårsVurderingTabell)
         assertThat(res2).isFalse()
     }
 
@@ -24,13 +29,25 @@ class BigQueryClientTest {
         val options = bigQueryContainer()
         val client = BigQueryClient(options)
 
-        client.createIfNotExists("my_table")
+        val vilkårsVurderingTabell = VilkårsVurderingTabell()
 
-        client.insertString("my_table", "dd")
+        client.create(vilkårsVurderingTabell)
 
-        val res2 = client.read("my_table")
+        val vilkårsResult = Vilkårsresultat(
+            "123", "behandling", listOf(
+                Vilkår(
+                    "type", listOf(VilkårsPeriode(LocalDate.now(), LocalDate.now(), "utfall", false, null, null))
+                )
+            )
+        )
 
-        assertThat(res2!!.size).isEqualTo(1)
-        assertThat(res2[0]).isEqualTo("dd")
+        client.insert(vilkårsVurderingTabell, vilkårsResult)
+        val uthentetResultat = client.read(vilkårsVurderingTabell)
+
+        assertThat(uthentetResultat.size).isEqualTo(1)
+        assertThat(uthentetResultat.first().saksnummer).isEqualTo("123")
+        assertThat(uthentetResultat.first().behandlingsType).isEqualTo("behandling")
+        assertThat(uthentetResultat.first().vilkår).hasSize(1)
+        assertThat(uthentetResultat.first().vilkår.first().vilkårType).isEqualTo("type")
     }
 }
