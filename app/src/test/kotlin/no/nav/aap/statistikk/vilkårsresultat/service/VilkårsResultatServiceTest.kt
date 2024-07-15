@@ -6,9 +6,11 @@ import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class VilkårsResultatServiceTest {
     @Test
@@ -21,13 +23,20 @@ class VilkårsResultatServiceTest {
         val vilkårsResultatService = VilkårsResultatService(postgresDataSource, bqRepository)
 
         val vilkårList = listOf(
-            Vilkår(vilkårType = "Vilkår1", listOf()),
+            Vilkår(
+                vilkårType = "Vilkår1", listOf(
+                    VilkårsPeriode(
+                        fraDato = LocalDate.now().minusDays(10),
+                        tilDato = LocalDate.now(),
+                        utfall = "AVSLAG",
+                        manuellVurdering = false
+                    )
+                )
+            ),
         )
 
         val vilkårsResult = Vilkårsresultat(
-            saksnummer = "123456789",
-            behandlingsType = "TypeA",
-            vilkår = vilkårList
+            saksnummer = "123456789", behandlingsType = "TypeA", vilkår = vilkårList
         )
 
         vilkårsResultatService.mottaVilkårsResultat(vilkårsResult)

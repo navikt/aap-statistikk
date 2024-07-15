@@ -12,9 +12,9 @@ class BigQueryClient(options: BigQueryConfig) : IBigQueryClient {
 
     private fun sjekkAtDatasetEksisterer(): Boolean {
         log.info("Verifying that $dataset exists.")
-        val dataset1 = bigQuery.getDataset(dataset)
+        val dataset = bigQuery.getDataset(dataset)
 
-        return dataset1 != null && dataset1.exists()
+        return dataset != null && dataset.exists()
     }
 
     override fun <E> create(table: BQTable<E>): Boolean {
@@ -26,7 +26,7 @@ class BigQueryClient(options: BigQueryConfig) : IBigQueryClient {
         val tabell = bigQuery.getTable(TableId.of(dataset, name))
 
         if (tabell != null && tabell.exists()) {
-            log.info("Tabell ${table.tableName }eksisterer allerede.")
+            log.info("Tabell ${table.tableName} eksisterer allerede.")
             return false
         }
 
@@ -39,8 +39,14 @@ class BigQueryClient(options: BigQueryConfig) : IBigQueryClient {
     }
 
     override fun <E> insert(table: BQTable<E>, value: E) {
+        insertMany(table, listOf(value))
+    }
+
+    override fun <E> insertMany(table: BQTable<E>, values: List<E>) {
         val builder = InsertAllRequest.newBuilder(dataset, table.tableName)
-        builder.addRow(table.toRow(value))
+        for (value in values) {
+            builder.addRow(table.toRow(value))
+        }
         val built = builder.build()
 
         val response = bigQuery.insertAll(built)
@@ -48,12 +54,14 @@ class BigQueryClient(options: BigQueryConfig) : IBigQueryClient {
         if (response.hasErrors()) {
             log.warn(response.insertErrors.toString())
         }
-        println(response)
     }
 
     override fun <E> read(table: BQTable<E>): List<E> {
         val query = "select * from $dataset.${table.tableName}"
-        val config = QueryJobConfiguration.newBuilder(query).build()
+
+        val config = QueryJobConfiguration.newBuilder(query)
+            .setUseLegacySql(false)
+            .setDefaultDataset(dataset).build()
 
         val res = bigQuery.query(config)
 
