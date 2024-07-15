@@ -57,7 +57,7 @@ fun postgresDataSource(): DataSource {
 }
 
 fun bigQueryContainer(): BigQueryConfig {
-    val container = BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.4.3");
+    val container = BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3");
     container.start()
 
     val url = container.emulatorHttpEndpoint
@@ -76,6 +76,8 @@ fun bigQueryContainer(): BigQueryConfig {
                 .build()
         }
     }
+
+    println("URL $url")
 
     val bigQueryOptions: BigQueryOptions = config.bigQueryOptions()
     val bigQuery: BigQuery = bigQueryOptions.service
