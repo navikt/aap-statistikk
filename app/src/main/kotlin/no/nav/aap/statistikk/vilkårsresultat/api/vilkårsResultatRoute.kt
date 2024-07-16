@@ -7,17 +7,18 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 
+data class VilkårsResultatResponsDTO(val id: Int)
 
 fun NormalOpenAPIRoute.vilkårsResultat(
     vilkårsResultatService: VilkårsResultatService
 ) {
     route("/vilkarsresultat") {
-        post<Unit, String, VilkårsResultatDTO> { _, dto ->
+        post<Unit, VilkårsResultatResponsDTO, VilkårsResultatDTO> { _, dto ->
             pipeline.context.application.log.info("Mottok vilkårsresultat: $dto")
 
-            vilkårsResultatService.mottaVilkårsResultat(dto.tilDomene())
+            val id = vilkårsResultatService.mottaVilkårsResultat(dto.tilDomene())
 
-            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
+            responder.respond(HttpStatusCode.Accepted, VilkårsResultatResponsDTO(id=id), pipeline)
         }
     }
 }

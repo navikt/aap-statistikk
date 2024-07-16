@@ -45,8 +45,10 @@ fun testKlient(
     }
 }
 
+data class Triplet(val client: HttpClient, val dbConfig: DbConfig, val bigQueryConfig: BigQueryConfig)
+
 fun testKlientMedTestContainer(
-    test: suspend (HttpClient) -> Unit
+    test: suspend (Triplet) -> Unit
 ) {
     val pgConfig = postgresTestConfig()
     val bqConfig: BigQueryConfig = bigQueryContainer()
@@ -62,7 +64,7 @@ fun testKlientMedTestContainer(
             }
         }
 
-        test(client)
+        test(Triplet(client, pgConfig, bqConfig))
     }
 }
 
