@@ -8,7 +8,7 @@ plugins {
 }
 
 val ktorVersion = "2.3.12"
-val mockkVersion = "1.13.11"
+val mockkVersion = "1.13.12"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
