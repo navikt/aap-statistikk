@@ -1,5 +1,7 @@
 ## AAP Statistikk
 
+[![release](https://github.com/navikt/aap-statistikk/actions/workflows/release.yaml/badge.svg)](https://github.com/navikt/aap-statistikk/actions/workflows/release.yaml)
+
 Formålet er å levere statistikk relatert til AAP i ny løsning.
 
 ## Komme i gang
