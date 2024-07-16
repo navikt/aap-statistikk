@@ -19,10 +19,7 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
-import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
+import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
@@ -64,7 +61,9 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
 
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
-    val vilkårsResultatService = VilkårsResultatService(dataSource, bqRepository)
+    val bqObserver = BigQueryObserver(bqRepository)
+    val vilkårsResultatService = VilkårsResultatService(dataSource)
+    vilkårsResultatService.registerObserver(bqObserver)
 
     module(hendelsesRepository, vilkårsResultatService)
 }

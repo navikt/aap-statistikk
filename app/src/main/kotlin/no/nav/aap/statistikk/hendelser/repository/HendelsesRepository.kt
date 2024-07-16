@@ -7,7 +7,7 @@ import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import java.sql.Statement
 import javax.sql.DataSource
 
-class HendelsesRepository(private val dataSource: DataSource) : IHendelsesRepository, ISubject<MottaStatistikkDTO> {
+class HendelsesRepository(private val dataSource: DataSource) : IHendelsesRepository, ISubject<MottaStatistikkDTO>{
     private val observers: MutableList<IObserver<MottaStatistikkDTO>> = mutableListOf()
 
     override fun lagreHendelse(hendelse: MottaStatistikkDTO) {
@@ -53,7 +53,7 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
         observers.remove(observer)
     }
 
-    override fun notifyObservers(data: MottaStatistikkDTO) {
+    override suspend fun notifyObservers(data: MottaStatistikkDTO) {
         observers.forEach { o -> o.update(data) }
     }
 }

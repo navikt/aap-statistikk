@@ -5,19 +5,21 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.*
 import no.nav.aap.statistikk.api.testKlient
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import kotlin.system.measureTimeMillis
 
 
 class ApplicationTest {
     @Test
     fun testHelloWorld() {
-        val iHendelsesRepository = mockk<IHendelsesRepository>()
+        val hendelsesRepository = mockk<IHendelsesRepository>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
-        testKlient(iHendelsesRepository, vilkårsResultatService) { client ->
+        testKlient(hendelsesRepository, vilkårsResultatService) { client ->
             val response = client.get("/")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             Assertions.assertEquals(response.body() as String, "Hello World!")
