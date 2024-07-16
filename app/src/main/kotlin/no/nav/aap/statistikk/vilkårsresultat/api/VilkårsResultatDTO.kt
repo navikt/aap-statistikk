@@ -24,19 +24,26 @@ data class VilkårDTO(val vilkårType: String, val perioder: List<VilkårsPeriod
     }
 }
 
+enum class Utfall {
+    IKKE_VURDERT,
+    IKKE_RELEVANT,
+    OPPFYLT,
+    IKKE_OPPFYLT
+}
+
 data class VilkårsPeriodeDTO(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val utfall: String,
+    val utfall: Utfall,
     val manuellVurdering: Boolean,
-    val innvilgelsesårsak: String?,
-    val avslagsårsak: String?
+    val innvilgelsesårsak: String? = null,
+    val avslagsårsak: String? = null
 ) {
     fun tilDomene(): VilkårsPeriode {
         return VilkårsPeriode(
             fraDato = this.fraDato,
             tilDato = this.tilDato,
-            utfall = this.utfall,
+            utfall = this.utfall.toString(),
             manuellVurdering = this.manuellVurdering,
             innvilgelsesårsak = this.innvilgelsesårsak,
             avslagsårsak = this.avslagsårsak
