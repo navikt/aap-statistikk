@@ -5,6 +5,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import no.nav.aap.statistikk.api.bigQueryContainer
 import no.nav.aap.statistikk.api.postgresDataSource
@@ -36,7 +37,7 @@ class VilkårsResultatServiceTest {
     }
 
     @Test
-    fun `lagrer vilkårsresultat i både pg og bq`(): Unit = runBlocking {
+    fun `lagrer vilkårsresultat i både pg og bq`(): Unit = runTest {
         val postgresDataSource = postgresDataSource()
         val bigQueryConfig = bigQueryContainer()
         val bqClient = BigQueryClient(bigQueryConfig)

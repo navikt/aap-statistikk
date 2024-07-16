@@ -5,13 +5,13 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.*
 import no.nav.aap.statistikk.api.testKlient
+import no.nav.aap.statistikk.api.testKlientMedTestContainer
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import kotlin.system.measureTimeMillis
 
 
 class ApplicationTest {
@@ -27,12 +27,21 @@ class ApplicationTest {
     }
 
     @Test
-    fun `kan poste ren json`() {
-        val iHendelsesRepository = mockk<IHendelsesRepository>()
-        val vilkårsResultatService = mockk<VilkårsResultatService>()
-        every { iHendelsesRepository.lagreHendelse(any()) } returns Unit
+    fun `hello world med testcontainer`() {
+        testKlientMedTestContainer { client ->
+            val response = client.get("/openapi.json")
+            Assertions.assertEquals(HttpStatusCode.OK, response.status)
+            assertThat(response.body<String>()).isNotEmpty()
+        }
+    }
 
-        testKlient(iHendelsesRepository, vilkårsResultatService) { client ->
+    @Test
+    fun `kan poste ren json`() {
+        val hendelsesRepository = mockk<IHendelsesRepository>()
+        val vilkårsResultatService = mockk<VilkårsResultatService>()
+        every { hendelsesRepository.lagreHendelse(any()) } returns Unit
+
+        testKlient(hendelsesRepository, vilkårsResultatService) { client ->
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 setBody("""{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering"}""")
