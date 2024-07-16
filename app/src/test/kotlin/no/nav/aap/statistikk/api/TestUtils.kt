@@ -9,13 +9,13 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
+import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
-import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
-import org.junit.ClassRule
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
@@ -45,16 +45,43 @@ fun testKlient(
     }
 }
 
-fun postgresDataSource(): DataSource {
+fun testKlientMedTestContainer(
+    test: suspend (HttpClient) -> Unit
+) {
+    val pgConfig = postgresTestConfig()
+    val bqConfig: BigQueryConfig = bigQueryContainer()
+    testApplication {
+        application {
+            startUp(pgConfig, bqConfig)
+        }
+        val client = client.config {
+            install(ContentNegotiation) {
+                jackson {
+                    registerModule(JavaTimeModule())
+                }
+            }
+        }
+
+        test(client)
+    }
+}
+
+fun postgresTestConfig(): DbConfig {
     val postgres = PostgreSQLContainer<Nothing>("postgres:15")
     postgres.waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
     postgres.start()
 
     val dbConfig = DbConfig(jdbcUrl = postgres.jdbcUrl, userName = postgres.username, password = postgres.password)
+    return dbConfig
+}
+
+fun postgresDataSource(): DataSource {
+    val dbConfig = postgresTestConfig()
 
     val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
     return dataSource
 }
+
 
 fun bigQueryContainer(): BigQueryConfig {
     val container = BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3");
