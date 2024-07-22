@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.db
 
 import io.mockk.*
-import no.nav.aap.statistikk.api.postgresDataSource
+import no.nav.aap.statistikk.WithPostgresContainer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -9,7 +9,7 @@ import java.sql.Connection
 import java.sql.SQLException
 import javax.sql.DataSource
 
-class WithinTransactionKtTest {
+class WithinTransactionKtTest: WithPostgresContainer() {
     @Test
     fun `om feilmelding under commit, så får vi TransaksjonsAvbrudd`() {
         val mockk = mockk<DataSource>()
@@ -30,7 +30,7 @@ class WithinTransactionKtTest {
 
     @Test
     fun `om dataSource ikke klarer å koble til, så får vi TilkoblingsAvbrud`() {
-        val dataSource = spyk(postgresDataSource())
+        val dataSource = spyk(dataSource())
 
         every { dataSource.connection } throws SQLException("feilmelding fra SQL")
 

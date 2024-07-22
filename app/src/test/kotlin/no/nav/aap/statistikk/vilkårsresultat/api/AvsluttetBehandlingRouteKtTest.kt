@@ -9,7 +9,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import no.nav.aap.statistikk.api.testKlient
+import no.nav.aap.statistikk.testKlient
 import no.nav.aap.statistikk.avsluttetbehandling.api.TilkjentYtelsePeriodeDTO
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository

@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.api
+package no.nav.aap.statistikk
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.google.cloud.NoCredentials
@@ -14,8 +14,6 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
-import no.nav.aap.statistikk.module
-import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
@@ -82,7 +80,7 @@ fun postgresTestConfig(): DbConfig {
 fun postgresDataSource(): DataSource {
     val dbConfig = postgresTestConfig()
 
-    val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
+    val dataSource = Flyway(dbConfig).createAndMigrateDataSource()
     return dataSource
 }
 

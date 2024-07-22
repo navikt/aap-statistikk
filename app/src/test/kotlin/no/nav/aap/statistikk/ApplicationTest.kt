@@ -7,8 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.aap.statistikk.api.testKlient
-import no.nav.aap.statistikk.api.testKlientMedTestContainer
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
@@ -69,7 +67,7 @@ class ApplicationTest {
 
             val resp = response.body<VilkårsResultatResponsDTO>()
 
-            val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
+            val dataSource = Flyway(dbConfig).createAndMigrateDataSource()
 
             val uthentet = VilkårsresultatRepository(dataSource).hentVilkårsResultat(1)
 
