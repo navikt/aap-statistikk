@@ -75,7 +75,12 @@ class AvsluttetBehandlingRouteKtTest {
                 val behandlingReferanse = UUID.randomUUID()
 
                 @Language("JSON") val jsonBody =
-                    """{"behandlingsReferanse": "$behandlingReferanse", "tilkjentYtelse": $tilkjentYtelseJSON, "vilkårsResultat": $vilkårsResultatJson}"""
+                    """{
+  "sakId": "4LENXDC",
+  "behandlingsReferanse": "$behandlingReferanse",
+  "tilkjentYtelse": $tilkjentYtelseJSON,
+  "vilkårsResultat": $vilkårsResultatJson
+}"""
                 setBody(jsonBody)
             }
 
