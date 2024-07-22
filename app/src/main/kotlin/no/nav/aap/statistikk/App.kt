@@ -27,6 +27,8 @@ import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.api.vilkårsResultat
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.slf4j.LoggerFactory
@@ -67,7 +69,9 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
     val vilkårsResultatService = VilkårsResultatService(dataSource)
     vilkårsResultatService.registerObserver(bqObserver)
 
-    val avsluttetBehandlingService = AvsluttetBehandlingService(vilkårsResultatService)
+    val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
+    val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository)
+    val avsluttetBehandlingService = AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService)
 
     module(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService)
 }

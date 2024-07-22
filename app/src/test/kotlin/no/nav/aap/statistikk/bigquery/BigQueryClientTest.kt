@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.UUID
 
 class BigQueryClientTest : WithBigQueryContainer {
     @Test
@@ -25,7 +26,7 @@ class BigQueryClientTest : WithBigQueryContainer {
     }
 
     @Test
-    fun `sette inn rad`() {
+    fun `sette inn rad og hente ut igjen`() {
         val options = testBigQueryConfig()
         val client = BigQueryClient(options)
 
@@ -33,8 +34,9 @@ class BigQueryClientTest : WithBigQueryContainer {
 
         client.create(vilkårsVurderingTabell)
 
+        val behandlingsReferanse = UUID.randomUUID().toString()
         val vilkårsResult = Vilkårsresultat(
-            "123", "behandling", listOf(
+            "123", behandlingsReferanse, "behandling", listOf(
                 Vilkår(
                     "type", listOf(VilkårsPeriode(LocalDate.now(), LocalDate.now(), "utfall", false, null, null))
                 )
@@ -46,6 +48,7 @@ class BigQueryClientTest : WithBigQueryContainer {
 
         assertThat(uthentetResultat.size).isEqualTo(1)
         assertThat(uthentetResultat.first().saksnummer).isEqualTo("123")
+        assertThat(uthentetResultat.first().behandlingsReferanse).isEqualTo(behandlingsReferanse)
         assertThat(uthentetResultat.first().behandlingsType).isEqualTo("behandling")
         assertThat(uthentetResultat.first().vilkår).hasSize(1)
         assertThat(uthentetResultat.first().vilkår.first().vilkårType).isEqualTo("type")

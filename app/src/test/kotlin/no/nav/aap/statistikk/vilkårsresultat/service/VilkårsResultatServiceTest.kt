@@ -63,12 +63,13 @@ class VilkårsResultatServiceTest : WithPostgresContainer(), WithBigQueryContain
             ),
         )
 
+        val behandlingsReferanse = UUID.randomUUID().toString()
         val vilkårsResult = Vilkårsresultat(
-            saksnummer = "123456789", behandlingsType = "TypeA", vilkår = vilkårList
+            saksnummer = "123456789", behandlingsType = "TypeA", behandlingsReferanse = behandlingsReferanse, vilkår = vilkårList
         )
 
         // TODO
-        vilkårsResultatService.mottaVilkårsResultat(UUID.randomUUID().toString(), vilkårsResult)
+        vilkårsResultatService.mottaVilkårsResultat(behandlingsReferanse, vilkårsResult)
 
         // Vent på at korutiner fullføres
         testDispatcher.scheduler.advanceUntilIdle()

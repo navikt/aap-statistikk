@@ -16,6 +16,7 @@ data class VilkårsResultatEntity(
         return Vilkårsresultat(
             saksnummer,
             typeBehandling,
+            behandlingsReferanse,
             vilkår.map { it: VilkårEntity -> it.tilVilkår() })
     }
 

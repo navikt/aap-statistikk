@@ -10,10 +10,11 @@ data class VilkårsResultatDTO(
     val typeBehandling: String,
     val vilkår: List<VilkårDTO>
 ) {
-    fun tilDomene(): Vilkårsresultat {
+    fun tilDomene(behandlingsReferanse: String): Vilkårsresultat {
         return Vilkårsresultat(
             saksnummer = this.saksnummer,
             behandlingsType = this.typeBehandling,
+            behandlingsReferanse = behandlingsReferanse,
             vilkår = this.vilkår.map { it.tilDomene() }
         )
     }
