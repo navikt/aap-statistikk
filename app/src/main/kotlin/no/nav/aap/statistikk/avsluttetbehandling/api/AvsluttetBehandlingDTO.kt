@@ -8,12 +8,14 @@ import java.time.LocalDate
 import java.util.*
 
 data class AvsluttetBehandlingDTO(
+    val sakId: String,
     val behandlingsReferanse: String,
     val tilkjentYtelse: List<TilkjentYtelsePeriodeDTO>,
     val vilkårsResultat: VilkårsResultatDTO
 ) {
     fun tilDomene(): AvsluttetBehandling {
         return AvsluttetBehandling(
+            sakId = sakId,
             behandlingReferanse = UUID.fromString(behandlingsReferanse),
             tilkjentYtelse = tilkjentYtelse.map(TilkjentYtelsePeriodeDTO::tilDomene),
             vilkårsresultat = vilkårsResultat.tilDomene()
