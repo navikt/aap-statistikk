@@ -7,7 +7,7 @@ import javax.sql.DataSource
 
 class TilkjentYtelseRepository(private val dataSource: DataSource) {
 
-    fun lagreTilkjentYtelse(tilkjentYtelsePeriodeEntity: TilkjentYtelsePeriodeEntity) {
+    fun lagreTilkjentYtelse(tilkjentYtelsePeriodeEntity: TilkjentYtelseEntity) {
         return dataSource.withinTransaction { connection ->
             val sql = "INSERT INTO TILKJENT_YTELSE DEFAULT VALUES"
             val statement = connection.prepareStatement(sql)
@@ -18,8 +18,6 @@ class TilkjentYtelseRepository(private val dataSource: DataSource) {
                 }
 
             val nøkkel = preparedStatement.hentGenerertNøkkel()
-
-            tilkjentYtelsePeriodeEntity
 
         }
     }

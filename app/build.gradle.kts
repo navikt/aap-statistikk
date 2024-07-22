@@ -51,7 +51,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0-RC")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("org.assertj:assertj-core:3.26.3")
-    testImplementation("org.testcontainers:postgresql:1.19.8")
+    testImplementation("org.testcontainers:postgresql:1.20.0")
     testImplementation("org.testcontainers:gcloud:1.20.0")
     testImplementation("org.testcontainers:junit-jupiter:1.20.0")
 }

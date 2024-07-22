@@ -1,18 +1,20 @@
 package no.nav.aap.statistikk.avsluttetbehandling.api
 
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.vilkårsresultat.api.VilkårsResultatDTO
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 data class AvsluttetBehandlingDTO(
+    val behandlingsReferanse: String,
     val tilkjentYtelse: List<TilkjentYtelsePeriodeDTO>,
     val vilkårsResultat: VilkårsResultatDTO
 ) {
     fun tilDomene(): AvsluttetBehandling {
         return AvsluttetBehandling(
+            behandlingReferanse = UUID.fromString(behandlingsReferanse),
             tilkjentYtelse = tilkjentYtelse.map(TilkjentYtelsePeriodeDTO::tilDomene),
             vilkårsresultat = vilkårsResultat.tilDomene()
         )
