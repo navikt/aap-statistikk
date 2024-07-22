@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat.service
 
+import WithBigQueryContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -7,7 +8,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import no.nav.aap.statistikk.WithPostgresContainer
-import no.nav.aap.statistikk.bigQueryContainer
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryObserver
@@ -23,7 +23,7 @@ import java.time.LocalDate
 import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class VilkårsResultatServiceTest : WithPostgresContainer() {
+class VilkårsResultatServiceTest : WithPostgresContainer(), WithBigQueryContainer {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @BeforeEach
@@ -38,8 +38,8 @@ class VilkårsResultatServiceTest : WithPostgresContainer() {
 
     @Test
     fun `lagrer vilkårsresultat i både pg og bq`(): Unit = runTest {
-        val postgresDataSource = dataSource()
-        val bigQueryConfig = bigQueryContainer()
+        val postgresDataSource = postgresDataSource()
+        val bigQueryConfig = testBigQueryConfig()
         val bqClient = BigQueryClient(bigQueryConfig)
         val bqRepository = BQRepository(bqClient)
         val bqObserver = BigQueryObserver(bqRepository, testDispatcher)

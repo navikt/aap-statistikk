@@ -12,7 +12,6 @@ import io.ktor.server.testing.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.testcontainers.containers.BigQueryEmulatorContainer
@@ -20,7 +19,6 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import javax.sql.DataSource
 
 
 fun testKlient(
@@ -77,15 +75,8 @@ fun postgresTestConfig(): DbConfig {
     return dbConfig
 }
 
-fun postgresDataSource(): DataSource {
-    val dbConfig = postgresTestConfig()
 
-    val dataSource = Flyway(dbConfig).createAndMigrateDataSource()
-    return dataSource
-}
-
-
-fun bigQueryContainer(): BigQueryConfig {
+private fun bigQueryContainer(): BigQueryConfig {
     val container = BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3");
     container.start()
 

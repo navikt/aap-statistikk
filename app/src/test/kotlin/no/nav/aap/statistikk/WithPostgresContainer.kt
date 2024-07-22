@@ -38,7 +38,7 @@ abstract class WithPostgresContainer {
         flyway.clean()
     }
 
-    fun dataSource(): HikariDataSource {
+    fun postgresDataSource(): HikariDataSource {
         return dataSource
     }
 }
