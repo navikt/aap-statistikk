@@ -15,8 +15,8 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
     override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity): Int {
 
         return dataSource.withinTransaction { connection ->
-            val sqlInsertResultat = """
-            INSERT INTO VILKARSRESULTAT(saksnummer,behandlingsreferanse, type_behandling) VALUES(?, ?, ?);
+            val sqlInsertResultat = """INSERT INTO VILKARSRESULTAT(saksnummer, behandlingsreferanse, type_behandling)
+VALUES (?, ?, ?);
         """
             val preparedStatement =
                 connection.prepareStatement(sqlInsertResultat, Statement.RETURN_GENERATED_KEYS).apply {
