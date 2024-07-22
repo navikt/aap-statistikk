@@ -1,5 +1,8 @@
 package no.nav.aap.statistikk
 
+import com.fasterxml.jackson.core.StreamReadFeature
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.route.apiRouting
@@ -25,6 +28,8 @@ import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.vilkårsresultat.api.vilkårsResultat
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.slf4j.LoggerFactory
@@ -65,10 +70,16 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
     val vilkårsResultatService = VilkårsResultatService(dataSource)
     vilkårsResultatService.registerObserver(bqObserver)
 
-    module(hendelsesRepository, vilkårsResultatService)
+    val avsluttetBehandlingService = AvsluttetBehandlingService(vilkårsResultatService)
+
+    module(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService)
 }
 
-fun Application.module(hendelsesRepository: IHendelsesRepository, vilkårsResultatService: VilkårsResultatService) {
+fun Application.module(
+    hendelsesRepository: IHendelsesRepository,
+    vilkårsResultatService: VilkårsResultatService,
+    avsluttetBehandlingService: AvsluttetBehandlingService
+) {
     monitoring()
     statusPages()
     tracing()
@@ -79,6 +90,7 @@ fun Application.module(hendelsesRepository: IHendelsesRepository, vilkårsResult
         apiRouting {
             mottaStatistikk(hendelsesRepository)
             vilkårsResultat(vilkårsResultatService)
+            avsluttetBehandling(avsluttetBehandlingService)
         }
         route("/") {
             get {
@@ -150,7 +162,7 @@ private fun Application.monitoring() {
 private fun Application.statusPages() {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            LoggerFactory.getLogger(App::class.java).error("Noe gikk galt. %", cause)
+            LoggerFactory.getLogger(App::class.java).error("Noe gikk galt.", cause)
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }

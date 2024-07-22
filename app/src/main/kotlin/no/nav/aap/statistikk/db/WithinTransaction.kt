@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.db
 
 import org.slf4j.LoggerFactory
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.SQLException
 import javax.sql.DataSource
 
@@ -48,4 +49,11 @@ fun <E> DataSource.withinTransaction(block: (Connection) -> E): E {
             }
         }
     }
+}
+
+fun PreparedStatement.hentGenerertNøkkel(): Int {
+    val resultSet = this.generatedKeys
+    resultSet.next()
+    val id = resultSet.getInt(1)
+    return id
 }

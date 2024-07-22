@@ -2,7 +2,7 @@
 <configuration>
     <appender name="pretty" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%cyan(%d{HH:mm:ss.SSS}) %gray([%thread]) %highlight(%-5level) %magenta(%logger{36}) [oppgave='%X{oppgavetype}', sakId='%X{sakId}', behandlingId='%X{behandlingId}'] - %msg%n
+            <pattern>%cyan(%d{HH:mm:ss.SSS}) %gray([%thread]) %highlight(%-5level) %magenta(%logger{100}) [oppgave='%X{oppgavetype}', sakId='%X{sakId}', behandlingId='%X{behandlingId}'] - %msg%n
             </pattern>
         </encoder>
     </appender>
@@ -17,5 +17,6 @@
 
     <logger name="io.netty" level="INFO" />
     <logger name="no.nav" level="INFO" />
+    <logger name="io.micrometer.prometheusmetrics.PrometheusMeterRegistry" level="DEBUG" />
 
 </configuration>

@@ -21,7 +21,6 @@ class VilkårsResultatService(
     fun mottaVilkårsResultat(vilkårsresultat: Vilkårsresultat): Int {
         val id = vilkårsResultatRepository.lagreVilkårsResultat(VilkårsResultatEntity.fraDomene(vilkårsresultat))
         runBlocking { notifyObservers(vilkårsresultat) }
-
         return id
     }
 
