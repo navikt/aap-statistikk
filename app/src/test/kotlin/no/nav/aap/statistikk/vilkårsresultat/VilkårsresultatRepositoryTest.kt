@@ -13,7 +13,7 @@ import java.util.*
 class VilkårsresultatRepositoryTest : WithPostgresContainer() {
     @Test
     fun `fungerer å lagre vilkårs-resultat og hente inn igjen`() {
-        val dataSource = dataSource()
+        val dataSource = postgresDataSource()
 
         val repo = VilkårsresultatRepository(dataSource)
 

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class HendelsesRepositoryTest : WithPostgresContainer() {
     @Test
     fun `sett inn hendelse i db`() {
-        val dataSource = dataSource()
+        val dataSource = postgresDataSource()
 
         val repository = HendelsesRepository(dataSource)
 

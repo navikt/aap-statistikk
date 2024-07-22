@@ -1,17 +1,17 @@
 package no.nav.aap.statistikk.bigquery
 
-import no.nav.aap.statistikk.bigQueryContainer
+import WithBigQueryContainer
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class BigQueryClientTest {
+class BigQueryClientTest : WithBigQueryContainer {
     @Test
     fun `lage en tabell to ganger er idempotent`() {
-        val options = bigQueryContainer()
+        val options = testBigQueryConfig()
         val client = BigQueryClient(options)
 
         val vilkårsVurderingTabell = VilkårsVurderingTabell()
@@ -26,7 +26,7 @@ class BigQueryClientTest {
 
     @Test
     fun `sette inn rad`() {
-        val options = bigQueryContainer()
+        val options = testBigQueryConfig()
         val client = BigQueryClient(options)
 
         val vilkårsVurderingTabell = VilkårsVurderingTabell()

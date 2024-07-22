@@ -30,7 +30,7 @@ class WithinTransactionKtTest: WithPostgresContainer() {
 
     @Test
     fun `om dataSource ikke klarer å koble til, så får vi TilkoblingsAvbrud`() {
-        val dataSource = spyk(dataSource())
+        val dataSource = spyk(postgresDataSource())
 
         every { dataSource.connection } throws SQLException("feilmelding fra SQL")
 
