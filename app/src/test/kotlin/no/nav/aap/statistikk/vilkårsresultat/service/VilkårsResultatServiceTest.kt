@@ -67,7 +67,8 @@ class VilkårsResultatServiceTest {
             saksnummer = "123456789", behandlingsType = "TypeA", vilkår = vilkårList
         )
 
-        vilkårsResultatService.mottaVilkårsResultat(vilkårsResult)
+        // TODO
+        vilkårsResultatService.mottaVilkårsResultat("123", vilkårsResult)
 
         // Vent på at korutiner fullføres
         testDispatcher.scheduler.advanceUntilIdle()

@@ -7,18 +7,23 @@ import java.time.LocalDate
 
 data class VilkårsResultatEntity(
     val id: Long?,
+    val behandlingsReferanse: String,
     val saksnummer: String,
     val typeBehandling: String,
     val vilkår: List<VilkårEntity>
 ) {
     fun tilVilkårsResultat(): Vilkårsresultat {
-        return Vilkårsresultat(saksnummer, typeBehandling, vilkår.map { it: VilkårEntity -> it.tilVilkår() })
+        return Vilkårsresultat(
+            saksnummer,
+            typeBehandling,
+            vilkår.map { it: VilkårEntity -> it.tilVilkår() })
     }
 
     companion object {
-        fun fraDomene(vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity {
+        fun fraDomene(behandlingsReferanse: String, vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity {
             return VilkårsResultatEntity(
                 null,
+                behandlingsReferanse = behandlingsReferanse,
                 vilkårsresultat.saksnummer,
                 vilkårsresultat.behandlingsType,
                 vilkårsresultat.vilkår.map { it: Vilkår -> VilkårEntity.fraDomene(it) }

@@ -40,7 +40,9 @@ class ApplicationTest {
 
             val vilkårsresultat =
                 VilkårsResultatDTO(
-                    typeBehandling = "Førstegangsbehandling", saksnummer = "ABC", vilkår = listOf(
+                    typeBehandling = "Førstegangsbehandling",
+                    saksnummer = "ABC",
+                    vilkår = listOf(
                         VilkårDTO(
                             vilkårType = "ALDERS",
                             listOf(

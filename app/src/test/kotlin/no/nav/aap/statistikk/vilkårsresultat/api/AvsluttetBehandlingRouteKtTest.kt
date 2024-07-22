@@ -29,7 +29,7 @@ class AvsluttetBehandlingRouteKtTest {
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
 
         every { avsluttetBehandlingService.lagre(any()) } just Runs
-        every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
+        every { vilkårsResultatService.mottaVilkårsResultat(any(), any()) } returns 1
 
         testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
             val response = client.post("/avsluttetBehandling") {

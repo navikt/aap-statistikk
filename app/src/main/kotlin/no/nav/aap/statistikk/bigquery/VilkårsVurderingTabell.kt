@@ -36,6 +36,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
     override fun parseRow(fieldValueList: FieldValueList): Vilkårsresultat {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingsType = fieldValueList.get("behandlingsType").stringValue
+        val behandlingsReferanse = "TODO"
 
         // TODO https://github.com/googleapis/java-bigquery/issues/3389
         val vilkår =
@@ -46,7 +47,11 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
                 )
             }
 
-        return Vilkårsresultat(saksnummer = saksnummer, behandlingsType = behandlingsType, vilkår = vilkår)
+        return Vilkårsresultat(
+            saksnummer = saksnummer,
+            behandlingsType = behandlingsType,
+            vilkår = vilkår
+        )
     }
 
     private fun vilkårsPeriodeFraFieldValue(periodeRecord: FieldValue) = VilkårsPeriode(

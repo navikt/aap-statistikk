@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatReposit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 class VilkårsresultatRepositoryTest {
     @Test
@@ -17,7 +18,7 @@ class VilkårsresultatRepositoryTest {
         val repo = VilkårsresultatRepository(dataSource)
 
         val vilkårsResultatEntity = VilkårsResultatEntity(
-            id = null,
+            id = null, behandlingsReferanse = UUID.randomUUID().toString(),
             "saksnummer", "typeBehandling", listOf(
                 VilkårEntity(
                     id = null,

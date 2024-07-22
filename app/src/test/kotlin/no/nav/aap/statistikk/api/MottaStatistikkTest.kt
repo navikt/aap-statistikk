@@ -66,7 +66,7 @@ class MottaStatistikkTest {
         val vilkårsResultatService = mockk<VilkårsResultatService>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
 
-        every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
+        every { vilkårsResultatService.mottaVilkårsResultat(any(), any()) } returns 1
 
         testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
             val res = client.post("/vilkarsresultat") {
