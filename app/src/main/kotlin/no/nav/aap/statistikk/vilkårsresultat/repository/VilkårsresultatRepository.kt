@@ -6,6 +6,7 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
+import java.sql.Types
 import javax.sql.DataSource
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
@@ -15,12 +16,13 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
 
         return dataSource.withinTransaction { connection ->
             val sqlInsertResultat = """
-            INSERT INTO VILKARSRESULTAT(saksnummer,type_behandling) VALUES(?, ?);
+            INSERT INTO VILKARSRESULTAT(saksnummer,behandlingsreferanse, type_behandling) VALUES(?, ?, ?);
         """
             val preparedStatement =
                 connection.prepareStatement(sqlInsertResultat, Statement.RETURN_GENERATED_KEYS).apply {
                     setString(1, vilkårsresultat.saksnummer)
-                    setString(2, vilkårsresultat.typeBehandling)
+                    setObject(2, vilkårsresultat.behandlingsReferanse, Types.OTHER)
+                    setString(3, vilkårsresultat.typeBehandling)
                     executeUpdate()
                 }
 
@@ -100,6 +102,7 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
         val id = resultSet.getLong("id")
         val saksNummer = resultSet.getString("saksnummer")
         val typeBehandling = resultSet.getString("type_behandling")
+        val behandlingsReferanse = resultSet.getString("behandlingsreferanse")
 
         do {
             val vilkårId = resultSet.getLong("id")
@@ -112,6 +115,7 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
         return VilkårsResultatEntity(
             id = id,
             saksnummer = saksNummer,
+            behandlingsReferanse = behandlingsReferanse,
             typeBehandling = typeBehandling,
             vilkår = vilkårList
         )

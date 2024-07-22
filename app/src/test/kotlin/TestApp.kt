@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.startUp
 
 fun main() {
     val pgConfig = postgresTestConfig()
+    println("PGCONFIG: $pgConfig")
     val bqConfig: BigQueryConfig = bigQueryContainer()
 
     embeddedServer(Netty, port = 8080) {

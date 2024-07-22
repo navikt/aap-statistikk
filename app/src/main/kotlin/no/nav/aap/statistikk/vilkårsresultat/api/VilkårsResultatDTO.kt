@@ -5,7 +5,11 @@ import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.time.LocalDate
 
-data class VilkårsResultatDTO(val saksnummer: String, val typeBehandling: String, val vilkår: List<VilkårDTO>) {
+data class VilkårsResultatDTO(
+    val saksnummer: String,
+    val typeBehandling: String,
+    val vilkår: List<VilkårDTO>
+) {
     fun tilDomene(): Vilkårsresultat {
         return Vilkårsresultat(
             saksnummer = this.saksnummer,

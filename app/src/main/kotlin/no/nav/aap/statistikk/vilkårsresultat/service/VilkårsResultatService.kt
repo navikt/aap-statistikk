@@ -18,8 +18,10 @@ class VilkårsResultatService(
     private val observers = mutableListOf<IObserver<Vilkårsresultat>>()
     private val vilkårsResultatRepository = VilkårsresultatRepository(dataSource)
 
-    fun mottaVilkårsResultat(vilkårsresultat: Vilkårsresultat): Int {
-        val id = vilkårsResultatRepository.lagreVilkårsResultat(VilkårsResultatEntity.fraDomene(vilkårsresultat))
+    fun mottaVilkårsResultat(behandlingsReferanse: String, vilkårsresultat: Vilkårsresultat): Int {
+        val id = vilkårsResultatRepository.lagreVilkårsResultat(
+            VilkårsResultatEntity.fraDomene(behandlingsReferanse, vilkårsresultat)
+        )
         runBlocking { notifyObservers(vilkårsresultat) }
         return id
     }
