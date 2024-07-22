@@ -13,4 +13,8 @@ class BQRepository(private val client: BigQueryClient) {
 
         client.insert(vilkårsVurderingTabell, vilkårsresultat)
     }
+
+    override fun toString(): String {
+        return "BQRepository(client=$client, vilkårsVurderingTabell=$vilkårsVurderingTabell)"
+    }
 }

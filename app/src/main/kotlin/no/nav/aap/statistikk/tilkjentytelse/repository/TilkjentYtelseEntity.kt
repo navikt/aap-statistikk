@@ -6,7 +6,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 
-data class TilkjentYtelseEntity(val id: Int? = null, val perioder: List<TilkjentYtelsePeriodeEntity>) {
+data class  TilkjentYtelseEntity(val id: Int? = null, val perioder: List<TilkjentYtelsePeriodeEntity>) {
     companion object {
         fun fraDomene(tilkjentYtelse: TilkjentYtelse): TilkjentYtelseEntity {
             return TilkjentYtelseEntity(perioder = tilkjentYtelse.perioder.map {

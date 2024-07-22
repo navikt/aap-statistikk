@@ -7,25 +7,38 @@ import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.time.LocalDate
 
+enum class FeltNavn(val feltNavn: String) {
+    SAKSNUMMER("saksnummer"),
+    BEHANDLINGSREFERANSE("behandlingsreferanse"),
+    BEHANDLINGSTYPE("behandlingsType"),
+    VILKÅR("vilkar"),
+    VILKÅR_TYPE("type"),
+    PERIODER("perioder"),
+    FRA_DATO("fraDato"),
+    TIL_DATO("tilDato"),
+    UTFALL("utfall"),
+    MANUELL_VURDERING("manuell_vurdering"),
+}
+
 class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
     override val tableName: String = "vilkarsResultat5"
     override val schema: Schema
         get() {
-            val saksnummerField = Field.of("saksnummer", StandardSQLTypeName.STRING)
-            val behandlingsReferanse = Field.of("behandlingsreferanse", StandardSQLTypeName.STRING)
-            val behandlingsType = Field.of("behandlingsType", StandardSQLTypeName.STRING)
+            val saksnummerField = Field.of(FeltNavn.SAKSNUMMER.feltNavn, StandardSQLTypeName.STRING)
+            val behandlingsReferanse = Field.of(FeltNavn.BEHANDLINGSREFERANSE.feltNavn, StandardSQLTypeName.STRING)
+            val behandlingsType = Field.of(FeltNavn.BEHANDLINGSTYPE.feltNavn, StandardSQLTypeName.STRING)
             val vilkårField =
                 Field.newBuilder(
-                    "vilkar",
+                    FeltNavn.VILKÅR.feltNavn,
                     StandardSQLTypeName.STRUCT,
-                    Field.of("type", StandardSQLTypeName.STRING),
+                    Field.of(FeltNavn.VILKÅR_TYPE.feltNavn, StandardSQLTypeName.STRING),
                     Field.newBuilder(
-                        "perioder",
+                        FeltNavn.PERIODER.feltNavn,
                         StandardSQLTypeName.STRUCT,
-                        Field.of("fraDato", StandardSQLTypeName.DATE),
-                        Field.of("tilDato", StandardSQLTypeName.DATE),
-                        Field.of("utfall", StandardSQLTypeName.STRING),
-                        Field.of("manuell_vurdering", StandardSQLTypeName.BOOL),
+                        Field.of(FeltNavn.FRA_DATO.feltNavn, StandardSQLTypeName.DATE),
+                        Field.of(FeltNavn.TIL_DATO.feltNavn, StandardSQLTypeName.DATE),
+                        Field.of(FeltNavn.UTFALL.feltNavn, StandardSQLTypeName.STRING),
+                        Field.of(FeltNavn.MANUELL_VURDERING.feltNavn, StandardSQLTypeName.BOOL),
                     ).setMode(Field.Mode.REPEATED).build()
                 )
                     .setMode(Field.Mode.REPEATED)
@@ -35,13 +48,13 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
 
 
     override fun parseRow(fieldValueList: FieldValueList): Vilkårsresultat {
-        val saksnummer = fieldValueList.get("saksnummer").stringValue
-        val behandlingsType = fieldValueList.get("behandlingsType").stringValue
-        val behandlingsReferanse = "TODO"
+        val saksnummer = hentVerdi(fieldValueList, FeltNavn.SAKSNUMMER)
+        val behandlingsType = hentVerdi(fieldValueList, FeltNavn.BEHANDLINGSTYPE)
+        val behandlingsReferanse = hentVerdi(fieldValueList, FeltNavn.BEHANDLINGSREFERANSE)
 
         // TODO https://github.com/googleapis/java-bigquery/issues/3389
         val vilkår =
-            fieldValueList.get("vilkar").repeatedValue.map {
+            fieldValueList.get(FeltNavn.VILKÅR.feltNavn).repeatedValue.map {
                 Vilkår(
                     vilkårType = it.recordValue[0].stringValue,
                     perioder = it.recordValue[1].repeatedValue.map(::vilkårsPeriodeFraFieldValue)
@@ -51,9 +64,13 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
         return Vilkårsresultat(
             saksnummer = saksnummer,
             behandlingsType = behandlingsType,
+            behandlingsReferanse = behandlingsReferanse,
             vilkår = vilkår
         )
     }
+
+    private fun hentVerdi(fieldValueList: FieldValueList, felt: FeltNavn): String =
+        fieldValueList.get(felt.feltNavn).stringValue
 
     private fun vilkårsPeriodeFraFieldValue(periodeRecord: FieldValue) = VilkårsPeriode(
         fraDato = LocalDate.parse(periodeRecord.recordValue[0].stringValue),
@@ -66,17 +83,18 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
         // TODO: bruke ID?
         return RowToInsert.of(
             mapOf(
-                "saksnummer" to value.saksnummer,
-                "behandlingsType" to value.behandlingsType,
-                "vilkar" to value.vilkår.map {
+                FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer,
+                FeltNavn.BEHANDLINGSTYPE.feltNavn to value.behandlingsType,
+                FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsReferanse,
+                FeltNavn.VILKÅR.feltNavn to value.vilkår.map {
                     mapOf(
-                        "type" to it.vilkårType,
-                        "perioder" to it.perioder.map { periode ->
+                        FeltNavn.VILKÅR_TYPE.feltNavn to it.vilkårType,
+                        FeltNavn.PERIODER.feltNavn to it.perioder.map { periode ->
                             mapOf(
-                                "fraDato" to periode.fraDato.toString(),
-                                "tilDato" to periode.tilDato.toString(),
-                                "utfall" to periode.utfall,
-                                "manuell_vurdering" to periode.manuellVurdering
+                                FeltNavn.FRA_DATO.feltNavn to periode.fraDato.toString(),
+                                FeltNavn.TIL_DATO.feltNavn to periode.tilDato.toString(),
+                                FeltNavn.UTFALL.feltNavn to periode.utfall,
+                                FeltNavn.MANUELL_VURDERING.feltNavn to periode.manuellVurdering
                             )
                         }
                     )

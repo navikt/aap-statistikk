@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 data class Vilkårsresultat(
     val saksnummer: String,
+    val behandlingsReferanse: String,
     val behandlingsType: String,
     val vilkår: List<Vilkår>
 )
