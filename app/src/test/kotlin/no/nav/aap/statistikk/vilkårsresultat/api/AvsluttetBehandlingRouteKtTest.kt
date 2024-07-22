@@ -15,9 +15,11 @@ import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingServ
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.assertj.core.api.Assertions.assertThat
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 class AvsluttetBehandlingRouteKtTest {
     @Test
@@ -70,8 +72,11 @@ class AvsluttetBehandlingRouteKtTest {
                     ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(tilkjentYtelseDTO)
 
                 contentType(ContentType.Application.Json)
-                setBody("""{"tilkjentYtelse": $tilkjentYtelseJSON, "vilkårsResultat": $vilkårsResultatJson}""")
-                println("""{"tilkjentYtelse": $tilkjentYtelseJSON, "vilkårsResultat": $vilkårsResultatJson}""")
+                val behandlingReferanse = UUID.randomUUID()
+
+                @Language("JSON") val jsonBody =
+                    """{"behandlingsReferanse": "$behandlingReferanse", "tilkjentYtelse": $tilkjentYtelseJSON, "vilkårsResultat": $vilkårsResultatJson}"""
+                setBody(jsonBody)
             }
 
             assertThat(response.status.isSuccess()).isTrue()
