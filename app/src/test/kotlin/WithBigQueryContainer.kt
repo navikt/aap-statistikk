@@ -3,6 +3,7 @@ import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import org.testcontainers.containers.BigQueryEmulatorContainer
+import java.util.*
 import kotlin.math.floor
 
 interface WithBigQueryContainer {
@@ -16,7 +17,7 @@ interface WithBigQueryContainer {
     }
 
     fun testBigQueryConfig(): BigQueryConfig {
-        val randomPart = floor(Math.random() * 10000).toString().substring(0, 4)
+        val randomPart = generateRandomString(5)
         val datasetName = "dataset-$randomPart"
         val datasetInfo = DatasetInfo.newBuilder(datasetName).build()
 
@@ -37,5 +38,16 @@ interface WithBigQueryContainer {
         config.bigQueryOptions().service.create(datasetInfo)
 
         return config
+    }
+
+    fun generateRandomString(length: Int): String {
+        val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val sb = StringBuilder()
+        val random = Random()
+        for (i in 0 until length) {
+            val index: Int = random.nextInt(alphabet.length)
+            sb.append(alphabet[index])
+        }
+        return sb.toString()
     }
 }
