@@ -21,6 +21,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VilkårsResultatServiceTest {
@@ -68,7 +69,7 @@ class VilkårsResultatServiceTest {
         )
 
         // TODO
-        vilkårsResultatService.mottaVilkårsResultat("123", vilkårsResult)
+        vilkårsResultatService.mottaVilkårsResultat(UUID.randomUUID().toString(), vilkårsResult)
 
         // Vent på at korutiner fullføres
         testDispatcher.scheduler.advanceUntilIdle()
