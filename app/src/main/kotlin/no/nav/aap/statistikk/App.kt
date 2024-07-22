@@ -1,8 +1,5 @@
 package no.nav.aap.statistikk
 
-import com.fasterxml.jackson.core.StreamReadFeature
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.route.apiRouting
@@ -22,14 +19,14 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
-import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
-import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.vilkårsresultat.api.vilkårsResultat
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.slf4j.LoggerFactory
@@ -53,8 +50,8 @@ fun main() {
 }
 
 fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
-    val flyway = Flyway()
-    val dataSource = flyway.createAndMigrateDataSource(dbConfig)
+    val flyway = Flyway(dbConfig)
+    val dataSource = flyway.createAndMigrateDataSource()
 
     environment.monitor.subscribe(ApplicationStopped) {
         log.info("Received shutdown event. Closing Hikari connection pool.")

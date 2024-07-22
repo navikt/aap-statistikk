@@ -12,6 +12,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
     override val schema: Schema
         get() {
             val saksnummerField = Field.of("saksnummer", StandardSQLTypeName.STRING)
+            val behandlingsReferanse = Field.of("behandlingsreferanse", StandardSQLTypeName.STRING)
             val behandlingsType = Field.of("behandlingsType", StandardSQLTypeName.STRING)
             val vilkårField =
                 Field.newBuilder(
@@ -29,7 +30,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
                 )
                     .setMode(Field.Mode.REPEATED)
                     .build()
-            return Schema.of(saksnummerField, behandlingsType, vilkårField)
+            return Schema.of(saksnummerField, behandlingsReferanse, behandlingsType, vilkårField)
         }
 
 

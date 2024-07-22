@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat
 
-import no.nav.aap.statistikk.api.postgresDataSource
+import no.nav.aap.statistikk.WithPostgresContainer
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-class VilkårsresultatRepositoryTest {
+class VilkårsresultatRepositoryTest : WithPostgresContainer() {
     @Test
     fun `fungerer å lagre vilkårs-resultat og hente inn igjen`() {
-        val dataSource = postgresDataSource()
+        val dataSource = dataSource()
 
         val repo = VilkårsresultatRepository(dataSource)
 
