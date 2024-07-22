@@ -9,6 +9,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
+import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
@@ -27,11 +28,12 @@ import javax.sql.DataSource
 fun testKlient(
     hendelsesRepository: IHendelsesRepository,
     vilkårsResultatService: VilkårsResultatService,
+    avsluttetBehandlingService: AvsluttetBehandlingService,
     test: suspend (HttpClient) -> Unit
 ) {
     testApplication {
         application {
-            module(hendelsesRepository, vilkårsResultatService)
+            module(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService)
         }
         val client = client.config {
             install(ContentNegotiation) {

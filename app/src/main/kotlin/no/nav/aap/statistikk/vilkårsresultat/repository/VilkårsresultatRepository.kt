@@ -57,6 +57,7 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
                     }
                 }
             }
+            log.info("Satte inn vilkårsresulat med db ID: $vilkårResultId")
             vilkårResultId
         }
     }
@@ -138,3 +139,4 @@ fun resultSetTilVilkårsPeriode(resultSet: ResultSet): VilkårsPeriodeEntity {
         avslagsårsak = resultSet.getString("avslagsaarsak")
     )
 }
+

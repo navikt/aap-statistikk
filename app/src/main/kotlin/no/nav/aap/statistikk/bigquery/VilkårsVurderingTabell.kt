@@ -42,18 +42,19 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
             fieldValueList.get("vilkar").repeatedValue.map {
                 Vilkår(
                     vilkårType = it.recordValue[0].stringValue,
-                    perioder = it.recordValue[1].repeatedValue.map { periodeRecord ->
-                        VilkårsPeriode(
-                            fraDato = LocalDate.parse(periodeRecord.recordValue[0].stringValue),
-                            tilDato = LocalDate.parse(periodeRecord.recordValue[1].stringValue),
-                            utfall = periodeRecord.recordValue[2].stringValue,
-                            manuellVurdering = periodeRecord.recordValue[3].booleanValue,
-                        )
-                    })
+                    perioder = it.recordValue[1].repeatedValue.map(::vilkårsPeriodeFraFieldValue)
+                )
             }
 
         return Vilkårsresultat(saksnummer = saksnummer, behandlingsType = behandlingsType, vilkår = vilkår)
     }
+
+    private fun vilkårsPeriodeFraFieldValue(periodeRecord: FieldValue) = VilkårsPeriode(
+        fraDato = LocalDate.parse(periodeRecord.recordValue[0].stringValue),
+        tilDato = LocalDate.parse(periodeRecord.recordValue[1].stringValue),
+        utfall = periodeRecord.recordValue[2].stringValue,
+        manuellVurdering = periodeRecord.recordValue[3].booleanValue,
+    )
 
     override fun toRow(value: Vilkårsresultat): RowToInsert {
         // TODO: bruke ID?

@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.aap.statistikk.api.testKlient
 import no.nav.aap.statistikk.api.testKlientMedTestContainer
+import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.vilkårsresultat.api.*
@@ -25,7 +26,8 @@ class ApplicationTest {
     fun testHelloWorld() {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
-        testKlient(hendelsesRepository, vilkårsResultatService) { client ->
+        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
             val response = client.get("/")
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             Assertions.assertEquals(response.body() as String, "Hello World!")
@@ -67,7 +69,7 @@ class ApplicationTest {
 
             val dataSource = Flyway().createAndMigrateDataSource(dbConfig)
 
-            val uthentet = VilkårsresultatRepository(dataSource).hentVilkårsResultat(resp.id)
+            val uthentet = VilkårsresultatRepository(dataSource).hentVilkårsResultat(1)
 
             assertThat(response.status).isEqualTo(HttpStatusCode.Accepted)
             assertThat(uthentet!!.saksnummer).isEqualTo("ABC")
@@ -78,9 +80,10 @@ class ApplicationTest {
     fun `kan poste ren json`() {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
+        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns Unit
 
-        testKlient(hendelsesRepository, vilkårsResultatService) { client ->
+        testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 setBody("""{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering"}""")
