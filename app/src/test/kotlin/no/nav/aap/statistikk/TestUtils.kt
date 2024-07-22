@@ -76,7 +76,7 @@ fun postgresTestConfig(): DbConfig {
 }
 
 
-private fun bigQueryContainer(): BigQueryConfig {
+fun bigQueryContainer(): BigQueryConfig {
     val container = BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3");
     container.start()
 
