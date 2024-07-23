@@ -39,7 +39,6 @@ class ApplicationTest {
             val vilkårsresultat =
                 VilkårsResultatDTO(
                     typeBehandling = "Førstegangsbehandling",
-                    saksnummer = "ABC",
                     vilkår = listOf(
                         VilkårDTO(
                             vilkårType = "ALDERS",
@@ -72,7 +71,7 @@ class ApplicationTest {
             val uthentet = VilkårsresultatRepository(dataSource).hentVilkårsResultat(1)
 
             assertThat(response.status).isEqualTo(HttpStatusCode.Accepted)
-            assertThat(uthentet!!.saksnummer).isEqualTo("ABC")
+            assertThat(uthentet!!.saksnummer).isEqualTo("sakid")
         }
     }
 

@@ -17,7 +17,7 @@ fun NormalOpenAPIRoute.avsluttetBehandling(avsluttetBehandlingService: Avsluttet
             val id = avsluttetBehandlingService.lagre(dto.tilDomene())
 
             // TODO: responder med id?
-            responder.respond(HttpStatusCode.Accepted, AvsluttetBehandlingResponsDTO(id = 122), pipeline)
+            responder.respond(HttpStatusCode.Accepted, AvsluttetBehandlingResponsDTO(id = 143), pipeline)
         }
     }
 }

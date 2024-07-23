@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat.api
 
+import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
@@ -7,13 +8,12 @@ import java.time.LocalDate
 import java.util.*
 
 data class VilkårsResultatDTO(
-    val saksnummer: String,
     val typeBehandling: String,
     val vilkår: List<VilkårDTO>
 ) {
-    fun tilDomene(behandlingsReferanse: UUID): Vilkårsresultat {
+    fun tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
         return Vilkårsresultat(
-            saksnummer = this.saksnummer,
+            saksnummer = saksnummer,
             behandlingsType = this.typeBehandling,
             behandlingsReferanse = behandlingsReferanse,
             vilkår = this.vilkår.map { it.tilDomene() }

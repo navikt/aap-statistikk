@@ -36,7 +36,7 @@ class AvsluttetBehandlingRouteKtTest {
         testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
             val response = client.post("/avsluttetBehandling") {
                 val vilkårsresultat = VilkårsResultatDTO(
-                    typeBehandling = "Førstegangsbehandling", saksnummer = "ABC", vilkår = listOf(
+                    typeBehandling = "Førstegangsbehandling", vilkår = listOf(
                         VilkårDTO(
                             vilkårType = "ALDERS", listOf(
                                 VilkårsPeriodeDTO(
@@ -82,7 +82,7 @@ class AvsluttetBehandlingRouteKtTest {
             }
 
             assertThat(response.status.isSuccess()).isTrue()
-            assertThat(response.body<VilkårsResultatResponsDTO>().id).isEqualTo(122)
+            assertThat(response.body<VilkårsResultatResponsDTO>().id).isEqualTo(143)
 
             verify(exactly = 1) {  tilkjentYtelseService.lagreTilkjentYtelse(any()) }
             verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(any()) }
