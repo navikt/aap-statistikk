@@ -68,6 +68,7 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
+        maxParallelForks = Runtime.getRuntime().availableProcessors()
     }
 }
 
