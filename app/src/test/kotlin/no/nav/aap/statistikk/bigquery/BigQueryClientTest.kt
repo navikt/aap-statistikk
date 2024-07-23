@@ -7,7 +7,7 @@ import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class BigQueryClientTest : WithBigQueryContainer {
     @Test
@@ -34,7 +34,7 @@ class BigQueryClientTest : WithBigQueryContainer {
 
         client.create(vilkårsVurderingTabell)
 
-        val behandlingsReferanse = UUID.randomUUID().toString()
+        val behandlingsReferanse = UUID.randomUUID()
         val vilkårsResult = Vilkårsresultat(
             "123", behandlingsReferanse, "behandling", listOf(
                 Vilkår(

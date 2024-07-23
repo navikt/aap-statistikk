@@ -16,25 +16,32 @@ data class AvsluttetBehandlingDTO(
 ) {
     fun tilDomene(): AvsluttetBehandling {
         return AvsluttetBehandling(
-            sakId = sakId,
-            behandlingReferanse = UUID.fromString(behandlingsReferanse),
-            tilkjentYtelse = tilkjentYtelse.tilDomene(),
-            vilkårsresultat = vilkårsResultat.tilDomene(behandlingsReferanse)
+            tilkjentYtelse = tilkjentYtelse.tilDomene(
+                sakId,
+                behandlingsReferanse = UUID.fromString(behandlingsReferanse)
+            ),
+            vilkårsresultat = vilkårsResultat.tilDomene(UUID.fromString(behandlingsReferanse))
         )
     }
 }
 
-data class TilkjentYtelseDTO(val perioder: List<TilkjentYtelsePeriodeDTO>) {
-    fun tilDomene(): TilkjentYtelse {
-        return TilkjentYtelse(perioder = perioder.map(TilkjentYtelsePeriodeDTO::tilDomene))
+data class TilkjentYtelseDTO(
+    val perioder: List<TilkjentYtelsePeriodeDTO>
+) {
+    fun tilDomene(sakId: String, behandlingsReferanse: UUID): TilkjentYtelse {
+        return TilkjentYtelse(
+            saksnummer = sakId,
+            behandlingsReferanse = behandlingsReferanse,
+            perioder = perioder.map(TilkjentYtelsePeriodeDTO::tilDomene)
+        )
     }
 }
 
 data class TilkjentYtelsePeriodeDTO(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val dagsats: BigDecimal,
-    val gradering: BigDecimal,
+    val dagsats: Double,
+    val gradering: Double,
 ) {
     fun tilDomene(): TilkjentYtelsePeriode {
         return TilkjentYtelsePeriode(fraDato = fraDato, tilDato = tilDato, dagsats = dagsats, gradering)

@@ -12,8 +12,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.api.TilkjentYtelsePeriodeDTO
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -32,7 +30,7 @@ class AvsluttetBehandlingRouteKtTest {
 
         val behandlingReferanse = UUID.randomUUID()
 
-        every { vilkårsResultatService.mottaVilkårsResultat(behandlingReferanse.toString(), any()) } returns 1
+        every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
         every { tilkjentYtelseService.lagreTilkjentYtelse(any()) } just Runs
 
         testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
@@ -63,8 +61,8 @@ class AvsluttetBehandlingRouteKtTest {
                         TilkjentYtelsePeriodeDTO(
                             fraDato = LocalDate.now().minusDays(10),
                             tilDato = LocalDate.now(),
-                            dagsats = BigDecimal("100.23"),
-                            gradering = BigDecimal("70.2")
+                            dagsats = 100.23,
+                            gradering = 70.2
                         )
                     )
                 )
@@ -83,13 +81,11 @@ class AvsluttetBehandlingRouteKtTest {
                 setBody(jsonBody)
             }
 
-
-
             assertThat(response.status.isSuccess()).isTrue()
             assertThat(response.body<VilkårsResultatResponsDTO>().id).isEqualTo(122)
 
             verify(exactly = 1) {  tilkjentYtelseService.lagreTilkjentYtelse(any()) }
-            verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(behandlingReferanse.toString(), any()) }
+            verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(any()) }
 
             checkUnnecessaryStub(tilkjentYtelseService, vilkårsResultatService)
         }

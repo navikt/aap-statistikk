@@ -9,11 +9,11 @@ import javax.sql.DataSource
 private val log = LoggerFactory.getLogger("WithinTransaction")
 
 
-class TilkoblingsAvbrudd(message: String?) : Exception(message)
+class TilkoblingsAvbrudd(message: String?, cause: Throwable?) : Exception(message, cause)
 
-class TransaksjonsAvbrudd(message: String?) : Exception(message)
+class TransaksjonsAvbrudd(message: String?, cause: Throwable?) : Exception(message, cause)
 
-class TilbakerullingsAvbrudd(message: String?) : Exception(message)
+class TilbakerullingsAvbrudd(message: String?, cause: Throwable?) : Exception(message, cause)
 
 // extension function on datasource
 fun <E> DataSource.withinTransaction(block: (Connection) -> E): E {
@@ -31,14 +31,14 @@ fun <E> DataSource.withinTransaction(block: (Connection) -> E): E {
         if (connection != null) {
             try {
                 connection.rollback()
-                throw TransaksjonsAvbrudd(ex.message)
+                throw TransaksjonsAvbrudd(ex.message, ex)
             } catch (rbEx: SQLException) {
                 log.error("Error during transaction rollback: ${rbEx.message}", rbEx)
-                throw TilbakerullingsAvbrudd(rbEx.message)
+                throw TilbakerullingsAvbrudd(rbEx.message, ex)
             }
         }
         log.error("Kunne ikke få tak i Connection-objekt", ex)
-        throw TilkoblingsAvbrudd("Kunne ikke få tak i Connection-objekt.")
+        throw TilkoblingsAvbrudd("Kunne ikke få tak i Connection-objekt.", ex)
     } finally {
         // Make sure to close the connection
         if (connection != null) {

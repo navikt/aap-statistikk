@@ -4,13 +4,14 @@ import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.time.LocalDate
+import java.util.*
 
 data class VilkårsResultatDTO(
     val saksnummer: String,
     val typeBehandling: String,
     val vilkår: List<VilkårDTO>
 ) {
-    fun tilDomene(behandlingsReferanse: String): Vilkårsresultat {
+    fun tilDomene(behandlingsReferanse: UUID): Vilkårsresultat {
         return Vilkårsresultat(
             saksnummer = this.saksnummer,
             behandlingsType = this.typeBehandling,

@@ -67,7 +67,7 @@ fun testKlientMedTestContainer(
 }
 
 fun postgresTestConfig(): DbConfig {
-    val postgres = PostgreSQLContainer<Nothing>("postgres:15")
+    val postgres = PostgreSQLContainer("postgres:15")
     postgres.waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
     postgres.start()
 

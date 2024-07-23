@@ -9,7 +9,6 @@ class AvsluttetBehandlingService(
 ) {
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
         vilkårsResultatService.mottaVilkårsResultat(
-            avsluttetBehandling.behandlingReferanse.toString(),
             avsluttetBehandling.vilkårsresultat
         )
 

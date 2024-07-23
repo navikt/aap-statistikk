@@ -6,21 +6,22 @@ import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.time.LocalDate
-
-enum class FeltNavn(val feltNavn: String) {
-    SAKSNUMMER("saksnummer"),
-    BEHANDLINGSREFERANSE("behandlingsreferanse"),
-    BEHANDLINGSTYPE("behandlingsType"),
-    VILKÅR("vilkar"),
-    VILKÅR_TYPE("type"),
-    PERIODER("perioder"),
-    FRA_DATO("fraDato"),
-    TIL_DATO("tilDato"),
-    UTFALL("utfall"),
-    MANUELL_VURDERING("manuell_vurdering"),
-}
+import java.util.*
 
 class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
+    private enum class FeltNavn(val feltNavn: String) {
+        SAKSNUMMER("saksnummer"),
+        BEHANDLINGSREFERANSE("behandlingsreferanse"),
+        BEHANDLINGSTYPE("behandlingsType"),
+        VILKÅR("vilkar"),
+        VILKÅR_TYPE("type"),
+        PERIODER("perioder"),
+        FRA_DATO("fraDato"),
+        TIL_DATO("tilDato"),
+        UTFALL("utfall"),
+        MANUELL_VURDERING("manuell_vurdering"),
+    }
+
     override val tableName: String = "vilkarsResultat5"
     override val schema: Schema
         get() {
@@ -64,7 +65,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
         return Vilkårsresultat(
             saksnummer = saksnummer,
             behandlingsType = behandlingsType,
-            behandlingsReferanse = behandlingsReferanse,
+            behandlingsReferanse = UUID.fromString(behandlingsReferanse),
             vilkår = vilkår
         )
     }
@@ -85,7 +86,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
             mapOf(
                 FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer,
                 FeltNavn.BEHANDLINGSTYPE.feltNavn to value.behandlingsType,
-                FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsReferanse,
+                FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsReferanse.toString(),
                 FeltNavn.VILKÅR.feltNavn to value.vilkår.map {
                     mapOf(
                         FeltNavn.VILKÅR_TYPE.feltNavn to it.vilkårType,

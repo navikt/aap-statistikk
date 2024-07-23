@@ -86,11 +86,11 @@ VALUES (?, ?, ?);
     }
 
     private fun createPreparedStatement(connection: Connection, vilkårResultatId: Int): PreparedStatement {
-        val preparedSqlStatement = """
-            SELECT * FROM VILKARSRESULTAT 
-            LEFT JOIN VILKAR ON VILKARSRESULTAT.id = VILKAR.vilkarresult_id
-            LEFT JOIN VILKARSPERIODE ON VILKAR.id = VILKARSPERIODE.vilkar_id
-            WHERE VILKARSRESULTAT.id = ?;
+        val preparedSqlStatement = """SELECT *
+FROM VILKARSRESULTAT
+         LEFT JOIN VILKAR ON VILKARSRESULTAT.id = VILKAR.vilkarresult_id
+         LEFT JOIN VILKARSPERIODE ON VILKAR.id = VILKARSPERIODE.vilkar_id
+WHERE VILKARSRESULTAT.id = ?;
             """
         val preparedStatement = connection.prepareStatement(preparedSqlStatement)
         preparedStatement.setInt(1, vilkårResultatId)
