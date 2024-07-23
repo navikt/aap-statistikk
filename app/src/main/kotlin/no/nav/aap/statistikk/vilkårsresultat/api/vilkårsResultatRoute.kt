@@ -17,9 +17,9 @@ fun NormalOpenAPIRoute.vilkårsResultat(
         post<Unit, VilkårsResultatResponsDTO, VilkårsResultatDTO> { _, dto ->
             pipeline.context.application.log.info("Mottok vilkårsresultat: $dto")
 
-            // TODO: bort
-            val behandlingsReferanse = UUID.randomUUID().toString()
-            val id = vilkårsResultatService.mottaVilkårsResultat(behandlingsReferanse, dto.tilDomene(behandlingsReferanse))
+            // TODO: denne skal erstattes med /avsluttetBehandling
+            val behandlingsReferanse = UUID.randomUUID()
+            val id = vilkårsResultatService.mottaVilkårsResultat(dto.tilDomene(behandlingsReferanse))
 
             responder.respond(HttpStatusCode.Accepted, VilkårsResultatResponsDTO(id=id), pipeline)
         }

@@ -65,13 +65,13 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
 
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
-    val bqObserver = BigQueryObserver(bqRepository)
-    val vilkårsResultatService = VilkårsResultatService(dataSource)
-    vilkårsResultatService.registerObserver(bqObserver)
+    val vilkårsResultatService = VilkårsResultatService(dataSource, bqRepository)
 
     val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
-    val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository)
+    val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository, bqRepository)
     val avsluttetBehandlingService = AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService)
+
+
 
     module(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService)
 }

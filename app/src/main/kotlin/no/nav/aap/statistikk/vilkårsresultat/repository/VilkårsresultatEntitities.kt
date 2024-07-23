@@ -4,6 +4,7 @@ import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.time.LocalDate
+import java.util.*
 
 data class VilkårsResultatEntity(
     val id: Long?,
@@ -15,16 +16,16 @@ data class VilkårsResultatEntity(
     fun tilVilkårsResultat(): Vilkårsresultat {
         return Vilkårsresultat(
             saksnummer,
+            UUID.fromString(behandlingsReferanse),
             typeBehandling,
-            behandlingsReferanse,
             vilkår.map { it: VilkårEntity -> it.tilVilkår() })
     }
 
     companion object {
-        fun fraDomene(behandlingsReferanse: String, vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity {
+        fun fraDomene(vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity {
             return VilkårsResultatEntity(
                 null,
-                behandlingsReferanse = behandlingsReferanse,
+                behandlingsReferanse = vilkårsresultat.behandlingsReferanse.toString(),
                 vilkårsresultat.saksnummer,
                 vilkårsresultat.behandlingsType,
                 vilkårsresultat.vilkår.map { it: Vilkår -> VilkårEntity.fraDomene(it) }

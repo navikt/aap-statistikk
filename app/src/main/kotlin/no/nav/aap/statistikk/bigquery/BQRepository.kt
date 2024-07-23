@@ -1,17 +1,22 @@
 package no.nav.aap.statistikk.bigquery
 
+import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 
-class BQRepository(private val client: BigQueryClient) {
-
+class BQRepository(
+    private val client: BigQueryClient
+) {
     private val vilkårsVurderingTabell = VilkårsVurderingTabell()
+    private val tilkjentYtelseTabell = TilkjentYtelseTabell()
 
-    fun lagreVilkårsResultat(vilkårsresultat: Vilkårsresultat) {
-        // Hvis ikke eksiterer, lagre alt
-        // Dette er logikk som burde være i servicen egentlig
+    fun lagre(payload: Vilkårsresultat) {
         client.create(vilkårsVurderingTabell)
+        client.insert(vilkårsVurderingTabell, payload)
+    }
 
-        client.insert(vilkårsVurderingTabell, vilkårsresultat)
+    fun lagre(payload: TilkjentYtelse) {
+        client.create(tilkjentYtelseTabell)
+        client.insert(tilkjentYtelseTabell, payload)
     }
 
     override fun toString(): String {
