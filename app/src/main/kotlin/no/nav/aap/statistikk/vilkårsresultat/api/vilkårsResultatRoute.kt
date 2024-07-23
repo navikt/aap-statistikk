@@ -19,7 +19,7 @@ fun NormalOpenAPIRoute.vilkårsResultat(
 
             // TODO: denne skal erstattes med /avsluttetBehandling
             val behandlingsReferanse = UUID.randomUUID()
-            val id = vilkårsResultatService.mottaVilkårsResultat(dto.tilDomene(behandlingsReferanse))
+            val id = vilkårsResultatService.mottaVilkårsResultat(dto.tilDomene("sakid", behandlingsReferanse))
 
             responder.respond(HttpStatusCode.Accepted, VilkårsResultatResponsDTO(id=id), pipeline)
         }

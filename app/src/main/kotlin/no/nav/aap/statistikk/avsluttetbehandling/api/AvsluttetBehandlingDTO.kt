@@ -1,16 +1,16 @@
 package no.nav.aap.statistikk.avsluttetbehandling.api
 
+import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.vilkårsresultat.api.VilkårsResultatDTO
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
 data class AvsluttetBehandlingDTO(
-    val sakId: String,
-    val behandlingsReferanse: String,
+    @StringExample("4LELS7K", "4LEFCQ8") val sakId: String,
+    val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelseDTO,
     val vilkårsResultat: VilkårsResultatDTO
 ) {
@@ -18,9 +18,9 @@ data class AvsluttetBehandlingDTO(
         return AvsluttetBehandling(
             tilkjentYtelse = tilkjentYtelse.tilDomene(
                 sakId,
-                behandlingsReferanse = UUID.fromString(behandlingsReferanse)
+                behandlingsReferanse = behandlingsReferanse
             ),
-            vilkårsresultat = vilkårsResultat.tilDomene(UUID.fromString(behandlingsReferanse))
+            vilkårsresultat = vilkårsResultat.tilDomene(sakId, behandlingsReferanse)
         )
     }
 }

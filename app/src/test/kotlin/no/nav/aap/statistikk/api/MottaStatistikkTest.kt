@@ -48,7 +48,6 @@ class MottaStatistikkTest {
     fun `kan motta json av vilkårsresultat`() {
         @Language("json")
         val vilkårsResultatJSON = """{
-  "saksnummer" : "1234",
   "typeBehandling" : "Førstegangsbehandling",
   "vilkår" : [ {
     "vilkårType" : "MEDLEMSKAP",
