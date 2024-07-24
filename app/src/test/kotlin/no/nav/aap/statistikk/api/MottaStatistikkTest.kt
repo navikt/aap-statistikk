@@ -2,13 +2,13 @@ package no.nav.aap.statistikk.api
 
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.testKlient
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

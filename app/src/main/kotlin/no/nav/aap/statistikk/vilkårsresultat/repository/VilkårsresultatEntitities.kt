@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.vilkårsresultat.repository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import java.time.LocalDate
 import java.util.*
 
@@ -36,14 +37,14 @@ data class VilkårsResultatEntity(
 
 data class VilkårEntity(val id: Long?, val vilkårType: String, val perioder: List<VilkårsPeriodeEntity>) {
     fun tilVilkår(): Vilkår {
-        return Vilkår(vilkårType, perioder.map { it.tilVilkårsPeriode() })
+        return Vilkår(Vilkårtype.valueOf(vilkårType), perioder.map { it.tilVilkårsPeriode() })
     }
 
     companion object {
         fun fraDomene(vilkår: Vilkår): VilkårEntity {
             return VilkårEntity(
                 null,
-                vilkår.vilkårType,
+                vilkår.vilkårType.toString(),
                 vilkår.perioder.map { it: VilkårsPeriode -> VilkårsPeriodeEntity.fraDomene(it) }
             )
         }

@@ -3,37 +3,29 @@ package no.nav.aap.statistikk.avsluttetbehandling.api
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import java.time.LocalDate
 import java.util.*
 
 data class VilkårsResultatDTO(
-    val typeBehandling: String,
-    val vilkår: List<VilkårDTO>
+    val typeBehandling: String, val vilkår: List<VilkårDTO>
 ) {
     fun tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
-        return Vilkårsresultat(
-            saksnummer = saksnummer,
+        return Vilkårsresultat(saksnummer = saksnummer,
             behandlingsType = this.typeBehandling,
             behandlingsReferanse = behandlingsReferanse,
-            vilkår = this.vilkår.map { it.tilDomene() }
-        )
+            vilkår = this.vilkår.map { it.tilDomene() })
     }
 }
 
-data class VilkårDTO(val vilkårType: String, val perioder: List<VilkårsPeriodeDTO>) {
+data class VilkårDTO(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriodeDTO>) {
     fun tilDomene(): Vilkår {
-        return Vilkår(
-            vilkårType = this.vilkårType,
-            perioder = this.perioder.map { it.tilDomene() }
-        )
+        return Vilkår(vilkårType = this.vilkårType, perioder = this.perioder.map { it.tilDomene() })
     }
 }
 
 enum class Utfall {
-    IKKE_VURDERT,
-    IKKE_RELEVANT,
-    OPPFYLT,
-    IKKE_OPPFYLT
+    IKKE_VURDERT, IKKE_RELEVANT, OPPFYLT, IKKE_OPPFYLT
 }
 
 data class VilkårsPeriodeDTO(

@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import java.time.LocalDate
 import java.util.*
 
@@ -57,7 +58,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
         val vilkår =
             fieldValueList.get(FeltNavn.VILKÅR.feltNavn).repeatedValue.map {
                 Vilkår(
-                    vilkårType = it.recordValue[0].stringValue,
+                    vilkårType = Vilkårtype.valueOf(it.recordValue[0].stringValue),
                     perioder = it.recordValue[1].repeatedValue.map(::vilkårsPeriodeFraFieldValue)
                 )
             }
@@ -89,7 +90,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
                 FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsReferanse.toString(),
                 FeltNavn.VILKÅR.feltNavn to value.vilkår.map {
                     mapOf(
-                        FeltNavn.VILKÅR_TYPE.feltNavn to it.vilkårType,
+                        FeltNavn.VILKÅR_TYPE.feltNavn to it.vilkårType.toString(),
                         FeltNavn.PERIODER.feltNavn to it.perioder.map { periode ->
                             mapOf(
                                 FeltNavn.FRA_DATO.feltNavn to periode.fraDato.toString(),

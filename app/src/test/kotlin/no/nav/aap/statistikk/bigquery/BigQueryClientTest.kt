@@ -4,6 +4,7 @@ import BigQuery
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -36,7 +37,8 @@ class BigQueryClientTest {
         val vilkårsResult = Vilkårsresultat(
             "123", behandlingsReferanse, "behandling", listOf(
                 Vilkår(
-                    "type", listOf(VilkårsPeriode(LocalDate.now(), LocalDate.now(), "utfall", false, null, null))
+                    Vilkårtype.MEDLEMSKAP,
+                    listOf(VilkårsPeriode(LocalDate.now(), LocalDate.now(), "utfall", false, null, null))
                 )
             )
         )
@@ -49,6 +51,6 @@ class BigQueryClientTest {
         assertThat(uthentetResultat.first().behandlingsReferanse).isEqualTo(behandlingsReferanse)
         assertThat(uthentetResultat.first().behandlingsType).isEqualTo("behandling")
         assertThat(uthentetResultat.first().vilkår).hasSize(1)
-        assertThat(uthentetResultat.first().vilkår.first().vilkårType).isEqualTo("type")
+        assertThat(uthentetResultat.first().vilkår.first().vilkårType).isEqualTo(Vilkårtype.MEDLEMSKAP)
     }
 }
