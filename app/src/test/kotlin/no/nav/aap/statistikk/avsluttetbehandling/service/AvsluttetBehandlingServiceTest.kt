@@ -14,7 +14,7 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
-import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

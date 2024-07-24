@@ -7,7 +7,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingServ
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.testKlient
-import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -16,11 +16,10 @@ class MottaStatistikkTest {
     @Test
     fun `hendelse blir lagret i repository`() {
         val hendelsesRepository = mockk<IHendelsesRepository>()
-        val vilkårsResultatService = mockk<VilkårsResultatService>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns Unit
 
-        testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
+        testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
             val res = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 setBody(
@@ -41,41 +40,6 @@ class MottaStatistikkTest {
                     behandlingsType = "Førstegangsbehandling"
                 )
             )
-        }
-    }
-
-    @Test
-    fun `kan motta json av vilkårsresultat`() {
-        @Language("json")
-        val vilkårsResultatJSON = """{
-  "typeBehandling" : "Førstegangsbehandling",
-  "vilkår" : [ {
-    "vilkårType" : "MEDLEMSKAP",
-    "perioder" : [ {
-      "fraDato" : "2024-07-09",
-      "tilDato" : "2024-07-11",
-      "utfall" : "OPPFYLT",
-      "manuellVurdering" : false,
-      "innvilgelsesårsak" : null,
-      "avslagsårsak" : null
-    } ]
-  } ]
-}"""
-
-        val hendelsesRepository = mockk<IHendelsesRepository>()
-        val vilkårsResultatService = mockk<VilkårsResultatService>()
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-
-        every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
-
-        testKlient(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService) { client ->
-            val res = client.post("/vilkarsresultat") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    vilkårsResultatJSON
-                )
-            }
-            Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
         }
     }
 }

@@ -4,12 +4,11 @@ import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import no.nav.aap.statistikk.vilkårsresultat.api.VilkårsResultatDTO
 import java.time.LocalDate
 import java.util.*
 
 data class AvsluttetBehandlingDTO(
-    @StringExample("4LELS7K", "4LEFCQ8") val sakId: String,
+    @StringExample("4LELS7K", "4LEFCQ8") val saksnummer: String,
     val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelseDTO,
     val vilkårsResultat: VilkårsResultatDTO
@@ -17,10 +16,10 @@ data class AvsluttetBehandlingDTO(
     fun tilDomene(): AvsluttetBehandling {
         return AvsluttetBehandling(
             tilkjentYtelse = tilkjentYtelse.tilDomene(
-                sakId,
+                saksnummer,
                 behandlingsReferanse = behandlingsReferanse
             ),
-            vilkårsresultat = vilkårsResultat.tilDomene(sakId, behandlingsReferanse)
+            vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse)
         )
     }
 }
@@ -28,9 +27,9 @@ data class AvsluttetBehandlingDTO(
 data class TilkjentYtelseDTO(
     val perioder: List<TilkjentYtelsePeriodeDTO>
 ) {
-    fun tilDomene(sakId: String, behandlingsReferanse: UUID): TilkjentYtelse {
+    fun tilDomene(saksnummer: String, behandlingsReferanse: UUID): TilkjentYtelse {
         return TilkjentYtelse(
-            saksnummer = sakId,
+            saksnummer = saksnummer,
             behandlingsReferanse = behandlingsReferanse,
             perioder = perioder.map(TilkjentYtelsePeriodeDTO::tilDomene)
         )
