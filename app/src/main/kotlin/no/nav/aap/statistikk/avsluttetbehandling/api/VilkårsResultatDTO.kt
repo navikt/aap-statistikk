@@ -1,6 +1,5 @@
-package no.nav.aap.statistikk.vilkårsresultat.api
+package no.nav.aap.statistikk.avsluttetbehandling.api
 
-import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat

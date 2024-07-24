@@ -1,7 +1,6 @@
-package no.nav.aap.statistikk.vilkårsresultat.service
+package no.nav.aap.statistikk.vilkårsresultat
 
 import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory

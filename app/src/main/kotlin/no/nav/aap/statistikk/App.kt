@@ -21,7 +21,10 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.bigquery.*
+import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
@@ -29,8 +32,7 @@ import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.api.vilkårsResultat
-import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -71,14 +73,11 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
     val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository, bqRepository)
     val avsluttetBehandlingService = AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService)
 
-
-
-    module(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService)
+    module(hendelsesRepository, avsluttetBehandlingService)
 }
 
 fun Application.module(
     hendelsesRepository: IHendelsesRepository,
-    vilkårsResultatService: VilkårsResultatService,
     avsluttetBehandlingService: AvsluttetBehandlingService
 ) {
     monitoring()
@@ -90,7 +89,6 @@ fun Application.module(
     routing {
         apiRouting {
             mottaStatistikk(hendelsesRepository)
-            vilkårsResultat(vilkårsResultatService)
             avsluttetBehandling(avsluttetBehandlingService)
         }
         route("/") {

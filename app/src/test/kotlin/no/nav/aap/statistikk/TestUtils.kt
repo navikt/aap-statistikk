@@ -13,7 +13,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingServ
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
-import no.nav.aap.statistikk.vilkårsresultat.service.VilkårsResultatService
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
@@ -23,13 +22,12 @@ import java.time.temporal.ChronoUnit
 
 fun testKlient(
     hendelsesRepository: IHendelsesRepository,
-    vilkårsResultatService: VilkårsResultatService,
     avsluttetBehandlingService: AvsluttetBehandlingService,
     test: suspend (HttpClient) -> Unit
 ) {
     testApplication {
         application {
-            module(hendelsesRepository, vilkårsResultatService, avsluttetBehandlingService)
+            module(hendelsesRepository, avsluttetBehandlingService)
         }
         val client = client.config {
             install(ContentNegotiation) {
