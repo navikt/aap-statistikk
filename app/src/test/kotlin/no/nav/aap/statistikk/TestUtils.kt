@@ -41,29 +41,6 @@ fun testKlient(
     }
 }
 
-data class Triplet(val client: HttpClient, val dbConfig: DbConfig, val bigQueryConfig: BigQueryConfig)
-
-fun testKlientMedTestContainer(
-    test: suspend (Triplet) -> Unit
-) {
-    val pgConfig = postgresTestConfig()
-    val bqConfig: BigQueryConfig = bigQueryContainer()
-    testApplication {
-        application {
-            startUp(pgConfig, bqConfig)
-        }
-        val client = client.config {
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                }
-            }
-        }
-
-        test(Triplet(client, pgConfig, bqConfig))
-    }
-}
-
 fun postgresTestConfig(): DbConfig {
     val postgres = PostgreSQLContainer("postgres:15")
     postgres.waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
