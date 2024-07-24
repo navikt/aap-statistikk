@@ -8,10 +8,7 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.Vilkår
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -36,6 +33,12 @@ class AvsluttetBehandlingServiceTest {
                         tilDato = LocalDate.now().plusDays(1),
                         dagsats = 1337.420,
                         gradering = 90.0
+                    ),
+                    TilkjentYtelsePeriode(
+                        fraDato = LocalDate.now().minusYears(3),
+                        tilDato = LocalDate.now().minusYears(2),
+                        dagsats = 1234.0,
+                        gradering = 45.0
                     )
                 )
             ), vilkårsresultat = Vilkårsresultat(
@@ -44,7 +47,7 @@ class AvsluttetBehandlingServiceTest {
                 saksnummer = saksnummer,
                 vilkår = listOf(
                     Vilkår(
-                        vilkårType = "ALDERSVILKÅR", perioder = listOf(
+                        vilkårType = Vilkårtype.ALDERSVILKÅRET, perioder = listOf(
                             VilkårsPeriode(
                                 fraDato = LocalDate.now().minusYears(2),
                                 tilDato = LocalDate.now().plusDays(3),
@@ -70,7 +73,7 @@ class AvsluttetBehandlingServiceTest {
 
         val uthentetTilkjentYtelse = tilkjentYtelseRepository.hentTilkjentYtelse(1)
         assertThat(uthentetTilkjentYtelse).isNotNull()
-        assertThat(uthentetTilkjentYtelse!!.perioder).hasSize(1)
+        assertThat(uthentetTilkjentYtelse!!.perioder).hasSize(2)
         assertThat(uthentetTilkjentYtelse.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
     }
 

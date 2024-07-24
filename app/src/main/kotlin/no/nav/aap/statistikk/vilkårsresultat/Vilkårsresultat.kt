@@ -10,7 +10,15 @@ data class Vilkårsresultat(
     val vilkår: List<Vilkår>
 )
 
-data class Vilkår(val vilkårType: String, val perioder: List<VilkårsPeriode>)
+enum class Vilkårtype {
+    ALDERSVILKÅRET,
+    SYKDOMSVILKÅRET,
+    BISTANDSVILKÅRET, MEDLEMSKAP,
+    GRUNNLAGET,
+    SYKEPENGEERSTATNING
+}
+
+data class Vilkår(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriode>)
 
 data class VilkårsPeriode(
     val fraDato: LocalDate,

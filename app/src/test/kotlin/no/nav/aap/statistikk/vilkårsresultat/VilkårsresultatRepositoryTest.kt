@@ -22,7 +22,7 @@ class VilkårsresultatRepositoryTest {
             "saksnummer", "typeBehandling", listOf(
                 VilkårEntity(
                     id = null,
-                    "vilkårType", listOf(
+                    Vilkårtype.MEDLEMSKAP.toString(), listOf(
                         VilkårsPeriodeEntity(
                             id = null,
                             LocalDate.now().minusDays(5),
@@ -40,7 +40,7 @@ class VilkårsresultatRepositoryTest {
                 ),
                 VilkårEntity(
                     id = null,
-                    "vilkårType2", listOf(
+                    Vilkårtype.SYKDOMSVILKÅRET.toString(), listOf(
                         VilkårsPeriodeEntity(
                             id = null,
                             LocalDate.now().minusDays(5),

@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingServ
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -48,7 +49,7 @@ class ApplicationTest {
                 val vilkårsresultat = VilkårsResultatDTO(
                     typeBehandling = "Førstegangsbehandling", vilkår = listOf(
                         VilkårDTO(
-                            vilkårType = "ALDERS", listOf(
+                            vilkårType = Vilkårtype.ALDERSVILKÅRET, listOf(
                                 VilkårsPeriodeDTO(
                                     fraDato = LocalDate.now().minusDays(10),
                                     tilDato = LocalDate.now().minusDays(0),
