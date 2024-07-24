@@ -1,16 +1,15 @@
 package no.nav.aap.statistikk.hendelser
 
-import no.nav.aap.statistikk.WithPostgresContainer
+import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import javax.sql.DataSource
 
-class HendelsesRepositoryTest : WithPostgresContainer() {
+class HendelsesRepositoryTest {
     @Test
-    fun `sett inn hendelse i db`() {
-        val dataSource = postgresDataSource()
-
+    fun `sett inn hendelse i db`(@Postgres dataSource: DataSource) {
         val repository = HendelsesRepository(dataSource)
 
         repository.lagreHendelse(MottaStatistikkDTO(saksNummer = "123", status = "AVS", behandlingsType = "asd"))

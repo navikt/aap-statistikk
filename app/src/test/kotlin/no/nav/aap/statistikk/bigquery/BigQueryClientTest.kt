@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.bigquery
 
-import WithBigQueryContainer
+import BigQuery
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
@@ -9,11 +9,10 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-class BigQueryClientTest : WithBigQueryContainer {
+class BigQueryClientTest {
     @Test
-    fun `lage en tabell to ganger er idempotent`() {
-        val options = testBigQueryConfig()
-        val client = BigQueryClient(options)
+    fun `lage en tabell to ganger er idempotent`(@BigQuery bigQueryConfig: BigQueryConfig) {
+        val client = BigQueryClient(bigQueryConfig)
 
         val vilkårsVurderingTabell = VilkårsVurderingTabell()
         val res = client.create(vilkårsVurderingTabell)
@@ -26,9 +25,8 @@ class BigQueryClientTest : WithBigQueryContainer {
     }
 
     @Test
-    fun `sette inn rad og hente ut igjen`() {
-        val options = testBigQueryConfig()
-        val client = BigQueryClient(options)
+    fun `sette inn rad og hente ut igjen`(@BigQuery bigQueryConfig: BigQueryConfig) {
+        val client = BigQueryClient(bigQueryConfig)
 
         val vilkårsVurderingTabell = VilkårsVurderingTabell()
 

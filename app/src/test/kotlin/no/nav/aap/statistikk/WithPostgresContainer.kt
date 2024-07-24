@@ -3,42 +3,57 @@ package no.nav.aap.statistikk
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.*
 import org.testcontainers.containers.PostgreSQLContainer
+import javax.sql.DataSource
 
-abstract class WithPostgresContainer {
 
-    companion object {
-        private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:15")
-        private var dataSource: HikariDataSource
-        private val flyway: Flyway
-        private val dbConfig: DbConfig
+@Target(
+    AnnotationTarget.FUNCTION, AnnotationTarget.FIELD, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.CLASS,
+    AnnotationTarget.VALUE_PARAMETER
+)
+@Retention(AnnotationRetention.RUNTIME)
+@ExtendWith(
+    Postgres.WithPostgresContainer::class
+)
+annotation class Postgres {
+    class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
-        init {
-            postgresContainer.start()
-            dbConfig = DbConfig(
-                jdbcUrl = postgresContainer.jdbcUrl,
-                userName = postgresContainer.username,
-                password = postgresContainer.password
-            )
-            flyway = Flyway(dbConfig)
-            dataSource = flyway.createAndMigrateDataSource()
+        companion object {
+            private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:15")
+            private var dataSource: HikariDataSource
+            private val flyway: Flyway
+            private val dbConfig: DbConfig
+
+            init {
+                postgresContainer.start()
+                dbConfig = DbConfig(
+                    jdbcUrl = postgresContainer.jdbcUrl,
+                    userName = postgresContainer.username,
+                    password = postgresContainer.password
+                )
+                flyway = Flyway(dbConfig)
+                dataSource = flyway.createAndMigrateDataSource()
+            }
         }
-    }
 
+        override fun beforeEach(context: ExtensionContext?) {
+            flyway.createAndMigrateDataSource()
+        }
 
-    @BeforeEach
-    fun beforeEach() {
-        flyway.createAndMigrateDataSource()
-    }
+        override fun afterEach(context: ExtensionContext?) {
+            flyway.clean()
+        }
 
-    @AfterEach
-    fun afterEach() {
-        flyway.clean()
-    }
+        override fun supportsParameter(
+            parameterContext: ParameterContext?,
+            extensionContext: ExtensionContext?
+        ): Boolean {
+            return parameterContext?.isAnnotated(Postgres::class.java) == true && (parameterContext.parameter.type == DataSource::class.java)
+        }
 
-    fun postgresDataSource(): HikariDataSource {
-        return dataSource
+        override fun resolveParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Any {
+            return dataSource
+        }
     }
 }
