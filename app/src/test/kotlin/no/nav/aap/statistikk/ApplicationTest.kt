@@ -6,6 +6,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
+import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
@@ -81,6 +82,15 @@ class ApplicationTest {
                 val tilkjentYtelseJSON =
                     ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(tilkjentYtelseDTO)
 
+                val beregningsGrunnlag =
+                    ObjectMapper().writeValueAsString(
+                        BeregningsgrunnlagDTO(
+                            grunnlag = 1337.2,
+                            er6GBegrenset = true,
+                            grunnlag11_19dto = Grunnlag11_19DTO(inntekter = mapOf())
+                        )
+                    )
+
                 contentType(ContentType.Application.Json)
 
                 @Language("JSON") val jsonBody = """{
@@ -88,7 +98,7 @@ class ApplicationTest {
   "behandlingsReferanse": "$behandlingReferanse",
   "tilkjentYtelse": $tilkjentYtelseJSON,
   "vilkårsResultat": $vilkårsResultatJson,
-  "beregningsGrunnlag": 1
+  "beregningsGrunnlag": $beregningsGrunnlag
 }"""
                 setBody(jsonBody)
             }
