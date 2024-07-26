@@ -11,7 +11,8 @@ data class AvsluttetBehandlingDTO(
     @StringExample("4LELS7K", "4LEFCQ8") val saksnummer: String,
     val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelseDTO,
-    val vilkårsResultat: VilkårsResultatDTO
+    val vilkårsResultat: VilkårsResultatDTO,
+    val beregningsGrunnlag: Any
 ) {
     fun tilDomene(): AvsluttetBehandling {
         return AvsluttetBehandling(
