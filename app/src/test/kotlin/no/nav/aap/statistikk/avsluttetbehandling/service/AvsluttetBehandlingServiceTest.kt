@@ -1,8 +1,10 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import BigQuery
+import io.mockk.mockk
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
@@ -57,7 +59,8 @@ class AvsluttetBehandlingServiceTest {
                         )
                     )
                 )
-            )
+            ),
+            beregningsgrunnlag = mockk<IBeregningsGrunnlag>()
         )
 
         service.lagre(avsluttetBehandling)
@@ -94,7 +97,8 @@ class AvsluttetBehandlingServiceTest {
                 behandlingsType = "Førstegangsbehandling",
                 saksnummer = saksnummer,
                 vilkår = listOf()
-            )
+            ),
+            beregningsgrunnlag = mockk<IBeregningsGrunnlag>()
         )
 
         service.lagre(avsluttetBehandling)
