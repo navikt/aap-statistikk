@@ -87,7 +87,8 @@ class ApplicationTest {
   "saksnummer": "4LENXDC",
   "behandlingsReferanse": "$behandlingReferanse",
   "tilkjentYtelse": $tilkjentYtelseJSON,
-  "vilkårsResultat": $vilkårsResultatJson
+  "vilkårsResultat": $vilkårsResultatJson,
+  "beregningsGrunnlag": 1
 }"""
                 setBody(jsonBody)
             }
