@@ -64,7 +64,7 @@ WHERE tilkjent_ytelse.id = ?"""
                 val behandlingsReferanse = UUID.randomUUID() // !!!
 
                 val perioder = mutableListOf<TilkjentYtelsePeriode>()
-                do  {
+                do {
                     val fraDato = resultSet.getDate("fra_dato").toLocalDate()
                     val tilDato = resultSet.getDate("til_dato").toLocalDate()
                     val dagsats = resultSet.getDouble("dagsats")
