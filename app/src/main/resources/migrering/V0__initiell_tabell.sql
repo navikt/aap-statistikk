@@ -10,7 +10,7 @@ CREATE TABLE VILKARSRESULTAT
 (
     id                   BIGSERIAL NOT NULL PRIMARY KEY,
     saksnummer           TEXT      NOT NULL,
-    behandlingsreferanse uuid      NOT NULL,
+    behandlingsreferanse uuid      NOT NULL UNIQUE,
     type_behandling      TEXT      NOT NULL
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE TILKJENT_YTELSE
 (
     ID                   BIGSERIAL   NOT NULL PRIMARY KEY,
     saksnummer           VARCHAR(10) NOT NULL,
-    behandlingsreferanse uuid        NOT NULL
+    behandlingsreferanse uuid        NOT NULL UNIQUE
 );
 
 CREATE TABLE TILKJENT_YTELSE_PERIODE

@@ -11,9 +11,12 @@ private val log = LoggerFactory.getLogger("WithinTransaction")
 
 class TilkoblingsAvbrudd(message: String?, cause: Throwable?) : Exception(message, cause)
 
-class TransaksjonsAvbrudd(message: String?, cause: Throwable?) : Exception(message, cause)
+open class TransaksjonsAvbrudd(message: String?, cause: Throwable?) : Exception(message, cause)
 
 class TilbakerullingsAvbrudd(message: String?, cause: Throwable?) : Exception(message, cause)
+
+class EksistererAlleredeAvbrudd(message: String?, cause: Throwable) :
+    TransaksjonsAvbrudd(message, cause)
 
 // extension function on datasource
 fun <E> DataSource.withinTransaction(block: (Connection) -> E): E {
@@ -27,11 +30,15 @@ fun <E> DataSource.withinTransaction(block: (Connection) -> E): E {
         connection.commit()
         return res
     } catch (ex: SQLException) {
-        // If there was an exception, roll back the transaction
+        // If there were an exception, roll back the transaction
         if (connection != null) {
             try {
                 connection.rollback()
-                throw TransaksjonsAvbrudd(ex.message, ex)
+                if (ex.sqlState == "23505") {
+                    throw EksistererAlleredeAvbrudd(ex.message, ex)
+                } else {
+                    throw TransaksjonsAvbrudd(ex.message, ex)
+                }
             } catch (rbEx: SQLException) {
                 log.error("Error during transaction rollback: ${rbEx.message}", rbEx)
                 throw TilbakerullingsAvbrudd(rbEx.message, ex)

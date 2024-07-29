@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 

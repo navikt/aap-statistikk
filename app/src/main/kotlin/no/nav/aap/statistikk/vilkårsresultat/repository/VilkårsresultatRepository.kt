@@ -2,20 +2,16 @@ package no.nav.aap.statistikk.vilkårsresultat.repository
 
 import no.nav.aap.statistikk.db.withinTransaction
 import org.slf4j.LoggerFactory
-import java.sql.Connection
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.Statement
-import java.sql.Types
+import java.sql.*
 import javax.sql.DataSource
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
 
 class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårsresultatRepository {
     override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity): Int {
-
         return dataSource.withinTransaction { connection ->
-            val sqlInsertResultat = """INSERT INTO VILKARSRESULTAT(saksnummer, behandlingsreferanse, type_behandling)
+            val sqlInsertResultat =
+                """INSERT INTO VILKARSRESULTAT(saksnummer, behandlingsreferanse, type_behandling)
 VALUES (?, ?, ?);
         """
             val preparedStatement =
