@@ -14,13 +14,13 @@ sealed interface IBeregningsGrunnlag {
     data class Grunnlag_11_19(
         val grunnlag: Double,
         val er6GBegrenset: Boolean,
-        val innteker: Map<String, BigDecimal>
+        val inntekter: Map<String, BigDecimal>
     ) : IBeregningsGrunnlag
 
     data class GrunnlagUføre(
         val grunnlag: Double,
         val er6GBegrenset: Boolean,
-        val type: String,
+        val type: UføreType,
         val grunnlag11_19: Grunnlag_11_19,
         val uføregrad: Int,
         val uføreInntekterFraForegåendeÅr: Map<String, BigDecimal>,
@@ -32,6 +32,7 @@ sealed interface IBeregningsGrunnlag {
         val grunnlag: Double,
         val er6GBegrenset: Boolean,
         val beregningsgrunnlag: Grunnlag_11_19,
+        // Denne er hardkodet til 70% i behandlingsflyt?
         val terskelverdiForYrkesskade: Int,
         val andelSomSkyldesYrkesskade: BigDecimal,
         val andelYrkesskade: Int,
@@ -43,4 +44,8 @@ sealed interface IBeregningsGrunnlag {
         val yrkesskadeinntektIG: BigDecimal,
         val grunnlagEtterYrkesskadeFordel: BigDecimal,
     ) : IBeregningsGrunnlag
+}
+
+enum class UføreType {
+    STANDARD, YTTERLIGERE_NEDSATT
 }
