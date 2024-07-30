@@ -1,10 +1,11 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import BigQuery
-import io.mockk.mockk
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
@@ -13,6 +14,7 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
@@ -60,7 +62,25 @@ class AvsluttetBehandlingServiceTest {
                     )
                 )
             ),
-            beregningsgrunnlag = mockk<IBeregningsGrunnlag>()
+            beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
+                grunnlag = 25000.0,
+                er6GBegrenset = false,
+                beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
+                    grunnlag = 20000.0,
+                    er6GBegrenset = false,
+                    inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
+                ),
+                terskelverdiForYrkesskade = 70,
+                andelSomSkyldesYrkesskade = BigDecimal(30),
+                andelYrkesskade = 25,
+                benyttetAndelForYrkesskade = 20,
+                andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
+                antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
+                yrkesskadeTidspunkt = 2018,
+                grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
+                yrkesskadeinntektIG = BigDecimal(25000),
+                grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            )
         )
 
         service.lagre(avsluttetBehandling)
@@ -98,7 +118,25 @@ class AvsluttetBehandlingServiceTest {
                 saksnummer = saksnummer,
                 vilkår = listOf()
             ),
-            beregningsgrunnlag = mockk<IBeregningsGrunnlag>()
+            beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
+                grunnlag = 25000.0,
+                er6GBegrenset = false,
+                beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
+                    grunnlag = 20000.0,
+                    er6GBegrenset = false,
+                    inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
+                ),
+                terskelverdiForYrkesskade = 70,
+                andelSomSkyldesYrkesskade = BigDecimal(30),
+                andelYrkesskade = 25,
+                benyttetAndelForYrkesskade = 20,
+                andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
+                antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
+                yrkesskadeTidspunkt = 2018,
+                grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
+                yrkesskadeinntektIG = BigDecimal(25000),
+                grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            )
         )
 
         service.lagre(avsluttetBehandling)
@@ -117,8 +155,11 @@ class AvsluttetBehandlingServiceTest {
         val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
 
         val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository, bqRepository)
+        val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
+        val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
 
-        val service = AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService)
+        val service =
+            AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService, beregningsGrunnlagService)
         return Triple(tilkjentYtelseRepository, bigQueryClient, service)
     }
 

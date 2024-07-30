@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.avsluttetbehandling.api
 import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import java.math.BigDecimal
@@ -58,7 +59,7 @@ data class Grunnlag11_19DTO(
         return IBeregningsGrunnlag.Grunnlag_11_19(
             grunnlag = grunnlag,
             er6GBegrenset = er6GBegrenset,
-            innteker = inntekter
+            inntekter = inntekter
         )
     }
 }
@@ -82,7 +83,7 @@ data class GrunnlagYrkesskadeDTO(
  * @property uføreInntektIKroner Grunnlaget
  */
 data class GrunnlagUføreDTO(
-    val type: String,
+    val uføreType: UføreType,
     val grunnlag: Grunnlag11_19DTO,
     val grunnlagYtterligereNedsatt: Grunnlag11_19DTO,
     val uføregrad: Int,
@@ -131,7 +132,7 @@ data class BeregningsgrunnlagDTO(
             return IBeregningsGrunnlag.GrunnlagUføre(
                 grunnlag = grunnlag,
                 er6GBegrenset = er6GBegrenset,
-                type = grunnlagUføre.type,
+                type = grunnlagUføre.uføreType,
                 grunnlag11_19 = grunnlagUføre.grunnlag.tilDomene(grunnlag = grunnlag, er6GBegrenset = er6GBegrenset),
                 uføreInntektIKroner = grunnlagUføre.uføreInntektIKroner,
                 uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr,

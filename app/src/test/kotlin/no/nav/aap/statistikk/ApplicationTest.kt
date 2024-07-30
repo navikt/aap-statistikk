@@ -6,9 +6,9 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
+import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
@@ -38,12 +38,15 @@ class ApplicationTest {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
         val tilkjentYtelseService = mockk<TilkjentYtelseService>()
-        val avsluttetBehandlingService = AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService)
+        val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+        val avsluttetBehandlingService =
+            AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService, beregningsGrunnlagService)
 
         val behandlingReferanse = UUID.randomUUID()
 
         every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
         every { tilkjentYtelseService.lagreTilkjentYtelse(any()) } just Runs
+        every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any())} just Runs
 
         testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
             val response = client.post("/avsluttetBehandling") {

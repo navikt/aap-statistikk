@@ -21,6 +21,8 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
+import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
@@ -71,7 +73,10 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
 
     val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
     val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository, bqRepository)
-    val avsluttetBehandlingService = AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService)
+    val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
+    val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
+    val avsluttetBehandlingService =
+        AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService, beregningsGrunnlagService)
 
     module(hendelsesRepository, avsluttetBehandlingService)
 }

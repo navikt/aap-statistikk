@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat.repository
 
+import no.nav.aap.statistikk.db.hentGenerertNøkkel
 import no.nav.aap.statistikk.db.withinTransaction
 import org.slf4j.LoggerFactory
 import java.sql.*
@@ -22,7 +23,7 @@ VALUES (?, ?, ?);
                     executeUpdate()
                 }
 
-            val vilkårResultId = hentGenerertNøkkel(preparedStatement)
+            val vilkårResultId = preparedStatement.hentGenerertNøkkel()
 
             val sqlInsertVilkar = """
                 INSERT INTO VILKAR(vilkar_type, vilkarresult_id) VALUES(?, ?);
@@ -36,7 +37,7 @@ VALUES (?, ?, ?);
                     executeUpdate()
                 }
 
-                val vilkårKey = hentGenerertNøkkel(resultat)
+                val vilkårKey = resultat.hentGenerertNøkkel()
 
                 vilkarDTO.perioder.forEach { periode ->
                     val sqlInsertPeriode = """
@@ -58,14 +59,6 @@ VALUES (?, ?, ?);
             log.info("Satte inn vilkårsresulat med db ID: $vilkårResultId")
             vilkårResultId
         }
-    }
-
-
-    private fun hentGenerertNøkkel(preparedStatement: PreparedStatement): Int {
-        val resultSet = preparedStatement.generatedKeys
-        resultSet.next()
-        val vilkårResultId = resultSet.getInt(1)
-        return vilkårResultId
     }
 
     override fun hentVilkårsResultat(vilkårResultatId: Int): VilkårsResultatEntity? {
