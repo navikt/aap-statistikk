@@ -36,7 +36,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus:1.13.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
     implementation("ch.qos.logback:logback-classic:1.5.6")
-    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+    implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
     implementation("org.flywaydb:flyway-database-postgresql:10.17.0")
     runtimeOnly("org.postgresql:postgresql:42.7.3")
