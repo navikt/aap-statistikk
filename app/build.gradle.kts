@@ -53,7 +53,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.26.3")
     testImplementation("org.testcontainers:postgresql:1.20.1")
     testImplementation("org.testcontainers:gcloud:1.20.0")
-    testImplementation("org.testcontainers:junit-jupiter:1.20.0")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.1")
 }
 
 repositories {
