@@ -8,6 +8,7 @@ class Flyway(config: DbConfig) {
         jdbcUrl = config.jdbcUrl
         username = config.userName
         password = config.password
+        connectionTestQuery = "SELECT 1"
     }
 
     private val flyway = Flyway

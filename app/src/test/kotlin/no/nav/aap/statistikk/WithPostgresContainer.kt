@@ -5,6 +5,9 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
 import org.junit.jupiter.api.extension.*
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 
@@ -20,7 +23,9 @@ annotation class Postgres {
     class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
         companion object {
-            private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:15")
+            private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:15").apply {
+                waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
+            }
             private var dataSource: HikariDataSource
             private val flyway: Flyway
             private val dbConfig: DbConfig
