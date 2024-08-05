@@ -45,7 +45,7 @@ class BeregningsgrunnlagRepositoryTest {
     fun `sette inn grunnlag uføre`(@Postgres dataSource: DataSource) {
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
-        val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre = IBeregningsGrunnlag.GrunnlagUføre(
+        val grunnlagUfore: IBeregningsGrunnlag.GrunnlagMedUføre = IBeregningsGrunnlag.GrunnlagMedUføre(
             grunnlag = 30000.0,
             er6GBegrenset = false,
             grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(

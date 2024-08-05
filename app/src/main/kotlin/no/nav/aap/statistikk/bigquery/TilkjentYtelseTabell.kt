@@ -21,8 +21,7 @@ class TilkjentYtelseTabell : BQTable<TilkjentYtelse> {
         GRADERING("gradering")
     }
 
-    override val tableName: String
-        get() = "tilkjentYtelse"
+    override val tableName = "tilkjentYtelse"
 
     override val schema: Schema
         get() {

@@ -129,7 +129,7 @@ data class BeregningsgrunnlagDTO(
             )
         }
         if (grunnlagUføre != null) {
-            return IBeregningsGrunnlag.GrunnlagUføre(
+            return IBeregningsGrunnlag.GrunnlagMedUføre(
                 grunnlag = grunnlag,
                 er6GBegrenset = er6GBegrenset,
                 type = grunnlagUføre.uføreType,

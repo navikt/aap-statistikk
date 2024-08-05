@@ -9,7 +9,7 @@ data class AvsluttetBehandling(
     val vilkårsresultat: Vilkårsresultat,
     val beregningsgrunnlag: IBeregningsGrunnlag
 )
-
+// TODO rydd i tabeller
 sealed interface IBeregningsGrunnlag {
     data class Grunnlag_11_19(
         val grunnlag: Double,
