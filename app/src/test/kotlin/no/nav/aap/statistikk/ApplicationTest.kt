@@ -15,21 +15,20 @@ import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
 class ApplicationTest {
+    companion object {
+        private val fakes = Fakes()
 
-    @Test
-    fun testHelloWorld() {
-        val hendelsesRepository = mockk<IHendelsesRepository>()
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
-            val response = client.get("/")
-            Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertEquals(response.body() as String, "Hello World!")
+        @AfterAll
+        @JvmStatic
+        internal fun afterAll() {
+            fakes.close()
         }
     }
 
