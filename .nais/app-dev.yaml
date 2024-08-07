@@ -31,6 +31,9 @@ spec:
   prometheus:
     enabled: true
     path: /actuator/metrics
+  azure:
+    application:
+      enabled: true
   liveness:
     path: /actuator/live
     initialDelay: 5

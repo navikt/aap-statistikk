@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.route.apiRouting
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
@@ -20,6 +21,8 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
+import no.nav.aap.statistikk.server.authenticate.AZURE
+import no.nav.aap.statistikk.server.authenticate.authentication
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -32,6 +35,7 @@ import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
@@ -91,18 +95,16 @@ fun Application.module(
     contentNegotation()
     swaggerDoc()
 
+    authentication(AzureConfig())
+
     routing {
-        apiRouting {
-            mottaStatistikk(hendelsesRepository)
-            avsluttetBehandling(avsluttetBehandlingService)
-        }
-        route("/") {
-            get {
-                call.respondText("Hello World!", contentType = ContentType.Text.Plain)
+        authenticate(AZURE) {
+            this@routing.apiRouting {
+                mottaStatistikk(hendelsesRepository)
+                avsluttetBehandling(avsluttetBehandlingService)
             }
         }
     }
-
 }
 
 private fun Application.swaggerDoc() {
