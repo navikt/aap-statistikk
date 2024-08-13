@@ -10,30 +10,24 @@ import no.nav.aap.statistikk.avsluttetbehandling.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
+@Fakes
 class ApplicationTest {
-    companion object {
-        private val fakes = Fakes(azurePort = 8081)
-
-        @AfterAll
-        @JvmStatic
-        internal fun afterAll() {
-            fakes.close()
-        }
-    }
-
     @Test
-    fun `kan parse avsluttet behandling dto og returnerer database-id`() {
+    fun `kan parse avsluttet behandling dto og returnerer database-id`(
+        @Fakes azureConfig: AzureConfig,
+        @Fakes token: TestToken
+    ) {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
         val tilkjentYtelseService = mockk<TilkjentYtelseService>()
@@ -45,14 +39,12 @@ class ApplicationTest {
 
         every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
         every { tilkjentYtelseService.lagreTilkjentYtelse(any()) } just Runs
-        every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any())} just Runs
+        every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
 
-        val token = AzureTokenGen("tilgang", "tilgang").generate()
-
-        testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
+        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
             val response = client.post("/avsluttetBehandling") {
                 headers {
-                    append("Authorization", "Bearer $token")
+                    append("Authorization", "Bearer ${token.access_token}")
                 }
                 val vilkårsresultat = VilkårsResultatDTO(
                     typeBehandling = "Førstegangsbehandling", vilkår = listOf(
@@ -73,7 +65,6 @@ class ApplicationTest {
                 val vilkårsResultatJson =
                     ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(vilkårsresultat)
 
-                println(vilkårsResultatJson)
 
                 val tilkjentYtelseDTO = TilkjentYtelseDTO(
                     perioder = listOf(
@@ -121,18 +112,19 @@ class ApplicationTest {
     }
 
     @Test
-    fun `kan poste ren json`() {
+    fun `kan poste ren json`(
+        @Fakes azureConfig: AzureConfig,
+        @Fakes token: TestToken
+    ) {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns Unit
 
-        val token = AzureTokenGen("tilgang", "tilgang").generate()
-
-        testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
+        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 headers {
-                    append("Authorization", "Bearer $token")
+                    append("Authorization", "Bearer ${token.access_token}")
                 }
                 setBody("""{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering"}""")
             }

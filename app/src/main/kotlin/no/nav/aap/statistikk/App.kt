@@ -53,13 +53,15 @@ fun main() {
     }
     val dbConfig = DbConfig.fraMiljøVariabler()
     val bgConfig = BigQueryConfigFromEnv()
+    val azureConfig = AzureConfig.fraMiljøVariabler()
 
     embeddedServer(Netty, port = 8080) {
-        startUp(dbConfig, bgConfig)
+        startUp(dbConfig, bgConfig, azureConfig)
     }.start(wait = true)
 }
 
-fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
+fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfig: AzureConfig) {
+    log.info("Starter.")
     val flyway = Flyway(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
@@ -82,12 +84,13 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig) {
     val avsluttetBehandlingService =
         AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService, beregningsGrunnlagService)
 
-    module(hendelsesRepository, avsluttetBehandlingService)
+    module(hendelsesRepository, avsluttetBehandlingService, azureConfig)
 }
 
 fun Application.module(
     hendelsesRepository: IHendelsesRepository,
-    avsluttetBehandlingService: AvsluttetBehandlingService
+    avsluttetBehandlingService: AvsluttetBehandlingService,
+    azureConfig: AzureConfig
 ) {
     monitoring()
     statusPages()
@@ -95,7 +98,7 @@ fun Application.module(
     contentNegotation()
     generateOpenAPI()
 
-    authentication(AzureConfig())
+    authentication(azureConfig)
 
     routing {
         authenticate(AZURE) {
