@@ -23,7 +23,7 @@ import java.util.*
 
 class ApplicationTest {
     companion object {
-        private val fakes = Fakes()
+        private val fakes = Fakes(azurePort = 8081)
 
         @AfterAll
         @JvmStatic
@@ -47,8 +47,13 @@ class ApplicationTest {
         every { tilkjentYtelseService.lagreTilkjentYtelse(any()) } just Runs
         every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any())} just Runs
 
+        val token = AzureTokenGen("tilgang", "tilgang").generate()
+
         testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
             val response = client.post("/avsluttetBehandling") {
+                headers {
+                    append("Authorization", "Bearer $token")
+                }
                 val vilkårsresultat = VilkårsResultatDTO(
                     typeBehandling = "Førstegangsbehandling", vilkår = listOf(
                         VilkårDTO(
@@ -121,9 +126,14 @@ class ApplicationTest {
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns Unit
 
+        val token = AzureTokenGen("tilgang", "tilgang").generate()
+
         testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
+                headers {
+                    append("Authorization", "Bearer $token")
+                }
                 setBody("""{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering"}""")
             }
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)

@@ -5,6 +5,8 @@ import io.ktor.server.netty.*
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 
 fun main() {
+    Fakes(azurePort = 8081)
+
     val pgConfig = postgresTestConfig()
     println("PGCONFIG: $pgConfig")
     val bqConfig: BigQueryConfig = bigQueryContainer()

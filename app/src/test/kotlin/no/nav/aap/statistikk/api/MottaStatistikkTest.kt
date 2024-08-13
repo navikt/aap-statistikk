@@ -5,6 +5,7 @@ import io.ktor.http.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.aap.statistikk.AzureTokenGen
 import no.nav.aap.statistikk.Fakes
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
@@ -31,9 +32,14 @@ class MottaStatistikkTest {
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns Unit
 
+        val token = AzureTokenGen("tilgang", "tilgang").generate()
+
         testKlient(hendelsesRepository, avsluttetBehandlingService) { client ->
             val res = client.post("/motta") {
                 contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
                 setBody(
                     MottaStatistikkDTO(
                         saksNummer = "123",
