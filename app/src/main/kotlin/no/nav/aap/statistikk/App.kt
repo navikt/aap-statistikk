@@ -1,8 +1,6 @@
 package no.nav.aap.statistikk
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.papsign.ktor.openapigen.OpenAPIGen
-import com.papsign.ktor.openapigen.route.apiRouting
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -21,8 +19,6 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
-import no.nav.aap.statistikk.server.authenticate.AZURE
-import no.nav.aap.statistikk.server.authenticate.authentication
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -35,10 +31,14 @@ import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.server.authenticate.authentication
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
+import no.nav.aap.sttistikk.apiRoute
+import no.nav.aap.sttistikk.generateOpenAPI
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -93,28 +93,16 @@ fun Application.module(
     statusPages()
     tracing()
     contentNegotation()
-    swaggerDoc()
+    generateOpenAPI()
 
     authentication(AzureConfig())
 
     routing {
         authenticate(AZURE) {
-            this@routing.apiRouting {
+            apiRoute {
                 mottaStatistikk(hendelsesRepository)
                 avsluttetBehandling(avsluttetBehandlingService)
             }
-        }
-    }
-}
-
-private fun Application.swaggerDoc() {
-    install(OpenAPIGen) {
-        // this serves OpenAPI definition on /openapi.json
-        serveOpenApiJson = true
-        // this serves Swagger UI on /swagger-ui/index.html
-        serveSwaggerUi = true
-        info {
-            title = "AAP - Statistikk"
         }
     }
 }

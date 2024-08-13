@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
-import BigQuery
+import no.nav.aap.statistikk.BigQuery
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag

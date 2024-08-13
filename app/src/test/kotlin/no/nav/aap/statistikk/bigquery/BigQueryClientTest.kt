@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.bigquery
 
-import BigQuery
+import no.nav.aap.statistikk.BigQuery
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat

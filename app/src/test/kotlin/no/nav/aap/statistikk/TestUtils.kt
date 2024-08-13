@@ -20,11 +20,12 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 
-fun testKlient(
+fun <E> testKlient(
     hendelsesRepository: IHendelsesRepository,
     avsluttetBehandlingService: AvsluttetBehandlingService,
-    test: suspend (HttpClient) -> Unit
-) {
+    test: suspend (HttpClient) -> E?
+): E? {
+    var res: E? = null;
     testApplication {
         application {
             module(hendelsesRepository, avsluttetBehandlingService)
@@ -37,8 +38,9 @@ fun testKlient(
             }
         }
 
-        test(client)
+        res = test(client)
     }
+    return res
 }
 
 fun postgresTestConfig(): DbConfig {

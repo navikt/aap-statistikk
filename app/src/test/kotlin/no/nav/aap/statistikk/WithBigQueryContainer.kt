@@ -1,3 +1,5 @@
+package no.nav.aap.statistikk
+
 import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
