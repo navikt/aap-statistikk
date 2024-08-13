@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -113,8 +114,11 @@ fun Application.module(
 private fun Application.contentNegotation() {
     install(ContentNegotiation) {
         // TODO sjekk om bør gjøre samme settings som behandlingsflyt
+
         jackson {
             registerModule(JavaTimeModule())
+            setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
+            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         }
     }
 }

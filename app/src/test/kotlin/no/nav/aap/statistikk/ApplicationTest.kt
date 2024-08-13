@@ -130,5 +130,32 @@ class ApplicationTest {
             }
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
+
+        verify(exactly = 1) { hendelsesRepository.lagreHendelse(any()) }
+    }
+
+    @Test
+    fun `godtar payload med ukjente felter`(
+        @Fakes azureConfig: AzureConfig,
+        @Fakes token: TestToken
+    ) {
+        val hendelsesRepository = mockk<IHendelsesRepository>()
+        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        every { hendelsesRepository.lagreHendelse(any()) } returns Unit
+
+        @Language("JSON")
+        val payload =
+            """{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering", "ukjentFelt": "verdi"}"""
+
+        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+            val response = client.post("/motta") {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append("Authorization", "Bearer ${token.access_token}")
+                }
+                setBody(payload)
+            }
+            Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
+        }
     }
 }
