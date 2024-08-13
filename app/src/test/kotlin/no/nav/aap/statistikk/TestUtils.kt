@@ -13,22 +13,35 @@ import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingServ
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import java.net.URI
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
+private val logger = LoggerFactory.getLogger("TestUtils")
 
+/**
+ * @param azureConfig Send inn egen her om det skal gjøres autentiserte kall.
+ */
 fun <E> testKlient(
     hendelsesRepository: IHendelsesRepository,
     avsluttetBehandlingService: AvsluttetBehandlingService,
+    azureConfig: AzureConfig = AzureConfig(
+        clientId = "tilgang",
+        jwks = URI.create("http://localhost:8081/jwks").toURL(),
+        issuer = "tilgang"
+    ),
     test: suspend (HttpClient) -> E?
 ): E? {
     var res: E? = null;
+
     testApplication {
         application {
-            module(hendelsesRepository, avsluttetBehandlingService)
+            module(hendelsesRepository, avsluttetBehandlingService, azureConfig)
         }
         val client = client.config {
             install(ContentNegotiation) {
@@ -74,7 +87,7 @@ fun bigQueryContainer(): BigQueryConfig {
         }
     }
 
-    println("URL $url")
+    logger.info("BigQuery URL: $url")
 
     val bigQueryOptions: BigQueryOptions = config.bigQueryOptions()
     val bigQuery: BigQuery = bigQueryOptions.service
