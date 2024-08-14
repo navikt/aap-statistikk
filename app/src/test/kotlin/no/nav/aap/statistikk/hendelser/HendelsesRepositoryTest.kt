@@ -5,6 +5,9 @@ import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.util.*
 import javax.sql.DataSource
 
 class HendelsesRepositoryTest {
@@ -12,16 +15,30 @@ class HendelsesRepositoryTest {
     fun `sett inn hendelse i db`(@Postgres dataSource: DataSource) {
         val repository = HendelsesRepository(dataSource)
 
-        repository.lagreHendelse(MottaStatistikkDTO(saksNummer = "123", status = "AVS", behandlingsType = "asd"))
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingOpprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        repository.lagreHendelse(
+            MottaStatistikkDTO(
+                saksnummer = "123",
+                status = "AVS",
+                behandlingType = "asd",
+                ident = "21",
+                behandlingReferanse = behandlingReferanse,
+                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
+            )
+        )
 
         val hentHendelser = repository.hentHendelser()
 
         assertThat(hentHendelser).hasSize(1)
         assertThat(hentHendelser.first()).isEqualTo(
             MottaStatistikkDTO(
-                saksNummer = "123",
+                saksnummer = "123",
                 status = "AVS",
-                behandlingsType = "asd"
+                behandlingType = "asd",
+                ident = "21",
+                behandlingReferanse = behandlingReferanse,
+                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
             )
         )
     }

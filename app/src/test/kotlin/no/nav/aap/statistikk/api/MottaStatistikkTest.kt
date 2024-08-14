@@ -14,15 +14,22 @@ import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testKlient
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.util.*
 
 @Fakes
 class MottaStatistikkTest {
     @Test
-    fun `hendelse blir lagret i repository`(@Fakes azureConfig: AzureConfig, @Fakes token: TestToken) {
+    fun `hendelse blir lagret i repository`(
+        @Fakes azureConfig: AzureConfig,
+        @Fakes token: TestToken
+    ) {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns Unit
+        every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingOpprettetTidspunkt = LocalDateTime.now()
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
             val res = client.post("/motta") {
                 contentType(ContentType.Application.Json)
@@ -31,7 +38,12 @@ class MottaStatistikkTest {
                 }
                 setBody(
                     MottaStatistikkDTO(
-                        saksNummer = "123", status = "OPPRETTET", behandlingsType = "Førstegangsbehandling"
+                        saksnummer = "123",
+                        status = "OPPRETTET",
+                        behandlingType = "Førstegangsbehandling",
+                        ident = "0",
+                        behandlingReferanse = behandlingReferanse,
+                        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
                     )
                 )
             }
@@ -41,7 +53,12 @@ class MottaStatistikkTest {
         verify {
             hendelsesRepository.lagreHendelse(
                 MottaStatistikkDTO(
-                    saksNummer = "123", status = "OPPRETTET", behandlingsType = "Førstegangsbehandling"
+                    saksnummer = "123",
+                    status = "OPPRETTET",
+                    behandlingType = "Førstegangsbehandling",
+                    ident = "0",
+                    behandlingReferanse = behandlingReferanse,
+                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
                 )
             )
         }

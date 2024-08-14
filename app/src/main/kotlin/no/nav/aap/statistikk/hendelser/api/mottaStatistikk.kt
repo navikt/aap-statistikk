@@ -16,7 +16,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         post<Unit, String, MottaStatistikkDTO> { _, dto ->
             hendelsesRepository.lagreHendelse(dto)
 
-            log.info("Got dto: $dto")
+            log.info("Got DTO: $dto")
 
             // Må ha String-respons på grunn av Accept-header. Denne må returnere json
             responder.respond(HttpStatusCode.Accepted, "{}", pipeline)

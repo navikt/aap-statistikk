@@ -1,30 +1,80 @@
 package no.nav.aap.statistikk.hendelser.repository
 
+import no.nav.aap.statistikk.db.hentGenerertNøkkel
 import no.nav.aap.statistikk.db.withinTransaction
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import java.sql.Statement
+import java.sql.Timestamp
+import java.util.*
 import javax.sql.DataSource
 
 class HendelsesRepository(private val dataSource: DataSource) : IHendelsesRepository {
-    override fun lagreHendelse(hendelse: MottaStatistikkDTO) {
+    override fun lagreHendelse(hendelse: MottaStatistikkDTO): Int {
         // TODO: bedre transaction-håndtering
-        dataSource.withinTransaction { connection ->
-            connection.prepareStatement(
-                "INSERT INTO motta_statistikk (saksnummer, status, behandlingstype) VALUES (?, ?, ?)",
+        // Ie: mer global. Men vil helst unngå å passe connection overalt...
+        return dataSource.withinTransaction { connection ->
+            val settInnPersonRespons = connection.prepareStatement(
+                "INSERT INTO person (ident) VALUES (?) ON CONFLICT DO NOTHING",
                 Statement.RETURN_GENERATED_KEYS
-            ).use { s ->
-                s.setString(1, hendelse.saksNummer)
-                s.setString(2, hendelse.status)
-                s.setString(3, hendelse.behandlingsType)
-                s.executeUpdate()
+            ).apply {
+                setString(1, hendelse.ident)
+                executeUpdate()
             }
+
+            val personId = settInnPersonRespons.hentGenerertNøkkel()
+
+            val settInnSak =
+                connection.prepareStatement(
+                    "INSERT INTO sak (saksnummer, person_id) VALUES (?, ?) ON CONFLICT (saksnummer) DO NOTHING ",
+                    Statement.RETURN_GENERATED_KEYS
+                )
+                    .apply {
+                        setString(1, hendelse.saksnummer)
+                        setInt(2, personId)
+                        executeUpdate()
+                    }
+
+            val sakNøkkel = settInnSak.hentGenerertNøkkel()
+
+            val settInnBehandling =
+                connection.prepareStatement(
+                    "INSERT INTO behandling (sak_id, referanse, type, opprettet_tid) VALUES (?, ?, ? ,?) ON CONFLICT (referanse) DO NOTHING ",
+                    Statement.RETURN_GENERATED_KEYS
+                )
+                    .apply {
+                        setInt(1, sakNøkkel)
+                        setObject(2, hendelse.behandlingReferanse)
+                        setObject(3, hendelse.behandlingType)
+                        setTimestamp(
+                            4,
+                            Timestamp.valueOf(hendelse.behandlingOpprettetTidspunkt)
+                        )
+                        executeUpdate()
+                    }
+
+            val behandlingId = settInnBehandling.hentGenerertNøkkel()
+
+            val returnedValue = connection.prepareStatement(
+                "INSERT INTO motta_statistikk (behandling_id, sak_id, status) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
+            ).apply {
+                setInt(1, behandlingId)
+                setInt(2, sakNøkkel)
+                setString(3, hendelse.status)
+                executeUpdate()
+            }
+            returnedValue.hentGenerertNøkkel()
         }
     }
 
     override fun hentHendelser(): Collection<MottaStatistikkDTO> {
         return dataSource.withinTransaction { connection ->
             val rs = connection.prepareStatement(
-                "SELECT * FROM motta_statistikk", Statement.RETURN_GENERATED_KEYS
+                """select *
+from motta_statistikk
+         left join behandling b on b.id = motta_statistikk.behandling_id
+         left join sak ms on motta_statistikk.sak_id = ms.id
+         inner join person p on ms.person_id = p.id;""", Statement.RETURN_GENERATED_KEYS
             ).executeQuery()
 
             val hendelser = mutableListOf<MottaStatistikkDTO>()
@@ -32,9 +82,22 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
             while (rs.next()) {
                 val saksNummer = rs.getString("saksnummer")
                 val status = rs.getString("status")
-                val behandlingType = rs.getString("behandlingstype")
+                val behandlingType = rs.getString("type")
+                val referanse = UUID.fromString(rs.getString("referanse"))
+                val opprettetTidspunkt = rs.getTimestamp("opprettet_tid").toLocalDateTime()
+                val ident = rs.getString("ident")
 
-                hendelser.add(MottaStatistikkDTO(saksNummer, status, behandlingType))
+                // TODO
+                hendelser.add(
+                    MottaStatistikkDTO(
+                        saksnummer = saksNummer,
+                        behandlingReferanse = referanse,
+                        status = status,
+                        behandlingType = behandlingType,
+                        behandlingOpprettetTidspunkt = opprettetTidspunkt,
+                        ident = ident
+                    )
+                )
             }
 
             hendelser

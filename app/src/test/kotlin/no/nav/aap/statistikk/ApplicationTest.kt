@@ -33,7 +33,11 @@ class ApplicationTest {
         val tilkjentYtelseService = mockk<TilkjentYtelseService>()
         val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
         val avsluttetBehandlingService =
-            AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService, beregningsGrunnlagService)
+            AvsluttetBehandlingService(
+                vilkårsResultatService,
+                tilkjentYtelseService,
+                beregningsGrunnlagService
+            )
 
         val behandlingReferanse = UUID.randomUUID()
 
@@ -63,7 +67,8 @@ class ApplicationTest {
 
                 // konverter til json med jackson
                 val vilkårsResultatJson =
-                    ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(vilkårsresultat)
+                    ObjectMapper().registerModule(JavaTimeModule())
+                        .writeValueAsString(vilkårsresultat)
 
 
                 val tilkjentYtelseDTO = TilkjentYtelseDTO(
@@ -78,7 +83,8 @@ class ApplicationTest {
                 )
 
                 val tilkjentYtelseJSON =
-                    ObjectMapper().registerModule(JavaTimeModule()).writeValueAsString(tilkjentYtelseDTO)
+                    ObjectMapper().registerModule(JavaTimeModule())
+                        .writeValueAsString(tilkjentYtelseDTO)
 
                 val beregningsGrunnlag =
                     ObjectMapper().writeValueAsString(
@@ -118,15 +124,33 @@ class ApplicationTest {
     ) {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns Unit
+        every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+            @Language("JSON")
+            val body =
+                """{
+  "saksnummer": "123456789",
+  "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
+  "behandlingOpprettetTidspunkt": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ],
+  "status": "OPPRETTET",
+  "behandlingType": "Førstegangsbehandling",
+  "ident": "1403199012345"
+}"""
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 headers {
                     append("Authorization", "Bearer ${token.access_token}")
                 }
-                setBody("""{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering"}""")
+                setBody(body)
             }
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
@@ -141,11 +165,26 @@ class ApplicationTest {
     ) {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns Unit
+        every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
         @Language("JSON")
         val payload =
-            """{"saksnummer": "123456789", "status": "OPPRETTET", "behandlingType": "Revurdering", "ukjentFelt": "verdi"}"""
+            """{
+  "saksnummer": "123456789",
+  "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
+  "behandlingOpprettetTidspunkt": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ],
+  "status": "OPPRETTET",
+  "behandlingType": "Førstegangsbehandling",
+  "ident": "1403199012345"
+}"""
 
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
             val response = client.post("/motta") {
