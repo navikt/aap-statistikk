@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.Fakes
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.hendelser.api.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testKlient
@@ -40,10 +41,11 @@ class MottaStatistikkTest {
                     MottaStatistikkDTO(
                         saksnummer = "123",
                         status = "OPPRETTET",
-                        behandlingType = "Førstegangsbehandling",
+                        behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = "0",
                         behandlingReferanse = behandlingReferanse,
-                        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
+                        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                        avklaringsbehov = listOf()
                     )
                 )
             }
@@ -55,10 +57,11 @@ class MottaStatistikkTest {
                 MottaStatistikkDTO(
                     saksnummer = "123",
                     status = "OPPRETTET",
-                    behandlingType = "Førstegangsbehandling",
+                    behandlingType =  TypeBehandling.Førstegangsbehandling,
                     ident = "0",
                     behandlingReferanse = behandlingReferanse,
-                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
+                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                    avklaringsbehov = listOf()
                 )
             )
         }
