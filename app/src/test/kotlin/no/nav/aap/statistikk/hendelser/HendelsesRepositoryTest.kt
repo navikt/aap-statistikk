@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.hendelser.api.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -21,10 +22,11 @@ class HendelsesRepositoryTest {
             MottaStatistikkDTO(
                 saksnummer = "123",
                 status = "AVS",
-                behandlingType = "asd",
+                behandlingType = TypeBehandling.Førstegangsbehandling,
                 ident = "21",
                 behandlingReferanse = behandlingReferanse,
-                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
+                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                avklaringsbehov = listOf()
             )
         )
 
@@ -35,10 +37,11 @@ class HendelsesRepositoryTest {
             MottaStatistikkDTO(
                 saksnummer = "123",
                 status = "AVS",
-                behandlingType = "asd",
+                behandlingType = TypeBehandling.Førstegangsbehandling,
                 ident = "21",
                 behandlingReferanse = behandlingReferanse,
-                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt
+                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                avklaringsbehov = listOf()
             )
         )
     }

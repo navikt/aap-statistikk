@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.hendelser.repository
 import no.nav.aap.statistikk.db.hentGenerertNøkkel
 import no.nav.aap.statistikk.db.withinTransaction
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.hendelser.api.TypeBehandling
 import java.sql.Statement
 import java.sql.Timestamp
 import java.util.*
@@ -44,7 +45,7 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
                     .apply {
                         setInt(1, sakNøkkel)
                         setObject(2, hendelse.behandlingReferanse)
-                        setObject(3, hendelse.behandlingType)
+                        setString(3, hendelse.behandlingType.toString())
                         setTimestamp(
                             4,
                             Timestamp.valueOf(hendelse.behandlingOpprettetTidspunkt)
@@ -93,9 +94,10 @@ from motta_statistikk
                         saksnummer = saksNummer,
                         behandlingReferanse = referanse,
                         status = status,
-                        behandlingType = behandlingType,
+                        behandlingType = TypeBehandling.valueOf(behandlingType),
                         behandlingOpprettetTidspunkt = opprettetTidspunkt,
-                        ident = ident
+                        ident = ident,
+                        avklaringsbehov = listOf()
                     )
                 )
             }
