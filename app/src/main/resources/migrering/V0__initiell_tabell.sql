@@ -1,9 +1,31 @@
+CREATE TABLE person
+(
+    ID    BIGSERIAL          NOT NULL PRIMARY KEY,
+    IDENT VARCHAR(19) UNIQUE NOT NULL -- fra DB i behandlingsflyt
+);
+
+CREATE TABLE sak
+(
+    ID         BIGSERIAL   NOT NULL PRIMARY KEY,
+    SAKSNUMMER VARCHAR(19) NOT NULL UNIQUE,
+    PERSON_ID  BIGINT      NOT NULL REFERENCES person (id)
+);
+
+CREATE TABLE behandling
+(
+    ID            BIGSERIAL    NOT NULL PRIMARY KEY,
+    SAK_ID        BIGINT       NOT NULL REFERENCES SAK (ID),
+    REFERANSE     UUID UNIQUE  NOT NULL,
+    TYPE          VARCHAR(100) NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) NOT NULL
+);
+
 CREATE TABLE motta_statistikk
 (
-    ID              BIGSERIAL    NOT NULL PRIMARY KEY,
-    saksnummer      VARCHAR(255) NOT NULL,
-    status          VARCHAR(255) NOT NULL,
-    behandlingstype VARCHAR(255) NOT NULL
+    ID            BIGSERIAL    NOT NULL PRIMARY KEY,
+    behandling_id BIGINT       NOT NULL REFERENCES behandling (ID),
+    sak_id        BIGINT       NOT NULL REFERENCES sak (ID),
+    status        VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE VILKARSRESULTAT

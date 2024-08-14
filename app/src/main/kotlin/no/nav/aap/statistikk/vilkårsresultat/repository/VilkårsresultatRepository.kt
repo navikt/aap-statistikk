@@ -45,8 +45,8 @@ VALUES (?, ?, ?);
                     VALUES(?,?,?,?,?,?,?);
                 """
                     connection.prepareStatement(sqlInsertPeriode, Statement.RETURN_GENERATED_KEYS).apply {
-                        setDate(1, java.sql.Date.valueOf(periode.fraDato))
-                        setDate(2, java.sql.Date.valueOf(periode.tilDato))
+                        setDate(1, Date.valueOf(periode.fraDato))
+                        setDate(2, Date.valueOf(periode.tilDato))
                         setString(3, periode.utfall)
                         setBoolean(4, periode.manuellVurdering)
                         setString(5, periode.innvilgelsesårsak)
