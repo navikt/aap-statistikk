@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
+import no.nav.aap.statistikk.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
@@ -29,6 +30,9 @@ class AvsluttetBehandlingServiceTest {
 
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "xxxx"
+
+        opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
+
         val avsluttetBehandling = AvsluttetBehandling(
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse, saksnummer = saksnummer, perioder = listOf(
@@ -109,6 +113,9 @@ class AvsluttetBehandlingServiceTest {
 
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "xxxx"
+
+        opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
+
         val avsluttetBehandling = AvsluttetBehandling(
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse, saksnummer = saksnummer, perioder = listOf()

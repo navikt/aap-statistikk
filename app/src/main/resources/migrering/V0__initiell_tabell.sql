@@ -30,10 +30,9 @@ CREATE TABLE motta_statistikk
 
 CREATE TABLE VILKARSRESULTAT
 (
-    id                   BIGSERIAL NOT NULL PRIMARY KEY,
-    saksnummer           TEXT      NOT NULL,
-    behandlingsreferanse uuid      NOT NULL UNIQUE,
-    type_behandling      TEXT      NOT NULL
+    id            BIGSERIAL     NOT NULL PRIMARY KEY,
+    sak_id        BIGINT        NOT NULL REFERENCES sak (ID),
+    behandling_id BIGINT UNIQUE NOT NULL REFERENCES behandling (ID)
 );
 
 CREATE TABLE VILKAR

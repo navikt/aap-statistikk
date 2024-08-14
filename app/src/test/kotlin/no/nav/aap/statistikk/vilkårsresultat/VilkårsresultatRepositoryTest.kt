@@ -2,6 +2,10 @@ package no.nav.aap.statistikk.vilkårsresultat
 
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.db.EksistererAlleredeAvbrudd
+import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.hendelser.api.TypeBehandling
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
@@ -10,17 +14,21 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
 class VilkårsresultatRepositoryTest {
     @Test
     fun `fungerer å lagre vilkårs-resultat og hente inn igjen`(@Postgres dataSource: DataSource) {
+        val randomUUID = UUID.randomUUID()
+        opprettTestHendelse(dataSource, randomUUID, "ABCDE")
+
         val repo = VilkårsresultatRepository(dataSource)
 
         val vilkårsResultatEntity = VilkårsResultatEntity(
-            id = null, behandlingsReferanse = UUID.randomUUID().toString(),
-            "saksnummer", "typeBehandling", listOf(
+            id = null, behandlingsReferanse = randomUUID.toString(),
+            "ABCDE", TypeBehandling.Førstegangsbehandling.toString(), listOf(
                 VilkårEntity(
                     id = null,
                     Vilkårtype.MEDLEMSKAP.toString(), listOf(
@@ -35,7 +43,12 @@ class VilkårsresultatRepositoryTest {
                         ),
                         VilkårsPeriodeEntity(
                             id = null,
-                            LocalDate.now().minusDays(3), LocalDate.now(), "utfall2", false, null, null
+                            LocalDate.now().minusDays(3),
+                            LocalDate.now(),
+                            "utfall2",
+                            false,
+                            null,
+                            null
                         )
                     )
                 ),
@@ -53,7 +66,12 @@ class VilkårsresultatRepositoryTest {
                         ),
                         VilkårsPeriodeEntity(
                             id = null,
-                            LocalDate.now().minusDays(3), LocalDate.now(), "utfa4ll2", true, null, null
+                            LocalDate.now().minusDays(3),
+                            LocalDate.now(),
+                            "utfa4ll2",
+                            true,
+                            null,
+                            null
                         )
                     )
                 )
@@ -71,14 +89,19 @@ class VilkårsresultatRepositoryTest {
 
     @Test
     fun `kun ett vilkårsresultat per behandling - skal få exception`(@Postgres dataSource: DataSource) {
+        val randomUUID = UUID.randomUUID()
+        val saksnummer = "saksnummer"
+
+        opprettTestHendelse(dataSource, randomUUID, saksnummer)
+
         val repo = VilkårsresultatRepository(dataSource)
 
         // lagre
-        val behandlingsReferanse = UUID.randomUUID().toString()
+        val behandlingsReferanse = randomUUID.toString()
 
         val vilkårsresultat = VilkårsResultatEntity(
             id = null, behandlingsReferanse = behandlingsReferanse,
-            "saksnummer", "typeBehandling", listOf(
+            saksnummer, "typeBehandling", listOf(
                 VilkårEntity(
                     id = null,
                     Vilkårtype.MEDLEMSKAP.toString(), listOf(
@@ -93,7 +116,12 @@ class VilkårsresultatRepositoryTest {
                         ),
                         VilkårsPeriodeEntity(
                             id = null,
-                            LocalDate.now().minusDays(3), LocalDate.now(), "utfall2", false, null, null
+                            LocalDate.now().minusDays(3),
+                            LocalDate.now(),
+                            "utfall2",
+                            false,
+                            null,
+                            null
                         )
                     )
                 ),

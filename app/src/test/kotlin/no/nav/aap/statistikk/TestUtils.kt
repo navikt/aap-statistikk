@@ -12,6 +12,9 @@ import io.ktor.server.testing.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.hendelser.api.TypeBehandling
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import org.slf4j.LoggerFactory
@@ -20,7 +23,10 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import java.net.URI
 import java.time.Duration
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
+import javax.sql.DataSource
 
 private val logger = LoggerFactory.getLogger("TestUtils")
 
@@ -56,12 +62,26 @@ fun <E> testKlient(
     return res
 }
 
-fun postgresTestConfig(): DbConfig {
+fun postgresTestConfig(port: Int? = null): DbConfig {
     val postgres = PostgreSQLContainer("postgres:15")
-    postgres.waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
+    if (port != null) {
+        postgres.portBindings = listOf("5432:5432")
+    }
+    postgres.waitingFor(
+        HostPortWaitStrategy().withStartupTimeout(
+            Duration.of(
+                60L,
+                ChronoUnit.SECONDS
+            )
+        )
+    )
     postgres.start()
 
-    val dbConfig = DbConfig(jdbcUrl = postgres.jdbcUrl, userName = postgres.username, password = postgres.password)
+    val dbConfig = DbConfig(
+        jdbcUrl = postgres.jdbcUrl,
+        userName = postgres.username,
+        password = postgres.password
+    )
     return dbConfig
 }
 
@@ -96,4 +116,19 @@ fun bigQueryContainer(): BigQueryConfig {
     bigQuery.create(datasetInfo)
 
     return config
+}
+
+fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: String) {
+    val hendelse = HendelsesRepository(dataSource)
+    hendelse.lagreHendelse(
+        MottaStatistikkDTO(
+            saksnummer = saksnummer,
+            behandlingReferanse = randomUUID,
+            behandlingOpprettetTidspunkt = LocalDateTime.now(),
+            status = "IVERKSATT",
+            behandlingType = TypeBehandling.Førstegangsbehandling,
+            ident = "123",
+            avklaringsbehov = listOf()
+        )
+    )
 }
