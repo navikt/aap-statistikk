@@ -143,7 +143,8 @@ class ApplicationTest {
   ],
   "status": "OPPRETTET",
   "behandlingType": "Førstegangsbehandling",
-  "ident": "1403199012345"
+  "ident": "1403199012345",
+  "avklaringsbehov": []
 }"""
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
@@ -183,7 +184,8 @@ class ApplicationTest {
   ],
   "status": "OPPRETTET",
   "behandlingType": "Førstegangsbehandling",
-  "ident": "1403199012345"
+  "ident": "1403199012345",
+  "avklaringsbehov": []
 }"""
 
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
