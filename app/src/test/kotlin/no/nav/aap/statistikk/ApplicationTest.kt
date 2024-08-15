@@ -185,7 +185,8 @@ class ApplicationTest {
   "status": "OPPRETTET",
   "behandlingType": "Førstegangsbehandling",
   "ident": "1403199012345",
-  "avklaringsbehov": []
+  "avklaringsbehov": [],
+  "ukjentfelt": "hei"
 }"""
 
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
