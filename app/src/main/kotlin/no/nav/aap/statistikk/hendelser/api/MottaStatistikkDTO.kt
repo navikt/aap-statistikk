@@ -49,12 +49,11 @@ data class MottaStatistikkDTO(
             behandlingOpprettetTidspunkt = LocalDateTime.now(),
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelse(
-                    definisjon = listOf(
-                        Definisjon(
-                            type = "5001",
-                            behovType = BehovType.MANUELT_PÅKREVD,
-                            løsesISteg = "AVKLAR_STUDENT"
-                        ),
+                    definisjon = Definisjon(
+                        type = "5001",
+                        behovType = BehovType.MANUELT_PÅKREVD,
+                        løsesISteg = "AVKLAR_STUDENT"
+
                     ),
                     status = EndringStatus.AVSLUTTET,
                     endringer = listOf(
@@ -71,12 +70,10 @@ data class MottaStatistikkDTO(
                     )
                 ),
                 AvklaringsbehovHendelse(
-                    definisjon = listOf(
-                        Definisjon(
-                            type = "5003",
-                            behovType = BehovType.MANUELT_PÅKREVD,
-                            løsesISteg = "AVKLAR_SYKDOM"
-                        ),
+                    definisjon = Definisjon(
+                        type = "5003",
+                        behovType = BehovType.MANUELT_PÅKREVD,
+                        løsesISteg = "AVKLAR_SYKDOM"
                     ),
                     status = EndringStatus.OPPRETTET,
                     endringer = listOf(
@@ -93,7 +90,7 @@ data class MottaStatistikkDTO(
 }
 
 data class AvklaringsbehovHendelse(
-    val definisjon: List<Definisjon>,
+    val definisjon: Definisjon,
     val status: EndringStatus,
     val endringer: List<Endring>
 )
