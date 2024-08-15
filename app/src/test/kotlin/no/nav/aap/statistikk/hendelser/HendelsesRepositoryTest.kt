@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.hendelser.api.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -44,5 +45,39 @@ class HendelsesRepositoryTest {
                 avklaringsbehov = listOf()
             )
         )
+    }
+
+    @Test
+    fun `sette inn to hendelser i db`(@Postgres dataSource: DataSource) {
+        val repository = HendelsesRepository(dataSource)
+
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingOpprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        repository.lagreHendelse(
+            MottaStatistikkDTO(
+                saksnummer = "123",
+                status = "AVS",
+                behandlingType = TypeBehandling.Førstegangsbehandling,
+                ident = "21",
+                behandlingReferanse = behandlingReferanse,
+                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                avklaringsbehov = listOf()
+            )
+        )
+
+        assertDoesNotThrow {
+            repository.lagreHendelse(
+                MottaStatistikkDTO(
+                    saksnummer = "123",
+                    status = "BEHA",
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    ident = "21",
+                    behandlingReferanse = behandlingReferanse,
+                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                    avklaringsbehov = listOf()
+                )
+            )
+        }
+
     }
 }

@@ -50,7 +50,7 @@ data class MottaStatistikkDTO(
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelse(
                     definisjon = Definisjon(
-                        type = "5001",
+                        type = 5001,
                         behovType = BehovType.MANUELT_PÅKREVD,
                         løsesISteg = "AVKLAR_STUDENT"
 
@@ -71,7 +71,7 @@ data class MottaStatistikkDTO(
                 ),
                 AvklaringsbehovHendelse(
                     definisjon = Definisjon(
-                        type = "5003",
+                        type = 5003,
                         behovType = BehovType.MANUELT_PÅKREVD,
                         løsesISteg = "AVKLAR_SYKDOM"
                     ),
@@ -115,7 +115,7 @@ data class Endring(
 
 
 data class Definisjon(
-    val type: String,
+    val type: Int,
     val behovType: BehovType,
     val løsesISteg: String
 )

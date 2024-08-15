@@ -13,47 +13,86 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
     override fun lagreHendelse(hendelse: MottaStatistikkDTO): Int {
         // TODO: bedre transaction-håndtering
         // Ie: mer global. Men vil helst unngå å passe connection overalt...
+        var personIdFraQuery: Int? = null;
         return dataSource.withinTransaction { connection ->
             val settInnPersonRespons = connection.prepareStatement(
-                "INSERT INTO person (ident) VALUES (?) ON CONFLICT DO NOTHING",
+                """WITH INSERTED AS (
+    INSERT INTO person (ident)
+        VALUES (?)
+        ON CONFLICT (ident) DO NOTHING
+        RETURNING id)
+SELECT id
+FROM INSERTED
+UNION ALL
+SELECT id FROM person WHERE ident = ?
+LIMIT 1;
+""",
                 Statement.RETURN_GENERATED_KEYS
             ).apply {
                 setString(1, hendelse.ident)
-                executeUpdate()
+                setString(2, hendelse.ident)
+                executeQuery().use {
+                    while (resultSet.next()) {
+                        personIdFraQuery = resultSet.getInt("id");
+                    }
+                }
             }
 
-            val personId = settInnPersonRespons.hentGenerertNøkkel()
+            val personId = requireNotNull(personIdFraQuery)
 
-            val settInnSak =
-                connection.prepareStatement(
-                    "INSERT INTO sak (saksnummer, person_id) VALUES (?, ?) ON CONFLICT (saksnummer) DO NOTHING ",
-                    Statement.RETURN_GENERATED_KEYS
-                )
-                    .apply {
-                        setString(1, hendelse.saksnummer)
-                        setInt(2, personId)
-                        executeUpdate()
+            var sakIdFraQuery: Int? = null;
+            connection.prepareStatement(
+                """WITH INSERTED
+     AS (INSERT INTO sak (saksnummer, person_id) VALUES (?, ?) ON CONFLICT (saksnummer) DO NOTHING RETURNING id)
+select id
+from INSERTED
+UNION ALL
+SELECT id FROM sak WHERE saksnummer = ?
+limit 1;""",
+                Statement.RETURN_GENERATED_KEYS
+            )
+                .apply {
+                    setString(1, hendelse.saksnummer)
+                    setString(3, hendelse.saksnummer)
+                    setInt(2, personId)
+                    executeQuery().use {
+                        while (resultSet.next()) {
+                            sakIdFraQuery = resultSet.getInt("id");
+                        }
                     }
+                }
 
-            val sakNøkkel = settInnSak.hentGenerertNøkkel()
+            val sakNøkkel = requireNotNull(sakIdFraQuery)
 
+            var behandlingIdFraQuery: Int? = null;
             val settInnBehandling =
                 connection.prepareStatement(
-                    "INSERT INTO behandling (sak_id, referanse, type, opprettet_tid) VALUES (?, ?, ? ,?) ON CONFLICT (referanse) DO NOTHING ",
+                    """WITH INSERTED
+         AS (INSERT INTO behandling (sak_id, referanse, type, opprettet_tid) VALUES (?, ?, ?, ?) ON CONFLICT (referanse) DO NOTHING RETURNING id)
+select id
+from INSERTED
+UNION ALL
+SELECT id FROM behandling WHERE referanse = ?
+limit 1;""",
                     Statement.RETURN_GENERATED_KEYS
                 )
                     .apply {
                         setInt(1, sakNøkkel)
                         setObject(2, hendelse.behandlingReferanse)
+                        setObject(5, hendelse.behandlingReferanse)
                         setString(3, hendelse.behandlingType.toString())
                         setTimestamp(
                             4,
                             Timestamp.valueOf(hendelse.behandlingOpprettetTidspunkt)
                         )
-                        executeUpdate()
+                        executeQuery().use {
+                            while (resultSet.next()) {
+                                behandlingIdFraQuery = resultSet.getInt("id");
+                            }
+                        }
                     }
 
-            val behandlingId = settInnBehandling.hentGenerertNøkkel()
+            val behandlingId = requireNotNull(behandlingIdFraQuery)
 
             val returnedValue = connection.prepareStatement(
                 "INSERT INTO motta_statistikk (behandling_id, sak_id, status) VALUES (?, ?, ?)",
