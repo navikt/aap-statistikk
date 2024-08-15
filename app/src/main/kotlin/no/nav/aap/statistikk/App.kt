@@ -83,7 +83,11 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
     val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
     val avsluttetBehandlingService =
-        AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService, beregningsGrunnlagService)
+        AvsluttetBehandlingService(
+            vilkårsResultatService,
+            tilkjentYtelseService,
+            beregningsGrunnlagService
+        )
 
     module(hendelsesRepository, avsluttetBehandlingService, azureConfig)
 }
@@ -163,7 +167,10 @@ private fun Application.monitoring() {
 private fun Application.statusPages() {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            LoggerFactory.getLogger(App::class.java).error("Noe gikk galt.", cause)
+            LoggerFactory.getLogger(App::class.java).error(
+                "Noe gikk galt. Exception-type: ${cause.javaClass} Query string: ${call.request.queryString()}",
+                cause
+            )
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
     }
