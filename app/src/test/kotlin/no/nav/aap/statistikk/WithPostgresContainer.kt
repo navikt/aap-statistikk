@@ -23,7 +23,7 @@ annotation class Postgres {
     class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
         companion object {
-            private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:15").apply {
+            private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16").apply {
                 waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
             }
             private var dataSource: HikariDataSource
