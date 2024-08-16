@@ -63,7 +63,7 @@ fun <E> testKlient(
 }
 
 fun postgresTestConfig(port: Int? = null): DbConfig {
-    val postgres = PostgreSQLContainer("postgres:15")
+    val postgres = PostgreSQLContainer("postgres:16")
     if (port != null) {
         postgres.portBindings = listOf("5432:5432")
     }
