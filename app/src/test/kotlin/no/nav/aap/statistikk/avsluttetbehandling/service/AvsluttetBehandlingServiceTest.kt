@@ -26,7 +26,10 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
-        val (tilkjentYtelseRepository, bigQueryClient, service) = konstruerTilkjentYtelseService(dataSource, bigQuery)
+        val (tilkjentYtelseRepository, bigQueryClient, service) = konstruerTilkjentYtelseService(
+            dataSource,
+            bigQuery
+        )
 
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "xxxx"
@@ -35,7 +38,9 @@ class AvsluttetBehandlingServiceTest {
 
         val avsluttetBehandling = AvsluttetBehandling(
             tilkjentYtelse = TilkjentYtelse(
-                behandlingsReferanse = behandlingReferanse, saksnummer = saksnummer, perioder = listOf(
+                behandlingsReferanse = behandlingReferanse,
+                saksnummer = saksnummer,
+                perioder = listOf(
                     TilkjentYtelsePeriode(
                         fraDato = LocalDate.now().minusYears(1),
                         tilDato = LocalDate.now().plusDays(1),
@@ -67,11 +72,12 @@ class AvsluttetBehandlingServiceTest {
                 )
             ),
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
-                grunnlag = 25000.0,
+                grunnlaget = 25000.0,
                 er6GBegrenset = false,
                 beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 20000.0,
                     er6GBegrenset = false,
+                    erGjennomsnitt = true,
                     inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
                 ),
                 terskelverdiForYrkesskade = 70,
@@ -109,7 +115,10 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
-        val (tilkjentYtelseRepository, _, service) = konstruerTilkjentYtelseService(dataSource, bigQuery)
+        val (tilkjentYtelseRepository, _, service) = konstruerTilkjentYtelseService(
+            dataSource,
+            bigQuery
+        )
 
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "xxxx"
@@ -118,7 +127,9 @@ class AvsluttetBehandlingServiceTest {
 
         val avsluttetBehandling = AvsluttetBehandling(
             tilkjentYtelse = TilkjentYtelse(
-                behandlingsReferanse = behandlingReferanse, saksnummer = saksnummer, perioder = listOf()
+                behandlingsReferanse = behandlingReferanse,
+                saksnummer = saksnummer,
+                perioder = listOf()
             ), vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
                 behandlingsType = "Førstegangsbehandling",
@@ -126,11 +137,12 @@ class AvsluttetBehandlingServiceTest {
                 vilkår = listOf()
             ),
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
-                grunnlag = 25000.0,
+                grunnlaget = 25000.0,
                 er6GBegrenset = false,
                 beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 20000.0,
                     er6GBegrenset = false,
+                    erGjennomsnitt = true,
                     inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
                 ),
                 terskelverdiForYrkesskade = 70,
@@ -166,7 +178,11 @@ class AvsluttetBehandlingServiceTest {
         val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
 
         val service =
-            AvsluttetBehandlingService(vilkårsResultatService, tilkjentYtelseService, beregningsGrunnlagService)
+            AvsluttetBehandlingService(
+                vilkårsResultatService,
+                tilkjentYtelseService,
+                beregningsGrunnlagService
+            )
         return Triple(tilkjentYtelseRepository, bigQueryClient, service)
     }
 

@@ -12,7 +12,10 @@ import javax.sql.DataSource
 
 
 @Target(
-    AnnotationTarget.FUNCTION, AnnotationTarget.FIELD, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.CLASS,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.CLASS,
     AnnotationTarget.VALUE_PARAMETER
 )
 @Retention(AnnotationRetention.RUNTIME)
@@ -57,7 +60,10 @@ annotation class Postgres {
             return parameterContext?.isAnnotated(Postgres::class.java) == true && (parameterContext.parameter.type == DataSource::class.java)
         }
 
-        override fun resolveParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Any {
+        override fun resolveParameter(
+            parameterContext: ParameterContext?,
+            extensionContext: ExtensionContext?
+        ): Any {
             return dataSource
         }
     }
