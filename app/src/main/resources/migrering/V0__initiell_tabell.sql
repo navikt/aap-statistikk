@@ -71,18 +71,32 @@ CREATE TABLE TILKJENT_YTELSE_PERIODE
     TILKJENT_YTELSE_ID BIGINT         NOT NULL REFERENCES TILKJENT_YTELSE (ID)
 );
 
+CREATE TYPE beregningsgrunnlag_variant AS ENUM (
+    '11_19',
+    'uføre',
+    'yrkesskade'
+    );
+
+CREATE TABLE GRUNNLAG
+(
+    ID   BIGSERIAL                  NOT NULL PRIMARY KEY,
+    type beregningsgrunnlag_variant not null
+);
 
 CREATE TABLE GRUNNLAG_11_19
 (
-    ID             BIGSERIAL      NOT NULL PRIMARY KEY,
-    grunnlag       NUMERIC(21, 5) NOT NULL,
-    er6g_begrenset BOOLEAN        NOT NULL,
-    inntekter      JSONB          NOT NULL
+    ID              BIGSERIAL      NOT NULL PRIMARY KEY,
+    grunnlag_id     BIGINT         NOT NULL REFERENCES GRUNNLAG (ID),
+    grunnlag        NUMERIC(21, 5) NOT NULL,
+    er6g_begrenset  BOOLEAN        NOT NULL,
+    er_gjennomsnitt BOOLEAN        NOT NULL,
+    inntekter       JSONB          NOT NULL
 );
 
 CREATE TABLE GRUNNLAG_UFORE
 (
     ID                                       BIGSERIAL      NOT NULL PRIMARY KEY,
+    grunnlag_id                              BIGINT         NOT NULL REFERENCES GRUNNLAG (ID),
     grunnlag                                 NUMERIC(21, 5) NOT NULL,
     er6g_begrenset                           BOOLEAN        NOT NULL,
     type                                     VARCHAR(20)    NOT NULL,
@@ -93,20 +107,26 @@ CREATE TABLE GRUNNLAG_UFORE
     ufore_ytterligere_nedsatt_arbeidsevne_ar INT            NOT NULL
 );
 
+CREATE TYPE beregningsgrunnlag_type AS ENUM (
+    'normal',
+    'ufore'
+    );
+
 CREATE TABLE GRUNNLAG_YRKESSKADE
 (
-    ID                                          BIGSERIAL      NOT NULL PRIMARY KEY,
-    grunnlag                                    NUMERIC(21, 5) NOT NULL,
-    er6g_begrenset                              BOOLEAN        NOT NULL,
-    beregningsgrunnlag_id                       BIGINT         NOT NULL REFERENCES Grunnlag_11_19,
-    terskelverdi_for_yrkesskade                 INT            NOT NULL,
-    andel_som_skyldes_yrkesskade                NUMERIC        NOT NULL,
-    andel_yrkesskade                            INT            NOT NULL,
-    benyttet_andel_for_yrkesskade               INT            NOT NULL,
-    andel_som_ikke_skyldes_yrkesskade           NUMERIC        NOT NULL,
-    antatt_arlig_inntekt_yrkesskade_tidspunktet NUMERIC        NOT NULL,
-    yrkesskade_tidspunkt                        INT            NOT NULL,
-    grunnlag_for_beregning_av_yrkesskadeandel   NUMERIC        NOT NULL,
-    yrkesskadeinntekt_ig                        NUMERIC        NOT NULL,
-    grunnlag_etter_yrkesskade_fordel            NUMERIC        NOT NULL
+    ID                                          BIGSERIAL               NOT NULL PRIMARY KEY,
+    grunnlag                                    NUMERIC(21, 5)          NOT NULL,
+    er6g_begrenset                              BOOLEAN                 NOT NULL,
+    beregningsgrunnlag_id                       BIGINT                  NOT NULL,
+    beregningsgrunnlag_type                     beregningsgrunnlag_type NOT NULL,
+    terskelverdi_for_yrkesskade                 INT                     NOT NULL,
+    andel_som_skyldes_yrkesskade                NUMERIC                 NOT NULL,
+    andel_yrkesskade                            INT                     NOT NULL,
+    benyttet_andel_for_yrkesskade               INT                     NOT NULL,
+    andel_som_ikke_skyldes_yrkesskade           NUMERIC                 NOT NULL,
+    antatt_arlig_inntekt_yrkesskade_tidspunktet NUMERIC                 NOT NULL,
+    yrkesskade_tidspunkt                        INT                     NOT NULL,
+    grunnlag_for_beregning_av_yrkesskadeandel   NUMERIC                 NOT NULL,
+    yrkesskadeinntekt_ig                        NUMERIC                 NOT NULL,
+    grunnlag_etter_yrkesskade_fordel            NUMERIC                 NOT NULL
 );

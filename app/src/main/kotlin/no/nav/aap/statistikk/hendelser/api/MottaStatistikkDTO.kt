@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
+import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -42,7 +43,7 @@ data class MottaStatistikkDTO(
     companion object : ExampleProvider<MottaStatistikkDTO> {
         override val example: MottaStatistikkDTO = MottaStatistikkDTO(
             saksnummer = "4LFL5CW",
-            behandlingReferanse = UUID.randomUUID(),
+            behandlingReferanse = eksempelUUID,
             status = "OPPRETTET",
             behandlingType = TypeBehandling.Førstegangsbehandling,
             ident = "1403199012345",
@@ -125,21 +126,3 @@ enum class BehovType {
     MANUELT_FRIVILLIG,
     VENTEPUNKT,
 }
-
-/*
- MottaStatistikkDTO(
- saksnummer=4LFL5CW,
- behandlingReferanse=62fc2bfb-7ce1-497a-8a0d-3f9348bb74f1,
- behandlingOpprettetTidspunkt=2024-08-14T10:36:33.699,
- status=UTREDES,
- behandlingType=Førstegangsbehandling,
- ident=24927398121,
- avklaringsbehov=[
-   {definisjon={type=5001, behovType=MANUELT_PÅKREVD, løsesISteg=AVKLAR_STUDENT},
-    status=AVSLUTTET,
-    endringer=[{status=OPPRETTET, tidsstempel=2024-08-14T10:36:33.972, frist=null, endretAv=Kelvin},
-               {status=AVSLUTTET, tidsstempel=2024-08-14T11:36:39.822, frist=null, endretAv=Z994573}]},
-   {definisjon={type=5003, behovType=MANUELT_PÅKREVD, løsesISteg=AVKLAR_SYKDOM},
-   status=OPPRETTET,
-   endringer=[{status=OPPRETTET, tidsstempel=2024-08-14T11:36:40.891, frist=null, endretAv=Kelvin}]}])
-*/

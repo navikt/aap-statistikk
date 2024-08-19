@@ -89,9 +89,12 @@ class ApplicationTest {
                 val beregningsGrunnlag =
                     ObjectMapper().writeValueAsString(
                         BeregningsgrunnlagDTO(
-                            grunnlag = 1337.2,
-                            er6GBegrenset = true,
-                            grunnlag11_19dto = Grunnlag11_19DTO(inntekter = mapOf())
+                            grunnlag11_19dto = Grunnlag11_19DTO(
+                                inntekter = mapOf(),
+                                grunnlaget = 6.0,
+                                erGjennomsnitt = true,
+                                er6GBegrenset = true
+                            )
                         )
                     )
 
@@ -157,6 +160,95 @@ class ApplicationTest {
         }
 
         verify(exactly = 1) { hendelsesRepository.lagreHendelse(any()) }
+    }
+
+    @Test
+    fun `kan parse json for beregningsgrunnlag`(
+        @Fakes azureConfig: AzureConfig,
+        @Fakes token: TestToken
+    ) {
+        val hendelsesRepository = mockk<IHendelsesRepository>()
+        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        every { hendelsesRepository.lagreHendelse(any()) } returns 1
+        every { avsluttetBehandlingService.lagre(any()) } returns Unit
+
+        @Language("JSON")
+        val payload = """{
+  "behandlingsReferanse": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "beregningsGrunnlag": {
+    "grunnlag11_19dto": null,
+    "grunnlagUføre": null,
+    "grunnlagYrkesskade": {
+      "andelSomIkkeSkyldesYrkesskade": 0,
+      "andelSomSkyldesYrkesskade": 0,
+      "andelYrkesskade": 0,
+      "antattÅrligInntektYrkesskadeTidspunktet": 0,
+      "benyttetAndelForYrkesskade": 0,
+      "beregningsgrunnlag": {
+        "grunnlag11_19dto": null,
+        "grunnlagUføre": {
+          "grunnlag": {
+            "er6GBegrenset": true,
+            "erGjennomsnitt": true,
+            "grunnlaget": 0,
+            "inntekter": {
+              "additionalProp1": 0,
+              "additionalProp2": 0,
+              "additionalProp3": 0
+            }
+          },
+          "grunnlagYtterligereNedsatt": {
+            "er6GBegrenset": true,
+            "erGjennomsnitt": true,
+            "grunnlaget": 0,
+            "inntekter": {
+              "additionalProp1": 0,
+              "additionalProp2": 0,
+              "additionalProp3": 0
+            }
+          },
+          "grunnlaget": 4.5,
+          "type": "YTTERLIGERE_NEDSATT",
+          "uføreInntektIKroner": 0,
+          "uføreInntekterFraForegåendeÅr": {
+            "additionalProp1": 0,
+            "additionalProp2": 0,
+            "additionalProp3": 0
+          },
+          "uføreYtterligereNedsattArbeidsevneÅr": 0,
+          "uføregrad": 0
+        }
+      },
+      "grunnlagEtterYrkesskadeFordel": 0,
+      "grunnlagForBeregningAvYrkesskadeandel": 0,
+      "grunnlaget": 4.5,
+      "inkludererUføre": false,
+      "terskelverdiForYrkesskade": 0,
+      "yrkesskadeTidspunkt": 0,
+      "yrkesskadeinntektIG": 0
+    }
+  },
+  "saksnummer": "string",
+  "tilkjentYtelse": {
+    "perioder": []
+  },
+  "vilkårsResultat": {
+    "typeBehandling": "string",
+    "vilkår": []
+  }
+}"""
+        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+            val response = client.post("/avsluttetBehandling") {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append("Authorization", "Bearer ${token.access_token}")
+                }
+                setBody(payload)
+            }
+            Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
+        }
+
+        verify(exactly = 1) { avsluttetBehandlingService.lagre(any()) }
     }
 
     @Test

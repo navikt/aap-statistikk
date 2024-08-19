@@ -11,11 +11,45 @@ data class AvsluttetBehandling(
 )
 
 sealed interface IBeregningsGrunnlag {
+    /**
+     * Hvilket grunnlag som blir brukt som grunnlag for AAP-beregningen.
+     */
+    fun grunnlaget(): Double
+
+    /**
+     * Om minst én inntekt i beregningen er begrenset oppdag til 6G.
+     */
+    fun er6GBegrenset(): Boolean
+
+    /**
+     * Om et gjennomnsnitt av flere års inntekter er brukt i beregningen.
+     */
+    fun erGjennomsnitt(): Boolean
+
+    fun type(): String
+
     data class Grunnlag_11_19(
         val grunnlag: Double,
         val er6GBegrenset: Boolean,
+        val erGjennomsnitt: Boolean,
         val inntekter: Map<String, BigDecimal>
-    ) : IBeregningsGrunnlag
+    ) : IBeregningsGrunnlag {
+        override fun grunnlaget(): Double {
+            return grunnlag
+        }
+
+        override fun er6GBegrenset(): Boolean {
+            return er6GBegrenset
+        }
+
+        override fun erGjennomsnitt(): Boolean {
+            return erGjennomsnitt
+        }
+
+        override fun type(): String {
+            return "11_19"
+        }
+    }
 
     data class GrunnlagUføre(
         val grunnlag: Double,
@@ -26,12 +60,28 @@ sealed interface IBeregningsGrunnlag {
         val uføreInntekterFraForegåendeÅr: Map<String, BigDecimal>,
         val uføreInntektIKroner: BigDecimal,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,
-    ) : IBeregningsGrunnlag
+    ) : IBeregningsGrunnlag {
+        override fun grunnlaget(): Double {
+            return grunnlag
+        }
+
+        override fun er6GBegrenset(): Boolean {
+            return er6GBegrenset
+        }
+
+        override fun erGjennomsnitt(): Boolean {
+            return grunnlag11_19.erGjennomsnitt()
+        }
+
+        override fun type(): String {
+            return "uføre"
+        }
+    }
 
     data class GrunnlagYrkesskade(
-        val grunnlag: Double,
+        val grunnlaget: Double,
         val er6GBegrenset: Boolean,
-        val beregningsgrunnlag: Grunnlag_11_19,
+        val beregningsgrunnlag: IBeregningsGrunnlag,
         // Denne er hardkodet til 70% i behandlingsflyt?
         val terskelverdiForYrkesskade: Int,
         val andelSomSkyldesYrkesskade: BigDecimal,
@@ -43,7 +93,23 @@ sealed interface IBeregningsGrunnlag {
         val grunnlagForBeregningAvYrkesskadeandel: BigDecimal,
         val yrkesskadeinntektIG: BigDecimal,
         val grunnlagEtterYrkesskadeFordel: BigDecimal,
-    ) : IBeregningsGrunnlag
+    ) : IBeregningsGrunnlag {
+        override fun grunnlaget(): Double {
+            return grunnlaget
+        }
+
+        override fun er6GBegrenset(): Boolean {
+            return er6GBegrenset
+        }
+
+        override fun erGjennomsnitt(): Boolean {
+            return beregningsgrunnlag.er6GBegrenset()
+        }
+
+        override fun type(): String {
+            return "yrkesskade"
+        }
+    }
 }
 
 enum class UføreType {

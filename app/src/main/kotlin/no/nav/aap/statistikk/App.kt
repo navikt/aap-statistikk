@@ -2,6 +2,7 @@ package no.nav.aap.statistikk
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -123,6 +124,7 @@ private fun Application.contentNegotation() {
             registerModule(JavaTimeModule())
             setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
             disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            jacksonObjectMapper()
         }
     }
 }
