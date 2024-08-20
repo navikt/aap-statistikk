@@ -1,4 +1,4 @@
-package no.nav.aap.sttistikk
+package no.nav.aap.statistikk
 
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.model.Described

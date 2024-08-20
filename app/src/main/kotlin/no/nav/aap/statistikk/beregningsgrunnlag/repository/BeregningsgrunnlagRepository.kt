@@ -45,7 +45,7 @@ class BeregningsgrunnlagRepository(private val dataSource: DataSource) :
 
         return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             .apply {
-                setObject(1, type, java.sql.Types.OTHER)
+                setString(1, type)
                 executeUpdate()
             }
             .hentGenerertNøkkel()
@@ -97,7 +97,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 setDouble(1, beregningsGrunnlag.grunnlaget())
                 setBoolean(2, beregningsGrunnlag.er6GBegrenset())
                 setInt(3, id)
-                setObject(4, grunnlagType, java.sql.Types.OTHER)
+                setString(4, grunnlagType)
                 setInt(5, beregningsGrunnlag.terskelverdiForYrkesskade)
                 setBigDecimal(6, beregningsGrunnlag.andelSomSkyldesYrkesskade)
                 setInt(7, beregningsGrunnlag.andelYrkesskade)

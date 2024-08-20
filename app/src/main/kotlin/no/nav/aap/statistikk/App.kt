@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.http.*
@@ -39,8 +40,6 @@ import no.nav.aap.statistikk.server.authenticate.authentication
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
-import no.nav.aap.sttistikk.apiRoute
-import no.nav.aap.sttistikk.generateOpenAPI
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -124,6 +123,8 @@ private fun Application.contentNegotation() {
             registerModule(JavaTimeModule())
             setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
             disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             jacksonObjectMapper()
         }
     }
