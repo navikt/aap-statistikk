@@ -6,6 +6,10 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
+import no.nav.aap.statistikk.api_kontrakt.BeregningsgrunnlagDTO
+import no.nav.aap.statistikk.api_kontrakt.Grunnlag11_19DTO
+import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelseDTO
+import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelsePeriodeDTO
 import no.nav.aap.statistikk.avsluttetbehandling.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
