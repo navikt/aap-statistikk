@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
+import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.math.BigDecimal
@@ -110,8 +111,4 @@ sealed interface IBeregningsGrunnlag {
             return "yrkesskade"
         }
     }
-}
-
-enum class UføreType {
-    STANDARD, YTTERLIGERE_NEDSATT
 }

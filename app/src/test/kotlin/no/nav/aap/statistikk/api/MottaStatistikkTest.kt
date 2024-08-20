@@ -9,8 +9,9 @@ import io.mockk.verify
 import no.nav.aap.statistikk.Fakes
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
+import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.hendelser.api.*
+import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig

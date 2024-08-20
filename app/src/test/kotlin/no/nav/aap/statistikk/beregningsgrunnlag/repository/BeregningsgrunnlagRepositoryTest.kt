@@ -1,8 +1,8 @@
 package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import no.nav.aap.statistikk.Postgres
+import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

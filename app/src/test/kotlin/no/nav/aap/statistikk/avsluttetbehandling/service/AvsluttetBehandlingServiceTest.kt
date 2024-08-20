@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import no.nav.aap.statistikk.BigQuery
 import no.nav.aap.statistikk.Postgres
+import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
@@ -12,7 +13,10 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.*
+import no.nav.aap.statistikk.vilkårsresultat.Vilkår
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

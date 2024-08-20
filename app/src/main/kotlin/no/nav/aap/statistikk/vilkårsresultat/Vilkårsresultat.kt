@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat
 
+import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import java.time.LocalDate
 import java.util.*
 
@@ -10,13 +11,6 @@ data class Vilkårsresultat(
     val vilkår: List<Vilkår>
 )
 
-enum class Vilkårtype {
-    ALDERSVILKÅRET,
-    SYKDOMSVILKÅRET,
-    BISTANDSVILKÅRET, MEDLEMSKAP,
-    GRUNNLAGET,
-    SYKEPENGEERSTATNING
-}
 
 data class Vilkår(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriode>)
 
