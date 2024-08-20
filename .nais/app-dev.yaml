@@ -28,6 +28,10 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: "java"
+    logging:
+      destinations:
+        - id: default
+        - id: loki
   prometheus:
     enabled: true
     path: /actuator/metrics
