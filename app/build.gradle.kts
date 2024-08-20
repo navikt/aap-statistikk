@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("jvm") version "2.0.10"
+    id("aap-statistikk.conventions")
+    kotlin("jvm")
     id("io.ktor.plugin") version "2.3.12"
     application
 }
@@ -16,6 +16,8 @@ application {
 
 
 dependencies {
+    implementation(project(":api-kontrakt"))
+
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
@@ -67,21 +69,4 @@ tasks {
     withType<ShadowJar> {
         mergeServiceFiles()
     }
-
-    withType<Test> {
-        useJUnitPlatform()
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
-    }
 }
-
-kotlin {
-    jvmToolchain(21)
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
-    }
-}
-
-kotlin.sourceSets["main"].kotlin.srcDirs("main")
-kotlin.sourceSets["test"].kotlin.srcDirs("test")
-sourceSets["main"].resources.srcDirs("main")
-sourceSets["test"].resources.srcDirs("test")

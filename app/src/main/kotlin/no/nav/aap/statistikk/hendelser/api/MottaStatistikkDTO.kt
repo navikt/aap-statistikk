@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
-import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
+import no.nav.aap.statistikk.api_kontrakt.eksempelUUID
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

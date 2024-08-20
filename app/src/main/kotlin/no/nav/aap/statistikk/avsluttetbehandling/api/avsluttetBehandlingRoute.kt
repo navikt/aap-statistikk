@@ -5,6 +5,7 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import io.ktor.server.application.*
+import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 
 data class AvsluttetBehandlingResponsDTO(val id: Int)

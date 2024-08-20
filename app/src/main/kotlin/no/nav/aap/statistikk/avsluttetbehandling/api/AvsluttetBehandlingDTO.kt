@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.avsluttetbehandling.api
+package no.nav.aap.statistikk.api_kontrakt
 
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
@@ -7,6 +7,10 @@ import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
+import no.nav.aap.statistikk.avsluttetbehandling.api.Utfall
+import no.nav.aap.statistikk.avsluttetbehandling.api.VilkårDTO
+import no.nav.aap.statistikk.avsluttetbehandling.api.VilkårsPeriodeDTO
+import no.nav.aap.statistikk.avsluttetbehandling.api.VilkårsResultatDTO
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
