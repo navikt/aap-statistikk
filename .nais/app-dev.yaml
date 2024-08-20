@@ -30,7 +30,7 @@ spec:
       runtime: "java"
     logging:
       destinations:
-        - id: default
+        - id: elastic
         - id: loki
   prometheus:
     enabled: true
