@@ -1,49 +1,31 @@
 package no.nav.aap.statistikk.avsluttetbehandling.api
 
+import no.nav.aap.statistikk.api_kontrakt.VilkårDTO
+import no.nav.aap.statistikk.api_kontrakt.VilkårsPeriodeDTO
+import no.nav.aap.statistikk.api_kontrakt.VilkårsResultatDTO
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
-import java.time.LocalDate
 import java.util.*
 
-data class VilkårsResultatDTO(
-    val typeBehandling: String, val vilkår: List<VilkårDTO>
-) {
-    fun tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
-        return Vilkårsresultat(saksnummer = saksnummer,
-            behandlingsType = this.typeBehandling,
-            behandlingsReferanse = behandlingsReferanse,
-            vilkår = this.vilkår.map { it.tilDomene() })
-    }
+fun VilkårsResultatDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
+    return Vilkårsresultat(saksnummer = saksnummer,
+        behandlingsType = this.typeBehandling,
+        behandlingsReferanse = behandlingsReferanse,
+        vilkår = this.vilkår.map { it.tilDomene() })
 }
 
-data class VilkårDTO(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriodeDTO>) {
-    fun tilDomene(): Vilkår {
-        return Vilkår(vilkårType = this.vilkårType, perioder = this.perioder.map { it.tilDomene() })
-    }
+fun VilkårDTO.tilDomene(): Vilkår {
+    return Vilkår(vilkårType = this.vilkårType, perioder = this.perioder.map { it.tilDomene() })
 }
 
-enum class Utfall {
-    IKKE_VURDERT, IKKE_RELEVANT, OPPFYLT, IKKE_OPPFYLT
-}
-
-data class VilkårsPeriodeDTO(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val utfall: Utfall,
-    val manuellVurdering: Boolean,
-    val innvilgelsesårsak: String? = null,
-    val avslagsårsak: String? = null
-) {
-    fun tilDomene(): VilkårsPeriode {
-        return VilkårsPeriode(
-            fraDato = this.fraDato,
-            tilDato = this.tilDato,
-            utfall = this.utfall.toString(),
-            manuellVurdering = this.manuellVurdering,
-            innvilgelsesårsak = this.innvilgelsesårsak,
-            avslagsårsak = this.avslagsårsak
-        )
-    }
+fun VilkårsPeriodeDTO.tilDomene(): VilkårsPeriode {
+    return VilkårsPeriode(
+        fraDato = this.fraDato,
+        tilDato = this.tilDato,
+        utfall = this.utfall.toString(),
+        manuellVurdering = this.manuellVurdering,
+        innvilgelsesårsak = this.innvilgelsesårsak,
+        avslagsårsak = this.avslagsårsak
+    )
 }

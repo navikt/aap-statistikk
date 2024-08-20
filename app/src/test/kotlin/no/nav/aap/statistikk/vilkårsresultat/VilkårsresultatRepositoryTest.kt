@@ -1,10 +1,9 @@
 package no.nav.aap.statistikk.vilkårsresultat
 
 import no.nav.aap.statistikk.Postgres
+import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.db.EksistererAlleredeAvbrudd
-import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
-import no.nav.aap.statistikk.hendelser.api.TypeBehandling
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
@@ -14,7 +13,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 

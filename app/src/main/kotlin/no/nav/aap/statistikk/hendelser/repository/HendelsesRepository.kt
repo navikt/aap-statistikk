@@ -1,9 +1,9 @@
 package no.nav.aap.statistikk.hendelser.repository
 
+import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.db.hentGenerertNøkkel
 import no.nav.aap.statistikk.db.withinTransaction
 import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
-import no.nav.aap.statistikk.hendelser.api.TypeBehandling
 import java.sql.Statement
 import java.sql.Timestamp
 import java.util.*

@@ -6,10 +6,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
-import no.nav.aap.statistikk.api_kontrakt.BeregningsgrunnlagDTO
-import no.nav.aap.statistikk.api_kontrakt.Grunnlag11_19DTO
-import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelseDTO
-import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelsePeriodeDTO
+import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
@@ -17,7 +14,6 @@ import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions

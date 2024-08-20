@@ -3,8 +3,8 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.db.hentGenerertNøkkel
 import no.nav.aap.statistikk.db.withinTransaction
 import java.math.BigDecimal

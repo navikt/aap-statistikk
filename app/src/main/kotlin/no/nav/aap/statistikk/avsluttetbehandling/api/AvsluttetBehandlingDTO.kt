@@ -1,19 +1,14 @@
-package no.nav.aap.statistikk.api_kontrakt
+package no.nav.aap.statistikk.avsluttetbehandling.api
 
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
 import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
+import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.UføreType
-import no.nav.aap.statistikk.avsluttetbehandling.api.Utfall
-import no.nav.aap.statistikk.avsluttetbehandling.api.VilkårDTO
-import no.nav.aap.statistikk.avsluttetbehandling.api.VilkårsPeriodeDTO
-import no.nav.aap.statistikk.avsluttetbehandling.api.VilkårsResultatDTO
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -29,16 +24,6 @@ data class AvsluttetBehandlingDTO(
     val vilkårsResultat: VilkårsResultatDTO,
     val beregningsGrunnlag: BeregningsgrunnlagDTO
 ) {
-    fun tilDomene(): AvsluttetBehandling {
-        return AvsluttetBehandling(
-            tilkjentYtelse = tilkjentYtelse.tilDomene(
-                saksnummer,
-                behandlingsReferanse = behandlingsReferanse
-            ),
-            vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse),
-            beregningsgrunnlag = beregningsGrunnlag.tilDomene()
-        )
-    }
 
     companion object : ExampleProvider<AvsluttetBehandlingDTO> {
         override val example: AvsluttetBehandlingDTO =
@@ -102,181 +87,129 @@ data class AvsluttetBehandlingDTO(
     }
 }
 
-data class TilkjentYtelseDTO(
-    val perioder: List<TilkjentYtelsePeriodeDTO>
-) {
-    fun tilDomene(saksnummer: String, behandlingsReferanse: UUID): TilkjentYtelse {
-        return TilkjentYtelse(
-            saksnummer = saksnummer,
-            behandlingsReferanse = behandlingsReferanse,
-            perioder = perioder.map(TilkjentYtelsePeriodeDTO::tilDomene)
-        )
-    }
+fun AvsluttetBehandlingDTO.tilDomene(): AvsluttetBehandling {
+    return AvsluttetBehandling(
+        tilkjentYtelse = tilkjentYtelse.tilDomene(
+            saksnummer,
+            behandlingsReferanse = behandlingsReferanse
+        ),
+        vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse),
+        beregningsgrunnlag = tilDomene(beregningsGrunnlag)
+    )
 }
 
-data class TilkjentYtelsePeriodeDTO(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val dagsats: Double,
-    val gradering: Double,
-) {
-    fun tilDomene(): TilkjentYtelsePeriode {
-        return TilkjentYtelsePeriode(
-            fraDato = fraDato,
-            tilDato = tilDato,
-            dagsats = dagsats,
-            gradering
-        )
-    }
+fun TilkjentYtelseDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID): TilkjentYtelse {
+    return TilkjentYtelse(
+        saksnummer = saksnummer,
+        behandlingsReferanse = behandlingsReferanse,
+        perioder = perioder.map(TilkjentYtelsePeriodeDTO::tilDomene)
+    )
 }
 
-data class Grunnlag11_19DTO(
-    val inntekter: Map<String, BigDecimal>,
-    val grunnlaget: Double,
-    val er6GBegrenset: Boolean,
-    val erGjennomsnitt: Boolean
-) {
-    fun tilDomene(
-    ): IBeregningsGrunnlag.Grunnlag_11_19 {
+fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
+    return TilkjentYtelsePeriode(
+        fraDato = fraDato,
+        tilDato = tilDato,
+        dagsats = dagsats,
+        gradering
+    )
+}
+
+fun Grunnlag11_19DTO.tilDomene(
+): IBeregningsGrunnlag.Grunnlag_11_19 {
+    return IBeregningsGrunnlag.Grunnlag_11_19(
+        grunnlag = grunnlaget,
+        er6GBegrenset = er6GBegrenset,
+        erGjennomsnitt = erGjennomsnitt,
+        inntekter = inntekter
+    )
+}
+
+fun tilDomene(grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO): IBeregningsGrunnlag.GrunnlagYrkesskade {
+    return IBeregningsGrunnlag.GrunnlagYrkesskade(
+        grunnlaget = grunnlagYrkesskadeDTO.grunnlaget.toDouble(),
+        er6GBegrenset =
+        grunnlagYrkesskadeDTO.beregningsgrunnlag.grunnlagYrkesskade?.beregningsgrunnlag?.grunnlag11_19dto?.er6GBegrenset
+            ?: false,
+        beregningsgrunnlag = tilDomene(grunnlagYrkesskadeDTO.beregningsgrunnlag), // Assuming recursive structure handling
+        terskelverdiForYrkesskade = grunnlagYrkesskadeDTO.terskelverdiForYrkesskade,
+        andelSomSkyldesYrkesskade = grunnlagYrkesskadeDTO.andelSomSkyldesYrkesskade,
+        andelYrkesskade = grunnlagYrkesskadeDTO.andelYrkesskade,
+        benyttetAndelForYrkesskade = grunnlagYrkesskadeDTO.benyttetAndelForYrkesskade,
+        andelSomIkkeSkyldesYrkesskade = grunnlagYrkesskadeDTO.andelSomIkkeSkyldesYrkesskade,
+        antattÅrligInntektYrkesskadeTidspunktet = grunnlagYrkesskadeDTO.antattÅrligInntektYrkesskadeTidspunktet,
+        yrkesskadeTidspunkt = grunnlagYrkesskadeDTO.yrkesskadeTidspunkt,
+        grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskadeDTO.grunnlagForBeregningAvYrkesskadeandel,
+        yrkesskadeinntektIG = grunnlagYrkesskadeDTO.yrkesskadeinntektIG,
+        grunnlagEtterYrkesskadeFordel = grunnlagYrkesskadeDTO.grunnlagEtterYrkesskadeFordel
+    )
+}
+
+fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.GrunnlagUføre {
+    return IBeregningsGrunnlag.GrunnlagUføre(
+        grunnlag = grunnlagUføreDTO.grunnlaget.toDouble(),
+        type = grunnlagUføreDTO.type,
+        grunnlag11_19 = grunnlagUføreDTO.grunnlag.tilDomene(),
+        uføregrad = grunnlagUføreDTO.uføregrad,
+        uføreInntektIKroner = grunnlagUføreDTO.uføreInntektIKroner,
+        uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføreDTO.uføreYtterligereNedsattArbeidsevneÅr,
+        er6GBegrenset = grunnlagUføreDTO.grunnlag.er6GBegrenset, // ?,
+        uføreInntekterFraForegåendeÅr = grunnlagUføreDTO.uføreInntekterFraForegåendeÅr
+    )
+}
+
+fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag {
+    val grunnlagYrkesskade = beregningsgrunnlagDTO.grunnlagYrkesskade
+    val grunnlag11_19dto = beregningsgrunnlagDTO.grunnlag11_19dto
+    val grunnlagUføre = beregningsgrunnlagDTO.grunnlagUføre
+    if (grunnlag11_19dto != null) {
         return IBeregningsGrunnlag.Grunnlag_11_19(
-            grunnlag = grunnlaget,
-            er6GBegrenset = er6GBegrenset,
-            erGjennomsnitt = erGjennomsnitt,
-            inntekter = inntekter
+            grunnlag11_19dto.grunnlaget,
+            grunnlag11_19dto.er6GBegrenset,
+            grunnlag11_19dto.erGjennomsnitt,
+            grunnlag11_19dto.inntekter,
         )
     }
-}
+    if (grunnlagYrkesskade != null) {
+        var beregningsGrunnlag: IBeregningsGrunnlag? = null;
+        if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre != null) {
+            beregningsGrunnlag = tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre!!)
+        } else if (beregningsgrunnlagDTO.grunnlagYrkesskade!!.beregningsgrunnlag.grunnlagYrkesskade != null) {
+            beregningsGrunnlag =
+                tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade!!)
+        } else if (grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto != null) {
+            beregningsGrunnlag =
+                grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene()
+        }
+        beregningsGrunnlag = requireNotNull(beregningsGrunnlag)
 
-/**
- * @param [inkludererUføre] Sett til true om [beregningsgrunnlag] er av type [GrunnlagUføreDTO].
- */
-data class GrunnlagYrkesskadeDTO(
-    val grunnlaget: BigDecimal,
-    val inkludererUføre: Boolean,
-    val beregningsgrunnlag: BeregningsgrunnlagDTO,
-    val terskelverdiForYrkesskade: Int,
-    val andelSomSkyldesYrkesskade: BigDecimal,
-    val andelYrkesskade: Int,
-    val benyttetAndelForYrkesskade: Int,
-    val andelSomIkkeSkyldesYrkesskade: BigDecimal,
-    val antattÅrligInntektYrkesskadeTidspunktet: BigDecimal,
-    val yrkesskadeTidspunkt: Int,
-    val grunnlagForBeregningAvYrkesskadeandel: BigDecimal,
-    val yrkesskadeinntektIG: BigDecimal,
-    val grunnlagEtterYrkesskadeFordel: BigDecimal,
-) {
-    fun tilDomene(): IBeregningsGrunnlag.GrunnlagYrkesskade {
         return IBeregningsGrunnlag.GrunnlagYrkesskade(
-            grunnlaget = grunnlaget.toDouble(),
-            er6GBegrenset =
-            beregningsgrunnlag.grunnlagYrkesskade?.beregningsgrunnlag?.grunnlag11_19dto?.er6GBegrenset
-                ?: false,
-            beregningsgrunnlag = beregningsgrunnlag.tilDomene(), // Assuming recursive structure handling
-            terskelverdiForYrkesskade = terskelverdiForYrkesskade,
-            andelSomSkyldesYrkesskade = andelSomSkyldesYrkesskade,
-            andelYrkesskade = andelYrkesskade,
-            benyttetAndelForYrkesskade = benyttetAndelForYrkesskade,
-            andelSomIkkeSkyldesYrkesskade = andelSomIkkeSkyldesYrkesskade,
-            antattÅrligInntektYrkesskadeTidspunktet = antattÅrligInntektYrkesskadeTidspunktet,
-            yrkesskadeTidspunkt = yrkesskadeTidspunkt,
-            grunnlagForBeregningAvYrkesskadeandel = grunnlagForBeregningAvYrkesskadeandel,
-            yrkesskadeinntektIG = yrkesskadeinntektIG,
-            grunnlagEtterYrkesskadeFordel = grunnlagEtterYrkesskadeFordel
+            grunnlaget = grunnlagYrkesskade.grunnlaget.toDouble(),
+            beregningsgrunnlag = beregningsGrunnlag,
+            andelYrkesskade = grunnlagYrkesskade.andelYrkesskade,
+            andelSomSkyldesYrkesskade = grunnlagYrkesskade.andelSomSkyldesYrkesskade,
+            andelSomIkkeSkyldesYrkesskade = grunnlagYrkesskade.andelSomIkkeSkyldesYrkesskade,
+            antattÅrligInntektYrkesskadeTidspunktet = grunnlagYrkesskade.antattÅrligInntektYrkesskadeTidspunktet,
+            benyttetAndelForYrkesskade = grunnlagYrkesskade.benyttetAndelForYrkesskade,
+            grunnlagEtterYrkesskadeFordel = grunnlagYrkesskade.grunnlagEtterYrkesskadeFordel,
+            grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskade.grunnlagForBeregningAvYrkesskadeandel,
+            terskelverdiForYrkesskade = grunnlagYrkesskade.terskelverdiForYrkesskade,
+            yrkesskadeinntektIG = grunnlagYrkesskade.yrkesskadeinntektIG,
+            yrkesskadeTidspunkt = grunnlagYrkesskade.yrkesskadeTidspunkt,
+            er6GBegrenset = beregningsGrunnlag.er6GBegrenset(),
         )
     }
-}
-
-/**
- * @property uføreInntekterFraForegåendeÅr Uføre ikke oppjustert
- * @property uføreInntektIKroner Grunnlaget
- */
-data class GrunnlagUføreDTO(
-    val grunnlaget: BigDecimal,
-    val type: UføreType,
-    val grunnlag: Grunnlag11_19DTO,
-    val grunnlagYtterligereNedsatt: Grunnlag11_19DTO,
-    val uføregrad: Int,
-    val uføreInntekterFraForegåendeÅr: Map<String, BigDecimal>,
-    val uføreInntektIKroner: BigDecimal,
-    val uføreYtterligereNedsattArbeidsevneÅr: Int,
-) {
-    fun tilDomene(): IBeregningsGrunnlag.GrunnlagUføre {
+    if (grunnlagUføre != null) {
         return IBeregningsGrunnlag.GrunnlagUføre(
-            grunnlag = grunnlaget.toDouble(),
-            type = type,
-            grunnlag11_19 = grunnlag.tilDomene(),
-            uføregrad = uføregrad,
-            uføreInntektIKroner = uføreInntektIKroner,
-            uføreYtterligereNedsattArbeidsevneÅr = uføreYtterligereNedsattArbeidsevneÅr,
-            er6GBegrenset = grunnlag.er6GBegrenset, // ?,
-            uføreInntekterFraForegåendeÅr = uføreInntekterFraForegåendeÅr
+            grunnlag11_19 = grunnlagUføre.grunnlag.tilDomene(),
+            uføreInntektIKroner = grunnlagUføre.uføreInntektIKroner,
+            uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr,
+            uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
+            uføregrad = grunnlagUføre.uføregrad,
+            grunnlag = grunnlagUføre.grunnlaget.toDouble(),
+            er6GBegrenset = grunnlagUføre.grunnlag.er6GBegrenset,
+            type = grunnlagUføre.type
         )
     }
-}
-
-/**
- * Felter fra BeregningsGrunnlag-interfacet ([no.nav.aap.behandlingsflyt.faktagrunnlag.delvurdering.beregning.Beregningsgrunnlag]),
- * er alltid med. Minst én av grunnlag11_19dto, grunnlagYrkesskade, grunnlagUføre er ikke-null.
- */
-data class BeregningsgrunnlagDTO(
-    val grunnlag11_19dto: Grunnlag11_19DTO? = null,
-    val grunnlagYrkesskade: GrunnlagYrkesskadeDTO? = null,
-    val grunnlagUføre: GrunnlagUføreDTO? = null
-) {
-    init {
-        require(grunnlag11_19dto != null || grunnlagYrkesskade != null || grunnlagUføre != null)
-    }
-
-    fun tilDomene(): IBeregningsGrunnlag {
-        if (grunnlag11_19dto != null) {
-            return IBeregningsGrunnlag.Grunnlag_11_19(
-                grunnlag11_19dto.grunnlaget,
-                grunnlag11_19dto.er6GBegrenset,
-                grunnlag11_19dto.erGjennomsnitt,
-                grunnlag11_19dto.inntekter,
-            )
-        }
-        if (grunnlagYrkesskade != null) {
-            var beregningsGrunnlag: IBeregningsGrunnlag? = null;
-            if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre != null) {
-                beregningsGrunnlag = grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre.tilDomene()
-            } else if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade != null) {
-                beregningsGrunnlag =
-                    grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade.tilDomene()
-            } else if (grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto != null) {
-                beregningsGrunnlag =
-                    grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto.tilDomene()
-            }
-            beregningsGrunnlag = requireNotNull(beregningsGrunnlag)
-
-            return IBeregningsGrunnlag.GrunnlagYrkesskade(
-                grunnlaget = grunnlagYrkesskade.grunnlaget.toDouble(),
-                beregningsgrunnlag = beregningsGrunnlag,
-                andelYrkesskade = grunnlagYrkesskade.andelYrkesskade,
-                andelSomSkyldesYrkesskade = grunnlagYrkesskade.andelSomSkyldesYrkesskade,
-                andelSomIkkeSkyldesYrkesskade = grunnlagYrkesskade.andelSomIkkeSkyldesYrkesskade,
-                antattÅrligInntektYrkesskadeTidspunktet = grunnlagYrkesskade.antattÅrligInntektYrkesskadeTidspunktet,
-                benyttetAndelForYrkesskade = grunnlagYrkesskade.benyttetAndelForYrkesskade,
-                grunnlagEtterYrkesskadeFordel = grunnlagYrkesskade.grunnlagEtterYrkesskadeFordel,
-                grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskade.grunnlagForBeregningAvYrkesskadeandel,
-                terskelverdiForYrkesskade = grunnlagYrkesskade.terskelverdiForYrkesskade,
-                yrkesskadeinntektIG = grunnlagYrkesskade.yrkesskadeinntektIG,
-                yrkesskadeTidspunkt = grunnlagYrkesskade.yrkesskadeTidspunkt,
-                er6GBegrenset = beregningsGrunnlag.er6GBegrenset(),
-            )
-        }
-        if (grunnlagUføre != null) {
-            return IBeregningsGrunnlag.GrunnlagUføre(
-                grunnlag11_19 = grunnlagUføre.grunnlag.tilDomene(),
-                uføreInntektIKroner = grunnlagUføre.uføreInntektIKroner,
-                uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr,
-                uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
-                uføregrad = grunnlagUføre.uføregrad,
-                grunnlag = grunnlagUføre.grunnlaget.toDouble(),
-                er6GBegrenset = grunnlagUføre.grunnlag.er6GBegrenset,
-                type = grunnlagUføre.type
-            )
-        }
-        throw IllegalStateException()
-    }
+    throw IllegalStateException()
 }
