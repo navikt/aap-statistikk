@@ -44,6 +44,7 @@ jobs:
       - uses: paulhatch/semantic-version@v5.4.0
         id: tag
         with:
+          change_path: "api-kontrakt/"
           bump_each_commit: true
           tag_prefix: ""
           bump_each_commit_patch_pattern: ''
@@ -55,15 +56,15 @@ jobs:
           echo 'CHANGELOG<<$randomDelimiter' >> $GITHUB_OUTPUT
           echo $text >> $GITHUB_OUTPUT
           echo '$randomDelimiter' >> $GITHUB_OUTPUT
-      - uses: actions/create-release@v1.1.4
+      - uses:  softprops/action-gh-release@v2
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.version }}
-          release_name: ${{ steps.tag.outputs.version }}
+          name: ${{ steps.tag.outputs.version }}
           body: |
-            Changes in this Release
+            Endringer siden sist:
             ${{ steps.notes.outputs.CHANGELOG }}
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
