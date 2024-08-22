@@ -2,6 +2,17 @@ package no.nav.aap.statistikk.api_kontrakt
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
+
+data class MottaStatistikkDTO(
+    val saksnummer: String,
+    val behandlingReferanse: UUID,
+    val behandlingOpprettetTidspunkt: LocalDateTime,
+    val status: String,
+    val behandlingType: TypeBehandling,
+    val ident: String,
+    val avklaringsbehov: List<AvklaringsbehovHendelse>
+)
 
 enum class TypeBehandling(private var identifikator: String) {
     Førstegangsbehandling("ae0034"),

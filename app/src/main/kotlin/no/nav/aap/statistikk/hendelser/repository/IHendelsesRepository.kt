@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.hendelser.repository
 
-import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 
 interface IHendelsesRepository {
     fun lagreHendelse(hendelse: MottaStatistikkDTO): Int
