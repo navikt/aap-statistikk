@@ -1,91 +1,11 @@
 package no.nav.aap.statistikk.avsluttetbehandling.api
 
-import com.papsign.ktor.openapigen.annotations.Request
-import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
-import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
-import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.*
-
-val eksempelUUID = UUID.randomUUID()
-
-@Request("Ved avsluttet behandling sendes samlet data.")
-@WithExample
-data class AvsluttetBehandlingDTO(
-    @StringExample("4LELS7K", "4LEFCQ8") val saksnummer: String,
-    val behandlingsReferanse: UUID,
-    val tilkjentYtelse: TilkjentYtelseDTO,
-    val vilkårsResultat: VilkårsResultatDTO,
-    val beregningsGrunnlag: BeregningsgrunnlagDTO
-) {
-
-    companion object : ExampleProvider<AvsluttetBehandlingDTO> {
-        override val example: AvsluttetBehandlingDTO =
-            AvsluttetBehandlingDTO(
-                saksnummer = "4LELS7K",
-                behandlingsReferanse = eksempelUUID,
-                tilkjentYtelse = TilkjentYtelseDTO(
-                    perioder = listOf(
-                        TilkjentYtelsePeriodeDTO(
-                            fraDato = LocalDate.now(),
-                            tilDato = LocalDate.now().plusYears(1),
-                            dagsats = 1000.0,
-                            gradering = 0.0
-                        )
-                    )
-                ),
-                vilkårsResultat = VilkårsResultatDTO(
-                    typeBehandling = "Førstegangsbehandling",
-                    vilkår = listOf(
-                        VilkårDTO(
-                            Vilkårtype.GRUNNLAGET, perioder = listOf(
-                                VilkårsPeriodeDTO(
-                                    fraDato = LocalDate.now().minusWeeks(2),
-                                    tilDato = LocalDate.now(),
-                                    utfall = Utfall.OPPFYLT,
-                                    manuellVurdering = true
-                                )
-                            )
-                        )
-                    )
-                ),
-                beregningsGrunnlag = BeregningsgrunnlagDTO(
-                    grunnlagYrkesskade = GrunnlagYrkesskadeDTO(
-                        grunnlaget = BigDecimal.valueOf(100000),
-                        beregningsgrunnlag = BeregningsgrunnlagDTO(
-                            grunnlag11_19dto = Grunnlag11_19DTO(
-                                inntekter = mapOf(
-                                    "2021" to BigDecimal.valueOf(100000),
-                                    "2022" to BigDecimal.valueOf(10000),
-                                    "2023" to BigDecimal.valueOf(1000),
-                                ),
-                                grunnlaget = 5.5,
-                                er6GBegrenset = false,
-                                erGjennomsnitt = false,
-                            )
-                        ),
-                        terskelverdiForYrkesskade = 70,
-                        andelSomSkyldesYrkesskade = BigDecimal.valueOf(60),
-                        andelYrkesskade = 60,
-                        benyttetAndelForYrkesskade = 60,
-                        andelSomIkkeSkyldesYrkesskade = BigDecimal.valueOf(40),
-                        inkludererUføre = false,
-                        antattÅrligInntektYrkesskadeTidspunktet = BigDecimal.valueOf(500000),
-                        yrkesskadeTidspunkt = 1999,
-                        grunnlagForBeregningAvYrkesskadeandel = BigDecimal.valueOf(10000),
-                        yrkesskadeinntektIG = BigDecimal.valueOf(100000),
-                        grunnlagEtterYrkesskadeFordel = BigDecimal.valueOf(100000),
-                    )
-                )
-            )
-    }
-}
 
 fun AvsluttetBehandlingDTO.tilDomene(): AvsluttetBehandling {
     return AvsluttetBehandling(

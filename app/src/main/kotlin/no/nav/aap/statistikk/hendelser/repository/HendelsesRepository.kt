@@ -1,9 +1,10 @@
 package no.nav.aap.statistikk.hendelser.repository
 
+import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.db.hentGenerertNøkkel
 import no.nav.aap.statistikk.db.withinTransaction
-import no.nav.aap.statistikk.hendelser.api.MottaStatistikkDTO
+import java.sql.Connection
 import java.sql.Statement
 import java.sql.Timestamp
 import java.util.*
@@ -106,7 +107,7 @@ class HendelsesRepository(private val dataSource: DataSource) : IHendelsesReposi
     }
 
     private fun hentEllerSettInnBehandling(
-        connection: java.sql.Connection,
+        connection: Connection,
         hendelse: MottaStatistikkDTO,
         sakId: Int
     ): Int {
