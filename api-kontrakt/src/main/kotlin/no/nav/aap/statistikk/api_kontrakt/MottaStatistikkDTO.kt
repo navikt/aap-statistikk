@@ -4,6 +4,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * @param saksnummer Saksnummer.
+ */
 data class MottaStatistikkDTO(
     val saksnummer: String,
     val behandlingReferanse: UUID,
