@@ -27,6 +27,45 @@ jobs:
     uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
     secrets: inherit
 
+  publish-kontrakt:
+    needs: gradle
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: paulhatch/semantic-version@v5.4.0
+        id: tag
+        with:
+          bump_each_commit: true
+          tag_prefix: ""
+          bump_each_commit_patch_pattern: ''
+          major_pattern: "(MAJOR)" # If major bump, include this in commit message
+      - id: notes
+        run: |
+          randomDelimiter=${RANDOM}
+          text="$(git --no-pager log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%h %s")"
+          echo 'CHANGELOG<<$randomDelimiter' >> $GITHUB_OUTPUT
+          echo $text >> $GITHUB_OUTPUT
+          echo '$randomDelimiter' >> $GITHUB_OUTPUT
+      - uses: actions/create-release@v1.1.4
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.version }}
+          release_name: ${{ steps.tag.outputs.version }}
+          body: |
+            Changes in this Release
+            ${{ steps.notes.outputs.CHANGELOG }}
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew -Pversion=${{ steps.tag.outputs.version }} publish
+
   dev:
     ## push til main eller etter branch (e.g. dependabot) er merget
     if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'dev-gcp'

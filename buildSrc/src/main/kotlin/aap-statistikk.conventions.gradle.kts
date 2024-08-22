@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "no.nav.aap.statistikk"
-version = "1.0"
+version = project.findProperty("version")?.toString() ?: "0.0.0"
 
 repositories {
     mavenCentral()
@@ -23,6 +23,7 @@ kotlin {
         jvmTarget.set(JvmTarget.JVM_21)
     }
 }
+
 
 kotlin.sourceSets["main"].kotlin.srcDirs("main")
 kotlin.sourceSets["test"].kotlin.srcDirs("test")
