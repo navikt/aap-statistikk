@@ -2,6 +2,9 @@ package no.nav.aap.statistikk.api_kontrakt
 
 import java.time.LocalDate
 
+/**
+ * Liste over perioder med tilkjent ytelse.
+ */
 data class TilkjentYtelseDTO(
     val perioder: List<TilkjentYtelsePeriodeDTO>
 )
