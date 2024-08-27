@@ -11,7 +11,6 @@ import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
@@ -177,15 +176,15 @@ class AvsluttetBehandlingServiceTest {
         val vilkårsResultatService = VilkårsResultatService(dataSource, bqRepository)
         val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
 
-        val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository, bqRepository)
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
         val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
 
         val service =
             AvsluttetBehandlingService(
                 vilkårsResultatService,
-                tilkjentYtelseService,
-                beregningsGrunnlagService
+                tilkjentYtelseRepository,
+                beregningsGrunnlagService,
+                bqRepository,
             )
         return Triple(tilkjentYtelseRepository, bigQueryClient, service)
     }
