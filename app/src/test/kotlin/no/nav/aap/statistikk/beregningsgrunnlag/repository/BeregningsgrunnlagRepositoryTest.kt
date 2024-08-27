@@ -17,7 +17,7 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlag = 20000.0,
             er6GBegrenset = false,
             erGjennomsnitt = true,
-            inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
+            inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
         )
 
         beregningsgrunnlagRepository.lagreBeregningsGrunnlag(grunnlag)
@@ -39,7 +39,7 @@ class BeregningsgrunnlagRepositoryTest {
                 grunnlag = 20000.0,
                 er6GBegrenset = false,
                 erGjennomsnitt = true,
-                inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
+                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -75,15 +75,15 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf("2019" to BigDecimal(30000), "2020" to BigDecimal(31000))
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 uføregrad = 50,
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntektIKroner = BigDecimal(28000),
                 uføreInntekterFraForegåendeÅr = mapOf(
-                    "2018" to BigDecimal(27000),
-                    "2019" to BigDecimal(27500),
-                    "2020" to BigDecimal(28000)
+                    2018 to 27000.0,
+                    2019 to 27500.0,
+                    2020 to 28000.0
                 ),
                 uføreYtterligereNedsattArbeidsevneÅr = 2020
             ),
@@ -118,15 +118,15 @@ class BeregningsgrunnlagRepositoryTest {
                 grunnlag = 25000.0,
                 er6GBegrenset = false,
                 erGjennomsnitt = true,
-                inntekter = mapOf("2019" to BigDecimal(30000), "2020" to BigDecimal(31000))
+                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
             ),
             uføregrad = 50,
             type = UføreType.YTTERLIGERE_NEDSATT,
             uføreInntektIKroner = BigDecimal(28000),
             uføreInntekterFraForegåendeÅr = mapOf(
-                "2018" to BigDecimal(27000),
-                "2019" to BigDecimal(27500),
-                "2020" to BigDecimal(28000)
+                2018 to 27000.0,
+                2019 to 27500.0,
+                2020 to 28000.0,
             ),
             uføreYtterligereNedsattArbeidsevneÅr = 2020
         )
@@ -153,15 +153,15 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf("2019" to BigDecimal(30000), "2020" to BigDecimal(31000))
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 uføregrad = 50,
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntektIKroner = BigDecimal(28000),
                 uføreInntekterFraForegåendeÅr = mapOf(
-                    "2018" to BigDecimal(27000),
-                    "2019" to BigDecimal(27500),
-                    "2020" to BigDecimal(28000)
+                    2018 to 27000.0,
+                    2019 to 27500.0,
+                    2020 to 28000.0
                 ),
                 uføreYtterligereNedsattArbeidsevneÅr = 2020
             ),
@@ -184,15 +184,15 @@ class BeregningsgrunnlagRepositoryTest {
                 grunnlag = 25000.0,
                 er6GBegrenset = false,
                 erGjennomsnitt = true,
-                inntekter = mapOf("2019" to BigDecimal(30000), "2020" to BigDecimal(31000))
+                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
             ),
             uføregrad = 50,
             type = UføreType.YTTERLIGERE_NEDSATT,
             uføreInntektIKroner = BigDecimal(28000),
             uføreInntekterFraForegåendeÅr = mapOf(
-                "2018" to BigDecimal(27000),
-                "2019" to BigDecimal(27500),
-                "2020" to BigDecimal(28000)
+                2018 to 27000.0,
+                2019 to 27500.0,
+                2020 to 28000.0
             ),
             uføreYtterligereNedsattArbeidsevneÅr = 2020
         )
@@ -205,6 +205,7 @@ class BeregningsgrunnlagRepositoryTest {
         assertThat(uthentet).hasSize(2)
         assertThat(uthentet).containsOnly(
             grunnlagUfore,
-            grunnlagYrkesskade)
+            grunnlagYrkesskade
+        )
     }
 }

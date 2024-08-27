@@ -33,7 +33,7 @@ sealed interface IBeregningsGrunnlag {
         val grunnlag: Double,
         val er6GBegrenset: Boolean,
         val erGjennomsnitt: Boolean,
-        val inntekter: Map<String, BigDecimal>
+        val inntekter: Map<Int, Double>
     ) : IBeregningsGrunnlag {
         override fun grunnlaget(): Double {
             return grunnlag
@@ -58,7 +58,7 @@ sealed interface IBeregningsGrunnlag {
         val type: UføreType,
         val grunnlag11_19: Grunnlag_11_19,
         val uføregrad: Int,
-        val uføreInntekterFraForegåendeÅr: Map<String, BigDecimal>,
+        val uføreInntekterFraForegåendeÅr: Map<Int, Double>,
         val uføreInntektIKroner: BigDecimal,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,
     ) : IBeregningsGrunnlag {

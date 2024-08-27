@@ -268,8 +268,8 @@ from grunnlag
 
     private fun hentGrunnlag11_19(grunnlagUføreRs: ResultSet): IBeregningsGrunnlag.Grunnlag_11_19 {
         val typeRef
-                : TypeReference<Map<String, BigDecimal>> =
-            object : TypeReference<Map<String, BigDecimal>>() {}
+                : TypeReference<Map<Int, Double>> =
+            object : TypeReference<Map<Int, Double>>() {}
         val parsedMap = ObjectMapper().readValue(grunnlagUføreRs.getString("g_inntekter"), typeRef)
 
         val grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(

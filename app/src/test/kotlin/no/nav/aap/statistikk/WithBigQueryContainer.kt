@@ -4,6 +4,7 @@ import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
@@ -25,7 +26,7 @@ import java.util.*
     BigQuery.BigQueryExtension::class
 )
 annotation class BigQuery {
-    class BigQueryExtension : ParameterResolver {
+    class BigQueryExtension : ParameterResolver, AfterAllCallback {
 
         companion object {
             private val bigQueryContainer =
@@ -82,8 +83,15 @@ annotation class BigQuery {
             return parameterContext?.isAnnotated(BigQuery::class.java) == true && (parameterContext.parameter.type == BigQueryConfig::class.java)
         }
 
-        override fun resolveParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Any {
+        override fun resolveParameter(
+            parameterContext: ParameterContext?,
+            extensionContext: ExtensionContext?
+        ): Any {
             return testBigQueryConfig()
+        }
+
+        override fun afterAll(context: ExtensionContext?) {
+            bigQueryContainer.stop()
         }
     }
 }

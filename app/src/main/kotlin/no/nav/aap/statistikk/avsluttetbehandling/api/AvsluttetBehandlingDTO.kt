@@ -41,7 +41,7 @@ fun Grunnlag11_19DTO.tilDomene(
         grunnlag = grunnlaget,
         er6GBegrenset = er6GBegrenset,
         erGjennomsnitt = erGjennomsnitt,
-        inntekter = inntekter
+        inntekter = inntekter.mapKeys { (k, _) -> k.toInt() }
     )
 }
 
@@ -74,7 +74,7 @@ fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.Grunnla
         uføreInntektIKroner = grunnlagUføreDTO.uføreInntektIKroner,
         uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføreDTO.uføreYtterligereNedsattArbeidsevneÅr,
         er6GBegrenset = grunnlagUføreDTO.grunnlag.er6GBegrenset, // ?,
-        uføreInntekterFraForegåendeÅr = grunnlagUføreDTO.uføreInntekterFraForegåendeÅr
+        uføreInntekterFraForegåendeÅr = grunnlagUføreDTO.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() }
     )
 }
 
@@ -87,7 +87,7 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             grunnlag11_19dto.grunnlaget,
             grunnlag11_19dto.er6GBegrenset,
             grunnlag11_19dto.erGjennomsnitt,
-            grunnlag11_19dto.inntekter,
+            grunnlag11_19dto.inntekter.mapKeys { (k, _) -> k.toInt() }
         )
     }
     if (grunnlagYrkesskade != null) {
@@ -123,7 +123,7 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
         return IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag11_19 = grunnlagUføre.grunnlag.tilDomene(),
             uføreInntektIKroner = grunnlagUføre.uføreInntektIKroner,
-            uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr,
+            uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() },
             uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
             uføregrad = grunnlagUføre.uføregrad,
             grunnlag = grunnlagUføre.grunnlaget.toDouble(),
