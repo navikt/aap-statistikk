@@ -7,12 +7,14 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.avsluttetbehandling.api.*
+import no.nav.aap.statistikk.avsluttetbehandling.api.AvsluttetBehandlingResponsDTO
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
+import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
+import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -30,19 +32,22 @@ class ApplicationTest {
     ) {
         val hendelsesRepository = mockk<IHendelsesRepository>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
-        val tilkjentYtelseService = mockk<TilkjentYtelseService>()
+        val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
         val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+        val bqMock = mockk<BQRepository>()
         val avsluttetBehandlingService =
             AvsluttetBehandlingService(
                 vilkårsResultatService,
-                tilkjentYtelseService,
-                beregningsGrunnlagService
+                tilkjentYtelseRepository,
+                beregningsGrunnlagService,
+                bqMock
             )
 
         val behandlingReferanse = UUID.randomUUID()
 
         every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
-        every { tilkjentYtelseService.lagreTilkjentYtelse(any()) } just Runs
+        every { tilkjentYtelseRepository.lagreTilkjentYtelse(any()) } returns 143
+        every { bqMock.lagre(any<TilkjentYtelse>()) } returns Unit
         every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
 
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
@@ -113,10 +118,16 @@ class ApplicationTest {
             assertThat(response.status.isSuccess()).isTrue()
             assertThat(response.body<AvsluttetBehandlingResponsDTO>().id).isEqualTo(143)
 
-            verify(exactly = 1) { tilkjentYtelseService.lagreTilkjentYtelse(any()) }
+//            verify(exactly = 1) { tilkjentYtelseService.lagreTilkjentYtelse(any()) }
             verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(any()) }
 
-            checkUnnecessaryStub(tilkjentYtelseService, vilkårsResultatService)
+            checkUnnecessaryStub(
+                hendelsesRepository,
+                vilkårsResultatService,
+                tilkjentYtelseRepository,
+                beregningsGrunnlagService,
+                bqMock
+            )
         }
     }
 

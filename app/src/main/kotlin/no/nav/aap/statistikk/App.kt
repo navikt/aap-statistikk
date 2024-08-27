@@ -37,7 +37,6 @@ import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.server.authenticate.authentication
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import org.slf4j.LoggerFactory
@@ -79,14 +78,14 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val vilkårsResultatService = VilkårsResultatService(dataSource, bqRepository)
 
     val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
-    val tilkjentYtelseService = TilkjentYtelseService(tilkjentYtelseRepository, bqRepository)
     val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
     val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
     val avsluttetBehandlingService =
         AvsluttetBehandlingService(
             vilkårsResultatService,
-            tilkjentYtelseService,
-            beregningsGrunnlagService
+            tilkjentYtelseRepository,
+            beregningsGrunnlagService,
+            bqRepository,
         )
 
     module(hendelsesRepository, avsluttetBehandlingService, azureConfig)
