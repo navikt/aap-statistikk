@@ -54,9 +54,9 @@ fun NormalOpenAPIRoute.avsluttetBehandling(avsluttetBehandlingService: Avsluttet
                         beregningsgrunnlag = BeregningsgrunnlagDTO(
                             grunnlag11_19dto = Grunnlag11_19DTO(
                                 inntekter = mapOf(
-                                    "2021" to BigDecimal.valueOf(100000),
-                                    "2022" to BigDecimal.valueOf(10000),
-                                    "2023" to BigDecimal.valueOf(1000),
+                                    "2021" to 100000.0,
+                                    "2022" to 10000.0,
+                                    "2023" to 1000.0,
                                 ),
                                 grunnlaget = 5.5,
                                 er6GBegrenset = false,

@@ -82,7 +82,7 @@ class AvsluttetBehandlingServiceTest {
                     grunnlag = 20000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 terskelverdiForYrkesskade = 70,
                 andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -147,7 +147,7 @@ class AvsluttetBehandlingServiceTest {
                     grunnlag = 20000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf("2019" to BigDecimal(25000.0), "2020" to BigDecimal(26000.0))
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 terskelverdiForYrkesskade = 70,
                 andelSomSkyldesYrkesskade = BigDecimal(30),

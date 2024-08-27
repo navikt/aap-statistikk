@@ -192,9 +192,9 @@ class ApplicationTest {
             "erGjennomsnitt": true,
             "grunnlaget": 0,
             "inntekter": {
-              "additionalProp1": 0,
-              "additionalProp2": 0,
-              "additionalProp3": 0
+              "2021": 0,
+              "2022": 0,
+              "2023": 0
             }
           },
           "grunnlagYtterligereNedsatt": {
@@ -202,18 +202,18 @@ class ApplicationTest {
             "erGjennomsnitt": true,
             "grunnlaget": 0,
             "inntekter": {
-              "additionalProp1": 0,
-              "additionalProp2": 0,
-              "additionalProp3": 0
+              "2021": 0,
+              "2022": 0,
+              "2023": 0
             }
           },
           "grunnlaget": 4.5,
           "type": "YTTERLIGERE_NEDSATT",
           "uføreInntektIKroner": 0,
           "uføreInntekterFraForegåendeÅr": {
-            "additionalProp1": 0,
-            "additionalProp2": 0,
-            "additionalProp3": 0
+            "2021": 0,
+            "2022": 0,
+            "2023": 0
           },
           "uføreYtterligereNedsattArbeidsevneÅr": 0,
           "uføregrad": 0

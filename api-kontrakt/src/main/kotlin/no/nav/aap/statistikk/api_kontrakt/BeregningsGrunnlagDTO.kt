@@ -17,7 +17,7 @@ data class BeregningsgrunnlagDTO(
 }
 
 data class Grunnlag11_19DTO(
-    val inntekter: Map<String, BigDecimal>,
+    val inntekter: Map<String, Double>,
     val grunnlaget: Double,
     val er6GBegrenset: Boolean,
     val erGjennomsnitt: Boolean
@@ -52,7 +52,7 @@ data class GrunnlagUføreDTO(
     val grunnlag: Grunnlag11_19DTO,
     val grunnlagYtterligereNedsatt: Grunnlag11_19DTO,
     val uføregrad: Int,
-    val uføreInntekterFraForegåendeÅr: Map<String, BigDecimal>,
+    val uføreInntekterFraForegåendeÅr: Map<String, Double>,
     val uføreInntektIKroner: BigDecimal,
     val uføreYtterligereNedsattArbeidsevneÅr: Int,
 )
