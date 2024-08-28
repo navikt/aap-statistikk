@@ -58,25 +58,25 @@ class BeregningsGrunnlagTabell : BQTable<IBeregningsGrunnlag> {
         }
 
     override fun parseRow(fieldValueList: FieldValueList): IBeregningsGrunnlag {
-        if (!fieldValueList.get("beregningsgrunnlag_11_19").isNull) {
-            return grunnlag1119(fieldValueList.get("beregningsgrunnlag_11_19").recordValue)
+        if (!fieldValueList.get(0).isNull) {
+            return grunnlag1119(fieldValueList.get(0).recordValue)
         }
 
-        if (!fieldValueList.get("beregningsgrunnlag_ufore").isNull) {
-            val recordValue = fieldValueList.get("beregningsgrunnlag_ufore").recordValue
+        if (!fieldValueList.get(1).isNull) {
+            val recordValue = fieldValueList.get(1).recordValue
             return grunnlagUføre(recordValue)
         }
 
-        if (!fieldValueList.get("beregningsgrunnlag_yrkesskade").isNull) {
-            val recordValue = fieldValueList.get("beregningsgrunnlag_yrkesskade").recordValue
+        if (!fieldValueList.get(2).isNull) {
+            val recordValue = fieldValueList.get(2).recordValue
 
             val grunnlaget = recordValue.get(0).doubleValue
             val er6GBegrenset = recordValue.get(1).booleanValue
             val beregningsgrunnlag_11_19 =
-                if (recordValue.get(2).isNull) null else recordValue.get("beregningsgrunnlag_11_19").recordValue
+                if (recordValue.get(2).isNull) null else recordValue.get(0).recordValue
 
             val beregningsgrunnlag_ufore =
-                if (recordValue.get(3).isNull) null else recordValue.get("beregningsgrunnlag_ufore").recordValue
+                if (recordValue.get(3).isNull) null else recordValue.get(3).recordValue
 
             val terskelverdiForYrkesskade = recordValue.get(4).longValue
             val andelSomSkyldesYrkesskade = recordValue.get(5).doubleValue
@@ -104,9 +104,13 @@ class BeregningsGrunnlagTabell : BQTable<IBeregningsGrunnlag> {
                 andelYrkesskade = andelYrkesskade.toInt(),
                 benyttetAndelForYrkesskade = benyttetAndelForYrkesskade.toInt(),
                 andelSomIkkeSkyldesYrkesskade = BigDecimal(andelSomIkkeSkyldesYrkesskade),
-                antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(antattAarligInntektYrkesskadeTidspunktet),
+                antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(
+                    antattAarligInntektYrkesskadeTidspunktet
+                ),
                 yrkesskadeTidspunkt = yrkesskadeTidspunkt.toInt(),
-                grunnlagForBeregningAvYrkesskadeandel = BigDecimal(grunnlagForBeregningAvYrkesskadeandel),
+                grunnlagForBeregningAvYrkesskadeandel = BigDecimal(
+                    grunnlagForBeregningAvYrkesskadeandel
+                ),
                 yrkesskadeinntektIG = BigDecimal(yrkesskadeinntektIG),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(grunnlagEtterYrkesskadeFordel)
             )
@@ -131,7 +135,7 @@ class BeregningsGrunnlagTabell : BQTable<IBeregningsGrunnlag> {
                 val entry2 = if (inntekt.attribute == FieldValue.Attribute.REPEATED) {
                     inntekt.repeatedValue[1].recordValue.get(0).doubleValue
                 } else {
-                    inntekt.recordValue.get(0).doubleValue
+                    inntekt.recordValue.get(1).doubleValue
                 }
                 entry to entry2
             }.associate { it.first.toInt() to it.second }
@@ -139,29 +143,42 @@ class BeregningsGrunnlagTabell : BQTable<IBeregningsGrunnlag> {
         val uføreYtterligereNedsattArbeidsevneÅr =
             recordValue.get("uforeYtterligereNedsattArbeidsevneAar").longValue
 
-//        val inntekter = grunnlag11_19.get(0).repeatedValue.map { inntekt ->
-//            val entry = if (inntekt.attribute == FieldValue.Attribute.REPEATED) {
-//                inntekt.repeatedValue[0].repeatedValue.get(0).recordValue[0].doubleValue
-//            } else {
-//                inntekt.recordValue.get(0).doubleValue
-//            }
-//            val entry2 = if (inntekt.attribute == FieldValue.Attribute.REPEATED) {
-//                inntekt.repeatedValue[0].repeatedValue.get(1).recordValue[0].doubleValue
-//            } else {
-//                inntekt.recordValue.get(0).doubleValue
-//            }
-//            entry to entry2
-//        }.associate { it.first.toInt() to it.second }
-//
-//        val grunnlag_11_19_ = grunnlag11_19.get(1).doubleValue
-//        val erGjennomsnitt_ = grunnlag11_19.get(2).booleanValue
-//        val er6GBegrenset_11_19_ = grunnlag11_19.get(3).booleanValue
-//        val grunnlag1119 = IBeregningsGrunnlag.Grunnlag_11_19(
-//            inntekter = inntekter,
-//            grunnlag = grunnlag_11_19_,
-//            erGjennomsnitt = erGjennomsnitt_,
-//            er6GBegrenset = er6GBegrenset_11_19_
-//        )
+        val grunnlag11_19_field_value = grunnlag11_19.get(0)
+        val inntekter = grunnlag11_19_field_value.repeatedValue.map { inntekt ->
+            val rep = inntekt
+            val kuttedNed =
+                if (rep.attribute == FieldValue.Attribute.REPEATED && rep.repeatedValue.get(0).attribute == FieldValue.Attribute.REPEATED) {
+                    rep.repeatedValue.get(0).repeatedValue
+                } else {
+                    rep.repeatedValue
+                }
+            val entry = kuttedNed.get(0).recordValue.get(0).longValue
+            val entry2 = kuttedNed.get(1).recordValue.get(0).doubleValue
+
+            entry to entry2
+        }.associate { it.first.toInt() to it.second }
+
+        val grunnlag_11_19_ = if (grunnlag11_19.get(1).attribute == FieldValue.Attribute.RECORD) {
+            grunnlag11_19.get(1).recordValue.get(0).doubleValue
+        } else {
+            grunnlag11_19.get(1).doubleValue
+        }
+        val erGjennomsnitt_ = if (grunnlag11_19.get(2).attribute == FieldValue.Attribute.RECORD) {
+            grunnlag11_19.get(2).recordValue.get(0).booleanValue
+        } else {
+            grunnlag11_19.get(2).booleanValue
+        }
+        val er6GBegrenset_11_19_ = if (grunnlag11_19.get(3).attribute == FieldValue.Attribute.RECORD) {
+            grunnlag11_19.get(3).recordValue.get(0).booleanValue
+        } else {
+            grunnlag11_19.get(3).booleanValue
+        }
+        val grunnlag1119 = IBeregningsGrunnlag.Grunnlag_11_19(
+            inntekter = inntekter,
+            grunnlag = grunnlag_11_19_,
+            erGjennomsnitt = erGjennomsnitt_,
+            er6GBegrenset = er6GBegrenset_11_19_
+        )
 
         // TODO: test i bigquery for å skjønne dette
 
@@ -169,12 +186,7 @@ class BeregningsGrunnlagTabell : BQTable<IBeregningsGrunnlag> {
             grunnlag = grunnlag,
             er6GBegrenset = er6GBegrenset,
             type = UføreType.valueOf(type),
-            grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
-                grunnlag = 0.0,
-                er6GBegrenset = false,
-                erGjennomsnitt = false,
-                inntekter = mapOf()
-            ),
+            grunnlag11_19 = grunnlag1119,
             uføregrad = uføregrad.toInt(),
             uføreInntekterFraForegåendeÅr = uføreInntekterFraForegåendeÅr,
             uføreInntektIKroner = BigDecimal(uføreInntektIKroner),

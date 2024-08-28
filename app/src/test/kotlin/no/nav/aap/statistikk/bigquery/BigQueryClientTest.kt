@@ -126,8 +126,7 @@ class BigQueryClientTest {
 
         val uthentetResultat = client.read(tabell).first() as IBeregningsGrunnlag.GrunnlagUføre
 
-        // TODO!
-        // assertThat(uthentetResultat).isEqualTo(grunnlag)
+         assertThat(uthentetResultat).isEqualTo(grunnlag)
     }
 
     @Test
@@ -179,7 +178,6 @@ class BigQueryClientTest {
 
         val uthentetResultat = client.read(tabell).first() as IBeregningsGrunnlag.GrunnlagYrkesskade
 
-        // TODO: test hele objektet
-        assertThat(uthentetResultat.grunnlaget).isEqualTo(grunnlag.grunnlaget)
+        assertThat(uthentetResultat).isEqualTo(grunnlag)
     }
 }
