@@ -57,7 +57,7 @@ data class Endring(
 
 
 data class Definisjon(
-    val type: Int,
+    val type: String,
     val behovType: BehovType,
     val løsesISteg: String
 )

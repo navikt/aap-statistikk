@@ -86,7 +86,7 @@ class MottaStatistikkTest {
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelse(
                     definisjon = Definisjon(
-                        type = 5003,
+                        type = "5003",
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = "AVKLAR_SYKDOM"
                     ),
@@ -108,7 +108,7 @@ class MottaStatistikkTest {
                 ),
                 AvklaringsbehovHendelse(
                     definisjon = Definisjon(
-                        type = 5006,
+                        type = "5006",
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = "VURDER_BISTANDSBEHOV"
                     ),
@@ -130,7 +130,7 @@ class MottaStatistikkTest {
                 ),
                 AvklaringsbehovHendelse(
                     definisjon = Definisjon(
-                        type = 5097,
+                        type = "5097",
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = "KVALITETSSIKRING"
                     ),

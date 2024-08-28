@@ -38,7 +38,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                 avklaringsbehov = listOf(
                     AvklaringsbehovHendelse(
                         definisjon = Definisjon(
-                            type = 5001,
+                            type = "5001",
                             behovType = BehovType.MANUELT_PÅKREVD,
                             løsesISteg = "AVKLAR_STUDENT"
 
@@ -59,7 +59,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                     ),
                     AvklaringsbehovHendelse(
                         definisjon = Definisjon(
-                            type = 5003,
+                            type = "5003",
                             behovType = BehovType.MANUELT_PÅKREVD,
                             løsesISteg = "AVKLAR_SYKDOM"
                         ),
