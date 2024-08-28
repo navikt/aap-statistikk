@@ -24,6 +24,8 @@ class AvsluttetBehandlingService(
             )
         )
         bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)
+        
+        bqRepository.lagre(avsluttetBehandling.beregningsgrunnlag)
 
         beregningsGrunnlagService.mottaBeregningsGrunnlag(avsluttetBehandling.beregningsgrunnlag)
     }
