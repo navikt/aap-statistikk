@@ -7,6 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
 import no.nav.aap.statistikk.api_kontrakt.*
+import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.api.AvsluttetBehandlingResponsDTO
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
@@ -48,6 +49,7 @@ class ApplicationTest {
         every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
         every { tilkjentYtelseRepository.lagreTilkjentYtelse(any()) } returns 143
         every { bqMock.lagre(any<TilkjentYtelse>()) } returns Unit
+        every { bqMock.lagre(any<IBeregningsGrunnlag>()) } returns Unit
         every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
 
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
