@@ -75,7 +75,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
 
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
-    val vilkårsResultatService = VilkårsResultatService(dataSource, bqRepository)
+    val vilkårsResultatService = VilkårsResultatService(dataSource)
 
     val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
     val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)

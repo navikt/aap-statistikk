@@ -173,7 +173,7 @@ class AvsluttetBehandlingServiceTest {
     ): Triple<TilkjentYtelseRepository, BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig)
         val bqRepository = BQRepository(bigQueryClient)
-        val vilkårsResultatService = VilkårsResultatService(dataSource, bqRepository)
+        val vilkårsResultatService = VilkårsResultatService(dataSource)
         val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
 
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)

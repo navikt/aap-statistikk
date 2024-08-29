@@ -17,6 +17,7 @@ import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -50,6 +51,7 @@ class ApplicationTest {
         every { tilkjentYtelseRepository.lagreTilkjentYtelse(any()) } returns 143
         every { bqMock.lagre(any<TilkjentYtelse>()) } returns Unit
         every { bqMock.lagre(any<IBeregningsGrunnlag>()) } returns Unit
+        every { bqMock.lagre(any<Vilkårsresultat>()) } returns Unit
         every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
 
         testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
