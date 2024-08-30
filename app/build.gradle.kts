@@ -47,7 +47,7 @@ dependencies {
 
     implementation("dev.forst:ktor-openapi-generator:0.6.1")
 
-    implementation("com.google.cloud:google-cloud-bigquery:2.42.1")
+    implementation("com.google.cloud:google-cloud-bigquery:2.42.2")
 
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
