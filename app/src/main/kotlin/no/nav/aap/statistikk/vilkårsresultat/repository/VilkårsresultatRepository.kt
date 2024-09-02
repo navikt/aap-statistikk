@@ -16,9 +16,8 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
             val sqlInsertResultat =
                 """
     WITH inserted AS (
-        INSERT INTO VILKARSRESULTAT (sak_id, behandling_id)
-        SELECT s.id AS sak_id,
-               b.id AS behandling_id
+        INSERT INTO VILKARSRESULTAT (behandling_id)
+        SELECT b.id AS behandling_id
         FROM BEHANDLING b
         JOIN SAK s ON b.sak_id = s.id
         WHERE b.referanse = ?
@@ -28,17 +27,16 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
     SELECT id FROM inserted"""
 
             var uthentetId: Int? = null
-            val preparedStatement =
-                connection.prepareStatement(sqlInsertResultat, Statement.RETURN_GENERATED_KEYS)
-                    .apply {
-                        setObject(1, vilkårsresultat.behandlingsReferanse, Types.OTHER)
-                        setString(2, vilkårsresultat.saksnummer)
-                        executeQuery().use {
-                            while (resultSet.next()) {
-                                uthentetId = resultSet.getInt(1);
-                            }
+            connection.prepareStatement(sqlInsertResultat, Statement.RETURN_GENERATED_KEYS)
+                .apply {
+                    setObject(1, vilkårsresultat.behandlingsReferanse, Types.OTHER)
+                    setString(2, vilkårsresultat.saksnummer)
+                    executeQuery().use {
+                        while (resultSet.next()) {
+                            uthentetId = resultSet.getInt(1);
                         }
                     }
+                }
 
             val vilkårResultId = requireNotNull(uthentetId)
 
@@ -102,9 +100,9 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
 FROM VILKARSRESULTAT
          LEFT JOIN VILKAR ON VILKARSRESULTAT.id = VILKAR.vilkarresult_id
          LEFT JOIN VILKARSPERIODE ON VILKAR.id = VILKARSPERIODE.vilkar_id
-         LEFT JOIN sak s on vilkarsresultat.sak_id = s.id
          LEFT JOIN behandling b on VILKARSRESULTAT.behandling_id = b.id
-WHERE VILKARSRESULTAT.id = ?;
+         LEFT JOIN sak s on s.id = b.sak_id
+     WHERE VILKARSRESULTAT.id = ?;
             """
         val preparedStatement = connection.prepareStatement(preparedSqlStatement)
         preparedStatement.setInt(1, vilkårResultatId)
