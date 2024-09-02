@@ -14,7 +14,8 @@ fun AvsluttetBehandlingDTO.tilDomene(): AvsluttetBehandling {
             behandlingsReferanse = behandlingsReferanse
         ),
         vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse),
-        beregningsgrunnlag = tilDomene(beregningsGrunnlag)
+        beregningsgrunnlag = tilDomene(beregningsGrunnlag),
+        behandlingsReferanse = behandlingsReferanse,
     )
 }
 
@@ -34,6 +35,11 @@ fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
         gradering
     )
 }
+
+data class MedBehandlingsReferanse<V>(
+    val behandlingsReferanse: UUID,
+    val value: V,
+)
 
 fun Grunnlag11_19DTO.tilDomene(
 ): IBeregningsGrunnlag.Grunnlag_11_19 {
