@@ -41,13 +41,13 @@ spec:
   liveness:
     path: /actuator/live
     initialDelay: 5
-    periodSeconds: 3
-    failureThreshold: 3
+    periodSeconds: 5
+    failureThreshold: 5
   readiness:
     path: /actuator/ready
     initialDelay: 5
-    periodSeconds: 3
-    failureThreshold: 3
+    periodSeconds: 5
+    failureThreshold: 5
   secureLogs:
     enabled: true
   accessPolicy:
