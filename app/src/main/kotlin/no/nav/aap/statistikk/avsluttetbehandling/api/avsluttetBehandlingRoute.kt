@@ -13,13 +13,11 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
-data class AvsluttetBehandlingResponsDTO(val id: Int)
-
 val eksempelUUID = UUID.randomUUID()
 
 fun NormalOpenAPIRoute.avsluttetBehandling(avsluttetBehandlingService: AvsluttetBehandlingService) {
     route("/avsluttetBehandling") {
-        post<Unit, AvsluttetBehandlingResponsDTO, AvsluttetBehandlingDTO>(
+        post<Unit, String, AvsluttetBehandlingDTO>(
             TagModule(listOf(Tags.AvsluttetBehandling)), exampleRequest = AvsluttetBehandlingDTO(
                 saksnummer = "4LELS7K",
                 behandlingsReferanse = eksempelUUID,
@@ -85,7 +83,7 @@ fun NormalOpenAPIRoute.avsluttetBehandling(avsluttetBehandlingService: Avsluttet
             // TODO: responder med id?
             responder.respond(
                 HttpStatusCode.Accepted,
-                AvsluttetBehandlingResponsDTO(id = 143),
+                "{}",
                 pipeline
             )
         }
