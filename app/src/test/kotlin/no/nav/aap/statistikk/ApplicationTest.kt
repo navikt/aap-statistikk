@@ -8,7 +8,6 @@ import io.ktor.http.*
 import io.mockk.*
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.api.AvsluttetBehandlingResponsDTO
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.bigquery.BQRepository
@@ -120,9 +119,8 @@ class ApplicationTest {
             }
 
             assertThat(response.status.isSuccess()).isTrue()
-            assertThat(response.body<AvsluttetBehandlingResponsDTO>().id).isEqualTo(143)
+            assertThat(response.body<String>()).isEqualTo("{}")
 
-//            verify(exactly = 1) { tilkjentYtelseService.lagreTilkjentYtelse(any()) }
             verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(any()) }
 
             checkUnnecessaryStub(
