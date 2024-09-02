@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
@@ -24,7 +25,12 @@ class AvsluttetBehandlingService(
             )
         )
 
-        beregningsGrunnlagService.mottaBeregningsGrunnlag(avsluttetBehandling.beregningsgrunnlag)
+        beregningsGrunnlagService.mottaBeregningsGrunnlag(
+            MedBehandlingsreferanse(
+                value = avsluttetBehandling.beregningsgrunnlag,
+                behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
+            )
+        )
 
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
         bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)

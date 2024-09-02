@@ -93,7 +93,8 @@ class AvsluttetBehandlingServiceTest {
                 grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
-            )
+            ),
+            behandlingsReferanse = behandlingReferanse
         )
 
         service.lagre(avsluttetBehandling)
@@ -158,7 +159,8 @@ class AvsluttetBehandlingServiceTest {
                 grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
-            )
+            ),
+            behandlingsReferanse = behandlingReferanse
         )
 
         service.lagre(avsluttetBehandling)

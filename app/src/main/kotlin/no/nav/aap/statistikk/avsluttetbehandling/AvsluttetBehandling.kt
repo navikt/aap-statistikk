@@ -4,12 +4,16 @@ import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.math.BigDecimal
+import java.util.UUID
 
 data class AvsluttetBehandling(
+    val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelse,
     val vilkårsresultat: Vilkårsresultat,
     val beregningsgrunnlag: IBeregningsGrunnlag
 )
+
+data class MedBehandlingsreferanse<V>(val behandlingsReferanse: UUID, val value: V)
 
 sealed interface IBeregningsGrunnlag {
     /**

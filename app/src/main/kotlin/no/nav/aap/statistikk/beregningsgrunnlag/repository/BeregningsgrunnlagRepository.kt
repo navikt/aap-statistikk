@@ -5,25 +5,33 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.db.hentGenerertNøkkel
 import no.nav.aap.statistikk.db.withinTransaction
-import java.math.BigDecimal
+import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Statement
+import java.sql.Types
+import java.util.UUID
 import javax.sql.DataSource
 
 
 interface IBeregningsgrunnlagRepository {
-    fun lagreBeregningsGrunnlag(beregningsGrunnlag: IBeregningsGrunnlag): Int
-    fun hentBeregningsGrunnlag(): List<IBeregningsGrunnlag>
+    fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Int
+    fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>>
 }
+
+private val logger = LoggerFactory.getLogger(BeregningsgrunnlagRepository::class.java)
+
 
 class BeregningsgrunnlagRepository(private val dataSource: DataSource) :
     IBeregningsgrunnlagRepository {
-    override fun lagreBeregningsGrunnlag(beregningsGrunnlag: IBeregningsGrunnlag): Int {
+    override fun lagreBeregningsGrunnlag(beregningsGrunnlagMedReferanse: MedBehandlingsreferanse<IBeregningsGrunnlag>): Int {
         return dataSource.withinTransaction {
-            val baseGrunnlagId = lagreBaseGrunnlag(it, beregningsGrunnlag.type())
+            val behandlingsReferanseId = hentBehandlingsReferanseId(it, beregningsGrunnlagMedReferanse.behandlingsReferanse)
+            val beregningsGrunnlag = beregningsGrunnlagMedReferanse.value
+            val baseGrunnlagId = lagreBaseGrunnlag(it, beregningsGrunnlag.type(), behandlingsReferanseId)
 
             when (beregningsGrunnlag) {
                 is IBeregningsGrunnlag.Grunnlag_11_19 -> {
@@ -40,12 +48,31 @@ class BeregningsgrunnlagRepository(private val dataSource: DataSource) :
         }
     }
 
-    private fun lagreBaseGrunnlag(connection: Connection, type: String): Int {
-        val sql = "INSERT INTO GRUNNLAG(type) VALUES (?) ";
+    private fun hentBehandlingsReferanseId(connection: Connection, referanse: UUID): Int {
+        val sql = "SELECT id FROM behandling WHERE referanse = ?"
+
+        val preparedStatement =
+            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).apply {
+                setObject(1, referanse, Types.OTHER)
+                executeQuery()
+            }
+
+        val resultSet = preparedStatement.resultSet
+        if (resultSet.next()) {
+            val id = resultSet.getInt("id")
+            logger.info("ID retrieved: $id")
+            return id
+        }
+        throw RuntimeException("Behandling ID for beregningsgrunnlag med referanse $referanse ikke funnet")
+    }
+
+    private fun lagreBaseGrunnlag(connection: Connection, type: String, behandlingId: Int): Int {
+        val sql = "INSERT INTO GRUNNLAG(type, behandling_id) VALUES (?, ?) ";
 
         return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             .apply {
                 setString(1, type)
+                setInt(2, behandlingId)
                 executeUpdate()
             }
             .hentGenerertNøkkel()
@@ -150,7 +177,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
             }.hentGenerertNøkkel()
     }
 
-    override fun hentBeregningsGrunnlag(): List<IBeregningsGrunnlag> {
+    override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         return dataSource.connection.use { conn ->
             val resultSet = conn.prepareStatement(
                 """
@@ -186,17 +213,20 @@ select grunnlag.id                                    as gr_id,
        gu.uforegrad                                   as gu_uforegrad,
        gu.ufore_inntekter_fra_foregaende_ar           as gu_ufore_inntekter_fra_foregaende_ar,
        gu.ufore_inntekt_i_kroner                      as gu_ufore_inntekt_i_kroner,
-       gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    as gu_ufore_ytterligere_nedsatt_arbeidsevne_ar
+       gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    as gu_ufore_ytterligere_nedsatt_arbeidsevne_ar,
+       b.referanse                                    as b_referanse
 from grunnlag
          left outer join grunnlag_11_19 as g on grunnlag.id = g.grunnlag_id
          left outer join grunnlag_yrkesskade as gy on g.id = gy.beregningsgrunnlag_id
-         left outer join grunnlag_ufore as gu on g.id = gu.grunnlag_11_19_id;
+         left outer join grunnlag_ufore as gu on g.id = gu.grunnlag_11_19_id
+         left outer join behandling as b on b.id = grunnlag.behandling_id
             """
             ).executeQuery()
 
-            val beregningsGrunnlag = mutableListOf<IBeregningsGrunnlag>()
+            val beregningsGrunnlag = mutableListOf<MedBehandlingsreferanse<IBeregningsGrunnlag>>()
 
             while (resultSet.next()) {
+                val referanse = resultSet.getString("b_referanse")
                 val grunnlagsType: IBeregningsGrunnlag = when (resultSet.getString("gr_type")) {
                     "11_19" -> {
                         hentGrunnlag11_19(resultSet)
@@ -215,7 +245,10 @@ from grunnlag
                     }
                 }
 
-                beregningsGrunnlag.add(grunnlagsType)
+                beregningsGrunnlag.add(MedBehandlingsreferanse(
+                    behandlingsReferanse = UUID.fromString(referanse),
+                    value = grunnlagsType
+                ))
             }
 
             beregningsGrunnlag

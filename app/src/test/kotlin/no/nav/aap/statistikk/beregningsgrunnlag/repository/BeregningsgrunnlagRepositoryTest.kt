@@ -3,14 +3,20 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.opprettTestHendelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.util.UUID
 import javax.sql.DataSource
 
 class BeregningsgrunnlagRepositoryTest {
     @Test
     fun `sette inn rent 11-19`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
         val grunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
@@ -20,16 +26,28 @@ class BeregningsgrunnlagRepositoryTest {
             inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(grunnlag)
+        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+            MedBehandlingsreferanse(
+                value = grunnlag,
+                behandlingsReferanse = behandlingsReferanse,
+            )
+        )
 
         val hentBeregningsGrunnlag = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
-        assertThat(hentBeregningsGrunnlag.first()).isEqualTo(grunnlag)
+        assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
+            MedBehandlingsreferanse(
+                value = grunnlag,
+                behandlingsReferanse = behandlingsReferanse
+            )
+        )
     }
 
     @Test
-    fun `sette inn grunnlag yrkessakde`(@Postgres dataSource: DataSource) {
+    fun `sette inn grunnlag yrkesskade`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
@@ -53,16 +71,29 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(grunnlagYrkesskade)
+        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+            MedBehandlingsreferanse(
+                value = grunnlagYrkesskade,
+                behandlingsReferanse = behandlingsReferanse
+            )
+        )
 
         val hentBeregningsGrunnlag = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
-        assertThat(hentBeregningsGrunnlag.first()).isEqualTo(grunnlagYrkesskade)
+        assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
+            MedBehandlingsreferanse(
+                value = grunnlagYrkesskade,
+                behandlingsReferanse = behandlingsReferanse
+            )
+        )
     }
 
     @Test
     fun `sette inn grunnlag yrkesskade med uføre`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
@@ -99,16 +130,29 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(grunnlagYrkesskade)
+        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+            MedBehandlingsreferanse(
+                behandlingsReferanse = behandlingsReferanse,
+                value = grunnlagYrkesskade
+            )
+        )
 
         val hentBeregningsGrunnlag = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
-        assertThat(hentBeregningsGrunnlag.first()).isEqualTo(grunnlagYrkesskade)
+        assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
+            MedBehandlingsreferanse(
+                behandlingsReferanse,
+                grunnlagYrkesskade
+            )
+        )
     }
 
     @Test
     fun `sette inn grunnlag uføre`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
         val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre = IBeregningsGrunnlag.GrunnlagUføre(
@@ -131,16 +175,32 @@ class BeregningsgrunnlagRepositoryTest {
             uføreYtterligereNedsattArbeidsevneÅr = 2020
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(grunnlagUfore)
+        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+            MedBehandlingsreferanse(
+                value = grunnlagUfore,
+                behandlingsReferanse = behandlingsReferanse
+            )
+        )
 
         val uthentet = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
 
         assertThat(uthentet).hasSize(1)
-        assertThat(uthentet.first()).isEqualTo(grunnlagUfore)
+        assertThat(uthentet.first()).isEqualTo(
+            MedBehandlingsreferanse(
+                value = grunnlagUfore,
+                behandlingsReferanse = behandlingsReferanse
+            )
+        )
     }
 
     @Test
     fun `sette inn to beregningsgrunnlag`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+
+        val behandlingsReferanse2 = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse2, "ABCDF")
+
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
@@ -197,13 +257,24 @@ class BeregningsgrunnlagRepositoryTest {
             uføreYtterligereNedsattArbeidsevneÅr = 2020
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(grunnlagUfore)
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(grunnlagYrkesskade)
+        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+            MedBehandlingsreferanse(
+                behandlingsReferanse = behandlingsReferanse,
+                value = grunnlagUfore
+            )
+        )
+
+        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+            MedBehandlingsreferanse(
+                behandlingsReferanse = behandlingsReferanse2,
+                value = grunnlagYrkesskade
+            )
+        )
 
         val uthentet = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
 
         assertThat(uthentet).hasSize(2)
-        assertThat(uthentet).containsOnly(
+        assertThat(uthentet.map { it.value }).containsOnly(
             grunnlagUfore,
             grunnlagYrkesskade
         )
