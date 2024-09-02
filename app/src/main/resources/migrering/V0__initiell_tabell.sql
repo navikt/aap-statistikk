@@ -56,9 +56,8 @@ CREATE TABLE VILKARSPERIODE
 
 CREATE TABLE TILKJENT_YTELSE
 (
-    ID                   BIGSERIAL   NOT NULL PRIMARY KEY,
-    saksnummer           VARCHAR(10) NOT NULL,
-    behandlingsreferanse uuid        NOT NULL UNIQUE
+    ID            BIGSERIAL NOT NULL PRIMARY KEY,
+    behandling_id BIGINT    NOT NULL REFERENCES behandling (id) UNIQUE
 );
 
 CREATE TABLE TILKJENT_YTELSE_PERIODE

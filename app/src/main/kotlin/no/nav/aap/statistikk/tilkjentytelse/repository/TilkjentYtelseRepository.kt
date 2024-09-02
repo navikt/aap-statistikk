@@ -5,6 +5,7 @@ import no.nav.aap.statistikk.db.withinTransaction
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
+import java.sql.Connection
 import java.sql.Statement
 import java.sql.Types
 import java.util.*
@@ -15,12 +16,12 @@ private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.jav
 class TilkjentYtelseRepository(private val dataSource: DataSource) {
     fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Int {
         return dataSource.withinTransaction { connection ->
-            val sql = "INSERT INTO TILKJENT_YTELSE (saksnummer, behandlingsreferanse) VALUES (?, ?)"
+            val behandlingId = hentBehandlingId(tilkjentYtelse.behandlingsReferanse, connection)
+            val sql = "INSERT INTO TILKJENT_YTELSE (behandling_id) VALUES (?)"
 
             val preparedStatement =
                 connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).apply {
-                    setString(1, tilkjentYtelse.saksnummer)
-                    setObject(2, tilkjentYtelse.behandlingsReferanse, Types.OTHER)
+                    setInt(1, behandlingId)
                     executeUpdate()
                 }
 
@@ -42,6 +43,24 @@ class TilkjentYtelseRepository(private val dataSource: DataSource) {
 
             nøkkel
         }
+    }
+
+    private fun hentBehandlingId(behandlingReferanse: UUID, connection: Connection): Int {
+        val sql = "SELECT id FROM behandling WHERE referanse = ?"
+
+        val preparedStatement =
+            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).apply {
+                setObject(1, behandlingReferanse, Types.OTHER)
+                executeQuery()
+            }
+
+        val resultSet = preparedStatement.resultSet
+        if (resultSet.next()) {
+            val id = resultSet.getInt("id")
+            logger.info("ID retrieved: $id")
+            return id
+        }
+        throw RuntimeException("Behandling ID for hendelse $behandlingReferanse ikke funnet")
     }
 
     fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
