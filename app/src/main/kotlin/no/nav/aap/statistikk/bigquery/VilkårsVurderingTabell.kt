@@ -23,7 +23,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
         MANUELL_VURDERING("manuell_vurdering"),
     }
 
-    override val tableName: String = "vilkarsResultat5"
+    override val tableName: String = "vilkarsResultat"
     override val schema: Schema
         get() {
             val saksnummerField = Field.of(FeltNavn.SAKSNUMMER.feltNavn, StandardSQLTypeName.STRING)
