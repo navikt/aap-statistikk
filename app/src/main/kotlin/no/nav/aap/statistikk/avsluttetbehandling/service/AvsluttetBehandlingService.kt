@@ -34,7 +34,7 @@ class AvsluttetBehandlingService(
 
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
         bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)
-        bqRepository.lagre(avsluttetBehandling.beregningsgrunnlag)
+        bqRepository.lagre(avsluttetBehandling.beregningsgrunnlag, avsluttetBehandling.behandlingsReferanse)
 
     }
 }

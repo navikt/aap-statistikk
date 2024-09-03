@@ -13,7 +13,7 @@ data class AvsluttetBehandling(
     val beregningsgrunnlag: IBeregningsGrunnlag
 )
 
-data class MedBehandlingsreferanse<V>(val behandlingsReferanse: UUID, val value: V)
+data class MedBehandlingsreferanse<out V>(val behandlingsReferanse: UUID, val value: V)
 
 sealed interface IBeregningsGrunnlag {
     /**
