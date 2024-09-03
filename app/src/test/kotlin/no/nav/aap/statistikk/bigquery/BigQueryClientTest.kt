@@ -4,6 +4,7 @@ import no.nav.aap.statistikk.BigQuery
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
@@ -82,18 +83,23 @@ class BigQueryClientTest {
                 inntekter = mapOf(2020 to 123.2, 2021 to 146.4)
             )
 
-        client.insert(tabell, grunnlag)
+        client.insert(
+            tabell,
+            Beregningsgrunnlag(value = grunnlag, behandlingsReferanse = UUID.randomUUID())
+        )
 
         val uthentetResultat = client.read(tabell)
 
         assertThat(uthentetResultat.size).isEqualTo(1)
 
-        val første = uthentetResultat.first() as IBeregningsGrunnlag.Grunnlag_11_19
+        val første = uthentetResultat.first() as MedBehandlingsreferanse<*>
 
-        assertThat(første.inntekter).isEqualTo(mapOf(2020 to 123.2, 2021 to 146.4))
-        assertThat(første.grunnlag).isEqualTo(12.2)
-        assertThat(første.er6GBegrenset).isEqualTo(true)
-        assertThat(første.erGjennomsnitt).isEqualTo(false)
+        første.value as IBeregningsGrunnlag.Grunnlag_11_19
+
+        assertThat(første.value.inntekter).isEqualTo(mapOf(2020 to 123.2, 2021 to 146.4))
+        assertThat(første.value.grunnlag).isEqualTo(12.2)
+        assertThat(første.value.er6GBegrenset).isEqualTo(true)
+        assertThat(første.value.erGjennomsnitt).isEqualTo(false)
     }
 
     @Test
@@ -122,11 +128,20 @@ class BigQueryClientTest {
             uføreYtterligereNedsattArbeidsevneÅr = 1963,
         )
 
-        client.insert(tabell, grunnlag)
+        val behandlingsReferanse = UUID.randomUUID()
+        client.insert(
+            tabell,
+            Beregningsgrunnlag(value = grunnlag, behandlingsReferanse = behandlingsReferanse)
+        )
 
-        val uthentetResultat = client.read(tabell).first() as IBeregningsGrunnlag.GrunnlagUføre
+        val uthentetResultat = client.read(tabell).first() as MedBehandlingsreferanse<*>
 
-         assertThat(uthentetResultat).isEqualTo(grunnlag)
+        assertThat(uthentetResultat).isEqualTo(
+            Beregningsgrunnlag(
+                value = grunnlag,
+                behandlingsReferanse = behandlingsReferanse
+            )
+        )
     }
 
     @Test
@@ -174,10 +189,19 @@ class BigQueryClientTest {
         )
 
 
-        client.insert(tabell, grunnlag)
+        val behandlingsReferanse = UUID.randomUUID()
+        client.insert(
+            tabell,
+            Beregningsgrunnlag(value = grunnlag, behandlingsReferanse = behandlingsReferanse)
+        )
 
-        val uthentetResultat = client.read(tabell).first() as IBeregningsGrunnlag.GrunnlagYrkesskade
+        val uthentetResultat = client.read(tabell).first() as MedBehandlingsreferanse<*>
 
-        assertThat(uthentetResultat).isEqualTo(grunnlag)
+        assertThat(uthentetResultat).isEqualTo(
+            MedBehandlingsreferanse(
+                value = grunnlag,
+                behandlingsReferanse = behandlingsReferanse
+            )
+        )
     }
 }

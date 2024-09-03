@@ -49,7 +49,7 @@ class ApplicationTest {
         every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
         every { tilkjentYtelseRepository.lagreTilkjentYtelse(any()) } returns 143
         every { bqMock.lagre(any<TilkjentYtelse>()) } returns Unit
-        every { bqMock.lagre(any<IBeregningsGrunnlag>()) } returns Unit
+        every { bqMock.lagre(any<IBeregningsGrunnlag>(), any<UUID>()) } returns Unit
         every { bqMock.lagre(any<Vilkårsresultat>()) } returns Unit
         every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
 
