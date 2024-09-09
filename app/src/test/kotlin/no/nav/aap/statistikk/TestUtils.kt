@@ -9,10 +9,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.slot
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
@@ -20,7 +17,6 @@ import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.hendelser.repository.Factory
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -41,7 +37,7 @@ private val logger = LoggerFactory.getLogger("TestUtils")
  * @param azureConfig Send inn egen her om det skal gjøres autentiserte kall.
  */
 fun <E> testKlient(
-    dataSource: DataSource,
+    transactionExecutor: TransactionExecutor,
     hendelsesRepositoryFactory: Factory<IHendelsesRepository>,
     avsluttetBehandlingService: AvsluttetBehandlingService,
     azureConfig: AzureConfig = AzureConfig(
@@ -55,7 +51,7 @@ fun <E> testKlient(
 
     testApplication {
         application {
-            module(dataSource, hendelsesRepositoryFactory, avsluttetBehandlingService, azureConfig)
+            module(transactionExecutor, hendelsesRepositoryFactory, avsluttetBehandlingService, azureConfig)
         }
         val client = client.config {
             install(ContentNegotiation) {
@@ -143,12 +139,8 @@ fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: St
     }
 }
 
-fun mockDataSource(): DataSource {
-    val dataSource = mockk<DataSource>()
-    mockkStatic("no.nav.aap.komponenter.dbconnect.DBConnectKt")
-    val methodSlot = slot<(DBConnection) -> Unit>()
-    every { dataSource.transaction<Unit>(any<Boolean>(), capture(methodSlot)) } answers {
-        methodSlot.captured.invoke(mockk())
+val noOpTransactionExecutor = object : TransactionExecutor {
+    override fun <E> withinTransaction(block: (DBConnection) -> E): E {
+        return block(mockk())
     }
-    return dataSource
 }

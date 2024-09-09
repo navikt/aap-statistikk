@@ -32,8 +32,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
-import no.nav.aap.statistikk.hendelser.repository.Factory
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepositoryFactory
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -72,7 +71,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
         dataSource.close()
         environment.monitor.unsubscribe(ApplicationStopped) {}
     }
-    val hendelsesRepository = HendelsesRepository
+    val hendelsesRepositoryFactory = HendelsesRepositoryFactory()
 
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
@@ -89,11 +88,13 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
             bqRepository,
         )
 
-    module(dataSource, hendelsesRepository, avsluttetBehandlingService, azureConfig)
+    val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+
+    module(transactionExecutor, hendelsesRepositoryFactory, avsluttetBehandlingService, azureConfig)
 }
 
 fun Application.module(
-    dataSource: DataSource,
+    transactionExecutor: TransactionExecutor,
     hendelsesRepositoryFactory: Factory<IHendelsesRepository>,
     avsluttetBehandlingService: AvsluttetBehandlingService,
     azureConfig: AzureConfig
@@ -109,7 +110,7 @@ fun Application.module(
     routing {
         authenticate(AZURE) {
             apiRoute {
-                mottaStatistikk(dataSource, hendelsesRepositoryFactory)
+                mottaStatistikk(transactionExecutor, hendelsesRepositoryFactory)
                 avsluttetBehandling(avsluttetBehandlingService)
             }
         }

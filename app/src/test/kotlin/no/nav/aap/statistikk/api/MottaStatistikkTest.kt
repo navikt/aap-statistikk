@@ -5,22 +5,19 @@ import io.ktor.http.*
 import io.mockk.checkUnnecessaryStub
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.spyk
 import io.mockk.verify
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.Fakes
+import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.hendelser.repository.Factory
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepositoryFactory
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
-import no.nav.aap.statistikk.mockDataSource
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testKlient
+import no.nav.aap.statistikk.noOpTransactionExecutor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -44,10 +41,8 @@ class MottaStatistikkTest {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
 
-        val dataSource = mockDataSource()
-
         testKlient(
-            dataSource,
+            noOpTransactionExecutor,
             factoryMock,
             avsluttetBehandlingService,
             azureConfig
@@ -87,7 +82,6 @@ class MottaStatistikkTest {
         }
 
         checkUnnecessaryStub(
-            dataSource,
             avsluttetBehandlingService,
             factoryMock,
             hendelsesRepository
@@ -176,13 +170,15 @@ class MottaStatistikkTest {
             ),
             behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595")
         )
+
+        val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         dataSource.transaction {
-            val hendelsesRepository = HendelsesRepository.create(it)
+            val hendelsesRepository = HendelsesRepositoryFactory().create(it)
             val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
 
             testKlient(
-                dataSource,
-                HendelsesRepository,
+                transactionExecutor,
+                HendelsesRepositoryFactory(),
                 avsluttetBehandlingService,
                 azureConfig
             ) { client ->
