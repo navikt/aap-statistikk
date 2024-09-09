@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.hendelser.repository.Factory
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
+import javax.sql.DataSource
 
 @Fakes
 class ApplicationTest {
@@ -31,7 +33,7 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val hendelsesRepository = mockk<IHendelsesRepository>()
+        val hendelsesRepository = mockk<Factory<IHendelsesRepository>>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
         val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
         val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
@@ -53,7 +55,14 @@ class ApplicationTest {
         every { bqMock.lagre(any<Vilkårsresultat>()) } returns Unit
         every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
 
-        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+        val dataSource = mockDataSource()
+
+        testKlient(
+            dataSource,
+            hendelsesRepository,
+            avsluttetBehandlingService,
+            azureConfig
+        ) { client ->
             val response = client.post("/avsluttetBehandling") {
                 headers {
                     append("Authorization", "Bearer ${token.access_token}")
@@ -128,7 +137,8 @@ class ApplicationTest {
                 vilkårsResultatService,
                 tilkjentYtelseRepository,
                 beregningsGrunnlagService,
-                bqMock
+                bqMock,
+                dataSource
             )
         }
     }
@@ -138,11 +148,20 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
+        val factoryMock = mockk<Factory<IHendelsesRepository>>()
         val hendelsesRepository = mockk<IHendelsesRepository>()
+        every { factoryMock.create(any()) } returns hendelsesRepository
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
-        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+        val dataSource = mockDataSource()
+
+        testKlient(
+            dataSource,
+            factoryMock,
+            avsluttetBehandlingService,
+            azureConfig
+        ) { client ->
             @Language("JSON")
             val body =
                 """{
@@ -173,6 +192,13 @@ class ApplicationTest {
         }
 
         verify(exactly = 1) { hendelsesRepository.lagreHendelse(any()) }
+
+        checkUnnecessaryStub(
+            factoryMock,
+            hendelsesRepository,
+            avsluttetBehandlingService,
+            dataSource,
+        )
     }
 
     @Test
@@ -180,11 +206,6 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val hendelsesRepository = mockk<IHendelsesRepository>()
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns 1
-        every { avsluttetBehandlingService.lagre(any()) } returns Unit
-
         @Language("JSON")
         val payload = """{
   "behandlingsReferanse": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -250,7 +271,19 @@ class ApplicationTest {
     "vilkår": []
   }
 }"""
-        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+
+        val factoryMock = mockk<Factory<IHendelsesRepository>>()
+        val hendelsesRepository = mockk<IHendelsesRepository>()
+        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        every { avsluttetBehandlingService.lagre(any()) } returns Unit
+
+
+        testKlient(
+            mockk<DataSource>(),
+            factoryMock,
+            avsluttetBehandlingService,
+            azureConfig
+        ) { client ->
             val response = client.post("/avsluttetBehandling") {
                 contentType(ContentType.Application.Json)
                 headers {
@@ -262,6 +295,11 @@ class ApplicationTest {
         }
 
         verify(exactly = 1) { avsluttetBehandlingService.lagre(any()) }
+
+        checkUnnecessaryStub(
+            hendelsesRepository,
+            avsluttetBehandlingService, factoryMock, avsluttetBehandlingService
+        )
     }
 
     @Test
@@ -269,10 +307,6 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val hendelsesRepository = mockk<IHendelsesRepository>()
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns 1
-
         @Language("JSON")
         val payload =
             """{
@@ -293,8 +327,19 @@ class ApplicationTest {
   "avklaringsbehov": [],
   "ukjentfelt": "hei"
 }"""
+        val mockFactory = mockk<Factory<IHendelsesRepository>>()
+        val hendelsesRepository = mockk<IHendelsesRepository>()
+        every { mockFactory.create(any()) } returns hendelsesRepository
+        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        every { hendelsesRepository.lagreHendelse(any()) } returns 1
+        val dataSource = mockDataSource()
 
-        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+        testKlient(
+            dataSource,
+            mockFactory,
+            avsluttetBehandlingService,
+            azureConfig
+        ) { client ->
             val response = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 headers {
@@ -304,5 +349,12 @@ class ApplicationTest {
             }
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
+
+        checkUnnecessaryStub(
+            mockFactory,
+            hendelsesRepository,
+            avsluttetBehandlingService,
+            dataSource,
+        )
     }
 }

@@ -6,11 +6,15 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
+import no.nav.aap.statistikk.hendelser.repository.Factory
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import javax.sql.DataSource
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
 
@@ -24,61 +28,64 @@ enum class Tags(override val description: String) : APITag {
 }
 
 fun NormalOpenAPIRoute.mottaStatistikk(
-    hendelsesRepository: IHendelsesRepository,
+    dataSource: DataSource,
+    hendelsesRepositoryFactory: Factory<IHendelsesRepository>
 ) {
-    route("/motta") {
-        post<Unit, String, MottaStatistikkDTO>(
-            TagModule(listOf(Tags.MottaStatistikk)), exampleRequest = MottaStatistikkDTO(
-                saksnummer = "4LFL5CW",
-                behandlingReferanse = eksempelUUID,
-                status = "OPPRETTET",
-                behandlingType = TypeBehandling.Førstegangsbehandling,
-                ident = "1403199012345",
-                behandlingOpprettetTidspunkt = LocalDateTime.now(),
-                avklaringsbehov = listOf(
-                    AvklaringsbehovHendelse(
-                        definisjon = Definisjon(
-                            type = "5001",
-                            behovType = BehovType.MANUELT_PÅKREVD,
-                            løsesISteg = "AVKLAR_STUDENT"
+    val exampleRequest = MottaStatistikkDTO(
+        saksnummer = "4LFL5CW",
+        behandlingReferanse = eksempelUUID,
+        status = "OPPRETTET",
+        behandlingType = TypeBehandling.Førstegangsbehandling,
+        ident = "1403199012345",
+        behandlingOpprettetTidspunkt = LocalDateTime.now(),
+        avklaringsbehov = listOf(
+            AvklaringsbehovHendelse(
+                definisjon = Definisjon(
+                    type = "5001",
+                    behovType = BehovType.MANUELT_PÅKREVD,
+                    løsesISteg = "AVKLAR_STUDENT"
 
-                        ),
-                        status = EndringStatus.AVSLUTTET,
-                        endringer = listOf(
-                            Endring(
-                                status = EndringStatus.OPPRETTET,
-                                tidsstempel = LocalDateTime.now().minusMinutes(10),
-                                endretAv = "Kelvin"
-                            ),
-                            Endring(
-                                status = EndringStatus.AVSLUTTET,
-                                tidsstempel = LocalDateTime.now().minusMinutes(5),
-                                endretAv = "Z994573"
-                            )
-                        )
-                    ),
-                    AvklaringsbehovHendelse(
-                        definisjon = Definisjon(
-                            type = "5003",
-                            behovType = BehovType.MANUELT_PÅKREVD,
-                            løsesISteg = "AVKLAR_SYKDOM"
-                        ),
+                ),
+                status = EndringStatus.AVSLUTTET,
+                endringer = listOf(
+                    Endring(
                         status = EndringStatus.OPPRETTET,
-                        endringer = listOf(
-                            Endring(
-                                status = EndringStatus.OPPRETTET,
-                                tidsstempel = LocalDateTime.now().minusMinutes(3),
-                                endretAv = "Kelvin"
-                            )
-                        )
+                        tidsstempel = LocalDateTime.now().minusMinutes(10),
+                        endretAv = "Kelvin"
+                    ),
+                    Endring(
+                        status = EndringStatus.AVSLUTTET,
+                        tidsstempel = LocalDateTime.now().minusMinutes(5),
+                        endretAv = "Z994573"
+                    )
+                )
+            ),
+            AvklaringsbehovHendelse(
+                definisjon = Definisjon(
+                    type = "5003",
+                    behovType = BehovType.MANUELT_PÅKREVD,
+                    løsesISteg = "AVKLAR_SYKDOM"
+                ),
+                status = EndringStatus.OPPRETTET,
+                endringer = listOf(
+                    Endring(
+                        status = EndringStatus.OPPRETTET,
+                        tidsstempel = LocalDateTime.now().minusMinutes(3),
+                        endretAv = "Kelvin"
                     )
                 )
             )
+        )
+    )
+    route("/motta") {
+        post<Unit, String, MottaStatistikkDTO>(
+            TagModule(listOf(Tags.MottaStatistikk)), exampleRequest = exampleRequest
         ) { _, dto ->
-            hendelsesRepository.lagreHendelse(dto)
-
-            log.info("Got DTO: $dto")
-
+            dataSource.transaction { conn ->
+                val hendelsesRepository = hendelsesRepositoryFactory.create(conn)
+                hendelsesRepository.lagreHendelse(dto)
+                log.info("Got DTO: $dto")
+            }
             // Må ha String-respons på grunn av Accept-header. Denne må returnere json
             responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
         }

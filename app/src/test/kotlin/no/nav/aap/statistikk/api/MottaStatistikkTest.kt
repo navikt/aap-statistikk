@@ -2,17 +2,23 @@ package no.nav.aap.statistikk.api
 
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.mockk.checkUnnecessaryStub
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.Fakes
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
+import no.nav.aap.statistikk.hendelser.repository.Factory
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.mockDataSource
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testKlient
 import org.assertj.core.api.Assertions.assertThat
@@ -29,13 +35,23 @@ class MottaStatistikkTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
+        val factoryMock = mockk<Factory<IHendelsesRepository>>()
         val hendelsesRepository = mockk<IHendelsesRepository>()
+        every { factoryMock.create(any()) } returns hendelsesRepository
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
-        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
+
+        val dataSource = mockDataSource()
+
+        testKlient(
+            dataSource,
+            factoryMock,
+            avsluttetBehandlingService,
+            azureConfig
+        ) { client ->
             val res = client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 headers {
@@ -69,6 +85,13 @@ class MottaStatistikkTest {
                 )
             )
         }
+
+        checkUnnecessaryStub(
+            dataSource,
+            avsluttetBehandlingService,
+            factoryMock,
+            hendelsesRepository
+        )
     }
 
     @Test
@@ -153,31 +176,36 @@ class MottaStatistikkTest {
             ),
             behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595")
         )
+        dataSource.transaction {
+            val hendelsesRepository = HendelsesRepository.create(it)
+            val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
 
-        val hendelsesRepository = spyk(HendelsesRepository(dataSource))
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-
-        testKlient(hendelsesRepository, avsluttetBehandlingService, azureConfig) { client ->
-            val res = client.post("/motta") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
+            testKlient(
+                dataSource,
+                HendelsesRepository,
+                avsluttetBehandlingService,
+                azureConfig
+            ) { client ->
+                val res = client.post("/motta") {
+                    contentType(ContentType.Application.Json)
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
+                    }
+                    setBody(hendelse)
                 }
-                setBody(hendelse)
+                Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
+
+                val hentHendelser = hendelsesRepository.hentHendelser()
+
+                assertThat(hentHendelser).hasSize(1)
+                assertThat(hentHendelser.first().behandlingReferanse).isEqualTo(hendelse.behandlingReferanse)
+                assertThat(hentHendelser.first().saksnummer).isEqualTo(hendelse.saksnummer)
+                assertThat(hentHendelser.first().behandlingOpprettetTidspunkt).isEqualTo(hendelse.behandlingOpprettetTidspunkt)
+                assertThat(hentHendelser.first().behandlingType).isEqualTo(hendelse.behandlingType)
+                assertThat(hentHendelser.first().status).isEqualTo(hendelse.status)
             }
-            Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
         }
 
-        verify { hendelsesRepository.lagreHendelse(hendelse) }
-
-        val hentHendelser = hendelsesRepository.hentHendelser()
-
-        assertThat(hentHendelser).hasSize(1)
-        assertThat(hentHendelser.first().behandlingReferanse).isEqualTo(hendelse.behandlingReferanse)
-        assertThat(hentHendelser.first().saksnummer).isEqualTo(hendelse.saksnummer)
-        assertThat(hentHendelser.first().behandlingOpprettetTidspunkt).isEqualTo(hendelse.behandlingOpprettetTidspunkt)
-        assertThat(hentHendelser.first().behandlingType).isEqualTo(hendelse.behandlingType)
-        assertThat(hentHendelser.first().status).isEqualTo(hendelse.status)
         //assertThat(hentHendelser.first().avklaringsbehov).hasSize(3)
         //assertThat(hentHendelser.first().avklaringsbehov[0].status).isEqualTo(EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"))
         //assertThat(hentHendelser.first().avklaringsbehov[0].endringer).hasSize(2)

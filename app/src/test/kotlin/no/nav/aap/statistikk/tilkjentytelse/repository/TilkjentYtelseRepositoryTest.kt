@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.tilkjentytelse.repository
 
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
@@ -24,18 +25,21 @@ class TilkjentYtelseRepositoryTest {
                 perioder = listOf()
             )
 
-        val hendelsesRepository = HendelsesRepository(dataSource)
-        hendelsesRepository.lagreHendelse(
-            MottaStatistikkDTO(
-                saksnummer = "ABCDE",
-                behandlingReferanse = behandlingsReferanse,
-                behandlingOpprettetTidspunkt = LocalDateTime.now(),
-                status = "somestatus",
-                behandlingType = TypeBehandling.Førstegangsbehandling,
-                ident = "13",
-                avklaringsbehov = listOf()
+        dataSource.transaction { conn ->
+            val hendelsesRepository = HendelsesRepository(conn)
+            hendelsesRepository.lagreHendelse(
+                MottaStatistikkDTO(
+                    saksnummer = "ABCDE",
+                    behandlingReferanse = behandlingsReferanse,
+                    behandlingOpprettetTidspunkt = LocalDateTime.now(),
+                    status = "somestatus",
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    ident = "13",
+                    avklaringsbehov = listOf()
+                )
             )
-        )
+        }
+
 
         tilkjentYtelseRepository.lagreTilkjentYtelse(tilkjentYtelse)
 
