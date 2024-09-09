@@ -6,15 +6,12 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
-import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.TransactionExecutor
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
-import no.nav.aap.statistikk.hendelser.repository.Factory
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import javax.sql.DataSource
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
 
@@ -28,7 +25,7 @@ enum class Tags(override val description: String) : APITag {
 }
 
 fun NormalOpenAPIRoute.mottaStatistikk(
-    dataSource: DataSource,
+    transactionExecutor: TransactionExecutor,
     hendelsesRepositoryFactory: Factory<IHendelsesRepository>
 ) {
     val exampleRequest = MottaStatistikkDTO(
@@ -81,7 +78,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         post<Unit, String, MottaStatistikkDTO>(
             TagModule(listOf(Tags.MottaStatistikk)), exampleRequest = exampleRequest
         ) { _, dto ->
-            dataSource.transaction { conn ->
+            transactionExecutor.withinTransaction { conn ->
                 val hendelsesRepository = hendelsesRepositoryFactory.create(conn)
                 hendelsesRepository.lagreHendelse(dto)
                 log.info("Got DTO: $dto")

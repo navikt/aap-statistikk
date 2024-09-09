@@ -1,25 +1,13 @@
 package no.nav.aap.statistikk.hendelser.repository
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import java.util.*
-import javax.sql.DataSource
-
-interface Factory<T> {
-    fun create(dbConnection: DBConnection): T
-}
 
 class HendelsesRepository(
     private val dbConnection: DBConnection
 ) : IHendelsesRepository {
-
-    companion object : Factory<IHendelsesRepository> {
-        override fun create(dbConnection: DBConnection): IHendelsesRepository {
-            return HendelsesRepository(dbConnection)
-        }
-    }
 
     override fun lagreHendelse(hendelse: MottaStatistikkDTO): Int {
         val personId = hentEllerSettInnPersonId(dbConnection, hendelse.ident)

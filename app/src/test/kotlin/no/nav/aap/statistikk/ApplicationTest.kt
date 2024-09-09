@@ -11,7 +11,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.hendelser.repository.Factory
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -24,7 +23,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
-import javax.sql.DataSource
 
 @Fakes
 class ApplicationTest {
@@ -55,10 +53,8 @@ class ApplicationTest {
         every { bqMock.lagre(any<Vilkårsresultat>()) } returns Unit
         every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
 
-        val dataSource = mockDataSource()
-
         testKlient(
-            dataSource,
+            noOpTransactionExecutor,
             hendelsesRepository,
             avsluttetBehandlingService,
             azureConfig
@@ -138,7 +134,6 @@ class ApplicationTest {
                 tilkjentYtelseRepository,
                 beregningsGrunnlagService,
                 bqMock,
-                dataSource
             )
         }
     }
@@ -154,10 +149,8 @@ class ApplicationTest {
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
-        val dataSource = mockDataSource()
-
         testKlient(
-            dataSource,
+            noOpTransactionExecutor,
             factoryMock,
             avsluttetBehandlingService,
             azureConfig
@@ -197,7 +190,6 @@ class ApplicationTest {
             factoryMock,
             hendelsesRepository,
             avsluttetBehandlingService,
-            dataSource,
         )
     }
 
@@ -279,7 +271,7 @@ class ApplicationTest {
 
 
         testKlient(
-            mockk<DataSource>(),
+            mockk<TransactionExecutor>(),
             factoryMock,
             avsluttetBehandlingService,
             azureConfig
@@ -332,10 +324,10 @@ class ApplicationTest {
         every { mockFactory.create(any()) } returns hendelsesRepository
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { hendelsesRepository.lagreHendelse(any()) } returns 1
-        val dataSource = mockDataSource()
+
 
         testKlient(
-            dataSource,
+            noOpTransactionExecutor,
             mockFactory,
             avsluttetBehandlingService,
             azureConfig
@@ -354,7 +346,6 @@ class ApplicationTest {
             mockFactory,
             hendelsesRepository,
             avsluttetBehandlingService,
-            dataSource,
         )
     }
 }
