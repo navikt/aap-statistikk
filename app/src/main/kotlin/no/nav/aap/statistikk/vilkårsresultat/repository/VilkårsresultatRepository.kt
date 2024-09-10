@@ -5,7 +5,6 @@ import no.nav.aap.statistikk.db.withinTransaction
 import org.slf4j.LoggerFactory
 import java.sql.*
 import java.sql.Date
-import java.util.*
 import javax.sql.DataSource
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)

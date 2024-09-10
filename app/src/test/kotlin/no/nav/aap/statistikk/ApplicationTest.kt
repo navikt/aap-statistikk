@@ -16,8 +16,8 @@ import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -32,25 +32,26 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val vilkårsResultatService = mockk<VilkårsResultatService>()
         val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
         val factory = mockk<Factory<TilkjentYtelseRepository>>()
         every { factory.create(any()) } returns tilkjentYtelseRepository
         val bqMock = mockk<BQRepository>()
         val beregningsgrunnlagRepository = mockk<BeregningsgrunnlagRepository>()
         val transactionExecutor = noOpTransactionExecutor
+        val vilkårsResultatRepository = mockk<VilkårsresultatRepository>()
+
         val avsluttetBehandlingService =
             AvsluttetBehandlingService(
                 transactionExecutor,
                 factory,
-                vilkårsResultatService,
                 beregningsgrunnlagRepository,
+                vilkårsResultatRepository,
                 bqMock
             )
 
         val behandlingReferanse = UUID.randomUUID()
 
-        every { vilkårsResultatService.mottaVilkårsResultat(any()) } returns 1
+        every { vilkårsResultatRepository.lagreVilkårsResultat(any()) } returns 1
         every { tilkjentYtelseRepository.lagreTilkjentYtelse(any()) } returns 143
         every { bqMock.lagre(any<TilkjentYtelse>()) } returns Unit
         every { bqMock.lagre(any<IBeregningsGrunnlag>(), any<UUID>()) } returns Unit
@@ -136,12 +137,12 @@ class ApplicationTest {
         runBlocking {
             assertThat(response.body<String>()).isEqualTo("{}")
         }
-        verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(any()) }
+        verify(exactly = 1) { vilkårsResultatRepository.lagreVilkårsResultat(any()) }
 
         checkUnnecessaryStub(
-            vilkårsResultatService,
+            vilkårsResultatRepository,
             tilkjentYtelseRepository,
-            bqMock,
+            bqMock, factory, beregningsgrunnlagRepository, vilkårsResultatRepository
         )
     }
 

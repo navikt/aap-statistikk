@@ -16,8 +16,8 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -187,7 +187,6 @@ class AvsluttetBehandlingServiceTest {
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig)
         val bqRepository = BQRepository(bigQueryClient)
-        val vilkårsResultatService = VilkårsResultatService(dataSource)
 
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
@@ -199,8 +198,8 @@ class AvsluttetBehandlingServiceTest {
                         return TilkjentYtelseRepository(dbConnection)
                     }
                 },
-                vilkårsResultatService,
                 beregningsgrunnlagRepository,
+                VilkårsresultatRepository(dataSource),
                 bqRepository,
             )
         return Pair(bigQueryClient, service)

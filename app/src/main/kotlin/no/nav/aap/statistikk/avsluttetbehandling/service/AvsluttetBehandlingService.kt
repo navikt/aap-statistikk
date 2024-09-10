@@ -7,18 +7,19 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRep
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 
 class AvsluttetBehandlingService(
     private val transactionExecutor: TransactionExecutor,
     private val tilkjentYtelseRepositoryFactory: Factory<TilkjentYtelseRepository>,
-    private val vilkårsResultatService: VilkårsResultatService,
     private val beregningsgrunnlagRepository: BeregningsgrunnlagRepository,
+    private val vilkårsResultatRepository: VilkårsresultatRepository,
     private val bqRepository: BQRepository
 ) {
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
-        vilkårsResultatService.mottaVilkårsResultat(
-            avsluttetBehandling.vilkårsresultat
+        vilkårsResultatRepository.lagreVilkårsResultat(
+            VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat)
         )
 
         transactionExecutor.withinTransaction {
