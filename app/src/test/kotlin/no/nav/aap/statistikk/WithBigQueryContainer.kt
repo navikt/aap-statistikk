@@ -32,7 +32,7 @@ annotation class BigQuery {
             private val bigQueryContainer =
                 BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3").waitingFor(
                     HostPortWaitStrategy().withStartupTimeout(
-                        Duration.ofSeconds(5)
+                        Duration.ofSeconds(10)
                     )
                 );
 

@@ -15,6 +15,7 @@ import io.mockk.just
 import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
@@ -159,4 +160,20 @@ fun motorMock(): Motor {
     val motor = mockk<Motor>()
     every { motor.start() } just Runs
     return motor
+}
+
+
+class MockJobbAppender : JobbAppender {
+    var jobber = mutableListOf<JobbInput>()
+
+    override fun leggTil(
+        connection: DBConnection,
+        jobb: JobbInput
+    ) {
+        jobber.add(jobb)
+    }
+
+    override fun leggTil(jobb: JobbInput) {
+        jobber.add(jobb)
+    }
 }

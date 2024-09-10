@@ -22,13 +22,13 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
@@ -94,23 +94,27 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val bqRepository = BQRepository(bqClient)
     val vilkårsResultatService = VilkårsResultatService(dataSource)
 
-    val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
     val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
-    val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
-    val avsluttetBehandlingService =
-        AvsluttetBehandlingService(
-            vilkårsResultatService,
-            tilkjentYtelseRepository,
-            beregningsGrunnlagService,
-            bqRepository,
-        )
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+
+    val avsluttetBehandlingService =
+        AvsluttetBehandlingService(
+            transactionExecutor,
+            object : Factory<TilkjentYtelseRepository> {
+                override fun create(dbConnection: DBConnection): TilkjentYtelseRepository {
+                    return TilkjentYtelseRepository(dbConnection)
+                }
+            },
+            vilkårsResultatService,
+            beregningsgrunnlagRepository,
+            bqRepository,
+        )
 
     module(
         transactionExecutor,
         motor,
-        MotorJobbAppender(),
+        MotorJobbAppender(dataSource),
         avsluttetBehandlingService,
         azureConfig
     )
@@ -141,7 +145,7 @@ fun Application.module(
                     transactionExecutor,
                     jobbAppender,
                 )
-                avsluttetBehandling(avsluttetBehandlingService)
+                avsluttetBehandling(avsluttetBehandlingService, jobbAppender)
             }
         }
     }

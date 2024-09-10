@@ -6,13 +6,13 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
+import kotlinx.coroutines.runBlocking
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -32,16 +32,19 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val hendelsesRepository = mockk<Factory<IHendelsesRepository>>()
         val vilkårsResultatService = mockk<VilkårsResultatService>()
         val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-        val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+        val factory = mockk<Factory<TilkjentYtelseRepository>>()
+        every { factory.create(any()) } returns tilkjentYtelseRepository
         val bqMock = mockk<BQRepository>()
+        val beregningsgrunnlagRepository = mockk<BeregningsgrunnlagRepository>()
+        val transactionExecutor = noOpTransactionExecutor
         val avsluttetBehandlingService =
             AvsluttetBehandlingService(
+                transactionExecutor,
+                factory,
                 vilkårsResultatService,
-                tilkjentYtelseRepository,
-                beregningsGrunnlagService,
+                beregningsgrunnlagRepository,
                 bqMock
             )
 
@@ -52,12 +55,14 @@ class ApplicationTest {
         every { bqMock.lagre(any<TilkjentYtelse>()) } returns Unit
         every { bqMock.lagre(any<IBeregningsGrunnlag>(), any<UUID>()) } returns Unit
         every { bqMock.lagre(any<Vilkårsresultat>()) } returns Unit
-        every { beregningsGrunnlagService.mottaBeregningsGrunnlag(any()) } just Runs
+        every { beregningsgrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns 1
 
-        testKlient(
+        val jobbAppender = MockJobbAppender()
+
+        val response = testKlient(
             noOpTransactionExecutor,
             motor = motorMock(),
-            mockk(),
+            jobbAppender,
             avsluttetBehandlingService,
             azureConfig,
         ) { client ->
@@ -124,20 +129,20 @@ class ApplicationTest {
 }"""
                 setBody(jsonBody)
             }
-
-            assertThat(response.status.isSuccess()).isTrue()
-            assertThat(response.body<String>()).isEqualTo("{}")
-
-            verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(any()) }
-
-            checkUnnecessaryStub(
-                hendelsesRepository,
-                vilkårsResultatService,
-                tilkjentYtelseRepository,
-                beregningsGrunnlagService,
-                bqMock,
-            )
+            response
         }
+
+        assertThat(response!!.status.isSuccess()).isTrue()
+        runBlocking {
+            assertThat(response.body<String>()).isEqualTo("{}")
+        }
+        verify(exactly = 1) { vilkårsResultatService.mottaVilkårsResultat(any()) }
+
+        checkUnnecessaryStub(
+            vilkårsResultatService,
+            tilkjentYtelseRepository,
+            bqMock,
+        )
     }
 
     @Test
@@ -145,7 +150,6 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val hendelsesRepository = mockk<IHendelsesRepository>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
 
         val jobbAppender = mockk<JobbAppender>()
@@ -265,17 +269,15 @@ class ApplicationTest {
     "vilkår": []
   }
 }"""
-
-        val factoryMock = mockk<Factory<IHendelsesRepository>>()
-        val hendelsesRepository = mockk<IHendelsesRepository>()
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
         every { avsluttetBehandlingService.lagre(any()) } returns Unit
 
+        val jobbAppender = MockJobbAppender()
 
         testKlient(
-            mockk<TransactionExecutor>(),
+            noOpTransactionExecutor,
             motorMock(),
-            mockk(),
+            jobbAppender,
             avsluttetBehandlingService,
             azureConfig
         ) { client ->
@@ -290,11 +292,9 @@ class ApplicationTest {
         }
 
         verify(exactly = 1) { avsluttetBehandlingService.lagre(any()) }
+        assertThat(jobbAppender.jobber.size).isEqualTo(1)
 
-        checkUnnecessaryStub(
-            hendelsesRepository,
-            avsluttetBehandlingService, factoryMock, avsluttetBehandlingService
-        )
+        checkUnnecessaryStub(avsluttetBehandlingService)
     }
 
     @Test

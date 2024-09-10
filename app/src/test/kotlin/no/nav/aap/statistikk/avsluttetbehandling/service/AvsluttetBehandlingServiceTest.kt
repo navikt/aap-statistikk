@@ -1,11 +1,13 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.BigQuery
+import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.opprettTestHendelse
@@ -29,7 +31,7 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
-        val (tilkjentYtelseRepository, bigQueryClient, service) = konstruerTilkjentYtelseService(
+        val (bigQueryClient, avsluttetBehandlingService) = konstruerTilkjentYtelseService(
             dataSource,
             bigQuery
         )
@@ -97,7 +99,7 @@ class AvsluttetBehandlingServiceTest {
             behandlingsReferanse = behandlingReferanse
         )
 
-        service.lagre(avsluttetBehandling)
+        avsluttetBehandlingService.lagre(avsluttetBehandling)
 
         val utlestVilkårsVurderingFraBigQuery = bigQueryClient.read(VilkårsVurderingTabell())
         val utlestTilkjentYtelseFraBigQuery = bigQueryClient.read(TilkjentYtelseTabell())
@@ -108,7 +110,8 @@ class AvsluttetBehandlingServiceTest {
         assertThat(utlestTilkjentYtelseFraBigQuery).hasSize(1)
         assertThat(utlestTilkjentYtelseFraBigQuery.first()).isEqualTo(avsluttetBehandling.tilkjentYtelse)
 
-        val uthentetTilkjentYtelse = tilkjentYtelseRepository.hentTilkjentYtelse(1)
+        val uthentetTilkjentYtelse =
+            dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
         assertThat(uthentetTilkjentYtelse).isNotNull()
         assertThat(uthentetTilkjentYtelse!!.perioder).hasSize(2)
         assertThat(uthentetTilkjentYtelse.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
@@ -119,7 +122,7 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
-        val (tilkjentYtelseRepository, _, service) = konstruerTilkjentYtelseService(
+        val (_, service) = konstruerTilkjentYtelseService(
             dataSource,
             bigQuery
         )
@@ -133,7 +136,14 @@ class AvsluttetBehandlingServiceTest {
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse,
                 saksnummer = saksnummer,
-                perioder = listOf()
+                perioder = listOf(
+                    TilkjentYtelsePeriode(
+                        fraDato = LocalDate.now().minusYears(3),
+                        tilDato = LocalDate.now().minusYears(2),
+                        dagsats = 1234.0,
+                        gradering = 45.0
+                    )
+                )
             ), vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
                 behandlingsType = "Førstegangsbehandling",
@@ -165,30 +175,35 @@ class AvsluttetBehandlingServiceTest {
 
         service.lagre(avsluttetBehandling)
 
-        assertThat(tilkjentYtelseRepository.hentTilkjentYtelse(1)).isNull()
+        val uthentet =
+            dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }!!
 
+        assertThat(uthentet.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
     }
 
     private fun konstruerTilkjentYtelseService(
         dataSource: DataSource,
         bigQueryConfig: BigQueryConfig
-    ): Triple<TilkjentYtelseRepository, BigQueryClient, AvsluttetBehandlingService> {
+    ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig)
         val bqRepository = BQRepository(bigQueryClient)
         val vilkårsResultatService = VilkårsResultatService(dataSource)
-        val tilkjentYtelseRepository = TilkjentYtelseRepository(dataSource)
 
         val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
-        val beregningsGrunnlagService = BeregningsGrunnlagService(beregningsgrunnlagRepository)
 
         val service =
             AvsluttetBehandlingService(
+                FellesKomponentTransactionalExecutor(dataSource),
+                object : Factory<TilkjentYtelseRepository> {
+                    override fun create(dbConnection: DBConnection): TilkjentYtelseRepository {
+                        return TilkjentYtelseRepository(dbConnection)
+                    }
+                },
                 vilkårsResultatService,
-                tilkjentYtelseRepository,
-                beregningsGrunnlagService,
+                beregningsgrunnlagRepository,
                 bqRepository,
             )
-        return Triple(tilkjentYtelseRepository, bigQueryClient, service)
+        return Pair(bigQueryClient, service)
     }
 
 }
