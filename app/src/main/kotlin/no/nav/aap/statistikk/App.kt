@@ -22,7 +22,6 @@ import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
@@ -41,7 +40,7 @@ import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.server.authenticate.authentication
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -92,7 +91,8 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
 
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
-    val vilkårsResultatService = VilkårsResultatService(dataSource)
+
+    val vilkårsresultatRepository = VilkårsresultatRepository(dataSource)
 
     val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
@@ -106,8 +106,8 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
                     return TilkjentYtelseRepository(dbConnection)
                 }
             },
-            vilkårsResultatService,
             beregningsgrunnlagRepository,
+            vilkårsresultatRepository,
             bqRepository,
         )
 
