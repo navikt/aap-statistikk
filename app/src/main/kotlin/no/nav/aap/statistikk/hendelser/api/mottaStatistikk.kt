@@ -12,8 +12,7 @@ import no.nav.aap.statistikk.LagreHendelseJobb
 import no.nav.aap.statistikk.TransactionExecutor
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
-import no.nav.aap.statistikk.hendelser.JobbAppender
-import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.JobbAppender
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
