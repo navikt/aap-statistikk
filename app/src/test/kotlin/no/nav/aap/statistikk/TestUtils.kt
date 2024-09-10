@@ -9,14 +9,19 @@ import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.hendelser.JobbAppender
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -38,7 +43,8 @@ private val logger = LoggerFactory.getLogger("TestUtils")
  */
 fun <E> testKlient(
     transactionExecutor: TransactionExecutor,
-    hendelsesRepositoryFactory: Factory<IHendelsesRepository>,
+    motor: Motor,
+    jobbAppender: JobbAppender,
     avsluttetBehandlingService: AvsluttetBehandlingService,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
@@ -51,7 +57,13 @@ fun <E> testKlient(
 
     testApplication {
         application {
-            module(transactionExecutor, hendelsesRepositoryFactory, avsluttetBehandlingService, azureConfig)
+            module(
+                transactionExecutor,
+                motor,
+                jobbAppender,
+                avsluttetBehandlingService,
+                azureConfig
+            )
         }
         val client = client.config {
             install(ContentNegotiation) {
@@ -143,4 +155,10 @@ val noOpTransactionExecutor = object : TransactionExecutor {
     override fun <E> withinTransaction(block: (DBConnection) -> E): E {
         return block(mockk())
     }
+}
+
+fun motorMock(): Motor {
+    val motor = mockk<Motor>()
+    every { motor.start() } just Runs
+    return motor
 }

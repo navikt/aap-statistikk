@@ -21,6 +21,11 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.motor.JobbInput
+import no.nav.aap.motor.Motor
+import no.nav.aap.motor.mdc.JobbLogInfoProvider
+import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
@@ -31,9 +36,8 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
+import no.nav.aap.statistikk.hendelser.JobbAppender
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepositoryFactory
-import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.server.authenticate.authentication
@@ -41,7 +45,6 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsResultatService
 import org.slf4j.LoggerFactory
 import java.util.*
-import javax.sql.DataSource
 
 
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
@@ -66,12 +69,27 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val flyway = Flyway(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
+    val motor = Motor(
+        dataSource = dataSource,
+        antallKammer = 8,
+        logInfoProvider = object : JobbLogInfoProvider {
+            override fun hentInformasjon(
+                connection: DBConnection,
+                jobbInput: JobbInput
+            ): LogInformasjon? {
+                println(jobbInput)
+                return LogInformasjon(mapOf())
+            }
+        },
+        jobber = listOf(LagreHendelseJobb)
+    )
+
     environment.monitor.subscribe(ApplicationStopped) {
         log.info("Received shutdown event. Closing Hikari connection pool.")
+        motor.stop()
         dataSource.close()
         environment.monitor.unsubscribe(ApplicationStopped) {}
     }
-    val hendelsesRepositoryFactory = HendelsesRepositoryFactory()
 
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
@@ -90,19 +108,29 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-    module(transactionExecutor, hendelsesRepositoryFactory, avsluttetBehandlingService, azureConfig)
+    module(
+        transactionExecutor,
+        motor,
+        MotorJobbAppender(),
+        avsluttetBehandlingService,
+        azureConfig
+    )
 }
 
 fun Application.module(
     transactionExecutor: TransactionExecutor,
-    hendelsesRepositoryFactory: Factory<IHendelsesRepository>,
+    motor: Motor,
+    jobbAppender: JobbAppender,
     avsluttetBehandlingService: AvsluttetBehandlingService,
     azureConfig: AzureConfig
 ) {
+    motor.start()
+
     monitoring()
     statusPages()
     tracing()
     contentNegotation()
+
     generateOpenAPI()
 
     authentication(azureConfig)
@@ -110,7 +138,10 @@ fun Application.module(
     routing {
         authenticate(AZURE) {
             apiRoute {
-                mottaStatistikk(transactionExecutor, hendelsesRepositoryFactory)
+                mottaStatistikk(
+                    transactionExecutor,
+                    jobbAppender,
+                )
                 avsluttetBehandling(avsluttetBehandlingService)
             }
         }

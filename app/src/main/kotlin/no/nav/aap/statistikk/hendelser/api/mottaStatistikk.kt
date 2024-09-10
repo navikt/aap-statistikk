@@ -6,9 +6,13 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
+import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
+import no.nav.aap.motor.JobbInput
+import no.nav.aap.statistikk.LagreHendelseJobb
 import no.nav.aap.statistikk.TransactionExecutor
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
+import no.nav.aap.statistikk.hendelser.JobbAppender
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -26,7 +30,7 @@ enum class Tags(override val description: String) : APITag {
 
 fun NormalOpenAPIRoute.mottaStatistikk(
     transactionExecutor: TransactionExecutor,
-    hendelsesRepositoryFactory: Factory<IHendelsesRepository>
+    jobbAppender: JobbAppender,
 ) {
     val exampleRequest = MottaStatistikkDTO(
         saksnummer = "4LFL5CW",
@@ -79,9 +83,11 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             TagModule(listOf(Tags.MottaStatistikk)), exampleRequest = exampleRequest
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
-                val hendelsesRepository = hendelsesRepositoryFactory.create(conn)
-                hendelsesRepository.lagreHendelse(dto)
                 log.info("Got DTO: $dto")
+
+                val stringified = DefaultJsonMapper.toJson(dto)
+
+                jobbAppender.leggTil(conn, JobbInput(LagreHendelseJobb).medPayload(stringified))
             }
             // Må ha String-respons på grunn av Accept-header. Denne må returnere json
             responder.respond(HttpStatusCode.Accepted, "{}", pipeline)

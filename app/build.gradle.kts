@@ -45,10 +45,11 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql:42.7.4")
     implementation("com.zaxxer:HikariCP:5.1.0")
 
-    implementation("no.nav.aap.kelvin:motor:0.0.34")
+    implementation("no.nav.aap.kelvin:motor:0.0.36")
     implementation("no.nav.aap.kelvin:dbconnect:0.0.36")
+    implementation("no.nav.aap.kelvin:httpklient:0.0.36")
 
-    implementation("dev.forst:ktor-openapi-generator:0.6.1")
+    implementation("no.nav:ktor-openapi-generator:1.0.27")
 
     implementation("com.google.cloud:google-cloud-bigquery:2.42.2")
 
