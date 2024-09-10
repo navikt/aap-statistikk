@@ -4,22 +4,20 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.checkUnnecessaryStub
 import io.mockk.mockk
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
-import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.Fakes
 import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.LagreHendelseJobb
+import no.nav.aap.statistikk.MockJobbAppender
 import no.nav.aap.statistikk.MotorJobbAppender
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.JobbAppender
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepositoryFactory
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.motorMock
 import no.nav.aap.statistikk.noOpTransactionExecutor
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -44,15 +42,7 @@ class MottaStatistikkTest {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
 
-        val jobbAppender = object : JobbAppender {
-            var payload: String? = null
-            override fun leggTil(
-                connection: DBConnection,
-                jobb: JobbInput
-            ) {
-                payload = jobb.payload()
-            }
-        }
+        val jobbAppender = MockJobbAppender()
 
         val motor = motorMock()
 
@@ -83,16 +73,19 @@ class MottaStatistikkTest {
             Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
         }
 
-        assertThat(jobbAppender.payload).isNotNull
-        assertThat(jobbAppender.payload).isEqualTo(DefaultJsonMapper.toJson(MottaStatistikkDTO(
-            saksnummer = "123",
-            status = "OPPRETTET",
-            behandlingType = TypeBehandling.Førstegangsbehandling,
-            ident = "0",
-            behandlingReferanse = behandlingReferanse,
-            behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-            avklaringsbehov = listOf()
-        )))
+        assertThat(jobbAppender.jobber.first().payload()).isEqualTo(
+            DefaultJsonMapper.toJson(
+                MottaStatistikkDTO(
+                    saksnummer = "123",
+                    status = "OPPRETTET",
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    ident = "0",
+                    behandlingReferanse = behandlingReferanse,
+                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                    avklaringsbehov = listOf()
+                )
+            )
+        )
 
         checkUnnecessaryStub(
             avsluttetBehandlingService,
@@ -191,13 +184,13 @@ class MottaStatistikkTest {
             jobber = listOf(LagreHendelseJobb)
         )
 
+
+        val jobbAppender = MotorJobbAppender(dataSource)
+
         dataSource.transaction {
-            val hendelsesRepository = HendelsesRepositoryFactory().create(it)
+            val hendelsesRepository = HendelsesRepository(it)
             val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
 
-            val jobbAppender = MotorJobbAppender(
-
-            )
             testKlient(
                 transactionExecutor,
                 motor,
@@ -234,8 +227,10 @@ class MottaStatistikkTest {
         val timeInMillis = measureTimeMillis {
             dataSource.transaction(readOnly = true) {
                 val maxTid = LocalDateTime.now().plusMinutes(1)
-                val hendelsesRepository = HendelsesRepositoryFactory().create(it)
-                while (hendelsesRepository.hentHendelser().isEmpty() && maxTid.isAfter(LocalDateTime.now())) {
+                val hendelsesRepository = HendelsesRepository(it)
+                while (hendelsesRepository.hentHendelser()
+                        .isEmpty() && maxTid.isAfter(LocalDateTime.now())
+                ) {
                     Thread.sleep(50L)
                 }
             }

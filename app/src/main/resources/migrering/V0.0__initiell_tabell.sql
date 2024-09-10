@@ -28,6 +28,12 @@ CREATE TABLE motta_statistikk
     status        VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE avsluttet_behandling
+(
+    ID      BIGSERIAL NOT NULL PRIMARY KEY,
+    payload TEXT      NOT NULL
+);
+
 CREATE TABLE VILKARSRESULTAT
 (
     id            BIGSERIAL     NOT NULL PRIMARY KEY,

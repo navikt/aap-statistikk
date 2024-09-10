@@ -1,100 +1,89 @@
 package no.nav.aap.statistikk.tilkjentytelse.repository
 
-import no.nav.aap.statistikk.db.hentGenerertNøkkel
-import no.nav.aap.statistikk.db.withinTransaction
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
-import java.sql.Connection
-import java.sql.Statement
-import java.sql.Types
+import java.math.BigDecimal
 import java.util.*
-import javax.sql.DataSource
 
 private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.java)
 
-class TilkjentYtelseRepository(private val dataSource: DataSource) {
-    fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Int {
-        return dataSource.withinTransaction { connection ->
-            val behandlingId = hentBehandlingId(tilkjentYtelse.behandlingsReferanse, connection)
-            val sql = "INSERT INTO TILKJENT_YTELSE (behandling_id) VALUES (?)"
+class TilkjentYtelseRepository(
+    private val dbConnection: DBConnection
+) {
+    fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
 
-            val preparedStatement =
-                connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).apply {
-                    setInt(1, behandlingId)
-                    executeUpdate()
+        val nøkkel =
+            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id) VALUES (?)") {
+                setParams {
+                    setInt(1, hentBehandlingId(tilkjentYtelse.behandlingsReferanse, dbConnection))
                 }
-
-            val nøkkel = preparedStatement.hentGenerertNøkkel()
-
-            tilkjentYtelse.perioder.forEach { periode ->
-                logger.info("Setter inn tilkjentytelse-periode $periode med ID: $nøkkel")
-                val periodeSql =
-                    "INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID) VALUES (?, ?, ?, ?, ?)"
-
-                val periodeStatement = connection.prepareStatement(periodeSql)
-                periodeStatement.setObject(1, java.sql.Date.valueOf(periode.fraDato))
-                periodeStatement.setObject(2, java.sql.Date.valueOf(periode.tilDato))
-                periodeStatement.setObject(3, periode.dagsats)
-                periodeStatement.setObject(4, periode.gradering)
-                periodeStatement.setInt(5, nøkkel)
-                periodeStatement.executeUpdate()
             }
 
-            nøkkel
+        val sql =
+            "INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID) VALUES (?, ?, ?, ?, ?)"
+        tilkjentYtelse.perioder.forEach { periode ->
+            dbConnection.execute(sql) {
+                setParams {
+                    setLocalDate(1, periode.fraDato)
+                    setLocalDate(2, periode.tilDato)
+                    setBigDecimal(3, BigDecimal.valueOf(periode.dagsats))
+                    setBigDecimal(4, BigDecimal.valueOf(periode.gradering))
+                    setLong(5, nøkkel)
+                }
+            }
         }
+
+        logger.info("Lagret tilkjent ytelse med ID: $nøkkel.")
+
+        return nøkkel
     }
 
-    private fun hentBehandlingId(behandlingReferanse: UUID, connection: Connection): Int {
+    private fun hentBehandlingId(behandlingReferanse: UUID, connection: DBConnection): Int {
         val sql = "SELECT id FROM behandling WHERE referanse = ?"
 
-        val preparedStatement =
-            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).apply {
-                setObject(1, behandlingReferanse, Types.OTHER)
-                executeQuery()
+        return connection.queryFirst<Int>(sql) {
+            setParams {
+                setUUID(1, behandlingReferanse)
             }
-
-        val resultSet = preparedStatement.resultSet
-        if (resultSet.next()) {
-            val id = resultSet.getInt("id")
-            logger.info("ID retrieved: $id")
-            return id
+            setRowMapper {
+                it.getInt("id")
+            }
         }
-        throw RuntimeException("Behandling ID for hendelse $behandlingReferanse ikke funnet")
     }
 
     fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
-        return dataSource.withinTransaction { connection ->
-            val preparedStatement = connection.prepareStatement(
-                """SELECT *
+        val perioderTriple = dbConnection.queryList<Triple<TilkjentYtelsePeriode, UUID, String>>(
+            """SELECT *
 FROM tilkjent_ytelse_periode
-         left join tilkjent_ytelse on tilkjent_ytelse.id = tilkjent_ytelse_periode.tilkjent_ytelse_id
+         left join tilkjent_ytelse
+                   on tilkjent_ytelse.id = tilkjent_ytelse_periode.tilkjent_ytelse_id
+         left join behandling on behandling.id = tilkjent_ytelse.behandling_id
+         left join sak on sak.id = behandling.sak_id
 WHERE tilkjent_ytelse.id = ?"""
-            ).apply {
-                setInt(1, tilkjentYtelseId)
-                executeQuery()
-            }
+        ) {
+            setParams { setInt(1, tilkjentYtelseId) }
+            setRowMapper { row ->
+                val fraDato = row.getLocalDate("fra_dato")
+                val tilDato = row.getLocalDate("til_dato")
+                val dagsats = row.getBigDecimal("dagsats").toDouble()
+                val gradering = row.getBigDecimal("gradering").toDouble()
 
-            val resultSet = preparedStatement.resultSet
-            if (resultSet.next()) {
-                val id = resultSet.getLong("id")
-                logger.info("ID: $id")
-                val saksnummer = "xxxx" // resultSet.getString("saksnummer")
-                val behandlingsReferanse = UUID.randomUUID() // !!!
-
-                val perioder = mutableListOf<TilkjentYtelsePeriode>()
-                do {
-                    val fraDato = resultSet.getDate("fra_dato").toLocalDate()
-                    val tilDato = resultSet.getDate("til_dato").toLocalDate()
-                    val dagsats = resultSet.getDouble("dagsats")
-                    val gradering = resultSet.getDouble("gradering")
-                    perioder.add(TilkjentYtelsePeriode(fraDato, tilDato, dagsats, gradering))
-                } while (resultSet.next())
-
-                TilkjentYtelse(saksnummer, behandlingsReferanse, perioder)
-            } else {
-                null
+                Triple(
+                    TilkjentYtelsePeriode(
+                        fraDato = fraDato,
+                        tilDato = tilDato,
+                        dagsats = dagsats,
+                        gradering = gradering
+                    ), row.getUUID("referanse"), row.getString("saksnummer")
+                )
             }
         }
+
+        val saksnummer = perioderTriple.first().third
+        val behandlingsReferanse = perioderTriple.first().second
+
+        return TilkjentYtelse(saksnummer, behandlingsReferanse, perioderTriple.map { it.first })
     }
 }

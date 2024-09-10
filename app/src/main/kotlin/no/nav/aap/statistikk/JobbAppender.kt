@@ -5,4 +5,5 @@ import no.nav.aap.motor.JobbInput
 
 interface JobbAppender {
     fun leggTil(connection: DBConnection, jobb: JobbInput)
+    fun leggTil(jobb: JobbInput)
 }
