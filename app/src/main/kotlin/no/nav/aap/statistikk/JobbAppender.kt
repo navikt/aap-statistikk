@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.hendelser
+package no.nav.aap.statistikk
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.JobbInput

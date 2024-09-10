@@ -36,7 +36,6 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Flyway
-import no.nav.aap.statistikk.hendelser.JobbAppender
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig

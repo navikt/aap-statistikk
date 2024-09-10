@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.api
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.checkUnnecessaryStub
-import io.mockk.every
 import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -19,9 +18,8 @@ import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.hendelser.JobbAppender
+import no.nav.aap.statistikk.JobbAppender
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepositoryFactory
-import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.motorMock
 import no.nav.aap.statistikk.noOpTransactionExecutor
 import no.nav.aap.statistikk.server.authenticate.AzureConfig

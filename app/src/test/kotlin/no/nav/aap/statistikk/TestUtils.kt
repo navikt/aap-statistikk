@@ -21,9 +21,7 @@ import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.hendelser.JobbAppender
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
-import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
