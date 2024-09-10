@@ -6,11 +6,13 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
+import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.BeregningsGrunnlagService
 import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.hendelser.JobbAppender
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -55,9 +57,10 @@ class ApplicationTest {
 
         testKlient(
             noOpTransactionExecutor,
-            hendelsesRepository,
+            motor = motorMock(),
+            mockk(),
             avsluttetBehandlingService,
-            azureConfig
+            azureConfig,
         ) { client ->
             val response = client.post("/avsluttetBehandling") {
                 headers {
@@ -143,15 +146,16 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val factoryMock = mockk<Factory<IHendelsesRepository>>()
         val hendelsesRepository = mockk<IHendelsesRepository>()
-        every { factoryMock.create(any()) } returns hendelsesRepository
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns 1
+
+        val jobbAppender = mockk<JobbAppender>()
+        every { jobbAppender.leggTil(any(), any()) } returns Unit
 
         testKlient(
             noOpTransactionExecutor,
-            factoryMock,
+            motorMock(),
+            jobbAppender,
             avsluttetBehandlingService,
             azureConfig
         ) { client ->
@@ -184,12 +188,11 @@ class ApplicationTest {
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
 
-        verify(exactly = 1) { hendelsesRepository.lagreHendelse(any()) }
+        verify(exactly = 1) { jobbAppender.leggTil(any(), any<JobbInput>()) }
 
         checkUnnecessaryStub(
-            factoryMock,
-            hendelsesRepository,
             avsluttetBehandlingService,
+            jobbAppender
         )
     }
 
@@ -272,7 +275,8 @@ class ApplicationTest {
 
         testKlient(
             mockk<TransactionExecutor>(),
-            factoryMock,
+            motorMock(),
+            mockk(),
             avsluttetBehandlingService,
             azureConfig
         ) { client ->
@@ -319,16 +323,15 @@ class ApplicationTest {
   "avklaringsbehov": [],
   "ukjentfelt": "hei"
 }"""
-        val mockFactory = mockk<Factory<IHendelsesRepository>>()
-        val hendelsesRepository = mockk<IHendelsesRepository>()
-        every { mockFactory.create(any()) } returns hendelsesRepository
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
+        val jobbAppender = mockk<JobbAppender>()
+        every { jobbAppender.leggTil(any(), any()) } returns Unit
 
         testKlient(
             noOpTransactionExecutor,
-            mockFactory,
+            motorMock(),
+            jobbAppender,
             avsluttetBehandlingService,
             azureConfig
         ) { client ->
@@ -343,8 +346,6 @@ class ApplicationTest {
         }
 
         checkUnnecessaryStub(
-            mockFactory,
-            hendelsesRepository,
             avsluttetBehandlingService,
         )
     }

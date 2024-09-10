@@ -5,25 +5,34 @@ import io.ktor.http.*
 import io.mockk.checkUnnecessaryStub
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
+import no.nav.aap.motor.JobbInput
+import no.nav.aap.motor.Motor
+import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.Fakes
 import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
+import no.nav.aap.statistikk.LagreHendelseJobb
+import no.nav.aap.statistikk.MotorJobbAppender
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
+import no.nav.aap.statistikk.hendelser.JobbAppender
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepositoryFactory
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.motorMock
+import no.nav.aap.statistikk.noOpTransactionExecutor
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testKlient
-import no.nav.aap.statistikk.noOpTransactionExecutor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import kotlin.system.measureTimeMillis
 
 @Fakes
 class MottaStatistikkTest {
@@ -32,18 +41,27 @@ class MottaStatistikkTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val factoryMock = mockk<Factory<IHendelsesRepository>>()
-        val hendelsesRepository = mockk<IHendelsesRepository>()
-        every { factoryMock.create(any()) } returns hendelsesRepository
         val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { hendelsesRepository.lagreHendelse(any()) } returns 1
 
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
 
+        val jobbAppender = object : JobbAppender {
+            var payload: String? = null
+            override fun leggTil(
+                connection: DBConnection,
+                jobb: JobbInput
+            ) {
+                payload = jobb.payload()
+            }
+        }
+
+        val motor = motorMock()
+
         testKlient(
             noOpTransactionExecutor,
-            factoryMock,
+            motor,
+            jobbAppender,
             avsluttetBehandlingService,
             azureConfig
         ) { client ->
@@ -67,24 +85,19 @@ class MottaStatistikkTest {
             Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
         }
 
-        verify {
-            hendelsesRepository.lagreHendelse(
-                MottaStatistikkDTO(
-                    saksnummer = "123",
-                    status = "OPPRETTET",
-                    behandlingType = TypeBehandling.Førstegangsbehandling,
-                    ident = "0",
-                    behandlingReferanse = behandlingReferanse,
-                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                    avklaringsbehov = listOf()
-                )
-            )
-        }
+        assertThat(jobbAppender.payload).isNotNull
+        assertThat(jobbAppender.payload).isEqualTo(DefaultJsonMapper.toJson(MottaStatistikkDTO(
+            saksnummer = "123",
+            status = "OPPRETTET",
+            behandlingType = TypeBehandling.Førstegangsbehandling,
+            ident = "0",
+            behandlingReferanse = behandlingReferanse,
+            behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+            avklaringsbehov = listOf()
+        )))
 
         checkUnnecessaryStub(
             avsluttetBehandlingService,
-            factoryMock,
-            hendelsesRepository
         )
     }
 
@@ -172,13 +185,25 @@ class MottaStatistikkTest {
         )
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+
+        val motor = Motor(
+            dataSource = dataSource,
+            antallKammer = 2,
+            logInfoProvider = NoExtraLogInfoProvider,
+            jobber = listOf(LagreHendelseJobb)
+        )
+
         dataSource.transaction {
             val hendelsesRepository = HendelsesRepositoryFactory().create(it)
             val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
 
+            val jobbAppender = MotorJobbAppender(
+
+            )
             testKlient(
                 transactionExecutor,
-                HendelsesRepositoryFactory(),
+                motor,
+                jobbAppender,
                 avsluttetBehandlingService,
                 azureConfig
             ) { client ->
@@ -191,6 +216,8 @@ class MottaStatistikkTest {
                 }
                 Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
 
+                ventPåSvar(dataSource)
+
                 val hentHendelser = hendelsesRepository.hentHendelser()
 
                 assertThat(hentHendelser).hasSize(1)
@@ -199,11 +226,22 @@ class MottaStatistikkTest {
                 assertThat(hentHendelser.first().behandlingOpprettetTidspunkt).isEqualTo(hendelse.behandlingOpprettetTidspunkt)
                 assertThat(hentHendelser.first().behandlingType).isEqualTo(hendelse.behandlingType)
                 assertThat(hentHendelser.first().status).isEqualTo(hendelse.status)
+
+
             }
         }
+    }
 
-        //assertThat(hentHendelser.first().avklaringsbehov).hasSize(3)
-        //assertThat(hentHendelser.first().avklaringsbehov[0].status).isEqualTo(EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"))
-        //assertThat(hentHendelser.first().avklaringsbehov[0].endringer).hasSize(2)
+    private fun ventPåSvar(dataSource: DataSource) {
+        val timeInMillis = measureTimeMillis {
+            dataSource.transaction(readOnly = true) {
+                val maxTid = LocalDateTime.now().plusMinutes(1)
+                val hendelsesRepository = HendelsesRepositoryFactory().create(it)
+                while (hendelsesRepository.hentHendelser().isEmpty() && maxTid.isAfter(LocalDateTime.now())) {
+                    Thread.sleep(50L)
+                }
+            }
+        }
+        println("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder.")
     }
 }
