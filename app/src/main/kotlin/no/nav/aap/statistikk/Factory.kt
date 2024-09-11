@@ -1,5 +1,5 @@
 import no.nav.aap.komponenter.dbconnect.DBConnection
 
-interface Factory<T> {
+interface Factory<out T> {
     fun create(dbConnection: DBConnection): T
 }

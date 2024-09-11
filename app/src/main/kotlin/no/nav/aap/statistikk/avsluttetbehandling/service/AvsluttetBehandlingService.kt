@@ -5,14 +5,14 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 
 class AvsluttetBehandlingService(
     private val transactionExecutor: TransactionExecutor,
-    private val tilkjentYtelseRepositoryFactory: Factory<TilkjentYtelseRepository>,
+    private val tilkjentYtelseRepositoryFactory: Factory<ITilkjentYtelseRepository>,
     private val beregningsgrunnlagRepositoryFactory: Factory<BeregningsgrunnlagRepository>,
     private val vilkårsResultatRepository: VilkårsresultatRepository,
     private val bqRepository: IBQRepository

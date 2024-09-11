@@ -27,6 +27,9 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
+import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
@@ -199,7 +202,19 @@ class FakeBQRepository : IBQRepository {
         payload: IBeregningsGrunnlag,
         behandlingsReferanse: UUID
     ) {
-       beregningsgrunnlag.add(payload)
+        beregningsgrunnlag.add(payload)
+    }
+}
+
+class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
+    val tilkjentYtelser = mutableMapOf<Int, TilkjentYtelseEntity>()
+    override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
+        tilkjentYtelser.put(tilkjentYtelser.size, tilkjentYtelse)
+        return (tilkjentYtelser.size + 1).toLong();
+    }
+
+    override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
+        TODO("Not yet implemented")
     }
 
 }
