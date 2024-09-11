@@ -45,9 +45,9 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql:42.7.4")
     implementation("com.zaxxer:HikariCP:5.1.0")
 
-    implementation("no.nav.aap.kelvin:motor:0.0.36")
-    implementation("no.nav.aap.kelvin:dbconnect:0.0.36")
-    implementation("no.nav.aap.kelvin:httpklient:0.0.36")
+    implementation("no.nav.aap.kelvin:motor:0.0.42")
+    implementation("no.nav.aap.kelvin:dbconnect:0.0.42")
+    implementation("no.nav.aap.kelvin:httpklient:0.0.42")
 
     implementation("no.nav:ktor-openapi-generator:1.0.30")
 

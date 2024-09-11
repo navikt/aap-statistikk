@@ -7,16 +7,13 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -33,9 +30,9 @@ class ApplicationTest {
         @Fakes token: TestToken
     ) {
         val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-        val factory = mockk<Factory<TilkjentYtelseRepository>>()
-        every { factory.create(any()) } returns tilkjentYtelseRepository
-        val bqMock = mockk<BQRepository>()
+        val tilkjentYtelseRepositoryFactory = mockk<Factory<TilkjentYtelseRepository>>()
+        every { tilkjentYtelseRepositoryFactory.create(any()) } returns tilkjentYtelseRepository
+        val bqMock = FakeBQRepository()
         val beregningsgrunnlagRepository = mockk<BeregningsgrunnlagRepository>()
         val transactionExecutor = noOpTransactionExecutor
         val vilkårsResultatRepository = mockk<VilkårsresultatRepository>()
@@ -43,8 +40,12 @@ class ApplicationTest {
         val avsluttetBehandlingService =
             AvsluttetBehandlingService(
                 transactionExecutor,
-                factory,
-                beregningsgrunnlagRepository,
+                tilkjentYtelseRepositoryFactory,
+                object : Factory<BeregningsgrunnlagRepository> {
+                    override fun create(dbConnection: DBConnection): BeregningsgrunnlagRepository {
+                        return beregningsgrunnlagRepository
+                    }
+                },
                 vilkårsResultatRepository,
                 bqMock
             )
@@ -53,9 +54,6 @@ class ApplicationTest {
 
         every { vilkårsResultatRepository.lagreVilkårsResultat(any()) } returns 1
         every { tilkjentYtelseRepository.lagreTilkjentYtelse(any()) } returns 143
-        every { bqMock.lagre(any<TilkjentYtelse>()) } returns Unit
-        every { bqMock.lagre(any<IBeregningsGrunnlag>(), any<UUID>()) } returns Unit
-        every { bqMock.lagre(any<Vilkårsresultat>()) } returns Unit
         every { beregningsgrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns 1
 
         val jobbAppender = MockJobbAppender()
@@ -142,7 +140,8 @@ class ApplicationTest {
         checkUnnecessaryStub(
             vilkårsResultatRepository,
             tilkjentYtelseRepository,
-            bqMock, factory, beregningsgrunnlagRepository, vilkårsResultatRepository
+            tilkjentYtelseRepositoryFactory, beregningsgrunnlagRepository,
+            vilkårsResultatRepository
         )
     }
 

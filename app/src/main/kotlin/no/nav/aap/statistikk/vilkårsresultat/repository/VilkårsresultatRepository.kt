@@ -68,7 +68,7 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
                             setBoolean(4, periode.manuellVurdering)
                             setString(5, periode.innvilgelsesårsak)
                             setString(6, periode.avslagsårsak)
-                            setInt(7, vilkårKey)
+                            setLong(7, vilkårKey)
                             executeUpdate()
                         }
                 }

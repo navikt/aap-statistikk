@@ -92,11 +92,9 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
 
-    val vilkårsresultatRepository = VilkårsresultatRepository(dataSource)
-
-    val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
-
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+
+    val vilkårsresultatRepository = VilkårsresultatRepository(dataSource)
 
     val avsluttetBehandlingService =
         AvsluttetBehandlingService(
@@ -106,7 +104,12 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
                     return TilkjentYtelseRepository(dbConnection)
                 }
             },
-            beregningsgrunnlagRepository,
+            object : Factory<BeregningsgrunnlagRepository> {
+                override fun create(dbConnection: DBConnection): BeregningsgrunnlagRepository {
+                    return BeregningsgrunnlagRepository(dbConnection)
+                }
+
+            },
             vilkårsresultatRepository,
             bqRepository,
         )
