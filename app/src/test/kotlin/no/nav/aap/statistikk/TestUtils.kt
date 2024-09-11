@@ -30,6 +30,8 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
@@ -209,11 +211,22 @@ class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
     val tilkjentYtelser = mutableMapOf<Int, TilkjentYtelseEntity>()
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
         tilkjentYtelser.put(tilkjentYtelser.size, tilkjentYtelse)
-        return (tilkjentYtelser.size + 1).toLong();
+        return (tilkjentYtelser.size - 1).toLong();
     }
 
     override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
         TODO("Not yet implemented")
     }
+}
 
+class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
+    val vilkår = mutableMapOf<Int, VilkårsResultatEntity>()
+    override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity): Int {
+        vilkår.put(vilkår.size, vilkårsresultat)
+        return vilkår.size - 1
+    }
+
+    override fun hentVilkårsResultat(vilkårResultatId: Int): VilkårsResultatEntity? {
+        TODO("Not yet implemented")
+    }
 }

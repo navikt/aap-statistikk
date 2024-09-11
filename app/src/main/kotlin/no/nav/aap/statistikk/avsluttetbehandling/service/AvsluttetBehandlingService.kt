@@ -8,14 +8,14 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRep
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
+import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 
 class AvsluttetBehandlingService(
     private val transactionExecutor: TransactionExecutor,
     private val tilkjentYtelseRepositoryFactory: Factory<ITilkjentYtelseRepository>,
     private val beregningsgrunnlagRepositoryFactory: Factory<BeregningsgrunnlagRepository>,
-    private val vilkårsResultatRepository: VilkårsresultatRepository,
+    private val vilkårsResultatRepository: IVilkårsresultatRepository,
     private val bqRepository: IBQRepository
 ) {
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {

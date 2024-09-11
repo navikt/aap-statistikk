@@ -14,7 +14,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingServ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -37,7 +36,7 @@ class ApplicationTest {
         val faceBQRepository = FakeBQRepository()
         val beregningsgrunnlagRepository = mockk<BeregningsgrunnlagRepository>()
         val transactionExecutor = noOpTransactionExecutor
-        val vilkårsResultatRepository = mockk<VilkårsresultatRepository>()
+        val vilkårsResultatRepository = FakeVilkårsResultatRepository()
 
         val avsluttetBehandlingService =
             AvsluttetBehandlingService(
@@ -54,7 +53,6 @@ class ApplicationTest {
 
         val behandlingReferanse = UUID.randomUUID()
 
-        every { vilkårsResultatRepository.lagreVilkårsResultat(any()) } returns 1
         every { beregningsgrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns 1
 
         val jobbAppender = MockJobbAppender()
@@ -136,12 +134,11 @@ class ApplicationTest {
         runBlocking {
             assertThat(response.body<String>()).isEqualTo("{}")
         }
-        verify(exactly = 1) { vilkårsResultatRepository.lagreVilkårsResultat(any()) }
+
+        assertThat(vilkårsResultatRepository.vilkår.size).isEqualTo(1)
 
         checkUnnecessaryStub(
-            vilkårsResultatRepository,
             beregningsgrunnlagRepository,
-            vilkårsResultatRepository
         )
     }
 
