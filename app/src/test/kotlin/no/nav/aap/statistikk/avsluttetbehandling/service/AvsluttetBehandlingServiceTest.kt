@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.avsluttetbehandling.service
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.BigQuery
+import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
