@@ -9,10 +9,15 @@ import java.util.*
 
 private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.java)
 
+interface ITilkjentYtelseRepository {
+    fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long
+    fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse?
+}
+
 class TilkjentYtelseRepository(
     private val dbConnection: DBConnection
-) {
-    fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
+) : ITilkjentYtelseRepository {
+    override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
 
         val nøkkel =
             dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id) VALUES (?)") {
@@ -53,7 +58,7 @@ class TilkjentYtelseRepository(
         }
     }
 
-    fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
+    override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
         val perioderTriple = dbConnection.queryList<Triple<TilkjentYtelsePeriode, UUID, String>>(
             """SELECT *
 FROM tilkjent_ytelse_periode

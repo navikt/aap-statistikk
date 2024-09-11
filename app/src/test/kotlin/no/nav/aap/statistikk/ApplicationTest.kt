@@ -13,7 +13,7 @@ import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -29,10 +29,12 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-        val tilkjentYtelseRepositoryFactory = mockk<Factory<TilkjentYtelseRepository>>()
-        every { tilkjentYtelseRepositoryFactory.create(any()) } returns tilkjentYtelseRepository
-        val bqMock = FakeBQRepository()
+        val tilkjentYtelseRepositoryFactory = object : Factory<ITilkjentYtelseRepository> {
+            override fun create(dbConnection: DBConnection): ITilkjentYtelseRepository {
+                return FakeTilkjentYtelseRepository()
+            }
+        }
+        val faceBQRepository = FakeBQRepository()
         val beregningsgrunnlagRepository = mockk<BeregningsgrunnlagRepository>()
         val transactionExecutor = noOpTransactionExecutor
         val vilkårsResultatRepository = mockk<VilkårsresultatRepository>()
@@ -47,13 +49,12 @@ class ApplicationTest {
                     }
                 },
                 vilkårsResultatRepository,
-                bqMock
+                faceBQRepository
             )
 
         val behandlingReferanse = UUID.randomUUID()
 
         every { vilkårsResultatRepository.lagreVilkårsResultat(any()) } returns 1
-        every { tilkjentYtelseRepository.lagreTilkjentYtelse(any()) } returns 143
         every { beregningsgrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns 1
 
         val jobbAppender = MockJobbAppender()
@@ -139,8 +140,7 @@ class ApplicationTest {
 
         checkUnnecessaryStub(
             vilkårsResultatRepository,
-            tilkjentYtelseRepository,
-            tilkjentYtelseRepositoryFactory, beregningsgrunnlagRepository,
+            beregningsgrunnlagRepository,
             vilkårsResultatRepository
         )
     }

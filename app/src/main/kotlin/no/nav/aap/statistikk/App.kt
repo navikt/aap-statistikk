@@ -39,6 +39,7 @@ import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.server.authenticate.authentication
+import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
@@ -99,7 +100,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val avsluttetBehandlingService =
         AvsluttetBehandlingService(
             transactionExecutor,
-            object : Factory<TilkjentYtelseRepository> {
+            object : Factory<ITilkjentYtelseRepository> {
                 override fun create(dbConnection: DBConnection): TilkjentYtelseRepository {
                     return TilkjentYtelseRepository(dbConnection)
                 }
