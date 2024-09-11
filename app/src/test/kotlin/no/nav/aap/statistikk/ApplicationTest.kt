@@ -6,12 +6,8 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
-import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
@@ -256,37 +252,6 @@ class ApplicationTest {
         assertThat(fakeTilkjentYtelseRepository.tilkjentYtelser.size).isEqualTo(1)
 
         assertThat(jobbAppender.jobber.size).isEqualTo(1)
-    }
-
-    private fun konstruerFakes(): Triple<FakeTilkjentYtelseRepository, AvsluttetBehandlingService, FakeVilkårsResultatRepository> {
-        val fakeTilkjentYtelseRepository = FakeTilkjentYtelseRepository()
-        val tilkjentYtelseRepositoryFactory = object : Factory<ITilkjentYtelseRepository> {
-            override fun create(dbConnection: DBConnection): ITilkjentYtelseRepository {
-                return fakeTilkjentYtelseRepository
-            }
-        }
-        val faceBQRepository = FakeBQRepository()
-        val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
-        val transactionExecutor = noOpTransactionExecutor
-        val vilkårsResultatRepository = FakeVilkårsResultatRepository()
-
-        val avsluttetBehandlingService =
-            AvsluttetBehandlingService(
-                transactionExecutor,
-                tilkjentYtelseRepositoryFactory,
-                object : Factory<IBeregningsgrunnlagRepository> {
-                    override fun create(dbConnection: DBConnection): IBeregningsgrunnlagRepository {
-                        return beregningsgrunnlagRepository
-                    }
-                },
-                vilkårsResultatRepository,
-                faceBQRepository
-            )
-        return Triple(
-            fakeTilkjentYtelseRepository,
-            avsluttetBehandlingService,
-            vilkårsResultatRepository
-        )
     }
 
     @Test

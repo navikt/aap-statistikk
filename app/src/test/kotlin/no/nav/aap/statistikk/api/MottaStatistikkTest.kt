@@ -2,8 +2,6 @@ package no.nav.aap.statistikk.api
 
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.mockk.checkUnnecessaryStub
-import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
@@ -16,8 +14,8 @@ import no.nav.aap.statistikk.MotorJobbAppender
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.konstruerFakes
 import no.nav.aap.statistikk.motorMock
 import no.nav.aap.statistikk.noOpTransactionExecutor
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -37,7 +35,7 @@ class MottaStatistikkTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        val (_, avsluttetBehandlingService) = konstruerFakes()
 
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
@@ -85,10 +83,6 @@ class MottaStatistikkTest {
                     avklaringsbehov = listOf()
                 )
             )
-        )
-
-        checkUnnecessaryStub(
-            avsluttetBehandlingService,
         )
     }
 
@@ -189,7 +183,7 @@ class MottaStatistikkTest {
 
         dataSource.transaction {
             val hendelsesRepository = HendelsesRepository(it)
-            val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+            val (_,avsluttetBehandlingService) = konstruerFakes()
 
             testKlient(
                 transactionExecutor,
@@ -217,8 +211,6 @@ class MottaStatistikkTest {
                 assertThat(hentHendelser.first().behandlingOpprettetTidspunkt).isEqualTo(hendelse.behandlingOpprettetTidspunkt)
                 assertThat(hentHendelser.first().behandlingType).isEqualTo(hendelse.behandlingType)
                 assertThat(hentHendelser.first().status).isEqualTo(hendelse.status)
-
-
             }
         }
     }
