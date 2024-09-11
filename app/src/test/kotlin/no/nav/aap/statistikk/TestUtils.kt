@@ -29,7 +29,6 @@ import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
