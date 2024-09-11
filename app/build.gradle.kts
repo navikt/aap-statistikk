@@ -49,7 +49,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:dbconnect:0.0.36")
     implementation("no.nav.aap.kelvin:httpklient:0.0.36")
 
-    implementation("no.nav:ktor-openapi-generator:1.0.27")
+    implementation("no.nav:ktor-openapi-generator:1.0.30")
 
     implementation("com.google.cloud:google-cloud-bigquery:2.42.2")
 
