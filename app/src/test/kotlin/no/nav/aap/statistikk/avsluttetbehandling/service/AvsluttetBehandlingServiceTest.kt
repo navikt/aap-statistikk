@@ -18,6 +18,7 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -98,7 +99,6 @@ class AvsluttetBehandlingServiceTest {
         val bigQueryClient = dataSource.transaction {
             val (bigQueryClient, avsluttetBehandlingService) = konstruerTilkjentYtelseService(
                 dataSource,
-                it,
                 bigQuery
             )
 
@@ -175,14 +175,11 @@ class AvsluttetBehandlingServiceTest {
             behandlingsReferanse = behandlingReferanse
         )
 
-        dataSource.transaction {
-            val (_, service) = konstruerTilkjentYtelseService(
-                dataSource,
-                it,
-                bigQuery
-            )
-            service.lagre(avsluttetBehandling)
-        }
+        val (_, service) = konstruerTilkjentYtelseService(
+            dataSource,
+            bigQuery
+        )
+        service.lagre(avsluttetBehandling)
 
         val uthentet =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }!!
@@ -192,7 +189,6 @@ class AvsluttetBehandlingServiceTest {
 
     private fun konstruerTilkjentYtelseService(
         dataSource: DataSource,
-        dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig)
@@ -211,7 +207,11 @@ class AvsluttetBehandlingServiceTest {
                         return BeregningsgrunnlagRepository(dbConnection)
                     }
                 },
-                VilkårsresultatRepository(dataSource),
+                object : Factory<IVilkårsresultatRepository> {
+                    override fun create(dbConnection: DBConnection): IVilkårsresultatRepository {
+                        return VilkårsresultatRepository(dbConnection)
+                    }
+                },
                 bqRepository,
             )
         return Pair(bigQueryClient, service)
