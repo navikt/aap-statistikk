@@ -95,8 +95,6 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-    val vilkårsresultatRepository = VilkårsresultatRepository(dataSource)
-
     val avsluttetBehandlingService =
         AvsluttetBehandlingService(
             transactionExecutor,
@@ -111,7 +109,12 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
                 }
 
             },
-            vilkårsresultatRepository,
+            object: Factory<VilkårsresultatRepository> {
+                override fun create(dbConnection: DBConnection): VilkårsresultatRepository {
+                    return VilkårsresultatRepository(dbConnection)
+                }
+
+            },
             bqRepository,
         )
 

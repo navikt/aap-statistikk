@@ -15,15 +15,14 @@ class AvsluttetBehandlingService(
     private val transactionExecutor: TransactionExecutor,
     private val tilkjentYtelseRepositoryFactory: Factory<ITilkjentYtelseRepository>,
     private val beregningsgrunnlagRepositoryFactory: Factory<IBeregningsgrunnlagRepository>,
-    private val vilkårsResultatRepository: IVilkårsresultatRepository,
+    private val vilkårsResultatRepositoryFactory: Factory<IVilkårsresultatRepository>,
     private val bqRepository: IBQRepository
 ) {
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
-        vilkårsResultatRepository.lagreVilkårsResultat(
-            VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat)
-        )
-
         transactionExecutor.withinTransaction {
+            vilkårsResultatRepositoryFactory.create(it).lagreVilkårsResultat(
+                VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat)
+            )
             tilkjentYtelseRepositoryFactory.create(it).lagreTilkjentYtelse(
                 TilkjentYtelseEntity.fraDomene(
                     avsluttetBehandling.tilkjentYtelse

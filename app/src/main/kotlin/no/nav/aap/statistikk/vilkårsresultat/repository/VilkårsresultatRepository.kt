@@ -1,19 +1,17 @@
 package no.nav.aap.statistikk.vilkårsresultat.repository
 
-import no.nav.aap.statistikk.db.hentGenerertNøkkel
-import no.nav.aap.statistikk.db.withinTransaction
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import org.slf4j.LoggerFactory
-import java.sql.*
-import java.sql.Date
-import javax.sql.DataSource
+import java.util.UUID
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
 
-class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårsresultatRepository {
+class VilkårsresultatRepository(
+    private val dbConnection: DBConnection
+) : IVilkårsresultatRepository {
     override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity): Int {
-        return dataSource.withinTransaction { connection ->
-            val sqlInsertResultat =
-                """
+        val sqlInsertResultat =
+            """
     WITH inserted AS (
         INSERT INTO VILKARSRESULTAT (behandling_id)
         SELECT b.id AS behandling_id
@@ -25,137 +23,134 @@ class VilkårsresultatRepository(private val dataSource: DataSource) : IVilkårs
     )
     SELECT id FROM inserted"""
 
-            var uthentetId: Int? = null
-            connection.prepareStatement(sqlInsertResultat, Statement.RETURN_GENERATED_KEYS)
-                .apply {
-                    setObject(1, vilkårsresultat.behandlingsReferanse, Types.OTHER)
-                    setString(2, vilkårsresultat.saksnummer)
-                    executeQuery().use {
-                        while (resultSet.next()) {
-                            uthentetId = resultSet.getInt(1);
-                        }
-                    }
-                }
+        val uthentetId = dbConnection.queryFirst<Int>(sqlInsertResultat) {
+            setParams {
+                setUUID(1, UUID.fromString(vilkårsresultat.behandlingsReferanse))
+                setString(2, vilkårsresultat.saksnummer)
+            }
+            setRowMapper {
+                it.getInt("id")
+            }
+        }
 
-            val vilkårResultId = requireNotNull(uthentetId)
 
-            val sqlInsertVilkar = """
+        val sqlInsertVilkar = """
                 INSERT INTO VILKAR(vilkar_type, vilkarresult_id) VALUES(?, ?);
             """
 
-            vilkårsresultat.vilkår.forEach { vilkarDTO ->
-
-                val resultat =
-                    connection.prepareStatement(sqlInsertVilkar, Statement.RETURN_GENERATED_KEYS)
-                        .apply {
-                            setString(1, vilkarDTO.vilkårType)
-                            setInt(2, vilkårResultId)
-                            executeUpdate()
-                        }
-
-                val vilkårKey = resultat.hentGenerertNøkkel()
-
-                vilkarDTO.perioder.forEach { periode ->
-                    val sqlInsertPeriode = """
+        val sqlInsertPeriode = """
                     INSERT INTO VILKARSPERIODE(fra_dato,til_dato,utfall,manuell_vurdering,innvilgelsesaarsak,avslagsaarsak,vilkar_id)
                     VALUES(?,?,?,?,?,?,?);
                 """
-                    connection.prepareStatement(sqlInsertPeriode, Statement.RETURN_GENERATED_KEYS)
-                        .apply {
-                            setDate(1, Date.valueOf(periode.fraDato))
-                            setDate(2, Date.valueOf(periode.tilDato))
-                            setString(3, periode.utfall)
-                            setBoolean(4, periode.manuellVurdering)
-                            setString(5, periode.innvilgelsesårsak)
-                            setString(6, periode.avslagsårsak)
-                            setLong(7, vilkårKey)
-                            executeUpdate()
-                        }
+
+        vilkårsresultat.vilkår.forEach { vilkårEntity ->
+            val vilkårKey = dbConnection.executeReturnKey(sqlInsertVilkar) {
+                setParams {
+                    setString(1, vilkårEntity.vilkårType)
+                    setInt(2, uthentetId)
                 }
             }
-            log.info("Satte inn vilkårsresulat med db ID: $vilkårResultId")
-            vilkårResultId
+
+            vilkårEntity.perioder.forEach { periode ->
+                dbConnection.execute(sqlInsertPeriode) {
+                    setParams {
+                        setLocalDate(1, periode.fraDato)
+                        setLocalDate(2, periode.tilDato)
+                        setString(3, periode.utfall)
+                        setBoolean(4, periode.manuellVurdering)
+                        setString(5, periode.innvilgelsesårsak)
+                        setString(6, periode.avslagsårsak)
+                        setLong(7, vilkårKey)
+                    }
+                }
+            }
         }
+        log.info("Satte inn vilkårsresulat med db ID: $uthentetId")
+
+        return uthentetId
     }
 
     override fun hentVilkårsResultat(vilkårResultatId: Int): VilkårsResultatEntity? {
-        return dataSource.withinTransaction { connection ->
-            val preparedStatement = createPreparedStatement(connection, vilkårResultatId)
-            val resultSet = preparedStatement.executeQuery()
+        val preparedSqlStatement = """
+SELECT vr.id         as vr_id,
+       s.saksnummer  as s_saksnummer,
+       b.type        as b_type,
+       b.referanse   as b_referanse,
+       v.id             v_id,
+       v.vilkar_type as v_vilkar_type
+FROM VILKARSRESULTAT vr
+         LEFT JOIN VILKAR v ON vr.id = v.vilkarresult_id
+         LEFT JOIN behandling b on vr.behandling_id = b.id
+         LEFT JOIN sak s on s.id = b.sak_id
+WHERE vr.id = ?;
+            """
 
-            if (resultSet.next()) {
-                processResultSet(resultSet)
-            } else {
-                null
+        data class EkstraInfo(
+            val id: Long,
+            val saksnummer: String,
+            val type: String,
+            val referanse: String
+        )
+
+        val xx = dbConnection.queryList<Pair<EkstraInfo, VilkårEntity>>(preparedSqlStatement) {
+            setParams { setInt(1, vilkårResultatId) }
+            setRowMapper {
+                val id = it.getLong("vr_id")
+                val saksNummer = it.getString("s_saksnummer")
+                val typeBehandling = it.getString("b_type")
+                val behandlingsReferanse = it.getString("b_referanse")
+
+                val vilkårId = it.getLong("v_id")
+                val vilkårType = it.getString("v_vilkar_type")
+
+                val vilkårPerioder = getVilkårPerioder(dbConnection, vilkårId)
+                val vilkårEntity =
+                    VilkårEntity(id = vilkårId, vilkårType = vilkårType, perioder = vilkårPerioder)
+
+                Pair(
+                    EkstraInfo(
+                        id = id,
+                        saksnummer = saksNummer,
+                        type = typeBehandling,
+                        referanse = behandlingsReferanse
+                    ), vilkårEntity
+                )
             }
         }
-    }
-
-    private fun createPreparedStatement(
-        connection: Connection,
-        vilkårResultatId: Int
-    ): PreparedStatement {
-        val preparedSqlStatement = """SELECT *
-FROM VILKARSRESULTAT
-         LEFT JOIN VILKAR ON VILKARSRESULTAT.id = VILKAR.vilkarresult_id
-         LEFT JOIN VILKARSPERIODE ON VILKAR.id = VILKARSPERIODE.vilkar_id
-         LEFT JOIN behandling b on VILKARSRESULTAT.behandling_id = b.id
-         LEFT JOIN sak s on s.id = b.sak_id
-     WHERE VILKARSRESULTAT.id = ?;
-            """
-        val preparedStatement = connection.prepareStatement(preparedSqlStatement)
-        preparedStatement.setInt(1, vilkårResultatId)
-        return preparedStatement
-    }
-
-    private fun processResultSet(resultSet: ResultSet): VilkårsResultatEntity {
-        val vilkårList = mutableListOf<VilkårEntity>()
-        val id = resultSet.getLong("id")
-        val saksNummer = resultSet.getString("saksnummer")
-        val typeBehandling = resultSet.getString("type")
-        val behandlingsReferanse = resultSet.getString("referanse")
-
-        do {
-            val vilkårId = resultSet.getLong("id")
-            val vilkårType = resultSet.getString("vilkar_type")
-            val vilkårPerioder = getVilkårPerioder(resultSet, vilkårType)
-            val vilkårEntity =
-                VilkårEntity(id = vilkårId, vilkårType = vilkårType, perioder = vilkårPerioder)
-            vilkårList.add(vilkårEntity)
-        } while (!resultSet.isAfterLast)
 
         return VilkårsResultatEntity(
-            id = id,
-            saksnummer = saksNummer,
-            behandlingsReferanse = behandlingsReferanse,
-            typeBehandling = typeBehandling,
-            vilkår = vilkårList
+            id = xx.first().first.id,
+            behandlingsReferanse = xx.first().first.referanse,
+            saksnummer = xx.first().first.saksnummer,
+            typeBehandling = xx.first().first.type,
+            vilkår = xx.map { it.second },
         )
     }
 
     private fun getVilkårPerioder(
-        resultSet: ResultSet,
-        vilkårType: String
-    ): MutableList<VilkårsPeriodeEntity> {
-        val vilkårPerioder = mutableListOf<VilkårsPeriodeEntity>()
-        do {
-            val vilkårsPeriodeDTO = resultSetTilVilkårsPeriode(resultSet)
-            vilkårPerioder.add(vilkårsPeriodeDTO)
-        } while (resultSet.next() && resultSet.getString("vilkar_type") == vilkårType)
-
-        return vilkårPerioder
+        dbConnection: DBConnection,
+        vilkårId: Long,
+    ): List<VilkårsPeriodeEntity> {
+        val sql = """SELECT *
+FROM VILKARSPERIODE
+WHERE vilkar_id = ?;
+            """
+        return dbConnection.queryList<VilkårsPeriodeEntity>(sql) {
+            setParams {
+                setLong(1, vilkårId)
+            }
+            setRowMapper {
+                VilkårsPeriodeEntity(
+                    id = it.getLong("id"),
+                    fraDato = it.getLocalDate("fra_dato"),
+                    tilDato = it.getLocalDate("til_dato"),
+                    utfall = it.getString("utfall"),
+                    manuellVurdering = it.getBoolean("manuell_vurdering"),
+                    innvilgelsesårsak = it.getStringOrNull("innvilgelsesaarsak"),
+                    avslagsårsak = it.getStringOrNull("avslagsaarsak")
+                )
+            }
+        }
     }
-}
-
-fun resultSetTilVilkårsPeriode(resultSet: ResultSet): VilkårsPeriodeEntity {
-    return VilkårsPeriodeEntity(
-        id = resultSet.getLong("id"),
-        fraDato = resultSet.getDate("fra_dato").toLocalDate(),
-        tilDato = resultSet.getDate("til_dato").toLocalDate(),
-        utfall = resultSet.getString("utfall"),
-        manuellVurdering = resultSet.getBoolean("manuell_vurdering"),
-        innvilgelsesårsak = resultSet.getString("innvilgelsesaarsak"),
-        avslagsårsak = resultSet.getString("avslagsaarsak")
-    )
 }
 

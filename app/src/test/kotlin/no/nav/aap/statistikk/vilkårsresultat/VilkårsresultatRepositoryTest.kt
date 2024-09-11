@@ -1,9 +1,9 @@
 package no.nav.aap.statistikk.vilkårsresultat
 
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
-import no.nav.aap.statistikk.db.EksistererAlleredeAvbrudd
 import no.nav.aap.statistikk.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
@@ -21,8 +21,6 @@ class VilkårsresultatRepositoryTest {
     fun `fungerer å lagre vilkårs-resultat og hente inn igjen`(@Postgres dataSource: DataSource) {
         val randomUUID = UUID.randomUUID()
         opprettTestHendelse(dataSource, randomUUID, "ABCDE")
-
-        val repo = VilkårsresultatRepository(dataSource)
 
         val vilkårsResultatEntity = VilkårsResultatEntity(
             id = null, behandlingsReferanse = randomUUID.toString(),
@@ -76,12 +74,16 @@ class VilkårsresultatRepositoryTest {
             )
         )
 
-        val generertId = repo.lagreVilkårsResultat(vilkårsResultatEntity)
+        val generertId = dataSource.transaction { conn ->
+            val repo = VilkårsresultatRepository(conn)
+            repo.lagreVilkårsResultat(vilkårsResultatEntity)
+        }
 
         assertThat(generertId).isNotNull()
 
-        val hentetUt = repo.hentVilkårsResultat(generertId!!)
-
+        val hentetUt = dataSource.transaction {
+            VilkårsresultatRepository(it).hentVilkårsResultat(generertId!!)
+        }
         assertThat(hentetUt!!.tilVilkårsResultat()).isEqualTo(vilkårsResultatEntity.tilVilkårsResultat())
     }
 
@@ -91,8 +93,6 @@ class VilkårsresultatRepositoryTest {
         val saksnummer = "saksnummer"
 
         opprettTestHendelse(dataSource, randomUUID, saksnummer)
-
-        val repo = VilkårsresultatRepository(dataSource)
 
         // lagre
         val behandlingsReferanse = randomUUID.toString()
@@ -127,13 +127,17 @@ class VilkårsresultatRepositoryTest {
         )
 
         // Lagre én gang
-        repo.lagreVilkårsResultat(
-            vilkårsresultat
-        )
+        dataSource.transaction { conn ->
+            VilkårsresultatRepository(conn).lagreVilkårsResultat(vilkårsresultat)
+        }
 
         // Lagre én gang til skal kaste avbrudd
-        assertThrows<EksistererAlleredeAvbrudd> {
-            repo.lagreVilkårsResultat(vilkårsresultat)
+        assertThrows<Exception> {
+            dataSource.transaction {
+                VilkårsresultatRepository(it).lagreVilkårsResultat(
+                    vilkårsresultat
+                )
+            }
         }
     }
 }

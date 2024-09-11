@@ -266,7 +266,11 @@ fun konstruerFakes(): Triple<FakeTilkjentYtelseRepository, AvsluttetBehandlingSe
                     return beregningsgrunnlagRepository
                 }
             },
-            vilkårsResultatRepository,
+            object : Factory<IVilkårsresultatRepository> {
+                override fun create(dbConnection: DBConnection): IVilkårsresultatRepository {
+                    return vilkårsResultatRepository
+                }
+            },
             faceBQRepository
         )
     return Triple(
