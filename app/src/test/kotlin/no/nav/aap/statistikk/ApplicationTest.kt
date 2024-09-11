@@ -5,13 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -28,32 +26,9 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val tilkjentYtelseRepositoryFactory = object : Factory<ITilkjentYtelseRepository> {
-            override fun create(dbConnection: DBConnection): ITilkjentYtelseRepository {
-                return FakeTilkjentYtelseRepository()
-            }
-        }
-        val faceBQRepository = FakeBQRepository()
-        val beregningsgrunnlagRepository = mockk<BeregningsgrunnlagRepository>()
-        val transactionExecutor = noOpTransactionExecutor
-        val vilkårsResultatRepository = FakeVilkårsResultatRepository()
-
-        val avsluttetBehandlingService =
-            AvsluttetBehandlingService(
-                transactionExecutor,
-                tilkjentYtelseRepositoryFactory,
-                object : Factory<BeregningsgrunnlagRepository> {
-                    override fun create(dbConnection: DBConnection): BeregningsgrunnlagRepository {
-                        return beregningsgrunnlagRepository
-                    }
-                },
-                vilkårsResultatRepository,
-                faceBQRepository
-            )
+        val (_, avsluttetBehandlingService, vilkårsResultatRepository) = konstruerFakes()
 
         val behandlingReferanse = UUID.randomUUID()
-
-        every { beregningsgrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns 1
 
         val jobbAppender = MockJobbAppender()
 
@@ -136,10 +111,6 @@ class ApplicationTest {
         }
 
         assertThat(vilkårsResultatRepository.vilkår.size).isEqualTo(1)
-
-        checkUnnecessaryStub(
-            beregningsgrunnlagRepository,
-        )
     }
 
     @Test
@@ -147,10 +118,9 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        val (_, avsluttetBehandlingService) = konstruerFakes()
 
-        val jobbAppender = mockk<JobbAppender>()
-        every { jobbAppender.leggTil(any(), any()) } returns Unit
+        val jobbAppender = MockJobbAppender()
 
         testKlient(
             noOpTransactionExecutor,
@@ -188,12 +158,7 @@ class ApplicationTest {
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
 
-        verify(exactly = 1) { jobbAppender.leggTil(any(), any<JobbInput>()) }
-
-        checkUnnecessaryStub(
-            avsluttetBehandlingService,
-            jobbAppender
-        )
+        assertThat(jobbAppender.jobber).hasSize(1)
     }
 
     @Test
@@ -266,8 +231,8 @@ class ApplicationTest {
     "vilkår": []
   }
 }"""
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
-        every { avsluttetBehandlingService.lagre(any()) } returns Unit
+
+        val (fakeTilkjentYtelseRepository, avsluttetBehandlingService) = konstruerFakes()
 
         val jobbAppender = MockJobbAppender()
 
@@ -288,10 +253,40 @@ class ApplicationTest {
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
 
-        verify(exactly = 1) { avsluttetBehandlingService.lagre(any()) }
-        assertThat(jobbAppender.jobber.size).isEqualTo(1)
+        assertThat(fakeTilkjentYtelseRepository.tilkjentYtelser.size).isEqualTo(1)
 
-        checkUnnecessaryStub(avsluttetBehandlingService)
+        assertThat(jobbAppender.jobber.size).isEqualTo(1)
+    }
+
+    private fun konstruerFakes(): Triple<FakeTilkjentYtelseRepository, AvsluttetBehandlingService, FakeVilkårsResultatRepository> {
+        val fakeTilkjentYtelseRepository = FakeTilkjentYtelseRepository()
+        val tilkjentYtelseRepositoryFactory = object : Factory<ITilkjentYtelseRepository> {
+            override fun create(dbConnection: DBConnection): ITilkjentYtelseRepository {
+                return fakeTilkjentYtelseRepository
+            }
+        }
+        val faceBQRepository = FakeBQRepository()
+        val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
+        val transactionExecutor = noOpTransactionExecutor
+        val vilkårsResultatRepository = FakeVilkårsResultatRepository()
+
+        val avsluttetBehandlingService =
+            AvsluttetBehandlingService(
+                transactionExecutor,
+                tilkjentYtelseRepositoryFactory,
+                object : Factory<IBeregningsgrunnlagRepository> {
+                    override fun create(dbConnection: DBConnection): IBeregningsgrunnlagRepository {
+                        return beregningsgrunnlagRepository
+                    }
+                },
+                vilkårsResultatRepository,
+                faceBQRepository
+            )
+        return Triple(
+            fakeTilkjentYtelseRepository,
+            avsluttetBehandlingService,
+            vilkårsResultatRepository
+        )
     }
 
     @Test
@@ -319,10 +314,9 @@ class ApplicationTest {
   "avklaringsbehov": [],
   "ukjentfelt": "hei"
 }"""
-        val avsluttetBehandlingService = mockk<AvsluttetBehandlingService>()
+        val (_, avsluttetBehandlingService) = konstruerFakes()
 
-        val jobbAppender = mockk<JobbAppender>()
-        every { jobbAppender.leggTil(any(), any()) } returns Unit
+        val jobbAppender = MockJobbAppender()
 
         testKlient(
             noOpTransactionExecutor,
@@ -340,9 +334,5 @@ class ApplicationTest {
             }
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
-
-        checkUnnecessaryStub(
-            avsluttetBehandlingService,
-        )
     }
 }

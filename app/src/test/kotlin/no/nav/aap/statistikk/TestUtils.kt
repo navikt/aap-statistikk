@@ -20,7 +20,9 @@ import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
@@ -228,5 +230,17 @@ class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
 
     override fun hentVilkårsResultat(vilkårResultatId: Int): VilkårsResultatEntity? {
         TODO("Not yet implemented")
+    }
+}
+
+class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
+    val grunnlag = mutableListOf<MedBehandlingsreferanse<IBeregningsGrunnlag>>()
+    override fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
+        grunnlag.add(beregningsGrunnlag)
+        return grunnlag.indexOf(beregningsGrunnlag).toLong()
+    }
+
+    override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
+        return grunnlag
     }
 }
