@@ -244,3 +244,34 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
         return grunnlag
     }
 }
+
+fun konstruerFakes(): Triple<FakeTilkjentYtelseRepository, AvsluttetBehandlingService, FakeVilkårsResultatRepository> {
+    val fakeTilkjentYtelseRepository = FakeTilkjentYtelseRepository()
+    val tilkjentYtelseRepositoryFactory = object : Factory<ITilkjentYtelseRepository> {
+        override fun create(dbConnection: DBConnection): ITilkjentYtelseRepository {
+            return fakeTilkjentYtelseRepository
+        }
+    }
+    val faceBQRepository = FakeBQRepository()
+    val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
+    val transactionExecutor = noOpTransactionExecutor
+    val vilkårsResultatRepository = FakeVilkårsResultatRepository()
+
+    val avsluttetBehandlingService =
+        AvsluttetBehandlingService(
+            transactionExecutor,
+            tilkjentYtelseRepositoryFactory,
+            object : Factory<IBeregningsgrunnlagRepository> {
+                override fun create(dbConnection: DBConnection): IBeregningsgrunnlagRepository {
+                    return beregningsgrunnlagRepository
+                }
+            },
+            vilkårsResultatRepository,
+            faceBQRepository
+        )
+    return Triple(
+        fakeTilkjentYtelseRepository,
+        avsluttetBehandlingService,
+        vilkårsResultatRepository
+    )
+}
