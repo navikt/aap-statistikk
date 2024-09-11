@@ -4,7 +4,7 @@ import no.nav.aap.statistikk.TransactionExecutor
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
@@ -13,9 +13,9 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatReposit
 class AvsluttetBehandlingService(
     private val transactionExecutor: TransactionExecutor,
     private val tilkjentYtelseRepositoryFactory: Factory<TilkjentYtelseRepository>,
-    private val beregningsgrunnlagRepository: BeregningsgrunnlagRepository,
+    private val beregningsgrunnlagRepositoryFactory: Factory<BeregningsgrunnlagRepository>,
     private val vilkårsResultatRepository: VilkårsresultatRepository,
-    private val bqRepository: BQRepository
+    private val bqRepository: IBQRepository
 ) {
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
         vilkårsResultatRepository.lagreVilkårsResultat(
@@ -28,14 +28,14 @@ class AvsluttetBehandlingService(
                     avsluttetBehandling.tilkjentYtelse
                 )
             )
-        }
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
-            MedBehandlingsreferanse(
-                value = avsluttetBehandling.beregningsgrunnlag,
-                behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
+            beregningsgrunnlagRepositoryFactory.create(it).lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    value = avsluttetBehandling.beregningsgrunnlag,
+                    behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
+                )
             )
-        )
+        }
 
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
         bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)

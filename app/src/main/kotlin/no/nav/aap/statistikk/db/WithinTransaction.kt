@@ -58,12 +58,12 @@ fun <E> DataSource.withinTransaction(block: (Connection) -> E): E {
     }
 }
 
-fun PreparedStatement.hentGenerertNøkkel(): Int {
+fun PreparedStatement.hentGenerertNøkkel(): Long {
     val resultSet = this.generatedKeys
     val res = resultSet.next()
     if (!res) {
         throw RuntimeException("No key generated")
     }
-    val id = resultSet.getInt(1)
+    val id = resultSet.getLong(1)
     return id
 }

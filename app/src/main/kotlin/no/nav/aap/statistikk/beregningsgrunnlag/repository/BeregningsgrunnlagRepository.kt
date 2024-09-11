@@ -3,86 +3,86 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
-import no.nav.aap.statistikk.db.hentGenerertNøkkel
-import no.nav.aap.statistikk.db.withinTransaction
 import org.slf4j.LoggerFactory
-import java.sql.Connection
-import java.sql.ResultSet
-import java.sql.Statement
-import java.sql.Types
 import java.util.UUID
-import javax.sql.DataSource
 
 
 interface IBeregningsgrunnlagRepository {
-    fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Int
+    fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long
     fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>>
 }
 
 private val logger = LoggerFactory.getLogger(BeregningsgrunnlagRepository::class.java)
 
 
-class BeregningsgrunnlagRepository(private val dataSource: DataSource) :
+class BeregningsgrunnlagRepository(
+    private val dbConnection: DBConnection
+) :
     IBeregningsgrunnlagRepository {
-    override fun lagreBeregningsGrunnlag(beregningsGrunnlagMedReferanse: MedBehandlingsreferanse<IBeregningsGrunnlag>): Int {
-        return dataSource.withinTransaction {
-            val behandlingsReferanseId = hentBehandlingsReferanseId(it, beregningsGrunnlagMedReferanse.behandlingsReferanse)
-            val beregningsGrunnlag = beregningsGrunnlagMedReferanse.value
-            val baseGrunnlagId = lagreBaseGrunnlag(it, beregningsGrunnlag.type(), behandlingsReferanseId)
+    override fun lagreBeregningsGrunnlag(beregningsGrunnlagMedReferanse: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
+        val behandlingsReferanseId = hentBehandlingsReferanseId(
+            dbConnection,
+            beregningsGrunnlagMedReferanse.behandlingsReferanse
+        )
 
-            when (beregningsGrunnlag) {
-                is IBeregningsGrunnlag.Grunnlag_11_19 -> {
-                    lagre11_19(it, baseGrunnlagId, beregningsGrunnlag)
-                }
+        val beregningsGrunnlag = beregningsGrunnlagMedReferanse.value
 
-                is IBeregningsGrunnlag.GrunnlagYrkesskade -> {
-                    lagreGrunnlagYrkesskade(it, baseGrunnlagId, beregningsGrunnlag)
-                }
+        val baseGrunnlagId =
+            lagreBaseGrunnlag(dbConnection, beregningsGrunnlag.type(), behandlingsReferanseId)
 
-                is IBeregningsGrunnlag.GrunnlagUføre ->
-                    lagreGrunnlagUføre(it, baseGrunnlagId, beregningsGrunnlag)
+        return when (beregningsGrunnlag) {
+            is IBeregningsGrunnlag.Grunnlag_11_19 -> {
+                lagre11_19(dbConnection, baseGrunnlagId, beregningsGrunnlag)
             }
+
+            is IBeregningsGrunnlag.GrunnlagYrkesskade -> {
+                lagreGrunnlagYrkesskade(dbConnection, baseGrunnlagId, beregningsGrunnlag)
+            }
+
+            is IBeregningsGrunnlag.GrunnlagUføre ->
+                lagreGrunnlagUføre(dbConnection, baseGrunnlagId, beregningsGrunnlag)
         }
+
     }
 
-    private fun hentBehandlingsReferanseId(connection: Connection, referanse: UUID): Int {
+    private fun hentBehandlingsReferanseId(dbConnection: DBConnection, referanse: UUID): Long {
         val sql = "SELECT id FROM behandling WHERE referanse = ?"
 
-        val preparedStatement =
-            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).apply {
-                setObject(1, referanse, Types.OTHER)
-                executeQuery()
+        return dbConnection.queryFirst<Long>(sql) {
+            setParams {
+                setUUID(1, referanse)
             }
-
-        val resultSet = preparedStatement.resultSet
-        if (resultSet.next()) {
-            val id = resultSet.getInt("id")
-            logger.info("ID retrieved: $id")
-            return id
+            setRowMapper {
+                it.getLong("id")
+            }
         }
-        throw RuntimeException("Behandling ID for beregningsgrunnlag med referanse $referanse ikke funnet")
     }
 
-    private fun lagreBaseGrunnlag(connection: Connection, type: String, behandlingId: Int): Int {
+    private fun lagreBaseGrunnlag(
+        connection: DBConnection,
+        type: String,
+        behandlingId: Long
+    ): Long {
         val sql = "INSERT INTO GRUNNLAG(type, behandling_id) VALUES (?, ?) ";
 
-        return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-            .apply {
+        return connection.executeReturnKey(sql) {
+            setParams {
                 setString(1, type)
-                setInt(2, behandlingId)
-                executeUpdate()
+                setLong(2, behandlingId)
             }
-            .hentGenerertNøkkel()
+        }
     }
 
     private fun lagreGrunnlagYrkesskade(
-        connection: Connection,
-        baseGrunnlagId: Int,
+        connection: DBConnection,
+        baseGrunnlagId: Long,
         beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagYrkesskade
-    ): Int {
+    ): Long {
         val grunnlagType: String;
         val id = when (beregningsGrunnlag.beregningsgrunnlag) {
             is IBeregningsGrunnlag.Grunnlag_11_19 -> {
@@ -117,13 +117,11 @@ INSERT INTO GRUNNLAG_YRKESSKADE(grunnlag, er6g_begrenset, beregningsgrunnlag_id,
                                 yrkesskadeinntekt_ig,
                                 grunnlag_etter_yrkesskade_fordel)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-        return connection.prepareStatement(
-            insertQuery, Statement.RETURN_GENERATED_KEYS
-        )
-            .apply {
+        return connection.executeReturnKey(insertQuery) {
+            setParams {
                 setDouble(1, beregningsGrunnlag.grunnlaget())
                 setBoolean(2, beregningsGrunnlag.er6GBegrenset())
-                setInt(3, id)
+                setLong(3, id)
                 setString(4, grunnlagType)
                 setInt(5, beregningsGrunnlag.terskelverdiForYrkesskade)
                 setBigDecimal(6, beregningsGrunnlag.andelSomSkyldesYrkesskade)
@@ -141,30 +139,28 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 )
                 setBigDecimal(13, beregningsGrunnlag.yrkesskadeinntektIG)
                 setBigDecimal(14, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
-                executeUpdate()
-            }.hentGenerertNøkkel()
+            }
+        }
     }
 
     private fun lagreGrunnlagUføre(
-        connection: Connection,
-        baseGrunnlagId: Int,
+        connection: DBConnection,
+        baseGrunnlagId: Long,
         beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagUføre
-    ): Int {
+    ): Long {
         val id = lagre11_19(connection, baseGrunnlagId, beregningsGrunnlag.grunnlag11_19)
         val insertQuery =
             """INSERT INTO GRUNNLAG_UFORE(grunnlag_id, grunnlag, er6g_begrenset, grunnlag_11_19_id, type,
                                uforegrad, ufore_inntekter_fra_foregaende_ar, ufore_inntekt_i_kroner,
                                ufore_ytterligere_nedsatt_arbeidsevne_ar)
     VALUES (?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?)"""
-        return connection.prepareStatement(
-            insertQuery, Statement.RETURN_GENERATED_KEYS
 
-        )
-            .apply {
-                setInt(1, baseGrunnlagId)
+        return connection.executeReturnKey(insertQuery) {
+            setParams {
+                setLong(1, baseGrunnlagId)
                 setDouble(2, beregningsGrunnlag.grunnlag)
                 setBoolean(3, beregningsGrunnlag.er6GBegrenset)
-                setInt(4, id)
+                setLong(4, id)
                 setString(5, beregningsGrunnlag.type.name)
                 setInt(6, beregningsGrunnlag.uføregrad)
                 setString(
@@ -173,14 +169,12 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 )
                 setBigDecimal(8, beregningsGrunnlag.uføreInntektIKroner)
                 setInt(9, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
-                executeUpdate()
-            }.hentGenerertNøkkel()
+            }
+        }
     }
 
     override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
-        return dataSource.connection.use { conn ->
-            val resultSet = conn.prepareStatement(
-                """
+        var sql = """
 select grunnlag.id                                    as gr_id,
        grunnlag.type                                  as gr_type,
        g.id                                           as g_id,
@@ -221,23 +215,23 @@ from grunnlag
          left outer join grunnlag_ufore as gu on g.id = gu.grunnlag_11_19_id
          left outer join behandling as b on b.id = grunnlag.behandling_id
             """
-            ).executeQuery()
+        return dbConnection.queryList(sql) {
+            setRowMapper { row ->
+                val referanse = row.getUUID("b_referanse")
 
-            val beregningsGrunnlag = mutableListOf<MedBehandlingsreferanse<IBeregningsGrunnlag>>()
+                val type = row.getString("gr_type")
 
-            while (resultSet.next()) {
-                val referanse = resultSet.getString("b_referanse")
-                val grunnlagsType: IBeregningsGrunnlag = when (resultSet.getString("gr_type")) {
+                val grunnlagsType: IBeregningsGrunnlag = when (type) {
                     "11_19" -> {
-                        hentGrunnlag11_19(resultSet)
+                        hentGrunnlag11_19(row)
                     }
 
                     "uføre" -> {
-                        hentUtGrunnlagUføre(resultSet)
+                        hentUtGrunnlagUføre(row)
                     }
 
                     "yrkesskade" -> {
-                        hentUtGrunnlagYrkesskade(resultSet)
+                        hentUtGrunnlagYrkesskade(row)
                     }
 
                     else -> {
@@ -245,17 +239,15 @@ from grunnlag
                     }
                 }
 
-                beregningsGrunnlag.add(MedBehandlingsreferanse(
-                    behandlingsReferanse = UUID.fromString(referanse),
+                MedBehandlingsreferanse<IBeregningsGrunnlag>(
+                    behandlingsReferanse = referanse,
                     value = grunnlagsType
-                ))
+                )
             }
-
-            beregningsGrunnlag
         }
     }
 
-    private fun hentUtGrunnlagYrkesskade(resultSet: ResultSet): IBeregningsGrunnlag.GrunnlagYrkesskade {
+    private fun hentUtGrunnlagYrkesskade(resultSet: Row): IBeregningsGrunnlag.GrunnlagYrkesskade {
         val type = resultSet.getString("gy_beregningsgrunnlag_type")
         return IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = resultSet.getDouble("gy_grunnlag"),
@@ -282,7 +274,7 @@ from grunnlag
         )
     }
 
-    private fun hentUtGrunnlagUføre(resultSet: ResultSet): IBeregningsGrunnlag.GrunnlagUføre {
+    private fun hentUtGrunnlagUføre(resultSet: Row): IBeregningsGrunnlag.GrunnlagUføre {
         return IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag = resultSet.getDouble("gu_grunnlag"),
             er6GBegrenset = resultSet.getBoolean("gu_er6g_begrenset"),
@@ -299,7 +291,7 @@ from grunnlag
         )
     }
 
-    private fun hentGrunnlag11_19(grunnlagUføreRs: ResultSet): IBeregningsGrunnlag.Grunnlag_11_19 {
+    private fun hentGrunnlag11_19(grunnlagUføreRs: Row): IBeregningsGrunnlag.Grunnlag_11_19 {
         val typeRef
                 : TypeReference<Map<Int, Double>> =
             object : TypeReference<Map<Int, Double>>() {}
@@ -315,24 +307,21 @@ from grunnlag
     }
 
     private fun lagre11_19(
-        connection: Connection,
-        baseGrunnlagId: Int,
+        connection: DBConnection,
+        baseGrunnlagId: Long,
         beregningsGrunnlag: IBeregningsGrunnlag.Grunnlag_11_19
-    ): Int {
+    ): Long {
         val sqlStatement =
             "INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter) VALUES (?, ?,?, ?, ?::jsonb)"
-        val id = connection.prepareStatement(
-            sqlStatement,
-            Statement.RETURN_GENERATED_KEYS
-        )
-            .apply {
-                setInt(1, baseGrunnlagId)
+
+        return connection.executeReturnKey(sqlStatement) {
+            setParams {
+                setLong(1, baseGrunnlagId)
                 setDouble(2, beregningsGrunnlag.grunnlag)
                 setBoolean(3, beregningsGrunnlag.er6GBegrenset)
                 setBoolean(4, beregningsGrunnlag.erGjennomsnitt)
                 setString(5, ObjectMapper().writeValueAsString(beregningsGrunnlag.inntekter))
-                executeUpdate()
-            }.hentGenerertNøkkel()
-        return id
+            }
+        }
     }
 }

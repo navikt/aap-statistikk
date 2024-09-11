@@ -19,11 +19,15 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
@@ -176,4 +180,26 @@ class MockJobbAppender : JobbAppender {
     override fun leggTil(jobb: JobbInput) {
         jobber.add(jobb)
     }
+}
+
+class FakeBQRepository : IBQRepository {
+    val vilkårsresultater = mutableListOf<Vilkårsresultat>()
+    val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
+    val beregningsgrunnlag = mutableListOf<IBeregningsGrunnlag>()
+
+    override fun lagre(payload: Vilkårsresultat) {
+        vilkårsresultater.add(payload)
+    }
+
+    override fun lagre(payload: TilkjentYtelse) {
+        tilkjentYtelse.add(payload)
+    }
+
+    override fun lagre(
+        payload: IBeregningsGrunnlag,
+        behandlingsReferanse: UUID
+    ) {
+       beregningsgrunnlag.add(payload)
+    }
+
 }

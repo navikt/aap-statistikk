@@ -31,11 +31,6 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
-        val (bigQueryClient, avsluttetBehandlingService) = konstruerTilkjentYtelseService(
-            dataSource,
-            bigQuery
-        )
-
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "xxxx"
 
@@ -99,7 +94,18 @@ class AvsluttetBehandlingServiceTest {
             behandlingsReferanse = behandlingReferanse
         )
 
-        avsluttetBehandlingService.lagre(avsluttetBehandling)
+        val bigQueryClient = dataSource.transaction {
+            val (bigQueryClient, avsluttetBehandlingService) = konstruerTilkjentYtelseService(
+                dataSource,
+                it,
+                bigQuery
+            )
+
+            avsluttetBehandlingService.lagre(avsluttetBehandling)
+
+            bigQueryClient
+        }
+
 
         val utlestVilkårsVurderingFraBigQuery = bigQueryClient.read(VilkårsVurderingTabell())
         val utlestTilkjentYtelseFraBigQuery = bigQueryClient.read(TilkjentYtelseTabell())
@@ -122,11 +128,6 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
-        val (_, service) = konstruerTilkjentYtelseService(
-            dataSource,
-            bigQuery
-        )
-
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "xxxx"
 
@@ -173,7 +174,14 @@ class AvsluttetBehandlingServiceTest {
             behandlingsReferanse = behandlingReferanse
         )
 
-        service.lagre(avsluttetBehandling)
+        dataSource.transaction {
+            val (_, service) = konstruerTilkjentYtelseService(
+                dataSource,
+                it,
+                bigQuery
+            )
+            service.lagre(avsluttetBehandling)
+        }
 
         val uthentet =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }!!
@@ -183,12 +191,11 @@ class AvsluttetBehandlingServiceTest {
 
     private fun konstruerTilkjentYtelseService(
         dataSource: DataSource,
+        dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig)
         val bqRepository = BQRepository(bigQueryClient)
-
-        val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
         val service =
             AvsluttetBehandlingService(
@@ -198,7 +205,11 @@ class AvsluttetBehandlingServiceTest {
                         return TilkjentYtelseRepository(dbConnection)
                     }
                 },
-                beregningsgrunnlagRepository,
+                object : Factory<BeregningsgrunnlagRepository> {
+                    override fun create(dbConnection: DBConnection): BeregningsgrunnlagRepository {
+                        return BeregningsgrunnlagRepository(dbConnection)
+                    }
+                },
                 VilkårsresultatRepository(dataSource),
                 bqRepository,
             )

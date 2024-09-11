@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
@@ -17,8 +18,6 @@ class BeregningsgrunnlagRepositoryTest {
         val behandlingsReferanse = UUID.randomUUID()
         opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
 
-        val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
-
         val grunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
             grunnlag = 20000.0,
             er6GBegrenset = false,
@@ -26,14 +25,22 @@ class BeregningsgrunnlagRepositoryTest {
             inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
-            MedBehandlingsreferanse(
-                value = grunnlag,
-                behandlingsReferanse = behandlingsReferanse,
-            )
-        )
+        dataSource.transaction {
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
 
-        val hentBeregningsGrunnlag = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
+            beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    value = grunnlag,
+                    behandlingsReferanse = behandlingsReferanse,
+                )
+            )
+        }
+
+        val hentBeregningsGrunnlag = dataSource.transaction {
+            BeregningsgrunnlagRepository(
+                it
+            ).hentBeregningsGrunnlag()
+        }
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
         assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
@@ -42,13 +49,13 @@ class BeregningsgrunnlagRepositoryTest {
                 behandlingsReferanse = behandlingsReferanse
             )
         )
+
     }
 
     @Test
     fun `sette inn grunnlag yrkesskade`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
         opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
-        val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
@@ -71,14 +78,23 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
-            MedBehandlingsreferanse(
-                value = grunnlagYrkesskade,
-                behandlingsReferanse = behandlingsReferanse
-            )
-        )
+        dataSource.transaction {
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
 
-        val hentBeregningsGrunnlag = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
+            beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    value = grunnlagYrkesskade,
+                    behandlingsReferanse = behandlingsReferanse
+                )
+            )
+        }
+
+        val hentBeregningsGrunnlag =
+            dataSource.transaction {
+                BeregningsgrunnlagRepository(
+                    it
+                ).hentBeregningsGrunnlag()
+            }
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
         assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
@@ -94,8 +110,6 @@ class BeregningsgrunnlagRepositoryTest {
         val behandlingsReferanse = UUID.randomUUID()
         opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
 
-        val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
-
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
             er6GBegrenset = false,
@@ -130,14 +144,22 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
         )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
-            MedBehandlingsreferanse(
-                behandlingsReferanse = behandlingsReferanse,
-                value = grunnlagYrkesskade
-            )
-        )
+        dataSource.transaction {
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
 
-        val hentBeregningsGrunnlag = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
+            beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse = behandlingsReferanse,
+                    value = grunnlagYrkesskade
+                )
+            )
+        }
+
+        val hentBeregningsGrunnlag = dataSource.transaction {
+            BeregningsgrunnlagRepository(
+                it
+            ).hentBeregningsGrunnlag()
+        }
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
         assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
@@ -146,6 +168,7 @@ class BeregningsgrunnlagRepositoryTest {
                 grunnlagYrkesskade
             )
         )
+
     }
 
     @Test
@@ -153,36 +176,43 @@ class BeregningsgrunnlagRepositoryTest {
         val behandlingsReferanse = UUID.randomUUID()
         opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
 
-        val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
-
-        val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre = IBeregningsGrunnlag.GrunnlagUføre(
-            grunnlag = 30000.0,
-            er6GBegrenset = false,
-            grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
-                grunnlag = 25000.0,
+        val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre =
+            IBeregningsGrunnlag.GrunnlagUføre(
+                grunnlag = 30000.0,
                 er6GBegrenset = false,
-                erGjennomsnitt = true,
-                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
-            ),
-            uføregrad = 50,
-            type = UføreType.YTTERLIGERE_NEDSATT,
-            uføreInntektIKroner = BigDecimal(28000),
-            uføreInntekterFraForegåendeÅr = mapOf(
-                2018 to 27000.0,
-                2019 to 27500.0,
-                2020 to 28000.0,
-            ),
-            uføreYtterligereNedsattArbeidsevneÅr = 2020
-        )
-
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
-            MedBehandlingsreferanse(
-                value = grunnlagUfore,
-                behandlingsReferanse = behandlingsReferanse
+                grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
+                    grunnlag = 25000.0,
+                    er6GBegrenset = false,
+                    erGjennomsnitt = true,
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                ),
+                uføregrad = 50,
+                type = UføreType.YTTERLIGERE_NEDSATT,
+                uføreInntektIKroner = BigDecimal(28000),
+                uføreInntekterFraForegåendeÅr = mapOf(
+                    2018 to 27000.0,
+                    2019 to 27500.0,
+                    2020 to 28000.0,
+                ),
+                uføreYtterligereNedsattArbeidsevneÅr = 2020
             )
-        )
 
-        val uthentet = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
+        dataSource.transaction {
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
+
+            beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    value = grunnlagUfore,
+                    behandlingsReferanse = behandlingsReferanse
+                )
+            )
+        }
+
+        val uthentet = dataSource.transaction {
+            BeregningsgrunnlagRepository(
+                it
+            ).hentBeregningsGrunnlag()
+        }
 
         assertThat(uthentet).hasSize(1)
         assertThat(uthentet.first()).isEqualTo(
@@ -191,6 +221,7 @@ class BeregningsgrunnlagRepositoryTest {
                 behandlingsReferanse = behandlingsReferanse
             )
         )
+
     }
 
     @Test
@@ -199,9 +230,8 @@ class BeregningsgrunnlagRepositoryTest {
         opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
 
         val behandlingsReferanse2 = UUID.randomUUID()
-        opprettTestHendelse(dataSource, behandlingsReferanse2, "ABCDF")
 
-        val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dataSource)
+        opprettTestHendelse(dataSource, behandlingsReferanse2, "ABCDF")
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
@@ -237,41 +267,54 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
         )
 
-        val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre = IBeregningsGrunnlag.GrunnlagUføre(
-            grunnlag = 30000.0,
-            er6GBegrenset = false,
-            grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
-                grunnlag = 25000.0,
+        val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre =
+            IBeregningsGrunnlag.GrunnlagUføre(
+                grunnlag = 30000.0,
                 er6GBegrenset = false,
-                erGjennomsnitt = true,
-                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
-            ),
-            uføregrad = 50,
-            type = UføreType.YTTERLIGERE_NEDSATT,
-            uføreInntektIKroner = BigDecimal(28000),
-            uføreInntekterFraForegåendeÅr = mapOf(
-                2018 to 27000.0,
-                2019 to 27500.0,
-                2020 to 28000.0
-            ),
-            uføreYtterligereNedsattArbeidsevneÅr = 2020
-        )
-
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
-            MedBehandlingsreferanse(
-                behandlingsReferanse = behandlingsReferanse,
-                value = grunnlagUfore
+                grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
+                    grunnlag = 25000.0,
+                    er6GBegrenset = false,
+                    erGjennomsnitt = true,
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                ),
+                uføregrad = 50,
+                type = UføreType.YTTERLIGERE_NEDSATT,
+                uføreInntektIKroner = BigDecimal(28000),
+                uføreInntekterFraForegåendeÅr = mapOf(
+                    2018 to 27000.0,
+                    2019 to 27500.0,
+                    2020 to 28000.0
+                ),
+                uføreYtterligereNedsattArbeidsevneÅr = 2020
             )
-        )
 
-        beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
-            MedBehandlingsreferanse(
-                behandlingsReferanse = behandlingsReferanse2,
-                value = grunnlagYrkesskade
+        dataSource.transaction {
+
+
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
+
+
+            beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse = behandlingsReferanse,
+                    value = grunnlagUfore
+                )
             )
-        )
 
-        val uthentet = beregningsgrunnlagRepository.hentBeregningsGrunnlag()
+            beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse = behandlingsReferanse2,
+                    value = grunnlagYrkesskade
+                )
+            )
+        }
+
+        val uthentet =
+            dataSource.transaction {
+                BeregningsgrunnlagRepository(
+                    it
+                ).hentBeregningsGrunnlag()
+            }
 
         assertThat(uthentet).hasSize(2)
         assertThat(uthentet.map { it.value }).containsOnly(

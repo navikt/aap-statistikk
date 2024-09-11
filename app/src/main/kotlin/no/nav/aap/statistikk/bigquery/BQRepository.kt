@@ -8,22 +8,22 @@ import java.util.UUID
 
 class BQRepository(
     private val client: BigQueryClient
-) {
+): IBQRepository {
     private val vilkårsVurderingTabell = VilkårsVurderingTabell()
     private val tilkjentYtelseTabell = TilkjentYtelseTabell()
     private val beregningsGrunnlagTabell = BeregningsGrunnlagTabell()
 
-    fun lagre(payload: Vilkårsresultat) {
+    override fun lagre(payload: Vilkårsresultat) {
         client.create(vilkårsVurderingTabell)
         client.insert(vilkårsVurderingTabell, payload)
     }
 
-    fun lagre(payload: TilkjentYtelse) {
+    override fun lagre(payload: TilkjentYtelse) {
         client.create(tilkjentYtelseTabell)
         client.insert(tilkjentYtelseTabell, payload)
     }
 
-    fun lagre(payload: IBeregningsGrunnlag, behandlingsReferanse: UUID) {
+    override fun lagre(payload: IBeregningsGrunnlag, behandlingsReferanse: UUID) {
         client.create(beregningsGrunnlagTabell)
         client.insert(
             beregningsGrunnlagTabell,
