@@ -2,16 +2,16 @@ package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.BigQuery
+import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
-import no.nav.aap.statistikk.Postgres
+import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
-import no.nav.aap.statistikk.opprettTestHendelse
+import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository

@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.testutils
 
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.aap.statistikk.db.DbConfig

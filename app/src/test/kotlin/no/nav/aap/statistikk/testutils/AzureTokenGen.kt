@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.testutils
 
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
