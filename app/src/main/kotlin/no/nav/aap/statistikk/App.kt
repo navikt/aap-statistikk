@@ -80,7 +80,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
                 return LogInformasjon(mapOf())
             }
         },
-        jobber = listOf(LagreHendelseJobb)
+        jobber = listOf(LagreHendelseJobb, LagreAvsluttetBehandlingPostgresJobbUtfører)
     )
 
     environment.monitor.subscribe(ApplicationStopped) {
@@ -109,7 +109,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
                 }
 
             },
-            object: Factory<VilkårsresultatRepository> {
+            object : Factory<VilkårsresultatRepository> {
                 override fun create(dbConnection: DBConnection): VilkårsresultatRepository {
                     return VilkårsresultatRepository(dbConnection)
                 }
