@@ -21,7 +21,6 @@ import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
-import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
@@ -54,7 +53,6 @@ fun <E> testKlient(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
     jobbAppender: JobbAppender,
-    avsluttetBehandlingService: AvsluttetBehandlingService,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwks = URI.create("http://localhost:8081/jwks").toURL(),
@@ -70,7 +68,38 @@ fun <E> testKlient(
                 transactionExecutor,
                 motor,
                 jobbAppender,
-                avsluttetBehandlingService,
+                azureConfig
+            )
+        }
+        val client = client.config {
+            install(ContentNegotiation) {
+                jackson {
+                    registerModule(JavaTimeModule())
+                }
+            }
+        }
+
+        res = test(client)
+    }
+    return res
+}
+
+fun <E> testKlientNoInjection(
+    dbConfig: DbConfig, bqConfig: BigQueryConfig,
+    azureConfig: AzureConfig = AzureConfig(
+        clientId = "tilgang",
+        jwks = URI.create("http://localhost:8081/jwks").toURL(),
+        issuer = "tilgang"
+    ),
+    test: suspend (HttpClient) -> E?
+): E? {
+    var res: E? = null;
+
+    testApplication {
+        application {
+            startUp(
+                dbConfig,
+                bqConfig,
                 azureConfig
             )
         }
@@ -243,39 +272,4 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
     override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         return grunnlag
     }
-}
-
-fun konstruerFakes(): Triple<FakeTilkjentYtelseRepository, AvsluttetBehandlingService, FakeVilkårsResultatRepository> {
-    val fakeTilkjentYtelseRepository = FakeTilkjentYtelseRepository()
-    val tilkjentYtelseRepositoryFactory = object : Factory<ITilkjentYtelseRepository> {
-        override fun create(dbConnection: DBConnection): ITilkjentYtelseRepository {
-            return fakeTilkjentYtelseRepository
-        }
-    }
-    val faceBQRepository = FakeBQRepository()
-    val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
-    val transactionExecutor = noOpTransactionExecutor
-    val vilkårsResultatRepository = FakeVilkårsResultatRepository()
-
-    val avsluttetBehandlingService =
-        AvsluttetBehandlingService(
-            transactionExecutor,
-            tilkjentYtelseRepositoryFactory,
-            object : Factory<IBeregningsgrunnlagRepository> {
-                override fun create(dbConnection: DBConnection): IBeregningsgrunnlagRepository {
-                    return beregningsgrunnlagRepository
-                }
-            },
-            object : Factory<IVilkårsresultatRepository> {
-                override fun create(dbConnection: DBConnection): IVilkårsresultatRepository {
-                    return vilkårsResultatRepository
-                }
-            },
-            faceBQRepository
-        )
-    return Triple(
-        fakeTilkjentYtelseRepository,
-        avsluttetBehandlingService,
-        vilkårsResultatRepository
-    )
 }

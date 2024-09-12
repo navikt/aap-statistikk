@@ -6,11 +6,11 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import io.ktor.server.application.*
+import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.JobbAppender
 import no.nav.aap.statistikk.LagreAvsluttetHendelseDTOJobb
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.api.Tags
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -19,7 +19,6 @@ import java.util.*
 val eksempelUUID = UUID.randomUUID()
 
 fun NormalOpenAPIRoute.avsluttetBehandling(
-    avsluttetBehandlingService: AvsluttetBehandlingService,
     jobbAppender: JobbAppender
 ) {
     val exampleRequest = AvsluttetBehandlingDTO(
@@ -86,9 +85,11 @@ fun NormalOpenAPIRoute.avsluttetBehandling(
         ) { _, dto ->
             pipeline.context.application.log.info("Mottok avsluttet behandling: $dto")
 
-            avsluttetBehandlingService.lagre(dto.tilDomene())
-
-            jobbAppender.leggTil(JobbInput(LagreAvsluttetHendelseDTOJobb))
+            jobbAppender.leggTil(
+                JobbInput(LagreAvsluttetHendelseDTOJobb).medPayload(
+                    DefaultJsonMapper.toJson(dto)
+                )
+            )
 
             // TODO: responder med id?
             responder.respond(

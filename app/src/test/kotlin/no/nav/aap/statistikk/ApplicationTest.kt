@@ -22,8 +22,6 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val (_, avsluttetBehandlingService, vilkårsResultatRepository) = konstruerFakes()
-
         val behandlingReferanse = UUID.randomUUID()
 
         val jobbAppender = MockJobbAppender()
@@ -32,7 +30,6 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender,
-            avsluttetBehandlingService,
             azureConfig,
         ) { client ->
             val response = client.post("/avsluttetBehandling") {
@@ -106,7 +103,8 @@ class ApplicationTest {
             assertThat(response.body<String>()).isEqualTo("{}")
         }
 
-        assertThat(vilkårsResultatRepository.vilkår.size).isEqualTo(1)
+        assertThat(jobbAppender.jobber).hasSize(1)
+        assertThat(jobbAppender.jobber.first().type()).isEqualTo("lagreAvsluttetBehandlingDTO")
     }
 
     @Test
@@ -114,15 +112,12 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val (_, avsluttetBehandlingService) = konstruerFakes()
-
         val jobbAppender = MockJobbAppender()
 
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            avsluttetBehandlingService,
             azureConfig
         ) { client ->
             @Language("JSON")
@@ -228,15 +223,12 @@ class ApplicationTest {
   }
 }"""
 
-        val (fakeTilkjentYtelseRepository, avsluttetBehandlingService) = konstruerFakes()
-
         val jobbAppender = MockJobbAppender()
 
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            avsluttetBehandlingService,
             azureConfig
         ) { client ->
             val response = client.post("/avsluttetBehandling") {
@@ -248,10 +240,8 @@ class ApplicationTest {
             }
             Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
         }
-
-        assertThat(fakeTilkjentYtelseRepository.tilkjentYtelser.size).isEqualTo(1)
-
         assertThat(jobbAppender.jobber.size).isEqualTo(1)
+        assertThat(jobbAppender.jobber.first().type()).isEqualTo("lagreAvsluttetBehandlingDTO")
     }
 
     @Test
@@ -279,7 +269,6 @@ class ApplicationTest {
   "avklaringsbehov": [],
   "ukjentfelt": "hei"
 }"""
-        val (_, avsluttetBehandlingService) = konstruerFakes()
 
         val jobbAppender = MockJobbAppender()
 
@@ -287,7 +276,6 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            avsluttetBehandlingService,
             azureConfig
         ) { client ->
             val response = client.post("/motta") {
