@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.testutils
 
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*

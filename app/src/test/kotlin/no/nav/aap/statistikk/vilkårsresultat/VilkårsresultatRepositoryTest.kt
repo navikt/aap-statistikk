@@ -1,10 +1,10 @@
 package no.nav.aap.statistikk.vilkårsresultat
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.Postgres
+import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
-import no.nav.aap.statistikk.opprettTestHendelse
+import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity

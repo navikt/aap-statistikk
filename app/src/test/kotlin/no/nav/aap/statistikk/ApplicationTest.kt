@@ -8,6 +8,12 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.testutils.Fakes
+import no.nav.aap.statistikk.testutils.MockJobbAppender
+import no.nav.aap.statistikk.testutils.TestToken
+import no.nav.aap.statistikk.testutils.motorMock
+import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
+import no.nav.aap.statistikk.testutils.testKlient
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions

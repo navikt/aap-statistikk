@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.bigquery
 
-import no.nav.aap.statistikk.BigQuery
+import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag

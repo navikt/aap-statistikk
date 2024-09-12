@@ -4,6 +4,9 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.testutils.Fakes
+import no.nav.aap.statistikk.testutils.bigQueryContainer
+import no.nav.aap.statistikk.testutils.postgresTestConfig
 import org.slf4j.LoggerFactory
 import java.net.URI
 

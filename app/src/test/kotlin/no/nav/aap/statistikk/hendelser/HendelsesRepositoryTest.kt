@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.Postgres
+import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository

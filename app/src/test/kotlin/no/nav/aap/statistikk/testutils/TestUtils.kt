@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.testutils
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.google.cloud.NoCredentials
@@ -17,6 +17,8 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
+import no.nav.aap.statistikk.JobbAppender
+import no.nav.aap.statistikk.TransactionExecutor
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
@@ -26,7 +28,9 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
