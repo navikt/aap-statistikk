@@ -81,13 +81,12 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
                 connection: DBConnection,
                 jobbInput: JobbInput
             ): LogInformasjon? {
-                println(jobbInput)
                 return LogInformasjon(mapOf())
             }
         },
         jobber = listOf(
-            LagreHendelseJobb.Companion, LagreAvsluttertBehandlingJobb(bqRepository),
-            LagreAvsluttetHendelseDTOJobb.Companion
+            LagreHendelseJobb, LagreAvsluttertBehandlingJobb(bqRepository),
+            LagreAvsluttetHendelseDTOJobb
         )
     )
 
