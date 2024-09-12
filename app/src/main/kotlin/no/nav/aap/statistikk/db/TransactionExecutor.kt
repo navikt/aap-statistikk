@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.db
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction

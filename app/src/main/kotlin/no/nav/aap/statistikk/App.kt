@@ -32,8 +32,15 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
+import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
+import no.nav.aap.statistikk.jobber.JobbAppender
+import no.nav.aap.statistikk.jobber.LagreAvsluttertBehandlingJobb
+import no.nav.aap.statistikk.jobber.LagreAvsluttetHendelseDTOJobb
+import no.nav.aap.statistikk.jobber.LagreHendelseJobb
+import no.nav.aap.statistikk.jobber.MotorJobbAppender
 import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.server.authenticate.authentication
@@ -79,8 +86,8 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
             }
         },
         jobber = listOf(
-            LagreHendelseJobb, LagreAvsluttertBehandlingJobb(bqRepository),
-            LagreAvsluttetHendelseDTOJobb
+            LagreHendelseJobb.Companion, LagreAvsluttertBehandlingJobb(bqRepository),
+            LagreAvsluttetHendelseDTOJobb.Companion
         )
     )
 

@@ -8,11 +8,11 @@ import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
-import no.nav.aap.statistikk.LagreHendelseJobb
-import no.nav.aap.statistikk.TransactionExecutor
+import no.nav.aap.statistikk.jobber.LagreHendelseJobb
+import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
-import no.nav.aap.statistikk.JobbAppender
+import no.nav.aap.statistikk.jobber.JobbAppender
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 

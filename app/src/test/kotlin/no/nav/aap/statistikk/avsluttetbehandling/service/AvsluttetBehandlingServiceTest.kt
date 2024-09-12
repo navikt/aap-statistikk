@@ -4,7 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.Factory
-import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
+import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling

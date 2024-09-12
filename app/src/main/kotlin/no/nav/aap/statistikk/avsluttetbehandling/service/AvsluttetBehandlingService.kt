@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import no.nav.aap.statistikk.Factory
-import no.nav.aap.statistikk.TransactionExecutor
+import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository

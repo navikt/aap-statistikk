@@ -17,8 +17,8 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
-import no.nav.aap.statistikk.JobbAppender
-import no.nav.aap.statistikk.TransactionExecutor
+import no.nav.aap.statistikk.jobber.JobbAppender
+import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
