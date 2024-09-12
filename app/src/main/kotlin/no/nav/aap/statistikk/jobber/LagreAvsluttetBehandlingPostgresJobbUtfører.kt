@@ -1,10 +1,12 @@
-package no.nav.aap.statistikk
+package no.nav.aap.statistikk.jobber
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.statistikk.Factory
+import no.nav.aap.statistikk.db.FellesKomponentConnectionExecutor
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.avsluttetbehandling.api.tilDomene
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService

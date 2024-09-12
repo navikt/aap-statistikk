@@ -7,10 +7,10 @@ import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.testutils.Fakes
-import no.nav.aap.statistikk.FellesKomponentTransactionalExecutor
-import no.nav.aap.statistikk.LagreHendelseJobb
+import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
+import no.nav.aap.statistikk.jobber.LagreHendelseJobb
 import no.nav.aap.statistikk.testutils.MockJobbAppender
-import no.nav.aap.statistikk.MotorJobbAppender
+import no.nav.aap.statistikk.jobber.MotorJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*

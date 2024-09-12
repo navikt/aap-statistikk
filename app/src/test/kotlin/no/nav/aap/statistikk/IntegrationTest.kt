@@ -27,6 +27,11 @@ import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.testutils.BigQuery
+import no.nav.aap.statistikk.testutils.Fakes
+import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.TestToken
+import no.nav.aap.statistikk.testutils.testKlientNoInjection
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -36,7 +41,7 @@ import java.util.UUID
 @Fakes
 class IntegrationTest {
     @Test
-    fun `ffff ff`(
+    fun `test flyt`( // TODO, verifiser
         @Postgres dbConfig: DbConfig,
         @BigQuery config: BigQueryConfig,
         @Fakes token: TestToken,

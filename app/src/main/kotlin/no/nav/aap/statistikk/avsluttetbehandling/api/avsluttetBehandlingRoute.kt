@@ -8,8 +8,8 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
-import no.nav.aap.statistikk.JobbAppender
-import no.nav.aap.statistikk.LagreAvsluttetHendelseDTOJobb
+import no.nav.aap.statistikk.jobber.JobbAppender
+import no.nav.aap.statistikk.jobber.LagreAvsluttetHendelseDTOJobb
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.hendelser.api.Tags
 import java.math.BigDecimal
