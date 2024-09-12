@@ -8,10 +8,10 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
-import no.nav.aap.statistikk.jobber.JobbAppender
-import no.nav.aap.statistikk.jobber.LagreAvsluttetHendelseDTOJobb
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.hendelser.api.Tags
+import no.nav.aap.statistikk.jobber.JobbAppender
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -19,7 +19,8 @@ import java.util.*
 val eksempelUUID = UUID.randomUUID()
 
 fun NormalOpenAPIRoute.avsluttetBehandling(
-    jobbAppender: JobbAppender
+    jobbAppender: JobbAppender,
+    lagreAvsluttetBehandlingDTOJobb: LagreAvsluttetBehandlingDTOJobb,
 ) {
     val exampleRequest = AvsluttetBehandlingDTO(
         saksnummer = "4LELS7K",
@@ -86,7 +87,7 @@ fun NormalOpenAPIRoute.avsluttetBehandling(
             pipeline.context.application.log.info("Mottok avsluttet behandling: $dto")
 
             jobbAppender.leggTil(
-                JobbInput(LagreAvsluttetHendelseDTOJobb).medPayload(
+                JobbInput(lagreAvsluttetBehandlingDTOJobb).medPayload(
                     DefaultJsonMapper.toJson(dto)
                 )
             )

@@ -24,7 +24,9 @@ import no.nav.aap.statistikk.api_kontrakt.VilkårDTO
 import no.nav.aap.statistikk.api_kontrakt.VilkårsPeriodeDTO
 import no.nav.aap.statistikk.api_kontrakt.VilkårsResultatDTO
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
+import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.bigquery.VilkårsVurderingTabell
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testutils.BigQuery
@@ -32,6 +34,8 @@ import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.TestToken
 import no.nav.aap.statistikk.testutils.testKlientNoInjection
+import no.nav.aap.statistikk.testutils.ventPåSvar
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -41,7 +45,8 @@ import java.util.UUID
 @Fakes
 class IntegrationTest {
     @Test
-    fun `test flyt`( // TODO, verifiser
+    fun `test flyt`(
+        // TODO, verifiser
         @Postgres dbConfig: DbConfig,
         @BigQuery config: BigQueryConfig,
         @Fakes token: TestToken,
@@ -186,8 +191,11 @@ class IntegrationTest {
                 ),
             ),
         )
+
+        val bqClient = BigQueryClient(config)
+
         testKlientNoInjection(dbConfig, config, azureConfig) { client ->
-            val res = client.post("/motta") {
+            client.post("/motta") {
                 contentType(ContentType.Application.Json)
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
@@ -195,7 +203,7 @@ class IntegrationTest {
                 setBody(hendelse)
             }
 
-            val res2 = client.post("/avsluttetBehandling") {
+            client.post("/avsluttetBehandling") {
                 contentType(ContentType.Application.Json)
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
@@ -203,9 +211,10 @@ class IntegrationTest {
                 setBody(avsluttetBehandling)
             }
 
+            val bigQueryRespons =
+                ventPåSvar({ bqClient.read(VilkårsVurderingTabell()) }, { t -> t.isNotEmpty() })
 
-            Thread.sleep(1000)
-
+            assertThat(bigQueryRespons).hasSize(1)
         }
     }
 

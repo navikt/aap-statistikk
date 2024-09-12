@@ -37,8 +37,8 @@ import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.jobber.JobbAppender
-import no.nav.aap.statistikk.jobber.LagreAvsluttertBehandlingJobb
-import no.nav.aap.statistikk.jobber.LagreAvsluttetHendelseDTOJobb
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobb
 import no.nav.aap.statistikk.jobber.LagreHendelseJobb
 import no.nav.aap.statistikk.jobber.MotorJobbAppender
 import no.nav.aap.statistikk.server.authenticate.AZURE
@@ -73,6 +73,9 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val bqClient = BigQueryClient(bqConfig)
     val bqRepository = BQRepository(bqClient)
 
+    val lagreAvsluttetBehandlingJobb = LagreAvsluttetBehandlingDTOJobb(
+        jobb = LagreAvsluttetBehandlingJobb(bqRepository)
+    )
     val motor = Motor(
         dataSource = dataSource,
         antallKammer = 8,
@@ -85,8 +88,8 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
             }
         },
         jobber = listOf(
-            LagreHendelseJobb, LagreAvsluttertBehandlingJobb(bqRepository),
-            LagreAvsluttetHendelseDTOJobb
+            LagreHendelseJobb, LagreAvsluttetBehandlingJobb(bqRepository),
+            lagreAvsluttetBehandlingJobb
         )
     )
 
@@ -102,7 +105,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     module(
         transactionExecutor,
         motor,
-        MotorJobbAppender(dataSource),
+        MotorJobbAppender(dataSource), lagreAvsluttetBehandlingJobb,
         azureConfig
     )
 }
@@ -111,6 +114,7 @@ fun Application.module(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
     jobbAppender: JobbAppender,
+    lagreAvsluttetBehandlingJobb: LagreAvsluttetBehandlingDTOJobb,
     azureConfig: AzureConfig
 ) {
     motor.start()
@@ -131,7 +135,7 @@ fun Application.module(
                     transactionExecutor,
                     jobbAppender,
                 )
-                avsluttetBehandling(jobbAppender)
+                avsluttetBehandling(jobbAppender, lagreAvsluttetBehandlingJobb)
             }
         }
     }

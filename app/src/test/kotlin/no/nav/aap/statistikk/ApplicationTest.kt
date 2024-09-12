@@ -7,7 +7,10 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.statistikk.api_kontrakt.*
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobb
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.TestToken
@@ -36,6 +39,7 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender,
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
             azureConfig,
         ) { client ->
             val response = client.post("/avsluttetBehandling") {
@@ -124,6 +128,7 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
             azureConfig
         ) { client ->
             @Language("JSON")
@@ -235,6 +240,7 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
             azureConfig
         ) { client ->
             val response = client.post("/avsluttetBehandling") {
@@ -282,6 +288,7 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
             azureConfig
         ) { client ->
             val response = client.post("/motta") {
