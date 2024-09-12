@@ -6,26 +6,29 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
-import no.nav.aap.statistikk.testutils.Fakes
+import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
+import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobb
 import no.nav.aap.statistikk.jobber.LagreHendelseJobb
-import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.jobber.MotorJobbAppender
+import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.statistikk.testutils.FakeBQRepository
+import no.nav.aap.statistikk.testutils.Fakes
+import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.TestToken
-import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.testutils.motorMock
 import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testutils.testKlient
+import no.nav.aap.statistikk.testutils.ventPåSvar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
-import kotlin.system.measureTimeMillis
 
 @Fakes
 class MottaStatistikkTest {
@@ -45,6 +48,7 @@ class MottaStatistikkTest {
             noOpTransactionExecutor,
             motor,
             jobbAppender,
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
             azureConfig
         ) { client ->
             val res = client.post("/motta") {
@@ -177,26 +181,29 @@ class MottaStatistikkTest {
 
         val jobbAppender = MotorJobbAppender(dataSource)
 
-        dataSource.transaction {
-            val hendelsesRepository = HendelsesRepository(it)
 
-            testKlient(
-                transactionExecutor,
-                motor,
-                jobbAppender,
-                azureConfig
-            ) { client ->
-                val res = client.post("/motta") {
-                    contentType(ContentType.Application.Json)
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
-                    }
-                    setBody(hendelse)
+        testKlient(
+            transactionExecutor,
+            motor,
+            jobbAppender,
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
+            azureConfig
+        ) { client ->
+            val res = client.post("/motta") {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
                 }
-                Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
+                setBody(hendelse)
+            }
+            Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
 
-                ventPåSvar(dataSource)
+            val hendelser = dataSource.transaction(readOnly = true) {
+                ventPåSvar({ HendelsesRepository(it).hentHendelser() }, { it.isNotEmpty() })
+            }
 
+            dataSource.transaction {
+                val hendelsesRepository = HendelsesRepository(it)
                 val hentHendelser = hendelsesRepository.hentHendelser()
 
                 assertThat(hentHendelser).hasSize(1)
@@ -207,20 +214,5 @@ class MottaStatistikkTest {
                 assertThat(hentHendelser.first().status).isEqualTo(hendelse.status)
             }
         }
-    }
-
-    private fun ventPåSvar(dataSource: DataSource) {
-        val timeInMillis = measureTimeMillis {
-            dataSource.transaction(readOnly = true) {
-                val maxTid = LocalDateTime.now().plusMinutes(1)
-                val hendelsesRepository = HendelsesRepository(it)
-                while (hendelsesRepository.hentHendelser()
-                        .isEmpty() && maxTid.isAfter(LocalDateTime.now())
-                ) {
-                    Thread.sleep(50L)
-                }
-            }
-        }
-        println("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder.")
     }
 }

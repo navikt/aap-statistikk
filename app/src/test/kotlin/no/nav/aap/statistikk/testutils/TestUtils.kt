@@ -28,6 +28,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.startUp
@@ -47,6 +48,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
+import kotlin.system.measureTimeMillis
 
 private val logger = LoggerFactory.getLogger("TestUtils")
 
@@ -57,6 +59,7 @@ fun <E> testKlient(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
     jobbAppender: JobbAppender,
+    lagreAvsluttetBehandlingDTOJobb: LagreAvsluttetBehandlingDTOJobb,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwks = URI.create("http://localhost:8081/jwks").toURL(),
@@ -72,6 +75,7 @@ fun <E> testKlient(
                 transactionExecutor,
                 motor,
                 jobbAppender,
+                lagreAvsluttetBehandlingDTOJobb,
                 azureConfig
             )
         }
@@ -276,4 +280,24 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
     override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         return grunnlag
     }
+}
+
+fun <E> ventPåSvar(getter: () -> E?, predicate: (E) -> Boolean): E? {
+    var res: E? = null;
+    val timeInMillis = measureTimeMillis {
+        val maxTid = LocalDateTime.now().plusMinutes(1)
+        var suksess = false;
+        while (maxTid.isAfter(LocalDateTime.now()) && !suksess) {
+            try {
+                res = getter()
+                if (res != null && predicate(res)) {
+                    suksess = true
+                }
+            } catch (e: Exception) {
+                Thread.sleep(50L)
+            }
+        }
+    }
+    println("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder.")
+    return res
 }
