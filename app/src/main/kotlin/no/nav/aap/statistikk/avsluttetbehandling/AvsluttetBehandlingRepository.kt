@@ -9,7 +9,7 @@ class AvsluttetBehandlingRepository(private val connection: DBConnection) {
         val jsonString = DefaultJsonMapper.toJson(behandling)
 
         val id =
-            connection.executeReturnKey("INSERT INTO avsluttet_behandling VALUES ('$jsonString') RETURNING id") {
+            connection.executeReturnKey("INSERT INTO avsluttet_behandling(payload) VALUES(?) RETURNING id") {
                 setParams { setString(1, jsonString) }
             }
 

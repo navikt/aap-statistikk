@@ -15,7 +15,6 @@ import no.nav.aap.statistikk.Postgres
 import no.nav.aap.statistikk.TestToken
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
-import no.nav.aap.statistikk.konstruerFakes
 import no.nav.aap.statistikk.motorMock
 import no.nav.aap.statistikk.noOpTransactionExecutor
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -35,8 +34,6 @@ class MottaStatistikkTest {
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
-        val (_, avsluttetBehandlingService) = konstruerFakes()
-
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
 
@@ -48,7 +45,6 @@ class MottaStatistikkTest {
             noOpTransactionExecutor,
             motor,
             jobbAppender,
-            avsluttetBehandlingService,
             azureConfig
         ) { client ->
             val res = client.post("/motta") {
@@ -183,13 +179,11 @@ class MottaStatistikkTest {
 
         dataSource.transaction {
             val hendelsesRepository = HendelsesRepository(it)
-            val (_,avsluttetBehandlingService) = konstruerFakes()
 
             testKlient(
                 transactionExecutor,
                 motor,
                 jobbAppender,
-                avsluttetBehandlingService,
                 azureConfig
             ) { client ->
                 val res = client.post("/motta") {

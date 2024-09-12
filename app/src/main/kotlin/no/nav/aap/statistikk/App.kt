@@ -27,8 +27,6 @@ import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
-import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
@@ -39,9 +37,6 @@ import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.server.authenticate.AZURE
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.server.authenticate.authentication
-import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -68,6 +63,9 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val flyway = Flyway(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
+    val bqClient = BigQueryClient(bqConfig)
+    val bqRepository = BQRepository(bqClient)
+
     val motor = Motor(
         dataSource = dataSource,
         antallKammer = 8,
@@ -80,7 +78,10 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
                 return LogInformasjon(mapOf())
             }
         },
-        jobber = listOf(LagreHendelseJobb, LagreAvsluttetBehandlingPostgresJobbUtfører)
+        jobber = listOf(
+            LagreHendelseJobb, LagreAvsluttertBehandlingJobb(bqRepository),
+            LagreAvsluttetHendelseDTOJobb
+        )
     )
 
     environment.monitor.subscribe(ApplicationStopped) {
@@ -90,39 +91,12 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
         environment.monitor.unsubscribe(ApplicationStopped) {}
     }
 
-    val bqClient = BigQueryClient(bqConfig)
-    val bqRepository = BQRepository(bqClient)
-
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
-
-    val avsluttetBehandlingService =
-        AvsluttetBehandlingService(
-            transactionExecutor,
-            object : Factory<ITilkjentYtelseRepository> {
-                override fun create(dbConnection: DBConnection): TilkjentYtelseRepository {
-                    return TilkjentYtelseRepository(dbConnection)
-                }
-            },
-            object : Factory<BeregningsgrunnlagRepository> {
-                override fun create(dbConnection: DBConnection): BeregningsgrunnlagRepository {
-                    return BeregningsgrunnlagRepository(dbConnection)
-                }
-
-            },
-            object : Factory<VilkårsresultatRepository> {
-                override fun create(dbConnection: DBConnection): VilkårsresultatRepository {
-                    return VilkårsresultatRepository(dbConnection)
-                }
-
-            },
-            bqRepository,
-        )
 
     module(
         transactionExecutor,
         motor,
         MotorJobbAppender(dataSource),
-        avsluttetBehandlingService,
         azureConfig
     )
 }
@@ -131,7 +105,6 @@ fun Application.module(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
     jobbAppender: JobbAppender,
-    avsluttetBehandlingService: AvsluttetBehandlingService,
     azureConfig: AzureConfig
 ) {
     motor.start()
@@ -152,7 +125,7 @@ fun Application.module(
                     transactionExecutor,
                     jobbAppender,
                 )
-                avsluttetBehandling(avsluttetBehandlingService, jobbAppender)
+                avsluttetBehandling(jobbAppender)
             }
         }
     }

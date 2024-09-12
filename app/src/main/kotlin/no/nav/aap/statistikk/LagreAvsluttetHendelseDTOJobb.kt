@@ -23,7 +23,7 @@ class LagreAvsluttetHendelseDTOJobb(private val avsluttetBehandlingRepository: A
         }
 
         override fun type(): String {
-            return "lagreAvsluttetBehandling"
+            return "lagreAvsluttetBehandlingDTO"
         }
 
         override fun navn(): String {

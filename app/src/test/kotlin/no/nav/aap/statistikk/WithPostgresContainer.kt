@@ -27,7 +27,14 @@ annotation class Postgres {
 
         companion object {
             private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16").apply {
-                waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
+                waitingFor(
+                    HostPortWaitStrategy().withStartupTimeout(
+                        Duration.of(
+                            60L,
+                            ChronoUnit.SECONDS
+                        )
+                    )
+                )
             }
             private var dataSource: HikariDataSource
             private val flyway: Flyway
@@ -57,14 +64,24 @@ annotation class Postgres {
             parameterContext: ParameterContext?,
             extensionContext: ExtensionContext?
         ): Boolean {
-            return parameterContext?.isAnnotated(Postgres::class.java) == true && (parameterContext.parameter.type == DataSource::class.java)
+            return (parameterContext?.isAnnotated(Postgres::class.java) == true && (parameterContext.parameter.type == DataSource::class.java))
+                    || ((parameterContext?.isAnnotated(Postgres::class.java) == true && (parameterContext.parameter.type == DbConfig::class.java)))
         }
 
         override fun resolveParameter(
             parameterContext: ParameterContext?,
             extensionContext: ExtensionContext?
         ): Any {
-            return dataSource
+            if (parameterContext == null) {
+              throw IllegalArgumentException("ParameterContext cannot be null")
+            }
+            if (parameterContext.parameter.type == DataSource::class.java) {
+                return dataSource
+            }
+            if (parameterContext.parameter.type == DbConfig::class.java) {
+                return dbConfig
+            }
+            throw IllegalArgumentException("Not supported parameter type")
         }
     }
 }
