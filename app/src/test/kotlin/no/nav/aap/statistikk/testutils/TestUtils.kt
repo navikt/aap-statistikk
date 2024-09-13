@@ -17,17 +17,19 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
-import no.nav.aap.statistikk.jobber.JobbAppender
-import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.jobber.JobbAppender
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -279,6 +281,18 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
 
     override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         return grunnlag
+    }
+}
+
+class FakeAvsluttetBehandlingDTORepository : IAvsluttetBehandlingRepository {
+    val lagrede = mutableListOf<AvsluttetBehandlingDTO>()
+    override fun lagre(behandling: AvsluttetBehandlingDTO): Long {
+        lagrede.add(behandling)
+        return lagrede.indexOf(behandling).toLong()
+    }
+
+    override fun hent(id: Long): AvsluttetBehandlingDTO {
+        return lagrede.get(id.toInt())
     }
 }
 

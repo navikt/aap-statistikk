@@ -10,7 +10,7 @@ import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobb
+import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreHendelseJobb
 import no.nav.aap.statistikk.jobber.MotorJobbAppender
 import no.nav.aap.statistikk.server.authenticate.AzureConfig
@@ -48,7 +48,7 @@ class MottaStatistikkTest {
             noOpTransactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
         ) { client ->
             val res = client.post("/motta") {
@@ -186,7 +186,7 @@ class MottaStatistikkTest {
             transactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobb(FakeBQRepository())),
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
         ) { client ->
             val res = client.post("/motta") {

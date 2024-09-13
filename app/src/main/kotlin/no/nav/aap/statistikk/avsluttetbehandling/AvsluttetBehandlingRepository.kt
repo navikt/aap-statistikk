@@ -4,8 +4,8 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 
-class AvsluttetBehandlingRepository(private val connection: DBConnection) {
-    fun lagre(behandling: AvsluttetBehandlingDTO): Long {
+class AvsluttetBehandlingRepository(private val connection: DBConnection) : IAvsluttetBehandlingRepository {
+    override fun lagre(behandling: AvsluttetBehandlingDTO): Long {
         val jsonString = DefaultJsonMapper.toJson(behandling)
 
         val id =
@@ -16,7 +16,7 @@ class AvsluttetBehandlingRepository(private val connection: DBConnection) {
         return id
     }
 
-    fun hent(id: Long): AvsluttetBehandlingDTO {
+    override fun hent(id: Long): AvsluttetBehandlingDTO {
         val sql = "SELECT payload FROM avsluttet_behandling WHERE id = ?"
         return connection.queryFirst(sql) {
             setParams { setLong(1, id) }
