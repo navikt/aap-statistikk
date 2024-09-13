@@ -6,6 +6,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingRepository
+import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.api.tilDomene
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -14,7 +15,7 @@ import no.nav.aap.statistikk.db.FellesKomponentConnectionExecutor
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 
-class LagreAvsluttetBehandlingJobb(
+class LagreAvsluttetBehandlingJobbKonstruktør(
     val bQRepository: IBQRepository
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
@@ -58,7 +59,7 @@ class LagreAvsluttetBehandlingJobb(
 
 class LagreAvsluttetBehandlingPostgresJobbUtfører(
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
-    private val avsluttetBehandlingRepository: AvsluttetBehandlingRepository
+    private val avsluttetBehandlingRepository: IAvsluttetBehandlingRepository
 ) :
     JobbUtfører {
     override fun utfør(input: JobbInput) {

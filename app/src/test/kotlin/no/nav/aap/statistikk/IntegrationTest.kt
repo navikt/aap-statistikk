@@ -33,6 +33,7 @@ import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.TestToken
+import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.testKlientNoInjection
 import no.nav.aap.statistikk.testutils.ventPåSvar
 import org.assertj.core.api.Assertions.assertThat
@@ -132,65 +133,7 @@ class IntegrationTest {
             behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595")
         )
 
-        val avsluttetBehandling = AvsluttetBehandlingDTO(
-            behandlingsReferanse = behandlingReferanse,
-            saksnummer = saksnummer,
-            tilkjentYtelse = TilkjentYtelseDTO(
-                perioder = listOf(
-                    TilkjentYtelsePeriodeDTO(
-                        fraDato = LocalDate.now().minusYears(1),
-                        tilDato = LocalDate.now().plusDays(1),
-                        dagsats = 1337.420,
-                        gradering = 90.0
-                    ),
-                    TilkjentYtelsePeriodeDTO(
-                        fraDato = LocalDate.now().minusYears(3),
-                        tilDato = LocalDate.now().minusYears(2),
-                        dagsats = 1234.0,
-                        gradering = 45.0
-                    )
-                )
-            ),
-            vilkårsResultat = VilkårsResultatDTO(
-                typeBehandling = "førstegangsbehandling",
-                vilkår = listOf(
-                    VilkårDTO(
-                        vilkårType = Vilkårtype.ALDERSVILKÅRET, perioder = listOf(
-                            VilkårsPeriodeDTO(
-                                fraDato = LocalDate.now().minusYears(2),
-                                tilDato = LocalDate.now().plusDays(3),
-                                manuellVurdering = false,
-                                utfall = Utfall.OPPFYLT
-                            )
-                        )
-                    )
-                )
-            ),
-            beregningsGrunnlag = BeregningsgrunnlagDTO(
-                grunnlagYrkesskade = GrunnlagYrkesskadeDTO(
-                    grunnlaget = BigDecimal(25000.0),
-                    inkludererUføre = false,
-                    beregningsgrunnlag = BeregningsgrunnlagDTO(
-                        grunnlag11_19dto = Grunnlag11_19DTO(
-                            inntekter = mapOf("2019" to 25000.0, "2020" to 26000.0),
-                            grunnlaget = 20000.0,
-                            er6GBegrenset = false,
-                            erGjennomsnitt = true,
-                        )
-                    ),
-                    terskelverdiForYrkesskade = 70,
-                    andelSomSkyldesYrkesskade = BigDecimal(30),
-                    andelYrkesskade = 25,
-                    benyttetAndelForYrkesskade = 20,
-                    andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
-                    antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
-                    yrkesskadeTidspunkt = 2018,
-                    grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
-                    yrkesskadeinntektIG = BigDecimal(6),
-                    grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
-                ),
-            ),
-        )
+        val avsluttetBehandling = avsluttetBehandlingDTO(behandlingReferanse, saksnummer)
 
         val bqClient = BigQueryClient(config)
 

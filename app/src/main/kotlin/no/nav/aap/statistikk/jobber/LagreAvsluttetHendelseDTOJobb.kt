@@ -10,7 +10,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingRepository
 
 
 class LagreAvsluttetBehandlingDTOJobb(
-    val jobb: LagreAvsluttetBehandlingJobb
+    val jobb: LagreAvsluttetBehandlingJobbKonstruktør
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         return LagreAvsluttetHendelseDTOJobb(
@@ -36,7 +36,7 @@ class LagreAvsluttetBehandlingDTOJobb(
 class LagreAvsluttetHendelseDTOJobb(
     private val avsluttetBehandlingRepository: AvsluttetBehandlingRepository,
     private val jobbAppender: JobbAppender,
-    val jobb: LagreAvsluttetBehandlingJobb
+    val jobb: LagreAvsluttetBehandlingJobbKonstruktør
 ) :
     JobbUtfører {
     override fun utfør(input: JobbInput) {
