@@ -9,6 +9,7 @@ plugins {
 
 val ktorVersion = "2.3.12"
 val mockkVersion = "1.13.12"
+val komponenterVersjon = "0.0.54"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -45,9 +46,9 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql:42.7.4")
     implementation("com.zaxxer:HikariCP:5.1.0")
 
-    implementation("no.nav.aap.kelvin:motor:0.0.42")
-    implementation("no.nav.aap.kelvin:dbconnect:0.0.51")
-    implementation("no.nav.aap.kelvin:httpklient:0.0.42")
+    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
 
     implementation("no.nav:ktor-openapi-generator:1.0.30")
 
