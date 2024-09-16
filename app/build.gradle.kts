@@ -46,7 +46,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.1.0")
 
     implementation("no.nav.aap.kelvin:motor:0.0.42")
-    implementation("no.nav.aap.kelvin:dbconnect:0.0.42")
+    implementation("no.nav.aap.kelvin:dbconnect:0.0.51")
     implementation("no.nav.aap.kelvin:httpklient:0.0.42")
 
     implementation("no.nav:ktor-openapi-generator:1.0.30")
