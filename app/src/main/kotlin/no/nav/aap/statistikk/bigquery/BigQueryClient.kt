@@ -52,7 +52,7 @@ class BigQueryClient(options: BigQueryConfig) : IBigQueryClient {
         val response = bigQuery.insertAll(built)
 
         if (response.hasErrors()) {
-            log.warn(response.insertErrors.toString())
+            log.warn("Error ved insert. Tabell: ${table.tableName}. Feilmelding: ${response.insertErrors}.")
         }
     }
 
