@@ -59,6 +59,7 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
             avsluttetBehandlingRepository
         )
 
+        // ACT
         jobbutfører.utfør(
             JobbInput(LagreAvsluttetBehandlingJobbKonstruktør(bQRepository)).medParameter(
                 "id",

@@ -1,20 +1,23 @@
 package no.nav.aap.statistikk.testutils
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
-import io.ktor.client.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.jackson.*
-import io.ktor.server.testing.*
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
+import no.nav.aap.komponenter.httpklient.httpclient.RestClient
+import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
@@ -32,7 +35,6 @@ import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.JobbAppender
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.module
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
@@ -44,6 +46,7 @@ import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import java.io.InputStream
 import java.net.URI
 import java.time.Duration
 import java.time.LocalDateTime
@@ -64,33 +67,41 @@ fun <E> testKlient(
     lagreAvsluttetBehandlingDTOJobb: LagreAvsluttetBehandlingDTOJobb,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
-        jwks = URI.create("http://localhost:8081/jwks").toURL(),
-        issuer = "tilgang"
+        jwksUri = "http://localhost:8081/jwks",
+        issuer = "tilgang",
+        tokenEndpoint = URI.create("http://localhost:8081/jwks"),
+        clientSecret = "xxx",
     ),
-    test: suspend (HttpClient) -> E?
+    test: (url: String, client: RestClient<InputStream>) -> E?
 ): E? {
     var res: E? = null;
 
-    testApplication {
-        application {
-            module(
-                transactionExecutor,
-                motor,
-                jobbAppender,
-                lagreAvsluttetBehandlingDTOJobb,
-                azureConfig
-            )
-        }
-        val client = client.config {
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                }
-            }
-        }
+    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
+    System.setProperty("azure.app.client.id", azureConfig.clientId)
+    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
+    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
+    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
 
-        res = test(client)
-    }
+    val restClient = RestClient(
+        config = ClientConfig(scope = "AAP_SCOPES"),
+        tokenProvider = ClientCredentialsTokenProvider,
+        responseHandler = DefaultResponseHandler()
+    )
+
+    val server = embeddedServer(Netty, port = 0) {
+        module(
+            transactionExecutor,
+            motor,
+            jobbAppender,
+            lagreAvsluttetBehandlingDTOJobb,
+            azureConfig
+        )
+    }.start()
+
+    val port = runBlocking { server.resolvedConnectors().first().port }
+
+    res = test("http://localhost:$port", restClient)
+
     return res
 }
 
@@ -98,31 +109,39 @@ fun <E> testKlientNoInjection(
     dbConfig: DbConfig, bqConfig: BigQueryConfig,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
-        jwks = URI.create("http://localhost:8081/jwks").toURL(),
+        jwksUri = "http://localhost:8081/jwks",
         issuer = "tilgang"
     ),
-    test: suspend (HttpClient) -> E?
+    test: (url: String, client: RestClient<InputStream>) -> E?
 ): E? {
     var res: E? = null;
 
-    testApplication {
-        application {
-            startUp(
-                dbConfig,
-                bqConfig,
-                azureConfig
-            )
-        }
-        val client = client.config {
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                }
-            }
-        }
+    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
+    System.setProperty("azure.app.client.id", azureConfig.clientId)
+    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
+    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
+    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
 
-        res = test(client)
-    }
+    val restClient = RestClient(
+        config = ClientConfig(scope = "AAP_SCOPES"),
+        tokenProvider = ClientCredentialsTokenProvider,
+        responseHandler = DefaultResponseHandler()
+    )
+
+    val server = embeddedServer(Netty, port = 0) {
+        startUp(
+            dbConfig,
+            bqConfig,
+            azureConfig
+        )
+    }.start()
+
+    val port = runBlocking { server.resolvedConnectors().first().port }
+
+    res = test("http://localhost:$port", restClient)
+
+    server.stop(0L, 0L)
+
     return res
 }
 

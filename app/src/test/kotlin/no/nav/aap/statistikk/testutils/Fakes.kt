@@ -10,7 +10,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import org.junit.jupiter.api.extension.*
 import java.net.URI
 
@@ -48,7 +48,7 @@ annotation class Fakes {
             routing {
                 post("/token") {
                     val token = AzureTokenGen("tilgang", "tilgang").generate()
-                    call.respond(TestToken(access_token = token))
+                    call.respond(TestToken(access_token = token, scope = "AAP_SCOPES"))
                 }
                 get("/jwks") {
                     call.respond(AZURE_JWKS)
@@ -85,14 +85,16 @@ annotation class Fakes {
                 && parameterContext.parameter.type == AzureConfig::class.java) {
                 return AzureConfig(
                     clientId = "tilgang",
-                    jwks = URI.create("http://localhost:${azure.port()}/jwks").toURL(),
-                    issuer = "tilgang"
+                    jwksUri = "http://localhost:${azure.port()}/jwks",
+                    issuer = "tilgang",
+                    tokenEndpoint = URI.create("http://localhost:${azure.port()}/token"),
+                    clientSecret = "verysecret",
                 )
             } else {
                 if (parameterContext?.isAnnotated(Fakes::class.java) == true
                     && parameterContext.parameter.type == TestToken::class.java) {
                     val token = AzureTokenGen("tilgang", "tilgang").generate()
-                    return TestToken(access_token = token)
+                    return TestToken(access_token = token, scope = "AAP_SCOPES")
                 }
             }
 
@@ -103,6 +105,7 @@ annotation class Fakes {
 
 data class ErrorRespons(val message: String?)
 
+@Suppress("PropertyName")
 data class TestToken(
     val access_token: String,
     val refresh_token: String = "very.secure.token",

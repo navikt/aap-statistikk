@@ -1,26 +1,24 @@
 package no.nav.aap.statistikk
 
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.contentType
+import no.nav.aap.komponenter.httpklient.httpclient.post
+import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
+import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.VilkårsVurderingTabell
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.TestToken
 import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.behandlingHendelse
 import no.nav.aap.statistikk.testutils.testKlientNoInjection
 import no.nav.aap.statistikk.testutils.ventPåSvar
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.net.URI
 import java.util.UUID
 
 @Fakes
@@ -30,7 +28,6 @@ class IntegrationTest {
         // TODO, verifiser
         @Postgres dbConfig: DbConfig,
         @BigQuery config: BigQueryConfig,
-        @Fakes token: TestToken,
         @Fakes azureConfig: AzureConfig,
     ) {
 
@@ -41,22 +38,14 @@ class IntegrationTest {
 
         val bqClient = BigQueryClient(config)
 
-        testKlientNoInjection(dbConfig, config, azureConfig) { client ->
-            client.post("/motta") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
-                }
-                setBody(hendelse)
-            }
+        testKlientNoInjection(dbConfig, config, azureConfig) { url, client ->
+            client.post<MottaStatistikkDTO, Any>(URI.create("$url/motta"), PostRequest(hendelse))
 
-            client.post("/avsluttetBehandling") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
-                }
-                setBody(avsluttetBehandling)
-            }
+
+            client.post<AvsluttetBehandlingDTO, Any>(
+                URI.create("$url/avsluttetBehandling"),
+                PostRequest(avsluttetBehandling)
+            )
 
             val bigQueryRespons =
                 ventPåSvar({ bqClient.read(VilkårsVurderingTabell()) }, { t -> t.isNotEmpty() })

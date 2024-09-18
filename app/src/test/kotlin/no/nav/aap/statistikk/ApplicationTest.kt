@@ -2,14 +2,15 @@ package no.nav.aap.statistikk
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import kotlinx.coroutines.runBlocking
+import no.nav.aap.komponenter.httpklient.httpclient.Header
+import no.nav.aap.komponenter.httpklient.httpclient.post
+import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
+import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
@@ -19,8 +20,8 @@ import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
 import no.nav.aap.statistikk.testutils.testKlient
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.net.URI
 import java.time.LocalDate
 import java.util.*
 
@@ -35,90 +36,86 @@ class ApplicationTest {
 
         val jobbAppender = MockJobbAppender()
 
-        val response = testKlient(
-            noOpTransactionExecutor,
-            motor = motorMock(),
-            jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
-            azureConfig,
-        ) { client ->
-            val response = client.post("/avsluttetBehandling") {
-                headers {
-                    append("Authorization", "Bearer ${token.access_token}")
-                }
-                val vilkårsresultat = VilkårsResultatDTO(
-                    typeBehandling = "Førstegangsbehandling", vilkår = listOf(
-                        VilkårDTO(
-                            vilkårType = Vilkårtype.ALDERSVILKÅRET, listOf(
-                                VilkårsPeriodeDTO(
-                                    fraDato = LocalDate.now().minusDays(10),
-                                    tilDato = LocalDate.now().minusDays(0),
-                                    utfall = Utfall.IKKE_OPPFYLT,
-                                    manuellVurdering = true
-                                )
-                            )
-                        ),
-                    )
-                )
-
-                // konverter til json med jackson
-                val vilkårsResultatJson =
-                    ObjectMapper().registerModule(JavaTimeModule())
-                        .writeValueAsString(vilkårsresultat)
-
-
-                val tilkjentYtelseDTO = TilkjentYtelseDTO(
-                    perioder = listOf(
-                        TilkjentYtelsePeriodeDTO(
+        val vilkårsresultat = VilkårsResultatDTO(
+            typeBehandling = "Førstegangsbehandling", vilkår = listOf(
+                VilkårDTO(
+                    vilkårType = Vilkårtype.ALDERSVILKÅRET, listOf(
+                        VilkårsPeriodeDTO(
                             fraDato = LocalDate.now().minusDays(10),
-                            tilDato = LocalDate.now(),
-                            dagsats = 100.23,
-                            gradering = 70.2
+                            tilDato = LocalDate.now().minusDays(0),
+                            utfall = Utfall.IKKE_OPPFYLT,
+                            manuellVurdering = true
                         )
+                    )
+                ),
+            )
+        )
+
+        // konverter til json med jackson
+        val vilkårsResultatJson =
+            ObjectMapper().registerModule(JavaTimeModule())
+                .writeValueAsString(vilkårsresultat)
+
+
+        val tilkjentYtelseDTO = TilkjentYtelseDTO(
+            perioder = listOf(
+                TilkjentYtelsePeriodeDTO(
+                    fraDato = LocalDate.now().minusDays(10),
+                    tilDato = LocalDate.now(),
+                    dagsats = 100.23,
+                    gradering = 70.2
+                )
+            )
+        )
+
+        val tilkjentYtelseJSON =
+            ObjectMapper().registerModule(JavaTimeModule())
+                .writeValueAsString(tilkjentYtelseDTO)
+
+        val beregningsGrunnlag =
+            ObjectMapper().writeValueAsString(
+                BeregningsgrunnlagDTO(
+                    grunnlag11_19dto = Grunnlag11_19DTO(
+                        inntekter = mapOf(),
+                        grunnlaget = 6.0,
+                        erGjennomsnitt = true,
+                        er6GBegrenset = true
                     )
                 )
+            )
 
-                val tilkjentYtelseJSON =
-                    ObjectMapper().registerModule(JavaTimeModule())
-                        .writeValueAsString(tilkjentYtelseDTO)
-
-                val beregningsGrunnlag =
-                    ObjectMapper().writeValueAsString(
-                        BeregningsgrunnlagDTO(
-                            grunnlag11_19dto = Grunnlag11_19DTO(
-                                inntekter = mapOf(),
-                                grunnlaget = 6.0,
-                                erGjennomsnitt = true,
-                                er6GBegrenset = true
-                            )
-                        )
-                    )
-
-                contentType(ContentType.Application.Json)
-
-                @Language("JSON") val jsonBody = """{
+        @Language("JSON") val jsonBody = """{
   "saksnummer": "4LENXDC",
   "behandlingsReferanse": "$behandlingReferanse",
   "tilkjentYtelse": $tilkjentYtelseJSON,
   "vilkårsResultat": $vilkårsResultatJson,
   "beregningsGrunnlag": $beregningsGrunnlag
 }"""
-                setBody(jsonBody)
-            }
-            response
+
+        val response = testKlient(
+            noOpTransactionExecutor,
+            motor = motorMock(),
+            jobbAppender,
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
+            azureConfig,
+        ) { url, client ->
+
+            val respons = client.post<AvsluttetBehandlingDTO, LinkedHashMap<String, String>>(
+                URI.create("$url/avsluttetBehandling"), PostRequest<AvsluttetBehandlingDTO>(
+                    body = DefaultJsonMapper.fromJson<AvsluttetBehandlingDTO>(jsonBody)
+                )
+            )
+            respons
         }
 
-        assertThat(response!!.status.isSuccess()).isTrue()
-        runBlocking {
-            assertThat(response.body<String>()).isEqualTo("{}")
-        }
+        assertThat(response!!.size).isEqualTo(0)
 
         assertThat(jobbAppender.jobber).hasSize(1)
         assertThat(jobbAppender.jobber.first().type()).isEqualTo("lagreAvsluttetBehandlingDTO")
     }
 
     @Test
-    fun `kan poste ren json`(
+    fun `kan poste mottastatistikk, og jobb blir opprettet`(
         @Fakes azureConfig: AzureConfig,
         @Fakes token: TestToken
     ) {
@@ -130,7 +127,7 @@ class ApplicationTest {
             jobbAppender,
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
-        ) { client ->
+        ) { url, client ->
             @Language("JSON")
             val body =
                 """{
@@ -150,14 +147,15 @@ class ApplicationTest {
   "ident": "1403199012345",
   "avklaringsbehov": []
 }"""
-            val response = client.post("/motta") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append("Authorization", "Bearer ${token.access_token}")
-                }
-                setBody(body)
-            }
-            Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
+
+            client.post<MottaStatistikkDTO, Any>(
+                URI.create("$url/motta"),
+                PostRequest(
+                    DefaultJsonMapper.fromJson(body),
+                    contentType = ContentType.APPLICATION_JSON
+                )
+            )
+
         }
 
         assertThat(jobbAppender.jobber).hasSize(1)
@@ -165,8 +163,7 @@ class ApplicationTest {
 
     @Test
     fun `kan parse json for beregningsgrunnlag`(
-        @Fakes azureConfig: AzureConfig,
-        @Fakes token: TestToken
+        @Fakes azureConfig: AzureConfig
     ) {
         @Language("JSON")
         val payload = """{
@@ -242,15 +239,14 @@ class ApplicationTest {
             jobbAppender,
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
-        ) { client ->
-            val response = client.post("/avsluttetBehandling") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append("Authorization", "Bearer ${token.access_token}")
-                }
-                setBody(payload)
-            }
-            Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
+        ) { url, client ->
+            client.post<AvsluttetBehandlingDTO, String>(
+                URI.create("$url/avsluttetBehandling"),
+                PostRequest(
+                    DefaultJsonMapper.fromJson(payload),
+                    contentType = ContentType.APPLICATION_JSON
+                )
+            ) { st, s -> st.toString() }
         }
         assertThat(jobbAppender.jobber.size).isEqualTo(1)
         assertThat(jobbAppender.jobber.first().type()).isEqualTo("lagreAvsluttetBehandlingDTO")
@@ -290,15 +286,16 @@ class ApplicationTest {
             jobbAppender,
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
-        ) { client ->
-            val response = client.post("/motta") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append("Authorization", "Bearer ${token.access_token}")
-                }
-                setBody(payload)
-            }
-            Assertions.assertEquals(HttpStatusCode.Accepted, response.status)
+        ) { url, client ->
+            client.post<MottaStatistikkDTO, Object>(
+                URI.create("$url/motta"), PostRequest(
+                    DefaultJsonMapper.fromJson<MottaStatistikkDTO>(payload),
+                    additionalHeaders = listOf(
+                        Header("Accept", "application/json"),
+                        Header("Content-Type", "application/json")
+                    )
+                )
+            )
         }
     }
 }
