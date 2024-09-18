@@ -1,27 +1,22 @@
 package no.nav.aap.statistikk
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.http.*
-import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
-import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.callid.*
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.aap.behandlingsflyt.server.authenticate.AZURE
+import no.nav.aap.komponenter.commonKtorModule
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
@@ -41,11 +36,8 @@ import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreHendelseJobb
 import no.nav.aap.statistikk.jobber.MotorJobbAppender
-import no.nav.aap.statistikk.server.authenticate.AZURE
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
-import no.nav.aap.statistikk.server.authenticate.authentication
+import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import org.slf4j.LoggerFactory
-import java.util.*
 
 
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
@@ -58,7 +50,7 @@ fun main() {
     }
     val dbConfig = DbConfig.fraMiljøVariabler()
     val bgConfig = BigQueryConfigFromEnv()
-    val azureConfig = AzureConfig.fraMiljøVariabler()
+    val azureConfig = azureconfigFraMiljøVariabler()
 
     embeddedServer(Netty, port = 8080) {
         startUp(dbConfig, bgConfig, azureConfig)
@@ -119,14 +111,12 @@ fun Application.module(
 ) {
     motor.start()
 
-    monitoring()
+    val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
+    monitoring(prometheus)
     statusPages()
-    tracing()
-    contentNegotation()
 
-    generateOpenAPI()
-
-    authentication(azureConfig)
+    commonKtorModule(prometheus, azureConfig, "AAP - Statistikk")
 
     routing {
         authenticate(AZURE) {
@@ -141,39 +131,7 @@ fun Application.module(
     }
 }
 
-private fun Application.contentNegotation() {
-    install(ContentNegotiation) {
-        // TODO sjekk om bør gjøre samme settings som behandlingsflyt
-
-        jackson {
-            registerModule(JavaTimeModule())
-            setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
-            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            jacksonObjectMapper()
-        }
-    }
-}
-
-private fun Application.tracing() {
-    install(CallId) {
-        retrieveFromHeader(HttpHeaders.XCorrelationId)
-        generate { UUID.randomUUID().toString() }
-    }
-    install(CallLogging) {
-        callIdMdc("callId")
-        disableDefaultColors()
-        filter { call -> call.request.path().startsWith("/actuator").not() }
-    }
-}
-
-private fun Application.monitoring() {
-    val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-    install(MicrometerMetrics) {
-        registry = prometheus
-        meterBinders += LogbackMetrics()
-    }
+private fun Application.monitoring(prometheus: PrometheusMeterRegistry) {
     routing {
         route("/actuator") {
             get("/metrics") {

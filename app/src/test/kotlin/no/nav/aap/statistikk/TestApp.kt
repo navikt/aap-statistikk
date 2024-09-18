@@ -2,8 +2,8 @@ package no.nav.aap.statistikk
 
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.bigQueryContainer
 import no.nav.aap.statistikk.testutils.postgresTestConfig
@@ -20,12 +20,16 @@ fun main() {
     logger.info("Postgres Config: $pgConfig")
     val bqConfig: BigQueryConfig = bigQueryContainer()
 
+
+
     embeddedServer(Netty, port = 8080) {
         startUp(
             pgConfig, bqConfig, AzureConfig(
                 clientId = "tilgang",
-                jwks = URI.create("http://localhost:${azureFake.port()}/jwks").toURL(),
-                issuer = "tilgang"
+                jwksUri = "http://localhost:${azureFake.port()}/jwks",
+                issuer = "tilgang",
+                tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
+                clientSecret = "xxx",
             )
         )
     }.start(wait = true)

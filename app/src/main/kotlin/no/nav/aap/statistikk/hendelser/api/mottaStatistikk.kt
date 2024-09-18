@@ -86,7 +86,10 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 
                 val stringified = DefaultJsonMapper.toJson(dto)
 
-                jobbAppender.leggTil(conn, JobbInput(LagreHendelseJobb).medPayload(stringified))
+                jobbAppender.leggTil(
+                    conn,
+                    JobbInput(LagreHendelseJobb).medPayload(stringified).medCallId()
+                )
             }
             // Må ha String-respons på grunn av Accept-header. Denne må returnere json
             responder.respond(HttpStatusCode.Accepted, "{}", pipeline)

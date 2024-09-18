@@ -1,8 +1,9 @@
 package no.nav.aap.statistikk.api
 
-import io.ktor.client.request.*
-import io.ktor.http.*
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.httpklient.httpclient.post
+import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
@@ -13,7 +14,6 @@ import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreHendelseJobb
 import no.nav.aap.statistikk.jobber.MotorJobbAppender
-import no.nav.aap.statistikk.server.authenticate.AzureConfig
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
@@ -24,8 +24,8 @@ import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
 import no.nav.aap.statistikk.testutils.testKlient
 import no.nav.aap.statistikk.testutils.ventPåSvar
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.net.URI
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -34,8 +34,7 @@ import javax.sql.DataSource
 class MottaStatistikkTest {
     @Test
     fun `hendelse blir lagret i repository`(
-        @Fakes azureConfig: AzureConfig,
-        @Fakes token: TestToken
+        @Fakes azureConfig: AzureConfig
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
@@ -50,13 +49,9 @@ class MottaStatistikkTest {
             jobbAppender,
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
-        ) { client ->
-            val res = client.post("/motta") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
-                }
-                setBody(
+        ) { url, client ->
+            client.post<MottaStatistikkDTO, Any>(
+                URI.create("$url/motta"), PostRequest(
                     MottaStatistikkDTO(
                         saksnummer = "123",
                         status = "OPPRETTET",
@@ -67,8 +62,7 @@ class MottaStatistikkTest {
                         avklaringsbehov = listOf()
                     )
                 )
-            }
-            Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
+            )
         }
 
         assertThat(jobbAppender.jobber.first().payload()).isEqualTo(
@@ -188,17 +182,11 @@ class MottaStatistikkTest {
             jobbAppender,
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
-        ) { client ->
-            val res = client.post("/motta") {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${token.access_token}")
-                }
-                setBody(hendelse)
-            }
-            Assertions.assertEquals(HttpStatusCode.Accepted, res.status)
+        ) { url, client ->
 
-            val hendelser = dataSource.transaction(readOnly = true) {
+            client.post<MottaStatistikkDTO, Any>(URI.create("$url/motta"), PostRequest(hendelse))
+
+            dataSource.transaction(readOnly = true) {
                 ventPåSvar({ HendelsesRepository(it).hentHendelser() }, { it.isNotEmpty() })
             }
 
