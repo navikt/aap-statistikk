@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.testutils.BigQuery
@@ -36,7 +37,7 @@ class IntegrationTest {
         val hendelse = behandlingHendelse(saksnummer, behandlingReferanse)
         val avsluttetBehandling = avsluttetBehandlingDTO(behandlingReferanse, saksnummer)
 
-        val bqClient = BigQueryClient(config)
+        val bqClient = BigQueryClient(config, schemaRegistry)
 
         testKlientNoInjection(dbConfig, config, azureConfig) { url, client ->
             client.post<MottaStatistikkDTO, Any>(URI.create("$url/motta"), PostRequest(hendelse))

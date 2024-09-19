@@ -21,19 +21,16 @@ class BQRepository(
 
     override fun lagre(payload: Vilkårsresultat) {
         logger.info("Lagrer vilkårsresultat.")
-        client.create(vilkårsVurderingTabell)
         client.insert(vilkårsVurderingTabell, payload)
     }
 
     override fun lagre(payload: TilkjentYtelse) {
         logger.info("Lagrer tilkjent ytelse.")
-        client.create(tilkjentYtelseTabell)
         client.insert(tilkjentYtelseTabell, payload)
     }
 
     override fun lagre(payload: IBeregningsGrunnlag, behandlingsReferanse: UUID) {
         logger.info("Lagrer beregningsgrunnlag.")
-        client.create(beregningsGrunnlagTabell)
         client.insert(
             beregningsGrunnlagTabell,
             MedBehandlingsreferanse(value = payload, behandlingsReferanse = behandlingsReferanse)

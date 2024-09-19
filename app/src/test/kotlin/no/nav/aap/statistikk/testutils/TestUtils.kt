@@ -140,7 +140,7 @@ fun <E> testKlientNoInjection(
 
     res = test("http://localhost:$port", restClient)
 
-    server.stop(0L, 0L)
+    server.stop(500L, 10_000L)
 
     return res
 }

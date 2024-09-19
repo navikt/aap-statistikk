@@ -11,7 +11,11 @@ import java.util.UUID
 typealias Beregningsgrunnlag = MedBehandlingsreferanse<IBeregningsGrunnlag>
 
 class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
-    override val tableName: String = "beregningsgrunnlag"
+    companion object {
+        const val TABLE_NAME = "beregningsgrunnlag"
+    }
+    override val tableName: String = TABLE_NAME
+    override val version: Int = 1
     override val schema: Schema
         get() {
             val inntekt = Field.newBuilder(

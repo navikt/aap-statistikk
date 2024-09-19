@@ -6,7 +6,8 @@ import org.slf4j.LoggerFactory
 
 private val log = LoggerFactory.getLogger(BigQueryClient::class.java)
 
-class BigQueryClient(options: BigQueryConfig) : IBigQueryClient {
+class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: SchemaRegistry) :
+    IBigQueryClient {
     private val bigQuery: BigQuery = options.bigQueryOptions().service
     private val dataset = options.dataset
 
@@ -17,16 +18,46 @@ class BigQueryClient(options: BigQueryConfig) : IBigQueryClient {
         return dataset != null && dataset.exists()
     }
 
+    init {
+        migrate()
+    }
+
+    fun migrate() {
+        schemaRegistry.values.forEach {
+            if (!exists(it)) {
+                create(it)
+            } else {
+                migrateFields(it)
+            }
+        }
+    }
+
+    fun migrateFields(table: BQTable<*>) {
+        log.info("Oppdaterer skjema for tabell ${table.tableName}")
+        val existingTable = bigQuery.getTable(TableId.of(dataset, table.tableName))
+
+        val updatedTable = existingTable.toBuilder().setDefinition(StandardTableDefinition.of(table.schema)).build()
+
+        updatedTable.update()
+        // Samme måte som her: https://github.com/navikt/yrkesskade/blob/b6da4d18d023007f1cd1fd7821e3704aa3a0d051/libs/bigquery/src/main/kotlin/no/nav/yrkesskade/bigquery/client/DefaultBigQueryClient.kt#L96
+
+        log.info("Oppdatert tabell ${table.tableName}")
+    }
+
+    private fun exists(table: BQTable<*>): Boolean {
+        val table = bigQuery.getTable(TableId.of(dataset, table.tableName))
+        return table != null && table.exists()
+    }
+
     override fun <E> create(table: BQTable<E>): Boolean {
         if (!sjekkAtDatasetEksisterer()) {
             throw Exception("Dataset $dataset eksisterer ikke, så kan ikke lage tabell.")
         }
 
         val name = table.tableName
-        val tabell = bigQuery.getTable(TableId.of(dataset, name))
 
-        if (tabell != null && tabell.exists()) {
-            log.info("Tabell ${table.tableName} eksisterer allerede.")
+        if (exists(table)) {
+            log.info("Tabell $name eksisterer allerede.")
             return false
         }
 

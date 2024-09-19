@@ -10,6 +10,9 @@ import java.time.LocalDate
 import java.util.*
 
 class TilkjentYtelseTabell : BQTable<TilkjentYtelse> {
+    companion object {
+        const val TABLE_NAME = "tilkjentYtelse"
+    }
     private enum class FeltNavn(val feltNavn: String) {
         SAKSNUMMER("saksnummer"), BEHANDLINGSREFERANSE("behandlingsreferanse"), PERIODER("perioder"), FRA_DATO(
             "fraDato"
@@ -17,8 +20,8 @@ class TilkjentYtelseTabell : BQTable<TilkjentYtelse> {
         TIL_DATO("tilDato"), DAGSATS("dagsats"), GRADERING("gradering")
     }
 
-    override val tableName: String
-        get() = "tilkjentYtelse"
+    override val tableName: String = TABLE_NAME
+    override val version: Int = 1
 
     override val schema: Schema
         get() {

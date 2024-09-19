@@ -26,6 +26,7 @@ import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
+import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
@@ -62,7 +63,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val flyway = Flyway(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
-    val bqClient = BigQueryClient(bqConfig)
+    val bqClient = BigQueryClient(bqConfig, schemaRegistry)
     val bqRepository = BQRepository(bqClient)
 
     val lagreAvsluttetBehandlingJobbKonstruktør = LagreAvsluttetBehandlingDTOJobb(
