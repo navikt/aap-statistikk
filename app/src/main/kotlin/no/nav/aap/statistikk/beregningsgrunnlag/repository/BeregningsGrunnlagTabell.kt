@@ -1,9 +1,10 @@
-package no.nav.aap.statistikk.bigquery
+package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.bigquery.BQTable
 import java.math.BigDecimal
 import java.util.UUID
 

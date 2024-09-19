@@ -1,12 +1,11 @@
-package no.nav.aap.statistikk.bigquery
+package no.nav.aap.statistikk.tilkjentytelse
 
 import com.google.cloud.bigquery.Field
 import com.google.cloud.bigquery.FieldValueList
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
 import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
+import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDate
 import java.util.*
 

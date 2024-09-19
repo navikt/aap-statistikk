@@ -2,7 +2,10 @@ package no.nav.aap.statistikk.bigquery
 
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
+import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
 import java.util.UUID

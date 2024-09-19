@@ -7,7 +7,7 @@ import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.VilkårsVurderingTabell
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.Fakes

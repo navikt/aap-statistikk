@@ -5,8 +5,11 @@ import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.Beregningsgrunnlag
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
