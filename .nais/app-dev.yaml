@@ -54,6 +54,9 @@ spec:
     inbound:
       rules:
         - application: behandlingsflyt
+        - application: azure-token-generator
+          namespace: aura
+          cluster: dev-gcp
   gcp:
     sqlInstances:
       - type: POSTGRES_16
