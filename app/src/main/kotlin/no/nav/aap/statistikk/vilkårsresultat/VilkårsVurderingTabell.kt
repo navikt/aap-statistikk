@@ -8,6 +8,9 @@ import java.time.LocalDate
 import java.util.*
 
 class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
+    companion object {
+        const val TABLE_NAME = "vilkarsResultat"
+    }
     private enum class FeltNavn(val feltNavn: String) {
         SAKSNUMMER("saksnummer"),
         BEHANDLINGSREFERANSE("behandlingsreferanse"),
@@ -21,7 +24,8 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
         MANUELL_VURDERING("manuell_vurdering"),
     }
 
-    override val tableName: String = "vilkarsResultat"
+    override val tableName: String = TABLE_NAME
+    override val version: Int = 1
     override val schema: Schema
         get() {
             val saksnummerField = Field.of(FeltNavn.SAKSNUMMER.feltNavn, StandardSQLTypeName.STRING)

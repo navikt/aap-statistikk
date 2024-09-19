@@ -193,7 +193,7 @@ class AvsluttetBehandlingServiceTest {
         dataSource: DataSource,
         bigQueryConfig: BigQueryConfig
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
-        val bigQueryClient = BigQueryClient(bigQueryConfig)
+        val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
         val bqRepository = BQRepository(bigQueryClient)
 
         val service =

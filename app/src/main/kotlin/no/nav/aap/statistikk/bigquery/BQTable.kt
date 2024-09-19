@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.Schema
 
 interface BQTable<E> {
     val tableName: String
+    val version: Int
     val schema: Schema
 
     fun parseRow(fieldValueList: FieldValueList): E

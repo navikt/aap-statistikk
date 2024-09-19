@@ -25,7 +25,7 @@ annotation class Fakes {
         }
 
         fun close() {
-            azure.stop(0L, 0L)
+            azure.stop(500L, 10_000L)
         }
 
         fun port(): Int = azure.port()

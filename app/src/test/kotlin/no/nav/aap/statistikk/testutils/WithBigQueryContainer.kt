@@ -34,7 +34,7 @@ annotation class BigQuery {
                     HostPortWaitStrategy().withStartupTimeout(
                         Duration.ofSeconds(10)
                     )
-                );
+                ).withCommand("--log-level=debug --project test-project");
 
             init {
                 bigQueryContainer.start()
