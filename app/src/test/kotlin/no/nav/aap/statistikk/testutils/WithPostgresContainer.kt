@@ -53,11 +53,11 @@ annotation class Postgres {
         }
 
         override fun beforeEach(context: ExtensionContext?) {
+            flyway.clean()
             flyway.createAndMigrateDataSource()
         }
 
         override fun afterEach(context: ExtensionContext?) {
-            flyway.clean()
         }
 
         override fun supportsParameter(
