@@ -102,6 +102,8 @@ fun <E> testKlient(
 
     res = test("http://localhost:$port", restClient)
 
+    server.stop(500L, 10_000L)
+
     return res
 }
 
