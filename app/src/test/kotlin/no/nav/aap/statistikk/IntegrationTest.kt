@@ -37,7 +37,7 @@ class IntegrationTest {
         val hendelse = behandlingHendelse(saksnummer, behandlingReferanse)
         val avsluttetBehandling = avsluttetBehandlingDTO(behandlingReferanse, saksnummer)
 
-        val bqClient = BigQueryClient(config, mapOf())
+        val bqClient = BigQueryClient(config, schemaRegistry)
 
         testKlientNoInjection(dbConfig, config, azureConfig) { url, client ->
             client.post<MottaStatistikkDTO, Any>(URI.create("$url/motta"), PostRequest(hendelse))

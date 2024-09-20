@@ -22,7 +22,7 @@ fun main() {
 
 
 
-    embeddedServer(Netty, port = 8080) {
+    embeddedServer(Netty, port = 8080, watchPaths = listOf("classes")) {
         startUp(
             pgConfig, bqConfig, AzureConfig(
                 clientId = "tilgang",
