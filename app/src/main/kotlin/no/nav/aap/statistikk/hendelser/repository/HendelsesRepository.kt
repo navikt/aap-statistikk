@@ -45,6 +45,12 @@ class HendelsesRepository(
         }
     }
 
+    override fun tellHendelser(): Int {
+        return dbConnection.queryFirst<Int>("SELECT COUNT(*) FROM motta_statistikk") {
+            setRowMapper { it.getInt("count") }
+        }
+    }
+
     private fun hentEllerSettInnPersonId(connection: DBConnection, ident: String): Int {
         val query = """
             WITH INSERTED AS (
@@ -69,9 +75,7 @@ class HendelsesRepository(
     }
 
     private fun hentEllerSettInnSak(
-        connection: DBConnection,
-        saksnummer: String,
-        personId: Int
+        connection: DBConnection, saksnummer: String, personId: Int
     ): Int {
         val query = """
             WITH INSERTED AS (
@@ -97,9 +101,7 @@ class HendelsesRepository(
     }
 
     private fun hentEllerSettInnBehandling(
-        connection: DBConnection,
-        hendelse: MottaStatistikkDTO,
-        sakId: Int
+        connection: DBConnection, hendelse: MottaStatistikkDTO, sakId: Int
     ): Int {
         val query = """
             WITH INSERTED AS (

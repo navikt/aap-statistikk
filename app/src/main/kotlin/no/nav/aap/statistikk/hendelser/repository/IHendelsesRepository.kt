@@ -6,4 +6,6 @@ interface IHendelsesRepository {
     fun lagreHendelse(hendelse: MottaStatistikkDTO): Int
 
     fun hentHendelser(): Collection<MottaStatistikkDTO>
+
+    fun tellHendelser(): Int
 }
