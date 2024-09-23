@@ -1,10 +1,10 @@
 package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
+import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.assertj.core.api.Assertions.assertThat
@@ -32,14 +32,15 @@ class TilkjentYtelseRepositoryTest {
             dataSource.transaction { conn ->
                 val hendelsesRepository = HendelsesRepository(conn)
                 hendelsesRepository.lagreHendelse(
-                    MottaStatistikkDTO(
+                    StoppetBehandling(
                         saksnummer = "ABCDE",
                         behandlingReferanse = behandlingsReferanse,
                         behandlingOpprettetTidspunkt = LocalDateTime.now(),
                         status = "somestatus",
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = "13",
-                        avklaringsbehov = listOf()
+                        avklaringsbehov = listOf(),
+                        versjon = "xxx"
                     )
                 )
             }
@@ -83,14 +84,15 @@ class TilkjentYtelseRepositoryTest {
             dataSource.transaction { conn ->
                 val hendelsesRepository = HendelsesRepository(conn)
                 hendelsesRepository.lagreHendelse(
-                    MottaStatistikkDTO(
+                    StoppetBehandling(
                         saksnummer = "ABCDE",
                         behandlingReferanse = behandlingsReferanse,
                         behandlingOpprettetTidspunkt = LocalDateTime.now(),
                         status = "somestatus",
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = "13",
-                        avklaringsbehov = listOf()
+                        avklaringsbehov = listOf(),
+                        versjon = "ukjent"
                     )
                 )
             }

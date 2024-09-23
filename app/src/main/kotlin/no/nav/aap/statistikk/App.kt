@@ -32,7 +32,7 @@ import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
-import no.nav.aap.statistikk.jobber.LagreHendelseJobb
+import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
@@ -79,7 +79,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
             }
         },
         jobber = listOf(
-            LagreHendelseJobb,
+            LagreStoppetHendelseJobb,
             LagreAvsluttetBehandlingJobbKonstruktør(bqRepository),
             lagreAvsluttetBehandlingJobbKonstruktør
         )

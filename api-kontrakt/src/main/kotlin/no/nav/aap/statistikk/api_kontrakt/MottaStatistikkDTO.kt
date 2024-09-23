@@ -7,6 +7,11 @@ import java.util.*
 /**
  * @param saksnummer Saksnummer.
  */
+@Deprecated(
+    message = "Bruk StoppetBehandling", replaceWith = ReplaceWith(
+        expression = "StoppetBehandling(saksnummer, behandlingReferanse, behandlingOpprettetTidspunkt, status, behandlingType, ident, versjon, avklaringsbehov)"
+    )
+)
 data class MottaStatistikkDTO(
     val saksnummer: String,
     val behandlingReferanse: UUID,
@@ -14,6 +19,17 @@ data class MottaStatistikkDTO(
     val status: String,
     val behandlingType: TypeBehandling,
     val ident: String,
+    val avklaringsbehov: List<AvklaringsbehovHendelse>
+)
+
+data class StoppetBehandling(
+    val saksnummer: String,
+    val behandlingReferanse: UUID,
+    val behandlingOpprettetTidspunkt: LocalDateTime,
+    val status: String,
+    val behandlingType: TypeBehandling,
+    val ident: String,
+    val versjon: String,
     val avklaringsbehov: List<AvklaringsbehovHendelse>
 )
 
@@ -57,7 +73,7 @@ data class Endring(
 
 
 data class Definisjon(
-    val type: String,
+    val type: String, // TODO: enum her
     val behovType: BehovType,
     val løsesISteg: String
 )

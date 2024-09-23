@@ -9,7 +9,7 @@ import no.nav.aap.statistikk.api_kontrakt.Endring
 import no.nav.aap.statistikk.api_kontrakt.EndringStatus
 import no.nav.aap.statistikk.api_kontrakt.Grunnlag11_19DTO
 import no.nav.aap.statistikk.api_kontrakt.GrunnlagYrkesskadeDTO
-import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
+import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelseDTO
 import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelsePeriodeDTO
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
@@ -86,8 +86,8 @@ fun avsluttetBehandlingDTO(referanse: UUID, saksnummer: String): AvsluttetBehand
     )
 }
 
-fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): MottaStatistikkDTO {
-    return MottaStatistikkDTO(
+fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBehandling {
+    return StoppetBehandling(
         saksnummer = saksnummer,
         behandlingReferanse = behandlingReferanse,
         status = "UTREDES",
@@ -161,6 +161,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): MottaStat
                 )
             )
         ),
-        behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595")
+        behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
+        versjon = UUID.randomUUID().toString(),
     )
 }

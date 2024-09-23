@@ -8,7 +8,7 @@ import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
-import no.nav.aap.statistikk.jobber.LagreHendelseJobb
+import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
@@ -27,59 +27,105 @@ enum class Tags(override val description: String) : APITag {
     )
 }
 
+val avklaringsbehov = listOf(
+    AvklaringsbehovHendelse(
+        definisjon = Definisjon(
+            type = "5001",
+            behovType = BehovType.MANUELT_PÅKREVD,
+            løsesISteg = "AVKLAR_STUDENT"
+
+        ),
+        status = EndringStatus.AVSLUTTET,
+        endringer = listOf(
+            Endring(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.now().minusMinutes(10),
+                endretAv = "Kelvin"
+            ),
+            Endring(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.now().minusMinutes(5),
+                endretAv = "Z994573"
+            )
+        )
+    ),
+    AvklaringsbehovHendelse(
+        definisjon = Definisjon(
+            type = "5003",
+            behovType = BehovType.MANUELT_PÅKREVD,
+            løsesISteg = "AVKLAR_SYKDOM"
+        ),
+        status = EndringStatus.OPPRETTET,
+        endringer = listOf(
+            Endring(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.now().minusMinutes(3),
+                endretAv = "Kelvin"
+            )
+        )
+    )
+)
+val exampleRequest = MottaStatistikkDTO(
+    saksnummer = "4LFL5CW",
+    behandlingReferanse = eksempelUUID,
+    status = "OPPRETTET",
+    behandlingType = TypeBehandling.Førstegangsbehandling,
+    ident = "1403199012345",
+    behandlingOpprettetTidspunkt = LocalDateTime.now(),
+    avklaringsbehov = avklaringsbehov
+)
+
+val exampleRequestStoppetBehandling = StoppetBehandling(
+    saksnummer = "4LFL5CW",
+    behandlingReferanse = eksempelUUID,
+    status = "OPPRETTET",
+    behandlingType = TypeBehandling.Førstegangsbehandling,
+    ident = "1403199012345",
+    behandlingOpprettetTidspunkt = LocalDateTime.now(),
+    avklaringsbehov = avklaringsbehov,
+    versjon = "b21e88bca4533d3e0ee3a15f51a87cbaa11a7e9c"
+)
+
+
 fun NormalOpenAPIRoute.mottaStatistikk(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
 ) {
-    val exampleRequest = MottaStatistikkDTO(
-        saksnummer = "4LFL5CW",
-        behandlingReferanse = eksempelUUID,
-        status = "OPPRETTET",
-        behandlingType = TypeBehandling.Førstegangsbehandling,
-        ident = "1403199012345",
-        behandlingOpprettetTidspunkt = LocalDateTime.now(),
-        avklaringsbehov = listOf(
-            AvklaringsbehovHendelse(
-                definisjon = Definisjon(
-                    type = "5001",
-                    behovType = BehovType.MANUELT_PÅKREVD,
-                    løsesISteg = "AVKLAR_STUDENT"
 
-                ),
-                status = EndringStatus.AVSLUTTET,
-                endringer = listOf(
-                    Endring(
-                        status = EndringStatus.OPPRETTET,
-                        tidsstempel = LocalDateTime.now().minusMinutes(10),
-                        endretAv = "Kelvin"
-                    ),
-                    Endring(
-                        status = EndringStatus.AVSLUTTET,
-                        tidsstempel = LocalDateTime.now().minusMinutes(5),
-                        endretAv = "Z994573"
-                    )
-                )
-            ),
-            AvklaringsbehovHendelse(
-                definisjon = Definisjon(
-                    type = "5003",
-                    behovType = BehovType.MANUELT_PÅKREVD,
-                    løsesISteg = "AVKLAR_SYKDOM"
-                ),
-                status = EndringStatus.OPPRETTET,
-                endringer = listOf(
-                    Endring(
-                        status = EndringStatus.OPPRETTET,
-                        tidsstempel = LocalDateTime.now().minusMinutes(3),
-                        endretAv = "Kelvin"
-                    )
-                )
-            )
-        )
-    )
     route("/motta") {
         post<Unit, String, MottaStatistikkDTO>(
             TagModule(listOf(Tags.MottaStatistikk)), exampleRequest = exampleRequest
+        ) { _, dto ->
+            transactionExecutor.withinTransaction { conn ->
+                log.info("Got DTO: $dto")
+
+                val stoppetBehandling = StoppetBehandling(
+                    saksnummer = dto.saksnummer,
+                    behandlingReferanse = dto.behandlingReferanse,
+                    behandlingOpprettetTidspunkt = dto.behandlingOpprettetTidspunkt,
+                    status = dto.status,
+                    behandlingType = dto.behandlingType,
+                    ident = dto.ident,
+                    versjon = "UKJENT",
+                    avklaringsbehov = dto.avklaringsbehov
+                )
+
+                val stringified = DefaultJsonMapper.toJson(stoppetBehandling)
+
+                jobbAppender.leggTil(
+                    conn,
+                    JobbInput(LagreStoppetHendelseJobb).medPayload(stringified).medCallId()
+                )
+            }
+            // Må ha String-respons på grunn av Accept-header. Denne må returnere json
+            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
+        }
+    }
+
+    route("/stoppetBehandling") {
+        post<Unit, String, StoppetBehandling>(
+            TagModule(listOf(Tags.MottaStatistikk)),
+            exampleRequest = exampleRequestStoppetBehandling
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 log.info("Got DTO: $dto")
@@ -88,11 +134,16 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 
                 jobbAppender.leggTil(
                     conn,
-                    JobbInput(LagreHendelseJobb).medPayload(stringified).medCallId()
+                    JobbInput(LagreStoppetHendelseJobb).medPayload(stringified).medCallId()
                 )
             }
-            // Må ha String-respons på grunn av Accept-header. Denne må returnere json
-            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
+
+
+            responder.respond(
+                HttpStatusCode.Accepted,
+                "{}",
+                pipeline
+            )
         }
     }
 }

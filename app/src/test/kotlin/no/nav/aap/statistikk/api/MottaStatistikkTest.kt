@@ -12,13 +12,12 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
-import no.nav.aap.statistikk.jobber.LagreHendelseJobb
+import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.TestToken
 import no.nav.aap.statistikk.testutils.motorMock
 import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
 import no.nav.aap.statistikk.testutils.testKlient
@@ -50,16 +49,17 @@ class MottaStatistikkTest {
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
         ) { url, client ->
-            client.post<MottaStatistikkDTO, Any>(
+            client.post<StoppetBehandling, Any>(
                 URI.create("$url/motta"), PostRequest(
-                    MottaStatistikkDTO(
+                    StoppetBehandling(
                         saksnummer = "123",
                         status = "OPPRETTET",
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = "0",
                         behandlingReferanse = behandlingReferanse,
                         behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                        avklaringsbehov = listOf()
+                        avklaringsbehov = listOf(),
+                        versjon = "UKJENT"
                     )
                 )
             )
@@ -67,14 +67,15 @@ class MottaStatistikkTest {
 
         assertThat(jobbAppender.jobber.first().payload()).isEqualTo(
             DefaultJsonMapper.toJson(
-                MottaStatistikkDTO(
+                StoppetBehandling(
                     saksnummer = "123",
                     status = "OPPRETTET",
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = "0",
                     behandlingReferanse = behandlingReferanse,
                     behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                    avklaringsbehov = listOf()
+                    avklaringsbehov = listOf(),
+                    versjon = "UKJENT"
                 )
             )
         )
@@ -83,10 +84,9 @@ class MottaStatistikkTest {
     @Test
     fun `kan motta mer avansert object`(
         @Postgres dataSource: DataSource,
-        @Fakes azureConfig: AzureConfig,
-        @Fakes token: TestToken
+        @Fakes azureConfig: AzureConfig
     ) {
-        val hendelse = MottaStatistikkDTO(
+        val hendelse = StoppetBehandling(
             saksnummer = "4LFK2S0",
             behandlingReferanse = UUID.fromString("96175156-0950-475a-8de0-41a25f4c0cec"),
             status = "UTREDES",
@@ -160,7 +160,8 @@ class MottaStatistikkTest {
                     )
                 )
             ),
-            behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595")
+            behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
+            versjon = "UKJENT"
         )
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
@@ -169,7 +170,7 @@ class MottaStatistikkTest {
             dataSource = dataSource,
             antallKammer = 2,
             logInfoProvider = NoExtraLogInfoProvider,
-            jobber = listOf(LagreHendelseJobb)
+            jobber = listOf(LagreStoppetHendelseJobb)
         )
 
 
@@ -184,7 +185,7 @@ class MottaStatistikkTest {
             azureConfig
         ) { url, client ->
 
-            client.post<MottaStatistikkDTO, Any>(URI.create("$url/motta"), PostRequest(hendelse))
+            client.post<StoppetBehandling, Any>(URI.create("$url/motta"), PostRequest(hendelse))
 
             dataSource.transaction(readOnly = true) {
                 ventPåSvar({ HendelsesRepository(it).hentHendelser() }, { it.isNotEmpty() })

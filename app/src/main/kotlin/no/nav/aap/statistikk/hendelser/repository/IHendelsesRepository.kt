@@ -1,11 +1,11 @@
 package no.nav.aap.statistikk.hendelser.repository
 
-import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
+import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 
 interface IHendelsesRepository {
-    fun lagreHendelse(hendelse: MottaStatistikkDTO): Int
+    fun lagreHendelse(hendelse: StoppetBehandling): Int
 
-    fun hentHendelser(): Collection<MottaStatistikkDTO>
+    fun hentHendelser(): Collection<StoppetBehandling>
 
     fun tellHendelser(): Int
 }

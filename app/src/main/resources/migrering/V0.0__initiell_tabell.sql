@@ -20,12 +20,19 @@ CREATE TABLE behandling
     OPPRETTET_TID TIMESTAMP(3) NOT NULL
 );
 
+CREATE TABLE versjon
+(
+    ID      BIGSERIAL    NOT NULL PRIMARY KEY,
+    versjon VARCHAR(100) NOT NULL
+);
+
 CREATE TABLE motta_statistikk
 (
     ID            BIGSERIAL    NOT NULL PRIMARY KEY,
     behandling_id BIGINT       NOT NULL REFERENCES behandling (ID),
     sak_id        BIGINT       NOT NULL REFERENCES sak (ID),
-    status        VARCHAR(255) NOT NULL
+    status        VARCHAR(255) NOT NULL,
+    versjon_id    BIGINT       NOT NULL REFERENCES versjon (ID)
 );
 
 CREATE TABLE avsluttet_behandling
