@@ -26,6 +26,8 @@ import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
@@ -212,21 +214,32 @@ fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: St
 
     val id = opprettTestPerson(dataSource, ident)
 
-    val sakId = opprettTestSak(dataSource, saksnummer, Person(ident, id = id))
+    val sak = opprettTestSak(dataSource, saksnummer, Person(ident, id = id))
+
+    val behandlingId = opprettTestBehandling(
+        dataSource,
+        randomUUID,
+        Sak(
+            id = sak.id,
+            saksnummer = saksnummer,
+            person = Person(ident, id = id),
+        ),
+    )
 
     dataSource.transaction { conn ->
-        val hendelse = HendelsesRepository(conn)
-        hendelse.lagreHendelse(
-            StoppetBehandling(
-                saksnummer = saksnummer,
-                behandlingReferanse = randomUUID,
-                behandlingOpprettetTidspunkt = LocalDateTime.now(),
-                status = "IVERKSATT",
-                behandlingType = TypeBehandling.Førstegangsbehandling,
-                ident = ident,
-                avklaringsbehov = listOf(),
-                versjon = UUID.randomUUID().toString()
-            ), sakId
+        val hendelseRepo = HendelsesRepository(conn)
+        val hendelse = StoppetBehandling(
+            saksnummer = saksnummer,
+            behandlingReferanse = randomUUID,
+            behandlingOpprettetTidspunkt = LocalDateTime.now(),
+            status = "IVERKSATT",
+            behandlingType = TypeBehandling.Førstegangsbehandling,
+            ident = ident,
+            avklaringsbehov = listOf(),
+            versjon = UUID.randomUUID().toString()
+        )
+        hendelseRepo.lagreHendelse(
+            hendelse, sak.id!!, behandlingId.id!!
         )
     }
 }
@@ -238,15 +251,31 @@ fun opprettTestPerson(dataSource: DataSource, ident: String): Long {
     }
 }
 
-fun opprettTestSak(dataSource: DataSource, saksnummer: String, person: Person): Long {
+fun opprettTestSak(dataSource: DataSource, saksnummer: String, person: Person): Sak {
     return dataSource.transaction {
-        SakRepositoryImpl(it).settInnSak(
-            Sak(
-                saksnummer = saksnummer,
-                person = person,
-                id = null
-            )
+        val sak = Sak(
+            saksnummer = saksnummer,
+            person = person,
+            id = null
         )
+        val id = SakRepositoryImpl(it).settInnSak(sak)
+        sak.copy(id)
+    }
+}
+
+fun opprettTestBehandling(dataSource: DataSource, referanse: UUID, sak: Sak): Behandling {
+    return dataSource.transaction {
+        val behandling = Behandling(
+            referanse = referanse,
+            sak = sak,
+            typeBehandling = TypeBehandling.Førstegangsbehandling,
+            opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+        )
+        val id = BehandlingRepository(it).lagre(
+            behandling
+        )
+
+        behandling.copy(id)
     }
 }
 

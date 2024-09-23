@@ -6,6 +6,8 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
+import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.person.Person
@@ -19,6 +21,7 @@ class LagreStoppetHendelseJobb(
     private val hendelsesRepository: IHendelsesRepository,
     private val sakRepository: SakRepository,
     private val personRepository: PersonRepository,
+    private val behandlingRepository: BehandlingRepository,
 ) : JobbUtfører {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -29,7 +32,29 @@ class LagreStoppetHendelseJobb(
         val person = hentEllerSettInnPerson(dto)
         var sak = hentEllerSettInnSak(dto, person)
 
-        hendelsesRepository.lagreHendelse(dto, sak?.id!!)
+        val behandlingId = hentEllerLagreBehandlingId(dto, sak)
+
+        hendelsesRepository.lagreHendelse(dto, sak?.id!!, behandlingId)
+    }
+
+    private fun hentEllerLagreBehandlingId(
+        dto: StoppetBehandling,
+        sak: Sak?
+    ): Long {
+        val behandling = behandlingRepository.hent(dto.behandlingReferanse)
+        val behandlingId = if (behandling != null) {
+            behandling.id!!
+        } else {
+            behandlingRepository.lagre(
+                Behandling(
+                    referanse = dto.behandlingReferanse,
+                    sak = sak!!,
+                    typeBehandling = dto.behandlingType,
+                    opprettetTid = dto.behandlingOpprettetTidspunkt
+                )
+            )
+        }
+        return behandlingId
     }
 
     private fun hentEllerSettInnSak(
@@ -67,7 +92,8 @@ class LagreStoppetHendelseJobb(
             return LagreStoppetHendelseJobb(
                 hendelsesRepository,
                 SakRepositoryImpl(connection),
-                PersonRepository(connection)
+                PersonRepository(connection),
+                BehandlingRepository(connection)
             )
         }
 

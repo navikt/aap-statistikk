@@ -6,13 +6,12 @@ import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.opprettTestBehandling
 import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
@@ -21,12 +20,14 @@ class HendelsesRepositoryTest {
     fun `sett inn hendelse i db`(@Postgres dataSource: DataSource) {
         val testIdent = "1402202012345"
         val saksnummer = "123"
+        val behandlingReferanse = UUID.randomUUID()
 
         val personId = opprettTestPerson(dataSource, testIdent)
-        val sakId = opprettTestSak(dataSource, saksnummer, Person(testIdent, id = personId))
+        val sak = opprettTestSak(dataSource, saksnummer, Person(testIdent, id = personId))
 
-        val behandlingReferanse = UUID.randomUUID()
-        val behandlingOpprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        val behandling = opprettTestBehandling(dataSource, behandlingReferanse, sak)
+        val behandlingId = behandling.id!!
+        val opprettetTidspunkt = behandling.opprettetTid
 
         dataSource.transaction { conn ->
             val repository = HendelsesRepository(
@@ -40,10 +41,10 @@ class HendelsesRepositoryTest {
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = testIdent,
                     behandlingReferanse = behandlingReferanse,
-                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                    behandlingOpprettetTidspunkt = opprettetTidspunkt,
                     avklaringsbehov = listOf(),
                     versjon = "ukjent"
-                ), sakId
+                ), sak.id!!, behandlingId
             )
         }
 
@@ -61,7 +62,7 @@ class HendelsesRepositoryTest {
                 behandlingType = TypeBehandling.Førstegangsbehandling,
                 ident = testIdent,
                 behandlingReferanse = behandlingReferanse,
-                behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                behandlingOpprettetTidspunkt = opprettetTidspunkt,
                 avklaringsbehov = listOf(),
                 versjon = "ukjent"
             )
@@ -72,17 +73,20 @@ class HendelsesRepositoryTest {
     fun `sette inn to hendelser i db`(@Postgres dataSource: DataSource) {
         val ident = "21"
         val saksnummer = "123"
+        val behandlingReferanse = UUID.randomUUID()
 
         val personId = opprettTestPerson(dataSource, ident)
-        val sakId = opprettTestSak(dataSource, saksnummer, Person(ident, id = personId))
+        val sak = opprettTestSak(dataSource, saksnummer, Person(ident, id = personId))
+        val sakId= sak.id!!
+        val behandling = opprettTestBehandling(dataSource, behandlingReferanse, sak)
+        val behandlingId = behandling.id!!
+        val opprettetTidspunkt = behandling.opprettetTid
 
         dataSource.transaction { conn ->
             val repository = HendelsesRepository(
                 conn
             )
 
-            val behandlingReferanse = UUID.randomUUID()
-            val behandlingOpprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
             repository.lagreHendelse(
                 StoppetBehandling(
                     saksnummer = saksnummer,
@@ -90,10 +94,10 @@ class HendelsesRepositoryTest {
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = ident,
                     behandlingReferanse = behandlingReferanse,
-                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                    behandlingOpprettetTidspunkt = opprettetTidspunkt,
                     avklaringsbehov = listOf(),
                     versjon = "ukjent"
-                ), sakId
+                ), sakId, behandlingId
             )
 
 
@@ -105,10 +109,10 @@ class HendelsesRepositoryTest {
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = ident,
                         behandlingReferanse = behandlingReferanse,
-                        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+                        behandlingOpprettetTidspunkt = opprettetTidspunkt,
                         avklaringsbehov = listOf(),
                         versjon = "ukjent"
-                    ), sakId
+                    ), sakId, behandlingId
                 )
             }
         }
