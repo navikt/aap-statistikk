@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.jobber
+package no.nav.aap.statistikk.jobber.appender
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
