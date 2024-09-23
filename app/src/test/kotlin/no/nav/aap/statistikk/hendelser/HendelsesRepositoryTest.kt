@@ -1,10 +1,10 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
+import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -23,14 +23,15 @@ class HendelsesRepositoryTest {
             val repository = HendelsesRepository(conn)
 
             repository.lagreHendelse(
-                MottaStatistikkDTO(
+                StoppetBehandling(
                     saksnummer = "123",
                     status = "AVS",
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = "21",
                     behandlingReferanse = behandlingReferanse,
                     behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                    avklaringsbehov = listOf()
+                    avklaringsbehov = listOf(),
+                    versjon = "ukjent"
                 )
             )
         }
@@ -41,14 +42,15 @@ class HendelsesRepositoryTest {
         }
         assertThat(hentHendelser).hasSize(1)
         assertThat(hentHendelser.first()).isEqualTo(
-            MottaStatistikkDTO(
+            StoppetBehandling(
                 saksnummer = "123",
                 status = "AVS",
                 behandlingType = TypeBehandling.Førstegangsbehandling,
                 ident = "21",
                 behandlingReferanse = behandlingReferanse,
                 behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                avklaringsbehov = listOf()
+                avklaringsbehov = listOf(),
+                versjon = "ukjent"
             )
         )
     }
@@ -61,28 +63,30 @@ class HendelsesRepositoryTest {
             val behandlingReferanse = UUID.randomUUID()
             val behandlingOpprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
             repository.lagreHendelse(
-                MottaStatistikkDTO(
+                StoppetBehandling(
                     saksnummer = "123",
                     status = "AVS",
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = "21",
                     behandlingReferanse = behandlingReferanse,
                     behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                    avklaringsbehov = listOf()
+                    avklaringsbehov = listOf(),
+                    versjon = "ukjent"
                 )
             )
 
 
             assertDoesNotThrow {
                 repository.lagreHendelse(
-                    MottaStatistikkDTO(
+                    StoppetBehandling(
                         saksnummer = "123",
                         status = "BEHA",
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = "21",
                         behandlingReferanse = behandlingReferanse,
                         behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                        avklaringsbehov = listOf()
+                        avklaringsbehov = listOf(),
+                        versjon = "ukjent"
                     )
                 )
             }

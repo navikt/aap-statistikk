@@ -21,7 +21,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.Client
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
-import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
+import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
@@ -32,8 +32,8 @@ import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -207,14 +207,15 @@ fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: St
     dataSource.transaction { conn ->
         val hendelse = HendelsesRepository(conn)
         hendelse.lagreHendelse(
-            MottaStatistikkDTO(
+            StoppetBehandling(
                 saksnummer = saksnummer,
                 behandlingReferanse = randomUUID,
                 behandlingOpprettetTidspunkt = LocalDateTime.now(),
                 status = "IVERKSATT",
                 behandlingType = TypeBehandling.Førstegangsbehandling,
                 ident = "123",
-                avklaringsbehov = listOf()
+                avklaringsbehov = listOf(),
+                versjon = UUID.randomUUID().toString()
             )
         )
     }

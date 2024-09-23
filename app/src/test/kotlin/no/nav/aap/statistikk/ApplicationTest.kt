@@ -14,7 +14,6 @@ import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
-import no.nav.aap.statistikk.testutils.TestToken
 import no.nav.aap.statistikk.testutils.motorMock
 import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
 import no.nav.aap.statistikk.testutils.testKlient
@@ -29,8 +28,7 @@ import java.util.*
 class ApplicationTest {
     @Test
     fun `kan parse avsluttet behandling dto og returnerer database-id`(
-        @Fakes azureConfig: AzureConfig,
-        @Fakes token: TestToken
+        @Fakes azureConfig: AzureConfig
     ) {
         val behandlingReferanse = UUID.randomUUID()
 
@@ -116,8 +114,7 @@ class ApplicationTest {
 
     @Test
     fun `kan poste mottastatistikk, og jobb blir opprettet`(
-        @Fakes azureConfig: AzureConfig,
-        @Fakes token: TestToken
+        @Fakes azureConfig: AzureConfig
     ) {
         val jobbAppender = MockJobbAppender()
 
@@ -145,11 +142,12 @@ class ApplicationTest {
   "status": "OPPRETTET",
   "behandlingType": "Førstegangsbehandling",
   "ident": "1403199012345",
-  "avklaringsbehov": []
+  "avklaringsbehov": [],
+  "versjon": "UKJENT"
 }"""
 
-            client.post<MottaStatistikkDTO, Any>(
-                URI.create("$url/motta"),
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"),
                 PostRequest(
                     DefaultJsonMapper.fromJson(body),
                     contentType = ContentType.APPLICATION_JSON
@@ -254,8 +252,7 @@ class ApplicationTest {
 
     @Test
     fun `godtar payload med ukjente felter`(
-        @Fakes azureConfig: AzureConfig,
-        @Fakes token: TestToken
+        @Fakes azureConfig: AzureConfig
     ) {
         @Language("JSON")
         val payload =
@@ -275,6 +272,7 @@ class ApplicationTest {
   "behandlingType": "Førstegangsbehandling",
   "ident": "1403199012345",
   "avklaringsbehov": [],
+  "versjon": "UKJENT",
   "ukjentfelt": "hei"
 }"""
 
@@ -287,9 +285,9 @@ class ApplicationTest {
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
             azureConfig
         ) { url, client ->
-            client.post<MottaStatistikkDTO, Object>(
+            client.post<StoppetBehandling, Object>(
                 URI.create("$url/motta"), PostRequest(
-                    DefaultJsonMapper.fromJson<MottaStatistikkDTO>(payload),
+                    DefaultJsonMapper.fromJson<StoppetBehandling>(payload),
                     additionalHeaders = listOf(
                         Header("Accept", "application/json"),
                         Header("Content-Type", "application/json")

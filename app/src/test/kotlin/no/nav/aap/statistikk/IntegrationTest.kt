@@ -4,11 +4,10 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
-import no.nav.aap.statistikk.api_kontrakt.MottaStatistikkDTO
+import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.Fakes
@@ -17,6 +16,7 @@ import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.behandlingHendelse
 import no.nav.aap.statistikk.testutils.testKlientNoInjection
 import no.nav.aap.statistikk.testutils.ventPåSvar
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URI
@@ -40,7 +40,7 @@ class IntegrationTest {
         val bqClient = BigQueryClient(config, schemaRegistry)
 
         testKlientNoInjection(dbConfig, config, azureConfig) { url, client ->
-            client.post<MottaStatistikkDTO, Any>(URI.create("$url/motta"), PostRequest(hendelse))
+            client.post<StoppetBehandling, Any>(URI.create("$url/motta"), PostRequest(hendelse))
 
 
             client.post<AvsluttetBehandlingDTO, Any>(
