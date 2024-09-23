@@ -29,11 +29,11 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
-import no.nav.aap.statistikk.jobber.JobbAppender
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreHendelseJobb
-import no.nav.aap.statistikk.jobber.MotorJobbAppender
+import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import org.slf4j.LoggerFactory

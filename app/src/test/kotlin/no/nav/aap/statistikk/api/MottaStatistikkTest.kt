@@ -13,7 +13,7 @@ import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreHendelseJobb
-import no.nav.aap.statistikk.jobber.MotorJobbAppender
+import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender

@@ -32,7 +32,7 @@ import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
-import no.nav.aap.statistikk.jobber.JobbAppender
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.startUp
