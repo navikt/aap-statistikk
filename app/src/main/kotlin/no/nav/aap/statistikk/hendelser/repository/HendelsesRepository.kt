@@ -3,35 +3,13 @@ package no.nav.aap.statistikk.hendelser.repository
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
-import no.nav.aap.statistikk.sak.Person
-import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakRepository
 import java.util.*
 
 class HendelsesRepository(
     private val dbConnection: DBConnection,
-    private val sakRepository: SakRepository,
 ) : IHendelsesRepository {
 
-    override fun lagreHendelse(hendelse: StoppetBehandling): Int {
-        val personId = hentEllerSettInnPersonId(dbConnection, hendelse.ident)
-
-        var sak = sakRepository.hentSak(hendelse.saksnummer)
-        if (sak == null) {
-            val sakId = sakRepository.settInnSak(
-                Sak(
-                    id = null,
-                    saksnummer = hendelse.saksnummer,
-                    person = Person(
-                        ident = hendelse.ident,
-                        id = personId
-                    )
-                )
-            )
-            sak = sakRepository.hentSak(sakId)
-        }
-        val sakId = sakRepository.hentSak(hendelse.saksnummer)!!.id!!
-
+    override fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long): Int {
         val behandlingId = hentEllerSettInnBehandling(dbConnection, hendelse, sakId)
 
         val versjonId = dbConnection.executeReturnKey("INSERT INTO versjon (versjon) VALUES (?)") {
@@ -77,55 +55,6 @@ class HendelsesRepository(
     override fun tellHendelser(): Int {
         return dbConnection.queryFirst<Int>("SELECT COUNT(*) FROM motta_statistikk") {
             setRowMapper { it.getInt("count") }
-        }
-    }
-
-    private fun hentEllerSettInnPersonId(connection: DBConnection, ident: String): Long {
-        val query = """
-            WITH INSERTED AS (
-                INSERT INTO person (ident) VALUES (?)
-                ON CONFLICT (ident) DO NOTHING
-                RETURNING id
-            )
-            SELECT id FROM INSERTED
-            UNION ALL
-            SELECT id FROM person WHERE ident = ?
-            LIMIT 1
-        """
-        return connection.queryFirst<Long>(query) {
-            setParams {
-                setString(1, ident)
-                setString(2, ident)
-            }
-            setRowMapper { row ->
-                row.getLong("id")
-            }
-        }
-    }
-
-    private fun hentEllerSettInnSak(
-        connection: DBConnection, saksnummer: String, personId: Int
-    ): Int {
-        val query = """
-            WITH INSERTED AS (
-                INSERT INTO sak (saksnummer, person_id) VALUES (?, ?)
-                ON CONFLICT (saksnummer) DO NOTHING
-                RETURNING id
-            )
-            SELECT id FROM INSERTED
-            UNION ALL
-            SELECT id FROM sak WHERE saksnummer = ?
-            LIMIT 1
-        """
-        return connection.queryFirst<Int>(query) {
-            setParams {
-                setString(1, saksnummer)
-                setInt(2, personId)
-                setString(3, saksnummer)
-            }
-            setRowMapper { row ->
-                row.getInt("id")
-            }
         }
     }
 

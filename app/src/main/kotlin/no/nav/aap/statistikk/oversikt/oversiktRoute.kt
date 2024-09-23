@@ -20,8 +20,7 @@ internal fun Routing.oversiktRoute(transactionExecutor: TransactionExecutor) {
         val antallHendelser =
             transactionExecutor.withinTransaction {
                 HendelsesRepository(
-                    it,
-                    SakRepositoryImpl(it)
+                    it
                 ).tellHendelser()
             }
 

@@ -7,11 +7,18 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import org.slf4j.LoggerFactory
 
 class LagreStoppetHendelseJobb(
-    private val hendelsesRepository: HendelsesRepository
+    private val hendelsesRepository: IHendelsesRepository,
+    private val sakRepository: SakRepository,
+    private val personRepository: PersonRepository,
 ) : JobbUtfører {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -19,13 +26,49 @@ class LagreStoppetHendelseJobb(
         val dto = DefaultJsonMapper.fromJson<StoppetBehandling>(input.payload())
         logger.info("Got message: $dto")
 
-        hendelsesRepository.lagreHendelse(dto)
+        val person = hentEllerSettInnPerson(dto)
+        var sak = hentEllerSettInnSak(dto, person)
+
+        hendelsesRepository.lagreHendelse(dto, sak?.id!!)
+    }
+
+    private fun hentEllerSettInnSak(
+        dto: StoppetBehandling,
+        person: Person
+    ): Sak? {
+        var sak = sakRepository.hentSak(dto.saksnummer)
+        if (sak == null) {
+            val sakId = sakRepository.settInnSak(
+                Sak(
+                    id = null,
+                    saksnummer = dto.saksnummer,
+                    person = person
+                )
+            )
+            sak = sakRepository.hentSak(sakId)
+        }
+        return sak
+    }
+
+    private fun hentEllerSettInnPerson(dto: StoppetBehandling): Person {
+        var person = personRepository.hentPerson(dto.ident)
+        if (person == null) {
+            personRepository.lagrePerson(Person(dto.ident))
+        }
+        person = personRepository.hentPerson(dto.ident)!!
+        return person
     }
 
     companion object : Jobb {
         override fun konstruer(connection: DBConnection): JobbUtfører {
-            val hendelsesRepository = HendelsesRepository(connection, SakRepositoryImpl(connection))
-            return LagreStoppetHendelseJobb(hendelsesRepository)
+            val hendelsesRepository = HendelsesRepository(
+                connection
+            )
+            return LagreStoppetHendelseJobb(
+                hendelsesRepository,
+                SakRepositoryImpl(connection),
+                PersonRepository(connection)
+            )
         }
 
         override fun type(): String {
