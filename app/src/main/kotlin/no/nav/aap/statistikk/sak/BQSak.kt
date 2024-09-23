@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.sak
 
-data class Person(val ident: String, val id: Long? = null)
+import no.nav.aap.statistikk.person.Person
 
 data class Sak(val id: Long?, val saksnummer: String, val person: Person)
 

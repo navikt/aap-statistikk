@@ -35,6 +35,9 @@ import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -205,8 +208,14 @@ fun bigQueryContainer(): BigQueryConfig {
 }
 
 fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: String) {
+    val ident = "29021946"
+
+    val id = opprettTestPerson(dataSource, ident)
+
+    val sakId = opprettTestSak(dataSource, saksnummer, Person(ident, id = id))
+
     dataSource.transaction { conn ->
-        val hendelse = HendelsesRepository(conn, SakRepositoryImpl(conn))
+        val hendelse = HendelsesRepository(conn)
         hendelse.lagreHendelse(
             StoppetBehandling(
                 saksnummer = saksnummer,
@@ -214,9 +223,28 @@ fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: St
                 behandlingOpprettetTidspunkt = LocalDateTime.now(),
                 status = "IVERKSATT",
                 behandlingType = TypeBehandling.Førstegangsbehandling,
-                ident = "123",
+                ident = ident,
                 avklaringsbehov = listOf(),
                 versjon = UUID.randomUUID().toString()
+            ), sakId
+        )
+    }
+}
+
+fun opprettTestPerson(dataSource: DataSource, ident: String): Long {
+    return dataSource.transaction { conn ->
+        val personRepository = PersonRepository(conn)
+        personRepository.hentPerson(ident)?.id ?: personRepository.lagrePerson(Person(ident))
+    }
+}
+
+fun opprettTestSak(dataSource: DataSource, saksnummer: String, person: Person): Long {
+    return dataSource.transaction {
+        SakRepositoryImpl(it).settInnSak(
+            Sak(
+                saksnummer = saksnummer,
+                person = person,
+                id = null
             )
         )
     }

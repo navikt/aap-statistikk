@@ -1,55 +1,37 @@
 package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
-import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
 class TilkjentYtelseRepositoryTest {
     @Test
     fun `kun én lagret tilkjent ytelse per behandlingsreferanse`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, "123456789")
+
+        val tilkjentYtelse =
+            TilkjentYtelseEntity(
+                saksnummer = "ABCDE",
+                behandlingsReferanse = behandlingsReferanse,
+                perioder = listOf()
+            )
+
         dataSource.transaction { conn ->
-            val tilkjentYtelseRepository = TilkjentYtelseRepository(conn)
+            TilkjentYtelseRepository(conn).lagreTilkjentYtelse(tilkjentYtelse)
+        }
 
-            val behandlingsReferanse = UUID.randomUUID()
-            val tilkjentYtelse =
-                TilkjentYtelseEntity(
-                    saksnummer = "ABCDE",
-                    behandlingsReferanse = behandlingsReferanse,
-                    perioder = listOf()
-                )
-
-            dataSource.transaction { conn ->
-                val hendelsesRepository = HendelsesRepository(conn, SakRepositoryImpl(conn))
-                hendelsesRepository.lagreHendelse(
-                    StoppetBehandling(
-                        saksnummer = "ABCDE",
-                        behandlingReferanse = behandlingsReferanse,
-                        behandlingOpprettetTidspunkt = LocalDateTime.now(),
-                        status = "somestatus",
-                        behandlingType = TypeBehandling.Førstegangsbehandling,
-                        ident = "13",
-                        avklaringsbehov = listOf(),
-                        versjon = "xxx"
-                    )
-                )
-            }
-
-            tilkjentYtelseRepository.lagreTilkjentYtelse(tilkjentYtelse)
-
+        dataSource.transaction { conn ->
             assertThrows<Exception> {
-                tilkjentYtelseRepository.lagreTilkjentYtelse(
+                TilkjentYtelseRepository(conn).lagreTilkjentYtelse(
                     tilkjentYtelse
                 )
             }
@@ -59,9 +41,11 @@ class TilkjentYtelseRepositoryTest {
     @Test
     fun `lagre og hente ut tilkjent ytelse`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
+        val saksnummer = "ABCDE"
+
         val tilkjentYtelse =
             TilkjentYtelse(
-                saksnummer = "ABCDE",
+                saksnummer = saksnummer,
                 behandlingsReferanse = behandlingsReferanse,
                 perioder = listOf(
                     TilkjentYtelsePeriode(
@@ -79,24 +63,11 @@ class TilkjentYtelseRepositoryTest {
                 )
             )
 
+        opprettTestHendelse(dataSource, behandlingsReferanse, saksnummer)
+
         val id = dataSource.transaction { conn ->
             val tilkjentYtelseRepository = TilkjentYtelseRepository(conn)
 
-            dataSource.transaction { conn ->
-                val hendelsesRepository = HendelsesRepository(conn, SakRepositoryImpl(conn))
-                hendelsesRepository.lagreHendelse(
-                    StoppetBehandling(
-                        saksnummer = "ABCDE",
-                        behandlingReferanse = behandlingsReferanse,
-                        behandlingOpprettetTidspunkt = LocalDateTime.now(),
-                        status = "somestatus",
-                        behandlingType = TypeBehandling.Førstegangsbehandling,
-                        ident = "13",
-                        avklaringsbehov = listOf(),
-                        versjon = "ukjent"
-                    )
-                )
-            }
 
             tilkjentYtelseRepository.lagreTilkjentYtelse(
                 TilkjentYtelseEntity.fraDomene(

@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.sak
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.statistikk.person.Person
 
 class SakRepositoryImpl(private val dbConnection: DBConnection) : SakRepository {
     override fun hentSak(sakID: Long): Sak? {

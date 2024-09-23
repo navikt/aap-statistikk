@@ -14,7 +14,6 @@ import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
-import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
@@ -181,12 +180,18 @@ class MottaStatistikkTest {
             client.post<StoppetBehandling, Any>(URI.create("$url/motta"), PostRequest(hendelse))
 
             dataSource.transaction(readOnly = true) {
-                ventPåSvar({ HendelsesRepository(it, SakRepositoryImpl(it)).hentHendelser() },
+                ventPåSvar({
+                    HendelsesRepository(
+                        it
+                    ).hentHendelser()
+                },
                     { it.isNotEmpty() })
             }
 
             dataSource.transaction {
-                val hendelsesRepository = HendelsesRepository(it, SakRepositoryImpl(it))
+                val hendelsesRepository = HendelsesRepository(
+                    it
+                )
                 val hentHendelser = hendelsesRepository.hentHendelser()
 
                 assertThat(hentHendelser).hasSize(1)
