@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.hendelser.repository
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 
 interface IHendelsesRepository {
-    fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long): Int
+    fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long, behandlingId: Long): Int
 
     fun hentHendelser(): Collection<StoppetBehandling>
 

@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.opprettTestBehandling
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode

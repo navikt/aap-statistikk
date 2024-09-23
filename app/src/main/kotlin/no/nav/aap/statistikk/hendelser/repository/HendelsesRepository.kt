@@ -9,9 +9,7 @@ class HendelsesRepository(
     private val dbConnection: DBConnection,
 ) : IHendelsesRepository {
 
-    override fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long): Int {
-        val behandlingId = hentEllerSettInnBehandling(dbConnection, hendelse, sakId)
-
+    override fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long, behandlingId: Long): Int {
         val versjonId = dbConnection.executeReturnKey("INSERT INTO versjon (versjon) VALUES (?)") {
             setParams {
                 setString(1, hendelse.versjon)
@@ -20,7 +18,7 @@ class HendelsesRepository(
 
         return dbConnection.executeReturnKey("INSERT INTO motta_statistikk (behandling_id, sak_id, status, versjon_id) VALUES (?, ?, ?, ?)") {
             setParams {
-                setInt(1, behandlingId)
+                setLong(1, behandlingId)
                 setLong(2, sakId)
                 setString(3, hendelse.status)
                 setLong(4, versjonId)
@@ -55,34 +53,6 @@ class HendelsesRepository(
     override fun tellHendelser(): Int {
         return dbConnection.queryFirst<Int>("SELECT COUNT(*) FROM motta_statistikk") {
             setRowMapper { it.getInt("count") }
-        }
-    }
-
-    private fun hentEllerSettInnBehandling(
-        connection: DBConnection, hendelse: StoppetBehandling, sakId: Long
-    ): Int {
-        val query = """
-            WITH INSERTED AS (
-                INSERT INTO behandling (sak_id, referanse, type, opprettet_tid) VALUES (?, ?, ?, ?)
-                ON CONFLICT (referanse) DO NOTHING
-                RETURNING id
-            )
-            SELECT id FROM INSERTED
-            UNION ALL
-            SELECT id FROM behandling WHERE referanse = ?
-            LIMIT 1
-        """
-        return connection.queryFirst(query) {
-            setParams {
-                setLong(1, sakId)
-                setUUID(2, hendelse.behandlingReferanse)
-                setString(3, hendelse.behandlingType.toString())
-                setLocalDateTime(4, hendelse.behandlingOpprettetTidspunkt)
-                setUUID(5, hendelse.behandlingReferanse)
-            }
-            setRowMapper { row ->
-                row.getInt("id")
-            }
         }
     }
 }
