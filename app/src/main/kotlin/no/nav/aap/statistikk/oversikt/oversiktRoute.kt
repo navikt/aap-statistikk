@@ -12,12 +12,22 @@ import kotlinx.html.p
 import kotlinx.html.title
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 
 internal fun Routing.oversiktRoute(transactionExecutor: TransactionExecutor) {
     get("/") {
         val name = "Ktor"
         val antallHendelser =
-            transactionExecutor.withinTransaction { HendelsesRepository(it).tellHendelser() }
+            transactionExecutor.withinTransaction {
+                HendelsesRepository(
+                    it,
+                    SakRepositoryImpl(it)
+                ).tellHendelser()
+            }
+
+        val antallSaker = transactionExecutor.withinTransaction {
+            SakRepositoryImpl(it).tellSaker()
+        }
         call.respondHtml(HttpStatusCode.Companion.OK) {
             head {
                 title {
@@ -30,6 +40,9 @@ internal fun Routing.oversiktRoute(transactionExecutor: TransactionExecutor) {
                 }
                 p {
                     +"Antall hendelser: $antallHendelser"
+                }
+                p {
+                    +"Antall saker: $antallSaker"
                 }
             }
         }

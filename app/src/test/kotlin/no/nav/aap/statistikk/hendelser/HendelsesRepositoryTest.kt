@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -20,7 +21,7 @@ class HendelsesRepositoryTest {
         val behandlingOpprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
 
         dataSource.transaction { conn ->
-            val repository = HendelsesRepository(conn)
+            val repository = HendelsesRepository(conn, SakRepositoryImpl(conn))
 
             repository.lagreHendelse(
                 StoppetBehandling(
@@ -37,7 +38,7 @@ class HendelsesRepositoryTest {
         }
 
         val hentHendelser = dataSource.transaction { conn ->
-            val repository = HendelsesRepository(conn)
+            val repository = HendelsesRepository(conn, SakRepositoryImpl(conn))
             repository.hentHendelser()
         }
         assertThat(hentHendelser).hasSize(1)
@@ -58,7 +59,7 @@ class HendelsesRepositoryTest {
     @Test
     fun `sette inn to hendelser i db`(@Postgres dataSource: DataSource) {
         dataSource.transaction { conn ->
-            val repository = HendelsesRepository(conn)
+            val repository = HendelsesRepository(conn, SakRepositoryImpl(conn))
 
             val behandlingReferanse = UUID.randomUUID()
             val behandlingOpprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)

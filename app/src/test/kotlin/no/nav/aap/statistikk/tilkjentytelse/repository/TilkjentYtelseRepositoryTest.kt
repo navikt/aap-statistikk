@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
@@ -30,7 +31,7 @@ class TilkjentYtelseRepositoryTest {
                 )
 
             dataSource.transaction { conn ->
-                val hendelsesRepository = HendelsesRepository(conn)
+                val hendelsesRepository = HendelsesRepository(conn, SakRepositoryImpl(conn))
                 hendelsesRepository.lagreHendelse(
                     StoppetBehandling(
                         saksnummer = "ABCDE",
@@ -82,7 +83,7 @@ class TilkjentYtelseRepositoryTest {
             val tilkjentYtelseRepository = TilkjentYtelseRepository(conn)
 
             dataSource.transaction { conn ->
-                val hendelsesRepository = HendelsesRepository(conn)
+                val hendelsesRepository = HendelsesRepository(conn, SakRepositoryImpl(conn))
                 hendelsesRepository.lagreHendelse(
                     StoppetBehandling(
                         saksnummer = "ABCDE",

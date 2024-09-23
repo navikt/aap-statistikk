@@ -35,6 +35,7 @@ import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
@@ -205,7 +206,7 @@ fun bigQueryContainer(): BigQueryConfig {
 
 fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: String) {
     dataSource.transaction { conn ->
-        val hendelse = HendelsesRepository(conn)
+        val hendelse = HendelsesRepository(conn, SakRepositoryImpl(conn))
         hendelse.lagreHendelse(
             StoppetBehandling(
                 saksnummer = saksnummer,
