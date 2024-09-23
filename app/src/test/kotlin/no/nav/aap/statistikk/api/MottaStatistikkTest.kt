@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
@@ -83,8 +84,7 @@ class MottaStatistikkTest {
 
     @Test
     fun `kan motta mer avansert object`(
-        @Postgres dataSource: DataSource,
-        @Fakes azureConfig: AzureConfig
+        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
     ) {
         val hendelse = StoppetBehandling(
             saksnummer = "4LFK2S0",
@@ -106,16 +106,14 @@ class MottaStatistikkTest {
                             tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                             frist = null,
                             endretAv = "Kelvin"
-                        ),
-                        Endring(
+                        ), Endring(
                             status = EndringStatus.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                             frist = null,
                             endretAv = "Z994573"
                         )
                     )
-                ),
-                AvklaringsbehovHendelse(
+                ), AvklaringsbehovHendelse(
                     definisjon = Definisjon(
                         type = "5006",
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
@@ -128,30 +126,25 @@ class MottaStatistikkTest {
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                             frist = null,
                             endretAv = "Kelvin"
-                        ),
-                        Endring(
+                        ), Endring(
                             status = EndringStatus.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
                             frist = null,
                             endretAv = "Z994573"
                         )
                     )
-                ),
-                AvklaringsbehovHendelse(
+                ), AvklaringsbehovHendelse(
                     definisjon = Definisjon(
                         type = "5097",
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = "KVALITETSSIKRING"
-                    ),
-                    status = EndringStatus.valueOf("AVSLUTTET"),
-                    endringer = listOf(
+                    ), status = EndringStatus.valueOf("AVSLUTTET"), endringer = listOf(
                         Endring(
                             status = EndringStatus.valueOf("OPPRETTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                             frist = null,
                             endretAv = "Kelvin"
-                        ),
-                        Endring(
+                        ), Endring(
                             status = EndringStatus.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                             frist = null,
@@ -188,11 +181,12 @@ class MottaStatistikkTest {
             client.post<StoppetBehandling, Any>(URI.create("$url/motta"), PostRequest(hendelse))
 
             dataSource.transaction(readOnly = true) {
-                ventPåSvar({ HendelsesRepository(it).hentHendelser() }, { it.isNotEmpty() })
+                ventPåSvar({ HendelsesRepository(it, SakRepositoryImpl(it)).hentHendelser() },
+                    { it.isNotEmpty() })
             }
 
             dataSource.transaction {
-                val hendelsesRepository = HendelsesRepository(it)
+                val hendelsesRepository = HendelsesRepository(it, SakRepositoryImpl(it))
                 val hentHendelser = hendelsesRepository.hentHendelser()
 
                 assertThat(hentHendelser).hasSize(1)

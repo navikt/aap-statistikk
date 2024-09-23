@@ -17,7 +17,7 @@ class SakTabellTest {
 
         val referanse = UUID.randomUUID().toString()
         client.insert(
-            sakTabell, Sak(
+            sakTabell, BQSak(
                 saksnummer = "123", behandlinger = listOf(
                     Behandling(
                         referanse = referanse

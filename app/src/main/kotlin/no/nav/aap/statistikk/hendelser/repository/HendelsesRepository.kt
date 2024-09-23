@@ -3,15 +3,35 @@ package no.nav.aap.statistikk.hendelser.repository
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.sak.Person
+import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.SakRepository
 import java.util.*
 
 class HendelsesRepository(
-    private val dbConnection: DBConnection
+    private val dbConnection: DBConnection,
+    private val sakRepository: SakRepository,
 ) : IHendelsesRepository {
 
     override fun lagreHendelse(hendelse: StoppetBehandling): Int {
         val personId = hentEllerSettInnPersonId(dbConnection, hendelse.ident)
-        val sakId = hentEllerSettInnSak(dbConnection, hendelse.saksnummer, personId)
+
+        var sak = sakRepository.hentSak(hendelse.saksnummer)
+        if (sak == null) {
+            val sakId = sakRepository.settInnSak(
+                Sak(
+                    id = null,
+                    saksnummer = hendelse.saksnummer,
+                    person = Person(
+                        ident = hendelse.ident,
+                        id = personId
+                    )
+                )
+            )
+            sak = sakRepository.hentSak(sakId)
+        }
+        val sakId = sakRepository.hentSak(hendelse.saksnummer)!!.id!!
+
         val behandlingId = hentEllerSettInnBehandling(dbConnection, hendelse, sakId)
 
         val versjonId = dbConnection.executeReturnKey("INSERT INTO versjon (versjon) VALUES (?)") {
@@ -23,7 +43,7 @@ class HendelsesRepository(
         return dbConnection.executeReturnKey("INSERT INTO motta_statistikk (behandling_id, sak_id, status, versjon_id) VALUES (?, ?, ?, ?)") {
             setParams {
                 setInt(1, behandlingId)
-                setInt(2, sakId)
+                setLong(2, sakId)
                 setString(3, hendelse.status)
                 setLong(4, versjonId)
             }
@@ -60,7 +80,7 @@ class HendelsesRepository(
         }
     }
 
-    private fun hentEllerSettInnPersonId(connection: DBConnection, ident: String): Int {
+    private fun hentEllerSettInnPersonId(connection: DBConnection, ident: String): Long {
         val query = """
             WITH INSERTED AS (
                 INSERT INTO person (ident) VALUES (?)
@@ -72,15 +92,15 @@ class HendelsesRepository(
             SELECT id FROM person WHERE ident = ?
             LIMIT 1
         """
-        return connection.queryFirst<Int>(query) {
+        return connection.queryFirst<Long>(query) {
             setParams {
                 setString(1, ident)
                 setString(2, ident)
             }
             setRowMapper { row ->
-                row.getInt("id")
+                row.getLong("id")
             }
-        }.toInt()
+        }
     }
 
     private fun hentEllerSettInnSak(
@@ -110,7 +130,7 @@ class HendelsesRepository(
     }
 
     private fun hentEllerSettInnBehandling(
-        connection: DBConnection, hendelse: StoppetBehandling, sakId: Int
+        connection: DBConnection, hendelse: StoppetBehandling, sakId: Long
     ): Int {
         val query = """
             WITH INSERTED AS (
@@ -125,7 +145,7 @@ class HendelsesRepository(
         """
         return connection.queryFirst(query) {
             setParams {
-                setInt(1, sakId)
+                setLong(1, sakId)
                 setUUID(2, hendelse.behandlingReferanse)
                 setString(3, hendelse.behandlingType.toString())
                 setLocalDateTime(4, hendelse.behandlingOpprettetTidspunkt)

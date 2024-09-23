@@ -7,7 +7,7 @@ import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
 import no.nav.aap.statistikk.bigquery.BQTable
 
-class SakTabell : BQTable<Sak> {
+class SakTabell : BQTable<BQSak> {
     companion object {
         const val TABLE_NAME = "sak"
     }
@@ -26,19 +26,19 @@ class SakTabell : BQTable<Sak> {
             return Schema.of(saksnummmer, behandlinger)
         }
 
-    override fun parseRow(fieldValueList: FieldValueList): Sak {
+    override fun parseRow(fieldValueList: FieldValueList): BQSak {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlinger = fieldValueList.get("behandlinger").repeatedValue.map {
             Behandling(it.recordValue[0].stringValue)
         }
 
-        return Sak(
+        return BQSak(
             saksnummer = saksnummer,
             behandlinger = behandlinger
         )
     }
 
-    override fun toRow(value: Sak): InsertAllRequest.RowToInsert {
+    override fun toRow(value: BQSak): InsertAllRequest.RowToInsert {
         return InsertAllRequest.RowToInsert.of(
             mapOf("saksnummer" to value.saksnummer,
                 "behandlinger" to value.behandlinger.map { mapOf("behandlingUuid" to it.referanse) })
