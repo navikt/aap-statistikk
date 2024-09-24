@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.testutils.BigQuery
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class SakTabellTest {
@@ -21,7 +22,7 @@ class SakTabellTest {
 
         val referanse = UUID.randomUUID()
 
-        val opprettetTid = LocalDateTime.now()
+        val opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         client.insert(
             sakTabell, BQSak(
                 saksnummer = "123", behandlinger = listOf(
