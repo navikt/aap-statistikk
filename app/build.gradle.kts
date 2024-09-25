@@ -32,6 +32,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:6.0.0")
 
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")

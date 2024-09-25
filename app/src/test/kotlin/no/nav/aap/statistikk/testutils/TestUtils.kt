@@ -101,7 +101,9 @@ fun <E> testKlient(
             jobbAppender,
             lagreAvsluttetBehandlingDTOJobb,
             azureConfig
-        )
+        ) {
+
+        }
     }.start()
 
     val port = runBlocking { server.resolvedConnectors().first().port }
