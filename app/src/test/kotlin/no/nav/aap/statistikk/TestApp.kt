@@ -19,9 +19,7 @@ fun main() {
     val pgConfig = postgresTestConfig(5432)
     logger.info("Postgres Config: $pgConfig")
     val bqConfig: BigQueryConfig = bigQueryContainer()
-
-
-
+    
     embeddedServer(Netty, port = 8080, watchPaths = listOf("classes")) {
         startUp(
             pgConfig, bqConfig, AzureConfig(

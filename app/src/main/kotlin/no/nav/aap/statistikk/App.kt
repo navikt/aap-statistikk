@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk
 
+import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -17,6 +18,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
+import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
@@ -29,10 +31,10 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
@@ -68,17 +70,13 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
         jobb = LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)
     )
     val motor = Motor(
-        dataSource = dataSource,
-        antallKammer = 8,
-        logInfoProvider = object : JobbLogInfoProvider {
+        dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {
             override fun hentInformasjon(
-                connection: DBConnection,
-                jobbInput: JobbInput
+                connection: DBConnection, jobbInput: JobbInput
             ): LogInformasjon? {
                 return LogInformasjon(mapOf())
             }
-        },
-        jobber = listOf(
+        }, jobber = listOf(
             LagreStoppetHendelseJobb,
             LagreAvsluttetBehandlingJobbKonstruktør(bqRepository),
             lagreAvsluttetBehandlingJobbKonstruktør
@@ -94,11 +92,16 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
+    val motorApiCallback: NormalOpenAPIRoute.() -> Unit = {
+        motorApi(dataSource)
+    }
+
     module(
         transactionExecutor,
         motor,
-        MotorJobbAppender(dataSource), lagreAvsluttetBehandlingJobbKonstruktør,
-        azureConfig
+        MotorJobbAppender(dataSource),
+        lagreAvsluttetBehandlingJobbKonstruktør,
+        azureConfig, motorApiCallback
     )
 }
 
@@ -107,7 +110,8 @@ fun Application.module(
     motor: Motor,
     jobbAppender: JobbAppender,
     lagreAvsluttetBehandlingJobb: LagreAvsluttetBehandlingDTOJobb,
-    azureConfig: AzureConfig
+    azureConfig: AzureConfig,
+    motorApiCallback: NormalOpenAPIRoute.() -> Unit
 ) {
     motor.start()
 
@@ -127,10 +131,12 @@ fun Application.module(
                 )
                 avsluttetBehandling(jobbAppender, lagreAvsluttetBehandlingJobb)
             }
+            apiRoute(motorApiCallback)
         }
         oversiktRoute(transactionExecutor)
     }
 }
+
 
 private fun Application.monitoring(prometheus: PrometheusMeterRegistry) {
     routing {
