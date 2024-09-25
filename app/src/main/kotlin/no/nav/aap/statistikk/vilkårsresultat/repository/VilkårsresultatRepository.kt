@@ -23,15 +23,18 @@ class VilkårsresultatRepository(
     )
     SELECT id FROM inserted"""
 
-        val uthentetId = dbConnection.queryFirst<Int>(sqlInsertResultat) {
+        val saksnummer = vilkårsresultat.saksnummer
+        val behandlingsReferanse = vilkårsresultat.behandlingsReferanse
+
+        val uthentetId = requireNotNull(dbConnection.queryFirstOrNull<Int>(sqlInsertResultat) {
             setParams {
-                setUUID(1, UUID.fromString(vilkårsresultat.behandlingsReferanse))
-                setString(2, vilkårsresultat.saksnummer)
+                setUUID(1, UUID.fromString(behandlingsReferanse))
+                setString(2, saksnummer)
             }
             setRowMapper {
                 it.getInt("id")
             }
-        }
+        }) { "Kunne ikke skrive vilkårsresultat. Behandling-ref: $behandlingsReferanse. Saksnummer: $saksnummer" }
 
 
         val sqlInsertVilkar = """
