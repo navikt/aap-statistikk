@@ -10,7 +10,7 @@ data class AvsluttetBehandling(
     val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelse,
     val vilkårsresultat: Vilkårsresultat,
-    val beregningsgrunnlag: IBeregningsGrunnlag
+    val beregningsgrunnlag: IBeregningsGrunnlag?
 )
 
 data class MedBehandlingsreferanse<out V>(val behandlingsReferanse: UUID, val value: V)

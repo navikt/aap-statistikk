@@ -29,19 +29,24 @@ class AvsluttetBehandlingService(
                 )
             )
 
-            beregningsgrunnlagRepositoryFactory.create(it).lagreBeregningsGrunnlag(
-                MedBehandlingsreferanse(
-                    value = avsluttetBehandling.beregningsgrunnlag,
-                    behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
+            if (avsluttetBehandling.beregningsgrunnlag != null) {
+                beregningsgrunnlagRepositoryFactory.create(it).lagreBeregningsGrunnlag(
+                    MedBehandlingsreferanse(
+                        value = avsluttetBehandling.beregningsgrunnlag,
+                        behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
+                    )
                 )
-            )
+            }
+
         }
 
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
         bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)
-        bqRepository.lagre(
-            avsluttetBehandling.beregningsgrunnlag,
-            avsluttetBehandling.behandlingsReferanse
-        )
+        if (avsluttetBehandling.beregningsgrunnlag != null) {
+            bqRepository.lagre(
+                avsluttetBehandling.beregningsgrunnlag,
+                avsluttetBehandling.behandlingsReferanse
+            )
+        }
     }
 }
