@@ -14,7 +14,7 @@ fun AvsluttetBehandlingDTO.tilDomene(): AvsluttetBehandling {
             behandlingsReferanse = behandlingsReferanse
         ),
         vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse),
-        beregningsgrunnlag = tilDomene(beregningsGrunnlag),
+        beregningsgrunnlag = if (beregningsGrunnlag == null) null else tilDomene(beregningsGrunnlag!!),
         behandlingsReferanse = behandlingsReferanse,
     )
 }
