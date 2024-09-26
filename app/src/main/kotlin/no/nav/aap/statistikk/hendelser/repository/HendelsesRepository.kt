@@ -3,13 +3,14 @@ package no.nav.aap.statistikk.hendelser.repository
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.behandling.BehandlingId
 import java.util.*
 
 class HendelsesRepository(
     private val dbConnection: DBConnection,
 ) : IHendelsesRepository {
 
-    override fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long, behandlingId: Long): Int {
+    override fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long, behandlingId: BehandlingId): Int {
         val versjonId = dbConnection.executeReturnKey("INSERT INTO versjon (versjon) VALUES (?)") {
             setParams {
                 setString(1, hendelse.versjon)

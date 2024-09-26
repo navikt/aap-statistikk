@@ -6,6 +6,7 @@ import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.FellesKomponentConnectionExecutor
@@ -33,7 +34,8 @@ class LagreAvsluttetBehandlingJobbKonstruktør(
                     return VilkårsresultatRepository(connection)
                 }
             },
-            bqRepository = bQRepository
+            bqRepository = bQRepository,
+            behandlingRepositoryFactory = { BehandlingRepository(it) }
         )
         return LagreAvsluttetBehandlingPostgresJobbUtfører(
             avsluttetBehandlingService,

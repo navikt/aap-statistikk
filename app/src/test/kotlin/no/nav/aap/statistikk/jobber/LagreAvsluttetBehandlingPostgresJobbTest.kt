@@ -3,18 +3,17 @@ package no.nav.aap.statistikk.jobber
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.Factory
+import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
+import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.testutils.FakeAvsluttetBehandlingDTORepository
-import no.nav.aap.statistikk.testutils.FakeBQRepository
-import no.nav.aap.statistikk.testutils.FakeBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.testutils.FakeTilkjentYtelseRepository
-import no.nav.aap.statistikk.testutils.FakeVilkårsResultatRepository
-import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
-import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
+import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 
 
@@ -25,6 +24,26 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
         val fakeTilkjentYtelseRepository = FakeTilkjentYtelseRepository()
         val fakeBeregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
         val fakeVilkårsResultatRepository = FakeVilkårsResultatRepository()
+
+        val fakeBehandlingRepository = FakeBehandlingRepository()
+        val randomUUID = UUID.randomUUID()
+        val saksnummer = "4LFK2S0"
+        fakeBehandlingRepository.lagre(
+            Behandling(
+                referanse = randomUUID,
+                sak = Sak(
+                    id = 0,
+                    saksnummer = saksnummer,
+                    person = Person(
+                        ident = "123",
+                        id = 0
+                    )
+                ),
+                typeBehandling = TypeBehandling.Førstegangsbehandling,
+                opprettetTid = LocalDateTime.now()
+            )
+        )
+
 
         val avsluttetBehandlingService = AvsluttetBehandlingService(
             transactionExecutor = noOpTransactionExecutor,
@@ -43,13 +62,12 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
                     return fakeVilkårsResultatRepository
                 }
             },
-            bqRepository = bQRepository
+            bqRepository = bQRepository,
+            behandlingRepositoryFactory = { fakeBehandlingRepository }
         )
         val avsluttetBehandlingRepository = FakeAvsluttetBehandlingDTORepository()
-        val behandlingReferanse = UUID.randomUUID()
-        val saksnummer = "4LFK2S0"
         val id = avsluttetBehandlingRepository.lagre(
-            avsluttetBehandlingDTO(behandlingReferanse, saksnummer)
+            avsluttetBehandlingDTO(randomUUID, saksnummer)
         )
 
         assertThat(id).isEqualTo(0L)
@@ -73,6 +91,6 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
         assertThat(fakeBeregningsgrunnlagRepository.grunnlag.first()).extracting(
             { it.behandlingsReferanse },
             { it.value.er6GBegrenset() }
-        ).containsExactly(behandlingReferanse, false)
+        ).containsExactly(randomUUID, false)
     }
 }

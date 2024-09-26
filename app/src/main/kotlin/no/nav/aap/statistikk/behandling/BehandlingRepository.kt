@@ -6,8 +6,10 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import java.util.UUID
 
+typealias BehandlingId = Long
+
 class BehandlingRepository(private val dbConnection: DBConnection) : IBehandlingRepository {
-    override fun lagre(behandling: Behandling): Long {
+    override fun lagre(behandling: Behandling): BehandlingId {
         return dbConnection.executeReturnKey("""
 INSERT INTO behandling (sak_id, referanse, type, opprettet_tid)
 VALUES (?, ?, ?, ?)""") {
