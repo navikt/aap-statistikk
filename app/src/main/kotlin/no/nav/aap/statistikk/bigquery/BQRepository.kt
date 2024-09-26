@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.bigquery
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
+import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
@@ -26,7 +27,17 @@ class BQRepository(
 
     override fun lagre(payload: TilkjentYtelse) {
         logger.info("Lagrer tilkjent ytelse.")
-        client.insert(tilkjentYtelseTabell, payload)
+
+        client.insertMany(tilkjentYtelseTabell, payload.perioder.map {
+            BQTilkjentYtelse(
+                saksnummer = payload.saksnummer,
+                behandlingsreferanse = payload.behandlingsReferanse.toString(),
+                fraDato = it.fraDato,
+                tilDato = it.tilDato,
+                dagsats = it.dagsats,
+                gradering = it.gradering
+            )
+        })
     }
 
     override fun lagre(payload: IBeregningsGrunnlag, behandlingsReferanse: UUID) {

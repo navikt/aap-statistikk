@@ -8,6 +8,8 @@ import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.api_kontrakt.*
+import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
@@ -42,15 +44,18 @@ class MottaStatistikkTest {
 
         val motor = motorMock()
 
+        val bqRepository = FakeBQRepository()
+
         testKlient(
             noOpTransactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
-            azureConfig
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            azureConfig,
+            LagreStoppetHendelseJobb(bqRepository)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
-                URI.create("$url/motta"), PostRequest(
+                URI.create("$url/stoppetBehandling"), PostRequest(
                     StoppetBehandling(
                         saksnummer = "123",
                         status = "OPPRETTET",
@@ -158,26 +163,29 @@ class MottaStatistikkTest {
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
+        val bqRepository = FakeBQRepository()
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 2,
             logInfoProvider = NoExtraLogInfoProvider,
-            jobber = listOf(LagreStoppetHendelseJobb)
+            jobber = listOf(LagreStoppetHendelseJobb(bqRepository))
         )
 
-
         val jobbAppender = MotorJobbAppender(dataSource)
-
 
         testKlient(
             transactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
-            azureConfig
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            azureConfig,
+            LagreStoppetHendelseJobb(bqRepository)
         ) { url, client ->
 
-            client.post<StoppetBehandling, Any>(URI.create("$url/motta"), PostRequest(hendelse))
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"),
+                PostRequest(hendelse)
+            )
 
             dataSource.transaction(readOnly = true) {
                 ventPåSvar({
@@ -197,7 +205,9 @@ class MottaStatistikkTest {
                 assertThat(hentHendelser).hasSize(1)
                 assertThat(hentHendelser.first().behandlingReferanse).isEqualTo(hendelse.behandlingReferanse)
                 assertThat(hentHendelser.first().saksnummer).isEqualTo(hendelse.saksnummer)
-                assertThat(hentHendelser.first().behandlingOpprettetTidspunkt).isEqualTo(hendelse.behandlingOpprettetTidspunkt)
+                assertThat(hentHendelser.first().behandlingOpprettetTidspunkt).isEqualTo(
+                    hendelse.behandlingOpprettetTidspunkt
+                )
                 assertThat(hentHendelser.first().behandlingType).isEqualTo(hendelse.behandlingType)
                 assertThat(hentHendelser.first().status).isEqualTo(hendelse.status)
             }

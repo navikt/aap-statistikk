@@ -11,6 +11,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
     companion object {
         const val TABLE_NAME = "vilkarsResultat"
     }
+
     private enum class FeltNavn(val feltNavn: String) {
         SAKSNUMMER("saksnummer"),
         BEHANDLINGSREFERANSE("behandlingsreferanse"),
@@ -29,8 +30,10 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
     override val schema: Schema
         get() {
             val saksnummerField = Field.of(FeltNavn.SAKSNUMMER.feltNavn, StandardSQLTypeName.STRING)
-            val behandlingsReferanse = Field.of(FeltNavn.BEHANDLINGSREFERANSE.feltNavn, StandardSQLTypeName.STRING)
-            val behandlingsType = Field.of(FeltNavn.BEHANDLINGSTYPE.feltNavn, StandardSQLTypeName.STRING)
+            val behandlingsReferanse =
+                Field.of(FeltNavn.BEHANDLINGSREFERANSE.feltNavn, StandardSQLTypeName.STRING)
+            val behandlingsType =
+                Field.of(FeltNavn.BEHANDLINGSTYPE.feltNavn, StandardSQLTypeName.STRING)
             val vilkårField =
                 Field.newBuilder(
                     FeltNavn.VILKÅR.feltNavn,

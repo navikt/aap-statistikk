@@ -69,15 +69,16 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
     val lagreAvsluttetBehandlingJobbKonstruktør = LagreAvsluttetBehandlingDTOJobb(
         jobb = LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)
     )
+    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(bqRepository)
     val motor = Motor(
         dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {
             override fun hentInformasjon(
                 connection: DBConnection, jobbInput: JobbInput
-            ): LogInformasjon? {
+            ): LogInformasjon {
                 return LogInformasjon(mapOf())
             }
         }, jobber = listOf(
-            LagreStoppetHendelseJobb,
+            lagreStoppetHendelseJobb,
             LagreAvsluttetBehandlingJobbKonstruktør(bqRepository),
             lagreAvsluttetBehandlingJobbKonstruktør
         )
@@ -101,7 +102,7 @@ fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfi
         motor,
         MotorJobbAppender(dataSource),
         lagreAvsluttetBehandlingJobbKonstruktør,
-        azureConfig, motorApiCallback
+        azureConfig, motorApiCallback, lagreStoppetHendelseJobb
     )
 }
 
@@ -111,7 +112,8 @@ fun Application.module(
     jobbAppender: JobbAppender,
     lagreAvsluttetBehandlingJobb: LagreAvsluttetBehandlingDTOJobb,
     azureConfig: AzureConfig,
-    motorApiCallback: NormalOpenAPIRoute.() -> Unit
+    motorApiCallback: NormalOpenAPIRoute.() -> Unit,
+    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb
 ) {
     motor.start()
 
@@ -128,6 +130,7 @@ fun Application.module(
                 mottaStatistikk(
                     transactionExecutor,
                     jobbAppender,
+                    lagreStoppetHendelseJobb,
                 )
                 avsluttetBehandling(jobbAppender, lagreAvsluttetBehandlingJobb)
             }

@@ -40,7 +40,7 @@ class IntegrationTest {
         val bqClient = BigQueryClient(config, schemaRegistry)
 
         testKlientNoInjection(dbConfig, config, azureConfig) { url, client ->
-            client.post<StoppetBehandling, Any>(URI.create("$url/motta"), PostRequest(hendelse))
+            client.post<StoppetBehandling, Any>(URI.create("$url/stoppetBehandling"), PostRequest(hendelse))
 
 
             client.post<AvsluttetBehandlingDTO, Any>(

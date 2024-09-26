@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
+import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
@@ -117,8 +118,18 @@ class AvsluttetBehandlingServiceTest {
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
         assertThat(utlestVilkårsVurderingFraBigQuery.first()).isEqualTo(avsluttetBehandling.vilkårsresultat)
 
-        assertThat(utlestTilkjentYtelseFraBigQuery).hasSize(1)
-        assertThat(utlestTilkjentYtelseFraBigQuery.first()).isEqualTo(avsluttetBehandling.tilkjentYtelse)
+        assertThat(utlestTilkjentYtelseFraBigQuery).hasSize(2)
+        assertThat(utlestTilkjentYtelseFraBigQuery).containsExactlyInAnyOrderElementsOf(
+            avsluttetBehandling.tilkjentYtelse.perioder.map {
+                BQTilkjentYtelse(
+                    saksnummer,
+                    behandlingReferanse.toString(),
+                    it.fraDato,
+                    it.tilDato,
+                    it.dagsats,
+                    it.gradering
+                )
+            })
 
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
