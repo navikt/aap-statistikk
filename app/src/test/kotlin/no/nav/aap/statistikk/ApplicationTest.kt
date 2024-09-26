@@ -9,8 +9,11 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.statistikk.api_kontrakt.*
+import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
+import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.testutils.FakeBQRepository
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
@@ -90,12 +93,14 @@ class ApplicationTest {
   "beregningsGrunnlag": $beregningsGrunnlag
 }"""
 
+        val bqRepository = FakeBQRepository()
         val response = testKlient(
             noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
             azureConfig,
+            LagreStoppetHendelseJobb(bqRepository),
         ) { url, client ->
 
             val respons = client.post<AvsluttetBehandlingDTO, LinkedHashMap<String, String>>(
@@ -117,34 +122,36 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig
     ) {
         val jobbAppender = MockJobbAppender()
+        val bqRepository = FakeBQRepository()
 
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
-            azureConfig
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            azureConfig,
+            LagreStoppetHendelseJobb(bqRepository),
         ) { url, client ->
             @Language("JSON")
             val body =
                 """{
-  "saksnummer": "123456789",
-  "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
-  "behandlingOpprettetTidspunkt": [
-    2024,
-    8,
-    14,
-    11,
-    5,
-    10,
-    343319000
-  ],
-  "status": "OPPRETTET",
-  "behandlingType": "Førstegangsbehandling",
-  "ident": "1403199012345",
-  "avklaringsbehov": [],
-  "versjon": "UKJENT"
-}"""
+              "saksnummer": "123456789",
+              "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
+              "behandlingOpprettetTidspunkt": [
+                2024,
+                8,
+                14,
+                11,
+                5,
+                10,
+                343319000
+              ],
+              "status": "OPPRETTET",
+              "behandlingType": "Førstegangsbehandling",
+              "ident": "1403199012345",
+              "avklaringsbehov": [],
+              "versjon": "UKJENT"
+            }"""
 
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"),
@@ -236,7 +243,8 @@ class ApplicationTest {
             motorMock(),
             jobbAppender,
             LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
-            azureConfig
+            azureConfig,
+            LagreStoppetHendelseJobb(FakeBQRepository()),
         ) { url, client ->
             client.post<AvsluttetBehandlingDTO, String>(
                 URI.create("$url/avsluttetBehandling"),
@@ -277,16 +285,18 @@ class ApplicationTest {
 }"""
 
         val jobbAppender = MockJobbAppender()
+        val bqRepository = FakeBQRepository()
 
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
-            azureConfig
+            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            azureConfig,
+            LagreStoppetHendelseJobb(bqRepository),
         ) { url, client ->
-            client.post<StoppetBehandling, Object>(
-                URI.create("$url/motta"), PostRequest(
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"), PostRequest(
                     DefaultJsonMapper.fromJson<StoppetBehandling>(payload),
                     additionalHeaders = listOf(
                         Header("Accept", "application/json"),

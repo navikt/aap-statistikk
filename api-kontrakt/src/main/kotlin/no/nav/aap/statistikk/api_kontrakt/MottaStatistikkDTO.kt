@@ -6,22 +6,8 @@ import java.util.*
 
 /**
  * @param saksnummer Saksnummer.
+ * @param behandlingReferanse Behandlingsreferanse
  */
-@Deprecated(
-    message = "Bruk StoppetBehandling", replaceWith = ReplaceWith(
-        expression = "StoppetBehandling(saksnummer, behandlingReferanse, behandlingOpprettetTidspunkt, status, behandlingType, ident, versjon, avklaringsbehov)"
-    )
-)
-data class MottaStatistikkDTO(
-    val saksnummer: String,
-    val behandlingReferanse: UUID,
-    val behandlingOpprettetTidspunkt: LocalDateTime,
-    val status: String,
-    val behandlingType: TypeBehandling,
-    val ident: String,
-    val avklaringsbehov: List<AvklaringsbehovHendelse>
-)
-
 data class StoppetBehandling(
     val saksnummer: String,
     val behandlingReferanse: UUID,

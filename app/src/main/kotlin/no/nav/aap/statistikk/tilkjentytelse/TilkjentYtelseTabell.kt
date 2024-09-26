@@ -9,10 +9,20 @@ import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDate
 import java.util.*
 
-class TilkjentYtelseTabell : BQTable<TilkjentYtelse> {
+data class BQTilkjentYtelse(
+    val saksnummer: String,
+    val behandlingsreferanse: String,
+    val fraDato: LocalDate,
+    val tilDato: LocalDate,
+    val dagsats: Double,
+    val gradering: Double
+)
+
+class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
     companion object {
         const val TABLE_NAME = "tilkjentYtelse"
     }
+
     private enum class FeltNavn(val feltNavn: String) {
         SAKSNUMMER("saksnummer"), BEHANDLINGSREFERANSE("behandlingsreferanse"), PERIODER("perioder"), FRA_DATO(
             "fraDato"
@@ -23,56 +33,45 @@ class TilkjentYtelseTabell : BQTable<TilkjentYtelse> {
     override val tableName: String = TABLE_NAME
     override val version: Int = 1
 
-    override val schema: Schema
-        get() {
-            val saksnummerField = Field.of(FeltNavn.SAKSNUMMER.feltNavn, StandardSQLTypeName.STRING)
-            val behandlingsReferanse =
-                Field.of(FeltNavn.BEHANDLINGSREFERANSE.feltNavn, StandardSQLTypeName.STRING)
-            val perioderField = Field.newBuilder(
-                FeltNavn.PERIODER.feltNavn,
-                StandardSQLTypeName.STRUCT,
-                Field.of(FeltNavn.FRA_DATO.feltNavn, StandardSQLTypeName.DATE),
-                Field.of(FeltNavn.TIL_DATO.feltNavn, StandardSQLTypeName.DATE),
-                Field.of(FeltNavn.DAGSATS.feltNavn, StandardSQLTypeName.FLOAT64),
-                Field.of(FeltNavn.GRADERING.feltNavn, StandardSQLTypeName.FLOAT64)
-            ).setMode(Field.Mode.REPEATED).build()
-            return Schema.of(saksnummerField, behandlingsReferanse, perioderField)
-        }
+    override val schema: Schema = Schema.of(
+        Field.of(FeltNavn.SAKSNUMMER.feltNavn, StandardSQLTypeName.STRING),
+        Field.of(FeltNavn.BEHANDLINGSREFERANSE.feltNavn, StandardSQLTypeName.STRING),
+        Field.of(FeltNavn.FRA_DATO.feltNavn, StandardSQLTypeName.DATE),
+        Field.of(FeltNavn.TIL_DATO.feltNavn, StandardSQLTypeName.DATE),
+        Field.of(FeltNavn.DAGSATS.feltNavn, StandardSQLTypeName.FLOAT64),
+        Field.of(FeltNavn.GRADERING.feltNavn, StandardSQLTypeName.FLOAT64)
+    )
 
-    override fun parseRow(fieldValueList: FieldValueList): TilkjentYtelse {
+
+    override fun parseRow(fieldValueList: FieldValueList): BQTilkjentYtelse {
         val saksnummer = fieldValueList.get(FeltNavn.SAKSNUMMER.feltNavn).stringValue
         val behandlingsReferanse =
             fieldValueList.get(FeltNavn.BEHANDLINGSREFERANSE.feltNavn).stringValue
+        val fraDato = LocalDate.parse(fieldValueList.get(FeltNavn.FRA_DATO.feltNavn).stringValue)
+        val tilDato = LocalDate.parse(fieldValueList.get(FeltNavn.TIL_DATO.feltNavn).stringValue)
+        val dagsats = fieldValueList.get(FeltNavn.DAGSATS.feltNavn).doubleValue
+        val gradering = fieldValueList.get(FeltNavn.GRADERING.feltNavn).doubleValue
 
-        val tilkjentYtelsePerioder =
-            fieldValueList.get(FeltNavn.PERIODER.feltNavn).repeatedValue.map {
-                TilkjentYtelsePeriode(
-                    fraDato = LocalDate.parse(it.recordValue[0].stringValue),
-                    tilDato = LocalDate.parse(it.recordValue[1].stringValue),
-                    dagsats = it.recordValue[2].doubleValue,
-                    gradering = it.recordValue[3].doubleValue,
-                )
-            }
-
-        return TilkjentYtelse(
+        return BQTilkjentYtelse(
             saksnummer = saksnummer,
-            behandlingsReferanse = UUID.fromString(behandlingsReferanse),
-            perioder = tilkjentYtelsePerioder
+            behandlingsreferanse = behandlingsReferanse,
+            fraDato = fraDato,
+            tilDato = tilDato,
+            dagsats = dagsats,
+            gradering = gradering,
         )
     }
 
-    override fun toRow(value: TilkjentYtelse): RowToInsert {
+    override fun toRow(value: BQTilkjentYtelse): RowToInsert {
         return RowToInsert.of(
-            mapOf(FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer,
-                FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsReferanse.toString(),
-                FeltNavn.PERIODER.feltNavn to value.perioder.map {
-                    mapOf(
-                        FeltNavn.FRA_DATO.feltNavn to it.fraDato.toString(),
-                        FeltNavn.TIL_DATO.feltNavn to it.tilDato.toString(),
-                        FeltNavn.GRADERING.feltNavn to it.gradering,
-                        FeltNavn.DAGSATS.feltNavn to it.dagsats,
-                    )
-                })
+            mapOf(
+                FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer,
+                FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsreferanse,
+                FeltNavn.FRA_DATO.feltNavn to value.fraDato.toString(),
+                FeltNavn.TIL_DATO.feltNavn to value.tilDato.toString(),
+                FeltNavn.DAGSATS.feltNavn to value.dagsats,
+                FeltNavn.GRADERING.feltNavn to value.gradering,
+            )
         )
     }
 }

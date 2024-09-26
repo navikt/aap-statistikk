@@ -31,12 +31,15 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
+import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
+import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.person.Person
@@ -81,9 +84,10 @@ fun <E> testKlient(
         tokenEndpoint = URI.create("http://localhost:8081/jwks"),
         clientSecret = "xxx",
     ),
-    test: (url: String, client: RestClient<InputStream>) -> E?
+    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
-    var res: E? = null;
+    val res: E?;
 
     System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
     System.setProperty("azure.app.client.id", azureConfig.clientId)
@@ -103,10 +107,12 @@ fun <E> testKlient(
             motor,
             jobbAppender,
             lagreAvsluttetBehandlingDTOJobb,
-            azureConfig
-        ) {
+            azureConfig,
+            {
 
-        }
+            },
+            lagreStoppetHendelseJobb
+        )
     }.start()
 
     val port = runBlocking { server.resolvedConnectors().first().port }
@@ -412,7 +418,7 @@ class FakeAvsluttetBehandlingDTORepository : IAvsluttetBehandlingRepository {
 fun <E> ventPåSvar(getter: () -> E?, predicate: (E) -> Boolean): E? {
     var res: E? = null;
     val timeInMillis = measureTimeMillis {
-        val maxTid = LocalDateTime.now().plusMinutes(1)
+        val maxTid = LocalDateTime.now().plusSeconds(20)
         var suksess = false;
         while (maxTid.isAfter(LocalDateTime.now()) && !suksess) {
             try {
