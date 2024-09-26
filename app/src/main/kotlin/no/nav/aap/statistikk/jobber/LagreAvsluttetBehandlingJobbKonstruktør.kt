@@ -14,7 +14,7 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 
 class LagreAvsluttetBehandlingJobbKonstruktør(
-    val bQRepository: IBQRepository
+    private val bQRepository: IBQRepository
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val avsluttetBehandlingService = AvsluttetBehandlingService(

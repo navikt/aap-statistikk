@@ -30,11 +30,11 @@ class LagreStoppetHendelseJobb(
         logger.info("Got message: $dto")
 
         val person = hentEllerSettInnPerson(dto)
-        var sak = hentEllerSettInnSak(dto, person)
+        val sak = hentEllerSettInnSak(dto, person)
 
         val behandlingId = hentEllerLagreBehandlingId(dto, sak)
 
-        hendelsesRepository.lagreHendelse(dto, sak?.id!!, behandlingId)
+        hendelsesRepository.lagreHendelse(dto, sak.id!!, behandlingId)
     }
 
     private fun hentEllerLagreBehandlingId(
@@ -60,8 +60,8 @@ class LagreStoppetHendelseJobb(
     private fun hentEllerSettInnSak(
         dto: StoppetBehandling,
         person: Person
-    ): Sak? {
-        var sak = sakRepository.hentSak(dto.saksnummer)
+    ): Sak {
+        var sak = sakRepository.hentSakEllernull(dto.saksnummer)
         if (sak == null) {
             val sakId = sakRepository.settInnSak(
                 Sak(

@@ -37,16 +37,8 @@ class SakTabell : BQTable<BQSak> {
     override fun parseRow(fieldValueList: FieldValueList): BQSak {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlinger = fieldValueList.get("behandlinger").repeatedValue.map {
-            Behandling(
-                referanse = UUID.fromString(it.recordValue[0].stringValue),
-                typeBehandling = TypeBehandling.Førstegangsbehandling, // TODO
-                opprettetTid = LocalDateTime.parse(it.recordValue[2].stringValue),
-                sak = Sak(
-                    saksnummer = "123",
-                    person = Person(
-                        ident = "213", // TODO!!
-                    )
-                )
+            BQBehandling(
+                behandlingUUID = it.recordValue[0].stringValue,
             )
         }
 
@@ -61,9 +53,7 @@ class SakTabell : BQTable<BQSak> {
             mapOf("saksnummer" to value.saksnummer,
                 "behandlinger" to value.behandlinger.map {
                     mapOf(
-                        "behandlingUuid" to it.referanse.toString(),
-                        "behandlingType" to it.typeBehandling.toString(),
-                        "opprettetTid" to it.opprettetTid.toString(),
+                        "behandlingUuid" to it.behandlingUUID,
                     )
                 })
         )
