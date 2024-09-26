@@ -28,7 +28,7 @@ class HendelsesRepository(
     }
 
     override fun hentHendelser(): Collection<StoppetBehandling> {
-        return dbConnection.queryList<StoppetBehandling>(
+        return dbConnection.queryList(
             query = """SELECT *
                                FROM motta_statistikk
                                LEFT JOIN versjon v ON motta_statistikk.versjon_id = v.id
@@ -52,7 +52,7 @@ class HendelsesRepository(
     }
 
     override fun tellHendelser(): Int {
-        return dbConnection.queryFirst<Int>("SELECT COUNT(*) FROM motta_statistikk") {
+        return dbConnection.queryFirst("SELECT COUNT(*) FROM motta_statistikk") {
             setRowMapper { it.getInt("count") }
         }
     }

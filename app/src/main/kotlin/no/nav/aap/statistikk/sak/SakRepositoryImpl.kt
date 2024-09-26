@@ -1,10 +1,11 @@
 package no.nav.aap.statistikk.sak
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.statistikk.person.Person
 
 class SakRepositoryImpl(private val dbConnection: DBConnection) : SakRepository {
-    override fun hentSak(sakID: Long): Sak? {
+    override fun hentSak(sakID: Long): Sak {
         val query = """SELECT *
 FROM sak
          JOIN person p ON sak.person_id = p.id
@@ -16,41 +17,47 @@ WHERE sak.id = ?
                 setLong(1, sakID)
             }
             setRowMapper { row ->
-                Sak(
-                    id = row.getLong("id"),
-                    saksnummer = row.getString("saksnummer"),
-                    person = Person(
-                        ident = row.getString("ident"),
-                        id = row.getLong("person_id"),
-                    )
-                )
+                sakRowMapper(row)
             }
         }
     }
 
-    override fun hentSak(saksnummer: String): Sak? {
-        val query = """SELECT *
+    private val HENT_SAK_QUERY = """SELECT *
 FROM sak
          JOIN person p ON sak.person_id = p.id
 WHERE sak.saksnummer = ?
         """
 
-        return dbConnection.queryFirstOrNull<Sak>(query) {
+    override fun hentSak(saksnummer: String): Sak {
+        return dbConnection.queryFirst(HENT_SAK_QUERY) {
             setParams {
                 setString(1, saksnummer)
             }
             setRowMapper { row ->
-                Sak(
-                    id = row.getLong("id"),
-                    saksnummer = row.getString("saksnummer"),
-                    person = Person(
-                        ident = row.getString("ident"),
-                        id = row.getLong("person_id"),
-                    )
-                )
+                sakRowMapper(row)
             }
         }
     }
+
+    override fun hentSakEllernull(saksnummer: String): Sak? {
+        return dbConnection.queryFirstOrNull<Sak>(HENT_SAK_QUERY) {
+            setParams {
+                setString(1, saksnummer)
+            }
+            setRowMapper { row ->
+                sakRowMapper(row)
+            }
+        }
+    }
+
+    private fun sakRowMapper(row: Row) = Sak(
+        id = row.getLong("id"),
+        saksnummer = row.getString("saksnummer"),
+        person = Person(
+            ident = row.getString("ident"),
+            id = row.getLong("person_id"),
+        )
+    )
 
     override fun settInnSak(sak: Sak): Long {
         val personId = requireNotNull(sak.person.id)
@@ -67,7 +74,7 @@ WHERE sak.saksnummer = ?
             LIMIT 1
         """
 
-        return dbConnection.queryFirst<Long>(query) {
+        return dbConnection.queryFirst(query) {
             setParams {
                 setString(1, sak.saksnummer)
                 setLong(2, personId)
