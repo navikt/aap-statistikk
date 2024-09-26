@@ -31,10 +31,7 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
-import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.IBQRepository
+import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
@@ -125,13 +122,13 @@ fun <E> testKlient(
 }
 
 fun <E> testKlientNoInjection(
-    dbConfig: DbConfig, bqConfig: BigQueryConfig,
-    azureConfig: AzureConfig = AzureConfig(
+    dbConfig: DbConfig, azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwksUri = "http://localhost:8081/jwks",
         issuer = "tilgang"
     ),
-    test: (url: String, client: RestClient<InputStream>) -> E?
+    bigQueryClient: BigQueryClient,
+    test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
     var res: E? = null;
 
@@ -150,8 +147,8 @@ fun <E> testKlientNoInjection(
     val server = embeddedServer(Netty, port = 0) {
         startUp(
             dbConfig,
-            bqConfig,
-            azureConfig
+            azureConfig,
+            bigQueryClient
         )
     }.start()
 

@@ -22,7 +22,7 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
         migrate()
     }
 
-    fun migrate() {
+    private fun migrate() {
         schemaRegistry.values.forEach {
             if (!exists(it)) {
                 create(it)
@@ -37,7 +37,7 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
      *
      * NB! Kun noen få operasjoner er mulig. Spesifikt å legge til felter, og å gjøre kolonner nullable.
      */
-    fun migrateFields(table: BQTable<*>) {
+    private fun migrateFields(table: BQTable<*>) {
         log.info("Oppdaterer skjema for tabell ${table.tableName}")
         val existingTable = bigQuery.getTable(TableId.of(dataset, table.tableName))
 

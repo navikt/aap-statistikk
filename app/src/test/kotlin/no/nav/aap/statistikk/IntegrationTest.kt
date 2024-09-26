@@ -37,10 +37,22 @@ class IntegrationTest {
         val hendelse = behandlingHendelse(saksnummer, behandlingReferanse)
         val avsluttetBehandling = avsluttetBehandlingDTO(behandlingReferanse, saksnummer)
 
-        val bqClient = BigQueryClient(config, schemaRegistry)
+        val bigQueryClient = BigQueryClient(config, mapOf())
 
-        testKlientNoInjection(dbConfig, config, azureConfig) { url, client ->
-            client.post<StoppetBehandling, Any>(URI.create("$url/stoppetBehandling"), PostRequest(hendelse))
+        // Hack fordi emulator ikke støtter migrering
+        schemaRegistry.forEach { (_, schema) ->
+            bigQueryClient.create(schema)
+        }
+
+        testKlientNoInjection(
+            dbConfig,
+            azureConfig,
+            bigQueryClient
+        ) { url, client ->
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"),
+                PostRequest(hendelse)
+            )
 
 
             client.post<AvsluttetBehandlingDTO, Any>(
@@ -49,7 +61,9 @@ class IntegrationTest {
             )
 
             val bigQueryRespons =
-                ventPåSvar({ bqClient.read(VilkårsVurderingTabell()) }, { t -> t.isNotEmpty() })
+                ventPåSvar(
+                    { bigQueryClient.read(VilkårsVurderingTabell()) },
+                    { t -> t.isNotEmpty() })
 
             assertThat(bigQueryRespons).hasSize(1)
             val vilkårsVurderingRad = bigQueryRespons!!.first()
