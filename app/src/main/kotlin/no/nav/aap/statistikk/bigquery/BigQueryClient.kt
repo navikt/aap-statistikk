@@ -41,7 +41,9 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
         log.info("Oppdaterer skjema for tabell ${table.tableName}")
         val existingTable = bigQuery.getTable(TableId.of(dataset, table.tableName))
 
-        val updatedTable = existingTable.toBuilder().setDefinition(StandardTableDefinition.of(table.schema)).build()
+        val updatedTable =
+            existingTable.toBuilder().setDefinition(StandardTableDefinition.of(table.schema))
+                .build()
 
         updatedTable.update()
         // Samme måte som her: https://github.com/navikt/yrkesskade/blob/b6da4d18d023007f1cd1fd7821e3704aa3a0d051/libs/bigquery/src/main/kotlin/no/nav/yrkesskade/bigquery/client/DefaultBigQueryClient.kt#L96
@@ -50,8 +52,8 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
     }
 
     private fun exists(table: BQTable<*>): Boolean {
-        val table = bigQuery.getTable(TableId.of(dataset, table.tableName))
-        return table != null && table.exists()
+        val existingTable = bigQuery.getTable(TableId.of(dataset, table.tableName))
+        return existingTable != null && existingTable.exists()
     }
 
     override fun <E> create(table: BQTable<E>): Boolean {
@@ -88,7 +90,7 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
         val response = bigQuery.insertAll(built)
 
         if (response.hasErrors()) {
-            log.warn("Error ved insert. Tabell: ${table.tableName}. Feilmelding: ${response.insertErrors}.")
+            error("Feil ved insert. Tabell: ${table.tableName}. Feilmelding: ${response.insertErrors}.")
         }
     }
 
