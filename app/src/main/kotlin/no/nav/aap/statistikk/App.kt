@@ -22,10 +22,7 @@ import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
-import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
-import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
+import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
@@ -52,19 +49,21 @@ fun main() {
     val dbConfig = DbConfig.fraMiljøVariabler()
     val bgConfig = BigQueryConfigFromEnv()
     val azureConfig = azureconfigFraMiljøVariabler()
+    val bigQueryClient = BigQueryClient(bgConfig, schemaRegistry)
 
     embeddedServer(Netty, port = 8080) {
-        startUp(dbConfig, bgConfig, azureConfig)
+        startUp(dbConfig, azureConfig, bigQueryClient)
     }.start(wait = true)
 }
 
-fun Application.startUp(dbConfig: DbConfig, bqConfig: BigQueryConfig, azureConfig: AzureConfig) {
+fun Application.startUp(
+    dbConfig: DbConfig, azureConfig: AzureConfig, bigQueryClient: BigQueryClient
+) {
     log.info("Starter.")
     val flyway = Flyway(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
-    val bqClient = BigQueryClient(bqConfig, mapOf())
-    val bqRepository = BQRepository(bqClient)
+    val bqRepository = BQRepository(bigQueryClient)
 
     val lagreAvsluttetBehandlingJobbKonstruktør = LagreAvsluttetBehandlingDTOJobb(
         jobb = LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)
