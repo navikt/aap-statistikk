@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat.repository
 
+import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
@@ -9,15 +10,16 @@ import java.util.*
 
 data class VilkårsResultatEntity(
     val id: Long?,
-    val behandlingsReferanse: String,
-    val saksnummer: String,
-    val typeBehandling: String,
     val vilkår: List<VilkårEntity>
 ) {
-    fun tilVilkårsResultat(): Vilkårsresultat {
+    fun tilVilkårsResultat(
+        saksnummer: String,
+        behandlingsReferanse: UUID,
+        typeBehandling: String
+    ): Vilkårsresultat {
         return Vilkårsresultat(
             saksnummer,
-            UUID.fromString(behandlingsReferanse),
+            behandlingsReferanse,
             typeBehandling,
             vilkår.map { it: VilkårEntity -> it.tilVilkår() })
     }
@@ -26,16 +28,17 @@ data class VilkårsResultatEntity(
         fun fraDomene(vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity {
             return VilkårsResultatEntity(
                 null,
-                behandlingsReferanse = vilkårsresultat.behandlingsReferanse.toString(),
-                vilkårsresultat.saksnummer,
-                vilkårsresultat.behandlingsType,
                 vilkårsresultat.vilkår.map { it: Vilkår -> VilkårEntity.fraDomene(it) }
             )
         }
     }
 }
 
-data class VilkårEntity(val id: Long?, val vilkårType: String, val perioder: List<VilkårsPeriodeEntity>) {
+data class VilkårEntity(
+    val id: Long?,
+    val vilkårType: String,
+    val perioder: List<VilkårsPeriodeEntity>
+) {
     fun tilVilkår(): Vilkår {
         return Vilkår(Vilkårtype.valueOf(vilkårType), perioder.map { it.tilVilkårsPeriode() })
     }
@@ -61,7 +64,14 @@ data class VilkårsPeriodeEntity(
     val avslagsårsak: String?
 ) {
     fun tilVilkårsPeriode(): VilkårsPeriode {
-        return VilkårsPeriode(fraDato, tilDato, utfall, manuellVurdering, innvilgelsesårsak, avslagsårsak)
+        return VilkårsPeriode(
+            fraDato,
+            tilDato,
+            utfall,
+            manuellVurdering,
+            innvilgelsesårsak,
+            avslagsårsak
+        )
     }
 
     companion object {

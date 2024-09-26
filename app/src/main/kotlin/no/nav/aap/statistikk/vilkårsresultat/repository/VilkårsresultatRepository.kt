@@ -9,33 +9,18 @@ private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java
 class VilkårsresultatRepository(
     private val dbConnection: DBConnection
 ) : IVilkårsresultatRepository {
-    override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity): Int {
+    override fun lagreVilkårsResultat(
+        vilkårsresultat: VilkårsResultatEntity,
+        behandlingId: Long
+    ): Long {
         val sqlInsertResultat =
-            """
-    WITH inserted AS (
-        INSERT INTO VILKARSRESULTAT (behandling_id)
-        SELECT b.id AS behandling_id
-        FROM BEHANDLING b
-        JOIN SAK s ON b.sak_id = s.id
-        WHERE b.referanse = ?
-          AND s.saksnummer = ?
-        RETURNING *
-    )
-    SELECT id FROM inserted"""
+            """INSERT INTO VILKARSRESULTAT (behandling_id) VALUES (?)"""
 
-        val saksnummer = vilkårsresultat.saksnummer
-        val behandlingsReferanse = vilkårsresultat.behandlingsReferanse
-
-        val uthentetId = requireNotNull(dbConnection.queryFirstOrNull<Int>(sqlInsertResultat) {
+        val uthentetId = dbConnection.executeReturnKey(sqlInsertResultat) {
             setParams {
-                setUUID(1, UUID.fromString(behandlingsReferanse))
-                setString(2, saksnummer)
+                setLong(1, behandlingId)
             }
-            setRowMapper {
-                it.getInt("id")
-            }
-        }) { "Kunne ikke skrive vilkårsresultat. Behandling-ref: $behandlingsReferanse. Saksnummer: $saksnummer" }
-
+        }
 
         val sqlInsertVilkar = """
                 INSERT INTO VILKAR(vilkar_type, vilkarresult_id) VALUES(?, ?);
@@ -50,7 +35,7 @@ class VilkårsresultatRepository(
             val vilkårKey = dbConnection.executeReturnKey(sqlInsertVilkar) {
                 setParams {
                     setString(1, vilkårEntity.vilkårType)
-                    setInt(2, uthentetId)
+                    setLong(2, uthentetId)
                 }
             }
 
@@ -73,7 +58,7 @@ class VilkårsresultatRepository(
         return uthentetId
     }
 
-    override fun hentVilkårsResultat(vilkårResultatId: Int): VilkårsResultatEntity? {
+    override fun hentVilkårsResultat(vilkårResultatId: Long): VilkårsResultatEntity? {
         val preparedSqlStatement = """
 SELECT vr.id         as vr_id,
        s.saksnummer  as s_saksnummer,
@@ -95,8 +80,8 @@ WHERE vr.id = ?;
             val referanse: String
         )
 
-        val xx = dbConnection.queryList<Pair<EkstraInfo, VilkårEntity>>(preparedSqlStatement) {
-            setParams { setInt(1, vilkårResultatId) }
+        val xx = dbConnection.queryList(preparedSqlStatement) {
+            setParams { setLong(1, vilkårResultatId) }
             setRowMapper {
                 val id = it.getLong("vr_id")
                 val saksNummer = it.getString("s_saksnummer")
@@ -123,9 +108,6 @@ WHERE vr.id = ?;
 
         return VilkårsResultatEntity(
             id = xx.first().first.id,
-            behandlingsReferanse = xx.first().first.referanse,
-            saksnummer = xx.first().first.saksnummer,
-            typeBehandling = xx.first().first.type,
             vilkår = xx.map { it.second },
         )
     }

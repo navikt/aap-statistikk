@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
@@ -99,7 +100,7 @@ class AvsluttetBehandlingServiceTest {
         )
 
         val bigQueryClient = dataSource.transaction {
-            val (bigQueryClient, avsluttetBehandlingService) = konstruerTilkjentYtelseService(
+            val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 dataSource,
                 bigQuery
             )
@@ -177,7 +178,7 @@ class AvsluttetBehandlingServiceTest {
             behandlingsReferanse = behandlingReferanse
         )
 
-        val (_, service) = konstruerTilkjentYtelseService(
+        val (_, service) = konstruerAvsluttetBehandlingService(
             dataSource,
             bigQuery
         )
@@ -189,7 +190,7 @@ class AvsluttetBehandlingServiceTest {
         assertThat(uthentet.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
     }
 
-    private fun konstruerTilkjentYtelseService(
+    private fun konstruerAvsluttetBehandlingService(
         dataSource: DataSource,
         bigQueryConfig: BigQueryConfig
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
@@ -215,7 +216,7 @@ class AvsluttetBehandlingServiceTest {
                     }
                 },
                 bqRepository,
-            )
+            ) { BehandlingRepository(it) }
         return Pair(bigQueryClient, service)
     }
 

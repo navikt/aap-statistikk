@@ -20,11 +20,11 @@ class VilkårsresultatRepositoryTest {
     @Test
     fun `fungerer å lagre vilkårs-resultat og hente inn igjen`(@Postgres dataSource: DataSource) {
         val randomUUID = UUID.randomUUID()
-        opprettTestHendelse(dataSource, randomUUID, "ABCDE")
+        val saksnummer = "ABCDE"
+        val (behandlingId, _) = opprettTestHendelse(dataSource, randomUUID, saksnummer)
 
         val vilkårsResultatEntity = VilkårsResultatEntity(
-            id = null, behandlingsReferanse = randomUUID.toString(),
-            "ABCDE", TypeBehandling.Førstegangsbehandling.toString(), listOf(
+            id = null, listOf(
                 VilkårEntity(
                     id = null,
                     Vilkårtype.MEDLEMSKAP.toString(), listOf(
@@ -76,15 +76,23 @@ class VilkårsresultatRepositoryTest {
 
         val generertId = dataSource.transaction { conn ->
             val repo = VilkårsresultatRepository(conn)
-            repo.lagreVilkårsResultat(vilkårsResultatEntity)
+            repo.lagreVilkårsResultat(vilkårsResultatEntity, behandlingId)
         }
 
         assertThat(generertId).isNotNull()
 
         val hentetUt = dataSource.transaction {
-            VilkårsresultatRepository(it).hentVilkårsResultat(generertId!!)
+            VilkårsresultatRepository(it).hentVilkårsResultat(generertId)
         }
-        assertThat(hentetUt!!.tilVilkårsResultat()).isEqualTo(vilkårsResultatEntity.tilVilkårsResultat())
+        assertThat(hentetUt!!.tilVilkårsResultat(
+            saksnummer =saksnummer,
+            behandlingsReferanse = randomUUID,
+            typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
+        )).isEqualTo(vilkårsResultatEntity.tilVilkårsResultat(
+            saksnummer = saksnummer,
+            behandlingsReferanse = randomUUID,
+            typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
+        ))
     }
 
     @Test
@@ -92,14 +100,13 @@ class VilkårsresultatRepositoryTest {
         val randomUUID = UUID.randomUUID()
         val saksnummer = "saksnummer"
 
-        opprettTestHendelse(dataSource, randomUUID, saksnummer)
+        val (behandlingId, _) = opprettTestHendelse(dataSource, randomUUID, saksnummer)
 
         // lagre
         val behandlingsReferanse = randomUUID.toString()
 
         val vilkårsresultat = VilkårsResultatEntity(
-            id = null, behandlingsReferanse = behandlingsReferanse,
-            saksnummer, "typeBehandling", listOf(
+            id = null, listOf(
                 VilkårEntity(
                     id = null,
                     Vilkårtype.MEDLEMSKAP.toString(), listOf(
@@ -128,14 +135,14 @@ class VilkårsresultatRepositoryTest {
 
         // Lagre én gang
         dataSource.transaction { conn ->
-            VilkårsresultatRepository(conn).lagreVilkårsResultat(vilkårsresultat)
+            VilkårsresultatRepository(conn).lagreVilkårsResultat(vilkårsresultat, behandlingId)
         }
 
         // Lagre én gang til skal kaste avbrudd
         assertThrows<Exception> {
             dataSource.transaction {
                 VilkårsresultatRepository(it).lagreVilkårsResultat(
-                    vilkårsresultat
+                    vilkårsresultat, behandlingId
                 )
             }
         }

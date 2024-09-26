@@ -27,7 +27,9 @@ import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
@@ -40,6 +42,7 @@ import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.SakId
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -211,14 +214,18 @@ fun bigQueryContainer(): BigQueryConfig {
     return config
 }
 
-fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: String) {
+fun opprettTestHendelse(
+    dataSource: DataSource,
+    randomUUID: UUID,
+    saksnummer: String
+): Pair<BehandlingId, SakId> {
     val ident = "29021946"
 
     val id = opprettTestPerson(dataSource, ident)
 
     val sak = opprettTestSak(dataSource, saksnummer, Person(ident, id = id))
 
-    val behandlingId = opprettTestBehandling(
+    val behandling = opprettTestBehandling(
         dataSource,
         randomUUID,
         Sak(
@@ -228,6 +235,8 @@ fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: St
         ),
     )
 
+    val sakId = sak.id!!
+    val behandlingId = behandling.id!!
     dataSource.transaction { conn ->
         val hendelseRepo = HendelsesRepository(conn)
         val hendelse = StoppetBehandling(
@@ -241,9 +250,11 @@ fun opprettTestHendelse(dataSource: DataSource, randomUUID: UUID, saksnummer: St
             versjon = UUID.randomUUID().toString()
         )
         hendelseRepo.lagreHendelse(
-            hendelse, sak.id!!, behandlingId.id!!
+            hendelse, sakId, behandlingId
         )
     }
+
+    return Pair(behandlingId, sakId)
 }
 
 fun opprettTestPerson(dataSource: DataSource, ident: String): Long {
@@ -309,6 +320,22 @@ class MockJobbAppender : JobbAppender {
     }
 }
 
+class FakeBehandlingRepository : IBehandlingRepository {
+    private val behandlinger = mutableListOf<Behandling>()
+    override fun lagre(behandling: Behandling): Long {
+        behandlinger.add(behandling)
+        return behandlinger.indexOf(behandling).toLong()
+    }
+
+    override fun hent(referanse: UUID): Behandling? {
+        val behandling = behandlinger.firstOrNull { it.referanse == referanse }
+        if (behandling != null) {
+            return behandling.copy(id = behandlinger.indexOf(behandling).toLong())
+        }
+        return null
+    }
+}
+
 class FakeBQRepository : IBQRepository {
     val vilkårsresultater = mutableListOf<Vilkårsresultat>()
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
@@ -331,7 +358,7 @@ class FakeBQRepository : IBQRepository {
 }
 
 class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
-    val tilkjentYtelser = mutableMapOf<Int, TilkjentYtelseEntity>()
+    private val tilkjentYtelser = mutableMapOf<Int, TilkjentYtelseEntity>()
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
         tilkjentYtelser.put(tilkjentYtelser.size, tilkjentYtelse)
         return (tilkjentYtelser.size - 1).toLong();
@@ -343,13 +370,17 @@ class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
 }
 
 class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
-    val vilkår = mutableMapOf<Int, VilkårsResultatEntity>()
-    override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity): Int {
-        vilkår.put(vilkår.size, vilkårsresultat)
-        return vilkår.size - 1
+    val vilkår = mutableMapOf<Long, VilkårsResultatEntity>()
+
+    override fun lagreVilkårsResultat(
+        vilkårsresultat: VilkårsResultatEntity,
+        behandlingId: Long
+    ): Long {
+        vilkår.put(vilkår.size.toLong(), vilkårsresultat)
+        return (vilkår.size - 1).toLong()
     }
 
-    override fun hentVilkårsResultat(vilkårResultatId: Int): VilkårsResultatEntity? {
+    override fun hentVilkårsResultat(vilkårResultatId: Long): VilkårsResultatEntity? {
         TODO("Not yet implemented")
     }
 }

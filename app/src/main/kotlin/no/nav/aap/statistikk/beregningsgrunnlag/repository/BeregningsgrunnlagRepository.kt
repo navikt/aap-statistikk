@@ -8,6 +8,7 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.statistikk.api_kontrakt.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -24,28 +25,28 @@ class BeregningsgrunnlagRepository(
     private val dbConnection: DBConnection
 ) :
     IBeregningsgrunnlagRepository {
-    override fun lagreBeregningsGrunnlag(beregningsGrunnlagMedReferanse: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
+    override fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
         val behandlingsReferanseId = hentBehandlingsReferanseId(
             dbConnection,
-            beregningsGrunnlagMedReferanse.behandlingsReferanse
+            beregningsGrunnlag.behandlingsReferanse
         )
 
-        val beregningsGrunnlag = beregningsGrunnlagMedReferanse.value
+        val beregningsGrunnlagVerdi = beregningsGrunnlag.value
 
         val baseGrunnlagId =
-            lagreBaseGrunnlag(dbConnection, beregningsGrunnlag.type(), behandlingsReferanseId)
+            lagreBaseGrunnlag(dbConnection, beregningsGrunnlagVerdi.type(), behandlingsReferanseId)
 
-        return when (beregningsGrunnlag) {
+        return when (beregningsGrunnlagVerdi) {
             is IBeregningsGrunnlag.Grunnlag_11_19 -> {
-                lagre11_19(dbConnection, baseGrunnlagId, beregningsGrunnlag)
+                lagre11_19(dbConnection, baseGrunnlagId, beregningsGrunnlagVerdi)
             }
 
             is IBeregningsGrunnlag.GrunnlagYrkesskade -> {
-                lagreGrunnlagYrkesskade(dbConnection, baseGrunnlagId, beregningsGrunnlag)
+                lagreGrunnlagYrkesskade(dbConnection, baseGrunnlagId, beregningsGrunnlagVerdi)
             }
 
             is IBeregningsGrunnlag.GrunnlagUføre ->
-                lagreGrunnlagUføre(dbConnection, baseGrunnlagId, beregningsGrunnlag)
+                lagreGrunnlagUføre(dbConnection, baseGrunnlagId, beregningsGrunnlagVerdi)
         }
 
     }
@@ -66,7 +67,7 @@ class BeregningsgrunnlagRepository(
     private fun lagreBaseGrunnlag(
         connection: DBConnection,
         type: String,
-        behandlingId: Long
+        behandlingId: BehandlingId
     ): Long {
         val sql = "INSERT INTO GRUNNLAG(type, behandling_id) VALUES (?, ?) ";
 
