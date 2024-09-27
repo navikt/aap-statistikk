@@ -2,11 +2,13 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.sak.BQBehandling
+import no.nav.aap.statistikk.sak.BQSak
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
 
@@ -15,7 +17,7 @@ class HendelsesService(
     private val hendelsesRepository: IHendelsesRepository,
     private val sakRepository: SakRepository,
     private val personRepository: PersonRepository,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingRepository: IBehandlingRepository,
     private val bigQueryRepository: IBQRepository
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
@@ -25,6 +27,16 @@ class HendelsesService(
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
 
         hendelsesRepository.lagreHendelse(hendelse, sak.id!!, behandlingId)
+
+        val bqSak = BQSak(
+            saksnummer = sak.saksnummer,
+            behandlinger = listOf(
+                BQBehandling(
+                    behandlingUUID = behandlingRepository.hent(behandlingId).referanse.toString()
+                )
+            )
+        )
+        bigQueryRepository.lagre(bqSak)
     }
 
     private fun hentEllerLagreBehandlingId(
