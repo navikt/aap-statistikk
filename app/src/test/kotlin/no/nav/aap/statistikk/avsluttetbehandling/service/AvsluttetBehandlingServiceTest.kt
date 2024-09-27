@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.Factory
+import no.nav.aap.statistikk.api_kontrakt.Utfall
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
@@ -116,7 +117,9 @@ class AvsluttetBehandlingServiceTest {
         val utlestTilkjentYtelseFraBigQuery = bigQueryClient.read(TilkjentYtelseTabell())
 
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
-        assertThat(utlestVilkårsVurderingFraBigQuery.first()).isEqualTo(avsluttetBehandling.vilkårsresultat)
+        assertThat(utlestVilkårsVurderingFraBigQuery.first().behandlingsReferanse).isEqualTo(
+            avsluttetBehandling.vilkårsresultat.behandlingsReferanse
+        )
 
         assertThat(utlestTilkjentYtelseFraBigQuery).hasSize(2)
         assertThat(utlestTilkjentYtelseFraBigQuery).containsExactlyInAnyOrderElementsOf(
@@ -164,7 +167,19 @@ class AvsluttetBehandlingServiceTest {
                 behandlingsReferanse = behandlingReferanse,
                 behandlingsType = "Førstegangsbehandling",
                 saksnummer = saksnummer,
-                vilkår = listOf()
+                vilkår = listOf(
+                    Vilkår(
+                        vilkårType = Vilkårtype.MEDLEMSKAP,
+                        perioder = listOf(
+                            VilkårsPeriode(
+                                fraDato = LocalDate.now().minusYears(2),
+                                tilDato = LocalDate.now(),
+                                utfall = Utfall.OPPFYLT.name,
+                                manuellVurdering = true
+                            )
+                        )
+                    )
+                )
             ),
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
                 grunnlaget = 25000.0,

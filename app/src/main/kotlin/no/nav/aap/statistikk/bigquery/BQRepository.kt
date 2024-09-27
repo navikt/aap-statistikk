@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
+import no.nav.aap.statistikk.vilkårsresultat.BQVilkårsResultatPeriode
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
@@ -24,7 +25,22 @@ class BQRepository(
 
     override fun lagre(payload: Vilkårsresultat) {
         logger.info("Lagrer vilkårsresultat.")
-        client.insert(vilkårsVurderingTabell, payload)
+        val flatetListe = payload.vilkår
+            .flatMap { v ->
+            v.perioder.map {
+                BQVilkårsResultatPeriode(
+                    saksnummer = payload.saksnummer,
+                    behandlingsReferanse = payload.behandlingsReferanse,
+                    behandlingsType = payload.behandlingsType,
+                    vilkårtype = v.vilkårType,
+                    fraDato = it.fraDato,
+                    tilDato = it.tilDato,
+                    utfall = it.utfall,
+                    manuellVurdering = it.manuellVurdering
+                )
+            }
+        }
+        client.insertMany(vilkårsVurderingTabell, flatetListe)
     }
 
     override fun lagre(payload: TilkjentYtelse) {

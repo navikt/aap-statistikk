@@ -429,7 +429,7 @@ class FakeAvsluttetBehandlingDTORepository : IAvsluttetBehandlingRepository {
     }
 }
 
-fun <E> ventPåSvar(getter: () -> E?, predicate: (E) -> Boolean): E? {
+fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
     var res: E? = null;
     val timeInMillis = measureTimeMillis {
         val maxTid = LocalDateTime.now().plusSeconds(20)
@@ -445,6 +445,6 @@ fun <E> ventPåSvar(getter: () -> E?, predicate: (E) -> Boolean): E? {
             }
         }
     }
-    println("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder.")
+    logger.info("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder.")
     return res
 }
