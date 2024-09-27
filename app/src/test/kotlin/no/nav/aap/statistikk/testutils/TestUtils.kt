@@ -4,8 +4,8 @@ import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -31,7 +31,9 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.*
+import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
@@ -41,6 +43,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.sak.BQSak
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakId
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
@@ -122,7 +125,8 @@ fun <E> testKlient(
 }
 
 fun <E> testKlientNoInjection(
-    dbConfig: DbConfig, azureConfig: AzureConfig = AzureConfig(
+    dbConfig: DbConfig,
+    azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwksUri = "http://localhost:8081/jwks",
         issuer = "tilgang"
@@ -337,12 +341,21 @@ class FakeBehandlingRepository : IBehandlingRepository {
         }
         return null
     }
+
+    override fun hent(id: Long): Behandling {
+        return behandlinger[id.toInt()]
+    }
+
+    override fun hentEllerNull(id: Long): Behandling? {
+        return behandlinger.getOrNull(id.toInt())
+    }
 }
 
 class FakeBQRepository : IBQRepository {
     val vilkårsresultater = mutableListOf<Vilkårsresultat>()
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
     val beregningsgrunnlag = mutableListOf<IBeregningsGrunnlag>()
+    val saker = mutableListOf<BQSak>()
 
     override fun lagre(payload: Vilkårsresultat) {
         vilkårsresultater.add(payload)
@@ -357,6 +370,10 @@ class FakeBQRepository : IBQRepository {
         behandlingsReferanse: UUID
     ) {
         beregningsgrunnlag.add(payload)
+    }
+
+    override fun lagre(payload: BQSak) {
+        saker.add(payload)
     }
 }
 

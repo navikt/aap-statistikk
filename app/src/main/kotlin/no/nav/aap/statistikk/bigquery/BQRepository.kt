@@ -3,6 +3,8 @@ package no.nav.aap.statistikk.bigquery
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
+import no.nav.aap.statistikk.sak.BQSak
+import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
@@ -46,6 +48,11 @@ class BQRepository(
             beregningsGrunnlagTabell,
             MedBehandlingsreferanse(value = payload, behandlingsReferanse = behandlingsReferanse)
         )
+    }
+
+    override fun lagre(payload: BQSak) {
+        logger.info("Lagrer saksinfo.")
+        client.insert(SakTabell(), payload)
     }
 
     override fun toString(): String {

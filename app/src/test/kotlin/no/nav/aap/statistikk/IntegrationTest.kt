@@ -9,24 +9,18 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.testutils.BigQuery
-import no.nav.aap.statistikk.testutils.Fakes
-import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
-import no.nav.aap.statistikk.testutils.behandlingHendelse
-import no.nav.aap.statistikk.testutils.testKlientNoInjection
-import no.nav.aap.statistikk.testutils.ventPåSvar
+import no.nav.aap.statistikk.sak.SakTabell
+import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URI
-import java.util.UUID
+import java.util.*
 
 @Fakes
 class IntegrationTest {
     @Test
     fun `test flyt`(
-        // TODO, verifiser
         @Postgres dbConfig: DbConfig,
         @BigQuery config: BigQueryConfig,
         @Fakes azureConfig: AzureConfig,
@@ -71,7 +65,10 @@ class IntegrationTest {
             assertThat(vilkårsVurderingRad.vilkår.size).isEqualTo(avsluttetBehandling.vilkårsResultat.vilkår.size)
             assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
             assertThat(vilkårsVurderingRad.saksnummer).isEqualTo(saksnummer)
+
+            val sakRespons = ventPåSvar({bigQueryClient.read(SakTabell())}, { t -> t.isNotEmpty()})
+
+            assertThat(sakRespons).hasSize(1)
         }
     }
-
 }

@@ -7,7 +7,6 @@ import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDate
-import java.util.*
 
 data class BQTilkjentYtelse(
     val saksnummer: String,
