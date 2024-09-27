@@ -14,7 +14,8 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 
 class LagreAvsluttetBehandlingJobbKonstruktør(
-    private val bQRepository: IBQRepository
+    private val bQRepository: IBQRepository,
+    private val avsluttetBehandlingCounter: io.micrometer.core.instrument.Counter
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val avsluttetBehandlingService = AvsluttetBehandlingService(
@@ -39,7 +40,8 @@ class LagreAvsluttetBehandlingJobbKonstruktør(
         )
         return LagreAvsluttetBehandlingPostgresJobbUtfører(
             avsluttetBehandlingService,
-            AvsluttetBehandlingRepository(connection)
+            AvsluttetBehandlingRepository(connection),
+            avsluttetBehandlingCounter
         )
     }
 
