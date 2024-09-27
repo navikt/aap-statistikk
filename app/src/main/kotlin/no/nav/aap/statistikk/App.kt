@@ -22,7 +22,10 @@ import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
-import no.nav.aap.statistikk.bigquery.*
+import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
+import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
@@ -60,15 +63,29 @@ fun Application.startUp(
     dbConfig: DbConfig, azureConfig: AzureConfig, bigQueryClient: BigQueryClient
 ) {
     log.info("Starter.")
+
+    val prometheusMeterRegistry = PrometheusMeterRegistry(
+        PrometheusConfig.DEFAULT
+    )
+
     val flyway = Flyway(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
     val bqRepository = BQRepository(bigQueryClient)
 
+    val avsluttetBehandlingCounter = prometheusMeterRegistry.avsluttetBehandlingLagret()
+
     val lagreAvsluttetBehandlingJobbKonstruktør = LagreAvsluttetBehandlingDTOJobb(
-        jobb = LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)
+        jobb = LagreAvsluttetBehandlingJobbKonstruktør(
+            bqRepository,
+            avsluttetBehandlingCounter
+        ),
+        avsluttetBehandlingDtoLagretCounter = prometheusMeterRegistry.avsluttetBehandlingDtoLagret()
     )
-    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(bqRepository)
+    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+        bqRepository,
+        prometheusMeterRegistry.hendelseLagret()
+    )
     val motor = Motor(
         dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {
             override fun hentInformasjon(
@@ -78,7 +95,10 @@ fun Application.startUp(
             }
         }, jobber = listOf(
             lagreStoppetHendelseJobb,
-            LagreAvsluttetBehandlingJobbKonstruktør(bqRepository),
+            LagreAvsluttetBehandlingJobbKonstruktør(
+                bqRepository,
+                avsluttetBehandlingCounter
+            ),
             lagreAvsluttetBehandlingJobbKonstruktør
         )
     )
@@ -101,7 +121,7 @@ fun Application.startUp(
         motor,
         MotorJobbAppender(dataSource),
         lagreAvsluttetBehandlingJobbKonstruktør,
-        azureConfig, motorApiCallback, lagreStoppetHendelseJobb
+        azureConfig, motorApiCallback, lagreStoppetHendelseJobb, prometheusMeterRegistry
     )
 }
 
@@ -112,16 +132,15 @@ fun Application.module(
     lagreAvsluttetBehandlingJobb: LagreAvsluttetBehandlingDTOJobb,
     azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
-    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb
+    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    prometheusMeterRegistry: PrometheusMeterRegistry
 ) {
     motor.start()
 
-    val prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-
-    monitoring(prometheus)
+    monitoring(prometheusMeterRegistry)
     statusPages()
 
-    commonKtorModule(prometheus, azureConfig, "AAP - Statistikk")
+    commonKtorModule(prometheusMeterRegistry, azureConfig, "AAP - Statistikk")
 
     routing {
         authenticate(AZURE) {

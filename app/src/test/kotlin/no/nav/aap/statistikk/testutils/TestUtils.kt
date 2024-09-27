@@ -6,6 +6,8 @@ import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -111,7 +113,8 @@ fun <E> testKlient(
             {
 
             },
-            lagreStoppetHendelseJobb
+            lagreStoppetHendelseJobb,
+            PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         )
     }.start()
 

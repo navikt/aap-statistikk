@@ -1,9 +1,11 @@
 package no.nav.aap.statistikk.jobber
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -72,14 +74,24 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
 
         assertThat(id).isEqualTo(0L)
 
+        val meterRegistry = SimpleMeterRegistry()
+
+        val avsluttetBehandlingLagretCounter = meterRegistry.avsluttetBehandlingLagret()
+
         val jobbutfører = LagreAvsluttetBehandlingPostgresJobbUtfører(
             avsluttetBehandlingService,
-            avsluttetBehandlingRepository
+            avsluttetBehandlingRepository,
+            avsluttetBehandlingLagretCounter
         )
 
         // ACT
         jobbutfører.utfør(
-            JobbInput(LagreAvsluttetBehandlingJobbKonstruktør(bQRepository)).medParameter(
+            JobbInput(
+                LagreAvsluttetBehandlingJobbKonstruktør(
+                    bQRepository,
+                    avsluttetBehandlingLagretCounter
+                )
+            ).medParameter(
                 "id",
                 "0"
             )
@@ -92,5 +104,7 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
             { it.behandlingsReferanse },
             { it.value.er6GBegrenset() }
         ).containsExactly(randomUUID, false)
+
+        assertThat(avsluttetBehandlingLagretCounter.count()).isEqualTo(1.0)
     }
 }

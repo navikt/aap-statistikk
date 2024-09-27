@@ -1,18 +1,20 @@
 package no.nav.aap.statistikk.jobber
 
+import io.micrometer.core.instrument.Counter
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 
-class LagreStoppetHendelseJobb(private val bqRepository: IBQRepository) : Jobb {
+class LagreStoppetHendelseJobb(
+    private val bqRepository: IBQRepository,
+    private val stoppetHendelseLagretCounter: Counter
+) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val hendelsesService = HendelsesService(
             hendelsesRepository = HendelsesRepository(connection),
@@ -21,7 +23,10 @@ class LagreStoppetHendelseJobb(private val bqRepository: IBQRepository) : Jobb {
             behandlingRepository = BehandlingRepository(connection),
             bigQueryRepository = bqRepository
         )
-        return LagreStoppetHendelseJobbUtfører(hendelsesService)
+        return LagreStoppetHendelseJobbUtfører(
+            hendelsesService,
+            stoppetHendelseLagretCounter
+        )
     }
 
     override fun type(): String {

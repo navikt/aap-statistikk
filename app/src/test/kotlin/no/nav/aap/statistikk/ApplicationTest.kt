@@ -2,6 +2,7 @@ package no.nav.aap.statistikk
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
@@ -87,17 +88,29 @@ class ApplicationTest {
 }"""
 
         val bqRepository = FakeBQRepository()
+        val meterRegistry = SimpleMeterRegistry()
+
+        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
+        val avsluttetBehandlingDtoLagretCounter = meterRegistry.avsluttetBehandlingDtoLagret()
+        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
+
         val response = testKlient(
             noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            LagreAvsluttetBehandlingDTOJobb(
+                LagreAvsluttetBehandlingJobbKonstruktør(
+                    bqRepository,
+                    avsluttetBehandlingCounter
+                ),
+                avsluttetBehandlingDtoLagretCounter
+            ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository),
+            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter),
         ) { url, client ->
 
             val respons = client.post<AvsluttetBehandlingDTO, LinkedHashMap<String, String>>(
-                URI.create("$url/avsluttetBehandling"), PostRequest<AvsluttetBehandlingDTO>(
+                URI.create("$url/avsluttetBehandling"), PostRequest(
                     body = DefaultJsonMapper.fromJson<AvsluttetBehandlingDTO>(jsonBody)
                 )
             )
@@ -116,14 +129,21 @@ class ApplicationTest {
     ) {
         val jobbAppender = MockJobbAppender()
         val bqRepository = FakeBQRepository()
+        val meterRegistry = SimpleMeterRegistry()
 
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            LagreAvsluttetBehandlingDTOJobb(
+                LagreAvsluttetBehandlingJobbKonstruktør(
+                    bqRepository,
+                    meterRegistry.avsluttetBehandlingLagret()
+                ),
+                meterRegistry.avsluttetBehandlingDtoLagret()
+            ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository),
+            LagreStoppetHendelseJobb(bqRepository, meterRegistry.hendelseLagret()),
         ) { url, client ->
             @Language("JSON")
             val body =
@@ -230,14 +250,27 @@ class ApplicationTest {
 }"""
 
         val jobbAppender = MockJobbAppender()
+        val meterRegistry = SimpleMeterRegistry()
+        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
+        val avsluttetBehandlingDtoLagretCounter = meterRegistry.avsluttetBehandlingDtoLagret()
+        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
 
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(FakeBQRepository())),
+            LagreAvsluttetBehandlingDTOJobb(
+                LagreAvsluttetBehandlingJobbKonstruktør(
+                    FakeBQRepository(),
+                    avsluttetBehandlingCounter
+                ),
+                avsluttetBehandlingDtoLagretCounter
+            ),
             azureConfig,
-            LagreStoppetHendelseJobb(FakeBQRepository()),
+            LagreStoppetHendelseJobb(
+                FakeBQRepository(),
+                stoppetHendelseLagretCounter
+            )
         ) { url, client ->
             client.post<AvsluttetBehandlingDTO, String>(
                 URI.create("$url/avsluttetBehandling"),
@@ -279,14 +312,25 @@ class ApplicationTest {
 
         val jobbAppender = MockJobbAppender()
         val bqRepository = FakeBQRepository()
+        val meterRegistry = SimpleMeterRegistry()
+
+        val avsluttetBehandlingDtoLagretCounter = meterRegistry.avsluttetBehandlingDtoLagret()
+        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
+        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
 
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            LagreAvsluttetBehandlingDTOJobb(
+                LagreAvsluttetBehandlingJobbKonstruktør(
+                    bqRepository,
+                    avsluttetBehandlingCounter
+                ),
+                avsluttetBehandlingDtoLagretCounter
+            ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository),
+            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter),
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(

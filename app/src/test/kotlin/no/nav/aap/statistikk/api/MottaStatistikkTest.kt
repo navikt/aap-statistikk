@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.api
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
@@ -8,22 +9,16 @@ import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.avsluttetBehandlingDtoLagret
+import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
+import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
-import no.nav.aap.statistikk.testutils.FakeBQRepository
-import no.nav.aap.statistikk.testutils.Fakes
-import no.nav.aap.statistikk.testutils.MockJobbAppender
-import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.motorMock
-import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
-import no.nav.aap.statistikk.testutils.testKlient
-import no.nav.aap.statistikk.testutils.ventPåSvar
+import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URI
@@ -45,14 +40,24 @@ class MottaStatistikkTest {
         val motor = motorMock()
 
         val bqRepository = FakeBQRepository()
+        val meterRegistry = SimpleMeterRegistry()
+
+        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
+        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
 
         testKlient(
             noOpTransactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            LagreAvsluttetBehandlingDTOJobb(
+                LagreAvsluttetBehandlingJobbKonstruktør(
+                    bqRepository,
+                    avsluttetBehandlingCounter
+                ),
+                meterRegistry.avsluttetBehandlingDtoLagret()
+            ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository)
+            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(
@@ -164,11 +169,22 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
         val bqRepository = FakeBQRepository()
+        val meterRegistry = SimpleMeterRegistry()
+
+        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
+        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
+        val avsluttetBehandlingDtoLagretCounter = meterRegistry.avsluttetBehandlingDtoLagret()
+
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 2,
             logInfoProvider = NoExtraLogInfoProvider,
-            jobber = listOf(LagreStoppetHendelseJobb(bqRepository))
+            jobber = listOf(
+                LagreStoppetHendelseJobb(
+                    bqRepository,
+                    stoppetHendelseLagretCounter
+                )
+            )
         )
 
         val jobbAppender = MotorJobbAppender(dataSource)
@@ -177,9 +193,15 @@ class MottaStatistikkTest {
             transactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(LagreAvsluttetBehandlingJobbKonstruktør(bqRepository)),
+            LagreAvsluttetBehandlingDTOJobb(
+                LagreAvsluttetBehandlingJobbKonstruktør(
+                    bqRepository,
+                    avsluttetBehandlingCounter
+                ),
+                avsluttetBehandlingDtoLagretCounter
+            ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository)
+            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter)
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(

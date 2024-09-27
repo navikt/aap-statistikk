@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.jobber
 
+import io.micrometer.core.instrument.Counter
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbUtfører
@@ -7,13 +8,15 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.InniJobbJobbAppender
 
 class LagreAvsluttetBehandlingDTOJobb(
-    val jobb: LagreAvsluttetBehandlingJobbKonstruktør
+    private val jobb: LagreAvsluttetBehandlingJobbKonstruktør,
+    private val avsluttetBehandlingDtoLagretCounter: Counter
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         return LagreAvsluttetHendelseDTOJobbUtfører(
             AvsluttetBehandlingRepository(connection),
             InniJobbJobbAppender(connection),
             jobb,
+            avsluttetBehandlingDtoLagretCounter,
         )
     }
 
