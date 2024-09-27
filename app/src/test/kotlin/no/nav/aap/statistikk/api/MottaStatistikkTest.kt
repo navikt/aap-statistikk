@@ -193,7 +193,7 @@ class MottaStatistikkTest {
                         it
                     ).hentHendelser()
                 },
-                    { it.isNotEmpty() })
+                    { it?.isNotEmpty() ?: false })
             }
 
             dataSource.transaction {

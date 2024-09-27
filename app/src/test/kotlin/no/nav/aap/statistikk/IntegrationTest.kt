@@ -1,10 +1,12 @@
 package no.nav.aap.statistikk
 
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
@@ -16,12 +18,14 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.*
+import javax.sql.DataSource
 
 @Fakes
 class IntegrationTest {
     @Test
     fun `test flyt`(
         @Postgres dbConfig: DbConfig,
+        @Postgres dataSource: DataSource,
         @BigQuery config: BigQueryConfig,
         @Fakes azureConfig: AzureConfig,
     ) {
@@ -48,6 +52,10 @@ class IntegrationTest {
                 PostRequest(hendelse)
             )
 
+            ventPåSvar(
+                { dataSource.transaction { BehandlingRepository(it).hent(behandlingReferanse) } },
+                { it != null }
+            )
 
             client.post<AvsluttetBehandlingDTO, Any>(
                 URI.create("$url/avsluttetBehandling"),
@@ -57,16 +65,16 @@ class IntegrationTest {
             val bigQueryRespons =
                 ventPåSvar(
                     { bigQueryClient.read(VilkårsVurderingTabell()) },
-                    { t -> t.isNotEmpty() })
+                    { t -> t !== null && t.isNotEmpty() })
 
             assertThat(bigQueryRespons).hasSize(1)
             val vilkårsVurderingRad = bigQueryRespons!!.first()
 
-            assertThat(vilkårsVurderingRad.vilkår.size).isEqualTo(avsluttetBehandling.vilkårsResultat.vilkår.size)
             assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
             assertThat(vilkårsVurderingRad.saksnummer).isEqualTo(saksnummer)
 
-            val sakRespons = ventPåSvar({bigQueryClient.read(SakTabell())}, { t -> t.isNotEmpty()})
+            val sakRespons = ventPåSvar({ bigQueryClient.read(SakTabell()) },
+                { t -> t !== null && t.isNotEmpty() })
 
             assertThat(sakRespons).hasSize(1)
         }

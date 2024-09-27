@@ -7,10 +7,7 @@ import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.testutils.BigQuery
-import no.nav.aap.statistikk.vilkårsresultat.Vilkår
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -86,22 +83,13 @@ class BigQueryClientTest {
         val vilkårsVurderingTabell = VilkårsVurderingTabell()
 
         val behandlingsReferanse = UUID.randomUUID()
-        val vilkårsResult = Vilkårsresultat(
-            "123", behandlingsReferanse, "behandling", listOf(
-                Vilkår(
-                    Vilkårtype.MEDLEMSKAP,
-                    listOf(
-                        VilkårsPeriode(
-                            LocalDate.now(),
-                            LocalDate.now(),
-                            "utfall",
-                            false,
-                            null,
-                            null
-                        )
-                    )
-                )
-            )
+        val vilkårsResult = BQVilkårsResultatPeriode(
+            "123", behandlingsReferanse, "behandling",
+            fraDato = LocalDate.now().minusWeeks(2),
+            tilDato = LocalDate.now().minusDays(1),
+            utfall = "utfall",
+            manuellVurdering = true,
+            vilkårtype = Vilkårtype.GRUNNLAGET
         )
 
         client.insert(vilkårsVurderingTabell, vilkårsResult)
@@ -111,7 +99,6 @@ class BigQueryClientTest {
         assertThat(uthentetResultat.first().saksnummer).isEqualTo("123")
         assertThat(uthentetResultat.first().behandlingsReferanse).isEqualTo(behandlingsReferanse)
         assertThat(uthentetResultat.first().behandlingsType).isEqualTo("behandling")
-        assertThat(uthentetResultat.first().vilkår).hasSize(1)
-        assertThat(uthentetResultat.first().vilkår.first().vilkårType).isEqualTo(Vilkårtype.MEDLEMSKAP)
+        assertThat(uthentetResultat.first().vilkårtype).isEqualTo(Vilkårtype.GRUNNLAGET)
     }
 }

@@ -7,7 +7,18 @@ import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDate
 import java.util.*
 
-class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
+data class BQVilkårsResultatPeriode(
+    val saksnummer: String,
+    val behandlingsReferanse: UUID,
+    val behandlingsType: String,
+    val vilkårtype: Vilkårtype,
+    val fraDato: LocalDate,
+    val tilDato: LocalDate,
+    val utfall: String,
+    val manuellVurdering: Boolean,
+)
+
+class VilkårsVurderingTabell : BQTable<BQVilkårsResultatPeriode> {
     companion object {
         const val TABLE_NAME = "vilkarsResultat"
     }
@@ -16,9 +27,7 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
         SAKSNUMMER("saksnummer"),
         BEHANDLINGSREFERANSE("behandlingsreferanse"),
         BEHANDLINGSTYPE("behandlingsType"),
-        VILKÅR("vilkar"),
         VILKÅR_TYPE("type"),
-        PERIODER("perioder"),
         FRA_DATO("fraDato"),
         TIL_DATO("tilDato"),
         UTFALL("utfall"),
@@ -34,78 +43,63 @@ class VilkårsVurderingTabell : BQTable<Vilkårsresultat> {
                 Field.of(FeltNavn.BEHANDLINGSREFERANSE.feltNavn, StandardSQLTypeName.STRING)
             val behandlingsType =
                 Field.of(FeltNavn.BEHANDLINGSTYPE.feltNavn, StandardSQLTypeName.STRING)
-            val vilkårField =
-                Field.newBuilder(
-                    FeltNavn.VILKÅR.feltNavn,
-                    StandardSQLTypeName.STRUCT,
-                    Field.of(FeltNavn.VILKÅR_TYPE.feltNavn, StandardSQLTypeName.STRING),
-                    Field.newBuilder(
-                        FeltNavn.PERIODER.feltNavn,
-                        StandardSQLTypeName.STRUCT,
-                        Field.of(FeltNavn.FRA_DATO.feltNavn, StandardSQLTypeName.DATE),
-                        Field.of(FeltNavn.TIL_DATO.feltNavn, StandardSQLTypeName.DATE),
-                        Field.of(FeltNavn.UTFALL.feltNavn, StandardSQLTypeName.STRING),
-                        Field.of(FeltNavn.MANUELL_VURDERING.feltNavn, StandardSQLTypeName.BOOL),
-                    ).setMode(Field.Mode.REPEATED).build()
-                )
-                    .setMode(Field.Mode.REPEATED)
-                    .build()
-            return Schema.of(saksnummerField, behandlingsReferanse, behandlingsType, vilkårField)
+            val vilkårType = Field.of(FeltNavn.VILKÅR_TYPE.feltNavn, StandardSQLTypeName.STRING)
+            val fraDato = Field.of(FeltNavn.FRA_DATO.feltNavn, StandardSQLTypeName.DATE)
+            val tilDato = Field.of(FeltNavn.TIL_DATO.feltNavn, StandardSQLTypeName.DATE)
+            val utfall = Field.of(FeltNavn.UTFALL.feltNavn, StandardSQLTypeName.STRING)
+            val manuellVurdering =
+                Field.of(FeltNavn.MANUELL_VURDERING.feltNavn, StandardSQLTypeName.BOOL)
+            return Schema.of(
+                saksnummerField,
+                behandlingsReferanse,
+                behandlingsType,
+                vilkårType,
+                fraDato,
+                tilDato,
+                utfall,
+                manuellVurdering
+            )
         }
 
 
-    override fun parseRow(fieldValueList: FieldValueList): Vilkårsresultat {
+    override fun parseRow(fieldValueList: FieldValueList): BQVilkårsResultatPeriode {
         val saksnummer = hentVerdi(fieldValueList, FeltNavn.SAKSNUMMER)
         val behandlingsType = hentVerdi(fieldValueList, FeltNavn.BEHANDLINGSTYPE)
         val behandlingsReferanse = hentVerdi(fieldValueList, FeltNavn.BEHANDLINGSREFERANSE)
+        val vilkårType = hentVerdi(fieldValueList, FeltNavn.VILKÅR_TYPE)
+        val fraDato = hentVerdi(fieldValueList, FeltNavn.FRA_DATO)
+        val tilDato = hentVerdi(fieldValueList, FeltNavn.TIL_DATO)
+        val utfall = hentVerdi(fieldValueList, FeltNavn.UTFALL)
+        val manuellVurdering = fieldValueList.get(FeltNavn.MANUELL_VURDERING.feltNavn).booleanValue
 
-        // TODO https://github.com/googleapis/java-bigquery/issues/3389
-        val vilkår =
-            fieldValueList.get(FeltNavn.VILKÅR.feltNavn).repeatedValue.map {
-                Vilkår(
-                    vilkårType = Vilkårtype.valueOf(it.recordValue[0].stringValue),
-                    perioder = it.recordValue[1].repeatedValue.map(::vilkårsPeriodeFraFieldValue)
-                )
-            }
-
-        return Vilkårsresultat(
+        return BQVilkårsResultatPeriode(
             saksnummer = saksnummer,
             behandlingsType = behandlingsType,
             behandlingsReferanse = UUID.fromString(behandlingsReferanse),
-            vilkår = vilkår
+            vilkårtype = Vilkårtype.valueOf(vilkårType),
+            fraDato = LocalDate.parse(fraDato),
+            tilDato = LocalDate.parse(tilDato),
+            utfall = utfall,
+            manuellVurdering = manuellVurdering
         )
     }
 
     private fun hentVerdi(fieldValueList: FieldValueList, felt: FeltNavn): String =
         fieldValueList.get(felt.feltNavn).stringValue
 
-    private fun vilkårsPeriodeFraFieldValue(periodeRecord: FieldValue) = VilkårsPeriode(
-        fraDato = LocalDate.parse(periodeRecord.recordValue[0].stringValue),
-        tilDato = LocalDate.parse(periodeRecord.recordValue[1].stringValue),
-        utfall = periodeRecord.recordValue[2].stringValue,
-        manuellVurdering = periodeRecord.recordValue[3].booleanValue,
-    )
-
-    override fun toRow(value: Vilkårsresultat): RowToInsert {
+    override fun toRow(value: BQVilkårsResultatPeriode): RowToInsert {
         // TODO: bruke ID?
         return RowToInsert.of(
             mapOf(
                 FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer,
                 FeltNavn.BEHANDLINGSTYPE.feltNavn to value.behandlingsType,
                 FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsReferanse.toString(),
-                FeltNavn.VILKÅR.feltNavn to value.vilkår.map {
-                    mapOf(
-                        FeltNavn.VILKÅR_TYPE.feltNavn to it.vilkårType.toString(),
-                        FeltNavn.PERIODER.feltNavn to it.perioder.map { periode ->
-                            mapOf(
-                                FeltNavn.FRA_DATO.feltNavn to periode.fraDato.toString(),
-                                FeltNavn.TIL_DATO.feltNavn to periode.tilDato.toString(),
-                                FeltNavn.UTFALL.feltNavn to periode.utfall,
-                                FeltNavn.MANUELL_VURDERING.feltNavn to periode.manuellVurdering
-                            )
-                        }
-                    )
-                })
+                FeltNavn.VILKÅR_TYPE.feltNavn to value.vilkårtype.toString(),
+                FeltNavn.FRA_DATO.feltNavn to value.fraDato.toString(),
+                FeltNavn.TIL_DATO.feltNavn to value.tilDato.toString(),
+                FeltNavn.UTFALL.feltNavn to value.utfall,
+                FeltNavn.MANUELL_VURDERING.feltNavn to value.manuellVurdering
+            )
         )
     }
 }
