@@ -102,8 +102,8 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
         assertThat(bQRepository.vilkårsresultater).hasSize(1)
         assertThat(fakeBeregningsgrunnlagRepository.grunnlag.first()).extracting(
             { it.behandlingsReferanse },
-            { it.value.er6GBegrenset() }
-        ).containsExactly(randomUUID, false)
+            { it.value.type().toString() }
+        ).containsExactly(randomUUID, "yrkesskade")
 
         assertThat(avsluttetBehandlingLagretCounter.count()).isEqualTo(1.0)
     }

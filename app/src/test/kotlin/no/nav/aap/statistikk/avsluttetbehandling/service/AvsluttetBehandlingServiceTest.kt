@@ -80,7 +80,6 @@ class AvsluttetBehandlingServiceTest {
             ),
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
                 grunnlaget = 25000.0,
-                er6GBegrenset = false,
                 beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 20000.0,
                     er6GBegrenset = false,
@@ -183,7 +182,6 @@ class AvsluttetBehandlingServiceTest {
             ),
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
                 grunnlaget = 25000.0,
-                er6GBegrenset = false,
                 beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 20000.0,
                     er6GBegrenset = false,

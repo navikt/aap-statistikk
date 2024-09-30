@@ -54,9 +54,6 @@ fun Grunnlag11_19DTO.tilDomene(
 fun tilDomene(grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO): IBeregningsGrunnlag.GrunnlagYrkesskade {
     return IBeregningsGrunnlag.GrunnlagYrkesskade(
         grunnlaget = grunnlagYrkesskadeDTO.grunnlaget.toDouble(),
-        er6GBegrenset =
-        grunnlagYrkesskadeDTO.beregningsgrunnlag.grunnlagYrkesskade?.beregningsgrunnlag?.grunnlag11_19dto?.er6GBegrenset
-            ?: false,
         beregningsgrunnlag = tilDomene(grunnlagYrkesskadeDTO.beregningsgrunnlag), // Assuming recursive structure handling
         terskelverdiForYrkesskade = grunnlagYrkesskadeDTO.terskelverdiForYrkesskade,
         andelSomSkyldesYrkesskade = grunnlagYrkesskadeDTO.andelSomSkyldesYrkesskade,
@@ -79,7 +76,6 @@ fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.Grunnla
         uføregrad = grunnlagUføreDTO.uføregrad,
         uføreInntektIKroner = grunnlagUføreDTO.uføreInntektIKroner,
         uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføreDTO.uføreYtterligereNedsattArbeidsevneÅr,
-        er6GBegrenset = grunnlagUføreDTO.grunnlag.er6GBegrenset, // ?,
         uføreInntekterFraForegåendeÅr = grunnlagUføreDTO.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() }
     )
 }
@@ -122,7 +118,6 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             terskelverdiForYrkesskade = grunnlagYrkesskade.terskelverdiForYrkesskade,
             yrkesskadeinntektIG = grunnlagYrkesskade.yrkesskadeinntektIG,
             yrkesskadeTidspunkt = grunnlagYrkesskade.yrkesskadeTidspunkt,
-            er6GBegrenset = beregningsGrunnlag.er6GBegrenset(),
         )
     }
     if (grunnlagUføre != null) {
@@ -133,7 +128,6 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
             uføregrad = grunnlagUføre.uføregrad,
             grunnlag = grunnlagUføre.grunnlaget.toDouble(),
-            er6GBegrenset = grunnlagUføre.grunnlag.er6GBegrenset,
             type = grunnlagUføre.type
         )
     }
