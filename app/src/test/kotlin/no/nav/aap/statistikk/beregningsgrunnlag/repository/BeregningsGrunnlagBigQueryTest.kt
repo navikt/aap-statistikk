@@ -66,7 +66,6 @@ class BeregningsGrunnlagBigQueryTest {
             grunnlag11_19 = grunnlag_11_19,
             uføregrad = 80,
             uføreInntekterFraForegåendeÅr = mapOf(2020 to 123.1, 2021 to 145.5),
-            uføreInntektIKroner = BigDecimal(123456789.00),
             uføreYtterligereNedsattArbeidsevneÅr = 1963,
         )
 
@@ -106,7 +105,6 @@ class BeregningsGrunnlagBigQueryTest {
             grunnlag11_19 = grunnlag_11_19,
             uføregrad = 80,
             uføreInntekterFraForegåendeÅr = mapOf(2020 to 123.2, 2021 to 145.5),
-            uføreInntektIKroner = BigDecimal(123456789.00),
             uføreYtterligereNedsattArbeidsevneÅr = 1963,
         )
 

@@ -39,7 +39,7 @@ data class GrunnlagYrkesskadeDTO(
     val yrkesskadeTidspunkt: Int,
     val grunnlagForBeregningAvYrkesskadeandel: BigDecimal,
     val yrkesskadeinntektIG: BigDecimal,
-    val grunnlagEtterYrkesskadeFordel: BigDecimal,
+    val grunnlagEtterYrkesskadeFordel: BigDecimal
 )
 
 /**
@@ -53,7 +53,6 @@ data class GrunnlagUføreDTO(
     val grunnlagYtterligereNedsatt: Grunnlag11_19DTO,
     val uføregrad: Int,
     val uføreInntekterFraForegåendeÅr: Map<String, Double>,
-    val uføreInntektIKroner: BigDecimal,
     val uføreYtterligereNedsattArbeidsevneÅr: Int,
 )
 

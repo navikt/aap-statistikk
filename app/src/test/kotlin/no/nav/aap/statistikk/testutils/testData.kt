@@ -80,7 +80,7 @@ fun avsluttetBehandlingDTO(referanse: UUID, saksnummer: String): AvsluttetBehand
                 yrkesskadeTidspunkt = 2018,
                 grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
                 yrkesskadeinntektIG = BigDecimal(6),
-                grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+                grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
             ),
         )
     )

@@ -14,11 +14,13 @@ typealias Beregningsgrunnlag = MedBehandlingsreferanse<IBeregningsGrunnlag>
 data class BeregningsGrunnlagBQ(
     val behandlingsreferanse: UUID,
     val type: GrunnlagType,
-    val standard_grunnlag: Double,
-    val standard_er6GBegrenset: Boolean,
-    val standard_erGjennomsnitt: Boolean,
-    val ufore_grunnlag: Double,
-    val ufore_er6GBegrenset: Boolean,
+    val standardGrunnlag: Double,
+    val standardEr6GBegrenset: Boolean,
+    val standardErGjennomsnitt: Boolean,
+    val uføreGrunnlag: Double,
+    val uføreUføregrad: Int,
+    val uføreUføreInntekterFraForegaaendeAar: Map<Int, Double>,
+    val uføreInntektIKroner: Double,
 )
 
 class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
@@ -180,7 +182,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
                 }
                 entry to entry2
             }.associate { it.first.toInt() to it.second }
-        val uføreInntektIKroner = recordValue.get("uforeInntektIKroner").doubleValue
         val uføreYtterligereNedsattArbeidsevneÅr =
             recordValue.get("uforeYtterligereNedsattArbeidsevneAar").longValue
 
@@ -230,7 +231,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
             grunnlag11_19 = grunnlag1119,
             uføregrad = uføregrad.toInt(),
             uføreInntekterFraForegåendeÅr = uføreInntekterFraForegåendeÅr,
-            uføreInntektIKroner = BigDecimal(uføreInntektIKroner),
             uføreYtterligereNedsattArbeidsevneÅr = uføreYtterligereNedsattArbeidsevneÅr.toInt()
         )
     }
@@ -281,7 +281,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
                                 )
                             },
                             "uforeYtterligereNedsattArbeidsevneAar" to value.uføreYtterligereNedsattArbeidsevneÅr,
-                            "uforeInntektIKroner" to value.uføreInntektIKroner
                         )
                     )
                 )

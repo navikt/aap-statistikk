@@ -121,7 +121,6 @@ class BeregningsgrunnlagRepositoryTest {
                 ),
                 uføregrad = 50,
                 type = UføreType.YTTERLIGERE_NEDSATT,
-                uføreInntektIKroner = BigDecimal(28000),
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
                     2019 to 27500.0,
@@ -184,7 +183,6 @@ class BeregningsgrunnlagRepositoryTest {
                 ),
                 uføregrad = 50,
                 type = UføreType.YTTERLIGERE_NEDSATT,
-                uføreInntektIKroner = BigDecimal(28000),
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
                     2019 to 27500.0,
@@ -241,7 +239,6 @@ class BeregningsgrunnlagRepositoryTest {
                 ),
                 uføregrad = 50,
                 type = UføreType.YTTERLIGERE_NEDSATT,
-                uføreInntektIKroner = BigDecimal(28000),
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
                     2019 to 27500.0,
@@ -272,7 +269,6 @@ class BeregningsgrunnlagRepositoryTest {
                 ),
                 uføregrad = 50,
                 type = UføreType.YTTERLIGERE_NEDSATT,
-                uføreInntektIKroner = BigDecimal(28000),
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
                     2019 to 27500.0,

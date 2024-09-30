@@ -152,9 +152,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         val id = lagre11_19(connection, baseGrunnlagId, beregningsGrunnlag.grunnlag11_19)
         val insertQuery =
             """INSERT INTO GRUNNLAG_UFORE(grunnlag_id, grunnlag, grunnlag_11_19_id, type,
-                               uforegrad, ufore_inntekter_fra_foregaende_ar, ufore_inntekt_i_kroner,
+                               uforegrad, ufore_inntekter_fra_foregaende_ar,
                                ufore_ytterligere_nedsatt_arbeidsevne_ar)
-    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)"""
+    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?)"""
 
         return connection.executeReturnKey(insertQuery) {
             var c = 1
@@ -168,7 +168,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     c++,
                     ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr)
                 )
-                setBigDecimal(c++, beregningsGrunnlag.uføreInntektIKroner)
                 setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
             }
         }
@@ -205,7 +204,6 @@ select grunnlag.id                                    as gr_id,
        gu.grunnlag_11_19_id                           as gu_grunnlag_11_19_id,
        gu.uforegrad                                   as gu_uforegrad,
        gu.ufore_inntekter_fra_foregaende_ar           as gu_ufore_inntekter_fra_foregaende_ar,
-       gu.ufore_inntekt_i_kroner                      as gu_ufore_inntekt_i_kroner,
        gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    as gu_ufore_ytterligere_nedsatt_arbeidsevne_ar,
        b.referanse                                    as b_referanse
 from grunnlag
@@ -283,7 +281,6 @@ from grunnlag
                     "gu_ufore_inntekter_fra_foregaende_ar"
                 )
             ),
-            uføreInntektIKroner = resultSet.getBigDecimal("gu_ufore_inntekt_i_kroner"),
             uføreYtterligereNedsattArbeidsevneÅr = resultSet.getInt("gu_ufore_ytterligere_nedsatt_arbeidsevne_ar"),
         )
     }
