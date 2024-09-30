@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.bigquery
 
 import com.google.cloud.bigquery.*
+import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 
 
@@ -95,6 +96,7 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
     }
 
     override fun <E> read(table: BQTable<E>): List<E> {
+        @Language("BigQuery")
         val query = "select * from $dataset.${table.tableName}"
 
         val config = QueryJobConfiguration.newBuilder(query)

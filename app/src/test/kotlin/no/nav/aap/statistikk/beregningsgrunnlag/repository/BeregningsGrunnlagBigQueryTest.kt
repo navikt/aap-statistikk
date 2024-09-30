@@ -62,7 +62,6 @@ class BeregningsGrunnlagBigQueryTest {
 
         val grunnlag = IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag = 123.456,
-            er6GBegrenset = false,
             type = UføreType.STANDARD,
             grunnlag11_19 = grunnlag_11_19,
             uføregrad = 80,
@@ -103,7 +102,6 @@ class BeregningsGrunnlagBigQueryTest {
 
         val uføre = IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag = 123.456,
-            er6GBegrenset = false,
             type = UføreType.STANDARD,
             grunnlag11_19 = grunnlag_11_19,
             uføregrad = 80,
@@ -125,7 +123,6 @@ class BeregningsGrunnlagBigQueryTest {
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(1234),
             yrkesskadeinntektIG = BigDecimal(60000),
             grunnlagEtterYrkesskadeFordel = BigDecimal(6123),
-            er6GBegrenset = true
         )
 
 

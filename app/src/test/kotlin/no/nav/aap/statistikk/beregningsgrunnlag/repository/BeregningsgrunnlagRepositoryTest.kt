@@ -59,7 +59,6 @@ class BeregningsgrunnlagRepositoryTest {
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
-            er6GBegrenset = false,
             beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
                 grunnlag = 20000.0,
                 er6GBegrenset = false,
@@ -112,10 +111,8 @@ class BeregningsgrunnlagRepositoryTest {
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
-            er6GBegrenset = false,
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagUføre(
                 grunnlag = 30000.0,
-                er6GBegrenset = false,
                 grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
@@ -179,7 +176,6 @@ class BeregningsgrunnlagRepositoryTest {
         val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre =
             IBeregningsGrunnlag.GrunnlagUføre(
                 grunnlag = 30000.0,
-                er6GBegrenset = false,
                 grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
@@ -235,10 +231,8 @@ class BeregningsgrunnlagRepositoryTest {
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
-            er6GBegrenset = false,
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagUføre(
                 grunnlag = 30000.0,
-                er6GBegrenset = false,
                 grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
@@ -270,7 +264,6 @@ class BeregningsgrunnlagRepositoryTest {
         val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre =
             IBeregningsGrunnlag.GrunnlagUføre(
                 grunnlag = 30000.0,
-                er6GBegrenset = false,
                 grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
                     grunnlag = 25000.0,
                     er6GBegrenset = false,

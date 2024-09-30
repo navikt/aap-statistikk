@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.api_kontrakt.UføreType
+import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.bigquery.BQTable
@@ -10,10 +11,21 @@ import java.util.UUID
 
 typealias Beregningsgrunnlag = MedBehandlingsreferanse<IBeregningsGrunnlag>
 
+data class BeregningsGrunnlagBQ(
+    val behandlingsreferanse: UUID,
+    val type: GrunnlagType,
+    val standard_grunnlag: Double,
+    val standard_er6GBegrenset: Boolean,
+    val standard_erGjennomsnitt: Boolean,
+    val ufore_grunnlag: Double,
+    val ufore_er6GBegrenset: Boolean,
+)
+
 class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
     companion object {
         const val TABLE_NAME = "beregningsgrunnlag"
     }
+
     override val tableName: String = TABLE_NAME
     override val version: Int = 1
     override val schema: Schema
@@ -106,7 +118,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
 
     private fun getGrunnlagYrkesskade(recordValue: FieldValueList): IBeregningsGrunnlag.GrunnlagYrkesskade {
         val grunnlaget = recordValue.get(0).doubleValue
-        val er6GBegrenset = recordValue.get(1).booleanValue
         val beregningsgrunnlag_11_19 =
             if (recordValue.get(2).isNull) null else recordValue.get(0).recordValue
 
@@ -126,7 +137,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
 
         return IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = grunnlaget,
-            er6GBegrenset = er6GBegrenset,
             beregningsgrunnlag = if (beregningsgrunnlag_ufore !== null) {
                 grunnlagUføre(beregningsgrunnlag_ufore)
             } else if (beregningsgrunnlag_11_19 !== null) {
@@ -153,7 +163,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
 
     private fun grunnlagUføre(recordValue: FieldValueList): IBeregningsGrunnlag.GrunnlagUføre {
         val grunnlag = recordValue.get("grunnlag").doubleValue
-        val er6GBegrenset = recordValue.get("er6GBegrenset").booleanValue
         val type = recordValue.get("type").stringValue
         val grunnlag11_19 = recordValue.get(3).recordValue
         val uføregrad = recordValue.get("uforegrad").longValue
@@ -217,7 +226,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
 
         return IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag = grunnlag,
-            er6GBegrenset = er6GBegrenset,
             type = UføreType.valueOf(type),
             grunnlag11_19 = grunnlag1119,
             uføregrad = uføregrad.toInt(),
@@ -253,7 +261,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
                         "behandlingsreferanse" to input.behandlingsReferanse.toString(),
                         "beregningsgrunnlag_ufore" to mapOf(
                             "grunnlag" to value.grunnlag,
-                            "er6GBegrenset" to value.er6GBegrenset,
                             "type" to value.type.name,
                             "beregningsgrunnlag_11_19" to mapOf(
                                 "grunnlag" to value.grunnlag11_19.grunnlag,
@@ -285,7 +292,6 @@ class BeregningsGrunnlagTabell : BQTable<Beregningsgrunnlag> {
                     "behandlingsreferanse" to input.behandlingsReferanse.toString(),
                     "beregningsgrunnlag_yrkesskade" to mapOf(
                         "grunnlaget" to value.grunnlaget,
-                        "er6GBegrenset" to value.er6GBegrenset,
                         "beregningsgrunnlag_ufore" to (if (value.beregningsgrunnlag is IBeregningsGrunnlag.GrunnlagUføre) {
                             toRow(
                                 Beregningsgrunnlag(

@@ -34,7 +34,7 @@ class BeregningsgrunnlagRepository(
         val beregningsGrunnlagVerdi = beregningsGrunnlag.value
 
         val baseGrunnlagId =
-            lagreBaseGrunnlag(dbConnection, beregningsGrunnlagVerdi.type(), behandlingsReferanseId)
+            lagreBaseGrunnlag(dbConnection, beregningsGrunnlagVerdi.type().toString(), behandlingsReferanseId)
 
         return when (beregningsGrunnlagVerdi) {
             is IBeregningsGrunnlag.Grunnlag_11_19 -> {
@@ -108,7 +108,7 @@ class BeregningsgrunnlagRepository(
 
         val insertQuery =
             """
-INSERT INTO GRUNNLAG_YRKESSKADE(grunnlag, er6g_begrenset, beregningsgrunnlag_id, beregningsgrunnlag_type,
+INSERT INTO GRUNNLAG_YRKESSKADE(grunnlag, beregningsgrunnlag_id, beregningsgrunnlag_type,
                                 terskelverdi_for_yrkesskade,
                                 andel_som_skyldes_yrkesskade, andel_yrkesskade,
                                 benyttet_andel_for_yrkesskade,
@@ -117,29 +117,29 @@ INSERT INTO GRUNNLAG_YRKESSKADE(grunnlag, er6g_begrenset, beregningsgrunnlag_id,
                                 yrkesskade_tidspunkt, grunnlag_for_beregning_av_yrkesskadeandel,
                                 yrkesskadeinntekt_ig,
                                 grunnlag_etter_yrkesskade_fordel)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         return connection.executeReturnKey(insertQuery) {
+            var c = 1
             setParams {
-                setDouble(1, beregningsGrunnlag.grunnlaget())
-                setBoolean(2, beregningsGrunnlag.er6GBegrenset())
-                setLong(3, id)
-                setString(4, grunnlagType)
-                setInt(5, beregningsGrunnlag.terskelverdiForYrkesskade)
-                setBigDecimal(6, beregningsGrunnlag.andelSomSkyldesYrkesskade)
-                setInt(7, beregningsGrunnlag.andelYrkesskade)
-                setInt(8, beregningsGrunnlag.benyttetAndelForYrkesskade)
-                setBigDecimal(9, beregningsGrunnlag.andelSomIkkeSkyldesYrkesskade)
+                setDouble(c++, beregningsGrunnlag.grunnlaget())
+                setLong(c++, id)
+                setString(c++, grunnlagType)
+                setInt(c++, beregningsGrunnlag.terskelverdiForYrkesskade)
+                setBigDecimal(c++, beregningsGrunnlag.andelSomSkyldesYrkesskade)
+                setInt(c++, beregningsGrunnlag.andelYrkesskade)
+                setInt(c++, beregningsGrunnlag.benyttetAndelForYrkesskade)
+                setBigDecimal(c++, beregningsGrunnlag.andelSomIkkeSkyldesYrkesskade)
                 setBigDecimal(
-                    10,
+                    c++,
                     beregningsGrunnlag.antattÅrligInntektYrkesskadeTidspunktet
                 )
-                setInt(11, beregningsGrunnlag.yrkesskadeTidspunkt)
+                setInt(c++, beregningsGrunnlag.yrkesskadeTidspunkt)
                 setBigDecimal(
-                    12,
+                    c++,
                     beregningsGrunnlag.grunnlagForBeregningAvYrkesskadeandel
                 )
-                setBigDecimal(13, beregningsGrunnlag.yrkesskadeinntektIG)
-                setBigDecimal(14, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
+                setBigDecimal(c++, beregningsGrunnlag.yrkesskadeinntektIG)
+                setBigDecimal(c++, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
             }
         }
     }
@@ -151,31 +151,31 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     ): Long {
         val id = lagre11_19(connection, baseGrunnlagId, beregningsGrunnlag.grunnlag11_19)
         val insertQuery =
-            """INSERT INTO GRUNNLAG_UFORE(grunnlag_id, grunnlag, er6g_begrenset, grunnlag_11_19_id, type,
+            """INSERT INTO GRUNNLAG_UFORE(grunnlag_id, grunnlag, grunnlag_11_19_id, type,
                                uforegrad, ufore_inntekter_fra_foregaende_ar, ufore_inntekt_i_kroner,
                                ufore_ytterligere_nedsatt_arbeidsevne_ar)
-    VALUES (?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?)"""
+    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)"""
 
         return connection.executeReturnKey(insertQuery) {
+            var c = 1
             setParams {
-                setLong(1, baseGrunnlagId)
-                setDouble(2, beregningsGrunnlag.grunnlag)
-                setBoolean(3, beregningsGrunnlag.er6GBegrenset)
-                setLong(4, id)
-                setString(5, beregningsGrunnlag.type.name)
-                setInt(6, beregningsGrunnlag.uføregrad)
+                setLong(c++, baseGrunnlagId)
+                setDouble(c++, beregningsGrunnlag.grunnlag)
+                setLong(c++, id)
+                setString(c++, beregningsGrunnlag.type.name)
+                setInt(c++, beregningsGrunnlag.uføregrad)
                 setString(
-                    7,
+                    c++,
                     ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr)
                 )
-                setBigDecimal(8, beregningsGrunnlag.uføreInntektIKroner)
-                setInt(9, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
+                setBigDecimal(c++, beregningsGrunnlag.uføreInntektIKroner)
+                setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
             }
         }
     }
 
     override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
-        var sql = """
+        val sql = """
 select grunnlag.id                                    as gr_id,
        grunnlag.type                                  as gr_type,
        g.id                                           as g_id,
@@ -186,7 +186,6 @@ select grunnlag.id                                    as gr_id,
        g.inntekter                                    as g_inntekter,
        gy.id                                          as gy_id,
        gy.grunnlag                                    as gy_grunnlag,
-       gy.er6g_begrenset                              as gy_er6g_begrenset,
        gy.beregningsgrunnlag_id                       as gy_beregningsgrunnlag_id,
        gy.beregningsgrunnlag_type                     as gy_beregningsgrunnlag_type,
        gy.terskelverdi_for_yrkesskade                 as gy_terskelverdi_for_yrkesskade,
@@ -202,7 +201,6 @@ select grunnlag.id                                    as gr_id,
        gu.id                                          as gu_id,
        gu.grunnlag_id                                 as gu_grunnlag_id,
        gu.grunnlag                                    as gu_grunnlag,
-       gu.er6g_begrenset                              as gu_er6g_begrenset,
        gu.type                                        as gu_type,
        gu.grunnlag_11_19_id                           as gu_grunnlag_11_19_id,
        gu.uforegrad                                   as gu_uforegrad,
@@ -252,7 +250,6 @@ from grunnlag
         val type = resultSet.getString("gy_beregningsgrunnlag_type")
         return IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = resultSet.getDouble("gy_grunnlag"),
-            er6GBegrenset = resultSet.getBoolean("gy_er6g_begrenset"),
             beregningsgrunnlag = when (type) {
                 "normal" -> hentGrunnlag11_19(resultSet)
                 "ufore" -> hentUtGrunnlagUføre(resultSet)
@@ -278,7 +275,6 @@ from grunnlag
     private fun hentUtGrunnlagUføre(resultSet: Row): IBeregningsGrunnlag.GrunnlagUføre {
         return IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag = resultSet.getDouble("gu_grunnlag"),
-            er6GBegrenset = resultSet.getBoolean("gu_er6g_begrenset"),
             grunnlag11_19 = hentGrunnlag11_19(resultSet),
             type = UføreType.valueOf(resultSet.getString("gu_type")),
             uføregrad = resultSet.getInt("gu_uforegrad"),
