@@ -57,7 +57,6 @@ sealed interface IBeregningsGrunnlag {
         val grunnlag11_19: Grunnlag_11_19,
         val uføregrad: Int,
         val uføreInntekterFraForegåendeÅr: Map<Int, Double>,
-        val uføreInntektIKroner: BigDecimal,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,
     ) : IBeregningsGrunnlag {
         override fun grunnlaget(): Double {
