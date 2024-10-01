@@ -2,17 +2,20 @@ package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.api_kontrakt.Utfall
-import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
-import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.*
+import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.bigquery.schemaRegistry
+import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
+import no.nav.aap.statistikk.testutils.BigQuery
+import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -61,7 +64,8 @@ class AvsluttetBehandlingServiceTest {
                         gradering = 45.0
                     )
                 )
-            ), vilkårsresultat = Vilkårsresultat(
+            ),
+            vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
                 behandlingsType = "Førstegangsbehandling",
                 saksnummer = saksnummer,
@@ -97,7 +101,8 @@ class AvsluttetBehandlingServiceTest {
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
             ),
-            behandlingsReferanse = behandlingReferanse
+            behandlingsReferanse = behandlingReferanse,
+            saksnummer = saksnummer,
         )
 
         val bigQueryClient = dataSource.transaction {
@@ -162,7 +167,8 @@ class AvsluttetBehandlingServiceTest {
                         gradering = 45.0
                     )
                 )
-            ), vilkårsresultat = Vilkårsresultat(
+            ),
+            vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
                 behandlingsType = "Førstegangsbehandling",
                 saksnummer = saksnummer,
@@ -199,7 +205,8 @@ class AvsluttetBehandlingServiceTest {
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
             ),
-            behandlingsReferanse = behandlingReferanse
+            behandlingsReferanse = behandlingReferanse,
+            saksnummer = saksnummer,
         )
 
         val (_, service) = konstruerAvsluttetBehandlingService(
