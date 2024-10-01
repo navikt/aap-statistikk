@@ -15,3 +15,13 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 # For NAV-ansatte
 
 Interne henvendelser kan sendes via Slack i kanalen `#po-aap-team-aap`.
+
+## Oppdatere Gradle wrapper
+
+For å oppdatere Gradle wrapper: 
+
+```
+./gradlew wrapper --gradle-version=8.10.2
+```
+
+Commit genererte endringer og push.
