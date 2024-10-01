@@ -7,6 +7,7 @@ import java.math.BigDecimal
 import java.util.*
 
 data class AvsluttetBehandling(
+    val saksnummer: String,
     val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelse,
     val vilkårsresultat: Vilkårsresultat,

@@ -32,6 +32,7 @@ import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
@@ -357,7 +358,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
 class FakeBQRepository : IBQRepository {
     val vilkårsresultater = mutableListOf<Vilkårsresultat>()
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
-    val beregningsgrunnlag = mutableListOf<IBeregningsGrunnlag>()
+    val beregningsgrunnlag = mutableListOf<BeregningsGrunnlagBQ>()
     val saker = mutableListOf<BQSak>()
 
     override fun lagre(payload: Vilkårsresultat) {
@@ -369,8 +370,7 @@ class FakeBQRepository : IBQRepository {
     }
 
     override fun lagre(
-        payload: IBeregningsGrunnlag,
-        behandlingsReferanse: UUID
+        payload: BeregningsGrunnlagBQ
     ) {
         beregningsgrunnlag.add(payload)
     }

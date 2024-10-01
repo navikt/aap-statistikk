@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.bigquery
 
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
 import no.nav.aap.statistikk.sak.BQSak
 import no.nav.aap.statistikk.sak.SakTabell
@@ -12,7 +11,6 @@ import no.nav.aap.statistikk.vilkårsresultat.BQVilkårsResultatPeriode
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 private val logger = LoggerFactory.getLogger(BQRepository::class.java)
 
@@ -27,19 +25,19 @@ class BQRepository(
         logger.info("Lagrer vilkårsresultat.")
         val flatetListe = payload.vilkår
             .flatMap { v ->
-            v.perioder.map {
-                BQVilkårsResultatPeriode(
-                    saksnummer = payload.saksnummer,
-                    behandlingsReferanse = payload.behandlingsReferanse,
-                    behandlingsType = payload.behandlingsType,
-                    vilkårtype = v.vilkårType,
-                    fraDato = it.fraDato,
-                    tilDato = it.tilDato,
-                    utfall = it.utfall,
-                    manuellVurdering = it.manuellVurdering
-                )
+                v.perioder.map {
+                    BQVilkårsResultatPeriode(
+                        saksnummer = payload.saksnummer,
+                        behandlingsReferanse = payload.behandlingsReferanse,
+                        behandlingsType = payload.behandlingsType,
+                        vilkårtype = v.vilkårType,
+                        fraDato = it.fraDato,
+                        tilDato = it.tilDato,
+                        utfall = it.utfall,
+                        manuellVurdering = it.manuellVurdering
+                    )
+                }
             }
-        }
         client.insertMany(vilkårsVurderingTabell, flatetListe)
     }
 
@@ -58,11 +56,11 @@ class BQRepository(
         })
     }
 
-    override fun lagre(payload: IBeregningsGrunnlag, behandlingsReferanse: UUID) {
+    override fun lagre(payload: BeregningsGrunnlagBQ) {
         logger.info("Lagrer beregningsgrunnlag.")
         client.insert(
             beregningsGrunnlagTabell,
-            MedBehandlingsreferanse(value = payload, behandlingsReferanse = behandlingsReferanse)
+            payload
         )
     }
 
