@@ -39,7 +39,7 @@ dependencies {
 
     implementation("no.nav:ktor-openapi-generator:1.0.32")
 
-    implementation("com.google.cloud:google-cloud-bigquery:2.42.3")
+    implementation("com.google.cloud:google-cloud-bigquery:2.42.4")
 
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
