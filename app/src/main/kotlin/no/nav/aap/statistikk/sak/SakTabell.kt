@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class SakTabell : BQTable<BQBehandling> {
     companion object {
@@ -58,7 +59,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
                 "behandlingType" to value.behandlingType,
-                "tekniskTid" to value.tekniskTid,
+                "tekniskTid" to value.tekniskTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
             )
