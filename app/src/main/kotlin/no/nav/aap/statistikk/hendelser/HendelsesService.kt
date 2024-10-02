@@ -1,24 +1,27 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
+import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
-import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.sak.BQBehandling
-import no.nav.aap.statistikk.sak.BQSak
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
+import java.time.Clock
+import java.time.LocalDateTime
 
 
 class HendelsesService(
     private val hendelsesRepository: IHendelsesRepository,
     private val sakRepository: SakRepository,
-    private val personRepository: PersonRepository,
+    private val personRepository: IPersonRepository,
     private val behandlingRepository: IBehandlingRepository,
-    private val bigQueryRepository: IBQRepository
+    private val bigQueryRepository: IBQRepository,
+    private val clock: Clock = Clock.systemUTC()
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
         val person = hentEllerSettInnPerson(hendelse)
@@ -28,13 +31,18 @@ class HendelsesService(
 
         hendelsesRepository.lagreHendelse(hendelse, sak.id!!, behandlingId)
 
-        lagreSakInfoTilBigquery(sak, behandlingId)
+        lagreSakInfoTilBigquery(sak, behandlingId, hendelse.versjon)
     }
 
-    private fun lagreSakInfoTilBigquery(sak: Sak, behandlingId: Long) {
+    private fun lagreSakInfoTilBigquery(sak: Sak, behandlingId: Long, versjon: String) {
+        val behandling = behandlingRepository.hent(behandlingId)
         val bqSak = BQBehandling(
             saksnummer = sak.saksnummer,
-            behandlingUUID = behandlingRepository.hent(behandlingId).referanse.toString(),
+            behandlingUUID = behandling.referanse.toString(),
+            behandlingType = behandling.typeBehandling.toString().uppercase(),
+            tekniskTid = LocalDateTime.now(clock),
+            avsender = KELVIN,
+            verson = versjon
         )
         bigQueryRepository.lagre(bqSak)
     }

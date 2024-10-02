@@ -1,17 +1,9 @@
 package no.nav.aap.statistikk.sak
 
-import com.google.cloud.bigquery.Field
-import com.google.cloud.bigquery.FieldValueList
-import com.google.cloud.bigquery.InsertAllRequest
-import com.google.cloud.bigquery.Schema
-import com.google.cloud.bigquery.StandardSQLTypeName
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
-import no.nav.aap.statistikk.behandling.Behandling
+import com.google.cloud.bigquery.*
+import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.bigquery.BQTable
-import no.nav.aap.statistikk.person.Person
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 
 class SakTabell : BQTable<BQBehandling> {
     companion object {
@@ -25,16 +17,38 @@ class SakTabell : BQTable<BQBehandling> {
         get() {
             val saksnummmer = Field.of("saksnummer", StandardSQLTypeName.STRING)
             val behandlingUuid = Field.of("behandlingUuid", StandardSQLTypeName.STRING)
-            return Schema.of(saksnummmer, behandlingUuid)
+            val behandlingType = Field.of("behandlingType", StandardSQLTypeName.STRING)
+            val tekniskTid =
+                Field.newBuilder("tekniskTid", StandardSQLTypeName.DATETIME)
+                    .setDescription("Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.")
+                    .build()
+            val versjon = Field.of("versjon", StandardSQLTypeName.STRING)
+            val avsender = Field.of("avsender", StandardSQLTypeName.STRING)
+            return Schema.of(
+                saksnummmer,
+                behandlingUuid,
+                behandlingType,
+                tekniskTid,
+                versjon,
+                avsender
+            )
         }
 
     override fun parseRow(fieldValueList: FieldValueList): BQBehandling {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
+        val tekniskTid = fieldValueList.get("tekniskTid").stringValue
+        val behandlingType = fieldValueList.get("behandlingType").stringValue
+        val versjon = fieldValueList.get("versjon").stringValue
+        val avsender = fieldValueList.get("avsender").stringValue
 
         return BQBehandling(
             saksnummer = saksnummer,
             behandlingUUID = behandlingUuid,
+            tekniskTid = LocalDateTime.parse(tekniskTid),
+            behandlingType = behandlingType,
+            avsender = avsender,
+            verson = versjon
         )
     }
 
@@ -43,6 +57,10 @@ class SakTabell : BQTable<BQBehandling> {
             mapOf(
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
+                "behandlingType" to value.behandlingType,
+                "tekniskTid" to value.tekniskTid.toString(),
+                "avsender" to value.avsender,
+                "versjon" to value.verson,
             )
         )
     }

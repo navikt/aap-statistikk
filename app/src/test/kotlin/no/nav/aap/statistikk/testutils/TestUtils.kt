@@ -40,10 +40,12 @@ import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
+import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.sak.*
@@ -326,6 +328,66 @@ class MockJobbAppender : JobbAppender {
     override fun leggTil(jobb: JobbInput) {
         jobber.add(jobb)
     }
+}
+
+class FakeSakRepository : SakRepository {
+    private val saker = mutableMapOf<Long, Sak>()
+    override fun hentSak(sakID: SakId): Sak {
+        saker[sakID]?.let { return it }
+        throw IllegalArgumentException("Fant ikke sak med id $sakID")
+    }
+
+    override fun hentSak(saksnummer: String): Sak {
+        return saker.values.firstOrNull { it.saksnummer == saksnummer }!!
+    }
+
+    override fun hentSakEllernull(saksnummer: String): Sak? {
+        return saker.values.firstOrNull { it.saksnummer == saksnummer }
+    }
+
+    override fun settInnSak(sak: Sak): SakId {
+        val id = saker.size.toLong()
+        saker[id] = sak.copy(id = id)
+        return id
+    }
+
+    override fun tellSaker(): Int {
+        return saker.size
+    }
+}
+
+class FakePersonRepository : IPersonRepository {
+    private val personer = mutableMapOf<Long, Person>()
+    override fun lagrePerson(person: Person): Long {
+        personer[personer.size.toLong()] = person
+        return (personer.size - 1).toLong()
+    }
+
+    override fun hentPerson(ident: String): Person? {
+        return personer.values.firstOrNull { it.ident == ident }
+    }
+}
+
+class FakeHendelsesRepository : IHendelsesRepository {
+    private val hendelser = mutableListOf<StoppetBehandling>()
+
+    override fun lagreHendelse(
+        hendelse: StoppetBehandling,
+        sakId: SakId,
+        behandlingId: BehandlingId
+    ): Int {
+        hendelser.add(hendelse)
+        return hendelser.indexOf(hendelse)
+    }
+
+    override fun hentHendelser(): Collection<StoppetBehandling> {
+        return hendelser
+    }
+
+    override fun tellHendelser(): Int {
+        return hendelser.size
+    }
+
 }
 
 class FakeBehandlingRepository : IBehandlingRepository {

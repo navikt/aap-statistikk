@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.bigquery
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
 import no.nav.aap.statistikk.sak.BQBehandling
-import no.nav.aap.statistikk.sak.BQSak
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
