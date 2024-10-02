@@ -25,6 +25,9 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
 
     implementation("ch.qos.logback:logback-classic:1.5.8")
+    constraints {
+        implementation("org.apache.commons:commons-compress:1.26.0")
+    }
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
     implementation("org.flywaydb:flyway-database-postgresql:10.18.0")
@@ -38,7 +41,6 @@ dependencies {
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
     implementation("no.nav:ktor-openapi-generator:1.0.32")
-
     implementation("com.google.cloud:google-cloud-bigquery:2.42.4")
 
     testImplementation(kotlin("test"))
