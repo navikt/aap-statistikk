@@ -50,8 +50,8 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
             val standardErGjennomsnitt =
                 Field.of("standardErGjennomsnitt", StandardSQLTypeName.BOOL)
 
-            val uføreGrunnlag = Field.of("uføreGrunnlag", StandardSQLTypeName.FLOAT64)
-            val uføreUføregrad = Field.of("uføreUføregrad", StandardSQLTypeName.INT64)
+            val uforeGrunnlag = Field.of("uforeGrunnlag", StandardSQLTypeName.FLOAT64)
+            val uforeUforegrad = Field.of("uforeUforegrad", StandardSQLTypeName.INT64)
             val yrkesskadeTerskelVerdiForYrkesskade =
                 Field.of("yrkesskadeTerskelVerdiForYrkesskade", StandardSQLTypeName.INT64)
             val yrkesskadeAndelSomSkyldesYrkesskade =
@@ -62,8 +62,8 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
                 Field.of("yrkesskadeAndelYrkesskade", StandardSQLTypeName.INT64)
             val yrkesskadeBenyttetAndelForYrkesskade =
                 Field.of("yrkesskadeBenyttetAndelForYrkesskade", StandardSQLTypeName.INT64)
-            val yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet = Field.of(
-                "yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet",
+            val yrkesskadeAntattaarligInntektYrkesskadeTidspunktet = Field.of(
+                "yrkesskadeAntattaarligInntektYrkesskadeTidspunktet",
                 StandardSQLTypeName.FLOAT64
             )
             val yrkesskadeYrkesskadeTidspunkt =
@@ -85,14 +85,14 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
                 standardGrunnlag,
                 standardEr6GBegrenset,
                 standardErGjennomsnitt,
-                uføreGrunnlag,
-                uføreUføregrad,
+                uforeGrunnlag,
+                uforeUforegrad,
                 yrkesskadeTerskelVerdiForYrkesskade,
                 yrkesskadeAndelSomSkyldesYrkesskade,
                 yrkesskadeAndelSomIkkeSkyldesYrkesskade,
                 yrkesskadeAndelYrkesskade,
                 yrkesskadeBenyttetAndelForYrkesskade,
-                yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet,
+                yrkesskadeAntattaarligInntektYrkesskadeTidspunktet,
                 yrkesskadeYrkesskadeTidspunkt,
                 yrkesskadeGrunnlagForBeregningAvYrkesskadeandel,
                 yrkesskadeYrkesskadeinntektIG,
@@ -178,14 +178,14 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
                 "standardGrunnlag" to value.standardGrunnlag,
                 "standardEr6GBegrenset" to value.standardEr6GBegrenset,
                 "standardErGjennomsnitt" to value.standardErGjennomsnitt,
-                "uføreGrunnlag" to value.uføreGrunnlag,
-                "uføreUføregrad" to value.uføreUføregrad,
+                "uforeGrunnlag" to value.uføreGrunnlag,
+                "uforeUforegrad" to value.uføreUføregrad,
                 "yrkesskadeTerskelVerdiForYrkesskade" to value.yrkesskadeTerskelVerdiForYrkesskade,
                 "yrkesskadeAndelSomSkyldesYrkesskade" to value.yrkesskadeAndelSomSkyldesYrkesskade,
                 "yrkesskadeAndelSomIkkeSkyldesYrkesskade" to value.yrkesskadeAndelSomIkkeSkyldesYrkesskade,
                 "yrkesskadeAndelYrkesskade" to value.yrkesskadeAndelYrkesskade,
                 "yrkesskadeBenyttetAndelForYrkesskade" to value.yrkesskadeBenyttetAndelForYrkesskade,
-                "yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet" to value.yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet,
+                "yrkesskadeAntattaarligInntektYrkesskadeTidspunktet" to value.yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet,
                 "yrkesskadeYrkesskadeTidspunkt" to value.yrkesskadeYrkesskadeTidspunkt,
                 "yrkesskadeGrunnlagForBeregningAvYrkesskadeandel" to value.yrkesskadeGrunnlagForBeregningAvYrkesskadeandel,
                 "yrkesskadeYrkesskadeinntektIG" to value.yrkesskadeYrkesskadeinntektIG,
