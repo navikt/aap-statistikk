@@ -58,7 +58,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
                 "behandlingType" to value.behandlingType,
-                "tekniskTid" to value.tekniskTid.toString(),
+                "tekniskTid" to value.tekniskTid,
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
             )
