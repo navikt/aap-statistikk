@@ -5,6 +5,8 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalUnit
 
 class SakTabell : BQTable<BQBehandling> {
     companion object {
@@ -59,7 +61,8 @@ class SakTabell : BQTable<BQBehandling> {
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
                 "behandlingType" to value.behandlingType,
-                "tekniskTid" to value.tekniskTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.SECONDS)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
             )
