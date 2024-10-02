@@ -109,9 +109,9 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
         val standardGrunnlag = fieldValueList.get("standardGrunnlag").doubleValue
         val standardEr6GBegrenset = fieldValueList.get("standardEr6GBegrenset").booleanValue
         val standardErGjennomsnitt = fieldValueList.get("standardErGjennomsnitt").booleanValue
-        val uføreGrunnlag =
-            fieldValueList.get("uføreGrunnlag").let { if (it.isNull) null else it.doubleValue }
-        val uføreUføregrad = fieldValueList.get("uføreUføregrad")
+        val uforeGrunnlag =
+            fieldValueList.get("uforeGrunnlag").let { if (it.isNull) null else it.doubleValue }
+        val uforeUforegrad = fieldValueList.get("uforeUforegrad")
             .let { if (it.isNull) null else it.longValue.toInt() }
         val yrkesskadeTerskelVerdiForYrkesskade =
             fieldValueList.get("yrkesskadeTerskelVerdiForYrkesskade")
@@ -128,8 +128,8 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
         val yrkesskadeBenyttetAndelForYrkesskade =
             fieldValueList.get("yrkesskadeBenyttetAndelForYrkesskade")
                 .let { if (it.isNull) null else it.longValue.toInt() }
-        val yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet =
-            fieldValueList.get("yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet")
+        val yrkesskadeAntattaarligInntektYrkesskadeTidspunktet =
+            fieldValueList.get("yrkesskadeAntattaarligInntektYrkesskadeTidspunktet")
                 .let { if (it.isNull) null else it.doubleValue }
         val yrkesskadeYrkesskadeTidspunkt =
             fieldValueList.get("yrkesskadeYrkesskadeTidspunkt")
@@ -152,14 +152,14 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
             standardGrunnlag = standardGrunnlag,
             standardEr6GBegrenset = standardEr6GBegrenset,
             standardErGjennomsnitt = standardErGjennomsnitt,
-            uføreGrunnlag = uføreGrunnlag,
-            uføreUføregrad = uføreUføregrad,
+            uføreGrunnlag = uforeGrunnlag,
+            uføreUføregrad = uforeUforegrad,
             yrkesskadeTerskelVerdiForYrkesskade = yrkesskadeTerskelVerdiForYrkesskade,
             yrkesskadeAndelSomSkyldesYrkesskade = yrkesskadeAndelSomSkyldesYrkesskade,
             yrkesskadeAndelSomIkkeSkyldesYrkesskade = yrkesskadeAndelSomIkkeSkyldesYrkesskade,
             yrkesskadeAndelYrkesskade = yrkesskadeAndelYrkesskade,
             yrkesskadeBenyttetAndelForYrkesskade = yrkesskadeBenyttetAndelForYrkesskade,
-            yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet = yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet,
+            yrkesskadeAntattÅrligInntektYrkesskadeTidspunktet = yrkesskadeAntattaarligInntektYrkesskadeTidspunktet,
             yrkesskadeYrkesskadeTidspunkt = yrkesskadeYrkesskadeTidspunkt,
             yrkesskadeGrunnlagForBeregningAvYrkesskadeandel = yrkesskadeGrunnlagForBeregningAvYrkesskadeandel,
             yrkesskadeYrkesskadeinntektIG = yrkesskadeYrkesskadeinntektIG,
