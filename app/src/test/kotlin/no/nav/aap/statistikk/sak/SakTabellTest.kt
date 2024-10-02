@@ -21,12 +21,9 @@ class SakTabellTest {
 
         val opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         client.insert(
-            sakTabell, BQSak(
-                saksnummer = "123", behandlinger = listOf(
-                    BQBehandling(
-                        behandlingUUID = referanse.toString()
-                    )
-                )
+            sakTabell, BQBehandling(
+                saksnummer = "123",
+                behandlingUUID = referanse.toString()
             )
         )
 
@@ -34,10 +31,8 @@ class SakTabellTest {
 
         assertThat(uthentet.size).isEqualTo(1)
         assertThat(uthentet.first().saksnummer).isEqualTo("123")
-        assertThat(uthentet.first().behandlinger).containsExactly(
-            BQBehandling(
-                behandlingUUID = referanse.toString()
-            )
+        assertThat(uthentet.first().behandlingUUID).isEqualTo(
+            referanse.toString()
         )
     }
 }
