@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.sak
 
+import no.nav.aap.statistikk.KELVIN
+import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
@@ -7,7 +9,6 @@ import no.nav.aap.statistikk.testutils.BigQuery
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 class SakTabellTest {
@@ -19,11 +20,14 @@ class SakTabellTest {
 
         val referanse = UUID.randomUUID()
 
-        val opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         client.insert(
             sakTabell, BQBehandling(
                 saksnummer = "123",
-                behandlingUUID = referanse.toString()
+                behandlingUUID = referanse.toString(),
+                tekniskTid = LocalDateTime.now(),
+                behandlingType = TypeBehandling.Revurdering.toString().uppercase(),
+                avsender = KELVIN,
+                verson = "versjon"
             )
         )
 
@@ -34,5 +38,6 @@ class SakTabellTest {
         assertThat(uthentet.first().behandlingUUID).isEqualTo(
             referanse.toString()
         )
+        assertThat(uthentet.first().behandlingType).isEqualTo("REVURDERING")
     }
 }
