@@ -46,10 +46,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.sak.BQSak
-import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakId
-import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.sak.*
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
@@ -359,7 +356,7 @@ class FakeBQRepository : IBQRepository {
     val vilkårsresultater = mutableListOf<Vilkårsresultat>()
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
     val beregningsgrunnlag = mutableListOf<BeregningsGrunnlagBQ>()
-    val saker = mutableListOf<BQSak>()
+    val saker = mutableListOf<BQBehandling>()
 
     override fun lagre(payload: Vilkårsresultat) {
         vilkårsresultater.add(payload)
@@ -375,7 +372,7 @@ class FakeBQRepository : IBQRepository {
         beregningsgrunnlag.add(payload)
     }
 
-    override fun lagre(payload: BQSak) {
+    override fun lagre(payload: BQBehandling) {
         saker.add(payload)
     }
 }

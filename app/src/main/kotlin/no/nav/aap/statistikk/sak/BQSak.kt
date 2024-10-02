@@ -6,6 +6,7 @@ data class Sak(val id: Long? = 0L, val saksnummer: String, val person: Person)
 
 data class BQBehandling(
     val behandlingUUID: String,
+    val saksnummer: String,
 )
 
 data class BQSak(

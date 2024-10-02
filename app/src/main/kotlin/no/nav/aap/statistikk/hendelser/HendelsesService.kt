@@ -28,13 +28,13 @@ class HendelsesService(
 
         hendelsesRepository.lagreHendelse(hendelse, sak.id!!, behandlingId)
 
-        val bqSak = BQSak(
+        lagreSakInfoTilBigquery(sak, behandlingId)
+    }
+
+    private fun lagreSakInfoTilBigquery(sak: Sak, behandlingId: Long) {
+        val bqSak = BQBehandling(
             saksnummer = sak.saksnummer,
-            behandlinger = listOf(
-                BQBehandling(
-                    behandlingUUID = behandlingRepository.hent(behandlingId).referanse.toString()
-                )
-            )
+            behandlingUUID = behandlingRepository.hent(behandlingId).referanse.toString(),
         )
         bigQueryRepository.lagre(bqSak)
     }

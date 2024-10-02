@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk
 
+import com.papsign.ktor.openapigen.model.info.ContactModel
+import com.papsign.ktor.openapigen.model.info.InfoModel
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -140,7 +142,14 @@ fun Application.module(
     monitoring(prometheusMeterRegistry)
     statusPages()
 
-    commonKtorModule(prometheusMeterRegistry, azureConfig, "AAP - Statistikk")
+    commonKtorModule(
+        prometheusMeterRegistry, azureConfig, InfoModel(
+            title = "AAP - Statistikk",
+            version = "0.0.1",
+            description = "App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk.",
+            contact = ContactModel("Slack: #po_aap_dvh"),
+        )
+    )
 
     routing {
         authenticate(AZURE) {

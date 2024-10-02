@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-class SakTabell : BQTable<BQSak> {
+class SakTabell : BQTable<BQBehandling> {
     companion object {
         const val TABLE_NAME = "sak"
     }
@@ -24,38 +24,26 @@ class SakTabell : BQTable<BQSak> {
     override val schema: Schema
         get() {
             val saksnummmer = Field.of("saksnummer", StandardSQLTypeName.STRING)
-            val behandlinger = Field.newBuilder(
-                "behandlinger",
-                StandardSQLTypeName.STRUCT,
-                Field.of("behandlingUuid", StandardSQLTypeName.STRING),
-                Field.of("behandlingType", StandardSQLTypeName.STRING),
-                Field.of("opprettetTid", StandardSQLTypeName.DATETIME),
-            ).setMode(Field.Mode.REPEATED).build()
-            return Schema.of(saksnummmer, behandlinger)
+            val behandlingUuid = Field.of("behandlingUuid", StandardSQLTypeName.STRING)
+            return Schema.of(saksnummmer, behandlingUuid)
         }
 
-    override fun parseRow(fieldValueList: FieldValueList): BQSak {
+    override fun parseRow(fieldValueList: FieldValueList): BQBehandling {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
-        val behandlinger = fieldValueList.get("behandlinger").repeatedValue.map {
-            BQBehandling(
-                behandlingUUID = it.recordValue[0].stringValue,
-            )
-        }
+        val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
 
-        return BQSak(
+        return BQBehandling(
             saksnummer = saksnummer,
-            behandlinger = behandlinger
+            behandlingUUID = behandlingUuid,
         )
     }
 
-    override fun toRow(value: BQSak): InsertAllRequest.RowToInsert {
+    override fun toRow(value: BQBehandling): InsertAllRequest.RowToInsert {
         return InsertAllRequest.RowToInsert.of(
-            mapOf("saksnummer" to value.saksnummer,
-                "behandlinger" to value.behandlinger.map {
-                    mapOf(
-                        "behandlingUuid" to it.behandlingUUID,
-                    )
-                })
+            mapOf(
+                "saksnummer" to value.saksnummer,
+                "behandlingUuid" to value.behandlingUUID,
+            )
         )
     }
 }
