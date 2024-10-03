@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.testutils.*
@@ -32,7 +33,7 @@ class HendelsesServiceTest {
                 saksnummer = "1234",
                 behandlingReferanse = UUID.randomUUID(),
                 behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
-                status = "dasdasd",
+                status = BehandlingStatus.OPPRETTET,
                 behandlingType = TypeBehandling.Revurdering,
                 ident = "234",
                 versjon = "dsad",

@@ -23,6 +23,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.Client
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
+import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
@@ -253,7 +254,7 @@ fun opprettTestHendelse(
             saksnummer = saksnummer,
             behandlingReferanse = randomUUID,
             behandlingOpprettetTidspunkt = LocalDateTime.now(),
-            status = "IVERKSATT",
+            status = BehandlingStatus.UTREDES,
             behandlingType = TypeBehandling.Førstegangsbehandling,
             ident = ident,
             avklaringsbehov = listOf(),

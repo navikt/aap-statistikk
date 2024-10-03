@@ -23,8 +23,10 @@ CREATE TABLE behandling
 CREATE TABLE versjon
 (
     ID      BIGSERIAL    NOT NULL PRIMARY KEY,
-    versjon VARCHAR(100) NOT NULL
+    versjon VARCHAR(100) NOT NULL UNIQUE
 );
+
+CREATE INDEX IDX_VERSJON ON versjon (versjon);
 
 CREATE TABLE motta_statistikk
 (

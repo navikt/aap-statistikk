@@ -1,23 +1,6 @@
 package no.nav.aap.statistikk.testutils
 
-import no.nav.aap.statistikk.api_kontrakt.AvklaringsbehovHendelse
-import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
-import no.nav.aap.statistikk.api_kontrakt.BehovType
-import no.nav.aap.statistikk.api_kontrakt.BeregningsgrunnlagDTO
-import no.nav.aap.statistikk.api_kontrakt.Definisjon
-import no.nav.aap.statistikk.api_kontrakt.Endring
-import no.nav.aap.statistikk.api_kontrakt.EndringStatus
-import no.nav.aap.statistikk.api_kontrakt.Grunnlag11_19DTO
-import no.nav.aap.statistikk.api_kontrakt.GrunnlagYrkesskadeDTO
-import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
-import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelseDTO
-import no.nav.aap.statistikk.api_kontrakt.TilkjentYtelsePeriodeDTO
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
-import no.nav.aap.statistikk.api_kontrakt.Utfall
-import no.nav.aap.statistikk.api_kontrakt.VilkårDTO
-import no.nav.aap.statistikk.api_kontrakt.VilkårsPeriodeDTO
-import no.nav.aap.statistikk.api_kontrakt.VilkårsResultatDTO
-import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
+import no.nav.aap.statistikk.api_kontrakt.*
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -90,7 +73,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
     return StoppetBehandling(
         saksnummer = saksnummer,
         behandlingReferanse = behandlingReferanse,
-        status = "UTREDES",
+        status = BehandlingStatus.UTREDES,
         behandlingType = TypeBehandling.Førstegangsbehandling,
         ident = "14890097570",
         avklaringsbehov = listOf(
