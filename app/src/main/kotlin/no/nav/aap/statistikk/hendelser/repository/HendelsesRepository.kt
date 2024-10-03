@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser.repository
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.behandling.BehandlingId
@@ -10,8 +11,18 @@ class HendelsesRepository(
     private val dbConnection: DBConnection,
 ) : IHendelsesRepository {
 
-    override fun lagreHendelse(hendelse: StoppetBehandling, sakId: Long, behandlingId: BehandlingId): Int {
-        val versjonId = dbConnection.executeReturnKey("INSERT INTO versjon (versjon) VALUES (?)") {
+    override fun lagreHendelse(
+        hendelse: StoppetBehandling,
+        sakId: Long,
+        behandlingId: BehandlingId
+    ): Int {
+        val versjonId = dbConnection.executeReturnKey(
+            """INSERT INTO versjon (versjon)
+                            VALUES (?)
+                            ON CONFLICT (versjon)
+                                DO NOTHING
+                            RETURNING id;"""
+        ) {
             setParams {
                 setString(1, hendelse.versjon)
             }
@@ -21,7 +32,7 @@ class HendelsesRepository(
             setParams {
                 setLong(1, behandlingId)
                 setLong(2, sakId)
-                setString(3, hendelse.status)
+                setString(3, hendelse.status.toString())
                 setLong(4, versjonId)
             }
         }.toInt()
@@ -40,7 +51,7 @@ class HendelsesRepository(
                 StoppetBehandling(
                     saksnummer = row.getString("saksnummer"),
                     behandlingReferanse = UUID.fromString(row.getString("referanse")),
-                    status = row.getString("status"),
+                    status = BehandlingStatus.valueOf(row.getString("status")),
                     behandlingType = TypeBehandling.valueOf(row.getString("type")),
                     behandlingOpprettetTidspunkt = row.getLocalDateTime("opprettet_tid"),
                     ident = row.getString("ident"),

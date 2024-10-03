@@ -12,12 +12,24 @@ data class StoppetBehandling(
     val saksnummer: String,
     val behandlingReferanse: UUID,
     val behandlingOpprettetTidspunkt: LocalDateTime,
-    val status: String,
+    val status: BehandlingStatus,
     val behandlingType: TypeBehandling,
     val ident: String,
     val versjon: String,
     val avklaringsbehov: List<AvklaringsbehovHendelse>
-)
+) {
+    init {
+        require(ident.isNotEmpty())
+    }
+}
+
+enum class BehandlingStatus {
+    OPPRETTET,
+    UTREDES,
+    IVERKSETTES,
+    AVSLUTTET;
+}
+
 
 enum class TypeBehandling(private var identifikator: String) {
     Førstegangsbehandling("ae0034"),

@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
@@ -37,7 +38,7 @@ class HendelsesRepositoryTest {
             repository.lagreHendelse(
                 StoppetBehandling(
                     saksnummer = saksnummer,
-                    status = "AVS",
+                    status = BehandlingStatus.AVSLUTTET,
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = testIdent,
                     behandlingReferanse = behandlingReferanse,
@@ -58,7 +59,7 @@ class HendelsesRepositoryTest {
         assertThat(hentHendelser.first()).isEqualTo(
             StoppetBehandling(
                 saksnummer = saksnummer,
-                status = "AVS",
+                status = BehandlingStatus.AVSLUTTET,
                 behandlingType = TypeBehandling.Førstegangsbehandling,
                 ident = testIdent,
                 behandlingReferanse = behandlingReferanse,
@@ -90,7 +91,7 @@ class HendelsesRepositoryTest {
             repository.lagreHendelse(
                 StoppetBehandling(
                     saksnummer = saksnummer,
-                    status = "AVS",
+                    status = BehandlingStatus.UTREDES,
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = ident,
                     behandlingReferanse = behandlingReferanse,
@@ -105,13 +106,13 @@ class HendelsesRepositoryTest {
                 repository.lagreHendelse(
                     StoppetBehandling(
                         saksnummer = saksnummer,
-                        status = "BEHA",
+                        status = BehandlingStatus.AVSLUTTET,
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = ident,
                         behandlingReferanse = behandlingReferanse,
                         behandlingOpprettetTidspunkt = opprettetTidspunkt,
                         avklaringsbehov = listOf(),
-                        versjon = "ukjent"
+                        versjon = "ukjent2"
                     ), sakId, behandlingId
                 )
             }

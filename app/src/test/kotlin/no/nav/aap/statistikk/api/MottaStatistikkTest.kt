@@ -63,7 +63,7 @@ class MottaStatistikkTest {
                 URI.create("$url/stoppetBehandling"), PostRequest(
                     StoppetBehandling(
                         saksnummer = "123",
-                        status = "OPPRETTET",
+                        status = BehandlingStatus.OPPRETTET,
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = "0",
                         behandlingReferanse = behandlingReferanse,
@@ -79,7 +79,7 @@ class MottaStatistikkTest {
             DefaultJsonMapper.toJson(
                 StoppetBehandling(
                     saksnummer = "123",
-                    status = "OPPRETTET",
+                    status = BehandlingStatus.OPPRETTET,
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = "0",
                     behandlingReferanse = behandlingReferanse,
@@ -98,7 +98,7 @@ class MottaStatistikkTest {
         val hendelse = StoppetBehandling(
             saksnummer = "4LFK2S0",
             behandlingReferanse = UUID.fromString("96175156-0950-475a-8de0-41a25f4c0cec"),
-            status = "UTREDES",
+            status = BehandlingStatus.UTREDES,
             behandlingType = TypeBehandling.Førstegangsbehandling,
             ident = "14890097570",
             avklaringsbehov = listOf(
