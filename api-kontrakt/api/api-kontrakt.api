@@ -1,0 +1,334 @@
+public final class no/nav/aap/statistikk/api_kontrakt/AvklaringsbehovHendelse {
+	public fun <init> (Lno/nav/aap/statistikk/api_kontrakt/Definisjon;Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;Ljava/util/List;)V
+	public final fun component1 ()Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
+	public final fun component2 ()Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Lno/nav/aap/statistikk/api_kontrakt/Definisjon;Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;Ljava/util/List;)Lno/nav/aap/statistikk/api_kontrakt/AvklaringsbehovHendelse;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/AvklaringsbehovHendelse;Lno/nav/aap/statistikk/api_kontrakt/Definisjon;Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;Ljava/util/List;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/AvklaringsbehovHendelse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDefinisjon ()Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
+	public final fun getEndringer ()Ljava/util/List;
+	public final fun getStatus ()Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO {
+	public fun <init> (Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/UUID;
+	public final fun component3 ()Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;
+	public final fun component4 ()Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;
+	public final fun component5 ()Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
+	public final fun copy (Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;)Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBehandlingsReferanse ()Ljava/util/UUID;
+	public final fun getBeregningsGrunnlag ()Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
+	public final fun getSaksnummer ()Ljava/lang/String;
+	public final fun getTilkjentYtelse ()Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;
+	public final fun getVilkårsResultat ()Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/BehandlingStatus : java/lang/Enum {
+	public static final field AVSLUTTET Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public static final field IVERKSETTES Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public static final field OPPRETTET Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public static final field UTREDES Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/BehovType : java/lang/Enum {
+	public static final field MANUELT_FRIVILLIG Lno/nav/aap/statistikk/api_kontrakt/BehovType;
+	public static final field MANUELT_PÅKREVD Lno/nav/aap/statistikk/api_kontrakt/BehovType;
+	public static final field VENTEPUNKT Lno/nav/aap/statistikk/api_kontrakt/BehovType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/BehovType;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/BehovType;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO {
+	public fun <init> ()V
+	public fun <init> (Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;)V
+	public synthetic fun <init> (Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public final fun component2 ()Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;
+	public final fun component3 ()Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;
+	public final fun copy (Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;)Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGrunnlag11_19dto ()Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public final fun getGrunnlagUføre ()Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;
+	public final fun getGrunnlagYrkesskade ()Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/Definisjon {
+	public fun <init> (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lno/nav/aap/statistikk/api_kontrakt/BehovType;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/Definisjon;Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Ljava/lang/String;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBehovType ()Lno/nav/aap/statistikk/api_kontrakt/BehovType;
+	public final fun getLøsesISteg ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/Endring {
+	public fun <init> (Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;Ljava/time/LocalDateTime;Ljava/time/LocalDate;Ljava/lang/String;)V
+	public synthetic fun <init> (Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;Ljava/time/LocalDateTime;Ljava/time/LocalDate;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public final fun component2 ()Ljava/time/LocalDateTime;
+	public final fun component3 ()Ljava/time/LocalDate;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;Ljava/time/LocalDateTime;Ljava/time/LocalDate;Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/Endring;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/Endring;Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;Ljava/time/LocalDateTime;Ljava/time/LocalDate;Ljava/lang/String;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/Endring;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndretAv ()Ljava/lang/String;
+	public final fun getFrist ()Ljava/time/LocalDate;
+	public final fun getStatus ()Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public final fun getTidsstempel ()Ljava/time/LocalDateTime;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/EndringStatus : java/lang/Enum {
+	public static final field AVBRUTT Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static final field AVSLUTTET Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static final field KVALITETSSIKRET Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static final field OPPRETTET Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static final field SENDT_TILBAKE_FRA_BESLUTTER Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static final field SENDT_TILBAKE_FRA_KVALITETSSIKRER Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static final field TOTRINNS_VURDERT Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/EndringStatus;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO {
+	public fun <init> (Ljava/util/Map;DZZ)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()D
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun copy (Ljava/util/Map;DZZ)Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Ljava/util/Map;DZZILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEr6GBegrenset ()Z
+	public final fun getErGjennomsnitt ()Z
+	public final fun getGrunnlaget ()D
+	public final fun getInntekter ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO {
+	public fun <init> (Ljava/math/BigDecimal;Lno/nav/aap/statistikk/api_kontrakt/UføreType;Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;ILjava/util/Map;I)V
+	public final fun component1 ()Ljava/math/BigDecimal;
+	public final fun component2 ()Lno/nav/aap/statistikk/api_kontrakt/UføreType;
+	public final fun component3 ()Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public final fun component4 ()Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public final fun component5 ()I
+	public final fun component6 ()Ljava/util/Map;
+	public final fun component7 ()I
+	public final fun copy (Ljava/math/BigDecimal;Lno/nav/aap/statistikk/api_kontrakt/UføreType;Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;ILjava/util/Map;I)Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;Ljava/math/BigDecimal;Lno/nav/aap/statistikk/api_kontrakt/UføreType;Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;ILjava/util/Map;IILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/GrunnlagUføreDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGrunnlag ()Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public final fun getGrunnlagYtterligereNedsatt ()Lno/nav/aap/statistikk/api_kontrakt/Grunnlag11_19DTO;
+	public final fun getGrunnlaget ()Ljava/math/BigDecimal;
+	public final fun getType ()Lno/nav/aap/statistikk/api_kontrakt/UføreType;
+	public final fun getUføreInntekterFraForegåendeÅr ()Ljava/util/Map;
+	public final fun getUføreYtterligereNedsattArbeidsevneÅr ()I
+	public final fun getUføregrad ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO {
+	public fun <init> (Ljava/math/BigDecimal;ZLno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;ILjava/math/BigDecimal;IILjava/math/BigDecimal;Ljava/math/BigDecimal;ILjava/math/BigDecimal;Ljava/math/BigDecimal;Ljava/math/BigDecimal;)V
+	public final fun component1 ()Ljava/math/BigDecimal;
+	public final fun component10 ()I
+	public final fun component11 ()Ljava/math/BigDecimal;
+	public final fun component12 ()Ljava/math/BigDecimal;
+	public final fun component13 ()Ljava/math/BigDecimal;
+	public final fun component2 ()Z
+	public final fun component3 ()Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
+	public final fun component4 ()I
+	public final fun component5 ()Ljava/math/BigDecimal;
+	public final fun component6 ()I
+	public final fun component7 ()I
+	public final fun component8 ()Ljava/math/BigDecimal;
+	public final fun component9 ()Ljava/math/BigDecimal;
+	public final fun copy (Ljava/math/BigDecimal;ZLno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;ILjava/math/BigDecimal;IILjava/math/BigDecimal;Ljava/math/BigDecimal;ILjava/math/BigDecimal;Ljava/math/BigDecimal;Ljava/math/BigDecimal;)Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;Ljava/math/BigDecimal;ZLno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;ILjava/math/BigDecimal;IILjava/math/BigDecimal;Ljava/math/BigDecimal;ILjava/math/BigDecimal;Ljava/math/BigDecimal;Ljava/math/BigDecimal;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAndelSomIkkeSkyldesYrkesskade ()Ljava/math/BigDecimal;
+	public final fun getAndelSomSkyldesYrkesskade ()Ljava/math/BigDecimal;
+	public final fun getAndelYrkesskade ()I
+	public final fun getAntattÅrligInntektYrkesskadeTidspunktet ()Ljava/math/BigDecimal;
+	public final fun getBenyttetAndelForYrkesskade ()I
+	public final fun getBeregningsgrunnlag ()Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
+	public final fun getGrunnlagEtterYrkesskadeFordel ()Ljava/math/BigDecimal;
+	public final fun getGrunnlagForBeregningAvYrkesskadeandel ()Ljava/math/BigDecimal;
+	public final fun getGrunnlaget ()Ljava/math/BigDecimal;
+	public final fun getInkludererUføre ()Z
+	public final fun getTerskelverdiForYrkesskade ()I
+	public final fun getYrkesskadeTidspunkt ()I
+	public final fun getYrkesskadeinntektIG ()Ljava/math/BigDecimal;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/StoppetBehandling {
+	public fun <init> (Ljava/lang/String;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/UUID;
+	public final fun component3 ()Ljava/time/LocalDateTime;
+	public final fun component4 ()Ljava/time/LocalDateTime;
+	public final fun component5 ()Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public final fun component6 ()Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;Ljava/lang/String;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAvklaringsbehov ()Ljava/util/List;
+	public final fun getBehandlingOpprettetTidspunkt ()Ljava/time/LocalDateTime;
+	public final fun getBehandlingReferanse ()Ljava/util/UUID;
+	public final fun getBehandlingType ()Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+	public final fun getIdent ()Ljava/lang/String;
+	public final fun getMottattTid ()Ljava/time/LocalDateTime;
+	public final fun getSaksnummer ()Ljava/lang/String;
+	public final fun getStatus ()Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public final fun getVersjon ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Ljava/util/List;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPerioder ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/TilkjentYtelsePeriodeDTO {
+	public fun <init> (Ljava/time/LocalDate;Ljava/time/LocalDate;DD)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/time/LocalDate;
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun copy (Ljava/time/LocalDate;Ljava/time/LocalDate;DD)Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelsePeriodeDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelsePeriodeDTO;Ljava/time/LocalDate;Ljava/time/LocalDate;DDILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelsePeriodeDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDagsats ()D
+	public final fun getFraDato ()Ljava/time/LocalDate;
+	public final fun getGradering ()D
+	public final fun getTilDato ()Ljava/time/LocalDate;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/TypeBehandling : java/lang/Enum {
+	public static final field Førstegangsbehandling Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+	public static final field Klage Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+	public static final field Revurdering Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+	public static final field Tilbakekreving Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/UføreType : java/lang/Enum {
+	public static final field STANDARD Lno/nav/aap/statistikk/api_kontrakt/UføreType;
+	public static final field YTTERLIGERE_NEDSATT Lno/nav/aap/statistikk/api_kontrakt/UføreType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/UføreType;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/UføreType;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/Utfall : java/lang/Enum {
+	public static final field IKKE_OPPFYLT Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+	public static final field IKKE_RELEVANT Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+	public static final field IKKE_VURDERT Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+	public static final field OPPFYLT Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/VilkårDTO {
+	public fun <init> (Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;Ljava/util/List;)V
+	public final fun component1 ()Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;Ljava/util/List;)Lno/nav/aap/statistikk/api_kontrakt/VilkårDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/VilkårDTO;Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;Ljava/util/List;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/VilkårDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPerioder ()Ljava/util/List;
+	public final fun getVilkårType ()Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/VilkårsPeriodeDTO {
+	public fun <init> (Ljava/time/LocalDate;Ljava/time/LocalDate;Lno/nav/aap/statistikk/api_kontrakt/Utfall;ZLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/time/LocalDate;Ljava/time/LocalDate;Lno/nav/aap/statistikk/api_kontrakt/Utfall;ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/time/LocalDate;
+	public final fun component2 ()Ljava/time/LocalDate;
+	public final fun component3 ()Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/time/LocalDate;Ljava/time/LocalDate;Lno/nav/aap/statistikk/api_kontrakt/Utfall;ZLjava/lang/String;Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/VilkårsPeriodeDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/VilkårsPeriodeDTO;Ljava/time/LocalDate;Ljava/time/LocalDate;Lno/nav/aap/statistikk/api_kontrakt/Utfall;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/VilkårsPeriodeDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAvslagsårsak ()Ljava/lang/String;
+	public final fun getFraDato ()Ljava/time/LocalDate;
+	public final fun getInnvilgelsesårsak ()Ljava/lang/String;
+	public final fun getManuellVurdering ()Z
+	public final fun getTilDato ()Ljava/time/LocalDate;
+	public final fun getUtfall ()Lno/nav/aap/statistikk/api_kontrakt/Utfall;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTypeBehandling ()Ljava/lang/String;
+	public final fun getVilkår ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/Vilkårtype : java/lang/Enum {
+	public static final field ALDERSVILKÅRET Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public static final field BISTANDSVILKÅRET Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public static final field GRUNNLAGET Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public static final field MEDLEMSKAP Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public static final field SYKDOMSVILKÅRET Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public static final field SYKEPENGEERSTATNING Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/Vilkårtype;
+}
+

@@ -4,6 +4,7 @@ plugins {
     id("aap-statistikk.conventions")
     `maven-publish`
     `java-library`
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.16.3"
 }
 
 group = "no.nav.aap.statistikk"
