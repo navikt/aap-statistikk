@@ -6,7 +6,7 @@ import java.math.BigDecimal
  * Felter fra BeregningsGrunnlag-interfacet ([no.nav.aap.behandlingsflyt.faktagrunnlag.delvurdering.beregning.Beregningsgrunnlag]),
  * er alltid med. Minst én av grunnlag11_19dto, grunnlagYrkesskade, grunnlagUføre er ikke-null.
  */
-data class BeregningsgrunnlagDTO(
+public data class BeregningsgrunnlagDTO(
     val grunnlag11_19dto: Grunnlag11_19DTO? = null,
     val grunnlagYrkesskade: GrunnlagYrkesskadeDTO? = null,
     val grunnlagUføre: GrunnlagUføreDTO? = null
@@ -16,7 +16,7 @@ data class BeregningsgrunnlagDTO(
     }
 }
 
-data class Grunnlag11_19DTO(
+public data class Grunnlag11_19DTO(
     val inntekter: Map<String, Double>,
     val grunnlaget: Double,
     val er6GBegrenset: Boolean,
@@ -26,7 +26,7 @@ data class Grunnlag11_19DTO(
 /**
  * @param [inkludererUføre] Sett til true om [beregningsgrunnlag] er av type [GrunnlagUføreDTO].
  */
-data class GrunnlagYrkesskadeDTO(
+public data class GrunnlagYrkesskadeDTO(
     val grunnlaget: BigDecimal,
     val inkludererUføre: Boolean,
     val beregningsgrunnlag: BeregningsgrunnlagDTO,
@@ -46,7 +46,7 @@ data class GrunnlagYrkesskadeDTO(
  * @property uføreInntekterFraForegåendeÅr Uføre ikke oppjustert
  * @property uføreInntektIKroner Grunnlaget
  */
-data class GrunnlagUføreDTO(
+public data class GrunnlagUføreDTO(
     val grunnlaget: BigDecimal,
     val type: UføreType,
     val grunnlag: Grunnlag11_19DTO,
@@ -56,6 +56,6 @@ data class GrunnlagUføreDTO(
     val uføreYtterligereNedsattArbeidsevneÅr: Int,
 )
 
-enum class UføreType {
+public enum class UføreType {
     STANDARD, YTTERLIGERE_NEDSATT
 }

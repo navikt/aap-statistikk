@@ -4,8 +4,8 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.bigquery.IBQRepository
-import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.BQBehandling
@@ -13,10 +13,10 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
 import java.time.Clock
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 
 class HendelsesService(
-    private val hendelsesRepository: IHendelsesRepository,
     private val sakRepository: SakRepository,
     private val personRepository: IPersonRepository,
     private val behandlingRepository: IBehandlingRepository,
@@ -28,8 +28,6 @@ class HendelsesService(
         val sak = hentEllerSettInnSak(hendelse, person)
 
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
-
-        hendelsesRepository.lagreHendelse(hendelse, sak.id!!, behandlingId)
 
         lagreSakInfoTilBigquery(sak, behandlingId, hendelse.versjon)
     }
@@ -60,7 +58,10 @@ class HendelsesService(
                     referanse = dto.behandlingReferanse,
                     sak = sak!!,
                     typeBehandling = dto.behandlingType,
-                    opprettetTid = dto.behandlingOpprettetTidspunkt
+                    opprettetTid = dto.behandlingOpprettetTidspunkt,
+                    mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
+                    status = dto.status,
+                    versjon = Versjon(verdi = dto.versjon)
                 )
             )
         }

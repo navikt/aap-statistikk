@@ -5,7 +5,7 @@ import java.util.*
 /**
  * @param beregningsGrunnlag Beregningsgrunnlag. Kan være null om behandlingen avsluttes før inntekt hentes inn.
  */
-data class AvsluttetBehandlingDTO(
+public data class AvsluttetBehandlingDTO(
     val saksnummer: String,
     val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelseDTO,

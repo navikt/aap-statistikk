@@ -11,13 +11,14 @@ import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetBehandlingDtoLagret
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -45,6 +46,7 @@ class MottaStatistikkTest {
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
 
+        val mottattTid = LocalDateTime.now().minusDays(1)
         testKlient(
             noOpTransactionExecutor,
             motor,
@@ -69,7 +71,8 @@ class MottaStatistikkTest {
                         behandlingReferanse = behandlingReferanse,
                         behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
                         avklaringsbehov = listOf(),
-                        versjon = "UKJENT"
+                        versjon = "UKJENT",
+                        mottattTid = mottattTid
                     )
                 )
             )
@@ -85,7 +88,8 @@ class MottaStatistikkTest {
                     behandlingReferanse = behandlingReferanse,
                     behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
                     avklaringsbehov = listOf(),
-                    versjon = "UKJENT"
+                    versjon = "UKJENT",
+                    mottattTid = mottattTid
                 )
             )
         )
@@ -163,7 +167,8 @@ class MottaStatistikkTest {
                 )
             ),
             behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
-            versjon = "UKJENT"
+            versjon = "UKJENT",
+            mottattTid = LocalDateTime.now().minusDays(1)
         )
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
@@ -211,27 +216,28 @@ class MottaStatistikkTest {
 
             dataSource.transaction(readOnly = true) {
                 ventPåSvar({
-                    HendelsesRepository(
+                    SakRepositoryImpl(
                         it
-                    ).hentHendelser()
+                    ).tellSaker()
                 },
-                    { it?.isNotEmpty() ?: false })
+                    { it?.let { it > 0 } ?: false })
             }
 
             dataSource.transaction {
-                val hendelsesRepository = HendelsesRepository(
+                val hendelsesRepository = SakRepositoryImpl(
                     it
                 )
-                val hentHendelser = hendelsesRepository.hentHendelser()
+                val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer)
+                val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
 
-                assertThat(hentHendelser).hasSize(1)
-                assertThat(hentHendelser.first().behandlingReferanse).isEqualTo(hendelse.behandlingReferanse)
-                assertThat(hentHendelser.first().saksnummer).isEqualTo(hendelse.saksnummer)
-                assertThat(hentHendelser.first().behandlingOpprettetTidspunkt).isEqualTo(
+                assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
+                assertThat(uthentetSak.saksnummer).isEqualTo(hendelse.saksnummer)
+                assertThat(uthentetBehandling?.sak?.saksnummer).isEqualTo(hendelse.saksnummer)
+                assertThat(uthentetBehandling?.opprettetTid).isEqualTo(
                     hendelse.behandlingOpprettetTidspunkt
                 )
-                assertThat(hentHendelser.first().behandlingType).isEqualTo(hendelse.behandlingType)
-                assertThat(hentHendelser.first().status).isEqualTo(hendelse.status)
+                assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType)
+                assertThat(uthentetBehandling?.status).isEqualTo(hendelse.status)
             }
         }
     }

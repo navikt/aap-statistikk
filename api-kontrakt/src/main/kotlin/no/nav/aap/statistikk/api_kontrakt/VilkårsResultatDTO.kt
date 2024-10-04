@@ -2,19 +2,19 @@ package no.nav.aap.statistikk.api_kontrakt
 
 import java.time.LocalDate
 
-data class VilkårsResultatDTO(
+public data class VilkårsResultatDTO(
     val typeBehandling: String, val vilkår: List<VilkårDTO>
 )
 
-data class VilkårDTO(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriodeDTO>) {
+public data class VilkårDTO(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriodeDTO>) {
 }
 
 
-enum class Utfall {
+public enum class Utfall {
     IKKE_VURDERT, IKKE_RELEVANT, OPPFYLT, IKKE_OPPFYLT
 }
 
-enum class Vilkårtype {
+public enum class Vilkårtype {
     ALDERSVILKÅRET,
     SYKDOMSVILKÅRET,
     BISTANDSVILKÅRET, MEDLEMSKAP,
@@ -22,7 +22,7 @@ enum class Vilkårtype {
     SYKEPENGEERSTATNING
 }
 
-data class VilkårsPeriodeDTO(
+public data class VilkårsPeriodeDTO(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
     val utfall: Utfall,

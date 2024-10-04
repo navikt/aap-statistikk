@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
+
 plugins {
     id("aap-statistikk.conventions")
     `maven-publish`
@@ -11,6 +13,10 @@ apply(plugin = "java-library")
 
 java {
     withSourcesJar()
+}
+
+kotlin {
+    explicitApi = ExplicitApiMode.Warning
 }
 
 publishing {

@@ -4,12 +4,30 @@ CREATE TABLE person
     IDENT VARCHAR(19) UNIQUE NOT NULL -- fra DB i behandlingsflyt
 );
 
+CREATE TABLE versjon
+(
+    ID      BIGSERIAL    NOT NULL PRIMARY KEY,
+    versjon VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE INDEX IDX_VERSJON ON versjon (versjon);
+
 CREATE TABLE sak
 (
     ID         BIGSERIAL   NOT NULL PRIMARY KEY,
     SAKSNUMMER VARCHAR(19) NOT NULL UNIQUE,
     PERSON_ID  BIGINT      NOT NULL REFERENCES person (id)
 );
+
+CREATE TABLE sak_historikk
+(
+    ID            BIGSERIAL    NOT NULL PRIMARY KEY,
+    GJELDENDE     BOOLEAN      NOT NULL,
+    oppdatert_tid timestamp(3) not null,
+    SAK_ID        BIGINT       NOT NULL REFERENCES sak (id),
+    versjon       BIGINT       NOT NULL references versjon (id)
+);
+
 
 CREATE TABLE behandling
 (
@@ -20,21 +38,15 @@ CREATE TABLE behandling
     OPPRETTET_TID TIMESTAMP(3) NOT NULL
 );
 
-CREATE TABLE versjon
-(
-    ID      BIGSERIAL    NOT NULL PRIMARY KEY,
-    versjon VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE INDEX IDX_VERSJON ON versjon (versjon);
-
-CREATE TABLE motta_statistikk
+CREATE TABLE behandling_historikk
 (
     ID            BIGSERIAL    NOT NULL PRIMARY KEY,
-    behandling_id BIGINT       NOT NULL REFERENCES behandling (ID),
-    sak_id        BIGINT       NOT NULL REFERENCES sak (ID),
-    status        VARCHAR(255) NOT NULL,
-    versjon_id    BIGINT       NOT NULL REFERENCES versjon (ID)
+    behandling_id BIGINT       NOT NULL REFERENCES behandling (id),
+    versjon_id    BIGINT       NOT NULL references versjon (id),
+    GJELDENDE     BOOLEAN      NOT NULL,
+    oppdatert_tid timestamp(3) not null,
+    mottatt_tid   timestamp(3) not null,
+    status        VARCHAR(20)  not null
 );
 
 CREATE TABLE avsluttet_behandling
@@ -106,12 +118,10 @@ CREATE TABLE GRUNNLAG_UFORE
     ID                                       BIGSERIAL      NOT NULL PRIMARY KEY,
     grunnlag_id                              BIGINT         NOT NULL REFERENCES GRUNNLAG (ID),
     grunnlag                                 NUMERIC(21, 5) NOT NULL,
-    er6g_begrenset                           BOOLEAN        NOT NULL,
     type                                     VARCHAR(20)    NOT NULL,
     grunnlag_11_19_id                        BIGINT         NOT NULL REFERENCES GRUNNLAG_11_19,
     uforegrad                                INT            NOT NULL,
     ufore_inntekter_fra_foregaende_ar        JSONB          NOT NULL,
-    ufore_inntekt_i_kroner                   NUMERIC        NOT NULL,
     ufore_ytterligere_nedsatt_arbeidsevne_ar INT            NOT NULL
 );
 
@@ -119,7 +129,6 @@ CREATE TABLE GRUNNLAG_YRKESSKADE
 (
     ID                                          BIGSERIAL      NOT NULL PRIMARY KEY,
     grunnlag                                    NUMERIC(21, 5) NOT NULL,
-    er6g_begrenset                              BOOLEAN        NOT NULL,
     beregningsgrunnlag_id                       BIGINT         NOT NULL,
     beregningsgrunnlag_type                     varchar(10)    NOT NULL,
     terskelverdi_for_yrkesskade                 INT            NOT NULL,

@@ -5,11 +5,11 @@ import java.time.LocalDate
 /**
  * Liste over perioder med tilkjent ytelse.
  */
-data class TilkjentYtelseDTO(
+public data class TilkjentYtelseDTO(
     val perioder: List<TilkjentYtelsePeriodeDTO>
 )
 
-data class TilkjentYtelsePeriodeDTO(
+public data class TilkjentYtelsePeriodeDTO(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
     val dagsats: Double,

@@ -24,15 +24,11 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
-import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
-import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
@@ -40,8 +36,6 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
-import no.nav.aap.statistikk.hendelser.repository.IHendelsesRepository
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -248,22 +242,6 @@ fun opprettTestHendelse(
 
     val sakId = sak.id!!
     val behandlingId = behandling.id!!
-    dataSource.transaction { conn ->
-        val hendelseRepo = HendelsesRepository(conn)
-        val hendelse = StoppetBehandling(
-            saksnummer = saksnummer,
-            behandlingReferanse = randomUUID,
-            behandlingOpprettetTidspunkt = LocalDateTime.now(),
-            status = BehandlingStatus.UTREDES,
-            behandlingType = TypeBehandling.Førstegangsbehandling,
-            ident = ident,
-            avklaringsbehov = listOf(),
-            versjon = UUID.randomUUID().toString()
-        )
-        hendelseRepo.lagreHendelse(
-            hendelse, sakId, behandlingId
-        )
-    }
 
     return Pair(behandlingId, sakId)
 }
@@ -294,6 +272,9 @@ fun opprettTestBehandling(dataSource: DataSource, referanse: UUID, sak: Sak): Be
             sak = sak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
             opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+            status = BehandlingStatus.UTREDES,
+            mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+            versjon = Versjon(UUID.randomUUID().toString()),
         )
         val id = BehandlingRepository(it).lagre(
             behandling
@@ -367,28 +348,6 @@ class FakePersonRepository : IPersonRepository {
     override fun hentPerson(ident: String): Person? {
         return personer.values.firstOrNull { it.ident == ident }
     }
-}
-
-class FakeHendelsesRepository : IHendelsesRepository {
-    private val hendelser = mutableListOf<StoppetBehandling>()
-
-    override fun lagreHendelse(
-        hendelse: StoppetBehandling,
-        sakId: SakId,
-        behandlingId: BehandlingId
-    ): Int {
-        hendelser.add(hendelse)
-        return hendelser.indexOf(hendelse)
-    }
-
-    override fun hentHendelser(): Collection<StoppetBehandling> {
-        return hendelser
-    }
-
-    override fun tellHendelser(): Int {
-        return hendelser.size
-    }
-
 }
 
 class FakeBehandlingRepository : IBehandlingRepository {

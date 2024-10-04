@@ -146,5 +146,6 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
         ),
         behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
         versjon = UUID.randomUUID().toString(),
+        mottattTid = LocalDateTime.now().minusDays(1)
     )
 }

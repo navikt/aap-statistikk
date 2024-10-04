@@ -14,8 +14,7 @@ class LagreAvsluttetHendelseDTOJobbUtfører(
     private val jobbAppender: JobbAppender,
     private val jobb: LagreAvsluttetBehandlingJobbKonstruktør,
     private val avsluttetBehandlingDtoLagretCounter: Counter
-) :
-    JobbUtfører {
+) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val payload = input.payload()
         val dto = DefaultJsonMapper.fromJson<AvsluttetBehandlingDTO>(payload)

@@ -7,7 +7,6 @@ import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
-import no.nav.aap.statistikk.hendelser.repository.HendelsesRepository
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 
@@ -17,7 +16,6 @@ class LagreStoppetHendelseJobb(
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val hendelsesService = HendelsesService(
-            hendelsesRepository = HendelsesRepository(connection),
             sakRepository = SakRepositoryImpl(connection),
             personRepository = PersonRepository(connection),
             behandlingRepository = BehandlingRepository(connection),

@@ -148,23 +148,32 @@ class ApplicationTest {
             @Language("JSON")
             val body =
                 """{
-              "saksnummer": "123456789",
-              "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
-              "behandlingOpprettetTidspunkt": [
-                2024,
-                8,
-                14,
-                11,
-                5,
-                10,
-                343319000
-              ],
-              "status": "OPPRETTET",
-              "behandlingType": "Førstegangsbehandling",
-              "ident": "1403199012345",
-              "avklaringsbehov": [],
-              "versjon": "UKJENT"
-            }"""
+  "saksnummer": "123456789",
+  "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
+  "behandlingOpprettetTidspunkt": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ],
+  "status": "OPPRETTET",
+  "behandlingType": "Førstegangsbehandling",
+  "ident": "1403199012345",
+  "avklaringsbehov": [],
+  "versjon": "UKJENT",
+  "mottattTid": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ]
+}"""
 
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"),
@@ -307,6 +316,15 @@ class ApplicationTest {
   "ident": "1403199012345",
   "avklaringsbehov": [],
   "versjon": "UKJENT",
+  "mottattTid": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ],
   "ukjentfelt": "hei"
 }"""
 
