@@ -79,14 +79,12 @@ fun Application.startUp(
 
     val lagreAvsluttetBehandlingJobbKonstruktør = LagreAvsluttetBehandlingDTOJobb(
         jobb = LagreAvsluttetBehandlingJobbKonstruktør(
-            bqRepository,
-            avsluttetBehandlingCounter
+            bqRepository, avsluttetBehandlingCounter
         ),
         avsluttetBehandlingDtoLagretCounter = prometheusMeterRegistry.avsluttetBehandlingDtoLagret()
     )
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        bqRepository,
-        prometheusMeterRegistry.hendelseLagret()
+        bqRepository, prometheusMeterRegistry.hendelseLagret()
     )
     val motor = Motor(
         dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {
@@ -96,12 +94,9 @@ fun Application.startUp(
                 return LogInformasjon(mapOf())
             }
         }, jobber = listOf(
-            lagreStoppetHendelseJobb,
-            LagreAvsluttetBehandlingJobbKonstruktør(
-                bqRepository,
-                avsluttetBehandlingCounter
-            ),
-            lagreAvsluttetBehandlingJobbKonstruktør
+            lagreStoppetHendelseJobb, LagreAvsluttetBehandlingJobbKonstruktør(
+                bqRepository, avsluttetBehandlingCounter
+            ), lagreAvsluttetBehandlingJobbKonstruktør
         )
     )
 
@@ -123,7 +118,10 @@ fun Application.startUp(
         motor,
         MotorJobbAppender(dataSource),
         lagreAvsluttetBehandlingJobbKonstruktør,
-        azureConfig, motorApiCallback, lagreStoppetHendelseJobb, prometheusMeterRegistry
+        azureConfig,
+        motorApiCallback,
+        lagreStoppetHendelseJobb,
+        prometheusMeterRegistry
     )
 }
 
@@ -146,7 +144,7 @@ fun Application.module(
         prometheusMeterRegistry, azureConfig, InfoModel(
             title = "AAP - Statistikk",
             version = "0.0.1",
-            description = "App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk.",
+            description = "App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk for å få token.",
             contact = ContactModel("Slack: #po_aap_dvh"),
         )
     )
