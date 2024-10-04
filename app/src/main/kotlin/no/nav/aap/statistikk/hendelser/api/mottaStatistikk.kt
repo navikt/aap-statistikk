@@ -74,7 +74,8 @@ val exampleRequestStoppetBehandling = StoppetBehandling(
     ident = "1403199012345",
     behandlingOpprettetTidspunkt = LocalDateTime.now(),
     avklaringsbehov = avklaringsbehov,
-    versjon = "b21e88bca4533d3e0ee3a15f51a87cbaa11a7e9c"
+    versjon = "b21e88bca4533d3e0ee3a15f51a87cbaa11a7e9c",
+    mottattTid = LocalDateTime.now().minusDays(1)
 )
 
 

@@ -7,11 +7,14 @@ import java.util.*
 /**
  * @param saksnummer Saksnummer.
  * @param behandlingReferanse Behandlingsreferanse
+ * @param mottattTid Dato for første søknad mottatt for behandlingen.
+ * @param status Behandlingstatus. Ikke det samme som sakstatus.
  */
-data class StoppetBehandling(
+public data class StoppetBehandling(
     val saksnummer: String,
     val behandlingReferanse: UUID,
     val behandlingOpprettetTidspunkt: LocalDateTime,
+    val mottattTid: LocalDateTime,
     val status: BehandlingStatus,
     val behandlingType: TypeBehandling,
     val ident: String,
@@ -23,7 +26,7 @@ data class StoppetBehandling(
     }
 }
 
-enum class BehandlingStatus {
+public enum class BehandlingStatus {
     OPPRETTET,
     UTREDES,
     IVERKSETTES,
@@ -31,28 +34,28 @@ enum class BehandlingStatus {
 }
 
 
-enum class TypeBehandling(private var identifikator: String) {
-    Førstegangsbehandling("ae0034"),
-    Revurdering("ae0028"),
-    Tilbakekreving(""),
-    Klage("");
-
-    companion object {
-        fun from(identifikator: String): TypeBehandling {
-            return entries.first { it.identifikator == identifikator }
-        }
-    }
+public enum class TypeBehandling {
+    Førstegangsbehandling,
+    Revurdering,
+    Tilbakekreving,
+    Klage;
 }
 
 
-data class AvklaringsbehovHendelse(
+public data class AvklaringsbehovHendelse(
     val definisjon: Definisjon,
     val status: EndringStatus,
     val endringer: List<Endring>
 )
 
+public data class Definisjon(
+    val type: String, // TODO: enum her
+    val behovType: BehovType,
+    val løsesISteg: String
+)
 
-enum class EndringStatus {
+
+public enum class EndringStatus {
     OPPRETTET,
     AVSLUTTET,
     TOTRINNS_VURDERT,
@@ -62,21 +65,14 @@ enum class EndringStatus {
     AVBRUTT
 }
 
-data class Endring(
+public data class Endring(
     val status: EndringStatus,
     val tidsstempel: LocalDateTime,
     val frist: LocalDate? = null,
     val endretAv: String
 )
 
-
-data class Definisjon(
-    val type: String, // TODO: enum her
-    val behovType: BehovType,
-    val løsesISteg: String
-)
-
-enum class BehovType {
+public enum class BehovType {
     MANUELT_PÅKREVD,
     MANUELT_FRIVILLIG,
     VENTEPUNKT,

@@ -6,10 +6,7 @@ import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.util.*
 
 class HendelsesServiceTest {
@@ -19,7 +16,6 @@ class HendelsesServiceTest {
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val hendelsesService = HendelsesService(
-            hendelsesRepository = FakeHendelsesRepository(),
             sakRepository = FakeSakRepository(),
             personRepository = FakePersonRepository(),
             behandlingRepository = FakeBehandlingRepository(),
@@ -37,7 +33,8 @@ class HendelsesServiceTest {
                 behandlingType = TypeBehandling.Revurdering,
                 ident = "234",
                 versjon = "dsad",
-                avklaringsbehov = listOf()
+                avklaringsbehov = listOf(),
+                mottattTid = LocalDateTime.now().minusDays(1)
             )
         )
 
