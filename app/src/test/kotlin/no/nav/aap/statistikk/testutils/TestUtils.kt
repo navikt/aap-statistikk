@@ -226,9 +226,9 @@ fun opprettTestHendelse(
 ): Pair<BehandlingId, SakId> {
     val ident = "29021946"
 
-    val id = opprettTestPerson(dataSource, ident)
+    val personMedId = opprettTestPerson(dataSource, ident)
 
-    val sak = opprettTestSak(dataSource, saksnummer, Person(ident, id = id))
+    val sak = opprettTestSak(dataSource, saksnummer, Person(ident, id = personMedId.id))
 
     val behandling = opprettTestBehandling(
         dataSource,
@@ -236,7 +236,7 @@ fun opprettTestHendelse(
         Sak(
             id = sak.id,
             saksnummer = saksnummer,
-            person = Person(ident, id = id),
+            person = Person(ident, id = personMedId.id),
         ),
     )
 
@@ -246,10 +246,11 @@ fun opprettTestHendelse(
     return Pair(behandlingId, sakId)
 }
 
-fun opprettTestPerson(dataSource: DataSource, ident: String): Long {
+fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     return dataSource.transaction { conn ->
         val personRepository = PersonRepository(conn)
-        personRepository.hentPerson(ident)?.id ?: personRepository.lagrePerson(Person(ident))
+        val id = personRepository.hentPerson(ident)?.id ?: personRepository.lagrePerson(Person(ident))
+        Person(ident, id)
     }
 }
 
