@@ -30,16 +30,24 @@ VALUES (?, ?, ?, ?)"""
             }
         }
 
-        val versjonId = dbConnection.executeReturnKey(
-            """INSERT INTO versjon (versjon)
-                            VALUES (?)
-                            ON CONFLICT (versjon)
-                                DO NOTHING
-                            RETURNING id;"""
+        val versjonId = dbConnection.queryFirst(
+            """
+WITH ny_versjon AS (
+    INSERT INTO versjon (versjon)
+        VALUES (?)
+        ON CONFLICT DO NOTHING
+        RETURNING id)
+SELECT COALESCE(
+               (SELECT id FROM ny_versjon),
+               (SELECT id FROM versjon WHERE versjon.versjon = ?)
+       ) AS id;
+"""
         ) {
             setParams {
                 setString(1, behandling.versjon.verdi)
+                setString(2, behandling.versjon.verdi)
             }
+            setRowMapper { row -> row.getLong("id") }
         }
 
         dbConnection.execute("UPDATE behandling_historikk SET gjeldende = FALSE where behandling_id = ?") {
