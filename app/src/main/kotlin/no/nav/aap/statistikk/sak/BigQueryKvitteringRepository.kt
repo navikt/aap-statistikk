@@ -15,8 +15,8 @@ class BigQueryKvitteringRepository(private val dbConnection: DBConnection) :
             "INSERT INTO bigquery_kvittering (sak_snapshot_id, behandling_snapshot_id, tidspunkt) VALUES (?, ?, CURRENT_TIMESTAMP)"
         return dbConnection.executeReturnKey(query) {
             setParams {
-                setLong(1, sak.id!!)
-                setLong(2, behandling.id!!)
+                setLong(1, sak.snapShotId!!)
+                setLong(2, behandling.snapShotId!!)
             }
         }
     }
