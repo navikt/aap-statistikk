@@ -12,6 +12,7 @@ import java.util.*
  */
 public data class StoppetBehandling(
     val saksnummer: String,
+    val sakStatus: SakStatus,
     val behandlingReferanse: UUID,
     val behandlingOpprettetTidspunkt: LocalDateTime,
     val mottattTid: LocalDateTime,
@@ -24,6 +25,13 @@ public data class StoppetBehandling(
     init {
         require(ident.isNotEmpty())
     }
+}
+
+public enum class SakStatus {
+    OPPRETTET,
+    UTREDES,
+    LØPENDE,
+    AVSLUTTET
 }
 
 public enum class BehandlingStatus {

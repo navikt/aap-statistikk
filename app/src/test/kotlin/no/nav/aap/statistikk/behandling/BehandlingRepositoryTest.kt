@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
+import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.person.Person
@@ -18,6 +19,34 @@ import java.util.*
 import javax.sql.DataSource
 
 class BehandlingRepositoryTest {
+    @Test
+    fun `sette inn og hente ut igjen`(@Postgres dataSource: DataSource) {
+        val person = opprettTestPerson(dataSource, "123456789")
+        val sak = opprettTestSak(dataSource, "123456789", person)
+
+        val referanse = UUID.randomUUID()
+
+        dataSource.transaction {
+            BehandlingRepository(it).opprettBehandling(
+                Behandling(
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.UTREDES,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx")
+                )
+            )
+        }
+
+        val uthentet = dataSource.transaction { BehandlingRepository(it).hent(referanse) }
+
+        uthentet!!
+        assertThat(uthentet.status).isEqualTo(BehandlingStatus.UTREDES)
+        assertThat(uthentet.sak.sakStatus).isEqualTo(SakStatus.UTREDES)
+
+    }
 
     @Test
     fun `lagre to ganger med eksisterende versjon`(@Postgres dataSource: DataSource) {
@@ -26,7 +55,7 @@ class BehandlingRepositoryTest {
 
         val referanse = UUID.randomUUID()
         dataSource.transaction {
-            BehandlingRepository(it).lagre(
+            BehandlingRepository(it).opprettBehandling(
                 Behandling(
                     referanse = referanse,
                     sak = sak,
@@ -41,7 +70,7 @@ class BehandlingRepositoryTest {
 
         val referanse2 = UUID.randomUUID()
         dataSource.transaction {
-            BehandlingRepository(it).lagre(
+            BehandlingRepository(it).opprettBehandling(
                 Behandling(
                     referanse = referanse2,
                     sak = sak,
@@ -57,6 +86,46 @@ class BehandlingRepositoryTest {
         dataSource.transaction {
             assertThat(BehandlingRepository(it).hent(referanse)).isNotNull()
             assertThat(BehandlingRepository(it).hent(referanse2)).isNotNull()
+        }
+    }
+
+    @Test
+    fun `lagre oppdatert behandling, henter ut nyeste info`(@Postgres dataSource: DataSource) {
+        val person = opprettTestPerson(dataSource, "123456789")
+        val sak = opprettTestSak(dataSource, "123456789", person)
+
+        val referanse = UUID.randomUUID()
+
+        val behandlingId = dataSource.transaction {
+            BehandlingRepository(it).opprettBehandling(
+                Behandling(
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.OPPRETTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx")
+                )
+            )
+        }
+        dataSource.transaction {
+            BehandlingRepository(it).oppdaterBehandling(
+                Behandling(
+                    id = behandlingId,
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.UTREDES,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx2")
+                )
+            )
+        }
+
+        dataSource.transaction {
+            assertThat(BehandlingRepository(it).hent(referanse)).isNotNull()
         }
     }
 }

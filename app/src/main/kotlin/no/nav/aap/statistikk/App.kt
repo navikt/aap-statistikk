@@ -39,6 +39,7 @@ import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oversikt.oversiktRoute
+import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import org.slf4j.LoggerFactory
 
@@ -84,7 +85,8 @@ fun Application.startUp(
         avsluttetBehandlingDtoLagretCounter = prometheusMeterRegistry.avsluttetBehandlingDtoLagret()
     )
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        bqRepository, prometheusMeterRegistry.hendelseLagret()
+        bqRepository, prometheusMeterRegistry.hendelseLagret(),
+        bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) }
     )
     val motor = Motor(
         dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {

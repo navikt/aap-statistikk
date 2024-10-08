@@ -6,13 +6,21 @@ import no.nav.aap.statistikk.person.Person
 
 class SakRepositoryImpl(private val dbConnection: DBConnection) : SakRepository {
     override fun hentSak(sakID: Long): Sak {
-        val query = """SELECT *
+        val query = """
+SELECT sak.id           as s_id,
+       sak.saksnummer   as s_saksnummer,
+       sak.person_id    as s_person_id,
+       p.ident          as p_ident,
+       sh.oppdatert_tid as sh_oppdatert_tid,
+       sh.sak_status    as sh_sak_status,
+       sh.id            as sh_id
 FROM sak
          JOIN person p ON sak.person_id = p.id
+         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh ON sh.sak_id = sak.id
 WHERE sak.id = ?
         """
 
-        return dbConnection.queryFirst<Sak>(query) {
+        return dbConnection.queryFirst(query) {
             setParams {
                 setLong(1, sakID)
             }
@@ -22,9 +30,17 @@ WHERE sak.id = ?
         }
     }
 
-    private val HENT_SAK_QUERY = """SELECT *
+    private val HENT_SAK_QUERY = """
+SELECT sak.id           as s_id,
+       sak.saksnummer   as s_saksnummer,
+       sak.person_id    as s_person_id,
+       p.ident          as p_ident,
+       sh.oppdatert_tid as sh_oppdatert_tid,
+       sh.sak_status    as sh_sak_status,
+       sh.id            as sh_id
 FROM sak
          JOIN person p ON sak.person_id = p.id
+         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh ON sh.sak_id = sak.id
 WHERE sak.saksnummer = ?
         """
 
@@ -51,12 +67,15 @@ WHERE sak.saksnummer = ?
     }
 
     private fun sakRowMapper(row: Row) = Sak(
-        id = row.getLong("id"),
-        saksnummer = row.getString("saksnummer"),
+        id = row.getLong("s_id"),
+        saksnummer = row.getString("s_saksnummer"),
         person = Person(
-            ident = row.getString("ident"),
-            id = row.getLong("person_id"),
-        )
+            ident = row.getString("p_ident"),
+            id = row.getLong("s_person_id"),
+        ),
+        sistOppdatert = row.getLocalDateTime("sh_oppdatert_tid"),
+        snapShotId = row.getLong("sh_id"),
+        sakStatus = row.getEnum("sh_sak_status")
     )
 
     override fun settInnSak(sak: Sak): Long {
@@ -74,7 +93,7 @@ WHERE sak.saksnummer = ?
             LIMIT 1
         """
 
-        return dbConnection.queryFirst(query) {
+        val sakId = dbConnection.queryFirst(query) {
             setParams {
                 setString(1, sak.saksnummer)
                 setLong(2, personId)
@@ -84,6 +103,23 @@ WHERE sak.saksnummer = ?
                 row.getLong("id")
             }
         }
+
+        dbConnection.execute("UPDATE sak_historikk SET gjeldende = FALSE where sak_id = ?") {
+            setParams { setLong(1, sak.id) }
+        }
+
+        dbConnection.executeReturnKey("INSERT INTO sak_historikk (gjeldende, oppdatert_tid, sak_id, sak_status) VALUES (?, ?, ?, ?)") {
+            setParams {
+                var c = 1
+                setBoolean(c++, true)
+                setLocalDateTime(c++, sak.sistOppdatert)
+                setLong(c++, sakId)
+                setString(c++, sak.sakStatus.toString())
+            }
+        }
+
+        return sakId
+
     }
 
     override fun tellSaker(): Int {

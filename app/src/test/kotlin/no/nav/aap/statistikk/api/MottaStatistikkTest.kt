@@ -59,7 +59,10 @@ class MottaStatistikkTest {
                 meterRegistry.avsluttetBehandlingDtoLagret()
             ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter)
+            LagreStoppetHendelseJobb(
+                bqRepository, stoppetHendelseLagretCounter,
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+            )
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(
@@ -72,7 +75,8 @@ class MottaStatistikkTest {
                         behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
                         avklaringsbehov = listOf(),
                         versjon = "UKJENT",
-                        mottattTid = mottattTid
+                        mottattTid = mottattTid,
+                        sakStatus = SakStatus.UTREDES
                     )
                 )
             )
@@ -89,7 +93,8 @@ class MottaStatistikkTest {
                     behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
                     avklaringsbehov = listOf(),
                     versjon = "UKJENT",
-                    mottattTid = mottattTid
+                    mottattTid = mottattTid,
+                    sakStatus = SakStatus.UTREDES
                 )
             )
         )
@@ -168,7 +173,8 @@ class MottaStatistikkTest {
             ),
             behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
             versjon = "UKJENT",
-            mottattTid = LocalDateTime.now().minusDays(1)
+            mottattTid = LocalDateTime.now().minusDays(1),
+            sakStatus = SakStatus.UTREDES
         )
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
@@ -187,7 +193,8 @@ class MottaStatistikkTest {
             jobber = listOf(
                 LagreStoppetHendelseJobb(
                     bqRepository,
-                    stoppetHendelseLagretCounter
+                    stoppetHendelseLagretCounter,
+                    bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
                 )
             )
         )
@@ -206,7 +213,10 @@ class MottaStatistikkTest {
                 avsluttetBehandlingDtoLagretCounter
             ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter)
+            LagreStoppetHendelseJobb(
+                bqRepository, stoppetHendelseLagretCounter,
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+            )
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(

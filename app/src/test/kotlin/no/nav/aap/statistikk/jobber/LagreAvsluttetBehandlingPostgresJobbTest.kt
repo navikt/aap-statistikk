@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
+import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.service.AvsluttetBehandlingService
@@ -33,7 +34,7 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
         val fakeBehandlingRepository = FakeBehandlingRepository()
         val randomUUID = UUID.randomUUID()
         val saksnummer = "4LFK2S0"
-        fakeBehandlingRepository.lagre(
+        fakeBehandlingRepository.opprettBehandling(
             Behandling(
                 referanse = randomUUID,
                 sak = Sak(
@@ -42,7 +43,9 @@ class LagreAvsluttetBehandlingPostgresJobbTest {
                     person = Person(
                         ident = "123",
                         id = 0
-                    )
+                    ),
+                    sistOppdatert = LocalDateTime.now(),
+                    sakStatus = SakStatus.UTREDES
                 ),
                 typeBehandling = TypeBehandling.Førstegangsbehandling,
                 opprettetTid = LocalDateTime.now(),

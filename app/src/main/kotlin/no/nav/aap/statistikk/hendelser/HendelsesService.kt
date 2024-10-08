@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.BQBehandling
+import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
 import java.time.Clock
@@ -18,6 +19,7 @@ import java.time.temporal.ChronoUnit
 
 class HendelsesService(
     private val sakRepository: SakRepository,
+    private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
     private val personRepository: IPersonRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val bigQueryRepository: IBQRepository,
@@ -34,7 +36,11 @@ class HendelsesService(
 
     private fun lagreSakInfoTilBigquery(sak: Sak, behandlingId: Long, versjon: String) {
         val behandling = behandlingRepository.hent(behandlingId)
+
+        val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
+
         val bqSak = BQBehandling(
+            sekvensNummer = sekvensNummer,
             saksnummer = sak.saksnummer,
             behandlingUUID = behandling.referanse.toString(),
             behandlingType = behandling.typeBehandling.toString().uppercase(),
@@ -49,22 +55,20 @@ class HendelsesService(
         dto: StoppetBehandling,
         sak: Sak?
     ): Long {
-        val behandling = behandlingRepository.hent(dto.behandlingReferanse)
-        val behandlingId = if (behandling != null) {
-            behandling.id!!
-        } else {
-            behandlingRepository.lagre(
-                Behandling(
-                    referanse = dto.behandlingReferanse,
-                    sak = sak!!,
-                    typeBehandling = dto.behandlingType,
-                    opprettetTid = dto.behandlingOpprettetTidspunkt,
-                    mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-                    status = dto.status,
-                    versjon = Versjon(verdi = dto.versjon)
-                )
-            )
-        }
+        val behandling = Behandling(
+            referanse = dto.behandlingReferanse,
+            sak = sak!!,
+            typeBehandling = dto.behandlingType,
+            opprettetTid = dto.behandlingOpprettetTidspunkt,
+            mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
+            status = dto.status,
+            versjon = Versjon(verdi = dto.versjon)
+        )
+        val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
+        val behandlingId =
+            eksisterendeBehandlingId
+                ?.also { behandlingRepository.oppdaterBehandling(behandling.copy(id = eksisterendeBehandlingId)) }
+                ?: behandlingRepository.opprettBehandling(behandling)
         return behandlingId
     }
 
@@ -78,7 +82,9 @@ class HendelsesService(
                 Sak(
                     id = null,
                     saksnummer = dto.saksnummer,
-                    person = person
+                    person = person,
+                    sistOppdatert = LocalDateTime.now(clock),
+                    sakStatus = dto.sakStatus
                 )
             )
             sak = sakRepository.hentSak(sakId)

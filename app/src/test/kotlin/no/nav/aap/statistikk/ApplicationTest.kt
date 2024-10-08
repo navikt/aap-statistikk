@@ -106,7 +106,10 @@ class ApplicationTest {
                 avsluttetBehandlingDtoLagretCounter
             ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter),
+            LagreStoppetHendelseJobb(
+                bqRepository, stoppetHendelseLagretCounter,
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+            ),
         ) { url, client ->
 
             val respons = client.post<AvsluttetBehandlingDTO, LinkedHashMap<String, String>>(
@@ -143,12 +146,16 @@ class ApplicationTest {
                 meterRegistry.avsluttetBehandlingDtoLagret()
             ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository, meterRegistry.hendelseLagret()),
+            LagreStoppetHendelseJobb(
+                bqRepository, meterRegistry.hendelseLagret(),
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+            ),
         ) { url, client ->
             @Language("JSON")
             val body =
                 """{
   "saksnummer": "123456789",
+  "sakStatus": "OPPRETTET",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
   "behandlingOpprettetTidspunkt": [
     2024,
@@ -278,7 +285,8 @@ class ApplicationTest {
             azureConfig,
             LagreStoppetHendelseJobb(
                 FakeBQRepository(),
-                stoppetHendelseLagretCounter
+                stoppetHendelseLagretCounter,
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
             )
         ) { url, client ->
             client.post<AvsluttetBehandlingDTO, String>(
@@ -301,6 +309,7 @@ class ApplicationTest {
         val payload =
             """{
   "saksnummer": "123456789",
+  "sakStatus": "OPPRETTET",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
   "behandlingOpprettetTidspunkt": [
     2024,
@@ -348,7 +357,10 @@ class ApplicationTest {
                 avsluttetBehandlingDtoLagretCounter
             ),
             azureConfig,
-            LagreStoppetHendelseJobb(bqRepository, stoppetHendelseLagretCounter),
+            LagreStoppetHendelseJobb(
+                bqRepository, stoppetHendelseLagretCounter,
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+            ),
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(

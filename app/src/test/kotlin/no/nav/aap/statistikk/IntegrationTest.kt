@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
+import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
@@ -57,6 +58,20 @@ class IntegrationTest {
                 { it != null }
             )
 
+            val bqSaker = ventPåSvar({ bigQueryClient.read(SakTabell()) },
+                { t -> t !== null && t.isNotEmpty() })
+            assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
+
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"),
+                PostRequest(hendelse.copy(sakStatus = SakStatus.AVSLUTTET))
+            )
+
+            // Sekvensnummer økes med 1 med ny info på sak
+            val bqSaker2 = ventPåSvar({ bigQueryClient.read(SakTabell()) },
+                { t -> t !== null && t.isNotEmpty() && t.size > 1 })
+            assertThat(bqSaker2!![1].sekvensNummer).isEqualTo(2)
+
             client.post<AvsluttetBehandlingDTO, Any>(
                 URI.create("$url/avsluttetBehandling"),
                 PostRequest(avsluttetBehandling)
@@ -76,7 +91,7 @@ class IntegrationTest {
             val sakRespons = ventPåSvar({ bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(sakRespons).hasSize(1)
+            assertThat(sakRespons).hasSize(2)
         }
     }
 }

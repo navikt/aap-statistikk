@@ -24,6 +24,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
+import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
@@ -233,11 +234,7 @@ fun opprettTestHendelse(
     val behandling = opprettTestBehandling(
         dataSource,
         randomUUID,
-        Sak(
-            id = sak.id,
-            saksnummer = saksnummer,
-            person = Person(ident, id = personMedId.id),
-        ),
+        sak,
     )
 
     val sakId = sak.id!!
@@ -249,7 +246,8 @@ fun opprettTestHendelse(
 fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     return dataSource.transaction { conn ->
         val personRepository = PersonRepository(conn)
-        val id = personRepository.hentPerson(ident)?.id ?: personRepository.lagrePerson(Person(ident))
+        val id =
+            personRepository.hentPerson(ident)?.id ?: personRepository.lagrePerson(Person(ident))
         Person(ident, id)
     }
 }
@@ -259,7 +257,9 @@ fun opprettTestSak(dataSource: DataSource, saksnummer: String, person: Person): 
         val sak = Sak(
             saksnummer = saksnummer,
             person = person,
-            id = null
+            id = null,
+            sistOppdatert = LocalDateTime.now(),
+            sakStatus = SakStatus.UTREDES,
         )
         val id = SakRepositoryImpl(it).settInnSak(sak)
         sak.copy(id)
@@ -277,7 +277,7 @@ fun opprettTestBehandling(dataSource: DataSource, referanse: UUID, sak: Sak): Be
             mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
             versjon = Versjon(UUID.randomUUID().toString()),
         )
-        val id = BehandlingRepository(it).lagre(
+        val id = BehandlingRepository(it).opprettBehandling(
             behandling
         )
 
@@ -339,6 +339,13 @@ class FakeSakRepository : SakRepository {
     }
 }
 
+class FakeBigQueryKvitteringRepository : IBigQueryKvitteringRepository {
+    var kvitteringer = 0L
+    override fun lagreKvitteringForSak(sak: Sak, behandling: Behandling): Long {
+        return kvitteringer++
+    }
+}
+
 class FakePersonRepository : IPersonRepository {
     private val personer = mutableMapOf<Long, Person>()
     override fun lagrePerson(person: Person): Long {
@@ -353,9 +360,13 @@ class FakePersonRepository : IPersonRepository {
 
 class FakeBehandlingRepository : IBehandlingRepository {
     private val behandlinger = mutableListOf<Behandling>()
-    override fun lagre(behandling: Behandling): Long {
+    override fun opprettBehandling(behandling: Behandling): Long {
         behandlinger.add(behandling)
-        return behandlinger.indexOf(behandling).toLong()
+        return (behandlinger.size - 1).toLong()
+    }
+
+    override fun oppdaterBehandling(behandling: Behandling) {
+        behandlinger[behandling.id!!.toInt()] = behandling
     }
 
     override fun hent(referanse: UUID): Behandling? {

@@ -3,7 +3,9 @@ package no.nav.aap.statistikk.behandling
 import java.util.*
 
 interface IBehandlingRepository {
-    fun lagre(behandling: Behandling): Long
+    fun opprettBehandling(behandling: Behandling): Long
+
+    fun oppdaterBehandling(behandling: Behandling)
 
     fun hent(referanse: UUID): Behandling?
 
