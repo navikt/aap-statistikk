@@ -189,19 +189,30 @@ public final class no/nav/aap/statistikk/api_kontrakt/GrunnlagYrkesskadeDTO {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class no/nav/aap/statistikk/api_kontrakt/SakStatus : java/lang/Enum {
+	public static final field AVSLUTTET Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+	public static final field LØPENDE Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+	public static final field OPPRETTET Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+	public static final field UTREDES Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+}
+
 public final class no/nav/aap/statistikk/api_kontrakt/StoppetBehandling {
-	public fun <init> (Ljava/lang/String;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/SakStatus;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/UUID;
-	public final fun component3 ()Ljava/time/LocalDateTime;
+	public final fun component10 ()Ljava/util/List;
+	public final fun component2 ()Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+	public final fun component3 ()Ljava/util/UUID;
 	public final fun component4 ()Ljava/time/LocalDateTime;
-	public final fun component5 ()Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
-	public final fun component6 ()Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
-	public final fun component7 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/time/LocalDateTime;
+	public final fun component6 ()Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public final fun component7 ()Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
 	public final fun component8 ()Ljava/lang/String;
-	public final fun component9 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;
-	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;Ljava/lang/String;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/SakStatus;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/SakStatus;Ljava/util/UUID;Ljava/time/LocalDateTime;Ljava/time/LocalDateTime;Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/StoppetBehandling;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAvklaringsbehov ()Ljava/util/List;
 	public final fun getBehandlingOpprettetTidspunkt ()Ljava/time/LocalDateTime;
@@ -209,6 +220,7 @@ public final class no/nav/aap/statistikk/api_kontrakt/StoppetBehandling {
 	public final fun getBehandlingType ()Lno/nav/aap/statistikk/api_kontrakt/TypeBehandling;
 	public final fun getIdent ()Ljava/lang/String;
 	public final fun getMottattTid ()Ljava/time/LocalDateTime;
+	public final fun getSakStatus ()Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
 	public final fun getSaksnummer ()Ljava/lang/String;
 	public final fun getStatus ()Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
 	public final fun getVersjon ()Ljava/lang/String;
