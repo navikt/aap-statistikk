@@ -97,6 +97,7 @@ SELECT b.id             as b_id,
        bh.status        as bh_status,
        bh.versjon_id    as bh_versjon_id,
        bh.mottatt_tid   as bh_mottatt_tid,
+       bh.id            as bh_id,
        v.versjon        as v_versjon
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
@@ -116,7 +117,8 @@ WHERE b.referanse = ?"""
         }
     }
 
-    private val hentMedId = """SELECT b.id             as b_id,
+    private val hentMedId = """
+SELECT b.id             as b_id,
        b.referanse      as b_referanse,
        b.type           as b_type,
        b.opprettet_tid  as b_opprettet_tid,
@@ -130,6 +132,7 @@ WHERE b.referanse = ?"""
        bh.status        as bh_status,
        bh.versjon_id    as bh_versjon_id,
        bh.mottatt_tid   as bh_mottatt_tid,
+       bh.id            as bh_id,
        v.versjon        as v_versjon
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
@@ -182,6 +185,7 @@ WHERE b.id = ?"""
         opprettetTid = it.getLocalDateTime("b_opprettet_tid"),
         mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
         versjon = Versjon(verdi = it.getString("v_versjon"), id = it.getLong("bh_versjon_id")),
-        status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) }
+        status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
+        snapShotId = it.getLong("bh_id")
     )
 }
