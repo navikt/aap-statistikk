@@ -1,12 +1,16 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
+import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.*
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 class HendelsesServiceTest {
@@ -20,6 +24,7 @@ class HendelsesServiceTest {
             personRepository = FakePersonRepository(),
             behandlingRepository = FakeBehandlingRepository(),
             bigQueryRepository = bigQueryRepository,
+            bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
             clock = clock,
         )
 
@@ -34,7 +39,8 @@ class HendelsesServiceTest {
                 ident = "234",
                 versjon = "dsad",
                 avklaringsbehov = listOf(),
-                mottattTid = LocalDateTime.now().minusDays(1)
+                mottattTid = LocalDateTime.now().minusDays(1),
+                sakStatus = SakStatus.OPPRETTET,
             )
         )
 

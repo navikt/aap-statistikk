@@ -23,7 +23,8 @@ data class Behandling(
     val status: BehandlingStatus,
     val opprettetTid: LocalDateTime,
     val mottattTid: LocalDateTime,
-    val versjon: Versjon
+    val versjon: Versjon,
+    val snapShotId: Long? = null,
 ) {
     init {
         // Skal oppgis med sekund-presisjon

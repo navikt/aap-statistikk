@@ -27,7 +27,9 @@ class SakTabell : BQTable<BQBehandling> {
                     .build()
             val versjon = Field.of("versjon", StandardSQLTypeName.STRING)
             val avsender = Field.of("avsender", StandardSQLTypeName.STRING)
+            val sekvensNummer = Field.of("sekvensnummer", StandardSQLTypeName.INT64)
             return Schema.of(
+                sekvensNummer,
                 saksnummmer,
                 behandlingUuid,
                 behandlingType,
@@ -44,6 +46,7 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingType = fieldValueList.get("behandlingType").stringValue
         val versjon = fieldValueList.get("versjon").stringValue
         val avsender = fieldValueList.get("avsender").stringValue
+        val sekvensNummer = fieldValueList.get("sekvensnummer").longValue
 
         return BQBehandling(
             saksnummer = saksnummer,
@@ -51,13 +54,15 @@ class SakTabell : BQTable<BQBehandling> {
             tekniskTid = LocalDateTime.parse(tekniskTid),
             behandlingType = behandlingType,
             avsender = avsender,
-            verson = versjon
+            verson = versjon,
+            sekvensNummer = sekvensNummer
         )
     }
 
     override fun toRow(value: BQBehandling): InsertAllRequest.RowToInsert {
         return InsertAllRequest.RowToInsert.of(
             mapOf(
+                "sekvensnummer" to value.sekvensNummer,
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
                 "behandlingType" to value.behandlingType,

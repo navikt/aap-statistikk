@@ -27,7 +27,8 @@ class SakTabellTest {
                 tekniskTid = LocalDateTime.now(),
                 behandlingType = TypeBehandling.Revurdering.toString().uppercase(),
                 avsender = KELVIN,
-                verson = "versjon"
+                verson = "versjon",
+                sekvensNummer = 0L
             )
         )
 

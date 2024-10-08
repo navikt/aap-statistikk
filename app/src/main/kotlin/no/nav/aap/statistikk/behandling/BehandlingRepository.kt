@@ -16,7 +16,8 @@ class BehandlingRepository(
     private val dbConnection: DBConnection,
     private val clock: Clock = Clock.systemUTC()
 ) : IBehandlingRepository {
-    override fun lagre(behandling: Behandling): BehandlingId {
+
+    override fun opprettBehandling(behandling: Behandling): Long {
         val behandlingId = dbConnection.executeReturnKey(
             """
 INSERT INTO behandling (sak_id, referanse, type, opprettet_tid)
@@ -29,6 +30,13 @@ VALUES (?, ?, ?, ?)"""
                 setLocalDateTime(4, behandling.opprettetTid)
             }
         }
+        oppdaterBehandling(behandling.copy(id = behandlingId))
+
+        return behandlingId
+    }
+
+    override fun oppdaterBehandling(behandling: Behandling) {
+        val behandlingId = behandling.id!!
 
         val versjonId = dbConnection.queryFirst(
             """
@@ -70,27 +78,29 @@ VALUES (?, ?, ?, ?, ?, ?)""",
                 setString(c, behandling.status.name)
             }
         }
-
-        return behandlingId
     }
 
     override fun hent(referanse: UUID): Behandling? {
         return dbConnection.queryFirstOrNull(
             """
-SELECT b.id            as b_id,
-       b.referanse     as b_referanse,
-       b.type          as b_type,
-       b.opprettet_tid as b_opprettet_tid,
-       s.id            as s_id,
-       s.saksnummer    as s_saksnummer,
-       p.ident         as p_ident,
-       p.id            as p_id,
-       bh.status       as bh_status,
-       bh.versjon_id   as bh_versjon_id,
-       bh.mottatt_tid  as bh_mottatt_tid,
-       v.versjon       as v_versjon
+SELECT b.id             as b_id,
+       b.referanse      as b_referanse,
+       b.type           as b_type,
+       b.opprettet_tid  as b_opprettet_tid,
+       s.id             as s_id,
+       s.saksnummer     as s_saksnummer,
+       sh.oppdatert_tid as sh_oppdatert_tid,
+       sh.sak_status    as sh_sak_status,
+       sh.id            as sh_id,
+       p.ident          as p_ident,
+       p.id             as p_id,
+       bh.status        as bh_status,
+       bh.versjon_id    as bh_versjon_id,
+       bh.mottatt_tid   as bh_mottatt_tid,
+       v.versjon        as v_versjon
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
+         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
          JOIN person p on p.id = s.person_id
          JOIN (SELECT * FROM behandling_historikk bh WHERE bh.gjeldende = TRUE) bh
               on b.id = bh.behandling_id
@@ -106,20 +116,24 @@ WHERE b.referanse = ?"""
         }
     }
 
-    private val hentMedId = """SELECT b.id            as b_id,
-       b.referanse     as b_referanse,
-       b.type          as b_type,
-       b.opprettet_tid as b_opprettet_tid,
-       s.id            as s_id,
-       s.saksnummer    as s_saksnummer,
-       p.ident         as p_ident,
-       p.id            as p_id,
-       bh.status       as bh_status,
-       bh.versjon_id   as bh_versjon_id,
-       bh.mottatt_tid  as bh_mottatt_tid,
-       v.versjon       as v_versjon
+    private val hentMedId = """SELECT b.id             as b_id,
+       b.referanse      as b_referanse,
+       b.type           as b_type,
+       b.opprettet_tid  as b_opprettet_tid,
+       s.id             as s_id,
+       s.saksnummer     as s_saksnummer,
+       sh.oppdatert_tid as sh_oppdatert_tid,
+       sh.sak_status    as sh_sak_status,
+       sh.id            as sh_id,
+       p.ident          as p_ident,
+       p.id             as p_id,
+       bh.status        as bh_status,
+       bh.versjon_id    as bh_versjon_id,
+       bh.mottatt_tid   as bh_mottatt_tid,
+       v.versjon        as v_versjon
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
+         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
          JOIN person p on p.id = s.person_id
          JOIN (SELECT * FROM behandling_historikk WHERE gjeldende = TRUE) bh
               on bh.behandling_id = b.id
@@ -159,7 +173,10 @@ WHERE b.id = ?"""
             person = Person(
                 ident = it.getString("p_ident"),
                 id = it.getLong("p_id"),
-            )
+            ),
+            sistOppdatert = it.getLocalDateTime("sh_oppdatert_tid"),
+            snapShotId = it.getLong("sh_id"),
+            sakStatus = it.getEnum("sh_sak_status")
         ),
         typeBehandling = it.getString("b_type").let { TypeBehandling.valueOf(it) },
         opprettetTid = it.getLocalDateTime("b_opprettet_tid"),
