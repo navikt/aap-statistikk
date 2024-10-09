@@ -384,6 +384,10 @@ class FakeBehandlingRepository : IBehandlingRepository {
     override fun hentEllerNull(id: Long): Behandling? {
         return behandlinger.getOrNull(id.toInt())
     }
+
+    override fun tellFullførteBehandlinger(): Long {
+        TODO("Not yet implemented")
+    }
 }
 
 class FakeBQRepository : IBQRepository {

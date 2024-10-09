@@ -12,4 +12,6 @@ interface IBehandlingRepository {
     fun hentEllerNull(id: Long): Behandling?
 
     fun hent(id: Long): Behandling
+
+    fun tellFullførteBehandlinger(): Long
 }
