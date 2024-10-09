@@ -128,4 +128,75 @@ class BehandlingRepositoryTest {
             assertThat(BehandlingRepository(it).hent(referanse)).isNotNull()
         }
     }
+
+    @Test
+    fun `telle antall fullførte behandlinger`(@Postgres dataSource: DataSource) {
+        val person = opprettTestPerson(dataSource, "123456789")
+        val sak = opprettTestSak(dataSource, "123456789", person)
+
+        val referanse = UUID.randomUUID()
+        val referanse2 = UUID.randomUUID()
+
+        val behandlingId = dataSource.transaction {
+            BehandlingRepository(it).opprettBehandling(
+                Behandling(
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.OPPRETTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx")
+                )
+            )
+        }
+        dataSource.transaction {
+            BehandlingRepository(it).oppdaterBehandling(
+                Behandling(
+                    id = behandlingId,
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.AVSLUTTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx2")
+                )
+            )
+        }
+
+        val behandlingId2 = dataSource.transaction {
+            BehandlingRepository(it).opprettBehandling(
+                Behandling(
+                    referanse = referanse2,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.OPPRETTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx")
+                )
+            )
+        }
+        dataSource.transaction {
+            BehandlingRepository(it).oppdaterBehandling(
+                Behandling(
+                    id = behandlingId2,
+                    referanse = referanse2,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.AVSLUTTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx2")
+                )
+            )
+        }
+
+        val antall = dataSource.transaction {
+            BehandlingRepository(it).tellFullførteBehandlinger()
+        }
+
+        assertThat(antall).isEqualTo(2)
+    }
 }
