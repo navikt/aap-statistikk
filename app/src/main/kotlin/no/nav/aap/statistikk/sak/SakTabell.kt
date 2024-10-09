@@ -1,13 +1,35 @@
 package no.nav.aap.statistikk.sak
 
 import com.google.cloud.bigquery.*
-import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 
+/*
+* Mangler:
+*  - relatertBehandlingId
+*  - mottattTid
+*  - registrertTid
+*  - ferdigBehandletTid
+*  - vedtakTid
+*  - utbetaltTid
+*  - endretTid/funksjonellTid
+*  - søknadsformt
+*  - forventetOppstartTid
+*  - sakYtelse
+*  - behandlingStatus
+*  - behandlingResultat
+*  - resultatBegrunnelse
+*  - behandlingMetode (manuell, automatisk, etc)
+*  - opprettetAv
+*  - saksbehandler
+*  - ansvarligbeslutter
+*  - ansvarligenhet
+*  - tilbakekreveløp (behandlingtype tilbekakreving - har vi dette?)
+*  - FunksjonellPeriodeFom - samme
+*  - Vilkårsprøving (egen tabell)
+ */
 class SakTabell : BQTable<BQBehandling> {
     companion object {
         const val TABLE_NAME = "sak"
@@ -21,6 +43,7 @@ class SakTabell : BQTable<BQBehandling> {
             val saksnummmer = Field.of("saksnummer", StandardSQLTypeName.STRING)
             val behandlingUuid = Field.of("behandlingUuid", StandardSQLTypeName.STRING)
             val behandlingType = Field.of("behandlingType", StandardSQLTypeName.STRING)
+            val aktorId = Field.of("aktorId", StandardSQLTypeName.STRING)
             val tekniskTid =
                 Field.newBuilder("tekniskTid", StandardSQLTypeName.DATETIME)
                     .setDescription("Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.")
@@ -33,6 +56,7 @@ class SakTabell : BQTable<BQBehandling> {
                 saksnummmer,
                 behandlingUuid,
                 behandlingType,
+                aktorId,
                 tekniskTid,
                 versjon,
                 avsender
@@ -47,6 +71,7 @@ class SakTabell : BQTable<BQBehandling> {
         val versjon = fieldValueList.get("versjon").stringValue
         val avsender = fieldValueList.get("avsender").stringValue
         val sekvensNummer = fieldValueList.get("sekvensnummer").longValue
+        val aktorId = fieldValueList.get("aktorId").stringValue
 
         return BQBehandling(
             saksnummer = saksnummer,
@@ -55,7 +80,8 @@ class SakTabell : BQTable<BQBehandling> {
             behandlingType = behandlingType,
             avsender = avsender,
             verson = versjon,
-            sekvensNummer = sekvensNummer
+            sekvensNummer = sekvensNummer,
+            aktorId = aktorId
         )
     }
 
@@ -66,6 +92,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
                 "behandlingType" to value.behandlingType,
+                "aktorId" to value.aktorId,
                 "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,

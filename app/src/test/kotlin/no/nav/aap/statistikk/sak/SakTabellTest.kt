@@ -28,7 +28,8 @@ class SakTabellTest {
                 behandlingType = TypeBehandling.Revurdering.toString().uppercase(),
                 avsender = KELVIN,
                 verson = "versjon",
-                sekvensNummer = 0L
+                sekvensNummer = 0L,
+                aktorId = "123456"
             )
         )
 
@@ -40,5 +41,7 @@ class SakTabellTest {
             referanse.toString()
         )
         assertThat(uthentet.first().behandlingType).isEqualTo("REVURDERING")
+        assertThat(uthentet.first().sekvensNummer).isEqualTo(0L)
+        assertThat(uthentet.first().aktorId).isEqualTo("123456")
     }
 }
