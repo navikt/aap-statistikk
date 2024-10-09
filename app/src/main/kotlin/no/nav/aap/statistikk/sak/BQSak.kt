@@ -11,8 +11,10 @@ data class BQBehandling(
     val tekniskTid: LocalDateTime,
     val verson: String,
     val avsender: String,
+    val mottattTid: LocalDateTime,
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)
+        require(mottattTid.truncatedTo(java.time.temporal.ChronoUnit.SECONDS).isEqual(mottattTid))
     }
 }

@@ -9,7 +9,6 @@ import java.time.temporal.ChronoUnit
 /*
 * Mangler:
 *  - relatertBehandlingId
-*  - mottattTid
 *  - registrertTid
 *  - ferdigBehandletTid
 *  - vedtakTid
@@ -48,6 +47,9 @@ class SakTabell : BQTable<BQBehandling> {
                 Field.newBuilder("tekniskTid", StandardSQLTypeName.DATETIME)
                     .setDescription("Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.")
                     .build()
+            val mottattTid = Field.newBuilder("mottattTid", StandardSQLTypeName.DATETIME)
+                .setDescription("Tidspunktet da behandlingen oppstår (eks. søknad mottas). Dette er starten på beregning av saksbehandlingstid.")
+                .build()
             val versjon = Field.of("versjon", StandardSQLTypeName.STRING)
             val avsender = Field.of("avsender", StandardSQLTypeName.STRING)
             val sekvensNummer = Field.of("sekvensnummer", StandardSQLTypeName.INT64)
@@ -58,6 +60,7 @@ class SakTabell : BQTable<BQBehandling> {
                 behandlingType,
                 aktorId,
                 tekniskTid,
+                mottattTid,
                 versjon,
                 avsender
             )
@@ -67,6 +70,7 @@ class SakTabell : BQTable<BQBehandling> {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
         val tekniskTid = fieldValueList.get("tekniskTid").stringValue
+        val mottattTid = fieldValueList.get("mottattTid").stringValue
         val behandlingType = fieldValueList.get("behandlingType").stringValue
         val versjon = fieldValueList.get("versjon").stringValue
         val avsender = fieldValueList.get("avsender").stringValue
@@ -81,7 +85,8 @@ class SakTabell : BQTable<BQBehandling> {
             avsender = avsender,
             verson = versjon,
             sekvensNummer = sekvensNummer,
-            aktorId = aktorId
+            aktorId = aktorId,
+            mottattTid = LocalDateTime.parse(mottattTid)
         )
     }
 
@@ -94,6 +99,8 @@ class SakTabell : BQTable<BQBehandling> {
                 "behandlingType" to value.behandlingType,
                 "aktorId" to value.aktorId,
                 "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.SECONDS)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "mottattTid" to value.mottattTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
