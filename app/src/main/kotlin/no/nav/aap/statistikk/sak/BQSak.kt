@@ -9,6 +9,7 @@ data class BQBehandling(
     val aktorId: String,
     val saksnummer: String,
     val tekniskTid: LocalDateTime,
+    val registrertTid: LocalDateTime,
     val verson: String,
     val avsender: String,
     val mottattTid: LocalDateTime,
@@ -16,5 +17,8 @@ data class BQBehandling(
     init {
         require(behandlingType.uppercase() == behandlingType)
         require(mottattTid.truncatedTo(java.time.temporal.ChronoUnit.SECONDS).isEqual(mottattTid))
+        require(
+            registrertTid.truncatedTo(java.time.temporal.ChronoUnit.SECONDS).isEqual(registrertTid)
+        )
     }
 }

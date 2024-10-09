@@ -38,6 +38,7 @@ class HendelsesService(
         val behandling = behandlingRepository.hent(behandlingId)
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
+        // TODO - kun om endring siden sist. somehow!?
         val bqSak = BQBehandling(
             sekvensNummer = sekvensNummer,
             saksnummer = sak.saksnummer,
@@ -48,6 +49,7 @@ class HendelsesService(
             verson = versjon,
             aktorId = sak.person.ident,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
+            registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
         )
         bigQueryRepository.lagre(bqSak)
     }
