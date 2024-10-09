@@ -36,7 +36,6 @@ class HendelsesService(
 
     private fun lagreSakInfoTilBigquery(sak: Sak, behandlingId: Long, versjon: String) {
         val behandling = behandlingRepository.hent(behandlingId)
-
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
         val bqSak = BQBehandling(
@@ -46,7 +45,8 @@ class HendelsesService(
             behandlingType = behandling.typeBehandling.toString().uppercase(),
             tekniskTid = LocalDateTime.now(clock),
             avsender = KELVIN,
-            verson = versjon
+            verson = versjon,
+            aktorId = sak.person.ident,
         )
         bigQueryRepository.lagre(bqSak)
     }
