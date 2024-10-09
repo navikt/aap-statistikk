@@ -47,6 +47,7 @@ class HendelsesService(
             avsender = KELVIN,
             verson = versjon,
             aktorId = sak.person.ident,
+            mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
         )
         bigQueryRepository.lagre(bqSak)
     }

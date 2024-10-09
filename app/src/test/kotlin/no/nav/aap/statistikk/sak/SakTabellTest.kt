@@ -20,6 +20,8 @@ class SakTabellTest {
 
         val referanse = UUID.randomUUID()
 
+        val mottattTid =
+            LocalDateTime.now().minusDays(1).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
         client.insert(
             sakTabell, BQBehandling(
                 saksnummer = "123",
@@ -29,7 +31,8 @@ class SakTabellTest {
                 avsender = KELVIN,
                 verson = "versjon",
                 sekvensNummer = 0L,
-                aktorId = "123456"
+                aktorId = "123456",
+                mottattTid = mottattTid
             )
         )
 
@@ -43,5 +46,6 @@ class SakTabellTest {
         assertThat(uthentet.first().behandlingType).isEqualTo("REVURDERING")
         assertThat(uthentet.first().sekvensNummer).isEqualTo(0L)
         assertThat(uthentet.first().aktorId).isEqualTo("123456")
+        assertThat(uthentet.first().mottattTid).isEqualTo(mottattTid)
     }
 }
