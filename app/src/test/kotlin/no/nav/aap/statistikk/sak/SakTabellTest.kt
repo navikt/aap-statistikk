@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.testutils.BigQuery
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class SakTabellTest {
@@ -21,7 +22,9 @@ class SakTabellTest {
         val referanse = UUID.randomUUID()
 
         val mottattTid =
-            LocalDateTime.now().minusDays(1).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+            LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS)
+        val registrertTid = LocalDateTime.now().minusDays(1).plusHours(1)
+            .truncatedTo(ChronoUnit.SECONDS)
         client.insert(
             sakTabell, BQBehandling(
                 saksnummer = "123",
@@ -32,7 +35,8 @@ class SakTabellTest {
                 verson = "versjon",
                 sekvensNummer = 0L,
                 aktorId = "123456",
-                mottattTid = mottattTid
+                mottattTid = mottattTid,
+                registrertTid = registrertTid
             )
         )
 
@@ -47,5 +51,6 @@ class SakTabellTest {
         assertThat(uthentet.first().sekvensNummer).isEqualTo(0L)
         assertThat(uthentet.first().aktorId).isEqualTo("123456")
         assertThat(uthentet.first().mottattTid).isEqualTo(mottattTid)
+        assertThat(uthentet.first().registrertTid).isEqualTo(registrertTid)
     }
 }
