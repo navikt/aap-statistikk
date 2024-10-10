@@ -1,11 +1,8 @@
-package no.nav.aap.statistikk.avsluttetbehandling.service
+package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.statistikk.Factory
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
-import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.behandling.BQYtelseBehandling
+import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -19,9 +16,9 @@ import java.util.*
 
 class AvsluttetBehandlingService(
     private val transactionExecutor: TransactionExecutor,
-    private val tilkjentYtelseRepositoryFactory: Factory<ITilkjentYtelseRepository>,
-    private val beregningsgrunnlagRepositoryFactory: Factory<IBeregningsgrunnlagRepository>,
-    private val vilkårsResultatRepositoryFactory: Factory<IVilkårsresultatRepository>,
+    private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
+    private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
+    private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
     private val bqRepository: IBQRepository,
     private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository
 ) {
@@ -30,8 +27,9 @@ class AvsluttetBehandlingService(
 
             val uthentetBehandling =
                 behandlingRepositoryFactory(it).hent(avsluttetBehandling.behandlingsReferanse)
+
             if (uthentetBehandling != null) {
-                vilkårsResultatRepositoryFactory.create(it)
+                vilkårsResultatRepositoryFactory(it)
                     .lagreVilkårsResultat(
                         VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat),
                         uthentetBehandling.id!!
@@ -39,14 +37,15 @@ class AvsluttetBehandlingService(
             } else {
                 error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
             }
-            tilkjentYtelseRepositoryFactory.create(it).lagreTilkjentYtelse(
+
+            tilkjentYtelseRepositoryFactory(it).lagreTilkjentYtelse(
                 TilkjentYtelseEntity.fraDomene(
                     avsluttetBehandling.tilkjentYtelse
                 )
             )
 
             if (avsluttetBehandling.beregningsgrunnlag != null) {
-                beregningsgrunnlagRepositoryFactory.create(it).lagreBeregningsGrunnlag(
+                beregningsgrunnlagRepositoryFactory(it).lagreBeregningsGrunnlag(
                     MedBehandlingsreferanse(
                         value = avsluttetBehandling.beregningsgrunnlag,
                         behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
@@ -54,8 +53,22 @@ class AvsluttetBehandlingService(
                 )
             }
 
-        }
+            lagreAvsluttetBehandlingIBigQuery(avsluttetBehandling, uthentetBehandling)
 
+        }
+    }
+
+    private fun lagreAvsluttetBehandlingIBigQuery(
+        avsluttetBehandling: AvsluttetBehandling,
+        behandling: Behandling
+    ) {
+        bqRepository.lagre(
+            BQYtelseBehandling(
+                referanse = avsluttetBehandling.behandlingsReferanse,
+                brukerFnr = behandling.sak.person.ident,
+                behandlingsType = behandling.typeBehandling
+            )
+        )
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
         bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)
         if (avsluttetBehandling.beregningsgrunnlag != null) {

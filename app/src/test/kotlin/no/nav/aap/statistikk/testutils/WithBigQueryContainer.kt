@@ -4,11 +4,7 @@ import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import org.junit.jupiter.api.extension.AfterAllCallback
-import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.ParameterContext
-import org.junit.jupiter.api.extension.ParameterResolver
+import org.junit.jupiter.api.extension.*
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import java.time.Duration

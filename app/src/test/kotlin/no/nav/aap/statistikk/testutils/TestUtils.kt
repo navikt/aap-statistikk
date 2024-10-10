@@ -395,6 +395,7 @@ class FakeBQRepository : IBQRepository {
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
     val beregningsgrunnlag = mutableListOf<BeregningsGrunnlagBQ>()
     val saker = mutableListOf<BQBehandling>()
+    val behandlinger = mutableListOf<BQYtelseBehandling>()
 
     override fun lagre(payload: Vilkårsresultat) {
         vilkårsresultater.add(payload)
@@ -408,6 +409,10 @@ class FakeBQRepository : IBQRepository {
         payload: BeregningsGrunnlagBQ
     ) {
         beregningsgrunnlag.add(payload)
+    }
+
+    override fun lagre(payload: BQYtelseBehandling) {
+        behandlinger.add(payload)
     }
 
     override fun lagre(payload: BQBehandling) {

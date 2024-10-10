@@ -1,11 +1,10 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.Factory
 import no.nav.aap.statistikk.api_kontrakt.Utfall
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -26,7 +25,6 @@ import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
-import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -231,21 +229,9 @@ class AvsluttetBehandlingServiceTest {
         val service =
             AvsluttetBehandlingService(
                 FellesKomponentTransactionalExecutor(dataSource),
-                object : Factory<TilkjentYtelseRepository> {
-                    override fun create(dbConnection: DBConnection): TilkjentYtelseRepository {
-                        return TilkjentYtelseRepository(dbConnection)
-                    }
-                },
-                object : Factory<BeregningsgrunnlagRepository> {
-                    override fun create(dbConnection: DBConnection): BeregningsgrunnlagRepository {
-                        return BeregningsgrunnlagRepository(dbConnection)
-                    }
-                },
-                object : Factory<IVilkårsresultatRepository> {
-                    override fun create(dbConnection: DBConnection): IVilkårsresultatRepository {
-                        return VilkårsresultatRepository(dbConnection)
-                    }
-                },
+                { TilkjentYtelseRepository(it) },
+                { BeregningsgrunnlagRepository(it) },
+                { VilkårsresultatRepository(it) },
                 bqRepository,
             ) { BehandlingRepository(it) }
         return Pair(bigQueryClient, service)

@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.bigquery
 
+import no.nav.aap.statistikk.behandling.BQYtelseBehandling
+import no.nav.aap.statistikk.behandling.BehandlingTabell
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
 import no.nav.aap.statistikk.sak.BQBehandling
@@ -20,6 +22,8 @@ class BQRepository(
     private val vilkårsVurderingTabell = VilkårsVurderingTabell()
     private val tilkjentYtelseTabell = TilkjentYtelseTabell()
     private val beregningsGrunnlagTabell = BeregningsGrunnlagTabell()
+    private val sakTabell = SakTabell()
+    private val behandlingTabell = BehandlingTabell()
 
     override fun lagre(payload: Vilkårsresultat) {
         logger.info("Lagrer vilkårsresultat.")
@@ -64,9 +68,14 @@ class BQRepository(
         )
     }
 
+    override fun lagre(payload: BQYtelseBehandling) {
+        logger.info("Lagrer BQYtelseBehandling for behandling ${payload.referanse}.")
+        client.insert(behandlingTabell, payload)
+    }
+
     override fun lagre(payload: BQBehandling) {
         logger.info("Lagrer saksinfo.")
-        client.insert(SakTabell(), payload)
+        client.insert(sakTabell, payload)
     }
 
     override fun toString(): String {
