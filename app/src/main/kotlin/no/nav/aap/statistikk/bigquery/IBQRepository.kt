@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.bigquery
 
+import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -9,5 +10,6 @@ interface IBQRepository {
     fun lagre(payload: Vilkårsresultat)
     fun lagre(payload: TilkjentYtelse)
     fun lagre(payload: BeregningsGrunnlagBQ)
+    fun lagre(payload: BQYtelseBehandling)
     fun lagre(payload: BQBehandling)
 }
