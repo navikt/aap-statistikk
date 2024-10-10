@@ -24,7 +24,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
 
-    implementation("ch.qos.logback:logback-classic:1.5.8")
+    implementation("ch.qos.logback:logback-classic:1.5.9")
     constraints {
         implementation("org.apache.commons:commons-compress:1.26.0")
     }
