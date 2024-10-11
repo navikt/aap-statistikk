@@ -25,11 +25,9 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
 
     implementation("ch.qos.logback:logback-classic:1.5.9")
-    constraints {
-        implementation("org.apache.commons:commons-compress:1.26.0")
-    }
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
+    implementation("org.flywaydb:flyway-core:10.18.2")
     implementation("org.flywaydb:flyway-database-postgresql:10.18.2")
     runtimeOnly("org.postgresql:postgresql:42.7.4")
     implementation("com.zaxxer:HikariCP:6.0.0")
@@ -43,6 +41,7 @@ dependencies {
     implementation("no.nav:ktor-openapi-generator:1.0.32")
     implementation("com.google.cloud:google-cloud-bigquery:2.42.4")
 
+
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("com.nimbusds:nimbus-jose-jwt:9.41.2")
@@ -50,6 +49,11 @@ dependencies {
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("org.assertj:assertj-core:3.26.3")
     testImplementation("org.testcontainers:postgresql:1.20.1")
+    constraints {
+        implementation("org.apache.commons:commons-compress:1.26.0") {
+            because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
+        }
+    }
     testImplementation("org.testcontainers:gcloud:1.20.2")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
 }
