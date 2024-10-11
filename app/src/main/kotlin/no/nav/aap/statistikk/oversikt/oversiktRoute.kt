@@ -11,7 +11,7 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 
 internal fun Routing.oversiktRoute(transactionExecutor: TransactionExecutor) {
     get("/") {
-        val name = "Ktor"
+        val name = "Statistikkoversikt"
 
         val antallSaker = transactionExecutor.withinTransaction {
             SakRepositoryImpl(it).tellSaker()
