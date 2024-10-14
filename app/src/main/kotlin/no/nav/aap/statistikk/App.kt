@@ -2,6 +2,7 @@ package no.nav.aap.statistikk
 
 import com.papsign.ktor.openapigen.model.info.ContactModel
 import com.papsign.ktor.openapigen.model.info.InfoModel
+import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -14,10 +15,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.server.AZURE
+import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
@@ -153,7 +154,7 @@ fun Application.module(
 
     routing {
         authenticate(AZURE) {
-            apiRoute {
+            apiRouting {
                 mottaStatistikk(
                     transactionExecutor,
                     jobbAppender,
@@ -161,7 +162,7 @@ fun Application.module(
                 )
                 avsluttetBehandling(jobbAppender, lagreAvsluttetBehandlingJobb)
             }
-            apiRoute(motorApiCallback)
+            apiRouting(motorApiCallback)
         }
         oversiktRoute(transactionExecutor)
     }

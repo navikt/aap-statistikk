@@ -30,8 +30,8 @@ annotation class Fakes {
 
         fun port(): Int = azure.port()
 
-        private fun NettyApplicationEngine.port(): Int =
-            runBlocking { resolvedConnectors() }
+        private fun EmbeddedServer<*, *>.port(): Int =
+            runBlocking { this@port.engine.resolvedConnectors() }
                 .first { it.type == ConnectorType.HTTP }
                 .port
 
@@ -41,8 +41,15 @@ annotation class Fakes {
             }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
-                    this@azureFake.log.info("AZURE :: Ukjent feil ved kall til '{}'", call.request.local.uri, cause)
-                    call.respond(status = HttpStatusCode.InternalServerError, message = ErrorRespons(cause.message))
+                    this@azureFake.log.info(
+                        "AZURE :: Ukjent feil ved kall til '{}'",
+                        call.request.local.uri,
+                        cause
+                    )
+                    call.respond(
+                        status = HttpStatusCode.InternalServerError,
+                        message = ErrorRespons(cause.message)
+                    )
                 }
             }
             routing {
@@ -80,9 +87,13 @@ annotation class Fakes {
                     && (parameterContext.parameter.type == AzureConfig::class.java)
         }
 
-        override fun resolveParameter(parameterContext: ParameterContext?, extensionContext: ExtensionContext?): Any {
+        override fun resolveParameter(
+            parameterContext: ParameterContext?,
+            extensionContext: ExtensionContext?
+        ): Any {
             if (parameterContext?.isAnnotated(Fakes::class.java) == true
-                && parameterContext.parameter.type == AzureConfig::class.java) {
+                && parameterContext.parameter.type == AzureConfig::class.java
+            ) {
                 return AzureConfig(
                     clientId = "tilgang",
                     jwksUri = "http://localhost:${azure.port()}/jwks",
@@ -92,7 +103,8 @@ annotation class Fakes {
                 )
             } else {
                 if (parameterContext?.isAnnotated(Fakes::class.java) == true
-                    && parameterContext.parameter.type == TestToken::class.java) {
+                    && parameterContext.parameter.type == TestToken::class.java
+                ) {
                     val token = AzureTokenGen("tilgang", "tilgang").generate()
                     return TestToken(access_token = token, scope = "AAP_SCOPES")
                 }
