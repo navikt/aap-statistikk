@@ -114,7 +114,7 @@ fun <E> testKlient(
         )
     }.start()
 
-    val port = runBlocking { server.resolvedConnectors().first().port }
+    val port = runBlocking { server.engine.resolvedConnectors().first().port }
 
     res = test("http://localhost:$port", restClient)
 
@@ -155,7 +155,7 @@ fun <E> testKlientNoInjection(
         )
     }.start()
 
-    val port = runBlocking { server.resolvedConnectors().first().port }
+    val port = runBlocking { server.engine.resolvedConnectors().first().port }
 
     res = test("http://localhost:$port", restClient)
 

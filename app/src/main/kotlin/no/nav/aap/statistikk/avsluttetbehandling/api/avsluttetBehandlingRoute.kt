@@ -5,18 +5,20 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
-import io.ktor.server.application.*
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.hendelser.api.Tags
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
 val eksempelUUID = UUID.randomUUID()
+
+private val logger = LoggerFactory.getLogger("avsluttetBehandlingRoute")
 
 fun NormalOpenAPIRoute.avsluttetBehandling(
     jobbAppender: JobbAppender,
@@ -84,7 +86,7 @@ fun NormalOpenAPIRoute.avsluttetBehandling(
         post<Unit, String, AvsluttetBehandlingDTO>(
             TagModule(listOf(Tags.AvsluttetBehandling)), exampleRequest = exampleRequest
         ) { _, dto ->
-            pipeline.context.application.log.info("Mottok avsluttet behandling: $dto")
+            logger.info("Mottok avsluttet behandling: $dto")
 
             jobbAppender.leggTil(
                 JobbInput(lagreAvsluttetBehandlingDTOJobb).medPayload(
