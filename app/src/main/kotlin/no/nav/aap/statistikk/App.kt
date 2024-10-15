@@ -103,11 +103,11 @@ fun Application.startUp(
         )
     )
 
-    environment.monitor.subscribe(ApplicationStopped) {
+    monitor.subscribe(ApplicationStopped) {
         log.info("Received shutdown event. Closing Hikari connection pool.")
         motor.stop()
         dataSource.close()
-        environment.monitor.unsubscribe(ApplicationStopped) {}
+        monitor.unsubscribe(ApplicationStopped) {}
     }
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
@@ -147,7 +147,10 @@ fun Application.module(
         prometheusMeterRegistry, azureConfig, InfoModel(
             title = "AAP - Statistikk",
             version = "0.0.1",
-            description = "App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk for å få token.",
+            description = """
+                App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk
+                <a href="https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk">Token Generator</a> for å få token.
+                """.trimIndent(),
             contact = ContactModel("Slack: #po_aap_dvh"),
         )
     )
