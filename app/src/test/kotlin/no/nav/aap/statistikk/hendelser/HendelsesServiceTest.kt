@@ -41,6 +41,7 @@ class HendelsesServiceTest {
                 avklaringsbehov = listOf(),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = SakStatus.OPPRETTET,
+                hendelsesTidspunkt = LocalDateTime.now()
             )
         )
 

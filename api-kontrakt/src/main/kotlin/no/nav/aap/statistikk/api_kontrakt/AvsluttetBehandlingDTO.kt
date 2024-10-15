@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.api_kontrakt
 
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -10,5 +11,6 @@ public data class AvsluttetBehandlingDTO(
     val behandlingsReferanse: UUID,
     val tilkjentYtelse: TilkjentYtelseDTO,
     val vilkårsResultat: VilkårsResultatDTO,
-    val beregningsGrunnlag: BeregningsgrunnlagDTO?
+    val beregningsGrunnlag: BeregningsgrunnlagDTO?,
+    val hendelsesTidspunkt: LocalDateTime,
 )

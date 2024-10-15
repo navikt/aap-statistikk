@@ -35,7 +35,7 @@ class MottaStatistikkTest {
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
-
+        val hendelsesTidspunkt = LocalDateTime.now()
         val jobbAppender = MockJobbAppender()
 
         val motor = motorMock()
@@ -76,7 +76,8 @@ class MottaStatistikkTest {
                         avklaringsbehov = listOf(),
                         versjon = "UKJENT",
                         mottattTid = mottattTid,
-                        sakStatus = SakStatus.UTREDES
+                        sakStatus = SakStatus.UTREDES,
+                        hendelsesTidspunkt = hendelsesTidspunkt
                     )
                 )
             )
@@ -94,7 +95,8 @@ class MottaStatistikkTest {
                     avklaringsbehov = listOf(),
                     versjon = "UKJENT",
                     mottattTid = mottattTid,
-                    sakStatus = SakStatus.UTREDES
+                    sakStatus = SakStatus.UTREDES,
+                    hendelsesTidspunkt = hendelsesTidspunkt
                 )
             )
         )
@@ -174,7 +176,8 @@ class MottaStatistikkTest {
             behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
             versjon = "UKJENT",
             mottattTid = LocalDateTime.now().minusDays(1),
-            sakStatus = SakStatus.UTREDES
+            sakStatus = SakStatus.UTREDES,
+            hendelsesTidspunkt = LocalDateTime.now()
         )
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)

@@ -84,7 +84,16 @@ class ApplicationTest {
   "behandlingsReferanse": "$behandlingReferanse",
   "tilkjentYtelse": $tilkjentYtelseJSON,
   "vilkårsResultat": $vilkårsResultatJson,
-  "beregningsGrunnlag": $beregningsGrunnlag
+  "beregningsGrunnlag": $beregningsGrunnlag,
+  "hendelsesTidspunkt": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ]
 }"""
 
         val bqRepository = FakeBQRepository()
@@ -179,6 +188,15 @@ class ApplicationTest {
     5,
     10,
     343319000
+  ],
+  "hendelsesTidspunkt": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
   ]
 }"""
 
@@ -262,7 +280,16 @@ class ApplicationTest {
   "vilkårsResultat": {
     "typeBehandling": "string",
     "vilkår": []
-  }
+  },
+  "hendelsesTidspunkt": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ]
 }"""
 
         val jobbAppender = MockJobbAppender()
@@ -326,6 +353,15 @@ class ApplicationTest {
   "avklaringsbehov": [],
   "versjon": "UKJENT",
   "mottattTid": [
+    2024,
+    8,
+    14,
+    11,
+    5,
+    10,
+    343319000
+  ],
+  "hendelsesTidspunkt": [
     2024,
     8,
     14,

@@ -76,7 +76,8 @@ val exampleRequestStoppetBehandling = StoppetBehandling(
     avklaringsbehov = avklaringsbehov,
     versjon = "b21e88bca4533d3e0ee3a15f51a87cbaa11a7e9c",
     mottattTid = LocalDateTime.now().minusDays(1),
-    sakStatus = SakStatus.LØPENDE
+    sakStatus = SakStatus.LØPENDE,
+    hendelsesTidspunkt = LocalDateTime.now()
 )
 
 
