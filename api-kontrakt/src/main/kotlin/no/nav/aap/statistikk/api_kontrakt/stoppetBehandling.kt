@@ -20,7 +20,8 @@ public data class StoppetBehandling(
     val behandlingType: TypeBehandling,
     val ident: String,
     val versjon: String,
-    val avklaringsbehov: List<AvklaringsbehovHendelse>
+    val avklaringsbehov: List<AvklaringsbehovHendelse>,
+    val hendelsesTidspunkt: LocalDateTime,
 ) {
     init {
         require(ident.isNotEmpty())
