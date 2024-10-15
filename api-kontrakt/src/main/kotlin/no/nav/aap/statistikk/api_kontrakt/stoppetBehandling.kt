@@ -22,9 +22,12 @@ public data class StoppetBehandling(
     val versjon: String,
     val avklaringsbehov: List<AvklaringsbehovHendelse>,
     val hendelsesTidspunkt: LocalDateTime,
+    val avsluttetBehandling: AvsluttetBehandlingDTO? = null,
 ) {
     init {
         require(ident.isNotEmpty())
+//        require(sakStatus == SakStatus.AVSLUTTET || avsluttetBehandling != null)
+//        require(sakStatus !== SakStatus.AVSLUTTET || avsluttetBehandling == null)
     }
 }
 
