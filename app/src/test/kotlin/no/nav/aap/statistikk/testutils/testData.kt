@@ -65,7 +65,8 @@ fun avsluttetBehandlingDTO(referanse: UUID, saksnummer: String): AvsluttetBehand
                 yrkesskadeinntektIG = BigDecimal(6),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
             ),
-        )
+        ),
+        hendelsesTidspunkt = LocalDateTime.now()
     )
 }
 
@@ -147,6 +148,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
         behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
         versjon = UUID.randomUUID().toString(),
         mottattTid = LocalDateTime.now().minusDays(1),
-        sakStatus = SakStatus.UTREDES
+        sakStatus = SakStatus.UTREDES,
+        hendelsesTidspunkt = LocalDateTime.now()
     )
 }

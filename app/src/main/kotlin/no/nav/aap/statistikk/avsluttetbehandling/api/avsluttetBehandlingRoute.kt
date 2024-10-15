@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 val eksempelUUID = UUID.randomUUID()
@@ -79,7 +80,8 @@ fun NormalOpenAPIRoute.avsluttetBehandling(
                 yrkesskadeinntektIG = BigDecimal.valueOf(100000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal.valueOf(100000),
             )
-        )
+        ),
+        hendelsesTidspunkt = LocalDateTime.now()
     )
 
     route("/avsluttetBehandling") {

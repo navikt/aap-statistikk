@@ -14,17 +14,19 @@ public final class no/nav/aap/statistikk/api_kontrakt/AvklaringsbehovHendelse {
 }
 
 public final class no/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO {
-	public fun <init> (Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;Ljava/time/LocalDateTime;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/UUID;
 	public final fun component3 ()Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;
 	public final fun component4 ()Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;
 	public final fun component5 ()Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
-	public final fun copy (Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;)Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;
-	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;
+	public final fun component6 ()Ljava/time/LocalDateTime;
+	public final fun copy (Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;Ljava/time/LocalDateTime;)Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;Ljava/lang/String;Ljava/util/UUID;Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;Ljava/time/LocalDateTime;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/AvsluttetBehandlingDTO;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBehandlingsReferanse ()Ljava/util/UUID;
 	public final fun getBeregningsGrunnlag ()Lno/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO;
+	public final fun getHendelsesTidspunkt ()Ljava/time/LocalDateTime;
 	public final fun getSaksnummer ()Ljava/lang/String;
 	public final fun getTilkjentYtelse ()Lno/nav/aap/statistikk/api_kontrakt/TilkjentYtelseDTO;
 	public final fun getVilkårsResultat ()Lno/nav/aap/statistikk/api_kontrakt/VilkårsResultatDTO;

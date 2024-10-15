@@ -23,3 +23,7 @@ data class VilkårsPeriode(
     val innvilgelsesårsak: String? = null,
     val avslagsårsak: String? = null
 )
+
+// endringslogikk
+// lastet opp-tidspunkt på bigquery
+// sjekk grunnlaget - både oppad og nedad begrenset

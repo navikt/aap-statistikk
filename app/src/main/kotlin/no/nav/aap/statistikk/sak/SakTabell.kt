@@ -9,7 +9,6 @@ import java.time.temporal.ChronoUnit
 /*
 * Mangler:
 *  - relatertBehandlingId
-*  - registrertTid
 *  - ferdigBehandletTid
 *  - vedtakTid
 *  - utbetaltTid
@@ -42,6 +41,7 @@ class SakTabell : BQTable<BQBehandling> {
             val saksnummmer = Field.of("saksnummer", StandardSQLTypeName.STRING)
             val behandlingUuid = Field.of("behandlingUuid", StandardSQLTypeName.STRING)
             val behandlingType = Field.of("behandlingType", StandardSQLTypeName.STRING)
+            val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
             val aktorId = Field.of("aktorId", StandardSQLTypeName.STRING)
             val tekniskTid =
                 Field.newBuilder("tekniskTid", StandardSQLTypeName.DATETIME)
@@ -61,6 +61,7 @@ class SakTabell : BQTable<BQBehandling> {
                 saksnummmer,
                 behandlingUuid,
                 behandlingType,
+                behandlingStatus,
                 aktorId,
                 tekniskTid,
                 mottattTid,
