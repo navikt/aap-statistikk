@@ -37,11 +37,6 @@ fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
     )
 }
 
-data class MedBehandlingsReferanse<V>(
-    val behandlingsReferanse: UUID,
-    val value: V,
-)
-
 fun Grunnlag11_19DTO.tilDomene(
 ): IBeregningsGrunnlag.Grunnlag_11_19 {
     return IBeregningsGrunnlag.Grunnlag_11_19(

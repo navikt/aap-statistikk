@@ -104,7 +104,6 @@ fun <E> testKlient(
             transactionExecutor,
             motor,
             jobbAppender,
-            lagreAvsluttetBehandlingDTOJobb,
             azureConfig,
             {
 

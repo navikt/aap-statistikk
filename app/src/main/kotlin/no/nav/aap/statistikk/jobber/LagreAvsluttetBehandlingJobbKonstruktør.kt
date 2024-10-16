@@ -26,7 +26,7 @@ class LagreAvsluttetBehandlingJobbKonstruktør(
         val avsluttetBehandlingService = AvsluttetBehandlingService(
             transactionExecutor = FellesKomponentConnectionExecutor(connection),
             tilkjentYtelseRepositoryFactory = tilkjentYtelseRepository,
-            beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
+            beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(connection) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             bqRepository = bQRepository,
             behandlingRepositoryFactory = { BehandlingRepository(it) }

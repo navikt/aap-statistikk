@@ -61,7 +61,11 @@ class MottaStatistikkTest {
             azureConfig,
             LagreStoppetHendelseJobb(
                 bqRepository, stoppetHendelseLagretCounter,
-                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                behandlingRepositoryFactory = { FakeBehandlingRepository() }
             )
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -197,7 +201,11 @@ class MottaStatistikkTest {
                 LagreStoppetHendelseJobb(
                     bqRepository,
                     stoppetHendelseLagretCounter,
-                    bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+                    bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+                    tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+                    beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+                    vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                    behandlingRepositoryFactory = { FakeBehandlingRepository() }
                 )
             )
         )
@@ -218,7 +226,11 @@ class MottaStatistikkTest {
             azureConfig,
             LagreStoppetHendelseJobb(
                 bqRepository, stoppetHendelseLagretCounter,
-                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() }
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                behandlingRepositoryFactory = { FakeBehandlingRepository() }
             )
         ) { url, client ->
 
