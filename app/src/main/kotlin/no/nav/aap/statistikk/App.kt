@@ -24,7 +24,6 @@ import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
-import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
@@ -162,7 +161,6 @@ fun Application.module(
                     jobbAppender,
                     lagreStoppetHendelseJobb,
                 )
-                avsluttetBehandling()
             }
             apiRouting(motorApiCallback)
         }
