@@ -25,6 +25,8 @@ import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.statistikk.avsluttetbehandling.api.avsluttetBehandling
+import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
@@ -34,7 +36,6 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -42,6 +43,8 @@ import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
 
 
@@ -79,15 +82,13 @@ fun Application.startUp(
 
     val avsluttetBehandlingCounter = prometheusMeterRegistry.avsluttetBehandlingLagret()
 
-    val lagreAvsluttetBehandlingJobbKonstruktør = LagreAvsluttetBehandlingDTOJobb(
-        jobb = LagreAvsluttetBehandlingJobbKonstruktør(
-            bqRepository, avsluttetBehandlingCounter
-        ),
-        avsluttetBehandlingDtoLagretCounter = prometheusMeterRegistry.avsluttetBehandlingDtoLagret()
-    )
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         bqRepository, prometheusMeterRegistry.hendelseLagret(),
-        bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) }
+        bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+        tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
+        beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
+        vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
+        behandlingRepositoryFactory = { BehandlingRepository(it) }
     )
     val motor = Motor(
         dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {
@@ -99,7 +100,7 @@ fun Application.startUp(
         }, jobber = listOf(
             lagreStoppetHendelseJobb, LagreAvsluttetBehandlingJobbKonstruktør(
                 bqRepository, avsluttetBehandlingCounter
-            ), lagreAvsluttetBehandlingJobbKonstruktør
+            )
         )
     )
 
@@ -120,7 +121,6 @@ fun Application.startUp(
         transactionExecutor,
         motor,
         MotorJobbAppender(dataSource),
-        lagreAvsluttetBehandlingJobbKonstruktør,
         azureConfig,
         motorApiCallback,
         lagreStoppetHendelseJobb,
@@ -132,7 +132,6 @@ fun Application.module(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
     jobbAppender: JobbAppender,
-    lagreAvsluttetBehandlingJobb: LagreAvsluttetBehandlingDTOJobb,
     azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
@@ -163,7 +162,7 @@ fun Application.module(
                     jobbAppender,
                     lagreStoppetHendelseJobb,
                 )
-                avsluttetBehandling(jobbAppender, lagreAvsluttetBehandlingJobb)
+                avsluttetBehandling()
             }
             apiRouting(motorApiCallback)
         }

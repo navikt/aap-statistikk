@@ -26,8 +26,8 @@ public data class StoppetBehandling(
 ) {
     init {
         require(ident.isNotEmpty())
-//        require(sakStatus == SakStatus.AVSLUTTET || avsluttetBehandling != null)
-//        require(sakStatus !== SakStatus.AVSLUTTET || avsluttetBehandling == null)
+        require(status == BehandlingStatus.AVSLUTTET || avsluttetBehandling == null)
+        require(status != BehandlingStatus.AVSLUTTET || avsluttetBehandling != null)
     }
 }
 

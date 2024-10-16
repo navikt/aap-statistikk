@@ -5,12 +5,8 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
-import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
-import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.hendelser.api.Tags
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -21,10 +17,7 @@ val eksempelUUID = UUID.randomUUID()
 
 private val logger = LoggerFactory.getLogger("avsluttetBehandlingRoute")
 
-fun NormalOpenAPIRoute.avsluttetBehandling(
-    jobbAppender: JobbAppender,
-    lagreAvsluttetBehandlingDTOJobb: LagreAvsluttetBehandlingDTOJobb,
-) {
+fun NormalOpenAPIRoute.avsluttetBehandling() {
     val exampleRequest = AvsluttetBehandlingDTO(
         saksnummer = "4LELS7K",
         behandlingsReferanse = eksempelUUID,
@@ -88,13 +81,7 @@ fun NormalOpenAPIRoute.avsluttetBehandling(
         post<Unit, String, AvsluttetBehandlingDTO>(
             TagModule(listOf(Tags.AvsluttetBehandling)), exampleRequest = exampleRequest
         ) { _, dto ->
-            logger.info("Mottok avsluttet behandling: $dto")
-
-            jobbAppender.leggTil(
-                JobbInput(lagreAvsluttetBehandlingDTOJobb).medPayload(
-                    DefaultJsonMapper.toJson(dto)
-                )
-            )
+            logger.info("Mottok avsluttet behandling: $dto. Noop.")
 
             // TODO: responder med id?
             responder.respond(

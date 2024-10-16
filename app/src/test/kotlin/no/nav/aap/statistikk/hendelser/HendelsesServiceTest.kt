@@ -4,6 +4,7 @@ import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -19,12 +20,21 @@ class HendelsesServiceTest {
         val bigQueryRepository = FakeBQRepository()
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
+        val behandlingRepository = FakeBehandlingRepository()
         val hendelsesService = HendelsesService(
             sakRepository = FakeSakRepository(),
             personRepository = FakePersonRepository(),
-            behandlingRepository = FakeBehandlingRepository(),
+            behandlingRepository = behandlingRepository,
             bigQueryRepository = bigQueryRepository,
             bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
+            avsluttetBehandlingService = AvsluttetBehandlingService(
+                transactionExecutor = noOpTransactionExecutor,
+                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                bqRepository = bigQueryRepository,
+                behandlingRepositoryFactory = { behandlingRepository }
+            ),
             clock = clock,
         )
 
