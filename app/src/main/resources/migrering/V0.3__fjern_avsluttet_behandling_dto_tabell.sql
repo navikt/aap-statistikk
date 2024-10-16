@@ -1,0 +1,1 @@
+DROP TABLE avsluttet_behandling;

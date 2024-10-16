@@ -9,13 +9,10 @@ import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.avsluttetBehandlingDtoLagret
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
@@ -51,13 +48,6 @@ class MottaStatistikkTest {
             noOpTransactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(
-                LagreAvsluttetBehandlingJobbKonstruktør(
-                    bqRepository,
-                    avsluttetBehandlingCounter
-                ),
-                meterRegistry.avsluttetBehandlingDtoLagret()
-            ),
             azureConfig,
             LagreStoppetHendelseJobb(
                 bqRepository, stoppetHendelseLagretCounter,
@@ -65,7 +55,8 @@ class MottaStatistikkTest {
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() }
+                behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
             )
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -191,7 +182,6 @@ class MottaStatistikkTest {
 
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
-        val avsluttetBehandlingDtoLagretCounter = meterRegistry.avsluttetBehandlingDtoLagret()
 
         val motor = Motor(
             dataSource = dataSource,
@@ -205,7 +195,8 @@ class MottaStatistikkTest {
                     tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                     beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                     vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                    behandlingRepositoryFactory = { FakeBehandlingRepository() }
+                    behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
                 )
             )
         )
@@ -216,13 +207,6 @@ class MottaStatistikkTest {
             transactionExecutor,
             motor,
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(
-                LagreAvsluttetBehandlingJobbKonstruktør(
-                    bqRepository,
-                    avsluttetBehandlingCounter
-                ),
-                avsluttetBehandlingDtoLagretCounter
-            ),
             azureConfig,
             LagreStoppetHendelseJobb(
                 bqRepository, stoppetHendelseLagretCounter,
@@ -230,7 +214,8 @@ class MottaStatistikkTest {
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() }
+                behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
             )
         ) { url, client ->
 
@@ -263,6 +248,9 @@ class MottaStatistikkTest {
                 )
                 assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType)
                 assertThat(uthentetBehandling?.status).isEqualTo(hendelse.status)
+
+                assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
+                assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
             }
         }
     }

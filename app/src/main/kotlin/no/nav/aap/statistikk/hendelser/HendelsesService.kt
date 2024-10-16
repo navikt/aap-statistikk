@@ -1,25 +1,21 @@
 package no.nav.aap.statistikk.hendelser
 
+import io.micrometer.core.instrument.Counter
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.api.tilDomene
 import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
-import no.nav.aap.statistikk.db.FellesKomponentConnectionExecutor
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -32,6 +28,7 @@ class HendelsesService(
     private val personRepository: IPersonRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val bigQueryRepository: IBQRepository,
+    private val hendelseLagretCounter: Counter,
     private val clock: Clock = Clock.systemUTC()
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
@@ -45,6 +42,7 @@ class HendelsesService(
         }
 
         lagreSakInfoTilBigquery(sak, behandlingId, hendelse.versjon)
+        hendelseLagretCounter.increment()
     }
 
     private fun lagreSakInfoTilBigquery(sak: Sak, behandlingId: Long, versjon: String) {

@@ -20,31 +20,33 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatReposi
 class LagreStoppetHendelseJobb(
     private val bqRepository: IBQRepository,
     private val stoppetHendelseLagretCounter: Counter,
+    private val avsluttetBehandlingLagretCounter: Counter,
     private val bigQueryKvitteringRepository: (DBConnection) -> IBigQueryKvitteringRepository,
     private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
     private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
     private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository
-    ) : Jobb {
+) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val hendelsesService = HendelsesService(
             sakRepository = SakRepositoryImpl(connection),
-            personRepository = PersonRepository(connection),
-            behandlingRepository = BehandlingRepository(connection),
-            bigQueryRepository = bqRepository,
-            bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 transactionExecutor = FellesKomponentConnectionExecutor(connection),
                 tilkjentYtelseRepositoryFactory = tilkjentYtelseRepositoryFactory,
                 beregningsgrunnlagRepositoryFactory = beregningsgrunnlagRepositoryFactory,
                 vilkårsResultatRepositoryFactory = vilkårsResultatRepositoryFactory,
                 bqRepository = bqRepository,
-                behandlingRepositoryFactory = behandlingRepositoryFactory
-            )
+                behandlingRepositoryFactory = behandlingRepositoryFactory,
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingLagretCounter,
+            ),
+            bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
+            personRepository = PersonRepository(connection),
+            behandlingRepository = BehandlingRepository(connection),
+            bigQueryRepository = bqRepository,
+            hendelseLagretCounter = stoppetHendelseLagretCounter,
         )
         return LagreStoppetHendelseJobbUtfører(
             hendelsesService,
-            stoppetHendelseLagretCounter
         )
     }
 

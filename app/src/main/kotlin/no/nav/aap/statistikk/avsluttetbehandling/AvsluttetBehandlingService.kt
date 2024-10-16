@@ -20,7 +20,8 @@ class AvsluttetBehandlingService(
     private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
     private val bqRepository: IBQRepository,
-    private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository
+    private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
+    private val avsluttetBehandlingLagretCounter: io.micrometer.core.instrument.Counter,
 ) {
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
         transactionExecutor.withinTransaction {
@@ -54,7 +55,7 @@ class AvsluttetBehandlingService(
             }
 
             lagreAvsluttetBehandlingIBigQuery(avsluttetBehandling, uthentetBehandling)
-
+            avsluttetBehandlingLagretCounter.increment()
         }
     }
 

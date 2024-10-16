@@ -22,11 +22,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
-import no.nav.aap.statistikk.api_kontrakt.AvsluttetBehandlingDTO
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
-import no.nav.aap.statistikk.avsluttetbehandling.IAvsluttetBehandlingRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.behandling.*
@@ -37,7 +35,6 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
@@ -74,7 +71,6 @@ fun <E> testKlient(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
     jobbAppender: JobbAppender,
-    lagreAvsluttetBehandlingDTOJobb: LagreAvsluttetBehandlingDTOJobb,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwksUri = "http://localhost:8081/jwks",
@@ -453,18 +449,6 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
 
     override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         return grunnlag
-    }
-}
-
-class FakeAvsluttetBehandlingDTORepository : IAvsluttetBehandlingRepository {
-    val lagrede = mutableListOf<AvsluttetBehandlingDTO>()
-    override fun lagre(behandling: AvsluttetBehandlingDTO): Long {
-        lagrede.add(behandling)
-        return lagrede.indexOf(behandling).toLong()
-    }
-
-    override fun hent(id: Long): AvsluttetBehandlingDTO {
-        return lagrede.get(id.toInt())
     }
 }
 

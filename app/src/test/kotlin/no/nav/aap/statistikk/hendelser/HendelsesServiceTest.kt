@@ -1,10 +1,13 @@
 package no.nav.aap.statistikk.hendelser
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.api_kontrakt.SakStatus
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
+import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -21,6 +24,8 @@ class HendelsesServiceTest {
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
+        val simpleMeterRegistry = SimpleMeterRegistry()
+        val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
         val hendelsesService = HendelsesService(
             sakRepository = FakeSakRepository(),
             personRepository = FakePersonRepository(),
@@ -33,9 +38,11 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 bqRepository = bigQueryRepository,
-                behandlingRepositoryFactory = { behandlingRepository }
+                behandlingRepositoryFactory = { behandlingRepository },
+                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
             clock = clock,
+            hendelseLagretCounter = hendelseLagretCounter
         )
 
 
@@ -60,5 +67,6 @@ class HendelsesServiceTest {
         assertThat(bigQueryRepository.saker.first().tekniskTid).isEqualTo(
             LocalDateTime.now(clock)
         )
+        assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
     }
 }
