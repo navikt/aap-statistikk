@@ -7,11 +7,6 @@ fun MeterRegistry.hendelseLagret() =
         "statistikk_lagret_stoppet_hendelse_total",
     )
 
-fun MeterRegistry.avsluttetBehandlingDtoLagret() =
-    this.counter(
-        "statistikk_lagret_avsluttet_behandling_dto_total",
-    )
-
 fun MeterRegistry.avsluttetBehandlingLagret() =
     this.counter(
         "statistikk_lagret_avsluttet_behandling_total",

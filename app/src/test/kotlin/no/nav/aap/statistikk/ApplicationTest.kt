@@ -8,8 +8,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingDTOJobb
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
@@ -32,13 +30,6 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(
-                LagreAvsluttetBehandlingJobbKonstruktør(
-                    bqRepository,
-                    meterRegistry.avsluttetBehandlingLagret()
-                ),
-                meterRegistry.avsluttetBehandlingDtoLagret()
-            ),
             azureConfig,
             LagreStoppetHendelseJobb(
                 bqRepository, meterRegistry.hendelseLagret(),
@@ -46,7 +37,8 @@ class ApplicationTest {
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() }
+                behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                avsluttetBehandlingLagretCounter = meterRegistry.avsluttetBehandlingLagret()
             ),
         ) { url, client ->
             @Language("JSON")
@@ -151,7 +143,6 @@ class ApplicationTest {
         val bqRepository = FakeBQRepository()
         val meterRegistry = SimpleMeterRegistry()
 
-        val avsluttetBehandlingDtoLagretCounter = meterRegistry.avsluttetBehandlingDtoLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
 
@@ -159,13 +150,6 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             jobbAppender,
-            LagreAvsluttetBehandlingDTOJobb(
-                LagreAvsluttetBehandlingJobbKonstruktør(
-                    bqRepository,
-                    avsluttetBehandlingCounter
-                ),
-                avsluttetBehandlingDtoLagretCounter
-            ),
             azureConfig,
             LagreStoppetHendelseJobb(
                 bqRepository, stoppetHendelseLagretCounter,
@@ -173,7 +157,8 @@ class ApplicationTest {
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() }
+                behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
             ),
         ) { url, client ->
             client.post<StoppetBehandling, Any>(

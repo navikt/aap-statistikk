@@ -35,7 +35,6 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
-import no.nav.aap.statistikk.jobber.LagreAvsluttetBehandlingJobbKonstruktør
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
@@ -82,12 +81,14 @@ fun Application.startUp(
     val avsluttetBehandlingCounter = prometheusMeterRegistry.avsluttetBehandlingLagret()
 
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        bqRepository, prometheusMeterRegistry.hendelseLagret(),
+        bqRepository,
+        prometheusMeterRegistry.hendelseLagret(),
         bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
         tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
         beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
         vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
-        behandlingRepositoryFactory = { BehandlingRepository(it) }
+        behandlingRepositoryFactory = { BehandlingRepository(it) },
+        avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
     )
     val motor = Motor(
         dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {
@@ -97,9 +98,7 @@ fun Application.startUp(
                 return LogInformasjon(mapOf())
             }
         }, jobber = listOf(
-            lagreStoppetHendelseJobb, LagreAvsluttetBehandlingJobbKonstruktør(
-                bqRepository, avsluttetBehandlingCounter
-            )
+            lagreStoppetHendelseJobb
         )
     )
 

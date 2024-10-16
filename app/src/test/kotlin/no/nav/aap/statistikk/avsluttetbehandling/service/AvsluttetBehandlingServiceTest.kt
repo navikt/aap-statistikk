@@ -1,8 +1,11 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.api_kontrakt.Utfall
 import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
+import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
@@ -103,10 +106,14 @@ class AvsluttetBehandlingServiceTest {
             saksnummer = saksnummer,
         )
 
+        val meterRegistry = SimpleMeterRegistry()
+        val counter = meterRegistry.avsluttetBehandlingLagret()
+
         val bigQueryClient = dataSource.transaction {
             val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 dataSource,
-                bigQuery
+                bigQuery,
+                counter
             )
 
             avsluttetBehandlingService.lagre(avsluttetBehandling)
@@ -141,6 +148,7 @@ class AvsluttetBehandlingServiceTest {
         assertThat(uthentetTilkjentYtelse).isNotNull()
         assertThat(uthentetTilkjentYtelse!!.perioder).hasSize(2)
         assertThat(uthentetTilkjentYtelse.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
+        assertThat(counter.count()).isEqualTo(1.0)
     }
 
     @Test
@@ -150,6 +158,9 @@ class AvsluttetBehandlingServiceTest {
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "xxxx"
+
+        val meterRegistry = SimpleMeterRegistry()
+        val counter = meterRegistry.avsluttetBehandlingLagret()
 
         opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
 
@@ -209,7 +220,8 @@ class AvsluttetBehandlingServiceTest {
 
         val (_, service) = konstruerAvsluttetBehandlingService(
             dataSource,
-            bigQuery
+            bigQuery,
+            counter
         )
         service.lagre(avsluttetBehandling)
 
@@ -217,11 +229,13 @@ class AvsluttetBehandlingServiceTest {
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }!!
 
         assertThat(uthentet.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
+        assertThat(counter.count()).isEqualTo(1.0)
     }
 
     private fun konstruerAvsluttetBehandlingService(
         dataSource: DataSource,
-        bigQueryConfig: BigQueryConfig
+        bigQueryConfig: BigQueryConfig,
+        counter: Counter
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
         val bqRepository = BQRepository(bigQueryClient)
@@ -233,7 +247,9 @@ class AvsluttetBehandlingServiceTest {
                 { BeregningsgrunnlagRepository(it) },
                 { VilkårsresultatRepository(it) },
                 bqRepository,
-            ) { BehandlingRepository(it) }
+                behandlingRepositoryFactory = { BehandlingRepository(it) },
+                avsluttetBehandlingLagretCounter = counter
+            )
         return Pair(bigQueryClient, service)
     }
 
