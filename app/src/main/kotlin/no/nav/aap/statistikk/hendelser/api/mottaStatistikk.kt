@@ -9,12 +9,12 @@ import io.ktor.http.*
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api_kontrakt.*
-import no.nav.aap.statistikk.avsluttetbehandling.api.eksempelUUID
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.util.*
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
 
@@ -22,9 +22,6 @@ enum class Tags(override val description: String) : APITag {
     MottaStatistikk(
         "Dette endepunktet brukes for å motta statistikk ved stopp i behandlingen."
     ),
-    AvsluttetBehandling(
-        "Ved avsluttet behandling sendes samlet statistikk."
-    )
 }
 
 val avklaringsbehov = listOf(
@@ -65,6 +62,8 @@ val avklaringsbehov = listOf(
         )
     )
 )
+
+private val eksempelUUID = UUID.randomUUID()
 
 val exampleRequestStoppetBehandling = StoppetBehandling(
     saksnummer = "4LFL5CW",
