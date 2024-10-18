@@ -58,6 +58,8 @@ annotation class Postgres {
         }
 
         override fun afterEach(context: ExtensionContext?) {
+            flyway.clean()
+            flyway.createAndMigrateDataSource()
         }
 
         override fun supportsParameter(
@@ -73,7 +75,7 @@ annotation class Postgres {
             extensionContext: ExtensionContext?
         ): Any {
             if (parameterContext == null) {
-              throw IllegalArgumentException("ParameterContext cannot be null")
+                throw IllegalArgumentException("ParameterContext cannot be null")
             }
             if (parameterContext.parameter.type == DataSource::class.java) {
                 return dataSource
