@@ -16,6 +16,7 @@ import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
+import java.util.UUID.randomUUID
 
 class LagreStoppetHendelseJobb(
     private val bqRepository: IBQRepository,

@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.api
 
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
@@ -19,10 +21,13 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+
 
 @Fakes
 class MottaStatistikkTest {
@@ -95,6 +100,163 @@ class MottaStatistikkTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `motta to events rett etter hverandre`(
+        @Postgres dataSource: DataSource,
+        @Fakes azureConfig: AzureConfig
+    ) {
+        val hendelse = StoppetBehandling(
+            saksnummer = "4LFK2S0",
+            behandlingReferanse = UUID.fromString("96175156-0950-475a-8de0-41a25f4c0cec"),
+            status = BehandlingStatus.UTREDES,
+            behandlingType = TypeBehandling.Førstegangsbehandling,
+            ident = "14890097570",
+            avklaringsbehov = listOf(
+                AvklaringsbehovHendelse(
+                    definisjon = Definisjon(
+                        type = "5003",
+                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
+                        løsesISteg = "AVKLAR_SYKDOM"
+                    ),
+                    status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    endringer = listOf(
+                        Endring(
+                            status = EndringStatus.valueOf("OPPRETTET"),
+                            tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
+                            frist = null,
+                            endretAv = "Kelvin"
+                        ), Endring(
+                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
+                            frist = null,
+                            endretAv = "Z994573"
+                        )
+                    )
+                ), AvklaringsbehovHendelse(
+                    definisjon = Definisjon(
+                        type = "5006",
+                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
+                        løsesISteg = "VURDER_BISTANDSBEHOV"
+                    ),
+                    status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    endringer = listOf(
+                        Endring(
+                            status = EndringStatus.valueOf("OPPRETTET"),
+                            tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
+                            frist = null,
+                            endretAv = "Kelvin"
+                        ), Endring(
+                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
+                            frist = null,
+                            endretAv = "Z994573"
+                        )
+                    )
+                ), AvklaringsbehovHendelse(
+                    definisjon = Definisjon(
+                        type = "5097",
+                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
+                        løsesISteg = "KVALITETSSIKRING"
+                    ), status = EndringStatus.valueOf("AVSLUTTET"), endringer = listOf(
+                        Endring(
+                            status = EndringStatus.valueOf("OPPRETTET"),
+                            tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
+                            frist = null,
+                            endretAv = "Kelvin"
+                        ), Endring(
+                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
+                            frist = null,
+                            endretAv = "Z994573"
+                        )
+                    )
+                )
+            ),
+            behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
+            versjon = "UKJENT",
+            mottattTid = LocalDateTime.now().minusDays(1),
+            sakStatus = SakStatus.UTREDES,
+            hendelsesTidspunkt = LocalDateTime.now()
+        )
+
+        val hendelse2 = hendelse.copy(hendelsesTidspunkt = LocalDateTime.now().plusSeconds(0))
+
+        val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+
+        val bqRepository = FakeBQRepository()
+        val meterRegistry = SimpleMeterRegistry()
+
+        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
+        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
+
+        val motor = Motor(
+            dataSource = dataSource,
+            antallKammer = 8,
+            logInfoProvider = NoExtraLogInfoProvider,
+            jobber = listOf(
+                LagreStoppetHendelseJobb(
+                    bqRepository,
+                    stoppetHendelseLagretCounter,
+                    bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+                    tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+                    beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+                    vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                    behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
+                )
+            )
+        )
+
+        val jobbAppender = MotorJobbAppender(dataSource)
+
+        val logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
+        val listAppender = ListAppender<ILoggingEvent>()
+
+        listAppender.start()
+
+        logger.addAppender(listAppender)
+
+
+        testKlient(
+            transactionExecutor,
+            motor,
+            jobbAppender,
+            azureConfig,
+            LagreStoppetHendelseJobb(
+                bqRepository, stoppetHendelseLagretCounter,
+                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
+            )
+        ) { url, client ->
+
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"),
+                PostRequest(hendelse)
+            )
+
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"),
+                PostRequest(hendelse2)
+            )
+
+            dataSource.transaction(readOnly = true) {
+                ventPåSvar({
+                    SakRepositoryImpl(
+                        it
+                    ).tellSaker()
+                },
+                    { it?.let { it > 0 } ?: false })
+            }
+        }
+
+        val exceptions = listAppender.list.filter { it.throwableProxy != null }
+        assertThat(exceptions).isEmpty()
     }
 
     @Test
