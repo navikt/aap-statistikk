@@ -20,8 +20,8 @@ import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDateTime
@@ -102,7 +102,7 @@ class MottaStatistikkTest {
         )
     }
 
-    @Test
+    @RepeatedTest(value = 2)
     fun `motta to events rett etter hverandre`(
         @Postgres dataSource: DataSource,
         @Fakes azureConfig: AzureConfig
@@ -211,7 +211,8 @@ class MottaStatistikkTest {
 
         val jobbAppender = MotorJobbAppender(dataSource)
 
-        val logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
+        val logger =
+            LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
         val listAppender = ListAppender<ILoggingEvent>()
 
         listAppender.start()
@@ -257,6 +258,8 @@ class MottaStatistikkTest {
 
         val exceptions = listAppender.list.filter { it.throwableProxy != null }
         assertThat(exceptions).isEmpty()
+
+        motor.stop()
     }
 
     @Test
@@ -415,5 +418,7 @@ class MottaStatistikkTest {
                 assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
             }
         }
+
+        motor.stop()
     }
 }
