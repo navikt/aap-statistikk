@@ -15,6 +15,8 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
+import java.util.stream.IntStream
+import kotlin.math.roundToLong
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
 
@@ -27,33 +29,23 @@ enum class Tags(override val description: String) : APITag {
 val avklaringsbehov = listOf(
     AvklaringsbehovHendelse(
         definisjon = Definisjon(
-            type = "5001",
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = "AVKLAR_STUDENT"
+            type = "5001", behovType = BehovType.MANUELT_PÅKREVD, løsesISteg = "AVKLAR_STUDENT"
 
-        ),
-        status = EndringStatus.AVSLUTTET,
-        endringer = listOf(
+        ), status = EndringStatus.AVSLUTTET, endringer = listOf(
             Endring(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(10),
                 endretAv = "Kelvin"
-            ),
-            Endring(
+            ), Endring(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(5),
                 endretAv = "Z994573"
             )
         )
-    ),
-    AvklaringsbehovHendelse(
+    ), AvklaringsbehovHendelse(
         definisjon = Definisjon(
-            type = "5003",
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = "AVKLAR_SYKDOM"
-        ),
-        status = EndringStatus.OPPRETTET,
-        endringer = listOf(
+            type = "5003", behovType = BehovType.MANUELT_PÅKREVD, løsesISteg = "AVKLAR_SYKDOM"
+        ), status = EndringStatus.OPPRETTET, endringer = listOf(
             Endring(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(3),
@@ -95,18 +87,28 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 
                 val stringified = DefaultJsonMapper.toJson(dto)
 
+                val encodedSaksNummer = stringToNumber(dto.saksnummer)
+                val encodedBehandlingsUUID = stringToNumber(dto.behandlingReferanse.toString())
+
                 jobbAppender.leggTil(
                     conn,
                     JobbInput(lagreStoppetHendelseJobb).medPayload(stringified).medCallId()
+                        .forBehandling(encodedSaksNummer, encodedBehandlingsUUID)
                 )
             }
 
 
             responder.respond(
-                HttpStatusCode.Accepted,
-                "{}",
-                pipeline
+                HttpStatusCode.Accepted, "{}", pipeline
             )
         }
     }
+}
+
+private fun stringToNumber(string: String): Long {
+    return IntStream.range(0, string.length)
+        .mapToObj() { Math.pow(10.0, it.toDouble()) * string[it].code }
+        .reduce { acc, curr -> acc + curr }.orElse(0.0)
+        .mod(1_000_000.0)
+        .roundToLong()
 }
