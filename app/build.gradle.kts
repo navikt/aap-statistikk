@@ -38,7 +38,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
-    implementation("no.nav:ktor-openapi-generator:1.0.32")
+    implementation("no.nav:ktor-openapi-generator:1.0.46")
     implementation("com.google.cloud:google-cloud-bigquery:2.42.4")
 
 
