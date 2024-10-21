@@ -7,6 +7,7 @@ import java.util.*
 /**
  * @param saksnummer Saksnummer.
  * @param behandlingReferanse Behandlingsreferanse
+ * @param relatertBehandling Hvis behandlingen har oppsått med bakgrunn i en annen, skal den foregående behandlingen refereres til her.
  * @param mottattTid Dato for første søknad mottatt for behandlingen.
  * @param status Behandlingstatus. Ikke det samme som sakstatus.
  */
@@ -14,6 +15,7 @@ public data class StoppetBehandling(
     val saksnummer: String,
     val sakStatus: SakStatus,
     val behandlingReferanse: UUID,
+    val relatertBehandling: UUID? = null,
     val behandlingOpprettetTidspunkt: LocalDateTime,
     val mottattTid: LocalDateTime,
     val status: BehandlingStatus,
