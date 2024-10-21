@@ -28,8 +28,8 @@ public data class StoppetBehandling(
 ) {
     init {
         require(ident.isNotEmpty())
-        require(status == BehandlingStatus.AVSLUTTET || avsluttetBehandling == null)
-        require(status != BehandlingStatus.AVSLUTTET || avsluttetBehandling != null)
+        require(status == BehandlingStatus.AVSLUTTET || avsluttetBehandling == null) { "Om behandling er avsluttet, legg ved data om avsluttet behandling. Status er $status"}
+        require(status != BehandlingStatus.AVSLUTTET || avsluttetBehandling != null) { "Om behandling ikke er avsluttet, ikke legg ved data om avsluttet behandling. Status er $status"}
     }
 }
 
