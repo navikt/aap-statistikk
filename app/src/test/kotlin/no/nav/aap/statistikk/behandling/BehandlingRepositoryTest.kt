@@ -35,7 +35,7 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx")
+                    versjon = Versjon("xxx"),
                 )
             )
         }

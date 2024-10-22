@@ -49,6 +49,9 @@ class HendelsesService(
         val behandling = behandlingRepository.hent(behandlingId)
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
+        val relatertBehandlingUUID =
+            behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
+
         // TODO - kun om endring siden sist. somehow!?
         val bqSak = BQBehandling(
             sekvensNummer = sekvensNummer,
@@ -61,6 +64,7 @@ class HendelsesService(
             aktorId = sak.person.ident,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
+            relatertBehandlingUUID = relatertBehandlingUUID?.toString()
         )
         bigQueryRepository.lagre(bqSak)
     }
@@ -79,10 +83,22 @@ class HendelsesService(
             versjon = Versjon(verdi = dto.versjon)
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
+
+        val relatertBehandlingUUID = dto.relatertBehandling
+        val relatertBehadling =
+            relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
+
         val behandlingId =
             eksisterendeBehandlingId
-                ?.also { behandlingRepository.oppdaterBehandling(behandling.copy(id = eksisterendeBehandlingId)) }
-                ?: behandlingRepository.opprettBehandling(behandling)
+                ?.also {
+                    behandlingRepository.oppdaterBehandling(
+                        behandling.copy(
+                            id = eksisterendeBehandlingId,
+                            relatertBehandlingId = relatertBehadling?.id
+                        )
+                    )
+                }
+                ?: behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
         return behandlingId
     }
 

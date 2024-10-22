@@ -20,14 +20,15 @@ class BehandlingRepository(
     override fun opprettBehandling(behandling: Behandling): Long {
         val behandlingId = dbConnection.executeReturnKey(
             """
-INSERT INTO behandling (sak_id, referanse, type, opprettet_tid)
-VALUES (?, ?, ?, ?)"""
+INSERT INTO behandling (sak_id, referanse, type, opprettet_tid, forrige_behandling_id)
+VALUES (?, ?, ?, ?, ?)"""
         ) {
             setParams {
                 setLong(1, behandling.sak.id!!)
                 setUUID(2, behandling.referanse)
                 setString(3, behandling.typeBehandling.toString())
                 setLocalDateTime(4, behandling.opprettetTid)
+                setLong(5, behandling.relatertBehandlingId)
             }
         }
         oppdaterBehandling(behandling.copy(id = behandlingId))
