@@ -40,6 +40,9 @@ class SakTabell : BQTable<BQBehandling> {
         get() {
             val saksnummmer = Field.of("saksnummer", StandardSQLTypeName.STRING)
             val behandlingUuid = Field.of("behandlingUuid", StandardSQLTypeName.STRING)
+            val relatertBehandlingUUid =
+                Field.newBuilder("relatertBehandlingUUid", StandardSQLTypeName.STRING)
+                    .setMode(Field.Mode.NULLABLE).build()
             val behandlingType = Field.of("behandlingType", StandardSQLTypeName.STRING)
             val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
             val aktorId = Field.of("aktorId", StandardSQLTypeName.STRING)
@@ -60,6 +63,7 @@ class SakTabell : BQTable<BQBehandling> {
                 sekvensNummer,
                 saksnummmer,
                 behandlingUuid,
+                relatertBehandlingUUid,
                 behandlingType,
                 behandlingStatus,
                 aktorId,
@@ -74,6 +78,8 @@ class SakTabell : BQTable<BQBehandling> {
     override fun parseRow(fieldValueList: FieldValueList): BQBehandling {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
+        val relatertBehandlingUUid =
+            if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
         val tekniskTid = fieldValueList.get("tekniskTid").stringValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
@@ -86,6 +92,7 @@ class SakTabell : BQTable<BQBehandling> {
         return BQBehandling(
             saksnummer = saksnummer,
             behandlingUUID = behandlingUuid,
+            relatertBehandlingUUID = relatertBehandlingUUid,
             tekniskTid = LocalDateTime.parse(tekniskTid),
             behandlingType = behandlingType,
             avsender = avsender,
@@ -103,6 +110,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "sekvensnummer" to value.sekvensNummer,
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
+                "relatertBehandlingUUid" to value.relatertBehandlingUUID,
                 "behandlingType" to value.behandlingType,
                 "aktorId" to value.aktorId,
                 "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.SECONDS)

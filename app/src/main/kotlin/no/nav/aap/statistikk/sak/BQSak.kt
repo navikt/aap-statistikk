@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 data class BQBehandling(
     val sekvensNummer: Long,
     val behandlingUUID: String,
+    val relatertBehandlingUUID: String? = null,
     val behandlingType: String,
     val aktorId: String,
     val saksnummer: String,
