@@ -18,7 +18,7 @@ fun main() {
     val azureFake = Fakes.AzureFake(port = 8081)
     azureFake.start()
 
-    val pgConfig = postgresTestConfig(5432)
+    val pgConfig = postgresTestConfig()
     logger.info("Postgres Config: $pgConfig")
     val bqConfig: BigQueryConfig = bigQueryContainer()
 
