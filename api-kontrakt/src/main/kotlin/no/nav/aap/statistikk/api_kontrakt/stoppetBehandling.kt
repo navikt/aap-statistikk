@@ -28,8 +28,10 @@ public data class StoppetBehandling(
 ) {
     init {
         require(ident.isNotEmpty())
-        require(status == BehandlingStatus.AVSLUTTET || avsluttetBehandling == null) { "Om behandling er avsluttet, legg ved data om avsluttet behandling. Status er $status"}
-        require(status != BehandlingStatus.AVSLUTTET || avsluttetBehandling != null) { "Om behandling ikke er avsluttet, ikke legg ved data om avsluttet behandling. Status er $status"}
+        require(status == BehandlingStatus.AVSLUTTET || avsluttetBehandling == null)
+        { "Om behandling er avsluttet, legg ved data om avsluttet behandling. Status er $status" }
+        require(status != BehandlingStatus.AVSLUTTET || avsluttetBehandling != null)
+        { "Om behandling ikke er avsluttet, ikke legg ved data om avsluttet behandling. Status er $status" }
     }
 }
 
@@ -65,7 +67,7 @@ public data class AvklaringsbehovHendelse(
 public data class Definisjon(
     val type: String, // TODO: enum her
     val behovType: BehovType,
-    val løsesISteg: String
+    val løsesISteg: StegType
 )
 
 
@@ -87,7 +89,82 @@ public data class Endring(
 )
 
 public enum class BehovType {
-    MANUELT_PÅKREVD,
-    MANUELT_FRIVILLIG,
-    VENTEPUNKT,
+    MANUELT_PÅKREVD, MANUELT_FRIVILLIG, VENTEPUNKT,
+}
+
+public enum class StegType(
+    public val status: BehandlingStatus
+) {
+    START_BEHANDLING(
+        status = BehandlingStatus.OPPRETTET
+    ),
+    VURDER_ALDER(
+        status = BehandlingStatus.UTREDES,
+    ),
+    VURDER_LOVVALG(
+        status = BehandlingStatus.UTREDES
+    ),
+    VURDER_MEDLEMSKAP(
+        status = BehandlingStatus.UTREDES
+    ),
+    AVKLAR_STUDENT(
+        status = BehandlingStatus.UTREDES
+    ),
+    VURDER_BISTANDSBEHOV(
+        status = BehandlingStatus.UTREDES
+    ),
+    VURDER_SYKEPENGEERSTATNING(
+        status = BehandlingStatus.UTREDES
+    ),
+    FRITAK_MELDEPLIKT(
+        status = BehandlingStatus.UTREDES
+    ),
+    KVALITETSSIKRING(
+        status = BehandlingStatus.UTREDES,
+    ),
+    BARNETILLEGG(
+        status = BehandlingStatus.UTREDES
+    ),
+    AVKLAR_SYKDOM(
+        status = BehandlingStatus.UTREDES
+    ),
+    FASTSETT_ARBEIDSEVNE(
+        status = BehandlingStatus.UTREDES
+    ),
+    FASTSETT_BEREGNINGSTIDSPUNKT(
+        status = BehandlingStatus.UTREDES
+    ),
+    FASTSETT_GRUNNLAG(
+        status = BehandlingStatus.UTREDES
+    ),
+    VIS_GRUNNLAG(
+        status = BehandlingStatus.UTREDES
+    ),
+    FASTSETT_UTTAK(
+        status = BehandlingStatus.UTREDES
+    ),
+    SAMORDNING_GRADERING(
+        status = BehandlingStatus.UTREDES
+    ),
+    DU_ER_ET_ANNET_STED(
+        status = BehandlingStatus.UTREDES
+    ),
+    BEREGN_TILKJENT_YTELSE(
+        status = BehandlingStatus.UTREDES
+    ),
+    SIMULERING(
+        status = BehandlingStatus.UTREDES
+    ),
+    FORESLÅ_VEDTAK(
+        status = BehandlingStatus.UTREDES
+    ),
+    FATTE_VEDTAK(
+        status = BehandlingStatus.UTREDES
+    ),
+    BREV(
+        status = BehandlingStatus.IVERKSETTES,
+    ),
+    IVERKSETT_VEDTAK(
+        status = BehandlingStatus.IVERKSETTES
+    )
 }

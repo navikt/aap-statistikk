@@ -82,7 +82,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 definisjon = Definisjon(
                     type = "5003",
                     behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                    løsesISteg = "AVKLAR_SYKDOM"
+                    løsesISteg = StegType.AVKLAR_SYKDOM
                 ),
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
@@ -104,7 +104,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 definisjon = Definisjon(
                     type = "5006",
                     behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                    løsesISteg = "VURDER_BISTANDSBEHOV"
+                    løsesISteg = StegType.VURDER_BISTANDSBEHOV
                 ),
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
@@ -126,7 +126,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 definisjon = Definisjon(
                     type = "5097",
                     behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                    løsesISteg = "KVALITETSSIKRING"
+                    løsesISteg = StegType.KVALITETSSIKRING
                 ),
                 status = EndringStatus.valueOf("AVSLUTTET"),
                 endringer = listOf(

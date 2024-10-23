@@ -71,15 +71,15 @@ public final class no/nav/aap/statistikk/api_kontrakt/BeregningsgrunnlagDTO {
 }
 
 public final class no/nav/aap/statistikk/api_kontrakt/Definisjon {
-	public fun <init> (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Lno/nav/aap/statistikk/api_kontrakt/StegType;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lno/nav/aap/statistikk/api_kontrakt/BehovType;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
-	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/Definisjon;Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Ljava/lang/String;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
+	public final fun component3 ()Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public final fun copy (Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Lno/nav/aap/statistikk/api_kontrakt/StegType;)Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
+	public static synthetic fun copy$default (Lno/nav/aap/statistikk/api_kontrakt/Definisjon;Ljava/lang/String;Lno/nav/aap/statistikk/api_kontrakt/BehovType;Lno/nav/aap/statistikk/api_kontrakt/StegType;ILjava/lang/Object;)Lno/nav/aap/statistikk/api_kontrakt/Definisjon;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBehovType ()Lno/nav/aap/statistikk/api_kontrakt/BehovType;
-	public final fun getLøsesISteg ()Ljava/lang/String;
+	public final fun getLøsesISteg ()Lno/nav/aap/statistikk/api_kontrakt/StegType;
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -199,6 +199,37 @@ public final class no/nav/aap/statistikk/api_kontrakt/SakStatus : java/lang/Enum
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
 	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/SakStatus;
+}
+
+public final class no/nav/aap/statistikk/api_kontrakt/StegType : java/lang/Enum {
+	public static final field AVKLAR_STUDENT Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field AVKLAR_SYKDOM Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field BARNETILLEGG Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field BEREGN_TILKJENT_YTELSE Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field BREV Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field DU_ER_ET_ANNET_STED Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field FASTSETT_ARBEIDSEVNE Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field FASTSETT_BEREGNINGSTIDSPUNKT Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field FASTSETT_GRUNNLAG Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field FASTSETT_UTTAK Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field FATTE_VEDTAK Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field FORESLÅ_VEDTAK Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field FRITAK_MELDEPLIKT Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field IVERKSETT_VEDTAK Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field KVALITETSSIKRING Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field SAMORDNING_GRADERING Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field SIMULERING Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field START_BEHANDLING Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field VIS_GRUNNLAG Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field VURDER_ALDER Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field VURDER_BISTANDSBEHOV Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field VURDER_LOVVALG Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field VURDER_MEDLEMSKAP Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static final field VURDER_SYKEPENGEERSTATNING Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getStatus ()Lno/nav/aap/statistikk/api_kontrakt/BehandlingStatus;
+	public static fun valueOf (Ljava/lang/String;)Lno/nav/aap/statistikk/api_kontrakt/StegType;
+	public static fun values ()[Lno/nav/aap/statistikk/api_kontrakt/StegType;
 }
 
 public final class no/nav/aap/statistikk/api_kontrakt/StoppetBehandling {
