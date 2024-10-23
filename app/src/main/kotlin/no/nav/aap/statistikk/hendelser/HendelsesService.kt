@@ -70,7 +70,9 @@ class HendelsesService(
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
-            ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt else null,
+            ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt.truncatedTo(
+                ChronoUnit.SECONDS
+            ) else null,
         )
         bigQueryRepository.lagre(bqSak)
     }
