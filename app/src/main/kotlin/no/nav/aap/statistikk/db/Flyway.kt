@@ -13,8 +13,7 @@ class Flyway(config: DbConfig) {
 
     private val flyway = Flyway
         .configure()
-        .cleanDisabled(false)
-        .cleanOnValidationError(true) // TODO: endre denne når skjema har stabilisert seg litt
+        .cleanDisabled(true)
         .dataSource(dataSource)
         .locations("migrering")
         .validateMigrationNaming(true)
