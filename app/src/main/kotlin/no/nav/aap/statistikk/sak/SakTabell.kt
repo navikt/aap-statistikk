@@ -8,8 +8,6 @@ import java.time.temporal.ChronoUnit
 
 /*
 * Mangler:
-*  - relatertBehandlingId
-*  - ferdigBehandletTid
 *  - vedtakTid
 *  - utbetaltTid
 *  - endretTid/funksjonellTid
@@ -45,6 +43,9 @@ class SakTabell : BQTable<BQBehandling> {
                     .setMode(Field.Mode.NULLABLE).build()
             val behandlingType = Field.of("behandlingType", StandardSQLTypeName.STRING)
             val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
+            val ferdigbehandletTid =
+                Field.newBuilder("ferdigbehandletTid", StandardSQLTypeName.DATETIME)
+                    .setMode(Field.Mode.NULLABLE).build()
             val aktorId = Field.of("aktorId", StandardSQLTypeName.STRING)
             val tekniskTid =
                 Field.newBuilder("tekniskTid", StandardSQLTypeName.DATETIME)
@@ -66,6 +67,7 @@ class SakTabell : BQTable<BQBehandling> {
                 relatertBehandlingUUid,
                 behandlingType,
                 behandlingStatus,
+                ferdigbehandletTid,
                 aktorId,
                 tekniskTid,
                 mottattTid,
@@ -80,6 +82,7 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
         val relatertBehandlingUUid =
             if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
+        val ferdigbehandletTid = fieldValueList.get("ferdigbehandletTid").timestampValue
         val tekniskTid = fieldValueList.get("tekniskTid").stringValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
