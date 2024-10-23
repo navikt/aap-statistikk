@@ -41,11 +41,16 @@ class HendelsesService(
             avsluttetBehandlingService.lagre(hendelse.avsluttetBehandling!!.tilDomene())
         }
 
-        lagreSakInfoTilBigquery(sak, behandlingId, hendelse.versjon)
+        lagreSakInfoTilBigquery(sak, behandlingId, hendelse.versjon, hendelse.hendelsesTidspunkt)
         hendelseLagretCounter.increment()
     }
 
-    private fun lagreSakInfoTilBigquery(sak: Sak, behandlingId: Long, versjon: String) {
+    private fun lagreSakInfoTilBigquery(
+        sak: Sak,
+        behandlingId: Long,
+        versjon: String,
+        hendelsesTidspunkt: LocalDateTime
+    ) {
         val behandling = behandlingRepository.hent(behandlingId)
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
@@ -64,7 +69,8 @@ class HendelsesService(
             aktorId = sak.person.ident,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
-            relatertBehandlingUUID = relatertBehandlingUUID?.toString()
+            relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
+            ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt else null,
         )
         bigQueryRepository.lagre(bqSak)
     }

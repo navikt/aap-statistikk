@@ -6,6 +6,7 @@ data class BQBehandling(
     val sekvensNummer: Long,
     val behandlingUUID: String,
     val relatertBehandlingUUID: String? = null,
+    val ferdigbehandletTid: LocalDateTime? = null,
     val behandlingType: String,
     val aktorId: String,
     val saksnummer: String,
@@ -20,6 +21,10 @@ data class BQBehandling(
         require(mottattTid.truncatedTo(java.time.temporal.ChronoUnit.SECONDS).isEqual(mottattTid))
         require(
             registrertTid.truncatedTo(java.time.temporal.ChronoUnit.SECONDS).isEqual(registrertTid)
+        )
+        require(
+            ferdigbehandletTid?.truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+                ?.isEqual(ferdigbehandletTid) == true
         )
     }
 }
