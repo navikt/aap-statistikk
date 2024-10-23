@@ -159,7 +159,7 @@ fun <E> testKlientNoInjection(
     return res
 }
 
-fun postgresTestConfig(port: Int? = null): DbConfig {
+fun postgresTestConfig(): DbConfig {
     val postgres = PostgreSQLContainer("postgres:16")
     postgres.waitingFor(
         HostPortWaitStrategy().withStartupTimeout(

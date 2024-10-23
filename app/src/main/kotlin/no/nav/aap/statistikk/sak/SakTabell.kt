@@ -128,7 +128,8 @@ class SakTabell : BQTable<BQBehandling> {
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "mottattTid" to value.mottattTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "endretTid" to value.endretTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "endretTid" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "registrertTid" to value.registrertTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
