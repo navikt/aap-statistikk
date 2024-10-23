@@ -41,6 +41,7 @@ annotation class Postgres {
             private val dbConfig: DbConfig
 
             init {
+                System.setProperty("flyway.cleanDisabled", false.toString())
                 postgresContainer.start()
                 dbConfig = DbConfig(
                     jdbcUrl = postgresContainer.jdbcUrl,
