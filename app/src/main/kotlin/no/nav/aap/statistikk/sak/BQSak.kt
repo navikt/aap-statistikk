@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.sak
 
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.SECONDS
 
 data class BQBehandling(
     val sekvensNummer: Long,
@@ -18,13 +19,13 @@ data class BQBehandling(
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)
-        require(mottattTid.truncatedTo(java.time.temporal.ChronoUnit.SECONDS).isEqual(mottattTid))
+        require(mottattTid.truncatedTo(SECONDS).isEqual(mottattTid))
         require(
-            registrertTid.truncatedTo(java.time.temporal.ChronoUnit.SECONDS).isEqual(registrertTid)
+            registrertTid.truncatedTo(SECONDS).isEqual(registrertTid)
         )
         require(
-            ferdigbehandletTid?.truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
-                ?.isEqual(ferdigbehandletTid) == true
+            ferdigbehandletTid == null || ferdigbehandletTid.truncatedTo(SECONDS)
+                .isEqual(ferdigbehandletTid)
         )
     }
 }
