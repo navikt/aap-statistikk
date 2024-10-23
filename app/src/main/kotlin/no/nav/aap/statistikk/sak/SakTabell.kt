@@ -82,7 +82,8 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
         val relatertBehandlingUUid =
             if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
-        val ferdigbehandletTid = fieldValueList.get("ferdigbehandletTid").timestampValue
+        val ferdigbehandletTid =
+            if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
         val tekniskTid = fieldValueList.get("tekniskTid").stringValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
@@ -104,6 +105,7 @@ class SakTabell : BQTable<BQBehandling> {
             aktorId = aktorId,
             mottattTid = LocalDateTime.parse(mottattTid),
             registrertTid = LocalDateTime.parse(registrertTid),
+            ferdigbehandletTid = ferdigbehandletTid?.let { LocalDateTime.parse(it) }
         )
     }
 
@@ -123,6 +125,8 @@ class SakTabell : BQTable<BQBehandling> {
                 "registrertTid" to value.registrertTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
+                "ferdigbehandletTid" to value.ferdigbehandletTid?.truncatedTo(ChronoUnit.SECONDS)
+                    ?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             )
         )
     }
