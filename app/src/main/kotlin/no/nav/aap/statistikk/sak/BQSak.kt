@@ -13,6 +13,7 @@ data class BQBehandling(
     val saksnummer: String,
     val tekniskTid: LocalDateTime,
     val registrertTid: LocalDateTime,
+    val endretTid: LocalDateTime,
     val verson: String,
     val avsender: String,
     val mottattTid: LocalDateTime,
