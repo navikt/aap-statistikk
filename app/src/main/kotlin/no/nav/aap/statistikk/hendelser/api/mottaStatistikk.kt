@@ -29,7 +29,9 @@ enum class Tags(override val description: String) : APITag {
 val avklaringsbehov = listOf(
     AvklaringsbehovHendelse(
         definisjon = Definisjon(
-            type = "5001", behovType = BehovType.MANUELT_PÅKREVD, løsesISteg = "AVKLAR_STUDENT"
+            type = "5001",
+            behovType = BehovType.MANUELT_PÅKREVD,
+            løsesISteg = StegType.AVKLAR_STUDENT
 
         ), status = EndringStatus.AVSLUTTET, endringer = listOf(
             Endring(
@@ -44,7 +46,9 @@ val avklaringsbehov = listOf(
         )
     ), AvklaringsbehovHendelse(
         definisjon = Definisjon(
-            type = "5003", behovType = BehovType.MANUELT_PÅKREVD, løsesISteg = "AVKLAR_SYKDOM"
+            type = "5003",
+            behovType = BehovType.MANUELT_PÅKREVD,
+            løsesISteg = StegType.AVKLAR_SYKDOM
         ), status = EndringStatus.OPPRETTET, endringer = listOf(
             Endring(
                 status = EndringStatus.OPPRETTET,
@@ -97,7 +101,6 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                 )
             }
 
-
             responder.respond(
                 HttpStatusCode.Accepted, "{}", pipeline
             )
@@ -108,7 +111,5 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 private fun stringToNumber(string: String): Long {
     return IntStream.range(0, string.length)
         .mapToObj() { Math.pow(10.0, it.toDouble()) * string[it].code }
-        .reduce { acc, curr -> acc + curr }.orElse(0.0)
-        .mod(1_000_000.0)
-        .roundToLong()
+        .reduce { acc, curr -> acc + curr }.orElse(0.0).mod(1_000_000.0).roundToLong()
 }
