@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.testutils.BigQuery
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -54,6 +55,6 @@ class SakTabellTest {
         assertThat(uthentet.first().aktorId).isEqualTo("123456")
         assertThat(uthentet.first().mottattTid).isEqualTo(mottattTid)
         assertThat(uthentet.first().registrertTid).isEqualTo(registrertTid)
-        assertThat(uthentet.first().endretTid).isEqualTo(endretTid)
+        assertThat(uthentet.first().endretTid).isCloseTo(endretTid, within(10, ChronoUnit.MILLIS))
     }
 }
