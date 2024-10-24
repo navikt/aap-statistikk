@@ -10,6 +10,7 @@ import java.util.*
  * @param relatertBehandling Hvis behandlingen har oppsått med bakgrunn i en annen, skal den foregående behandlingen refereres til her. Dette er tolket som forrige behandling på samme sak.
  * @param mottattTid Dato for første søknad mottatt for behandlingen.
  * @param status Behandlingstatus. Ikke det samme som sakstatus.
+ * @param identerForSak Identer på sak. Brukes for å filtrere kode 6-personer.
  */
 public data class StoppetBehandling(
     val saksnummer: String,
@@ -25,6 +26,7 @@ public data class StoppetBehandling(
     val avklaringsbehov: List<AvklaringsbehovHendelse>,
     val hendelsesTidspunkt: LocalDateTime,
     val avsluttetBehandling: AvsluttetBehandlingDTO? = null,
+    val identerForSak: List<String> = listOf(),
 ) {
     init {
         require(ident.isNotEmpty())
