@@ -10,7 +10,6 @@ import java.time.temporal.ChronoUnit
 * Mangler:
 *  - vedtakTid
 *  - utbetaltTid
-*  - endretTid/funksjonellTid
 *  - søknadsformt
 *  - forventetOppstartTid
 *  - sakYtelse
@@ -18,7 +17,6 @@ import java.time.temporal.ChronoUnit
 *  - behandlingResultat
 *  - resultatBegrunnelse
 *  - behandlingMetode (manuell, automatisk, etc)
-*  - opprettetAv
 *  - saksbehandler
 *  - ansvarligbeslutter
 *  - ansvarligenhet
@@ -63,6 +61,9 @@ class SakTabell : BQTable<BQBehandling> {
             val versjon = Field.of("versjon", StandardSQLTypeName.STRING)
             val avsender = Field.of("avsender", StandardSQLTypeName.STRING)
             val sekvensNummer = Field.of("sekvensnummer", StandardSQLTypeName.INT64)
+            val opprettetAv = Field.newBuilder("opprettetAv", StandardSQLTypeName.STRING)
+                .setDescription("Vil alltid være systemet Kelvin.").build()
+
             return Schema.of(
                 sekvensNummer,
                 saksnummmer,
@@ -77,7 +78,8 @@ class SakTabell : BQTable<BQBehandling> {
                 mottattTid,
                 registrertTid,
                 versjon,
-                avsender
+                avsender,
+                opprettetAv
             )
         }
 
@@ -97,6 +99,7 @@ class SakTabell : BQTable<BQBehandling> {
         val avsender = fieldValueList.get("avsender").stringValue
         val sekvensNummer = fieldValueList.get("sekvensnummer").longValue
         val aktorId = fieldValueList.get("aktorId").stringValue
+        val opprettetAv = fieldValueList.get("opprettetAv").stringValue
 
         return BQBehandling(
             saksnummer = saksnummer,
@@ -112,6 +115,7 @@ class SakTabell : BQTable<BQBehandling> {
             registrertTid = LocalDateTime.parse(registrertTid),
             ferdigbehandletTid = ferdigbehandletTid?.let { LocalDateTime.parse(it) },
             endretTid = LocalDateTime.parse(endretTid),
+            opprettetAv = opprettetAv
         )
     }
 
@@ -135,6 +139,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "versjon" to value.verson,
                 "ferdigbehandletTid" to value.ferdigbehandletTid?.truncatedTo(ChronoUnit.SECONDS)
                     ?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "opprettetAv" to value.opprettetAv
             )
         )
     }

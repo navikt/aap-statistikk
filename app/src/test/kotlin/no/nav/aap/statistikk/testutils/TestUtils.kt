@@ -38,6 +38,9 @@ import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.pdl.Adressebeskyttelse
+import no.nav.aap.statistikk.pdl.Gradering
+import no.nav.aap.statistikk.pdl.PdlClient
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -449,6 +452,24 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
 
     override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         return grunnlag
+    }
+}
+
+class FakePdlClient : PdlClient {
+    override fun hentPerson(ident: String): no.nav.aap.statistikk.pdl.Person {
+        return when (ident.startsWith("1")) {
+            true -> no.nav.aap.statistikk.pdl.Person(
+                adressebeskyttelse = Adressebeskyttelse(
+                    gradering = Gradering.STRENGT_FORTROLIG
+                )
+            )
+
+            false -> no.nav.aap.statistikk.pdl.Person(
+                adressebeskyttelse = Adressebeskyttelse(
+                    gradering = Gradering.UGRADERT
+                )
+            )
+        }
     }
 }
 
