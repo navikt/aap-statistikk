@@ -455,19 +455,11 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
     }
 }
 
-class FakePdlClient : PdlClient {
-    override fun hentPerson(ident: String): no.nav.aap.statistikk.pdl.Person {
-        return when (ident.startsWith("1")) {
-            true -> no.nav.aap.statistikk.pdl.Person(
-                adressebeskyttelse = Adressebeskyttelse(
-                    gradering = Gradering.STRENGT_FORTROLIG
-                )
-            )
-
-            false -> no.nav.aap.statistikk.pdl.Person(
-                adressebeskyttelse = Adressebeskyttelse(
-                    gradering = Gradering.UGRADERT
-                )
+class FakePdlClient(val identerHemmelig: Map<String, Boolean>) : PdlClient {
+    override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.pdl.Person> {
+        return identer.map {
+            no.nav.aap.statistikk.pdl.Person(
+                adressebeskyttelse = Adressebeskyttelse(gradering = if (identerHemmelig[it] == true) Gradering.STRENGT_FORTROLIG else Gradering.UGRADERT)
             )
         }
     }
