@@ -67,4 +67,8 @@ spec:
       - name: tester
         cascadingDelete: true  # false for produksjon. Nå kan sletting gjøres ved å slette denne linja
         permission: READWRITE
-
+  env:
+    - name: INTEGRASJON_PDL_URL
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
+    - name: INTEGRASJON_PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
