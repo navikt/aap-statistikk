@@ -39,7 +39,8 @@ class SakTabellTest {
                 aktorId = "123456",
                 mottattTid = mottattTid,
                 registrertTid = registrertTid,
-                endretTid = endretTid
+                endretTid = endretTid,
+                opprettetAv = KELVIN
             )
         )
 

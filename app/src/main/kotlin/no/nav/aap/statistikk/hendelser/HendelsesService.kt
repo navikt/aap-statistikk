@@ -73,7 +73,8 @@ class HendelsesService(
             ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt.truncatedTo(
                 ChronoUnit.SECONDS
             ) else null,
-            endretTid = hendelsesTidspunkt
+            endretTid = hendelsesTidspunkt,
+            opprettetAv = KELVIN
         )
         bigQueryRepository.lagre(bqSak)
     }
