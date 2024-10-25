@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
@@ -28,6 +29,7 @@ class IntegrationTest {
         @Postgres dataSource: DataSource,
         @BigQuery config: BigQueryConfig,
         @Fakes azureConfig: AzureConfig,
+        @Fakes pdlConfig: PdlConfig,
     ) {
 
         val behandlingReferanse = UUID.randomUUID()
@@ -44,8 +46,9 @@ class IntegrationTest {
 
         testKlientNoInjection(
             dbConfig,
-            azureConfig,
-            bigQueryClient
+            pdlConfig = pdlConfig,
+            azureConfig = azureConfig,
+            bigQueryClient,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"),

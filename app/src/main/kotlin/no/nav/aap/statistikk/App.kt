@@ -39,6 +39,9 @@ import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oversikt.oversiktRoute
+import no.nav.aap.statistikk.pdl.PdlConfig
+import no.nav.aap.statistikk.pdl.PdlGraphQLClient
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -58,14 +61,21 @@ fun main() {
     val bgConfig = BigQueryConfigFromEnv()
     val azureConfig = azureconfigFraMiljøVariabler()
     val bigQueryClient = BigQueryClient(bgConfig, schemaRegistry)
+    val pdlConfig = PdlConfig(
+        url = System.getenv("INTEGRASJON_PDL_URL"),
+        scope = System.getenv("INTEGRASJON_PDL_URL")
+    )
 
     embeddedServer(Netty, port = 8080) {
-        startUp(dbConfig, azureConfig, bigQueryClient)
+        startUp(dbConfig, azureConfig, bigQueryClient, pdlConfig)
     }.start(wait = true)
 }
 
 fun Application.startUp(
-    dbConfig: DbConfig, azureConfig: AzureConfig, bigQueryClient: BigQueryClient
+    dbConfig: DbConfig,
+    azureConfig: AzureConfig,
+    bigQueryClient: BigQueryClient,
+    pdlConfig: PdlConfig
 ) {
     log.info("Starter.")
 
@@ -80,6 +90,9 @@ fun Application.startUp(
 
     val avsluttetBehandlingCounter = prometheusMeterRegistry.avsluttetBehandlingLagret()
 
+    val pdlClient = PdlGraphQLClient(
+        pdlConfig = pdlConfig
+    )
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         bqRepository,
         prometheusMeterRegistry.hendelseLagret(),
@@ -89,7 +102,9 @@ fun Application.startUp(
         vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
         behandlingRepositoryFactory = { BehandlingRepository(it) },
         avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+        skjermingService = SkjermingService(pdlClient),
     )
+
     val motor = Motor(
         dataSource = dataSource, antallKammer = 8, logInfoProvider = object : JobbLogInfoProvider {
             override fun hentInformasjon(

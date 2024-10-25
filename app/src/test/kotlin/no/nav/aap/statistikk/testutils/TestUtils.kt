@@ -41,6 +41,7 @@ import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.pdl.Gradering
 import no.nav.aap.statistikk.pdl.PdlClient
+import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -123,6 +124,7 @@ fun <E> testKlient(
 
 fun <E> testKlientNoInjection(
     dbConfig: DbConfig,
+    pdlConfig: PdlConfig,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwksUri = "http://localhost:8081/jwks",
@@ -131,7 +133,7 @@ fun <E> testKlientNoInjection(
     bigQueryClient: BigQueryClient,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
-    var res: E? = null;
+    val res: E?;
 
     System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
     System.setProperty("azure.app.client.id", azureConfig.clientId)
@@ -149,7 +151,8 @@ fun <E> testKlientNoInjection(
         startUp(
             dbConfig,
             azureConfig,
-            bigQueryClient
+            bigQueryClient,
+            pdlConfig,
         )
     }.start()
 
@@ -455,7 +458,7 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
     }
 }
 
-class FakePdlClient(val identerHemmelig: Map<String, Boolean>) : PdlClient {
+class FakePdlClient(val identerHemmelig: Map<String, Boolean> = emptyMap()) : PdlClient {
     override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.pdl.Person> {
         return identer.map {
             no.nav.aap.statistikk.pdl.Person(

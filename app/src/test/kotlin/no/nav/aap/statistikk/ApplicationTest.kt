@@ -9,6 +9,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -38,7 +39,8 @@ class ApplicationTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = meterRegistry.avsluttetBehandlingLagret()
+                avsluttetBehandlingLagretCounter = meterRegistry.avsluttetBehandlingLagret(),
+                skjermingService = SkjermingService(FakePdlClient())
             ),
         ) { url, client ->
             @Language("JSON")
@@ -158,6 +160,7 @@ class ApplicationTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                skjermingService = SkjermingService(FakePdlClient()),
                 avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
             ),
         ) { url, client ->
