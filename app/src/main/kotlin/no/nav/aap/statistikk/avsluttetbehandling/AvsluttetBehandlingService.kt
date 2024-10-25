@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
+import io.micrometer.core.instrument.Counter
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.Behandling
@@ -8,10 +9,12 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class AvsluttetBehandlingService(
@@ -21,8 +24,11 @@ class AvsluttetBehandlingService(
     private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
     private val bqRepository: IBQRepository,
     private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
-    private val avsluttetBehandlingLagretCounter: io.micrometer.core.instrument.Counter,
+    private val skjermingService: SkjermingService,
+    private val avsluttetBehandlingLagretCounter: Counter,
 ) {
+    private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
+
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
         transactionExecutor.withinTransaction {
 
@@ -54,7 +60,11 @@ class AvsluttetBehandlingService(
                 )
             }
 
-            lagreAvsluttetBehandlingIBigQuery(avsluttetBehandling, uthentetBehandling)
+            if (!skjermingService.erSkjermet(uthentetBehandling)) {
+                lagreAvsluttetBehandlingIBigQuery(avsluttetBehandling, uthentetBehandling)
+            } else {
+                logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
+            }
             avsluttetBehandlingLagretCounter.increment()
         }
     }

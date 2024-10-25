@@ -16,7 +16,9 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.testutils.BigQuery
+import no.nav.aap.statistikk.testutils.FakePdlClient
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
@@ -248,7 +250,8 @@ class AvsluttetBehandlingServiceTest {
                 { VilkårsresultatRepository(it) },
                 bqRepository,
                 behandlingRepositoryFactory = { BehandlingRepository(it) },
-                avsluttetBehandlingLagretCounter = counter
+                avsluttetBehandlingLagretCounter = counter,
+                skjermingService = SkjermingService(FakePdlClient(emptyMap()))
             )
         return Pair(bigQueryClient, service)
     }

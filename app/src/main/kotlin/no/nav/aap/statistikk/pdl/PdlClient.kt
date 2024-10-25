@@ -5,23 +5,27 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
+import org.slf4j.LoggerFactory
 import java.net.URI
 
+private val logger = LoggerFactory.getLogger(PdlClient::class.java)
 
 interface PdlClient {
-    fun hentPersoner(ident: List<String>): List<Person>
+    fun hentPersoner(identer: List<String>): List<Person>
 }
 
 class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
     private val client = RestClient(
-        config = ClientConfig(),
+        config = ClientConfig(scope = pdlConfig.scope),
         tokenProvider = no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider,
         responseHandler = DefaultResponseHandler()
     )
 
-    override fun hentPersoner(ident: List<String>): List<Person> {
+    override fun hentPersoner(identer: List<String>): List<Person> {
+        logger.info("Henter ${identer.size} personer fra PDL.")
+
         val graphQLRespons = client.post<Any, GraphQLRespons<List<HentPersonBolkResult>>>(
-            URI.create(pdlConfig.url), PostRequest(body = PdlRequest.hentPersonBolk(ident))
+            URI.create(pdlConfig.url), PostRequest(body = PdlRequest.hentPersonBolk(identer))
         )
 
         val graphQLdata = requireNotNull(graphQLRespons?.data)
@@ -31,7 +35,7 @@ class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
 
 }
 
-data class PdlConfig(val url: String)
+data class PdlConfig(val url: String, val scope: String)
 
 internal data class PdlRequest(val query: String, val variables: Variables) {
     data class Variables(val ident: String? = null, val identer: List<String>? = null)

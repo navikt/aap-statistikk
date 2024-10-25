@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.testutils.*
@@ -45,7 +46,10 @@ class HendelsesServiceTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 bqRepository = bigQueryRepository,
                 behandlingRepositoryFactory = { behandlingRepository },
-                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
+                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret(),
+                skjermingService = SkjermingService(
+                    pdlClient = FakePdlClient(emptyMap())
+                )
             ),
             clock = clock,
             hendelseLagretCounter = hendelseLagretCounter
@@ -119,7 +123,8 @@ class HendelsesServiceTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 bqRepository = bigQueryRepository,
                 behandlingRepositoryFactory = { behandlingRepository },
-                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
+                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret(),
+                skjermingService = SkjermingService(FakePdlClient(emptyMap()))
             ),
             clock = clock,
             hendelseLagretCounter = hendelseLagretCounter

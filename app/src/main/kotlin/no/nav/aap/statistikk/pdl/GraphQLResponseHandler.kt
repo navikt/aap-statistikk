@@ -1,8 +1,8 @@
 package no.nav.aap.statistikk.pdl
 
 data class GraphQLRespons<E>(
-    val errors: List<GraphQLError>?,
-    val extensions: GraphQLExtensions?,
+    val errors: List<GraphQLError>? = null,
+    val extensions: GraphQLExtensions? = null,
     val data: E?
 )
 

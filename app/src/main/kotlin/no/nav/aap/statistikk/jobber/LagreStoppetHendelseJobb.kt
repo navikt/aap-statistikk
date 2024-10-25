@@ -11,12 +11,12 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRe
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.db.FellesKomponentConnectionExecutor
 import no.nav.aap.statistikk.hendelser.HendelsesService
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
-import java.util.UUID.randomUUID
 
 class LagreStoppetHendelseJobb(
     private val bqRepository: IBQRepository,
@@ -26,7 +26,8 @@ class LagreStoppetHendelseJobb(
     private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
     private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
-    private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository
+    private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
+    private val skjermingService: SkjermingService,
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val hendelsesService = HendelsesService(
@@ -39,6 +40,7 @@ class LagreStoppetHendelseJobb(
                 bqRepository = bqRepository,
                 behandlingRepositoryFactory = behandlingRepositoryFactory,
                 avsluttetBehandlingLagretCounter = avsluttetBehandlingLagretCounter,
+                skjermingService = skjermingService,
             ),
             bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
             personRepository = PersonRepository(connection),

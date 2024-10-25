@@ -30,6 +30,8 @@ data class Behandling(
 ) {
     init {
         // Skal oppgis med sekund-presisjon
-        require(mottattTid.truncatedTo(ChronoUnit.SECONDS).isEqual(mottattTid))
+        require(
+            mottattTid.truncatedTo(ChronoUnit.SECONDS).isEqual(mottattTid)
+        ) { "Vil ha mottattTid på sekund-oppløsning" }
     }
 }

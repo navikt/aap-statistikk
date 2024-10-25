@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.api
 
+import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -17,6 +18,7 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
@@ -61,7 +63,8 @@ class MottaStatistikkTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+                skjermingService = SkjermingService(FakePdlClient())
             )
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -191,6 +194,7 @@ class MottaStatistikkTest {
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
+        val skjermingService = SkjermingService(FakePdlClient())
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 8,
@@ -204,7 +208,8 @@ class MottaStatistikkTest {
                     beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                     vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                     behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
+                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+                    skjermingService = skjermingService
                 )
             )
         )
@@ -212,7 +217,7 @@ class MottaStatistikkTest {
         val jobbAppender = MotorJobbAppender(dataSource)
 
         val logger =
-            LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
+            LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger
         val listAppender = ListAppender<ILoggingEvent>()
 
         listAppender.start()
@@ -232,7 +237,8 @@ class MottaStatistikkTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+                skjermingService = skjermingService
             )
         ) { url, client ->
 
@@ -348,6 +354,7 @@ class MottaStatistikkTest {
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
+        val skjermingService = SkjermingService(FakePdlClient())
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 2,
@@ -361,7 +368,8 @@ class MottaStatistikkTest {
                     beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                     vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                     behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
+                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+                    skjermingService = skjermingService
                 )
             )
         )
@@ -380,7 +388,8 @@ class MottaStatistikkTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+                skjermingService = skjermingService
             )
         ) { url, client ->
 
