@@ -63,7 +63,16 @@ SELECT COALESCE(
             setParams { setLong(1, behandlingId) }
         }
 
-        dbConnection.executeReturnKey(
+        dbConnection.executeBatch(
+            "INSERT INTO person (ident) VALUES (?) ON CONFLICT DO NOTHING",
+            behandling.relaterteIdenter
+        ) {
+            setParams { ident ->
+                setString(1, ident)
+            }
+        }
+
+        val historikkId = dbConnection.executeReturnKey(
             """
 INSERT INTO behandling_historikk (behandling_id, versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
                                   status)
@@ -77,6 +86,17 @@ VALUES (?, ?, ?, ?, ?, ?)""",
                 setLocalDateTime(c++, LocalDateTime.now(clock))
                 setLocalDateTime(c++, behandling.mottattTid)
                 setString(c, behandling.status.name)
+            }
+        }
+
+        dbConnection.executeBatch(
+            """INSERT INTO relaterte_personer (behandling_id, person_id)
+SELECT $historikkId, id
+FROM person
+WHERE ident = ?""", behandling.relaterteIdenter
+        ) {
+            setParams {
+                setString(1, it)
             }
         }
     }
@@ -99,7 +119,8 @@ SELECT b.id             as b_id,
        bh.versjon_id    as bh_versjon_id,
        bh.mottatt_tid   as bh_mottatt_tid,
        bh.id            as bh_id,
-       v.versjon        as v_versjon
+       v.versjon        as v_versjon,
+       rp.rp_ident      as rp_ident
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
@@ -107,6 +128,11 @@ FROM behandling b
          JOIN (SELECT * FROM behandling_historikk bh WHERE bh.gjeldende = TRUE) bh
               on b.id = bh.behandling_id
          JOIN versjon v on v.id = bh.versjon_id
+         LEFT JOIN (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
+                    FROM relaterte_personer rp
+                             JOIN person pr ON rp.person_id = pr.id
+                    GROUP BY rp.behandling_id) rp
+                   on rp.behandling_id = bh.id
 WHERE b.referanse = ?"""
         ) {
             setParams {
@@ -134,7 +160,8 @@ SELECT b.id             as b_id,
        bh.versjon_id    as bh_versjon_id,
        bh.mottatt_tid   as bh_mottatt_tid,
        bh.id            as bh_id,
-       v.versjon        as v_versjon
+       v.versjon        as v_versjon,
+       rp.rp_ident      as rp_ident
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
@@ -142,6 +169,11 @@ FROM behandling b
          JOIN (SELECT * FROM behandling_historikk WHERE gjeldende = TRUE) bh
               on bh.behandling_id = b.id
          JOIN versjon v on v.id = bh.versjon_id
+         LEFT JOIN (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
+                    FROM relaterte_personer rp
+                             JOIN person pr ON rp.person_id = pr.id
+                    GROUP BY rp.behandling_id) rp
+                   on rp.behandling_id = bh.id
 WHERE b.id = ?"""
 
     override fun hent(id: Long): Behandling {
@@ -195,6 +227,7 @@ WHERE b.id = ?"""
         mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
         versjon = Versjon(verdi = it.getString("v_versjon"), id = it.getLong("bh_versjon_id")),
         status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
-        snapShotId = it.getLong("bh_id")
+        snapShotId = it.getLong("bh_id"),
+        relaterteIdenter = it.getArray("rp_ident", String::class)
     )
 }

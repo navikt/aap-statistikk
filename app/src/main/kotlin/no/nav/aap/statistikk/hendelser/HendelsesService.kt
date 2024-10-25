@@ -71,7 +71,7 @@ class HendelsesService(
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
             ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt.truncatedTo(
-                ChronoUnit.SECONDS
+                ChronoUnit.SECONDS // SJEKK OPP DENNE, er iverksettes før avsluttet
             ) else null,
             endretTid = hendelsesTidspunkt,
             opprettetAv = KELVIN
@@ -81,16 +81,17 @@ class HendelsesService(
 
     private fun hentEllerLagreBehandlingId(
         dto: StoppetBehandling,
-        sak: Sak?
+        sak: Sak
     ): Long {
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
-            sak = sak!!,
+            sak = sak,
             typeBehandling = dto.behandlingType,
             opprettetTid = dto.behandlingOpprettetTidspunkt,
             mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             status = dto.status,
-            versjon = Versjon(verdi = dto.versjon)
+            versjon = Versjon(verdi = dto.versjon),
+            relaterteIdenter = listOf()
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 
