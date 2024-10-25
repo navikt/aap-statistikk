@@ -14,7 +14,7 @@ typealias BehandlingId = Long
 
 class BehandlingRepository(
     private val dbConnection: DBConnection,
-    private val clock: Clock = Clock.systemUTC()
+    private val clock: Clock = Clock.systemDefaultZone()
 ) : IBehandlingRepository {
 
     override fun opprettBehandling(behandling: Behandling): Long {
