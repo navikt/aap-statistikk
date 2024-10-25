@@ -54,6 +54,7 @@ spec:
     inbound:
       rules:
         - application: behandlingsflyt
+        - application: produksjonsstyring
         - application: azure-token-generator
           namespace: aura
           cluster: dev-gcp
