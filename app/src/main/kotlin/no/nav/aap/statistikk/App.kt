@@ -35,6 +35,7 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
+import no.nav.aap.statistikk.produksjonsstyring.api.hentBehandlingstidPerDag
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
@@ -175,8 +176,9 @@ fun Application.module(
                     jobbAppender,
                     lagreStoppetHendelseJobb,
                 )
+                hentBehandlingstidPerDag(transactionExecutor)
+                motorApiCallback
             }
-            apiRouting(motorApiCallback)
         }
         oversiktRoute(transactionExecutor)
     }
