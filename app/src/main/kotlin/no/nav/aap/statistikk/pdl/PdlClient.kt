@@ -36,14 +36,14 @@ class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
     override fun hentPersoner(identer: List<String>): List<Person> {
         logger.info("Henter ${identer.size} personer fra PDL.")
 
-        val graphQLRespons = client.post<Any, GraphQLRespons<List<HentPersonBolkResult>>>(
+        val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
             URI.create(pdlConfig.url), PostRequest(body = PdlRequest.hentPersonBolk(identer))
         )
 
         val graphQLdata =
             requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
 
-        return graphQLdata.map { requireNotNull(it.person) { "Fant ikke info om person ${it.ident}" } }
+        return graphQLdata.hentPersonBolk.map { requireNotNull(it.person) { "Fant ikke info om person ${it.ident}" } }
     }
 
 }
@@ -60,6 +60,8 @@ internal data class PdlRequest(val query: String, val variables: Variables) {
         )
     }
 }
+
+data class PdlRespons(val hentPersonBolk: List<HentPersonBolkResult>)
 
 data class HentPersonBolkResult(val ident: String, val person: Person?)
 

@@ -94,13 +94,15 @@ annotation class Fakes {
                 post {
                     call.respond(
                         GraphQLRespons(
-                            data = listOf(
-                                HentPersonBolkResult(
-                                    ident = "123",
-                                    person = Person(
-                                        adressebeskyttelse = listOf(
-                                            Adressebeskyttelse(
-                                                gradering = Gradering.UGRADERT
+                            data = PdlRespons(
+                                hentPersonBolk = listOf(
+                                    HentPersonBolkResult(
+                                        ident = "123",
+                                        person = Person(
+                                            adressebeskyttelse = listOf(
+                                                Adressebeskyttelse(
+                                                    gradering = Gradering.UGRADERT
+                                                )
                                             )
                                         )
                                     )
