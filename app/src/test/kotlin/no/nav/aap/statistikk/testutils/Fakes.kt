@@ -98,8 +98,10 @@ annotation class Fakes {
                                 HentPersonBolkResult(
                                     ident = "123",
                                     person = Person(
-                                        adressebeskyttelse = Adressebeskyttelse(
-                                            gradering = Gradering.UGRADERT
+                                        adressebeskyttelse = listOf(
+                                            Adressebeskyttelse(
+                                                gradering = Gradering.UGRADERT
+                                            )
                                         )
                                     )
                                 )

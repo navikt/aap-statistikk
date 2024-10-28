@@ -78,7 +78,7 @@ val PERSON_BOLK_QUERY = """
     }
 """.trimIndent()
 
-data class Person(val adressebeskyttelse: Adressebeskyttelse)
+data class Person(val adressebeskyttelse: List<Adressebeskyttelse>)
 
 data class Adressebeskyttelse(
     val gradering: Gradering

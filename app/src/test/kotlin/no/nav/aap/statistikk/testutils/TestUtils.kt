@@ -462,7 +462,7 @@ class FakePdlClient(val identerHemmelig: Map<String, Boolean> = emptyMap()) : Pd
     override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.pdl.Person> {
         return identer.map {
             no.nav.aap.statistikk.pdl.Person(
-                adressebeskyttelse = Adressebeskyttelse(gradering = if (identerHemmelig[it] == true) Gradering.STRENGT_FORTROLIG else Gradering.UGRADERT)
+                adressebeskyttelse = listOf(Adressebeskyttelse(gradering = if (identerHemmelig[it] == true) Gradering.STRENGT_FORTROLIG else Gradering.UGRADERT))
             )
         }
     }
