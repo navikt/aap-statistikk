@@ -27,6 +27,7 @@ class SakTabellTest {
         val registrertTid = LocalDateTime.now().minusDays(1).plusHours(1)
             .truncatedTo(ChronoUnit.SECONDS)
         val endretTid = LocalDateTime.now()
+
         client.insert(
             sakTabell, BQBehandling(
                 saksnummer = "123",
@@ -40,7 +41,8 @@ class SakTabellTest {
                 mottattTid = mottattTid,
                 registrertTid = registrertTid,
                 endretTid = endretTid,
-                opprettetAv = KELVIN
+                opprettetAv = KELVIN,
+                saksbehandler = "1234"
             )
         )
 
@@ -57,5 +59,7 @@ class SakTabellTest {
         assertThat(uthentet.first().mottattTid).isEqualTo(mottattTid)
         assertThat(uthentet.first().registrertTid).isEqualTo(registrertTid)
         assertThat(uthentet.first().endretTid).isCloseTo(endretTid, within(10, ChronoUnit.MILLIS))
+        assertThat(uthentet.first().opprettetAv).isEqualTo(KELVIN)
+        assertThat(uthentet.first().saksbehandler).isEqualTo("1234")
     }
 }

@@ -33,6 +33,8 @@ class HendelsesServiceTest {
         val simpleMeterRegistry = SimpleMeterRegistry()
         val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
         val sakRepository = FakeSakRepository()
+        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+
         val hendelsesService = HendelsesService(
             sakRepository = sakRepository,
             personRepository = FakePersonRepository(),
@@ -43,9 +45,7 @@ class HendelsesServiceTest {
                 vilkårsResultatRepositoryFactory = FakeVilkårsResultatRepository(),
                 bqRepository = bigQueryRepository,
                 behandlingRepositoryFactory = behandlingRepository,
-                skjermingService = SkjermingService(
-                    pdlClient = FakePdlClient(emptyMap())
-                ),
+                skjermingService = skjermingService,
                 avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
             clock = clock,
@@ -54,6 +54,7 @@ class HendelsesServiceTest {
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
                 bigQueryRepository = bigQueryRepository,
+                skjermingService = skjermingService,
                 clock = clock
             )
         )
@@ -113,6 +114,8 @@ class HendelsesServiceTest {
         val behandlingRepository = FakeBehandlingRepository()
         val simpleMeterRegistry = SimpleMeterRegistry()
         val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
+        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+        
         val hendelsesService = HendelsesService(
             sakRepository = FakeSakRepository(),
             personRepository = FakePersonRepository(),
@@ -123,7 +126,7 @@ class HendelsesServiceTest {
                 vilkårsResultatRepositoryFactory = FakeVilkårsResultatRepository(),
                 bqRepository = bigQueryRepository,
                 behandlingRepositoryFactory = behandlingRepository,
-                skjermingService = SkjermingService(FakePdlClient(emptyMap())),
+                skjermingService = skjermingService,
                 avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
             clock = clock,
@@ -132,6 +135,7 @@ class HendelsesServiceTest {
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
                 bigQueryRepository = bigQueryRepository,
+                skjermingService = skjermingService,
                 clock = clock
             )
         )

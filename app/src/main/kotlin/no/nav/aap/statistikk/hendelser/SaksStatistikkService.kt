@@ -4,18 +4,24 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
+import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.Sak
+import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+
+private val logger = LoggerFactory.getLogger("SaksStatistikkService")
 
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
     private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
     private val bigQueryRepository: IBQRepository,
-    private val clock: java.time.Clock = systemDefaultZone()
+    private val skjermingService: SkjermingService,
+    private val clock: Clock = systemDefaultZone()
 ) {
     fun lagreSakInfoTilBigquery(
         sak: Sak,
@@ -24,6 +30,9 @@ class SaksStatistikkService(
         hendelsesTidspunkt: LocalDateTime
     ) {
         val behandling = behandlingRepository.hent(behandlingId)
+        val saksbehandler =
+            if (skjermingService.erSkjermet(behandling)) "-5" else behandling.sisteSaksbehandler
+
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
         val relatertBehandlingUUID =
@@ -46,7 +55,8 @@ class SaksStatistikkService(
                 ChronoUnit.SECONDS // SJEKK OPP DENNE, er iverksettes før avsluttet
             ) else null,
             endretTid = hendelsesTidspunkt,
-            opprettetAv = KELVIN
+            opprettetAv = KELVIN,
+            saksbehandler = saksbehandler
         )
         bigQueryRepository.lagre(bqSak)
     }

@@ -24,6 +24,7 @@ data class Behandling(
     val opprettetTid: LocalDateTime,
     val mottattTid: LocalDateTime,
     val versjon: Versjon,
+    val sisteSaksbehandler: String? = null,
     val relaterteIdenter: List<String> = listOf(),
     val relatertBehandlingId: Long? = null,
     val snapShotId: Long? = null,

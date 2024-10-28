@@ -48,6 +48,7 @@ class LagreStoppetHendelseJobb(
                 behandlingRepository = behandlingRepositoryFactory(connection),
                 bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
                 bigQueryRepository = bqRepository,
+                skjermingService = skjermingService,
             ),
         )
         return LagreStoppetHendelseJobbUtfører(
