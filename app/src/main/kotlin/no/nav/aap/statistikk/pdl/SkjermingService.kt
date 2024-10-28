@@ -10,7 +10,9 @@ class SkjermingService(
         val identer = listOf(behandling.sak.person.ident) + behandling.relaterteIdenter
         val hentPersoner = pdlClient.hentPersoner(identer)
 
-        return hentPersoner.any { it.adressebeskyttelse.gradering.erHemmelig() }
+        return hentPersoner
+            .flatMap { it.adressebeskyttelse }
+            .any { it.gradering.erHemmelig() }
     }
 }
 
