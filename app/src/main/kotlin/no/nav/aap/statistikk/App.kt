@@ -64,7 +64,7 @@ fun main() {
     val bigQueryClient = BigQueryClient(bgConfig, schemaRegistry)
     val pdlConfig = PdlConfig(
         url = System.getenv("INTEGRASJON_PDL_URL"),
-        scope = System.getenv("INTEGRASJON_PDL_URL")
+        scope = System.getenv("INTEGRASJON_PDL_SCOPE")
     )
 
     embeddedServer(Netty, port = 8080) {
