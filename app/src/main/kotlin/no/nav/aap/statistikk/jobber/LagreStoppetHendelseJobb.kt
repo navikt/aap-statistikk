@@ -9,8 +9,8 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
-import no.nav.aap.statistikk.db.FellesKomponentConnectionExecutor
 import no.nav.aap.statistikk.hendelser.HendelsesService
+import no.nav.aap.statistikk.hendelser.SaksStatistikkService
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
@@ -33,20 +33,22 @@ class LagreStoppetHendelseJobb(
         val hendelsesService = HendelsesService(
             sakRepository = SakRepositoryImpl(connection),
             avsluttetBehandlingService = AvsluttetBehandlingService(
-                transactionExecutor = FellesKomponentConnectionExecutor(connection),
-                tilkjentYtelseRepositoryFactory = tilkjentYtelseRepositoryFactory,
-                beregningsgrunnlagRepositoryFactory = beregningsgrunnlagRepositoryFactory,
-                vilkårsResultatRepositoryFactory = vilkårsResultatRepositoryFactory,
+                tilkjentYtelseRepositoryFactory = tilkjentYtelseRepositoryFactory(connection),
+                beregningsgrunnlagRepositoryFactory = beregningsgrunnlagRepositoryFactory(connection),
+                vilkårsResultatRepositoryFactory = vilkårsResultatRepositoryFactory(connection),
                 bqRepository = bqRepository,
-                behandlingRepositoryFactory = behandlingRepositoryFactory,
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingLagretCounter,
+                behandlingRepositoryFactory = behandlingRepositoryFactory(connection),
                 skjermingService = skjermingService,
+                avsluttetBehandlingLagretCounter = avsluttetBehandlingLagretCounter,
             ),
-            bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
             personRepository = PersonRepository(connection),
             behandlingRepository = BehandlingRepository(connection),
-            bigQueryRepository = bqRepository,
             hendelseLagretCounter = stoppetHendelseLagretCounter,
+            sakStatistikkService = SaksStatistikkService(
+                behandlingRepository = behandlingRepositoryFactory(connection),
+                bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
+                bigQueryRepository = bqRepository,
+            ),
         )
         return LagreStoppetHendelseJobbUtfører(
             hendelsesService,

@@ -37,22 +37,25 @@ class HendelsesServiceTest {
             sakRepository = sakRepository,
             personRepository = FakePersonRepository(),
             behandlingRepository = behandlingRepository,
-            bigQueryRepository = bigQueryRepository,
-            bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
             avsluttetBehandlingService = AvsluttetBehandlingService(
-                transactionExecutor = noOpTransactionExecutor,
-                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                tilkjentYtelseRepositoryFactory = FakeTilkjentYtelseRepository(),
+                beregningsgrunnlagRepositoryFactory = FakeBeregningsgrunnlagRepository(),
+                vilkårsResultatRepositoryFactory = FakeVilkårsResultatRepository(),
                 bqRepository = bigQueryRepository,
-                behandlingRepositoryFactory = { behandlingRepository },
-                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret(),
+                behandlingRepositoryFactory = behandlingRepository,
                 skjermingService = SkjermingService(
                     pdlClient = FakePdlClient(emptyMap())
-                )
+                ),
+                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
             clock = clock,
-            hendelseLagretCounter = hendelseLagretCounter
+            hendelseLagretCounter = hendelseLagretCounter,
+            sakStatistikkService = SaksStatistikkService(
+                behandlingRepository = behandlingRepository,
+                bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
+                bigQueryRepository = bigQueryRepository,
+                clock = clock
+            )
         )
 
         val sak = Sak(
@@ -114,20 +117,23 @@ class HendelsesServiceTest {
             sakRepository = FakeSakRepository(),
             personRepository = FakePersonRepository(),
             behandlingRepository = behandlingRepository,
-            bigQueryRepository = bigQueryRepository,
-            bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
             avsluttetBehandlingService = AvsluttetBehandlingService(
-                transactionExecutor = noOpTransactionExecutor,
-                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                tilkjentYtelseRepositoryFactory = FakeTilkjentYtelseRepository(),
+                beregningsgrunnlagRepositoryFactory = FakeBeregningsgrunnlagRepository(),
+                vilkårsResultatRepositoryFactory = FakeVilkårsResultatRepository(),
                 bqRepository = bigQueryRepository,
-                behandlingRepositoryFactory = { behandlingRepository },
-                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret(),
-                skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+                behandlingRepositoryFactory = behandlingRepository,
+                skjermingService = SkjermingService(FakePdlClient(emptyMap())),
+                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
             clock = clock,
-            hendelseLagretCounter = hendelseLagretCounter
+            hendelseLagretCounter = hendelseLagretCounter,
+            sakStatistikkService = SaksStatistikkService(
+                behandlingRepository = behandlingRepository,
+                bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
+                bigQueryRepository = bigQueryRepository,
+                clock = clock
+            )
         )
 
 

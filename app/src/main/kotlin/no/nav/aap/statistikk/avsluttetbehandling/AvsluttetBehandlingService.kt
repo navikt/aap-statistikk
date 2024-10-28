@@ -1,14 +1,12 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
 import io.micrometer.core.instrument.Counter
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
-import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
@@ -18,55 +16,52 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class AvsluttetBehandlingService(
-    private val transactionExecutor: TransactionExecutor,
-    private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
-    private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
-    private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
+    private val tilkjentYtelseRepositoryFactory: ITilkjentYtelseRepository,
+    private val beregningsgrunnlagRepositoryFactory: IBeregningsgrunnlagRepository,
+    private val vilkårsResultatRepositoryFactory: IVilkårsresultatRepository,
     private val bqRepository: IBQRepository,
-    private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
+    private val behandlingRepositoryFactory: IBehandlingRepository,
     private val skjermingService: SkjermingService,
     private val avsluttetBehandlingLagretCounter: Counter,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
 
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
-        transactionExecutor.withinTransaction {
 
-            val uthentetBehandling =
-                behandlingRepositoryFactory(it).hent(avsluttetBehandling.behandlingsReferanse)
+        val uthentetBehandling =
+            behandlingRepositoryFactory.hent(avsluttetBehandling.behandlingsReferanse)
 
-            if (uthentetBehandling != null) {
-                vilkårsResultatRepositoryFactory(it)
-                    .lagreVilkårsResultat(
-                        VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat),
-                        uthentetBehandling.id!!
-                    )
-            } else {
-                error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
-            }
+        if (uthentetBehandling != null) {
+            vilkårsResultatRepositoryFactory
+                .lagreVilkårsResultat(
+                    VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat),
+                    uthentetBehandling.id!!
+                )
+        } else {
+            error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
+        }
 
-            tilkjentYtelseRepositoryFactory(it).lagreTilkjentYtelse(
-                TilkjentYtelseEntity.fraDomene(
-                    avsluttetBehandling.tilkjentYtelse
+        tilkjentYtelseRepositoryFactory.lagreTilkjentYtelse(
+            TilkjentYtelseEntity.fraDomene(
+                avsluttetBehandling.tilkjentYtelse
+            )
+        )
+
+        if (avsluttetBehandling.beregningsgrunnlag != null) {
+            beregningsgrunnlagRepositoryFactory.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    value = avsluttetBehandling.beregningsgrunnlag,
+                    behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
                 )
             )
-
-            if (avsluttetBehandling.beregningsgrunnlag != null) {
-                beregningsgrunnlagRepositoryFactory(it).lagreBeregningsGrunnlag(
-                    MedBehandlingsreferanse(
-                        value = avsluttetBehandling.beregningsgrunnlag,
-                        behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
-                    )
-                )
-            }
-
-            if (!skjermingService.erSkjermet(uthentetBehandling)) {
-                lagreAvsluttetBehandlingIBigQuery(avsluttetBehandling, uthentetBehandling)
-            } else {
-                logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
-            }
-            avsluttetBehandlingLagretCounter.increment()
         }
+
+        if (!skjermingService.erSkjermet(uthentetBehandling)) {
+            lagreAvsluttetBehandlingIBigQuery(avsluttetBehandling, uthentetBehandling)
+        } else {
+            logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
+        }
+        avsluttetBehandlingLagretCounter.increment()
     }
 
     private fun lagreAvsluttetBehandlingIBigQuery(
