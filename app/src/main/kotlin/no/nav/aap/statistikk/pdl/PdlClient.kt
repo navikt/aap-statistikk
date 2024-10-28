@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.pdl
 
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
+import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
@@ -15,9 +16,19 @@ interface PdlClient {
     fun hentPersoner(identer: List<String>): List<Person>
 }
 
+private const val BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING = "B287"
+
 class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
     private val client = RestClient(
-        config = ClientConfig(scope = pdlConfig.scope),
+        config = ClientConfig(
+            scope = pdlConfig.scope,
+            additionalHeaders = listOf(
+                Header(
+                    "behandlingsnummer",
+                    BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING
+                )
+            )
+        ),
         tokenProvider = ClientCredentialsTokenProvider,
         responseHandler = DefaultResponseHandler()
     )
