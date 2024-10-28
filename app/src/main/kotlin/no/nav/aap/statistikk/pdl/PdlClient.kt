@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -17,7 +18,7 @@ interface PdlClient {
 class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
     private val client = RestClient(
         config = ClientConfig(scope = pdlConfig.scope),
-        tokenProvider = no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider,
+        tokenProvider = ClientCredentialsTokenProvider,
         responseHandler = DefaultResponseHandler()
     )
 
@@ -28,7 +29,8 @@ class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
             URI.create(pdlConfig.url), PostRequest(body = PdlRequest.hentPersonBolk(identer))
         )
 
-        val graphQLdata = requireNotNull(graphQLRespons?.data)
+        val graphQLdata =
+            requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
 
         return graphQLdata.map { requireNotNull(it.person) { "Fant ikke info om person ${it.ident}" } }
     }
