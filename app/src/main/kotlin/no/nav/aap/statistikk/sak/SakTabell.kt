@@ -17,7 +17,6 @@ import java.time.temporal.ChronoUnit
 *  - behandlingResultat
 *  - resultatBegrunnelse
 *  - behandlingMetode (manuell, automatisk, etc)
-*  - saksbehandler
 *  - ansvarligbeslutter
 *  - ansvarligenhet
 *  - tilbakekreveløp (behandlingtype tilbekakreving - har vi dette?)
@@ -63,6 +62,10 @@ class SakTabell : BQTable<BQBehandling> {
             val sekvensNummer = Field.of("sekvensnummer", StandardSQLTypeName.INT64)
             val opprettetAv = Field.newBuilder("opprettetAv", StandardSQLTypeName.STRING)
                 .setDescription("Vil alltid være systemet Kelvin.").build()
+            val saksbehandler = Field.newBuilder("saksbehandler", StandardSQLTypeName.STRING)
+                .setMode(Field.Mode.NULLABLE)
+                .setDescription("[Geo-lokaliserende: oppgis som -5 hvis noen personer tilknyttet behandlingen er kode 6] Nav-Ident til saksbehandler som jobber med behandlingen. Vil være null om ingen saksbehandlere har vært innom saken.")
+                .build()
 
             return Schema.of(
                 sekvensNummer,
@@ -79,7 +82,8 @@ class SakTabell : BQTable<BQBehandling> {
                 registrertTid,
                 versjon,
                 avsender,
-                opprettetAv
+                opprettetAv,
+                saksbehandler
             )
         }
 
@@ -100,6 +104,7 @@ class SakTabell : BQTable<BQBehandling> {
         val sekvensNummer = fieldValueList.get("sekvensnummer").longValue
         val aktorId = fieldValueList.get("aktorId").stringValue
         val opprettetAv = fieldValueList.get("opprettetAv").stringValue
+        val saksbehandler = fieldValueList.get("saksbehandler").stringValue
 
         return BQBehandling(
             saksnummer = saksnummer,
@@ -115,7 +120,8 @@ class SakTabell : BQTable<BQBehandling> {
             registrertTid = LocalDateTime.parse(registrertTid),
             ferdigbehandletTid = ferdigbehandletTid?.let { LocalDateTime.parse(it) },
             endretTid = LocalDateTime.parse(endretTid),
-            opprettetAv = opprettetAv
+            opprettetAv = opprettetAv,
+            saksbehandler = saksbehandler
         )
     }
 
@@ -139,7 +145,8 @@ class SakTabell : BQTable<BQBehandling> {
                 "versjon" to value.verson,
                 "ferdigbehandletTid" to value.ferdigbehandletTid?.truncatedTo(ChronoUnit.SECONDS)
                     ?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "opprettetAv" to value.opprettetAv
+                "opprettetAv" to value.opprettetAv,
+                "saksbehandler" to value.saksbehandler,
             )
         )
     }

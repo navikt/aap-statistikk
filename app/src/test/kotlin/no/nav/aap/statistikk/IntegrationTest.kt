@@ -94,6 +94,7 @@ class IntegrationTest {
                 { t -> t !== null && t.isNotEmpty() })
 
             assertThat(sakRespons).hasSize(2)
+            assertThat(sakRespons!!.first().saksbehandler).isEqualTo("Z994573")
         }
     }
 }

@@ -18,6 +18,7 @@ data class BQBehandling(
     val avsender: String,
     val mottattTid: LocalDateTime,
     val opprettetAv: String,
+    val saksbehandler: String?,
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)
