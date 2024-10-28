@@ -14,13 +14,17 @@ import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.pdl.SkjermingService
+import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
@@ -195,22 +199,24 @@ class MottaStatistikkTest {
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
         val skjermingService = SkjermingService(FakePdlClient())
+
+        val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+            bqRepository, stoppetHendelseLagretCounter,
+            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+            tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
+            beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
+            vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
+            avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+            skjermingService = skjermingService
+        )
+
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 8,
             logInfoProvider = NoExtraLogInfoProvider,
             jobber = listOf(
-                LagreStoppetHendelseJobb(
-                    bqRepository,
-                    stoppetHendelseLagretCounter,
-                    bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
-                    tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                    beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                    vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                    behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
-                    skjermingService = skjermingService
-                )
+                lagreStoppetHendelseJobb
             )
         )
 
@@ -230,16 +236,7 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            LagreStoppetHendelseJobb(
-                bqRepository, stoppetHendelseLagretCounter,
-                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
-                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
-                skjermingService = skjermingService
-            )
+            lagreStoppetHendelseJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -355,23 +352,22 @@ class MottaStatistikkTest {
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
         val skjermingService = SkjermingService(FakePdlClient())
+
+        val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+            bqRepository, stoppetHendelseLagretCounter,
+            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+            tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
+            beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
+            vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
+            avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
+            skjermingService = skjermingService
+        )
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 2,
             logInfoProvider = NoExtraLogInfoProvider,
-            jobber = listOf(
-                LagreStoppetHendelseJobb(
-                    bqRepository,
-                    stoppetHendelseLagretCounter,
-                    bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
-                    tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                    beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                    vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                    behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                    avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
-                    skjermingService = skjermingService
-                )
-            )
+            jobber = listOf(lagreStoppetHendelseJobb)
         )
 
         val jobbAppender = MotorJobbAppender(dataSource)
@@ -381,16 +377,7 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            LagreStoppetHendelseJobb(
-                bqRepository, stoppetHendelseLagretCounter,
-                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
-                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
-                skjermingService = skjermingService
-            )
+            lagreStoppetHendelseJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -406,26 +393,26 @@ class MottaStatistikkTest {
                 },
                     { it?.let { it > 0 } ?: false })
             }
+        }
 
-            dataSource.transaction {
-                val hendelsesRepository = SakRepositoryImpl(
-                    it
-                )
-                val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer)
-                val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
+        dataSource.transaction {
+            val hendelsesRepository = SakRepositoryImpl(
+                it
+            )
+            val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer)
+            val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
 
-                assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
-                assertThat(uthentetSak.saksnummer).isEqualTo(hendelse.saksnummer)
-                assertThat(uthentetBehandling?.sak?.saksnummer).isEqualTo(hendelse.saksnummer)
-                assertThat(uthentetBehandling?.opprettetTid).isEqualTo(
-                    hendelse.behandlingOpprettetTidspunkt
-                )
-                assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType)
-                assertThat(uthentetBehandling?.status).isEqualTo(hendelse.status)
+            assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
+            assertThat(uthentetSak.saksnummer).isEqualTo(hendelse.saksnummer)
+            assertThat(uthentetBehandling?.sak?.saksnummer).isEqualTo(hendelse.saksnummer)
+            assertThat(uthentetBehandling?.opprettetTid).isEqualTo(
+                hendelse.behandlingOpprettetTidspunkt
+            )
+            assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType)
+            assertThat(uthentetBehandling?.status).isEqualTo(hendelse.status)
 
-                assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
-                assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
-            }
+            assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
+            assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
         }
 
         motor.stop()

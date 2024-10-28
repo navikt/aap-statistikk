@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.oversikt
 
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.html.*
 import io.ktor.server.routing.*
 import kotlinx.html.*

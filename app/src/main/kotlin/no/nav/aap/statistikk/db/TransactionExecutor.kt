@@ -16,10 +16,3 @@ class FellesKomponentTransactionalExecutor(private val dataSource: DataSource) :
         }
     }
 }
-
-class FellesKomponentConnectionExecutor(private val dbConnection: DBConnection) :
-    TransactionExecutor {
-    override fun <E> withinTransaction(block: (DBConnection) -> E): E {
-        return block(dbConnection)
-    }
-}

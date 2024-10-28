@@ -177,7 +177,7 @@ fun Application.module(
                     lagreStoppetHendelseJobb,
                 )
                 hentBehandlingstidPerDag(transactionExecutor)
-                motorApiCallback
+                motorApiCallback()
             }
         }
         oversiktRoute(transactionExecutor)
