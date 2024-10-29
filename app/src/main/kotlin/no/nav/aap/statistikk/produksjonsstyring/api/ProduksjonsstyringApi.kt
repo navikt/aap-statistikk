@@ -35,4 +35,12 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
     }
+
+    route("/åpne-behandlinger").get<Unit, Int>() { _ ->
+        val respons = transactionExecutor.withinTransaction {
+            ProduksjonsstyringRepository(it).antallÅpneBehandlinger()
+        }
+
+        respond(respons)
+    }
 }

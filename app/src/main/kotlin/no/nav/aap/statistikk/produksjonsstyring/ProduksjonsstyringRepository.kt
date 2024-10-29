@@ -39,7 +39,18 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                     row.getDouble("snitt")
                 )
             }
+        }
+    }
 
+    fun antallÅpneBehandlinger(): Int {
+        val sql = """
+            select count(*) from behandling_historikk where gjeldende = true and status != 'AVSLUTTET'
+        """.trimIndent()
+
+        return connection.queryFirst(sql) {
+            setRowMapper { row ->
+                row.getInt("count")
+            }
         }
     }
 
