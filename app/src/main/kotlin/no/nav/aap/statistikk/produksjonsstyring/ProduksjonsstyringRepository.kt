@@ -65,8 +65,9 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         return connection.queryList(sql) {
             setRowMapper { row ->
                 BehandlingPerAvklaringsbehov(
-                    row.getInt("count"),
-                    row.getString("gjeldende_avklaringsbehov"))
+                    antall = row.getInt("count"),
+                    behov = row.getStringOrNull("gjeldende_avklaringsbehov") ?: "UKJENT"
+                )
             }
         }
     }
