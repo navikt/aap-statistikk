@@ -36,7 +36,8 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
-                    relaterteIdenter = listOf("123", "456", "123456789")
+                    relaterteIdenter = listOf("123", "456", "123456789"),
+                    gjeldendeAvklaringsBehov = "0559"
                 )
             )
         }
@@ -47,6 +48,7 @@ class BehandlingRepositoryTest {
         assertThat(uthentet.status).isEqualTo(BehandlingStatus.UTREDES)
         assertThat(uthentet.sak.sakStatus).isEqualTo(SakStatus.UTREDES)
         assertThat(uthentet.relaterteIdenter).containsExactlyInAnyOrder("123", "456", "123456789")
+        assertThat(uthentet.gjeldendeAvklaringsBehov).isEqualTo("0559")
     }
 
     @Test

@@ -61,7 +61,8 @@ class HendelsesService(
             status = dto.status,
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
-            sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling()
+            sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
+            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov()
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 

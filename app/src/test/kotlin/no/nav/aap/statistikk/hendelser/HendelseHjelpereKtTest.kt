@@ -53,6 +53,16 @@ class HendelseHjelpereKtTest {
         )
         assertThat(liste.sistePersonPåBehandling()).isNull()
     }
+
+    @Test
+    fun `utled gjeldende avklaringsbehov`() {
+        assertThat(ufullførtBehandlingEndringer.utledGjeldendeAvklaringsBehov()).isEqualTo("5099")
+    }
+
+    @Test
+    fun `returnerer null for avsluttet behandling`() {
+        assertThat(avklaringsbehovHendelser.utledGjeldendeAvklaringsBehov()).isNull()
+    }
 }
 
 val avklaringsbehovHendelser = listOf(

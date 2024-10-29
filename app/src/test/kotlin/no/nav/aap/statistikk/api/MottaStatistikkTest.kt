@@ -403,6 +403,7 @@ class MottaStatistikkTest {
             val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
 
             assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
+            assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5003")
             assertThat(uthentetSak.saksnummer).isEqualTo(hendelse.saksnummer)
             assertThat(uthentetBehandling?.sak?.saksnummer).isEqualTo(hendelse.saksnummer)
             assertThat(uthentetBehandling?.opprettetTid).isEqualTo(
