@@ -27,7 +27,8 @@ class SaksStatistikkService(
         sak: Sak,
         behandlingId: Long,
         versjon: String,
-        hendelsesTidspunkt: LocalDateTime
+        hendelsesTidspunkt: LocalDateTime,
+        vedtakTidspunkt: LocalDateTime?,
     ) {
         val behandling = behandlingRepository.hent(behandlingId)
         val saksbehandler =
@@ -56,7 +57,8 @@ class SaksStatistikkService(
             ) else null,
             endretTid = hendelsesTidspunkt,
             opprettetAv = KELVIN,
-            saksbehandler = saksbehandler
+            saksbehandler = saksbehandler,
+            vedtakTid = vedtakTidspunkt?.truncatedTo(ChronoUnit.SECONDS),
         )
         bigQueryRepository.lagre(bqSak)
     }

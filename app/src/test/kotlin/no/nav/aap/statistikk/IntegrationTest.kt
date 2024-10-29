@@ -4,13 +4,13 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
-import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
+import no.nav.aap.statistikk.api_kontrakt.*
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.hendelser.utledVedtakTid
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.testutils.*
@@ -18,6 +18,7 @@ import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URI
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -34,8 +35,10 @@ class IntegrationTest {
 
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "4LFK2S0"
-        val hendelse = behandlingHendelse(saksnummer, behandlingReferanse)
+        val hendelseFørCopy = behandlingHendelse(saksnummer, behandlingReferanse)
         val avsluttetBehandling = avsluttetBehandlingDTO(behandlingReferanse, saksnummer)
+
+        val hendelse = gjørHendelseAvsluttet(hendelseFørCopy)
 
         val bigQueryClient = BigQueryClient(config, mapOf())
 
@@ -95,6 +98,33 @@ class IntegrationTest {
 
             assertThat(sakRespons).hasSize(2)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("Z994573")
+            assertThat(sakRespons.first().vedtakTid).isEqualTo(LocalDateTime.of(2024,10,18,11,7,27))
         }
     }
+
+    private fun gjørHendelseAvsluttet(hendelseFørCopy: StoppetBehandling) =
+        hendelseFørCopy.copy(
+            avklaringsbehov = hendelseFørCopy.avklaringsbehov + listOf(
+                AvklaringsbehovHendelse(
+                    definisjon = Definisjon(
+                        type = "5098",
+                        behovType = BehovType.MANUELT_PÅKREVD,
+                        løsesISteg = StegType.FATTE_VEDTAK
+                    ),
+                    status = EndringStatus.AVSLUTTET,
+                    endringer = listOf(
+                        Endring(
+                            status = EndringStatus.OPPRETTET,
+                            tidsstempel = LocalDateTime.parse("2024-10-18T11:07:17.882"),
+                            endretAv = "Kelvin"
+                        ),
+                        Endring(
+                            status = EndringStatus.AVSLUTTET,
+                            tidsstempel = LocalDateTime.parse("2024-10-18T11:07:27.634"),
+                            endretAv = "Z994573"
+                        )
+                    )
+                ),
+            )
+        )
 }

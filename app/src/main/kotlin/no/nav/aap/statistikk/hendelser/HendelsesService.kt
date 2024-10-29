@@ -36,11 +36,14 @@ class HendelsesService(
             avsluttetBehandlingService.lagre(hendelse.avsluttetBehandling!!.tilDomene())
         }
 
+        val vedtakTid = hendelse.avklaringsbehov.utledVedtakTid()
+
         sakStatistikkService.lagreSakInfoTilBigquery(
             sak,
             behandlingId,
             hendelse.versjon,
-            hendelse.hendelsesTidspunkt
+            hendelse.hendelsesTidspunkt,
+            vedtakTidspunkt = vedtakTid
         )
         hendelseLagretCounter.increment()
     }
