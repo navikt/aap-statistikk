@@ -9,6 +9,7 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
 import no.nav.aap.statistikk.produksjonsstyring.ProduksjonsstyringRepository
 import java.time.LocalDate
 
@@ -40,6 +41,14 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     route("/åpne-behandlinger").get<Unit, Int>(modules) { _ ->
         val respons = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallÅpneBehandlinger()
+        }
+
+        respond(respons)
+    }
+
+    route("/behandling-per-avklaringsbehov").get<Unit, List<BehandlingPerAvklaringsbehov>>(modules) { _ ->
+        val respons = transactionExecutor.withinTransaction {
+            ProduksjonsstyringRepository(it).antallÅpneBehandlingerPerAvklaringsbehov()
         }
 
         respond(respons)

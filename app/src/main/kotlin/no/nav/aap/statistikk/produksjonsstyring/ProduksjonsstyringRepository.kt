@@ -6,6 +6,8 @@ import java.time.LocalDate
 
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
+data class BehandlingPerAvklaringsbehov(val antall: Int, val behov: String)
+
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun hentBehandlingstidPerDag(typeBehandling: TypeBehandling? = null): List<BehandlingstidPerDag> {
@@ -50,6 +52,21 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         return connection.queryFirst(sql) {
             setRowMapper { row ->
                 row.getInt("count")
+            }
+        }
+    }
+
+    fun antallÅpneBehandlingerPerAvklaringsbehov(): List<BehandlingPerAvklaringsbehov> {
+        val sql = """
+            select count(*), gjeldende_avklaringsbehov from behandling_historikk where gjeldende = true group by gjeldende_avklaringsbehov;
+        """.trimIndent()
+
+
+        return connection.queryList(sql) {
+            setRowMapper { row ->
+                BehandlingPerAvklaringsbehov(
+                    row.getInt("count"),
+                    row.getString("gjeldende_avklaringsbehov"))
             }
         }
     }
