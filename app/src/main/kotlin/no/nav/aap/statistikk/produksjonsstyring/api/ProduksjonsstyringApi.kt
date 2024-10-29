@@ -22,12 +22,13 @@ enum class Tags(override val description: String) : APITag {
     ),
 }
 
+val modules = TagModule(listOf(Tags.Produksjonsstyring))
+
 fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     transactionExecutor: TransactionExecutor
 ) {
-
     route("/behandlingstid/{typeBehandling}").get<BehandlingstidPerDagInput, List<BehandlingstidPerDagDTO>>(
-        TagModule(listOf(Tags.Produksjonsstyring))
+        modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(req.typeBehandling)
@@ -36,7 +37,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
     }
 
-    route("/åpne-behandlinger").get<Unit, Int>() { _ ->
+    route("/åpne-behandlinger").get<Unit, Int>(modules) { _ ->
         val respons = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallÅpneBehandlinger()
         }

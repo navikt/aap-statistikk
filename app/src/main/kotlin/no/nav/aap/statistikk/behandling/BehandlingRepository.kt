@@ -74,9 +74,10 @@ SELECT COALESCE(
 
         val historikkId = dbConnection.executeReturnKey(
             """
-INSERT INTO behandling_historikk (behandling_id, versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
-                                  status, siste_saksbehandler)
-VALUES (?, ?, ?, ?, ?, ?, ?)""",
+INSERT INTO behandling_historikk (behandling_id,
+                                  versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
+                                  status, siste_saksbehandler, gjeldende_avklaringsbehov)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -86,7 +87,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 setLocalDateTime(c++, LocalDateTime.now(clock))
                 setLocalDateTime(c++, behandling.mottattTid)
                 setString(c++, behandling.status.name)
-                setString(c, behandling.sisteSaksbehandler)
+                setString(c++, behandling.sisteSaksbehandler)
+                setString(c, behandling.gjeldendeAvklaringsBehov)
             }
         }
 
@@ -105,25 +107,26 @@ WHERE ident = ?""", behandling.relaterteIdenter
     override fun hent(referanse: UUID): Behandling? {
         return dbConnection.queryFirstOrNull(
             """
-SELECT b.id                    as b_id,
-       b.referanse             as b_referanse,
-       b.type                  as b_type,
-       b.opprettet_tid         as b_opprettet_tid,
-       b.forrige_behandling_id as b_forrige_behandling_id,
-       s.id                    as s_id,
-       s.saksnummer            as s_saksnummer,
-       sh.oppdatert_tid        as sh_oppdatert_tid,
-       sh.sak_status           as sh_sak_status,
-       sh.id                   as sh_id,
-       p.ident                 as p_ident,
-       p.id                    as p_id,
-       bh.status               as bh_status,
-       bh.versjon_id           as bh_versjon_id,
-       bh.mottatt_tid          as bh_mottatt_tid,
-       bh.id                   as bh_id,
-       bh.siste_saksbehandler  as bh_siste_saksbehandler,
-       v.versjon               as v_versjon,
-       rp.rp_ident             as rp_ident
+SELECT b.id                         as b_id,
+       b.referanse                  as b_referanse,
+       b.type                       as b_type,
+       b.opprettet_tid              as b_opprettet_tid,
+       b.forrige_behandling_id      as b_forrige_behandling_id,
+       s.id                         as s_id,
+       s.saksnummer                 as s_saksnummer,
+       sh.oppdatert_tid             as sh_oppdatert_tid,
+       sh.sak_status                as sh_sak_status,
+       sh.id                        as sh_id,
+       p.ident                      as p_ident,
+       p.id                         as p_id,
+       bh.status                    as bh_status,
+       bh.versjon_id                as bh_versjon_id,
+       bh.mottatt_tid               as bh_mottatt_tid,
+       bh.id                        as bh_id,
+       bh.siste_saksbehandler       as bh_siste_saksbehandler,
+       bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
+       v.versjon                    as v_versjon,
+       rp.rp_ident                  as rp_ident
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
@@ -148,25 +151,26 @@ WHERE b.referanse = ?"""
     }
 
     private val hentMedId = """
-SELECT b.id                    as b_id,
-       b.referanse             as b_referanse,
-       b.type                  as b_type,
-       b.opprettet_tid         as b_opprettet_tid,
-       b.forrige_behandling_id as b_forrige_behandling_id,
-       s.id                    as s_id,
-       s.saksnummer            as s_saksnummer,
-       sh.oppdatert_tid        as sh_oppdatert_tid,
-       sh.sak_status           as sh_sak_status,
-       sh.id                   as sh_id,
-       p.ident                 as p_ident,
-       p.id                    as p_id,
-       bh.status               as bh_status,
-       bh.versjon_id           as bh_versjon_id,
-       bh.mottatt_tid          as bh_mottatt_tid,
-       bh.siste_saksbehandler  as bh_siste_saksbehandler,
-       bh.id                   as bh_id,
-       v.versjon               as v_versjon,
-       rp.rp_ident             as rp_ident
+SELECT b.id                         as b_id,
+       b.referanse                  as b_referanse,
+       b.type                       as b_type,
+       b.opprettet_tid              as b_opprettet_tid,
+       b.forrige_behandling_id      as b_forrige_behandling_id,
+       s.id                         as s_id,
+       s.saksnummer                 as s_saksnummer,
+       sh.oppdatert_tid             as sh_oppdatert_tid,
+       sh.sak_status                as sh_sak_status,
+       sh.id                        as sh_id,
+       p.ident                      as p_ident,
+       p.id                         as p_id,
+       bh.status                    as bh_status,
+       bh.versjon_id                as bh_versjon_id,
+       bh.mottatt_tid               as bh_mottatt_tid,
+       bh.siste_saksbehandler       as bh_siste_saksbehandler,
+       bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
+       bh.id                        as bh_id,
+       v.versjon                    as v_versjon,
+       rp.rp_ident                  as rp_ident
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
@@ -235,6 +239,7 @@ WHERE b.id = ?"""
         snapShotId = it.getLong("bh_id"),
         relaterteIdenter = it.getArray("rp_ident", String::class),
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
-        relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id")
+        relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id"),
+        gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")?.ifBlank { null }
     )
 }

@@ -66,8 +66,11 @@ public data class AvklaringsbehovHendelse(
     val endringer: List<Endring>
 )
 
+/**
+ * @param type Referer til type avklaringsbehov. Disse er definert i Definisjon.kt i aap-behandlingsflyt.
+ */
 public data class Definisjon(
-    val type: String, // TODO: enum her
+    val type: String,
     val behovType: BehovType,
     val løsesISteg: StegType
 )

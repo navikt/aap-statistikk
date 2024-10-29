@@ -18,3 +18,15 @@ fun List<AvklaringsbehovHendelse>.sistePersonPåBehandling(): String? {
         .filter { it.endretAv.lowercase() != "Kelvin".lowercase() }
         .maxByOrNull { it.tidsstempel }?.endretAv
 }
+
+fun List<AvklaringsbehovHendelse>.utledGjeldendeAvklaringsBehov(): String? {
+    return this.filter { it.status.erÅpent() }.map { it.definisjon.type }.firstOrNull()
+}
+
+fun EndringStatus.erÅpent(): Boolean {
+    return this in setOf(
+        EndringStatus.OPPRETTET,
+        EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER,
+        EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER
+    )
+}
