@@ -8,14 +8,14 @@ import java.time.LocalDateTime
 class HendelseHjelpereKtTest {
     @Test
     fun `kan utlede vedtaktid fra liste av avklaringsbehovhendelser`() {
-        val utledetVedtakTid = utledVedtakTid(avklaringsbehovHendelser)
+        val utledetVedtakTid = avklaringsbehovHendelser.utledVedtakTid()
 
         assertThat(utledetVedtakTid).isEqualTo(LocalDateTime.parse("2024-10-18T11:12:01.293"))
     }
 
     @Test
     fun `gir null på tom liste`() {
-        assertThat(utledVedtakTid(emptyList())).isNull()
+        assertThat(emptyList<AvklaringsbehovHendelse>().utledVedtakTid()).isNull()
     }
 
     @Test
@@ -364,5 +364,4 @@ val ufullførtBehandlingEndringer = listOf(
         )
     )
 )
-        
-        
+

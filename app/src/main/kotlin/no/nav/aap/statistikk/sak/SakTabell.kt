@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit
 
 /*
 * Mangler:
-*  - vedtakTid
 *  - utbetaltTid
 *  - søknadsformt
 *  - forventetOppstartTid
@@ -66,6 +65,9 @@ class SakTabell : BQTable<BQBehandling> {
                 .setMode(Field.Mode.NULLABLE)
                 .setDescription("[Geo-lokaliserende: oppgis som -5 hvis noen personer tilknyttet behandlingen er kode 6] Nav-Ident til saksbehandler som jobber med behandlingen. Vil være null om ingen saksbehandlere har vært innom saken.")
                 .build()
+            val vedtakTid = Field.newBuilder("vedtakTid", StandardSQLTypeName.DATETIME)
+                .setDescription("Tidspunktet for når vedtaket ble fattet - hvis saken ble vedtatt.")
+                .setMode(Field.Mode.NULLABLE).build()
 
             return Schema.of(
                 sekvensNummer,
@@ -83,7 +85,8 @@ class SakTabell : BQTable<BQBehandling> {
                 versjon,
                 avsender,
                 opprettetAv,
-                saksbehandler
+                saksbehandler,
+                vedtakTid
             )
         }
 
@@ -105,6 +108,8 @@ class SakTabell : BQTable<BQBehandling> {
         val aktorId = fieldValueList.get("aktorId").stringValue
         val opprettetAv = fieldValueList.get("opprettetAv").stringValue
         val saksbehandler = fieldValueList.get("saksbehandler").stringValue
+        val vedtakTid =
+            if (!fieldValueList.get("vedtakTid").isNull) fieldValueList.get("vedtakTid").stringValue else null
 
         return BQBehandling(
             saksnummer = saksnummer,
@@ -121,7 +126,8 @@ class SakTabell : BQTable<BQBehandling> {
             ferdigbehandletTid = ferdigbehandletTid?.let { LocalDateTime.parse(it) },
             endretTid = LocalDateTime.parse(endretTid),
             opprettetAv = opprettetAv,
-            saksbehandler = saksbehandler
+            saksbehandler = saksbehandler,
+            vedtakTid = vedtakTid?.let { LocalDateTime.parse(it) },
         )
     }
 
@@ -147,6 +153,7 @@ class SakTabell : BQTable<BQBehandling> {
                     ?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "opprettetAv" to value.opprettetAv,
                 "saksbehandler" to value.saksbehandler,
+                "vedtakTid" to value.vedtakTid?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             )
         )
     }

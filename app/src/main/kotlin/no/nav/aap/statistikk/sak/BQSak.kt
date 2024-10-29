@@ -18,6 +18,7 @@ data class BQBehandling(
     val avsender: String,
     val mottattTid: LocalDateTime,
     val opprettetAv: String,
+    val vedtakTid: LocalDateTime? = null,
     val saksbehandler: String?,
 ) {
     init {
@@ -30,5 +31,6 @@ data class BQBehandling(
             ferdigbehandletTid == null || ferdigbehandletTid.truncatedTo(SECONDS)
                 .isEqual(ferdigbehandletTid)
         )
+        require(vedtakTid == null || vedtakTid.truncatedTo(SECONDS).isEqual(vedtakTid))
     }
 }
