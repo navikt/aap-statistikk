@@ -57,8 +57,10 @@ import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import org.testcontainers.utility.MountableFile
 import java.io.InputStream
 import java.net.URI
+import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -167,6 +169,11 @@ fun <E> testKlientNoInjection(
 
 fun postgresTestConfig(): DbConfig {
     val postgres = PostgreSQLContainer("postgres:16")
+    // Get the current working directory
+    val dumpFile = Path.of("").toAbsolutePath().resolve("dump.sql")
+
+    val forHostPath = MountableFile.forHostPath(dumpFile)
+
     postgres.waitingFor(
         HostPortWaitStrategy().withStartupTimeout(
             Duration.of(
@@ -174,14 +181,25 @@ fun postgresTestConfig(): DbConfig {
                 ChronoUnit.SECONDS
             )
         )
+    ).withCopyFileToContainer(
+        forHostPath,
+        "/dump.sql"
     )
     postgres.start()
+
+    if (dumpFile.toFile().exists()) {
+        val res = postgres.execInContainer("bash", "-c", "psql -U test -d test -f /dump.sql 2>&1")
+        if (res.exitCode != 0) {
+            println(res)
+        }
+    }
 
     val dbConfig = DbConfig(
         jdbcUrl = postgres.jdbcUrl,
         userName = postgres.username,
         password = postgres.password
     )
+
     return dbConfig
 }
 
