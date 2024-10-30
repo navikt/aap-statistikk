@@ -124,7 +124,6 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                 bh.oppdatert_tid > current_date - interval '$antallDager days'
             group by dag
             order by dag
-            
         """.trimIndent()
 
         return connection.queryList<AntallPerDag>(sql) {

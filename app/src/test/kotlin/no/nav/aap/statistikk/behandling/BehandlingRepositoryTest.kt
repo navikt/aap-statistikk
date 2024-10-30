@@ -204,4 +204,45 @@ class BehandlingRepositoryTest {
 
         assertThat(antall).isEqualTo(2)
     }
+
+    @Test
+    fun `prøve å sette inn flere med gjeldende = true skal feile`(@Postgres dataSource: DataSource) {
+        val person = opprettTestPerson(dataSource, "123456789")
+        val sak = opprettTestSak(dataSource, "123456789", person)
+
+        val referanse = UUID.randomUUID()
+
+        val id = dataSource.transaction {
+            BehandlingRepository(it).opprettBehandling(
+                Behandling(
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.UTREDES,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx"),
+                    relaterteIdenter = listOf("123", "456", "123456789"),
+                    gjeldendeAvklaringsBehov = "0559"
+                )
+            )
+        }
+
+        org.junit.jupiter.api.assertThrows<Exception> {
+            dataSource.transaction {
+                it.execute("INSERT INTO behandling_historikk (behandling_id, versjon_id, gjeldende, oppdatert_tid, mottatt_tid, status, siste_saksbehandler, gjeldende_avklaringsbehov) VALUES (?,?,?,?,?,?,?,?)") {
+                    setParams {
+                        setLong(1, id)
+                        setLong(2, 1)
+                        setBoolean(3, true)
+                        setLocalDateTime(4, LocalDateTime.now())
+                        setLocalDateTime(5, LocalDateTime.now())
+                        setString(6, BehandlingStatus.UTREDES.name)
+                        setString(7, BehandlingStatus.UTREDES.name)
+                        setString(8, BehandlingStatus.UTREDES.name)
+                    }
+                }
+            }
+        }
+    }
 }
