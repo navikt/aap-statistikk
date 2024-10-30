@@ -13,7 +13,7 @@ spec:
     - https://aap-statistikk.intern.dev.nav.no  
   image: {{image}}
   strategy:
-   type: Recreate
+   type: RollingUpdate
   port: 8080
   replicas:
     max: 1
