@@ -58,7 +58,11 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun antallÅpneBehandlingerPerAvklaringsbehov(): List<BehandlingPerAvklaringsbehov> {
         val sql = """
-            select count(*), gjeldende_avklaringsbehov from behandling_historikk where gjeldende = true group by gjeldende_avklaringsbehov;
+            select count(*), gjeldende_avklaringsbehov
+            from behandling_historikk
+            where gjeldende = true
+              and status != 'AVSLUTTET'
+            group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
 
