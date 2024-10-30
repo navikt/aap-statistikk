@@ -8,6 +8,8 @@ data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingPerAvklaringsbehov(val antall: Int, val behov: String)
 
+data class AntallPerDag(val dag: LocalDate, val antall: Int)
+
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun hentBehandlingstidPerDag(typeBehandling: TypeBehandling? = null): List<BehandlingstidPerDag> {
@@ -75,6 +77,60 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
             }
         }
     }
+
+    fun antallNyeBehandlingerPerDag(antallDager: Int = 7): List<AntallPerDag> {
+        val sql = """
+            select
+                date(bh.mottatt_tid) as dag,
+                count(*) antall
+            from
+                behandling b,
+                behandling_historikk bh
+            where
+                b.id = bh.behandling_id and
+                bh.gjeldende = true and
+                bh.status != 'AVSLUTTET' and
+                bh.mottatt_tid > current_date - interval '$antallDager days'
+            group by dag
+            order by dag
+            
+        """.trimIndent()
+
+        return connection.queryList<AntallPerDag>(sql) {
+            setRowMapper {
+                AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
+            }
+        }
+
+    }
+
+    fun antallAvsluttedeBehandlingerPerDag(antallDager: Int = 7): List<AntallPerDag> {
+        val sql = """
+            select
+                date(bh.oppdatert_tid) as dag,
+                count(*) antall
+            from
+                behandling b,
+                behandling_historikk bh
+            where
+                b.id = bh.behandling_id and
+                bh.gjeldende = true and
+                bh.status = 'AVSLUTTET' and
+                bh.oppdatert_tid > current_date - interval '$antallDager days'
+            group by dag
+            order by dag
+            
+        """.trimIndent()
+
+        return connection.queryList<AntallPerDag>(sql) {
+            setRowMapper {
+                AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
+            }
+        }
+
+    }
+
+
 
     private fun typeBehandlingClaus(typeBehandling: TypeBehandling?): String {
         if (typeBehandling == null) return ""
