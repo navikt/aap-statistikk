@@ -17,6 +17,8 @@ data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingstidPerDagInput(@PathParam("typebehandling") val typeBehandling: TypeBehandling?)
 
+data class AntallBehandlinger(val nye: Int = 0, val avsluttede: Int = 0)
+
 enum class Tags(override val description: String) : APITag {
     Produksjonsstyring(
         "Endepunkter relatert til produksjonsstyring."
@@ -53,4 +55,26 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
         respond(respons)
     }
+
+    route("/behandlinger/utvikling").get<Unit, Map<LocalDate, AntallBehandlinger>>(
+        TagModule(listOf(Tags.Produksjonsstyring))
+    ) {
+        val antallBehandlinger = mutableMapOf<LocalDate, AntallBehandlinger>()
+        transactionExecutor.withinTransaction { connection ->
+            val repo = ProduksjonsstyringRepository(connection)
+            val antallNye = repo.antallNyeBehandlingerPerDag()
+            val antallAvsluttede = repo.antallAvsluttedeBehandlingerPerDag()
+            antallNye.forEach { antallBehandlinger[it.dag] = AntallBehandlinger(nye = it.antall) }
+            antallAvsluttede.forEach {
+                if (antallBehandlinger[it.dag] != null) {
+                    antallBehandlinger[it.dag] = antallBehandlinger[it.dag]!!.copy(avsluttede = it.antall)
+                } else {
+                    antallBehandlinger[it.dag] = AntallBehandlinger(avsluttede = it.antall)
+                }
+            }
+        }
+        respond(antallBehandlinger)
+    }
+
+
 }
