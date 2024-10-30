@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.produksjonsstyring.api
 import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.route.TagModule
+import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
@@ -16,6 +17,8 @@ import java.time.LocalDate
 data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingstidPerDagInput(@PathParam("typebehandling") val typeBehandling: TypeBehandling?)
+
+data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int)
 
 data class AntallBehandlinger(val nye: Int = 0, val avsluttede: Int = 0)
 
@@ -41,6 +44,17 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         }
 
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
+    }
+
+    route("/behandlingstid/lukkede-siste-dager/{antallDager}").get<AlderSisteDager, Double>(
+        modules,
+        info(description = "Henter alle behandlinger som er lukket i de siste n dager, og regner ut snittalderen på disse.")
+    ) { req ->
+        val respons = transactionExecutor.withinTransaction { conn ->
+            ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(req.antallDager)
+        }
+
+        respond(respons)
     }
 
     route("/åpne-behandlinger").get<Unit, AntallÅpneOgGjennomsnitt>(modules) { _ ->
