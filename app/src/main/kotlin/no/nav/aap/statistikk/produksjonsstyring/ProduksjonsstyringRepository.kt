@@ -10,6 +10,8 @@ data class BehandlingPerAvklaringsbehov(val antall: Int, val behov: String)
 
 data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
+data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
+
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun hentBehandlingstidPerDag(typeBehandling: TypeBehandling? = null): List<BehandlingstidPerDag> {
@@ -46,14 +48,22 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlinger(): Int {
+    fun antallÅpneBehandlinger(): AntallÅpneOgGjennomsnitt {
         val sql = """
-            select count(*) from behandling_historikk where gjeldende = true and status != 'AVSLUTTET'
+            select count(*),
+                   extract(epoch from avg(current_timestamp - b.opprettet_tid)) as gjennomsnitt_alder
+            from behandling_historikk bh
+                     join public.behandling b on b.id = bh.behandling_id
+            where gjeldende = true
+              and status != 'AVSLUTTET' 
         """.trimIndent()
 
         return connection.queryFirst(sql) {
             setRowMapper { row ->
-                row.getInt("count")
+                AntallÅpneOgGjennomsnitt(
+                    antallÅpne = row.getInt("count"),
+                    gjennomsnittsalder = row.getDouble("gjennomsnitt_alder")
+                )
             }
         }
     }
@@ -124,7 +134,6 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
 
     }
-
 
 
     private fun typeBehandlingClaus(typeBehandling: TypeBehandling?): String {

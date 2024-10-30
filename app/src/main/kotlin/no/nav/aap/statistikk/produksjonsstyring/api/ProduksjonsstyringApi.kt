@@ -19,6 +19,9 @@ data class BehandlingstidPerDagInput(@PathParam("typebehandling") val typeBehand
 
 data class AntallBehandlinger(val nye: Int = 0, val avsluttede: Int = 0)
 
+data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
+
+
 enum class Tags(override val description: String) : APITag {
     Produksjonsstyring(
         "Endepunkter relatert til produksjonsstyring."
@@ -40,12 +43,12 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
     }
 
-    route("/åpne-behandlinger").get<Unit, Int>(modules) { _ ->
+    route("/åpne-behandlinger").get<Unit, AntallÅpneOgGjennomsnitt>(modules) { _ ->
         val respons = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallÅpneBehandlinger()
         }
 
-        respond(respons)
+        respond(AntallÅpneOgGjennomsnitt(respons.antallÅpne, respons.gjennomsnittsalder))
     }
 
     route("/behandling-per-avklaringsbehov").get<Unit, List<BehandlingPerAvklaringsbehov>>(modules) { _ ->
@@ -67,7 +70,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
             antallNye.forEach { antallBehandlinger[it.dag] = AntallBehandlinger(nye = it.antall) }
             antallAvsluttede.forEach {
                 if (antallBehandlinger[it.dag] != null) {
-                    antallBehandlinger[it.dag] = antallBehandlinger[it.dag]!!.copy(avsluttede = it.antall)
+                    antallBehandlinger[it.dag] =
+                        antallBehandlinger[it.dag]!!.copy(avsluttede = it.antall)
                 } else {
                     antallBehandlinger[it.dag] = AntallBehandlinger(avsluttede = it.antall)
                 }
