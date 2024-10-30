@@ -81,19 +81,14 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
     fun antallNyeBehandlingerPerDag(antallDager: Int = 7): List<AntallPerDag> {
         val sql = """
             select
-                date(bh.mottatt_tid) as dag,
+                date(b.opprettet_tid) as dag,
                 count(*) antall
             from
-                behandling b,
-                behandling_historikk bh
-            where
-                b.id = bh.behandling_id and
-                bh.gjeldende = true and
-                bh.status != 'AVSLUTTET' and
-                bh.mottatt_tid > current_date - interval '$antallDager days'
+                behandling b
+            where              
+                b.opprettet_tid > current_date - interval '$antallDager days'
             group by dag
             order by dag
-            
         """.trimIndent()
 
         return connection.queryList<AntallPerDag>(sql) {
