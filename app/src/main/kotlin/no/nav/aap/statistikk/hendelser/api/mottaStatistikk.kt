@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.IntStream
+import kotlin.math.pow
 import kotlin.math.roundToLong
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
@@ -110,6 +111,6 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 
 private fun stringToNumber(string: String): Long {
     return IntStream.range(0, string.length)
-        .mapToObj() { Math.pow(10.0, it.toDouble()) * string[it].code }
+        .mapToObj() { 10.0.pow(it.toDouble()) * string[it].code }
         .reduce { acc, curr -> acc + curr }.orElse(0.0).mod(1_000_000.0).roundToLong()
 }
