@@ -126,12 +126,27 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
             order by dag
         """.trimIndent()
 
-        return connection.queryList<AntallPerDag>(sql) {
+        return connection.queryList(sql) {
             setRowMapper {
                 AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
             }
         }
+    }
 
+    fun alderPåFerdigeBehandlingerSisteDager(antallDager: Int): Double {
+        val sql = """
+            select avg(extract(epoch from bh.oppdatert_tid - bh.mottatt_tid))
+            from behandling_historikk bh
+            where status = 'AVSLUTTET'
+              and bh.oppdatert_tid > current_date - interval '$antallDager days';
+
+        """.trimIndent()
+
+        return connection.queryFirst(sql) {
+            setRowMapper {
+                it.getDouble("avg")
+            }
+        }
     }
 
 
