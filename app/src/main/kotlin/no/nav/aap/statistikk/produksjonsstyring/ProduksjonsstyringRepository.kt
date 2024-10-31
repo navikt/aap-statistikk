@@ -48,7 +48,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlinger(): AntallÅpneOgGjennomsnitt {
+    fun antallÅpneBehandlingerOgGjennomsnitt(): AntallÅpneOgGjennomsnitt {
         val sql = """
             select count(*),
                    extract(epoch from avg(current_timestamp - b.opprettet_tid)) as gjennomsnitt_alder
@@ -149,6 +149,24 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
+    fun antallÅpneBehandlinger(): Int {
+        val sql = """            
+            select
+                count(b.id) antall
+            from
+                behandling b,
+                behandling_historikk bh
+            where
+                b.id = bh.behandling_id and
+                bh.gjeldende = true and
+                bh.status != 'AVSLUTTET';
+        """.trimIndent()
+
+        return connection.queryFirst<Int>(sql) {
+            setRowMapper { it.getInt("antall") }
+        }
+
+    }
 
     private fun typeBehandlingClaus(typeBehandling: TypeBehandling?): String {
         if (typeBehandling == null) return ""
