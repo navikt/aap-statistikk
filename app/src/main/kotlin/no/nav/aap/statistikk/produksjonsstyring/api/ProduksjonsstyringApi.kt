@@ -10,7 +10,9 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.produksjonsstyring.AntallBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
+import no.nav.aap.statistikk.produksjonsstyring.BeregnAntallBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.ProduksjonsstyringRepository
 import java.time.LocalDate
 
@@ -20,10 +22,7 @@ data class BehandlingstidPerDagInput(@PathParam("typebehandling") val typeBehand
 
 data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int)
 
-data class AntallBehandlinger(val nye: Int = 0, val avsluttede: Int = 0)
-
 data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
-
 
 enum class Tags(override val description: String) : APITag {
     Produksjonsstyring(
@@ -59,7 +58,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
     route("/åpne-behandlinger").get<Unit, AntallÅpneOgGjennomsnitt>(modules) { _ ->
         val respons = transactionExecutor.withinTransaction {
-            ProduksjonsstyringRepository(it).antallÅpneBehandlinger()
+            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt()
         }
 
         respond(AntallÅpneOgGjennomsnitt(respons.antallÅpne, respons.gjennomsnittsalder))
@@ -76,23 +75,14 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     route("/behandlinger/utvikling").get<Unit, Map<LocalDate, AntallBehandlinger>>(
         TagModule(listOf(Tags.Produksjonsstyring))
     ) {
-        val antallBehandlinger = mutableMapOf<LocalDate, AntallBehandlinger>()
-        transactionExecutor.withinTransaction { connection ->
+        val antallBehandlinger = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
             val antallNye = repo.antallNyeBehandlingerPerDag()
             val antallAvsluttede = repo.antallAvsluttedeBehandlingerPerDag()
-            antallNye.forEach { antallBehandlinger[it.dag] = AntallBehandlinger(nye = it.antall) }
-            antallAvsluttede.forEach {
-                if (antallBehandlinger[it.dag] != null) {
-                    antallBehandlinger[it.dag] =
-                        antallBehandlinger[it.dag]!!.copy(avsluttede = it.antall)
-                } else {
-                    antallBehandlinger[it.dag] = AntallBehandlinger(avsluttede = it.antall)
-                }
-            }
+            val antallÅpneBehandlinger = repo.antallÅpneBehandlinger()
+            BeregnAntallBehandlinger.antallBehandlingerPerDag(antallNye, antallAvsluttede, antallÅpneBehandlinger)
         }
         respond(antallBehandlinger)
     }
-
 
 }
