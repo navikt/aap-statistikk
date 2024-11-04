@@ -38,7 +38,6 @@ class SakTabell : BQTable<BQBehandling> {
                 Field.newBuilder("relatertBehandlingUUid", StandardSQLTypeName.STRING)
                     .setMode(Field.Mode.NULLABLE).build()
             val behandlingType = Field.of("behandlingType", StandardSQLTypeName.STRING)
-            val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
             val ferdigbehandletTid =
                 Field.newBuilder("ferdigbehandletTid", StandardSQLTypeName.DATETIME)
                     .setMode(Field.Mode.NULLABLE).build()
@@ -63,11 +62,115 @@ class SakTabell : BQTable<BQBehandling> {
                 .setDescription("Vil alltid være systemet Kelvin.").build()
             val saksbehandler = Field.newBuilder("saksbehandler", StandardSQLTypeName.STRING)
                 .setMode(Field.Mode.NULLABLE)
-                .setDescription("[Geo-lokaliserende: oppgis som -5 hvis noen personer tilknyttet behandlingen er kode 6] Nav-Ident til saksbehandler som jobber med behandlingen. Vil være null om ingen saksbehandlere har vært innom saken.")
+                .setDescription(
+                    """
+                    [Geo-lokaliserende: oppgis som -5 hvis noen personer tilknyttet behandlingen er kode 6] Nav-Ident til saksbehandler som jobber med behandlingen. Vil være
+                    null om ingen saksbehandlere har vært innom saken.
+                    """.trimIndent()
+                )
                 .build()
             val vedtakTid = Field.newBuilder("vedtakTid", StandardSQLTypeName.DATETIME)
                 .setDescription("Tidspunktet for når vedtaket ble fattet - hvis saken ble vedtatt.")
                 .setMode(Field.Mode.NULLABLE).build()
+
+            // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
+            val utbetaltTid =
+                Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
+                    .setDescription("Tidspunkt for første utbetaling av ytelse.")
+                    .setMode(Field.Mode.NULLABLE).build()
+
+            val søknadsFormat =
+                Field.newBuilder("soknadsformat", StandardSQLTypeName.STRING)
+                    .setDescription("Angir om søknaden har kommet inn via digital søknadsdialog eller om den er scannet (sendt per post).")
+                    .build()
+
+            val forventOppstartTid =
+                Field.newBuilder("forventetOppstartTid", StandardSQLTypeName.DATE)
+                    .setDescription("Hvis systemet eller bruker har et forhold til når ytelsen normalt skal utbetales (planlagt uttak, ønsket oppstart etc).")
+                    .build()
+
+            val sakYtelse =
+                Field.newBuilder("sakYtelse", StandardSQLTypeName.STRING)
+                    .setDescription("Kode som angir hvilken ytelse/stønad behandlingen gjelder.")
+                    .build()
+
+            val sakUtland =
+                Field.newBuilder("sakUtland", StandardSQLTypeName.STRING).setDescription(
+                    "Kode som angir hvor vidt saken er for utland eller nasjonal å anses. Se begrepskatalogen: https://jira.adeo.no/browse/BEGREP-1611#"
+                ).build()
+
+            val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
+
+            val behandlingResultat =
+                Field.newBuilder("behandlingResultat", StandardSQLTypeName.STRING).setDescription(
+                    """
+                Kode som angir resultatet på behandling - typisk: avbrutt, innvilget, delvis innvilget, henlagt av tekniske hensyn, etc.
+
+                For behandlingstype klage: Angi behandlingsresultat fra vedtaksinstans, selv om det ikke er et endelig resultat på behandlingen - typisk: Fastholdt, omgjort.
+
+                Resultat er forventet hvis status for eksempel Avsluttet (enten produsert eller avbrutt)
+                  """
+                ).build()
+
+            val resultatBegrunnelse =
+                Field.newBuilder("resultatBegrunnelse", StandardSQLTypeName.STRING).setDescription(
+                    """
+                Kode som angir en begrunnelse til resultat ved avslag- typisk: vilkårsprøvingen feilet, dublett, teknisk avvik, etc.
+
+                For behandlingstype klage: Angi begrunnelse ved resultat omgjøring - typisk: feil lovanvendelse, endret faktum, saksbehandlingsfeil, etc.
+            """.trimIndent()
+                ).build()
+
+            val behandlingMetode =
+                Field.newBuilder("behandlingMetode", StandardSQLTypeName.STRING).setDescription(
+                    """
+                Kode som angir om behandlingen er manuell eller automatisk. Det er den akkumulerte verdien som er interessant, det vil si at
+                hvis behandlingen har hatt en manuell hendelse bør fremtidige rader ha verdien MANUELL (selv om enkelthendelsene kan ha vært automatiske).
+            """.trimIndent()
+                ).build()
+
+            val ansvarligBeslutter =
+                Field.newBuilder("ansvarligBeslutter", StandardSQLTypeName.STRING).setDescription(
+                    """
+                    Ved krav om totrinnskontroll skal dette feltet innholde Nav-Ident til ansvarlig beslutter.
+                """.trimIndent()
+                ).build()
+
+            val ansvarligEnhet =
+                Field.newBuilder("ansvarligEnhet", StandardSQLTypeName.STRING).setDescription(
+                    """
+                    Organisasjons-Id til NAV-enhet som har ansvaret for behandlingen (hvis nasjonal kø benyttes skal denne Org-IDen benyttes her).
+
+                    For behandlingstype klage: Viktig ved oversendelse til KA-instans, hvor vi forventer en 42-enhet
+                """.trimIndent()
+                ).build()
+
+            val tilbakekrevbeløp =
+                Field.newBuilder("tilbakekrevBelop", StandardSQLTypeName.FLOAT64).setDescription(
+                    """
+                Gjelder kun behandlingstype tilbakreving. Beløp til innkreving.
+            """.trimIndent()
+                ).build()
+
+            val funksjonellPeriodeFom =
+                Field.newBuilder("funksjonellPeriodeFom", StandardSQLTypeName.DATETIME)
+                    .setDescription(
+                        "Gjelder kun behandlingstype tilbakreving. Tidspunkt som representerer start på periode som feilutbetalingen gjelder"
+                    ).build()
+            val funksjonellPeriodeTom =
+                Field.newBuilder("funksjonellPeriodeTom", StandardSQLTypeName.DATETIME)
+                    .setDescription("Gjelder kun behandlingstype tilbakreving. Tidspunkt som representerer slutten av perioden som feilutbetalingen gjelder")
+                    .build()
+
+            val behandlingId = Field.newBuilder("behandlingId", StandardSQLTypeName.STRING)
+                .setDescription("Alltid null. Vi leverer UUID i stedet.")
+                .setMode(Field.Mode.NULLABLE).build()
+
+            val sakId = Field.newBuilder("sakId", StandardSQLTypeName.STRING)
+                .setDescription("Alltid null. Vi leverer saksnummer i stedet.")
+                .setMode(Field.Mode.NULLABLE).build()
+
+
 
             return Schema.of(
                 sekvensNummer,
@@ -75,7 +178,6 @@ class SakTabell : BQTable<BQBehandling> {
                 behandlingUuid,
                 relatertBehandlingUUid,
                 behandlingType,
-                behandlingStatus,
                 ferdigbehandletTid,
                 endretTid,
                 aktorId,
@@ -86,7 +188,27 @@ class SakTabell : BQTable<BQBehandling> {
                 avsender,
                 opprettetAv,
                 saksbehandler,
-                vedtakTid
+                vedtakTid,
+
+                // Ikke implementert ennå
+                behandlingStatus,
+                utbetaltTid,
+                søknadsFormat,
+                forventOppstartTid,
+                sakYtelse,
+                sakUtland,
+                behandlingResultat,
+                resultatBegrunnelse,
+                behandlingMetode,
+                ansvarligBeslutter,
+                ansvarligEnhet,
+                tilbakekrevbeløp,
+                funksjonellPeriodeFom,
+                funksjonellPeriodeTom,
+
+                // Vil alltid være null
+                behandlingId,
+                sakId,
             )
         }
 

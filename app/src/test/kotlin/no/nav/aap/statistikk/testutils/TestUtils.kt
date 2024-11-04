@@ -192,6 +192,8 @@ fun postgresTestConfig(): DbConfig {
         if (res.exitCode != 0) {
             println(res)
         }
+    } else {
+        println("Kan ikke finne databasedump med path $dumpFile")
     }
 
     val dbConfig = DbConfig(
