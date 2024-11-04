@@ -118,11 +118,11 @@ fun Application.startUp(
         )
     )
 
-    monitor.subscribe(ApplicationStopped) {
+    monitor.subscribe(ApplicationStopPreparing) {
         log.info("Received shutdown event. Closing Hikari connection pool.")
         motor.stop()
         dataSource.close()
-        monitor.unsubscribe(ApplicationStopped) {}
+        monitor.unsubscribe(ApplicationStopPreparing) {}
     }
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
