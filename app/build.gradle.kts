@@ -18,6 +18,7 @@ application {
 tasks.register<JavaExec>("runTestApp") {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("no.nav.aap.statistikk.TestAppKt")
+    workingDir = rootDir
 }
 
 
