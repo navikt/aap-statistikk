@@ -140,7 +140,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "relatertBehandlingUUid" to value.relatertBehandlingUUID,
                 "behandlingType" to value.behandlingType,
                 "aktorId" to value.aktorId,
-                "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.SECONDS)
+                "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "mottattTid" to value.mottattTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
