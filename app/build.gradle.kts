@@ -36,7 +36,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:10.20.1")
     implementation("org.flywaydb:flyway-database-postgresql:10.20.0")
     runtimeOnly("org.postgresql:postgresql:42.7.4")
-    implementation("com.zaxxer:HikariCP:6.0.0")
+    implementation("com.zaxxer:HikariCP:6.1.0")
 
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
