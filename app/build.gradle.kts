@@ -59,7 +59,7 @@ dependencies {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testImplementation("org.testcontainers:gcloud:1.20.2")
+    testImplementation("org.testcontainers:gcloud:1.20.3")
     testImplementation("org.testcontainers:junit-jupiter:1.20.2")
 }
 
