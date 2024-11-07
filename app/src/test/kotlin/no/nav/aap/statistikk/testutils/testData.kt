@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.testutils
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime

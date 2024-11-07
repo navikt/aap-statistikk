@@ -9,6 +9,7 @@ import io.ktor.http.*
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
