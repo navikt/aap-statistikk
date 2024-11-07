@@ -23,7 +23,6 @@ tasks.register<JavaExec>("runTestApp") {
 
 
 dependencies {
-    implementation(project(":api-kontrakt"))
     implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
@@ -45,6 +44,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
     implementation("no.nav:ktor-openapi-generator:1.0.46")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.36")
     implementation("com.google.cloud:google-cloud-bigquery:2.42.4")
 
 

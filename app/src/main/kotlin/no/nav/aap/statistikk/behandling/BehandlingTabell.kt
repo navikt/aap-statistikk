@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.behandling
 
 import com.google.cloud.bigquery.*
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.util.*
 

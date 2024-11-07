@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.sak
 
 import no.nav.aap.statistikk.KELVIN
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry

@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
-import no.nav.aap.statistikk.api_kontrakt.UføreType
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse

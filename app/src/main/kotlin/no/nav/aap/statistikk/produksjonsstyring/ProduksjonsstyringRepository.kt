@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import java.time.LocalDate
 
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)

@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat
 
-import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype
 import java.time.LocalDate
 import java.util.*
 

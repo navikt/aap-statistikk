@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.api_kontrakt.UføreType
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.testutils.opprettTestHendelse

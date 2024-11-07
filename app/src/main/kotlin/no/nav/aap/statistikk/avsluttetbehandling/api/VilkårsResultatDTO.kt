@@ -1,8 +1,8 @@
 package no.nav.aap.statistikk.avsluttetbehandling.api
 
-import no.nav.aap.statistikk.api_kontrakt.VilkårDTO
-import no.nav.aap.statistikk.api_kontrakt.VilkårsPeriodeDTO
-import no.nav.aap.statistikk.api_kontrakt.VilkårsResultatDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsPeriodeDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsResultatDTO
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
