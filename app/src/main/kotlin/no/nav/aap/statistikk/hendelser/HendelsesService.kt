@@ -5,11 +5,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.avsluttetbehandling.api.tilDomene
-import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.behandling.Versjon
-import no.nav.aap.statistikk.behandling.tilDomene
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -29,8 +25,8 @@ class HendelsesService(
     private val clock: Clock = Clock.systemUTC()
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
-        val person = hentEllerSettInnPerson(hendelse)
-        val sak = hentEllerSettInnSak(hendelse, person)
+        val person = hentEllerSettInnPerson(hendelse.ident)
+        val sak = hentEllerSettInnSak(person, hendelse.saksnummer, hendelse.sakStatus)
 
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
 
@@ -87,18 +83,19 @@ class HendelsesService(
     }
 
     private fun hentEllerSettInnSak(
-        dto: StoppetBehandling,
-        person: Person
+        person: Person,
+        saksnummer: String,
+        sakStatus: SakStatus
     ): Sak {
-        var sak = sakRepository.hentSakEllernull(dto.saksnummer)
+        var sak = sakRepository.hentSakEllernull(saksnummer)
         if (sak == null) {
             val sakId = sakRepository.settInnSak(
                 Sak(
                     id = null,
-                    saksnummer = dto.saksnummer,
+                    saksnummer = saksnummer,
                     person = person,
                     sistOppdatert = LocalDateTime.now(clock),
-                    sakStatus = dto.sakStatus.tilDomene()
+                    sakStatus = sakStatus.tilDomene()
                 )
             )
             sak = sakRepository.hentSak(sakId)
@@ -106,12 +103,12 @@ class HendelsesService(
         return sak
     }
 
-    private fun hentEllerSettInnPerson(dto: StoppetBehandling): Person {
-        var person = personRepository.hentPerson(dto.ident)
+    private fun hentEllerSettInnPerson(ident: String): Person {
+        var person = personRepository.hentPerson(ident)
         if (person == null) {
-            personRepository.lagrePerson(Person(dto.ident))
+            personRepository.lagrePerson(Person(ident))
         }
-        person = personRepository.hentPerson(dto.ident)!!
+        person = personRepository.hentPerson(ident)!!
         return person
     }
 }
@@ -125,3 +122,18 @@ private fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus {
     }
 }
 
+fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.tilDomene(): TypeBehandling =
+    when (this) {
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering -> TypeBehandling.Revurdering
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Klage -> TypeBehandling.Klage
+    }
+
+fun BehandlingStatus.tilDomene(): no.nav.aap.statistikk.behandling.BehandlingStatus =
+    when (this) {
+        BehandlingStatus.OPPRETTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.OPPRETTET
+        BehandlingStatus.UTREDES -> no.nav.aap.statistikk.behandling.BehandlingStatus.UTREDES
+        BehandlingStatus.IVERKSETTES -> no.nav.aap.statistikk.behandling.BehandlingStatus.IVERKSETTES
+        BehandlingStatus.AVSLUTTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.AVSLUTTET
+    }

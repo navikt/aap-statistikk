@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.avsluttetbehandling.api
+package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import java.util.*
+
 
 fun AvsluttetBehandlingDTO.tilDomene(): AvsluttetBehandling {
     return AvsluttetBehandling(
@@ -67,7 +68,7 @@ fun tilDomene(grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO): IBeregningsGrunnlag
 fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.GrunnlagUføre {
     return IBeregningsGrunnlag.GrunnlagUføre(
         grunnlag = grunnlagUføreDTO.grunnlaget.toDouble(),
-        type = uføreType(grunnlagUføreDTO.type),
+        type = grunnlagUføreDTO.type.tilDomene(),
         grunnlag11_19 = grunnlagUføreDTO.grunnlag.tilDomene(),
         uføregrad = grunnlagUføreDTO.uføregrad,
         uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføreDTO.uføreYtterligereNedsattArbeidsevneÅr,
@@ -122,14 +123,14 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
             uføregrad = grunnlagUføre.uføregrad,
             grunnlag = grunnlagUføre.grunnlaget.toDouble(),
-            type = uføreType(grunnlagUføre.type)
+            type = grunnlagUføre.type.tilDomene()
         )
     }
     throw IllegalStateException()
 }
 
-private fun uføreType(uføreType: UføreType): no.nav.aap.statistikk.avsluttetbehandling.UføreType =
-    when (uføreType) {
+private fun UføreType.tilDomene(): no.nav.aap.statistikk.avsluttetbehandling.UføreType =
+    when (this) {
         UføreType.STANDARD -> no.nav.aap.statistikk.avsluttetbehandling.UføreType.STANDARD
         UføreType.YTTERLIGERE_NEDSATT -> no.nav.aap.statistikk.avsluttetbehandling.UføreType.YTTERLIGERE_NEDSATT
     }

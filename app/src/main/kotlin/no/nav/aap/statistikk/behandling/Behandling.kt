@@ -51,19 +51,3 @@ enum class TypeBehandling {
     Tilbakekreving,
     Klage;
 }
-
-fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.tilDomene(): TypeBehandling =
-    when (this) {
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering -> TypeBehandling.Revurdering
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Klage -> TypeBehandling.Klage
-    }
-
-fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.tilDomene(): BehandlingStatus =
-    when (this) {
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.OPPRETTET -> BehandlingStatus.OPPRETTET
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.UTREDES -> BehandlingStatus.UTREDES
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.IVERKSETTES -> BehandlingStatus.IVERKSETTES
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.AVSLUTTET -> BehandlingStatus.AVSLUTTET
-    }
