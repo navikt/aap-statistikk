@@ -1,8 +1,12 @@
 package no.nav.aap.statistikk.testutils
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
@@ -83,21 +87,21 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
         behandlingType = TypeBehandling.Førstegangsbehandling,
         ident = "14890097570",
         avklaringsbehov = listOf(
-            AvklaringsbehovHendelse(
-                definisjon = Definisjon(
-                    type = "5003",
+            AvklaringsbehovHendelseDto(
+                definisjon = DefinisjonDTO(
+                    type = AvklaringsbehovKode.`5003`,
                     behovType = BehovType.MANUELT_PÅKREVD,
                     løsesISteg = StegType.AVKLAR_SYKDOM
                 ),
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
-                    Endring(
+                    EndringDTO(
                         status = EndringStatus.valueOf("OPPRETTET"),
                         tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                         frist = null,
                         endretAv = "Kelvin"
                     ),
-                    Endring(
+                    EndringDTO(
                         status = EndringStatus.valueOf("AVSLUTTET"),
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                         frist = null,
@@ -105,21 +109,21 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                     )
                 )
             ),
-            AvklaringsbehovHendelse(
-                definisjon = Definisjon(
-                    type = "5006",
+            AvklaringsbehovHendelseDto(
+                definisjon = DefinisjonDTO(
+                    type = AvklaringsbehovKode.`5006`,
                     behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                     løsesISteg = StegType.VURDER_BISTANDSBEHOV
                 ),
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
-                    Endring(
+                    EndringDTO(
                         status = EndringStatus.valueOf("OPPRETTET"),
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                         frist = null,
                         endretAv = "Kelvin"
                     ),
-                    Endring(
+                    EndringDTO(
                         status = EndringStatus.valueOf("AVSLUTTET"),
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
                         frist = null,
@@ -127,21 +131,21 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                     )
                 )
             ),
-            AvklaringsbehovHendelse(
-                definisjon = Definisjon(
-                    type = "5097",
+            AvklaringsbehovHendelseDto(
+                definisjon = DefinisjonDTO(
+                    type = AvklaringsbehovKode.`5097`,
                     behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                     løsesISteg = StegType.KVALITETSSIKRING
                 ),
                 status = EndringStatus.valueOf("AVSLUTTET"),
                 endringer = listOf(
-                    Endring(
+                    EndringDTO(
                         status = EndringStatus.valueOf("OPPRETTET"),
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                         frist = null,
                         endretAv = "Kelvin"
                     ),
-                    Endring(
+                    EndringDTO(
                         status = EndringStatus.valueOf("AVSLUTTET"),
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                         frist = null,

@@ -1,12 +1,15 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 
 class HendelseHjelpereKtTest {
     @Test
@@ -18,7 +21,7 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `gir null på tom liste`() {
-        assertThat(emptyList<AvklaringsbehovHendelse>().utledVedtakTid()).isNull()
+        assertThat(emptyList<AvklaringsbehovHendelseDto>().utledVedtakTid()).isNull()
     }
 
     @Test
@@ -37,15 +40,15 @@ class HendelseHjelpereKtTest {
     @Test
     fun `om behandlingen nettopp er opprettet, er det ingen menneskelige saksbehandlere`() {
         val liste = listOf(
-            AvklaringsbehovHendelse(
-                definisjon = Definisjon(
-                    type = "5001",
+            AvklaringsbehovHendelseDto(
+                definisjon = DefinisjonDTO(
+                    type = AvklaringsbehovKode.`5001`,
                     behovType = BehovType.MANUELT_PÅKREVD,
                     løsesISteg = StegType.AVKLAR_STUDENT
                 ),
                 status = EndringStatus.OPPRETTET,
                 endringer = listOf(
-                    Endring(
+                    EndringDTO(
                         status = EndringStatus.OPPRETTET,
                         tidsstempel = LocalDateTime.of(2024, 10, 23, 9, 30, 7),
                         frist = null,
@@ -59,7 +62,9 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `utled gjeldende avklaringsbehov`() {
-        assertThat(ufullførtBehandlingEndringer.utledGjeldendeAvklaringsBehov()).isEqualTo("5099")
+        assertThat(ufullførtBehandlingEndringer.utledGjeldendeAvklaringsBehov()).isEqualTo(
+            AvklaringsbehovKode.`5099`.toString()
+        )
     }
 
     @Test
@@ -69,27 +74,27 @@ class HendelseHjelpereKtTest {
 }
 
 val avklaringsbehovHendelser = listOf(
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5003",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5003`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.AVKLAR_SYKDOM
         ),
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:42:07.925"),
                 frist = null,
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:53:18.400"),
                 frist = null,
                 endretAv = "Z994573"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:53:45.371"),
                 frist = null,
@@ -97,21 +102,21 @@ val avklaringsbehovHendelser = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5005",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5005`,
             behovType = BehovType.MANUELT_FRIVILLIG,
             løsesISteg = StegType.FRITAK_MELDEPLIKT
         ),
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:58:51.113"),
                 frist = null,
                 endretAv = "Z994573"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:58:51.172"),
                 frist = null,
@@ -119,100 +124,100 @@ val avklaringsbehovHendelser = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5006",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5006`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.VURDER_BISTANDSBEHOV
         ),
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:53:18.957"),
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:01:05.396"),
                 endretAv = "Z994573"
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5008",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5008`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.FASTSETT_BEREGNINGSTIDSPUNKT
         ),
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:04:09.241"),
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:07:14.231"),
                 endretAv = "Z994573"
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5097",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5097`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.KVALITETSSIKRING
         ),
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:01:05.883"),
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:04:08.355"),
                 endretAv = "Z994573"
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5098",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5098`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.FORESLÅ_VEDTAK
         ),
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:07:17.882"),
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:07:27.634"),
                 endretAv = "Z994573"
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5099",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5099`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.FATTE_VEDTAK
         ),
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:07:28.821"),
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:12:01.293"),
                 endretAv = "Z994573"
@@ -222,21 +227,21 @@ val avklaringsbehovHendelser = listOf(
 )
 
 val ufullførtBehandlingEndringer = listOf(
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5003",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5003`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.AVKLAR_SYKDOM
         ),
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:05:59.373"),
                 frist = null,
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:12:39.461"),
                 frist = null,
@@ -244,27 +249,27 @@ val ufullførtBehandlingEndringer = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5004",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5004`,
             behovType = BehovType.MANUELT_FRIVILLIG,
             løsesISteg = StegType.FASTSETT_ARBEIDSEVNE
         ),
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:50:40.989"),
                 frist = null,
                 endretAv = "Z994573"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:50:41.070"),
                 frist = null,
                 endretAv = "Z994573"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:51:00.104"),
                 frist = null,
@@ -272,21 +277,21 @@ val ufullførtBehandlingEndringer = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5005",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5005`,
             behovType = BehovType.MANUELT_FRIVILLIG,
             løsesISteg = StegType.FRITAK_MELDEPLIKT
         ),
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:12:55.558"),
                 frist = null,
                 endretAv = "Z994573"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:12:55.607"),
                 frist = null,
@@ -294,21 +299,21 @@ val ufullførtBehandlingEndringer = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5006",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5006`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.VURDER_BISTANDSBEHOV
         ),
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:12:41.492"),
                 frist = null,
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:51:07.726"),
                 frist = null,
@@ -316,21 +321,21 @@ val ufullførtBehandlingEndringer = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5097",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5097`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.KVALITETSSIKRING
         ),
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:51:09.136"),
                 frist = null,
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:51:21.191"),
                 frist = null,
@@ -338,21 +343,21 @@ val ufullførtBehandlingEndringer = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5098",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5098`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.FORESLÅ_VEDTAK
         ),
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:51:27.150"),
                 frist = null,
                 endretAv = "Kelvin"
             ),
-            Endring(
+            EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:51:51.815"),
                 frist = null,
@@ -360,15 +365,15 @@ val ufullførtBehandlingEndringer = listOf(
             )
         )
     ),
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5099",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5099`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.FATTE_VEDTAK
         ),
         status = EndringStatus.OPPRETTET,
         endringer = listOf(
-            Endring(
+            EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-28T09:51:54.928"),
                 frist = null,

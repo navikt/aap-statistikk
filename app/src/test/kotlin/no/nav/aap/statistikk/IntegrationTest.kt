@@ -1,8 +1,12 @@
 package no.nav.aap.statistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
@@ -100,27 +104,36 @@ class IntegrationTest {
 
             assertThat(sakRespons).hasSize(2)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("Z994573")
-            assertThat(sakRespons.first().vedtakTid).isEqualTo(LocalDateTime.of(2024,10,18,11,7,27))
+            assertThat(sakRespons.first().vedtakTid).isEqualTo(
+                LocalDateTime.of(
+                    2024,
+                    10,
+                    18,
+                    11,
+                    7,
+                    27
+                )
+            )
         }
     }
 
     private fun gjørHendelseAvsluttet(hendelseFørCopy: StoppetBehandling) =
         hendelseFørCopy.copy(
             avklaringsbehov = hendelseFørCopy.avklaringsbehov + listOf(
-                AvklaringsbehovHendelse(
-                    definisjon = Definisjon(
-                        type = "5098",
+                AvklaringsbehovHendelseDto(
+                    definisjon = DefinisjonDTO(
+                        type = AvklaringsbehovKode.`5098`,
                         behovType = BehovType.MANUELT_PÅKREVD,
                         løsesISteg = StegType.FATTE_VEDTAK
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(
-                        Endring(
+                        EndringDTO(
                             status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-10-18T11:07:17.882"),
                             endretAv = "Kelvin"
                         ),
-                        Endring(
+                        EndringDTO(
                             status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-10-18T11:07:27.634"),
                             endretAv = "Z994573"
