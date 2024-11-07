@@ -31,17 +31,6 @@ enum class Vilkårtype {
     SYKEPENGEERSTATNING
 }
 
-fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.tilDomene(): Vilkårtype {
-    return when (this) {
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.ALDERSVILKÅRET -> Vilkårtype.ALDERSVILKÅRET
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.SYKDOMSVILKÅRET -> Vilkårtype.SYKDOMSVILKÅRET
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.BISTANDSVILKÅRET -> Vilkårtype.BISTANDSVILKÅRET
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.MEDLEMSKAP -> Vilkårtype.MEDLEMSKAP
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.GRUNNLAGET -> Vilkårtype.GRUNNLAGET
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.SYKEPENGEERSTATNING -> Vilkårtype.SYKEPENGEERSTATNING
-    }
-}
-
 // endringslogikk
 // lastet opp-tidspunkt på bigquery
 // sjekk grunnlaget - både oppad og nedad begrenset
