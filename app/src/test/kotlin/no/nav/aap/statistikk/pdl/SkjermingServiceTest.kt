@@ -1,9 +1,9 @@
 package no.nav.aap.statistikk.pdl
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak

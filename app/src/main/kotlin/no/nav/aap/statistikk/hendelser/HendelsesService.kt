@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.api.tilDomene
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -55,10 +56,10 @@ class HendelsesService(
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
-            typeBehandling = dto.behandlingType,
+            typeBehandling = dto.behandlingType.tilDomene(),
             opprettetTid = dto.behandlingOpprettetTidspunkt,
             mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-            status = dto.status,
+            status = dto.status.tilDomene(),
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),

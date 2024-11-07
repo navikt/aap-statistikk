@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.vilkårsresultat
 
 import com.google.cloud.bigquery.*
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.LocalDate
 import java.util.*

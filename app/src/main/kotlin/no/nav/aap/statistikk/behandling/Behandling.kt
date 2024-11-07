@@ -1,11 +1,9 @@
 package no.nav.aap.statistikk.behandling
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.sak.Sak
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 
 data class Versjon(
     val verdi: String,
@@ -37,3 +35,35 @@ data class Behandling(
         ) { "Vil ha mottattTid på sekund-oppløsning" }
     }
 }
+
+
+enum class BehandlingStatus {
+    OPPRETTET,
+    UTREDES,
+    IVERKSETTES,
+    AVSLUTTET;
+}
+
+
+enum class TypeBehandling {
+    Førstegangsbehandling,
+    Revurdering,
+    Tilbakekreving,
+    Klage;
+}
+
+fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.tilDomene(): TypeBehandling =
+    when (this) {
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering -> TypeBehandling.Revurdering
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Klage -> TypeBehandling.Klage
+    }
+
+fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.tilDomene(): BehandlingStatus =
+    when (this) {
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.OPPRETTET -> BehandlingStatus.OPPRETTET
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.UTREDES -> BehandlingStatus.UTREDES
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.IVERKSETTES -> BehandlingStatus.IVERKSETTES
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.AVSLUTTET -> BehandlingStatus.AVSLUTTET
+    }

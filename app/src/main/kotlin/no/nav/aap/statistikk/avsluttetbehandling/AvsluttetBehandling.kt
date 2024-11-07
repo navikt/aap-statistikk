@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.UføreType
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.math.BigDecimal
@@ -13,6 +12,10 @@ data class AvsluttetBehandling(
     val vilkårsresultat: Vilkårsresultat,
     val beregningsgrunnlag: IBeregningsGrunnlag?
 )
+
+enum class UføreType {
+    STANDARD, YTTERLIGERE_NEDSATT
+}
 
 data class MedBehandlingsreferanse<out V>(val behandlingsReferanse: UUID, val value: V)
 

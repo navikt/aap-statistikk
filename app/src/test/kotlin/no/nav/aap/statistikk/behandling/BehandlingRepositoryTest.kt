@@ -1,17 +1,11 @@
 package no.nav.aap.statistikk.behandling
 
-import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
-import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.person.Person
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
-
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
