@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.Counter
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -30,7 +30,7 @@ class HendelsesService(
 
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
 
-        if (hendelse.status == BehandlingStatus.AVSLUTTET) {
+        if (hendelse.behandlingStatus == Status.AVSLUTTET) {
             avsluttetBehandlingService.lagre(hendelse.avsluttetBehandling!!.tilDomene())
         }
 
@@ -56,7 +56,7 @@ class HendelsesService(
             typeBehandling = dto.behandlingType.tilDomene(),
             opprettetTid = dto.behandlingOpprettetTidspunkt,
             mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-            status = dto.status.tilDomene(),
+            status = dto.behandlingStatus.tilDomene(),
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
@@ -130,10 +130,10 @@ fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.tilDomene(): T
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Klage -> TypeBehandling.Klage
     }
 
-fun BehandlingStatus.tilDomene(): no.nav.aap.statistikk.behandling.BehandlingStatus =
+fun Status.tilDomene(): no.nav.aap.statistikk.behandling.BehandlingStatus =
     when (this) {
-        BehandlingStatus.OPPRETTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.OPPRETTET
-        BehandlingStatus.UTREDES -> no.nav.aap.statistikk.behandling.BehandlingStatus.UTREDES
-        BehandlingStatus.IVERKSETTES -> no.nav.aap.statistikk.behandling.BehandlingStatus.IVERKSETTES
-        BehandlingStatus.AVSLUTTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.AVSLUTTET
+        Status.OPPRETTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.OPPRETTET
+        Status.UTREDES -> no.nav.aap.statistikk.behandling.BehandlingStatus.UTREDES
+        Status.IVERKSETTES -> no.nav.aap.statistikk.behandling.BehandlingStatus.IVERKSETTES
+        Status.AVSLUTTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.AVSLUTTET
     }

@@ -59,6 +59,7 @@ class ApplicationTest {
     343319000
   ],
   "status": "OPPRETTET",
+  "behandlingStatus": "OPPRETTET",
   "behandlingType": "Førstegangsbehandling",
   "ident": "1403199012345",
   "avklaringsbehov": [],
@@ -116,6 +117,7 @@ class ApplicationTest {
     343319000
   ],
   "status": "OPPRETTET",
+  "behandlingStatus": "OPPRETTET",
   "behandlingType": "Førstegangsbehandling",
   "ident": "1403199012345",
   "avklaringsbehov": [],

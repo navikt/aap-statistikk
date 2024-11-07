@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
@@ -78,6 +79,7 @@ class MottaStatistikkTest {
                     StoppetBehandling(
                         saksnummer = "123",
                         status = BehandlingStatus.OPPRETTET,
+                        behandlingStatus = Status.OPPRETTET,
                         behandlingType = TypeBehandling.Førstegangsbehandling,
                         ident = "0",
                         behandlingReferanse = behandlingReferanse,
@@ -97,6 +99,7 @@ class MottaStatistikkTest {
                 StoppetBehandling(
                     saksnummer = "123",
                     status = BehandlingStatus.OPPRETTET,
+                    behandlingStatus = Status.OPPRETTET,
                     behandlingType = TypeBehandling.Førstegangsbehandling,
                     ident = "0",
                     behandlingReferanse = behandlingReferanse,
@@ -120,6 +123,7 @@ class MottaStatistikkTest {
             saksnummer = "4LFK2S0",
             behandlingReferanse = UUID.fromString("96175156-0950-475a-8de0-41a25f4c0cec"),
             status = BehandlingStatus.UTREDES,
+            behandlingStatus = Status.OPPRETTET,
             behandlingType = TypeBehandling.Førstegangsbehandling,
             ident = "14890097570",
             avklaringsbehov = listOf(
@@ -275,6 +279,7 @@ class MottaStatistikkTest {
             saksnummer = "4LFK2S0",
             behandlingReferanse = UUID.fromString("96175156-0950-475a-8de0-41a25f4c0cec"),
             status = BehandlingStatus.UTREDES,
+            behandlingStatus = Status.OPPRETTET,
             behandlingType = TypeBehandling.Førstegangsbehandling,
             ident = "14890097570",
             avklaringsbehov = listOf(
@@ -412,7 +417,7 @@ class MottaStatistikkTest {
                 hendelse.behandlingOpprettetTidspunkt
             )
             assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
-            assertThat(uthentetBehandling?.status).isEqualTo(hendelse.status.tilDomene())
+            assertThat(uthentetBehandling?.status).isEqualTo(hendelse.behandlingStatus.tilDomene())
 
             assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
             assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
