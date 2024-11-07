@@ -34,3 +34,8 @@ data class BQBehandling(
         require(vedtakTid == null || vedtakTid.truncatedTo(SECONDS).isEqual(vedtakTid))
     }
 }
+
+/**
+ * @param id Skal referere til sekvensnummer.
+ */
+data class BQVilkårsPrøving(val id: String, val beskrivelse: String, val resultat: String)
