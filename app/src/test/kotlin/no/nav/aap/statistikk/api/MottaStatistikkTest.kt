@@ -14,6 +14,7 @@ import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
@@ -409,8 +410,8 @@ class MottaStatistikkTest {
             assertThat(uthentetBehandling?.opprettetTid).isEqualTo(
                 hendelse.behandlingOpprettetTidspunkt
             )
-            assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType)
-            assertThat(uthentetBehandling?.status).isEqualTo(hendelse.status)
+            assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
+            assertThat(uthentetBehandling?.status).isEqualTo(hendelse.status.tilDomene())
 
             assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
             assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)

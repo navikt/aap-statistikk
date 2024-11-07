@@ -1,9 +1,9 @@
 package no.nav.aap.statistikk.vilkårsresultat.repository
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import java.time.LocalDate
 import java.util.*
 

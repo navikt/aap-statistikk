@@ -1,13 +1,13 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -90,8 +90,8 @@ class HendelsesServiceTest {
                 saksnummer = "1234",
                 behandlingReferanse = UUID.randomUUID(),
                 behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
-                status = BehandlingStatus.OPPRETTET,
-                behandlingType = TypeBehandling.Revurdering,
+                status = no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.OPPRETTET,
+                behandlingType = no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering,
                 ident = "234",
                 versjon = "dsad",
                 avklaringsbehov = listOf(),
@@ -146,8 +146,8 @@ class HendelsesServiceTest {
                 saksnummer = "1234",
                 behandlingReferanse = UUID.randomUUID(),
                 behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
-                status = BehandlingStatus.OPPRETTET,
-                behandlingType = TypeBehandling.Revurdering,
+                status = no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.OPPRETTET,
+                behandlingType = no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering,
                 ident = "234",
                 versjon = "dsad",
                 avklaringsbehov = listOf(),

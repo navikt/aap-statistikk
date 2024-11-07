@@ -1,9 +1,8 @@
 package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
@@ -11,7 +10,7 @@ import no.nav.aap.statistikk.testutils.BigQuery
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 class BeregningsGrunnlagBigQueryTest {
 

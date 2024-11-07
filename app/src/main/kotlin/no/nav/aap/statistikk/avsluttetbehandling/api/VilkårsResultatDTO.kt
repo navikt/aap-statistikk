@@ -6,6 +6,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsResultatDTO
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import no.nav.aap.statistikk.vilkårsresultat.tilDomene
 import java.util.*
 
 fun VilkårsResultatDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
@@ -16,7 +17,9 @@ fun VilkårsResultatDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID
 }
 
 fun VilkårDTO.tilDomene(): Vilkår {
-    return Vilkår(vilkårType = this.vilkårType, perioder = this.perioder.map { it.tilDomene() })
+    return Vilkår(
+        vilkårType = this.vilkårType.tilDomene(),
+        perioder = this.perioder.map { it.tilDomene() })
 }
 
 fun VilkårsPeriodeDTO.tilDomene(): VilkårsPeriode {

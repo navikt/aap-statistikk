@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.KELVIN
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.pdl.SkjermingService

@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.AvklaringsbehovHendelse
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Endring
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.EndringStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StegType
 import java.time.LocalDateTime

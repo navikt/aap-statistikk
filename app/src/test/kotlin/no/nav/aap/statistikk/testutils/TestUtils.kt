@@ -22,9 +22,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.behandling.*

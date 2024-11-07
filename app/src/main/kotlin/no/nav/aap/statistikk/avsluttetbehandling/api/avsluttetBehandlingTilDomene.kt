@@ -67,7 +67,7 @@ fun tilDomene(grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO): IBeregningsGrunnlag
 fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.GrunnlagUføre {
     return IBeregningsGrunnlag.GrunnlagUføre(
         grunnlag = grunnlagUføreDTO.grunnlaget.toDouble(),
-        type = grunnlagUføreDTO.type,
+        type = uføreType(grunnlagUføreDTO.type),
         grunnlag11_19 = grunnlagUføreDTO.grunnlag.tilDomene(),
         uføregrad = grunnlagUføreDTO.uføregrad,
         uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføreDTO.uføreYtterligereNedsattArbeidsevneÅr,
@@ -122,8 +122,14 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
             uføregrad = grunnlagUføre.uføregrad,
             grunnlag = grunnlagUføre.grunnlaget.toDouble(),
-            type = grunnlagUføre.type
+            type = uføreType(grunnlagUføre.type)
         )
     }
     throw IllegalStateException()
 }
+
+private fun uføreType(uføreType: UføreType): no.nav.aap.statistikk.avsluttetbehandling.UføreType =
+    when (uføreType) {
+        UføreType.STANDARD -> no.nav.aap.statistikk.avsluttetbehandling.UføreType.STANDARD
+        UføreType.YTTERLIGERE_NEDSATT -> no.nav.aap.statistikk.avsluttetbehandling.UføreType.YTTERLIGERE_NEDSATT
+    }

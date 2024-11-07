@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.UføreType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 
 interface IBeregningsgrunnlagRepository {
