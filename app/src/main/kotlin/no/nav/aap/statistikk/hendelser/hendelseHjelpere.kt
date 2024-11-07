@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.AvklaringsbehovHendelse
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.EndringStatus
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StegType
+import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import java.time.LocalDateTime
 
 fun List<AvklaringsbehovHendelse>.utledVedtakTid(): LocalDateTime? {
