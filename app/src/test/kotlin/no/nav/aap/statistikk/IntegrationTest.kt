@@ -1,17 +1,17 @@
 package no.nav.aap.statistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
-import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.hendelser.utledVedtakTid
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.testutils.*
@@ -73,6 +73,7 @@ class IntegrationTest {
                 PostRequest(
                     hendelse.copy(
                         status = BehandlingStatus.AVSLUTTET,
+                        behandlingStatus = Status.AVSLUTTET,
                         avsluttetBehandling = avsluttetBehandling
                     )
                 )
