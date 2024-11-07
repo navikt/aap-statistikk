@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.Counter
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.api.tilDomene
@@ -97,7 +98,7 @@ class HendelsesService(
                     saksnummer = dto.saksnummer,
                     person = person,
                     sistOppdatert = LocalDateTime.now(clock),
-                    sakStatus = dto.sakStatus
+                    sakStatus = dto.sakStatus.tilDomene()
                 )
             )
             sak = sakRepository.hentSak(sakId)
@@ -112,6 +113,15 @@ class HendelsesService(
         }
         person = personRepository.hentPerson(dto.ident)!!
         return person
+    }
+}
+
+private fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus {
+    return when (this) {
+        SakStatus.OPPRETTET -> no.nav.aap.statistikk.sak.SakStatus.OPPRETTET
+        SakStatus.UTREDES -> no.nav.aap.statistikk.sak.SakStatus.UTREDES
+        SakStatus.LØPENDE -> no.nav.aap.statistikk.sak.SakStatus.LØPENDE
+        SakStatus.AVSLUTTET -> no.nav.aap.statistikk.sak.SakStatus.AVSLUTTET
     }
 }
 

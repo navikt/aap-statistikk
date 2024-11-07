@@ -6,11 +6,16 @@ data class AntallBehandlinger(val nye: Int = 0, val avsluttede: Int = 0, val tot
 
 object BeregnAntallBehandlinger {
 
-    fun antallBehandlingerPerDag(antallNye: List<AntallPerDag>, antallAvsluttede: List<AntallPerDag>, antallÅpneBehandlinger: Int): Map<LocalDate, AntallBehandlinger> {
+    fun antallBehandlingerPerDag(
+        antallNye: List<AntallPerDag>,
+        antallAvsluttede: List<AntallPerDag>,
+        antallÅpneBehandlinger: Int
+    ): Map<LocalDate, AntallBehandlinger> {
         val antallBehandlinger = mutableMapOf<LocalDate, AntallBehandlinger>()
 
         // Finn start og slutt
-        val alleDagerMedEndringer = antallNye.map {it.dag}.plus(antallAvsluttede.map {it.dag}.toSet())
+        val alleDagerMedEndringer =
+            antallNye.map { it.dag }.plus(antallAvsluttede.map { it.dag }.toSet())
         val start = alleDagerMedEndringer.min()
         val slutt = alleDagerMedEndringer.max()
 
@@ -22,13 +27,17 @@ object BeregnAntallBehandlinger {
         }
 
         // Oppdater AntallBehandlinger med nye og avsluttede behandlinger
-        antallNye.forEach { antallBehandlinger[it.dag] = antallBehandlinger[it.dag]!!.copy(nye = it.antall) }
-        antallAvsluttede.forEach { antallBehandlinger[it.dag] = antallBehandlinger[it.dag]!!.copy(avsluttede = it.antall) }
+        antallNye.forEach {
+            antallBehandlinger[it.dag] = antallBehandlinger[it.dag]!!.copy(nye = it.antall)
+        }
+        antallAvsluttede.forEach {
+            antallBehandlinger[it.dag] = antallBehandlinger[it.dag]!!.copy(avsluttede = it.antall)
+        }
 
         // Oppdater AntallBehandlinger med totalt antall behandlinger per dag
         var justertAntallBehandlinger = antallÅpneBehandlinger
         antallBehandlinger.keys.sorted().reversed().forEach {
-            var antall = antallBehandlinger[it]
+            val antall = antallBehandlinger[it]
             require(antall != null)
             antallBehandlinger[it] = antall.copy(totalt = justertAntallBehandlinger)
             justertAntallBehandlinger -= antall.nye

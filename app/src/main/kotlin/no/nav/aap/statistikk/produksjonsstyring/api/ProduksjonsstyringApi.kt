@@ -9,6 +9,7 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
+import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.produksjonsstyring.AntallBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
@@ -39,7 +40,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(req.typeBehandling)
+            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(req.typeBehandling?.tilDomene())
         }
 
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
@@ -80,7 +81,11 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
             val antallNye = repo.antallNyeBehandlingerPerDag()
             val antallAvsluttede = repo.antallAvsluttedeBehandlingerPerDag()
             val antallÅpneBehandlinger = repo.antallÅpneBehandlinger()
-            BeregnAntallBehandlinger.antallBehandlingerPerDag(antallNye, antallAvsluttede, antallÅpneBehandlinger)
+            BeregnAntallBehandlinger.antallBehandlingerPerDag(
+                antallNye,
+                antallAvsluttede,
+                antallÅpneBehandlinger
+            )
         }
         respond(antallBehandlinger)
     }
