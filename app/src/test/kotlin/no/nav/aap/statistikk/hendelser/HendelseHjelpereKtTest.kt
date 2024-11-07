@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType

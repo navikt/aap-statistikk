@@ -122,12 +122,12 @@ private fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus {
     }
 }
 
-fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.tilDomene(): TypeBehandling =
+fun no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.tilDomene(): TypeBehandling =
     when (this) {
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering -> TypeBehandling.Revurdering
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
-        no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Klage -> TypeBehandling.Klage
+        no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling
+        no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering -> TypeBehandling.Revurdering
+        no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
+        no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Klage -> TypeBehandling.Klage
     }
 
 fun Status.tilDomene(): no.nav.aap.statistikk.behandling.BehandlingStatus =
