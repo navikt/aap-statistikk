@@ -72,7 +72,6 @@ class IntegrationTest {
                 URI.create("$url/stoppetBehandling"),
                 PostRequest(
                     hendelse.copy(
-                        status = BehandlingStatus.AVSLUTTET,
                         behandlingStatus = Status.AVSLUTTET,
                         avsluttetBehandling = avsluttetBehandling
                     )

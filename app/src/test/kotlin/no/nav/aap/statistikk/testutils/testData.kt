@@ -76,7 +76,6 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
     return StoppetBehandling(
         saksnummer = saksnummer,
         behandlingReferanse = behandlingReferanse,
-        status = BehandlingStatus.UTREDES,
         behandlingStatus = Status.OPPRETTET,
         behandlingType = TypeBehandling.Førstegangsbehandling,
         ident = "14890097570",
