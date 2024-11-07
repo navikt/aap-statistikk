@@ -1,10 +1,10 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
-import no.nav.aap.statistikk.api_kontrakt.SakStatus
-import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.Behandling

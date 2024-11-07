@@ -5,7 +5,7 @@ import com.google.cloud.bigquery.FieldValueList
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
 import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
-import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.vilkårsresultat.*
 import org.assertj.core.api.Assertions.assertThat

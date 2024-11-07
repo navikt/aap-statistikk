@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.avsluttetbehandling.api
 
-import no.nav.aap.statistikk.api_kontrakt.*
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse

@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.statistikk.api_kontrakt.UføreType
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.UføreType
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.math.BigDecimal

@@ -4,8 +4,8 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.api_kontrakt.Utfall
-import no.nav.aap.statistikk.api_kontrakt.Vilkårtype
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Utfall
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService

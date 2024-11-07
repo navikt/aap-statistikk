@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.behandling
 
-import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.sak.Sak
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit

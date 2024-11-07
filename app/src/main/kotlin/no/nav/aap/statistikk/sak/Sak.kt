@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.sak
 
-import no.nav.aap.statistikk.api_kontrakt.SakStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.statistikk.person.Person
 import java.time.LocalDateTime
 

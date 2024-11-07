@@ -1,9 +1,9 @@
 package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
-import no.nav.aap.statistikk.api_kontrakt.SakStatus
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.testutils.Postgres

@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
-import no.nav.aap.statistikk.api_kontrakt.*
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

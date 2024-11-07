@@ -1,8 +1,8 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.Counter
-import no.nav.aap.statistikk.api_kontrakt.BehandlingStatus
-import no.nav.aap.statistikk.api_kontrakt.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.api.tilDomene
 import no.nav.aap.statistikk.behandling.Behandling

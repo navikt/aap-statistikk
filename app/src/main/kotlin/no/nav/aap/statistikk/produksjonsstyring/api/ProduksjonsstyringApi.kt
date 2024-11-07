@@ -8,7 +8,7 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
-import no.nav.aap.statistikk.api_kontrakt.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.produksjonsstyring.AntallBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
