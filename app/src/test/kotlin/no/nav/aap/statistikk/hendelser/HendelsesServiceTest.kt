@@ -98,7 +98,7 @@ class HendelsesServiceTest {
                 versjon = "dsad",
                 avklaringsbehov = listOf(),
                 mottattTid = LocalDateTime.now().minusDays(1),
-                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus.OPPRETTET,
+                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID
             )
@@ -154,7 +154,7 @@ class HendelsesServiceTest {
                 versjon = "dsad",
                 avklaringsbehov = listOf(),
                 mottattTid = LocalDateTime.now().minusDays(1),
-                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus.OPPRETTET,
+                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now()
             )
         )
