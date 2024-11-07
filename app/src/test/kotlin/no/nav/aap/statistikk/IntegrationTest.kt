@@ -112,15 +112,15 @@ class IntegrationTest {
                         behovType = BehovType.MANUELT_PÅKREVD,
                         løsesISteg = StegType.FATTE_VEDTAK
                     ),
-                    status = EndringStatus.AVSLUTTET,
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(
                         Endring(
-                            status = EndringStatus.OPPRETTET,
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-10-18T11:07:17.882"),
                             endretAv = "Kelvin"
                         ),
                         Endring(
-                            status = EndringStatus.AVSLUTTET,
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-10-18T11:07:27.634"),
                             endretAv = "Z994573"
                         )

@@ -130,15 +130,15 @@ class MottaStatistikkTest {
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = StegType.AVKLAR_SYKDOM
                     ),
-                    status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         Endring(
-                            status = EndringStatus.valueOf("OPPRETTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("OPPRETTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), Endring(
-                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                             frist = null,
                             endretAv = "Z994573"
@@ -150,15 +150,15 @@ class MottaStatistikkTest {
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = StegType.VURDER_BISTANDSBEHOV
                     ),
-                    status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         Endring(
-                            status = EndringStatus.valueOf("OPPRETTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("OPPRETTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), Endring(
-                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
                             frist = null,
                             endretAv = "Z994573"
@@ -169,14 +169,14 @@ class MottaStatistikkTest {
                         type = "5097",
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = StegType.KVALITETSSIKRING
-                    ), status = EndringStatus.valueOf("AVSLUTTET"), endringer = listOf(
+                    ), status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"), endringer = listOf(
                         Endring(
-                            status = EndringStatus.valueOf("OPPRETTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("OPPRETTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), Endring(
-                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                             frist = null,
                             endretAv = "Z994573"
@@ -285,15 +285,15 @@ class MottaStatistikkTest {
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = StegType.AVKLAR_SYKDOM
                     ),
-                    status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         Endring(
-                            status = EndringStatus.valueOf("OPPRETTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("OPPRETTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), Endring(
-                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                             frist = null,
                             endretAv = "Z994573"
@@ -305,15 +305,15 @@ class MottaStatistikkTest {
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = StegType.VURDER_BISTANDSBEHOV
                     ),
-                    status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         Endring(
-                            status = EndringStatus.valueOf("OPPRETTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("OPPRETTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), Endring(
-                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
                             frist = null,
                             endretAv = "Z994573"
@@ -324,14 +324,14 @@ class MottaStatistikkTest {
                         type = "5097",
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
                         løsesISteg = StegType.KVALITETSSIKRING
-                    ), status = EndringStatus.valueOf("AVSLUTTET"), endringer = listOf(
+                    ), status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"), endringer = listOf(
                         Endring(
-                            status = EndringStatus.valueOf("OPPRETTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("OPPRETTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), Endring(
-                            status = EndringStatus.valueOf("AVSLUTTET"),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                             frist = null,
                             endretAv = "Z994573"

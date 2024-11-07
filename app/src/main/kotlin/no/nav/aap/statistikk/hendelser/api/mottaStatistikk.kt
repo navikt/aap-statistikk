@@ -36,13 +36,13 @@ val avklaringsbehov = listOf(
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.AVKLAR_STUDENT
 
-        ), status = EndringStatus.AVSLUTTET, endringer = listOf(
+        ), status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET, endringer = listOf(
             Endring(
-                status = EndringStatus.OPPRETTET,
+                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(10),
                 endretAv = "Kelvin"
             ), Endring(
-                status = EndringStatus.AVSLUTTET,
+                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(5),
                 endretAv = "Z994573"
             )
@@ -52,9 +52,9 @@ val avklaringsbehov = listOf(
             type = "5003",
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.AVKLAR_SYKDOM
-        ), status = EndringStatus.OPPRETTET, endringer = listOf(
+        ), status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET, endringer = listOf(
             Endring(
-                status = EndringStatus.OPPRETTET,
+                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(3),
                 endretAv = "Kelvin"
             )
