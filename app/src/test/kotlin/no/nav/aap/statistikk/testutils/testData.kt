@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.testutils
 
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import java.math.BigDecimal
@@ -76,6 +77,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
         saksnummer = saksnummer,
         behandlingReferanse = behandlingReferanse,
         status = BehandlingStatus.UTREDES,
+        behandlingStatus = Status.OPPRETTET,
         behandlingType = TypeBehandling.Førstegangsbehandling,
         ident = "14890097570",
         avklaringsbehov = listOf(

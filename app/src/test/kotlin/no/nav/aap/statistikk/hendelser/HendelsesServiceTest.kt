@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -91,6 +92,7 @@ class HendelsesServiceTest {
                 behandlingReferanse = UUID.randomUUID(),
                 behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
                 status = no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.OPPRETTET,
+                behandlingStatus = Status.OPPRETTET,
                 behandlingType = no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering,
                 ident = "234",
                 versjon = "dsad",
@@ -147,6 +149,7 @@ class HendelsesServiceTest {
                 behandlingReferanse = UUID.randomUUID(),
                 behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
                 status = no.nav.aap.behandlingsflyt.kontrakt.statistikk.BehandlingStatus.OPPRETTET,
+                behandlingStatus = Status.OPPRETTET,
                 behandlingType = no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling.Revurdering,
                 ident = "234",
                 versjon = "dsad",

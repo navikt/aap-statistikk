@@ -6,10 +6,11 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
-import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
-import no.nav.aap.motor.JobbInput
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
+import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
+import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -74,7 +75,8 @@ val exampleRequestStoppetBehandling = StoppetBehandling(
     versjon = "b21e88bca4533d3e0ee3a15f51a87cbaa11a7e9c",
     mottattTid = LocalDateTime.now().minusDays(1),
     sakStatus = SakStatus.LØPENDE,
-    hendelsesTidspunkt = LocalDateTime.now()
+    hendelsesTidspunkt = LocalDateTime.now(),
+    behandlingStatus = Status.OPPRETTET
 )
 
 
