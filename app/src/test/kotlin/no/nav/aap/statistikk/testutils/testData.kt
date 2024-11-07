@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.testutils
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import java.math.BigDecimal
