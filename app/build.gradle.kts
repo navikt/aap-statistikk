@@ -44,7 +44,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
     implementation("no.nav:ktor-openapi-generator:1.0.46")
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.41")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.42")
     implementation("com.google.cloud:google-cloud-bigquery:2.42.4")
 
 
