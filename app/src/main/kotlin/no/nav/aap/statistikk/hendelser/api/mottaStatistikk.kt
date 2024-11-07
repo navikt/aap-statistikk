@@ -6,11 +6,14 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
@@ -23,6 +26,7 @@ import java.util.*
 import java.util.stream.IntStream
 import kotlin.math.pow
 import kotlin.math.roundToLong
+import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
 
@@ -33,30 +37,34 @@ enum class Tags(override val description: String) : APITag {
 }
 
 val avklaringsbehov = listOf(
-    AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5001",
+    AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5001`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.AVKLAR_STUDENT
 
-        ), status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET, endringer = listOf(
-            Endring(
+        ),
+        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
+        endringer = listOf(
+            EndringDTO(
                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(10),
                 endretAv = "Kelvin"
-            ), Endring(
+            ), EndringDTO(
                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(5),
                 endretAv = "Z994573"
             )
         )
-    ), AvklaringsbehovHendelse(
-        definisjon = Definisjon(
-            type = "5003",
+    ), AvklaringsbehovHendelseDto(
+        definisjon = DefinisjonDTO(
+            type = AvklaringsbehovKode.`5003`,
             behovType = BehovType.MANUELT_PÅKREVD,
             løsesISteg = StegType.AVKLAR_SYKDOM
-        ), status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET, endringer = listOf(
-            Endring(
+        ),
+        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+        endringer = listOf(
+            EndringDTO(
                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                 tidsstempel = LocalDateTime.now().minusMinutes(3),
                 endretAv = "Kelvin"
