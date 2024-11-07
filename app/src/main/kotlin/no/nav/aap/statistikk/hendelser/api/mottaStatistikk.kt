@@ -67,7 +67,6 @@ private val eksempelUUID = UUID.randomUUID()
 val exampleRequestStoppetBehandling = StoppetBehandling(
     saksnummer = "4LFL5CW",
     behandlingReferanse = eksempelUUID,
-    status = BehandlingStatus.OPPRETTET,
     behandlingType = TypeBehandling.Førstegangsbehandling,
     ident = "1403199012345",
     behandlingOpprettetTidspunkt = LocalDateTime.now(),
