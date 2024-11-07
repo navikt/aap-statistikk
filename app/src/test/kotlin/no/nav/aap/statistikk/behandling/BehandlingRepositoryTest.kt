@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.behandling
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak

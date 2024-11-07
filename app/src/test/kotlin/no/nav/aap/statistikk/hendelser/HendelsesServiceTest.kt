@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -13,6 +12,7 @@ import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -96,7 +96,7 @@ class HendelsesServiceTest {
                 versjon = "dsad",
                 avklaringsbehov = listOf(),
                 mottattTid = LocalDateTime.now().minusDays(1),
-                sakStatus = SakStatus.OPPRETTET,
+                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID
             )
@@ -152,7 +152,7 @@ class HendelsesServiceTest {
                 versjon = "dsad",
                 avklaringsbehov = listOf(),
                 mottattTid = LocalDateTime.now().minusDays(1),
-                sakStatus = SakStatus.OPPRETTET,
+                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now()
             )
         )

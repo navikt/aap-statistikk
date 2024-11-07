@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.sak
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.SakStatus
 import no.nav.aap.statistikk.person.Person
 import java.time.LocalDateTime
 
@@ -12,3 +11,10 @@ data class Sak(
     val sistOppdatert: LocalDateTime,
     val snapShotId: Long? = null
 )
+
+enum class SakStatus {
+    OPPRETTET,
+    UTREDES,
+    LØPENDE,
+    AVSLUTTET
+}
