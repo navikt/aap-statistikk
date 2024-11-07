@@ -1,6 +1,8 @@
 package no.nav.aap.statistikk.testutils
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
@@ -84,7 +86,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
             AvklaringsbehovHendelse(
                 definisjon = Definisjon(
                     type = "5003",
-                    behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
+                    behovType = BehovType.MANUELT_PÅKREVD,
                     løsesISteg = StegType.AVKLAR_SYKDOM
                 ),
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),

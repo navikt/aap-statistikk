@@ -2,8 +2,8 @@ package no.nav.aap.statistikk.vilkårsresultat
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
