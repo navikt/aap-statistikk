@@ -52,10 +52,7 @@ class SakTabell : BQTable<BQBehandling> {
             val mottattTid = Field.newBuilder("mottattTid", StandardSQLTypeName.DATETIME)
                 .setDescription("Tidspunktet da behandlingen oppstår (eks. søknad mottas). Dette er starten på beregning av saksbehandlingstid.")
                 .build()
-            val endretTid = Field.newBuilder("endretTid", StandardSQLTypeName.DATETIME)
-                .setDescription("Tidspunkt for siste endring på behandlingen. Ved første melding vil denne være lik registrertTid.")
-                .build()
-            val endretTid2 = Field.newBuilder("endretTid2", StandardSQLTypeName.TIMESTAMP)
+            val endretTid = Field.newBuilder("endretTid", StandardSQLTypeName.TIMESTAMP)
                 .setDescription("Tidspunkt for siste endring på behandlingen. Ved første melding vil denne være lik registrertTid.")
                 .build()
             val registrertTid = Field.newBuilder("registrertTid", StandardSQLTypeName.DATETIME)
@@ -186,7 +183,6 @@ class SakTabell : BQTable<BQBehandling> {
                 behandlingType,
                 ferdigbehandletTid,
                 endretTid,
-                endretTid2,
                 aktorId,
                 tekniskTid,
                 mottattTid,
@@ -228,7 +224,7 @@ class SakTabell : BQTable<BQBehandling> {
             if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
         val tekniskTid = fieldValueList.get("tekniskTid").doubleValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
-        val endretTid = fieldValueList.get("endretTid2").doubleValue
+        val endretTid = fieldValueList.get("endretTid").doubleValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
         val behandlingType = fieldValueList.get("behandlingType").stringValue
         val versjon = fieldValueList.get("versjon").stringValue
@@ -279,8 +275,6 @@ class SakTabell : BQTable<BQBehandling> {
                 "mottattTid" to value.mottattTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "endretTid" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "endretTid2" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
                     .toInstant(ZoneOffset.UTC).toEpochMilli(),
                 "registrertTid" to value.registrertTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
