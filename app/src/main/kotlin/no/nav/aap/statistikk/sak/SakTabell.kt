@@ -55,6 +55,9 @@ class SakTabell : BQTable<BQBehandling> {
             val endretTid = Field.newBuilder("endretTid", StandardSQLTypeName.DATETIME)
                 .setDescription("Tidspunkt for siste endring på behandlingen. Ved første melding vil denne være lik registrertTid.")
                 .build()
+            val endretTid2 = Field.newBuilder("endretTid2", StandardSQLTypeName.TIMESTAMP)
+                .setDescription("Tidspunkt for siste endring på behandlingen. Ved første melding vil denne være lik registrertTid.")
+                .build()
             val registrertTid = Field.newBuilder("registrertTid", StandardSQLTypeName.DATETIME)
                 .setDescription("Tidspunkt da behandlingen første gang ble registrert i fagsystemet. Ved digitale søknader bør denne være tilnærmet lik mottattTid.")
                 .build()
@@ -183,6 +186,7 @@ class SakTabell : BQTable<BQBehandling> {
                 behandlingType,
                 ferdigbehandletTid,
                 endretTid,
+                endretTid2,
                 aktorId,
                 tekniskTid,
                 mottattTid,
@@ -224,7 +228,7 @@ class SakTabell : BQTable<BQBehandling> {
             if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
         val tekniskTid = fieldValueList.get("tekniskTid").doubleValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
-        val endretTid = fieldValueList.get("endretTid").stringValue
+        val endretTid = fieldValueList.get("endretTid2").doubleValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
         val behandlingType = fieldValueList.get("behandlingType").stringValue
         val versjon = fieldValueList.get("versjon").stringValue
@@ -252,7 +256,10 @@ class SakTabell : BQTable<BQBehandling> {
             mottattTid = LocalDateTime.parse(mottattTid),
             registrertTid = LocalDateTime.parse(registrertTid),
             ferdigbehandletTid = ferdigbehandletTid?.let { LocalDateTime.parse(it) },
-            endretTid = LocalDateTime.parse(endretTid),
+            endretTid = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(endretTid.toLong()),
+                ZoneId.of("Z")
+            ),
             opprettetAv = opprettetAv,
             saksbehandler = saksbehandler,
             vedtakTid = vedtakTid?.let { LocalDateTime.parse(it) },
@@ -273,6 +280,8 @@ class SakTabell : BQTable<BQBehandling> {
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "endretTid" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "endretTid2" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
+                    .toInstant(ZoneOffset.UTC).toEpochMilli(),
                 "registrertTid" to value.registrertTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
