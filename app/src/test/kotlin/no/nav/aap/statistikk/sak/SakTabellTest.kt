@@ -28,11 +28,12 @@ class SakTabellTest {
             .truncatedTo(ChronoUnit.SECONDS)
         val endretTid = LocalDateTime.now()
 
+        val tekniskTid = LocalDateTime.now()
         client.insert(
             sakTabell, BQBehandling(
                 saksnummer = "123",
                 behandlingUUID = referanse.toString(),
-                tekniskTid = LocalDateTime.now(),
+                tekniskTid = tekniskTid,
                 behandlingType = TypeBehandling.Revurdering.toString().uppercase(),
                 avsender = KELVIN,
                 verson = "versjon",
@@ -49,17 +50,19 @@ class SakTabellTest {
         val uthentet = client.read(sakTabell)
 
         assertThat(uthentet.size).isEqualTo(1)
-        assertThat(uthentet.first().saksnummer).isEqualTo("123")
-        assertThat(uthentet.first().behandlingUUID).isEqualTo(
+        val uthentetInnslag = uthentet.first()
+        assertThat(uthentetInnslag.saksnummer).isEqualTo("123")
+        assertThat(uthentetInnslag.behandlingUUID).isEqualTo(
             referanse.toString()
         )
-        assertThat(uthentet.first().behandlingType).isEqualTo("REVURDERING")
-        assertThat(uthentet.first().sekvensNummer).isEqualTo(0L)
-        assertThat(uthentet.first().aktorId).isEqualTo("123456")
-        assertThat(uthentet.first().mottattTid).isEqualTo(mottattTid)
-        assertThat(uthentet.first().registrertTid).isEqualTo(registrertTid)
-        assertThat(uthentet.first().endretTid).isCloseTo(endretTid, within(10, ChronoUnit.MILLIS))
-        assertThat(uthentet.first().opprettetAv).isEqualTo(KELVIN)
-        assertThat(uthentet.first().saksbehandler).isEqualTo("1234")
+        assertThat(uthentetInnslag.behandlingType).isEqualTo("REVURDERING")
+        assertThat(uthentetInnslag.sekvensNummer).isEqualTo(0L)
+        assertThat(uthentetInnslag.aktorId).isEqualTo("123456")
+        assertThat(uthentetInnslag.mottattTid).isEqualTo(mottattTid)
+        assertThat(uthentetInnslag.registrertTid).isEqualTo(registrertTid)
+        assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(10, ChronoUnit.MILLIS))
+        assertThat(uthentetInnslag.opprettetAv).isEqualTo(KELVIN)
+        assertThat(uthentetInnslag.saksbehandler).isEqualTo("1234")
+        assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(10, ChronoUnit.MILLIS))
     }
 }

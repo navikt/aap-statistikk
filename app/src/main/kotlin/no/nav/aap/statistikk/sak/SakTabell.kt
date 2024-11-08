@@ -2,7 +2,10 @@ package no.nav.aap.statistikk.sak
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.bigquery.BQTable
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -44,6 +47,10 @@ class SakTabell : BQTable<BQBehandling> {
             val aktorId = Field.of("aktorId", StandardSQLTypeName.STRING)
             val tekniskTid =
                 Field.newBuilder("tekniskTid", StandardSQLTypeName.DATETIME)
+                    .setDescription("Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.")
+                    .build()
+            val tekniskTid2 =
+                Field.newBuilder("tekniskTid2", StandardSQLTypeName.TIMESTAMP)
                     .setDescription("Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.")
                     .build()
             val mottattTid = Field.newBuilder("mottattTid", StandardSQLTypeName.DATETIME)
@@ -182,6 +189,7 @@ class SakTabell : BQTable<BQBehandling> {
                 endretTid,
                 aktorId,
                 tekniskTid,
+                tekniskTid2,
                 mottattTid,
                 registrertTid,
                 versjon,
@@ -219,7 +227,7 @@ class SakTabell : BQTable<BQBehandling> {
             if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
         val ferdigbehandletTid =
             if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
-        val tekniskTid = fieldValueList.get("tekniskTid").stringValue
+        val tekniskTid = fieldValueList.get("tekniskTid2").doubleValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
         val endretTid = fieldValueList.get("endretTid").stringValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
@@ -237,7 +245,10 @@ class SakTabell : BQTable<BQBehandling> {
             saksnummer = saksnummer,
             behandlingUUID = behandlingUuid,
             relatertBehandlingUUID = relatertBehandlingUUid,
-            tekniskTid = LocalDateTime.parse(tekniskTid),
+            tekniskTid = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(tekniskTid.toLong()),
+                ZoneId.of("Z")
+            ),
             behandlingType = behandlingType,
             avsender = avsender,
             verson = versjon,
@@ -264,6 +275,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "aktorId" to value.aktorId,
                 "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "tekniskTid2" to value.tekniskTid.toInstant(ZoneOffset.UTC).toEpochMilli(),
                 "mottattTid" to value.mottattTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "endretTid" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
