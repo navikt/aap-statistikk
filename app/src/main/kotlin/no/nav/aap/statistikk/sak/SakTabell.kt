@@ -46,11 +46,7 @@ class SakTabell : BQTable<BQBehandling> {
                     .setMode(Field.Mode.NULLABLE).build()
             val aktorId = Field.of("aktorId", StandardSQLTypeName.STRING)
             val tekniskTid =
-                Field.newBuilder("tekniskTid", StandardSQLTypeName.DATETIME)
-                    .setDescription("Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.")
-                    .build()
-            val tekniskTid2 =
-                Field.newBuilder("tekniskTid2", StandardSQLTypeName.TIMESTAMP)
+                Field.newBuilder("tekniskTid", StandardSQLTypeName.TIMESTAMP)
                     .setDescription("Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.")
                     .build()
             val mottattTid = Field.newBuilder("mottattTid", StandardSQLTypeName.DATETIME)
@@ -189,7 +185,6 @@ class SakTabell : BQTable<BQBehandling> {
                 endretTid,
                 aktorId,
                 tekniskTid,
-                tekniskTid2,
                 mottattTid,
                 registrertTid,
                 versjon,
@@ -227,7 +222,7 @@ class SakTabell : BQTable<BQBehandling> {
             if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
         val ferdigbehandletTid =
             if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
-        val tekniskTid = fieldValueList.get("tekniskTid2").doubleValue
+        val tekniskTid = fieldValueList.get("tekniskTid").doubleValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
         val endretTid = fieldValueList.get("endretTid").stringValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
@@ -273,9 +268,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "relatertBehandlingUUid" to value.relatertBehandlingUUID,
                 "behandlingType" to value.behandlingType,
                 "aktorId" to value.aktorId,
-                "tekniskTid" to value.tekniskTid.truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "tekniskTid2" to value.tekniskTid.toInstant(ZoneOffset.UTC).toEpochMilli(),
+                "tekniskTid" to value.tekniskTid.toInstant(ZoneOffset.UTC).toEpochMilli(),
                 "mottattTid" to value.mottattTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "endretTid" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
