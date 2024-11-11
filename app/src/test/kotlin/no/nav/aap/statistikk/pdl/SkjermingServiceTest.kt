@@ -1,5 +1,8 @@
 package no.nav.aap.statistikk.pdl
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.TypeBehandling
@@ -10,6 +13,7 @@ import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.testutils.FakePdlClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -67,5 +71,28 @@ class SkjermingServiceTest {
 
 
         assertThat(service.erSkjermet(behandling)).isFalse()
+    }
+
+    @Test
+    fun `om pdl-kall feiler, returneres false med warning i logg`() {
+        val logger =
+            LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger
+        val listAppender = ListAppender<ILoggingEvent>()
+
+        listAppender.start()
+
+        logger.addAppender(listAppender)
+
+        val service = SkjermingService(object : PdlClient {
+            override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.pdl.Person> {
+                throw Exception("oopsie")
+            }
+        })
+
+
+        val res = service.erSkjermet(behandling)
+
+        assertThat(res).isFalse()
+        assertThat(listAppender.list.map { it.message }).anySatisfy { it.contains("Returnerer false for skjerming. Se stackTrace") }
     }
 }
