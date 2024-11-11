@@ -222,9 +222,9 @@ class SakTabell : BQTable<BQBehandling> {
             if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
         val ferdigbehandletTid =
             if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
-        val tekniskTid = fieldValueList.get("tekniskTid").doubleValue
+        val tekniskTid = fieldValueList.get("tekniskTid").timestampValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
-        val endretTid = fieldValueList.get("endretTid").doubleValue
+        val endretTid = fieldValueList.get("endretTid").timestampValue
         val registrertTid = fieldValueList.get("registrertTid").stringValue
         val behandlingType = fieldValueList.get("behandlingType").stringValue
         val versjon = fieldValueList.get("versjon").stringValue
@@ -241,7 +241,10 @@ class SakTabell : BQTable<BQBehandling> {
             behandlingUUID = behandlingUuid,
             relatertBehandlingUUID = relatertBehandlingUUid,
             tekniskTid = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(tekniskTid.toLong()),
+                Instant.ofEpochSecond(
+                    tekniskTid / (1000 * 1000),
+                    tekniskTid.rem(1000 * 1000) * 1000.toLong()
+                ),
                 ZoneId.of("Z")
             ),
             behandlingType = behandlingType,
@@ -253,7 +256,10 @@ class SakTabell : BQTable<BQBehandling> {
             registrertTid = LocalDateTime.parse(registrertTid),
             ferdigbehandletTid = ferdigbehandletTid?.let { LocalDateTime.parse(it) },
             endretTid = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(endretTid.toLong()),
+                Instant.ofEpochSecond(
+                    endretTid / (1000 * 1000),
+                    endretTid.rem(1000 * 1000) * 1000.toLong()
+                ),
                 ZoneId.of("Z")
             ),
             opprettetAv = opprettetAv,
@@ -271,11 +277,11 @@ class SakTabell : BQTable<BQBehandling> {
                 "relatertBehandlingUUid" to value.relatertBehandlingUUID,
                 "behandlingType" to value.behandlingType,
                 "aktorId" to value.aktorId,
-                "tekniskTid" to value.tekniskTid.toInstant(ZoneOffset.UTC).toEpochMilli(),
+                "tekniskTid" to value.tekniskTid.toInstant(ZoneOffset.UTC).toEpochMilli() / 1000.0,
                 "mottattTid" to value.mottattTid.truncatedTo(ChronoUnit.SECONDS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "endretTid" to value.endretTid.truncatedTo(ChronoUnit.MILLIS)
-                    .toInstant(ZoneOffset.UTC).toEpochMilli(),
+                    .toInstant(ZoneOffset.UTC).toEpochMilli() / 1000.0,
                 "registrertTid" to value.registrertTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
