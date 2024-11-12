@@ -9,7 +9,7 @@ plugins {
 
 val ktorVersion = "3.0.1"
 val mockkVersion = "1.13.13"
-val komponenterVersjon = "1.0.54"
+val komponenterVersjon = "1.0.55"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
