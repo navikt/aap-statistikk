@@ -33,7 +33,7 @@ class ApplicationTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepository, meterRegistry.hendelseLagret(),
+                bqRepository, meterRegistry,
                 bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
@@ -156,7 +156,7 @@ class ApplicationTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepository, stoppetHendelseLagretCounter,
+                bqRepository, meterRegistry,
                 bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },

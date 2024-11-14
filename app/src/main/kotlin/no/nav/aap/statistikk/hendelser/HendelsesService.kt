@@ -1,11 +1,13 @@
 package no.nav.aap.statistikk.hendelser
 
-import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -20,7 +22,7 @@ class HendelsesService(
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personRepository: IPersonRepository,
     private val behandlingRepository: IBehandlingRepository,
-    private val hendelseLagretCounter: Counter,
+    private val meterRegistry: MeterRegistry,
     private val sakStatistikkService: SaksStatistikkService,
     private val clock: Clock = Clock.systemUTC()
 ) {
@@ -43,7 +45,7 @@ class HendelsesService(
             hendelse.hendelsesTidspunkt,
             vedtakTidspunkt = vedtakTid
         )
-        hendelseLagretCounter.increment()
+        meterRegistry.hendelseLagret().increment()
     }
 
     private fun hentEllerLagreBehandlingId(
@@ -78,7 +80,8 @@ class HendelsesService(
                         )
                     )
                 }
-                ?: behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
+                ?: (behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
+                    .also { meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()) })
         return behandlingId
     }
 

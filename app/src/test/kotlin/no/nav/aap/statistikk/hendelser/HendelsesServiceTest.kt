@@ -51,7 +51,7 @@ class HendelsesServiceTest {
                 avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
             clock = clock,
-            hendelseLagretCounter = hendelseLagretCounter,
+            meterRegistry = simpleMeterRegistry,
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
@@ -105,6 +105,7 @@ class HendelsesServiceTest {
         )
 
         assertThat(behandlingRepository.hent(relatertUUID)).isNotNull()
+        assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
     }
 
 
@@ -132,7 +133,7 @@ class HendelsesServiceTest {
                 avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
             clock = clock,
-            hendelseLagretCounter = hendelseLagretCounter,
+            meterRegistry = simpleMeterRegistry,
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
