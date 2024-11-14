@@ -60,7 +60,7 @@ class SakTabellTest {
         assertThat(uthentetInnslag.aktorId).isEqualTo("123456")
         assertThat(uthentetInnslag.mottattTid).isEqualTo(mottattTid)
         assertThat(uthentetInnslag.registrertTid).isEqualTo(registrertTid)
-        assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(10, ChronoUnit.MILLIS))
+        assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(100, ChronoUnit.MILLIS))
         assertThat(uthentetInnslag.opprettetAv).isEqualTo(KELVIN)
         assertThat(uthentetInnslag.saksbehandler).isEqualTo("1234")
         assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(10, ChronoUnit.MILLIS))

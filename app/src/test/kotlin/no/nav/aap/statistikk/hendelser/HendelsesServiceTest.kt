@@ -6,10 +6,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.*
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.Person
@@ -80,6 +77,7 @@ class HendelsesServiceTest {
                 status = BehandlingStatus.AVSLUTTET,
                 opprettetTid = LocalDateTime.now().minusWeeks(4),
                 mottattTid = LocalDateTime.now().minusWeeks(4).truncatedTo(ChronoUnit.SECONDS),
+                søknadsformat = SøknadsFormat.PAPIR,
                 versjon = Versjon(
                     verdi = "1111"
                 )
@@ -118,7 +116,7 @@ class HendelsesServiceTest {
         val simpleMeterRegistry = SimpleMeterRegistry()
         val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
         val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
-        
+
         val hendelsesService = HendelsesService(
             sakRepository = FakeSakRepository(),
             personRepository = FakePersonRepository(),

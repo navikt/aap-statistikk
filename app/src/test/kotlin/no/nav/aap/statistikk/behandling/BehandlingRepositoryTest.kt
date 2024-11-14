@@ -31,7 +31,8 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
                     relaterteIdenter = listOf("123", "456", "123456789"),
-                    gjeldendeAvklaringsBehov = "0559"
+                    gjeldendeAvklaringsBehov = "0559",
+                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -43,6 +44,7 @@ class BehandlingRepositoryTest {
         assertThat(uthentet.sak.sakStatus).isEqualTo(SakStatus.UTREDES)
         assertThat(uthentet.relaterteIdenter).containsExactlyInAnyOrder("123", "456", "123456789")
         assertThat(uthentet.gjeldendeAvklaringsBehov).isEqualTo("0559")
+        assertThat(uthentet.søknadsformat).isEqualTo(SøknadsFormat.PAPIR)
     }
 
     @Test
@@ -61,7 +63,8 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
-                    relaterteIdenter = listOf()
+                    relaterteIdenter = listOf(),
+                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -77,7 +80,8 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
-                    relaterteIdenter = listOf()
+                    relaterteIdenter = listOf(),
+                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -104,7 +108,8 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx")
+                    versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -118,7 +123,8 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx2")
+                    versjon = Versjon("xxx2"),
+                    søknadsformat = SøknadsFormat.DIGITAL
                 )
             )
         }
@@ -145,7 +151,8 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx")
+                    versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -159,7 +166,8 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.AVSLUTTET,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx2")
+                    versjon = Versjon("xxx2"),
+                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -173,7 +181,8 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx")
+                    versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.DIGITAL
                 )
             )
         }
@@ -187,7 +196,8 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.AVSLUTTET,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx2")
+                    versjon = Versjon("xxx2"),
+                    søknadsformat = SøknadsFormat.DIGITAL
                 )
             )
         }
@@ -217,7 +227,8 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
                     relaterteIdenter = listOf("123", "456", "123456789"),
-                    gjeldendeAvklaringsBehov = "0559"
+                    gjeldendeAvklaringsBehov = "0559",
+                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
