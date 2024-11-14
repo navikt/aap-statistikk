@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Kanal
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
@@ -15,6 +15,7 @@ import no.nav.aap.statistikk.sak.SakRepository
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 
 class HendelsesService(
@@ -62,7 +63,8 @@ class HendelsesService(
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
-            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov()
+            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov(),
+            søknadsformat = dto.soknadsFormat.tilDomene()
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 
@@ -133,10 +135,17 @@ fun no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.tilDomene(): T
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Klage -> TypeBehandling.Klage
     }
 
-fun Status.tilDomene(): no.nav.aap.statistikk.behandling.BehandlingStatus =
+fun Status.tilDomene(): BehandlingStatus =
     when (this) {
-        Status.OPPRETTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.OPPRETTET
-        Status.UTREDES -> no.nav.aap.statistikk.behandling.BehandlingStatus.UTREDES
-        Status.IVERKSETTES -> no.nav.aap.statistikk.behandling.BehandlingStatus.IVERKSETTES
-        Status.AVSLUTTET -> no.nav.aap.statistikk.behandling.BehandlingStatus.AVSLUTTET
+        Status.OPPRETTET -> BehandlingStatus.OPPRETTET
+        Status.UTREDES -> BehandlingStatus.UTREDES
+        Status.IVERKSETTES -> BehandlingStatus.IVERKSETTES
+        Status.AVSLUTTET -> BehandlingStatus.AVSLUTTET
     }
+
+fun Kanal.tilDomene(): SøknadsFormat {
+    return when (this) {
+        Kanal.DIGITAL -> SøknadsFormat.DIGITAL
+        Kanal.PAPIR -> SøknadsFormat.PAPIR
+    }
+}

@@ -22,6 +22,7 @@ data class Behandling(
     val opprettetTid: LocalDateTime,
     val mottattTid: LocalDateTime,
     val versjon: Versjon,
+    val søknadsformat: SøknadsFormat,
     val sisteSaksbehandler: String? = null,
     val relaterteIdenter: List<String> = listOf(),
     val relatertBehandlingId: Long? = null,
@@ -34,6 +35,10 @@ data class Behandling(
             mottattTid.truncatedTo(ChronoUnit.SECONDS).isEqual(mottattTid)
         ) { "Vil ha mottattTid på sekund-oppløsning" }
     }
+}
+
+enum class SøknadsFormat {
+    PAPIR, DIGITAL
 }
 
 

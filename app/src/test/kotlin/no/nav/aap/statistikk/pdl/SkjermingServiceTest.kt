@@ -3,10 +3,7 @@ package no.nav.aap.statistikk.pdl
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
@@ -34,6 +31,7 @@ class SkjermingServiceTest {
         status = BehandlingStatus.UTREDES,
         opprettetTid = LocalDateTime.now(),
         mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+        søknadsformat = SøknadsFormat.PAPIR,
         versjon = Versjon(
             verdi = "xxx"
         )
