@@ -10,6 +10,7 @@ plugins {
 val ktorVersion = "3.0.1"
 val mockkVersion = "1.13.13"
 val komponenterVersjon = "1.0.55"
+val behandlingsflytversjon = "0.0.46"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -44,7 +45,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
     implementation("no.nav:ktor-openapi-generator:1.0.46")
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.43")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:$behandlingsflytversjon")
     implementation("com.google.cloud:google-cloud-bigquery:2.42.4")
 
 
