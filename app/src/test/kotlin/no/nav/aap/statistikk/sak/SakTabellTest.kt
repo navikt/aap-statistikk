@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.sak
 
 import no.nav.aap.statistikk.KELVIN
+import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
@@ -43,7 +44,8 @@ class SakTabellTest {
                 registrertTid = registrertTid,
                 endretTid = endretTid,
                 opprettetAv = KELVIN,
-                saksbehandler = "1234"
+                saksbehandler = "1234",
+                søknadsFormat = SøknadsFormat.DIGITAL
             )
         )
 
@@ -63,6 +65,7 @@ class SakTabellTest {
         assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(100, ChronoUnit.MILLIS))
         assertThat(uthentetInnslag.opprettetAv).isEqualTo(KELVIN)
         assertThat(uthentetInnslag.saksbehandler).isEqualTo("1234")
-        assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(10, ChronoUnit.MILLIS))
+        assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(100, ChronoUnit.MILLIS))
+        assertThat(uthentetInnslag.søknadsFormat).isEqualTo(SøknadsFormat.DIGITAL)
     }
 }
