@@ -71,7 +71,7 @@ class MottaStatistikkTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepository, stoppetHendelseLagretCounter,
+                bqRepository, meterRegistry,
                 bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
@@ -219,13 +219,12 @@ class MottaStatistikkTest {
         val bqRepository = FakeBQRepository()
         val meterRegistry = SimpleMeterRegistry()
 
-        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepository, stoppetHendelseLagretCounter,
+            bqRepository, meterRegistry,
             bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -274,11 +273,12 @@ class MottaStatistikkTest {
             )
 
             dataSource.transaction(readOnly = true) {
-                ventPåSvar({
-                    SakRepositoryImpl(
-                        it
-                    ).tellSaker()
-                },
+                ventPåSvar(
+                    {
+                        SakRepositoryImpl(
+                            it
+                        ).tellSaker()
+                    },
                     { it?.let { it > 0 } ?: false })
             }
         }
@@ -392,7 +392,7 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepository, stoppetHendelseLagretCounter,
+            bqRepository, meterRegistry,
             bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -424,11 +424,12 @@ class MottaStatistikkTest {
             )
 
             dataSource.transaction(readOnly = true) {
-                ventPåSvar({
-                    SakRepositoryImpl(
-                        it
-                    ).tellSaker()
-                },
+                ventPåSvar(
+                    {
+                        SakRepositoryImpl(
+                            it
+                        ).tellSaker()
+                    },
                     { it?.let { it > 0 } ?: false })
             }
         }

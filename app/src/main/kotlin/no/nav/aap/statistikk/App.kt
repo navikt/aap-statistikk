@@ -96,7 +96,7 @@ fun Application.startUp(
     )
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         bqRepository,
-        prometheusMeterRegistry.hendelseLagret(),
+        prometheusMeterRegistry,
         bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
         tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
         beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },

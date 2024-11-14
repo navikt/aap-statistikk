@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.jobber
 
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbUtfører
@@ -20,7 +21,7 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatReposi
 
 class LagreStoppetHendelseJobb(
     private val bqRepository: IBQRepository,
-    private val stoppetHendelseLagretCounter: Counter,
+    private val meterRegistry: MeterRegistry,
     private val avsluttetBehandlingLagretCounter: Counter,
     private val bigQueryKvitteringRepository: (DBConnection) -> IBigQueryKvitteringRepository,
     private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
@@ -43,7 +44,7 @@ class LagreStoppetHendelseJobb(
             ),
             personRepository = PersonRepository(connection),
             behandlingRepository = BehandlingRepository(connection),
-            hendelseLagretCounter = stoppetHendelseLagretCounter,
+            meterRegistry = meterRegistry,
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepositoryFactory(connection),
                 bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
