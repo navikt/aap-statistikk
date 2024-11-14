@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.sak
 
+import no.nav.aap.statistikk.behandling.SøknadsFormat
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
@@ -19,6 +20,7 @@ data class BQBehandling(
     val mottattTid: LocalDateTime,
     val opprettetAv: String,
     val vedtakTid: LocalDateTime? = null,
+    val søknadsFormat: SøknadsFormat,
     val saksbehandler: String?,
 ) {
     init {

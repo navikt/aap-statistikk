@@ -59,6 +59,7 @@ class SaksStatistikkService(
             opprettetAv = KELVIN,
             saksbehandler = saksbehandler,
             vedtakTid = vedtakTidspunkt?.truncatedTo(ChronoUnit.SECONDS),
+            søknadsFormat = behandling.søknadsformat
         )
         bigQueryRepository.lagre(bqSak)
     }

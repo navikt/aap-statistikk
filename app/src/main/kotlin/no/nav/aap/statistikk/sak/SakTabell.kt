@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.sak
 
 import com.google.cloud.bigquery.*
+import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.Instant
 import java.time.LocalDateTime
@@ -76,16 +77,16 @@ class SakTabell : BQTable<BQBehandling> {
                 .setDescription("Tidspunktet for når vedtaket ble fattet - hvis saken ble vedtatt.")
                 .setMode(Field.Mode.NULLABLE).build()
 
+            val søknadsFormat =
+                Field.newBuilder("soknadsformat", StandardSQLTypeName.STRING)
+                    .setDescription("Angir om søknaden har kommet inn via digital søknadsdialog eller om den er scannet (sendt per post). Mulige verdier: DIGITAL/PAPIR.")
+                    .build()
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
                     .setDescription("Tidspunkt for første utbetaling av ytelse.")
                     .setMode(Field.Mode.NULLABLE).build()
-
-            val søknadsFormat =
-                Field.newBuilder("soknadsformat", StandardSQLTypeName.STRING)
-                    .setDescription("Angir om søknaden har kommet inn via digital søknadsdialog eller om den er scannet (sendt per post).")
-                    .build()
 
             val forventOppstartTid =
                 Field.newBuilder("forventetOppstartTid", StandardSQLTypeName.DATE)
@@ -192,11 +193,11 @@ class SakTabell : BQTable<BQBehandling> {
                 opprettetAv,
                 saksbehandler,
                 vedtakTid,
+                søknadsFormat,
 
                 // Ikke implementert ennå
                 behandlingStatus,
                 utbetaltTid,
-                søknadsFormat,
                 forventOppstartTid,
                 sakYtelse,
                 sakUtland,
@@ -233,6 +234,7 @@ class SakTabell : BQTable<BQBehandling> {
         val aktorId = fieldValueList.get("aktorId").stringValue
         val opprettetAv = fieldValueList.get("opprettetAv").stringValue
         val saksbehandler = fieldValueList.get("saksbehandler").stringValue
+        val søknadsFormat = fieldValueList.get("soknadsformat").stringValue
         val vedtakTid =
             if (!fieldValueList.get("vedtakTid").isNull) fieldValueList.get("vedtakTid").stringValue else null
 
@@ -265,6 +267,7 @@ class SakTabell : BQTable<BQBehandling> {
             opprettetAv = opprettetAv,
             saksbehandler = saksbehandler,
             vedtakTid = vedtakTid?.let { LocalDateTime.parse(it) },
+            søknadsFormat = SøknadsFormat.valueOf(søknadsFormat)
         )
     }
 
@@ -290,6 +293,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "opprettetAv" to value.opprettetAv,
                 "saksbehandler" to value.saksbehandler,
                 "vedtakTid" to value.vedtakTid?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "soknadsformat" to value.søknadsFormat.toString()
             )
         )
     }
