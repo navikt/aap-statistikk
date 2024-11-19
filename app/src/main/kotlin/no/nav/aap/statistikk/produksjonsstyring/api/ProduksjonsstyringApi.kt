@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.produksjonsstyring.api
 
 import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
+import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.route.TagModule
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
@@ -20,6 +21,8 @@ import java.time.LocalDate
 data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingstidPerDagInput(@PathParam("typebehandling") val typeBehandling: TypeBehandling?)
+
+data class BehandlingUtviklingsUtviklingInput(@QueryParam("Hvor mange dager å lage fordelingpå.") val antallDager: Int = 7)
 
 data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int)
 
@@ -73,13 +76,14 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons)
     }
 
-    route("/behandlinger/utvikling").get<Unit, Map<LocalDate, AntallBehandlinger>>(
+    route("/behandlinger/utvikling").get<BehandlingUtviklingsUtviklingInput, Map<LocalDate, AntallBehandlinger>>(
         TagModule(listOf(Tags.Produksjonsstyring))
-    ) {
+    ) { req ->
+        val antallDager = req.antallDager
         val antallBehandlinger = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
-            val antallNye = repo.antallNyeBehandlingerPerDag()
-            val antallAvsluttede = repo.antallAvsluttedeBehandlingerPerDag()
+            val antallNye = repo.antallNyeBehandlingerPerDag(antallDager)
+            val antallAvsluttede = repo.antallAvsluttedeBehandlingerPerDag(antallDager)
             val antallÅpneBehandlinger = repo.antallÅpneBehandlinger()
             BeregnAntallBehandlinger.antallBehandlingerPerDag(
                 antallNye,
