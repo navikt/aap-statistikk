@@ -12,7 +12,6 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.tilDomene
-import no.nav.aap.statistikk.produksjonsstyring.AntallBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
 import no.nav.aap.statistikk.produksjonsstyring.BeregnAntallBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.ProduksjonsstyringRepository
@@ -27,6 +26,13 @@ data class BehandlingUtviklingsUtviklingInput(@QueryParam("Hvor mange dager å l
 data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int)
 
 data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
+
+data class BehandlinEndringerPerDag(
+    val dato: LocalDate,
+    val nye: Int = 0,
+    val avsluttede: Int = 0,
+    val totalt: Int = 0
+)
 
 enum class Tags(override val description: String) : APITag {
     Produksjonsstyring(
@@ -76,7 +82,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons)
     }
 
-    route("/behandlinger/utvikling").get<BehandlingUtviklingsUtviklingInput, Map<LocalDate, AntallBehandlinger>>(
+    route("/behandlinger/utvikling").get<BehandlingUtviklingsUtviklingInput, List<BehandlinEndringerPerDag>>(
         TagModule(listOf(Tags.Produksjonsstyring))
     ) { req ->
         val antallDager = req.antallDager
@@ -91,7 +97,14 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 antallÅpneBehandlinger
             )
         }
-        respond(antallBehandlinger)
+        respond(antallBehandlinger.map { (k, v) ->
+            BehandlinEndringerPerDag(
+                dato = k,
+                nye = v.nye,
+                avsluttede = v.avsluttede,
+                totalt = v.totalt
+            )
+        })
     }
 
 }
