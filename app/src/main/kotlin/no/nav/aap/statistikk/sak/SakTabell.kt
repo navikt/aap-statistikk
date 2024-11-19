@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit
 /*
 * Mangler:
 *  - utbetaltTid
-*  - søknadsformt
 *  - forventetOppstartTid
 *  - sakYtelse
 *  - behandlingStatus

@@ -16,8 +16,8 @@ object BeregnAntallBehandlinger {
         // Finn start og slutt
         val alleDagerMedEndringer =
             antallNye.map { it.dag }.plus(antallAvsluttede.map { it.dag }.toSet())
-        val start = alleDagerMedEndringer.min()
-        val slutt = alleDagerMedEndringer.max()
+        val start = alleDagerMedEndringer.minOrNull() ?: LocalDate.now()
+        val slutt = alleDagerMedEndringer.maxOrNull() ?: LocalDate.now()
 
         // Opprett AntallBehandlinger for alle dagene
         var dag = start
