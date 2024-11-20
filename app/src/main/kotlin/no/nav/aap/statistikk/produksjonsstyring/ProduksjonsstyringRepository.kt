@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.produksjonsstyring
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
@@ -170,9 +171,14 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     }
 
-    fun alderÅpneBehandlinger(): List<FordelingÅpneBehandlinger> {
-        val antallDager = 30
-        val totaltSekunder = 2592000 // = 60 * 60 * 24 * 30
+    fun alderÅpneBehandlinger(
+        bøttestørrelse: Int = 1,
+        enhet: ChronoUnit = ChronoUnit.DAYS,
+        antallBøtter: Int = 30
+    ): List<FordelingÅpneBehandlinger> {
+
+        val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
+        println(totaltSekunder)
         val sql = """
             with dt as (select bh.behandling_id                                       bid,
                                EXTRACT(EPOCH FROM (current_date - bh.mottatt_tid)) as diff
@@ -184,7 +190,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                           and bh.gjeldende = true
                           and b.type = 'Førstegangsbehandling'
                           and bh.status != 'AVSLUTTET')
-            select width_bucket(diff, 0, $totaltSekunder, $antallDager) as bucket, count(*)
+            select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
             from dt
             group by bucket;
         """.trimIndent()

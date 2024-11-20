@@ -17,6 +17,7 @@ import no.nav.aap.statistikk.produksjonsstyring.BeregnAntallBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.FordelingÅpneBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.ProduksjonsstyringRepository
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
 
@@ -27,6 +28,12 @@ data class BehandlingUtviklingsUtviklingInput(@QueryParam("Hvor mange dager å l
 data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int)
 
 data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
+
+data class FordelingÅpneBehandlingerInput(
+    @QueryParam("Hvor mange bøtter skal åpne behandlinger plasseres i?") val antallBøtter: Int?,
+    @QueryParam("Week, month, day, etc.") val enhet: ChronoUnit = ChronoUnit.DAYS,
+    @QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?
+)
 
 data class BehandlinEndringerPerDag(
     val dato: LocalDate,
@@ -83,12 +90,21 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons)
     }
 
-    route("/behandlinger/fordeling-åpne-behandlinger").get<Unit, List<FordelingÅpneBehandlinger>>(
+    route("/behandlinger/fordeling-åpne-behandlinger").get<FordelingÅpneBehandlingerInput, List<FordelingÅpneBehandlinger>>(
         modules,
-        info(description = "Returnerer en liste over fordelingen på åpne behandlinger. Bøtte nr 1 teller antall behandlinger som er én dag. Bøtte nr 31 teller antall behandlinger eldre enn 30 dager.")
-    ) {
+        info(
+            description = """
+            Returnerer en liste over fordelingen på åpne behandlinger. Bøtte nr 1 teller antall behandlinger som er én dag. Bøtte nr 31 teller antall behandlinger eldre enn 30 dager.
+            """.trimIndent()
+        )
+    ) { req ->
+
         respond(transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).alderÅpneBehandlinger()
+            ProduksjonsstyringRepository(conn).alderÅpneBehandlinger(
+                bøttestørrelse = req.bøtteStørrelse ?: 1,
+                enhet = req.enhet,
+                antallBøtter = req.antallBøtter ?: 30
+            )
         })
     }
 
