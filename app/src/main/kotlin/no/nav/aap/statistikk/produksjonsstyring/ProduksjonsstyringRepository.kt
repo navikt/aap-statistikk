@@ -13,7 +13,7 @@ data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
 data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
 
-data class FordelingÅpneBehandlinger(val bøtte: Int, val antall: Int)
+data class BøtteFordeling(val bøtte: Int, val antall: Int)
 
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
@@ -175,10 +175,9 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         bøttestørrelse: Int = 1,
         enhet: ChronoUnit = ChronoUnit.DAYS,
         antallBøtter: Int = 30
-    ): List<FordelingÅpneBehandlinger> {
+    ): List<BøtteFordeling> {
 
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
-        println(totaltSekunder)
         val sql = """
             with dt as (select bh.behandling_id                                       bid,
                                EXTRACT(EPOCH FROM (current_date - bh.mottatt_tid)) as diff
@@ -197,7 +196,36 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
         return connection.queryList(sql) {
             setRowMapper {
-                FordelingÅpneBehandlinger(it.getInt("bucket"), it.getInt("count"))
+                BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
+            }
+        }
+    }
+
+    fun alderLukkedeBehandlinger(
+        bøttestørrelse: Int = 1,
+        enhet: ChronoUnit = ChronoUnit.DAYS,
+        antallBøtter: Int = 30
+    ): List<BøtteFordeling> {
+        val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
+        val sql = """
+            with dt as (select bh.behandling_id                                       bid,
+                               EXTRACT(EPOCH FROM (bh.oppdatert_tid - bh.mottatt_tid)) as diff
+                        from sak s,
+                             behandling b,
+                             behandling_historikk bh
+                        where s.id = b.sak_id
+                          and b.id = bh.behandling_id
+                          and bh.gjeldende = true
+                          and b.type = 'Førstegangsbehandling'
+                          and bh.status = 'AVSLUTTET')
+            select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
+            from dt
+            group by bucket;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setRowMapper {
+                BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
             }
         }
     }

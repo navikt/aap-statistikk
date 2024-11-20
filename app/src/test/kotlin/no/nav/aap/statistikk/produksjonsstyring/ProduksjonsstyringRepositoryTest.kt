@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.produksjonsstyring
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -16,6 +17,7 @@ import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.FakePdlClient
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.behandlingHendelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
@@ -27,7 +29,7 @@ import javax.sql.DataSource
 
 class ProduksjonsstyringRepositoryTest {
     @Test
-    fun `skal legge i riktige bøtter`(@Postgres dataSource: DataSource) {
+    fun `skal legge i riktige bøtter for alder på åpne behandlinger`(@Postgres dataSource: DataSource) {
         settInnBehandling(dataSource, LocalDateTime.now())
         settInnBehandling(
             dataSource,
@@ -49,13 +51,46 @@ class ProduksjonsstyringRepositoryTest {
 
         assertThat(res).hasSize(3)
         assertThat(res).containsExactly(
-            FordelingÅpneBehandlinger(bøtte = 0, antall = 1),
-            FordelingÅpneBehandlinger(bøtte = 1, antall = 1),
-            FordelingÅpneBehandlinger(bøtte = 2, antall = 2)
+            BøtteFordeling(bøtte = 0, antall = 1),
+            BøtteFordeling(bøtte = 1, antall = 1),
+            BøtteFordeling(bøtte = 2, antall = 2)
         )
     }
 
-    private fun settInnBehandling(dataSource: DataSource, mottattTid: LocalDateTime) =
+    @Test
+    fun `skal legge i riktige bøtter for alder på lukkede behandlinger`(@Postgres dataSource: DataSource) {
+        settInnBehandling(dataSource, LocalDateTime.now())
+        settInnBehandling(
+            dataSource,
+            LocalDateTime.now().minusDays(1),
+            åpen = false
+        )
+        settInnBehandling(
+            dataSource,
+            LocalDateTime.now().minusDays(2), åpen = false
+        )
+        settInnBehandling(
+            dataSource,
+            LocalDateTime.now().minusDays(2), åpen = false
+        )
+
+        val res = dataSource.transaction {
+            val alderÅpneBehandlinger = ProduksjonsstyringRepository(it).alderLukkedeBehandlinger()
+            alderÅpneBehandlinger
+        }
+
+        assertThat(res).hasSize(2)
+        assertThat(res).containsExactly(
+            BøtteFordeling(bøtte = 2, antall = 1),
+            BøtteFordeling(bøtte = 3, antall = 2)
+        )
+    }
+
+    private fun settInnBehandling(
+        dataSource: DataSource,
+        mottattTid: LocalDateTime,
+        åpen: Boolean = true
+    ) =
         dataSource.transaction { conn ->
             val bqRepository = mockk<IBQRepository>(relaxed = true)
 
@@ -89,5 +124,17 @@ class ProduksjonsstyringRepositoryTest {
             ).copy(mottattTid = mottattTid)
 
             hendelsesService.prosesserNyHendelse(hendelse)
+
+
+            if (!åpen) {
+                val avsluttetBehandlingHendelse = hendelse.copy(
+                    avsluttetBehandling = avsluttetBehandlingDTO(
+                        referanse = hendelse.behandlingReferanse,
+                        saksnummer = hendelse.saksnummer
+                    ),
+                    behandlingStatus = Status.AVSLUTTET
+                )
+                hendelsesService.prosesserNyHendelse(avsluttetBehandlingHendelse)
+            }
         }
 }

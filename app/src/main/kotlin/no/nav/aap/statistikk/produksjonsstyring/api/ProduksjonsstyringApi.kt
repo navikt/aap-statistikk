@@ -14,7 +14,7 @@ import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
 import no.nav.aap.statistikk.produksjonsstyring.BeregnAntallBehandlinger
-import no.nav.aap.statistikk.produksjonsstyring.FordelingÅpneBehandlinger
+import no.nav.aap.statistikk.produksjonsstyring.BøtteFordeling
 import no.nav.aap.statistikk.produksjonsstyring.ProduksjonsstyringRepository
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -29,11 +29,37 @@ data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDag
 
 data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
 
-data class FordelingÅpneBehandlingerInput(
+data class FordelingÅpneBehandlinger(val bøtte: Int, val antall: Int) {
+    companion object {
+        fun fraBøtteFordeling(bøtteFordeling: BøtteFordeling): FordelingÅpneBehandlinger {
+            return FordelingÅpneBehandlinger(
+                bøtte = bøtteFordeling.bøtte,
+                antall = bøtteFordeling.antall
+            )
+        }
+    }
+}
+
+data class FordelingLukkedeBehandlinger(val bøtte: Int, val antall: Int) {
+    companion object {
+        fun fraBøtteFordeling(bøtteFordeling: BøtteFordeling): FordelingLukkedeBehandlinger {
+            return FordelingLukkedeBehandlinger(
+                bøtte = bøtteFordeling.bøtte,
+                antall = bøtteFordeling.antall
+            )
+        }
+    }
+}
+
+data class FordelingInput(
     @QueryParam("Hvor mange bøtter skal åpne behandlinger plasseres i?") val antallBøtter: Int?,
-    @QueryParam("Week, month, day, etc.") val enhet: ChronoUnit = ChronoUnit.DAYS,
+    @QueryParam("Week, month, day, etc.") val enhet: Tidsenhet = Tidsenhet.DAG,
     @QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?
-)
+) {
+    enum class Tidsenhet {
+        DAG, UKE, MÅNED, ÅR,
+    }
+}
 
 data class BehandlinEndringerPerDag(
     val dato: LocalDate,
@@ -90,11 +116,13 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons)
     }
 
-    route("/behandlinger/fordeling-åpne-behandlinger").get<FordelingÅpneBehandlingerInput, List<FordelingÅpneBehandlinger>>(
+    route("/behandlinger/fordeling-åpne-behandlinger").get<FordelingInput, List<FordelingÅpneBehandlinger>>(
         modules,
         info(
             description = """
-            Returnerer en liste over fordelingen på åpne behandlinger. Bøtte nr 1 teller antall behandlinger som er én dag. Bøtte nr 31 teller antall behandlinger eldre enn 30 dager.
+            Returnerer en liste over fordelingen på åpne behandlinger. Bøtte nr 1 teller antall
+            behandlinger som er enhet * bøtteStørrelse gammel . Bøtte nr antallBøtter + 1 teller
+            antall behandlinger eldre enn bøttestørrelsen.
             """.trimIndent()
         )
     ) { req ->
@@ -102,9 +130,39 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).alderÅpneBehandlinger(
                 bøttestørrelse = req.bøtteStørrelse ?: 1,
-                enhet = req.enhet,
+                enhet = when (req.enhet) {
+                    FordelingInput.Tidsenhet.DAG -> ChronoUnit.DAYS
+                    FordelingInput.Tidsenhet.UKE -> ChronoUnit.WEEKS
+                    FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
+                    FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
+                },
                 antallBøtter = req.antallBøtter ?: 30
-            )
+            ).map { FordelingÅpneBehandlinger.fraBøtteFordeling(it) }
+        })
+    }
+
+    route("/behandlinger/fordeling-lukkede-behandlinger").get<FordelingInput, List<FordelingLukkedeBehandlinger>>(
+        modules,
+        info(
+            description = """
+            Returnerer en liste over behandlingstiden på lukkede behandlinger. Bøtte nr 1 teller antall
+            behandlinger som er enhet * bøtteStørrelse gammel . Bøtte nr antallBøtter + 1 teller
+            antall behandlinger eldre enn bøttestørrelsen.
+            """.trimIndent()
+        )
+    ) { req ->
+
+        respond(transactionExecutor.withinTransaction { conn ->
+            ProduksjonsstyringRepository(conn).alderLukkedeBehandlinger(
+                bøttestørrelse = req.bøtteStørrelse ?: 1,
+                enhet = when (req.enhet) {
+                    FordelingInput.Tidsenhet.DAG -> ChronoUnit.DAYS
+                    FordelingInput.Tidsenhet.UKE -> ChronoUnit.WEEKS
+                    FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
+                    FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
+                },
+                antallBøtter = req.antallBøtter ?: 30
+            ).map { FordelingLukkedeBehandlinger.fraBøtteFordeling(it) }
         })
     }
 
