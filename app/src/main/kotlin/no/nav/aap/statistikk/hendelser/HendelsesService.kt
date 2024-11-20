@@ -67,7 +67,8 @@ class HendelsesService(
             relaterteIdenter = dto.identerForSak,
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
             gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov(),
-            søknadsformat = dto.soknadsFormat.tilDomene()
+            søknadsformat = dto.soknadsFormat.tilDomene(),
+            venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent()
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 

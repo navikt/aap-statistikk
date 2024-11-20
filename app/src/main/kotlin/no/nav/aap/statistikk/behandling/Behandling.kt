@@ -28,6 +28,7 @@ data class Behandling(
     val relatertBehandlingId: Long? = null,
     val snapShotId: Long? = null,
     val gjeldendeAvklaringsBehov: String? = null,
+    val venteÅrsak: String? = null,
 ) {
     init {
         // Skal oppgis med sekund-presisjon
