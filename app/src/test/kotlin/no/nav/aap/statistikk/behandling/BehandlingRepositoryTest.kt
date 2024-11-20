@@ -32,7 +32,8 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     relaterteIdenter = listOf("123", "456", "123456789"),
                     gjeldendeAvklaringsBehov = "0559",
-                    søknadsformat = SøknadsFormat.PAPIR
+                    søknadsformat = SøknadsFormat.PAPIR,
+                    venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER"
                 )
             )
         }
@@ -45,6 +46,7 @@ class BehandlingRepositoryTest {
         assertThat(uthentet.relaterteIdenter).containsExactlyInAnyOrder("123", "456", "123456789")
         assertThat(uthentet.gjeldendeAvklaringsBehov).isEqualTo("0559")
         assertThat(uthentet.søknadsformat).isEqualTo(SøknadsFormat.PAPIR)
+        assertThat(uthentet.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
     }
 
     @Test

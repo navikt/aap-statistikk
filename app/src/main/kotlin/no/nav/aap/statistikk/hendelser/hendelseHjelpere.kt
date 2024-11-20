@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import java.time.LocalDateTime
@@ -19,4 +20,12 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
     return this.filter { it.status.erÅpent() }.map { it.definisjon.type }.firstOrNull()?.toString()
+}
+
+fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
+    return this
+        .filter { it.definisjon.behovType == Definisjon.BehovType.VENTEPUNKT }
+        .flatMap { it.endringer }
+        .maxByOrNull { it.tidsstempel }
+        ?.årsakTilSattPåVent?.toString()
 }

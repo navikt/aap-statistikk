@@ -74,8 +74,8 @@ SELECT COALESCE(
             """
 INSERT INTO behandling_historikk (behandling_id,
                                   versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
-                                  status, siste_saksbehandler, gjeldende_avklaringsbehov, soknadsformat)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  status, siste_saksbehandler, gjeldende_avklaringsbehov, soknadsformat, venteaarsak)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -87,7 +87,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.status.name)
                 setString(c++, behandling.sisteSaksbehandler)
                 setString(c++, behandling.gjeldendeAvklaringsBehov)
-                setEnumName(c, behandling.søknadsformat)
+                setEnumName(c++, behandling.søknadsformat)
+                setString(c, behandling.venteÅrsak)
             }
         }
 
@@ -105,8 +106,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
 
     override fun hent(referanse: UUID): Behandling? {
         return dbConnection.queryFirstOrNull(
-            """
-SELECT b.id                         as b_id,
+            """SELECT b.id                         as b_id,
        b.referanse                  as b_referanse,
        b.type                       as b_type,
        b.opprettet_tid              as b_opprettet_tid,
@@ -123,6 +123,7 @@ SELECT b.id                         as b_id,
        bh.mottatt_tid               as bh_mottatt_tid,
        bh.id                        as bh_id,
        bh.siste_saksbehandler       as bh_siste_saksbehandler,
+       bh.venteaarsak               as bh_venteaarsak,
        bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
        bh.soknadsformat             as bh_soknadsformat,
        v.versjon                    as v_versjon,
@@ -166,6 +167,7 @@ WHERE b.referanse = ?"""
        bh.versjon_id                as bh_versjon_id,
        bh.mottatt_tid               as bh_mottatt_tid,
        bh.siste_saksbehandler       as bh_siste_saksbehandler,
+       bh.venteaarsak               as bh_venteaarsak,
        bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
        bh.soknadsformat             as bh_soknadsformat,
        bh.id                        as bh_id,
@@ -242,6 +244,7 @@ WHERE b.id = ?"""
         relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id"),
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
             ?.ifBlank { null },
-        søknadsformat = it.getEnum("bh_soknadsformat")
+        søknadsformat = it.getEnum("bh_soknadsformat"),
+        venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null }
     )
 }

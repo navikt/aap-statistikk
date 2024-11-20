@@ -2,9 +2,11 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -70,6 +72,49 @@ class HendelseHjelpereKtTest {
     @Test
     fun `returnerer null for avsluttet behandling`() {
         assertThat(avklaringsbehovHendelser.utledGjeldendeAvklaringsBehov()).isNull()
+    }
+
+    @Test
+    fun `å utlede venteårsak gir null om ingen er gitt`() {
+        assertThat(avklaringsbehovHendelser.utledÅrsakTilSattPåVent()).isNull()
+    }
+
+    @Test
+    fun `utleder nyeste venteårsak`() {
+        val input: List<AvklaringsbehovHendelseDto> =
+            listOf<AvklaringsbehovHendelseDto>() + AvklaringsbehovHendelseDto(
+                definisjon = DefinisjonDTO(
+                    type = AvklaringsbehovKode.`9001`,
+                    behovType = BehovType.VENTEPUNKT,
+                    løsesISteg = StegType.AVKLAR_SYKDOM
+                ),
+                status = Status.OPPRETTET,
+                endringer = listOf(
+                    EndringDTO(
+                        status = Status.OPPRETTET,
+                        tidsstempel = LocalDateTime.now(),
+                        endretAv = "meg",
+                        årsakTilSattPåVent = ÅrsakTilSettPåVent.VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER
+                    )
+                )
+            ) + AvklaringsbehovHendelseDto(
+                definisjon = DefinisjonDTO(
+                    type = AvklaringsbehovKode.`9001`,
+                    behovType = BehovType.VENTEPUNKT,
+                    løsesISteg = StegType.BEREGN_TILKJENT_YTELSE
+                ),
+                status = Status.OPPRETTET,
+                endringer = listOf(
+                    EndringDTO(
+                        status = Status.OPPRETTET,
+                        tidsstempel = LocalDateTime.now().minusDays(1),
+                        endretAv = "meg",
+                        årsakTilSattPåVent = ÅrsakTilSettPåVent.VENTER_PÅ_MASKINELL_AVKLARING
+                    )
+                )
+            )
+
+        assertThat(input.utledÅrsakTilSattPåVent()).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
     }
 }
 
