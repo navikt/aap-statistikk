@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
 import no.nav.aap.statistikk.produksjonsstyring.BeregnAntallBehandlinger
+import no.nav.aap.statistikk.produksjonsstyring.FordelingÅpneBehandlinger
 import no.nav.aap.statistikk.produksjonsstyring.ProduksjonsstyringRepository
 import java.time.LocalDate
 
@@ -80,6 +81,15 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         }
 
         respond(respons)
+    }
+
+    route("/behandlinger/fordeling-åpne-behandlinger").get<Unit, List<FordelingÅpneBehandlinger>>(
+        modules,
+        info(description = "Returnerer en liste over fordelingen på åpne behandlinger. Bøtte nr 1 teller antall behandlinger som er én dag. Bøtte nr 31 teller antall behandlinger eldre enn 30 dager.")
+    ) {
+        respond(transactionExecutor.withinTransaction { conn ->
+            ProduksjonsstyringRepository(conn).alderÅpneBehandlinger()
+        })
     }
 
     route("/behandlinger/utvikling").get<BehandlingUtviklingsUtviklingInput, List<BehandlinEndringerPerDag>>(

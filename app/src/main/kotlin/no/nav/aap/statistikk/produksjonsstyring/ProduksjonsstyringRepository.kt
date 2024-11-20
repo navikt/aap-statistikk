@@ -12,6 +12,8 @@ data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
 data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
 
+data class FordelingÅpneBehandlinger(val bøtte: Int, val antall: Int)
+
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun hentBehandlingstidPerDag(typeBehandling: TypeBehandling? = null): List<BehandlingstidPerDag> {
@@ -26,7 +28,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                     and b.id = bh.behandling_id
                     and bh.gjeldende = true
                     ${typeBehandlingClaus(typeBehandling)}
-                    and bh.status = 'AVSLUTTET')
+                    and bh.status = 'AVSLUTTET') fomtom
             group by dag
             order by dag
         """.trimIndent()
@@ -166,6 +168,32 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
             setRowMapper { it.getInt("antall") }
         }
 
+    }
+
+    fun alderÅpneBehandlinger(): List<FordelingÅpneBehandlinger> {
+        val antallDager = 30
+        val totaltSekunder = 2592000 // = 60 * 60 * 24 * 30
+        val sql = """
+            with dt as (select bh.behandling_id                                       bid,
+                               EXTRACT(EPOCH FROM (current_date - bh.mottatt_tid)) as diff
+                        from sak s,
+                             behandling b,
+                             behandling_historikk bh
+                        where s.id = b.sak_id
+                          and b.id = bh.behandling_id
+                          and bh.gjeldende = true
+                          and b.type = 'Førstegangsbehandling'
+                          and bh.status != 'AVSLUTTET')
+            select width_bucket(diff, 0, $totaltSekunder, $antallDager) as bucket, count(*)
+            from dt
+            group by bucket;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setRowMapper {
+                FordelingÅpneBehandlinger(it.getInt("bucket"), it.getInt("count"))
+            }
+        }
     }
 
     private fun typeBehandlingClaus(typeBehandling: TypeBehandling?): String {
