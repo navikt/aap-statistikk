@@ -246,7 +246,7 @@ class AvsluttetBehandlingServiceTest {
                 BeregningsgrunnlagRepository(dbConnection),
                 VilkårsresultatRepository(dbConnection),
                 bqRepository,
-                behandlingRepositoryFactory = BehandlingRepository(dbConnection),
+                behandlingRepository = BehandlingRepository(dbConnection),
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
                 avsluttetBehandlingLagretCounter = counter
             )

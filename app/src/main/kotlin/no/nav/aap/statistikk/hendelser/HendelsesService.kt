@@ -12,11 +12,13 @@ import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
+private val logger = LoggerFactory.getLogger("HendelsesService")
 
 class HendelsesService(
     private val sakRepository: SakRepository,
@@ -47,6 +49,7 @@ class HendelsesService(
             vedtakTidspunkt = vedtakTid
         )
         meterRegistry.hendelseLagret().increment()
+        logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
     }
 
     private fun hentEllerLagreBehandlingId(

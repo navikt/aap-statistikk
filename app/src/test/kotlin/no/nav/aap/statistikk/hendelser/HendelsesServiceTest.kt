@@ -43,7 +43,7 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepositoryFactory = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepositoryFactory = FakeVilkårsResultatRepository(),
                 bqRepository = bigQueryRepository,
-                behandlingRepositoryFactory = behandlingRepository,
+                behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
                 avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),
@@ -126,7 +126,7 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepositoryFactory = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepositoryFactory = FakeVilkårsResultatRepository(),
                 bqRepository = bigQueryRepository,
-                behandlingRepositoryFactory = behandlingRepository,
+                behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
                 avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
             ),

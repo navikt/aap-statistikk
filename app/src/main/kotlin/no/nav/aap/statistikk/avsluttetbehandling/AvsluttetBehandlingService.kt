@@ -20,7 +20,7 @@ class AvsluttetBehandlingService(
     private val beregningsgrunnlagRepositoryFactory: IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepositoryFactory: IVilkårsresultatRepository,
     private val bqRepository: IBQRepository,
-    private val behandlingRepositoryFactory: IBehandlingRepository,
+    private val behandlingRepository: IBehandlingRepository,
     private val skjermingService: SkjermingService,
     private val avsluttetBehandlingLagretCounter: Counter,
 ) {
@@ -29,7 +29,7 @@ class AvsluttetBehandlingService(
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
 
         val uthentetBehandling =
-            behandlingRepositoryFactory.hent(avsluttetBehandling.behandlingsReferanse)
+            behandlingRepository.hent(avsluttetBehandling.behandlingsReferanse)
 
         if (uthentetBehandling != null) {
             vilkårsResultatRepositoryFactory

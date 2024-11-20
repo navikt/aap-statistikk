@@ -38,7 +38,7 @@ class LagreStoppetHendelseJobb(
                 beregningsgrunnlagRepositoryFactory = beregningsgrunnlagRepositoryFactory(connection),
                 vilkårsResultatRepositoryFactory = vilkårsResultatRepositoryFactory(connection),
                 bqRepository = bqRepository,
-                behandlingRepositoryFactory = behandlingRepositoryFactory(connection),
+                behandlingRepository = behandlingRepositoryFactory(connection),
                 skjermingService = skjermingService,
                 avsluttetBehandlingLagretCounter = avsluttetBehandlingLagretCounter,
             ),
