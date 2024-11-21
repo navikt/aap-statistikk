@@ -32,12 +32,15 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21.x'
-          cache: 'gradle'
-        env:
-          GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
 
       - name: Build
         run: ./gradlew clean build -x test
+        env:
+          GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
