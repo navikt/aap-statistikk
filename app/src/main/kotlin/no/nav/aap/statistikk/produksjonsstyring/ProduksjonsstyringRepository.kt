@@ -59,21 +59,31 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlingerOgGjennomsnitt(): AntallÅpneOgGjennomsnitt {
+    fun antallÅpneBehandlingerOgGjennomsnitt(behandlingsTyper: List<TypeBehandling>): AntallÅpneOgGjennomsnitt {
         val sql = """
             select count(*),
-                   extract(epoch from avg(current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid)) as gjennomsnitt_alder
+                   extract(epoch from
+                           avg(current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid)) as gjennomsnitt_alder
             from behandling_historikk bh
                      join public.behandling b on b.id = bh.behandling_id
             where gjeldende = true
+              and (b.type = ANY(?::text[]) or $1 is null)
               and status != 'AVSLUTTET' 
         """.trimIndent()
 
         return connection.queryFirst(sql) {
+            setParams {
+                if (behandlingsTyper.isNotEmpty()) {
+                    setArray(1, behandlingsTyper.map { it.toString() })
+                } else {
+                    // string fordi setArray ikke støtter null
+                    setString(1, null)
+                }
+            }
             setRowMapper { row ->
                 AntallÅpneOgGjennomsnitt(
                     antallÅpne = row.getInt("count"),
-                    gjennomsnittsalder = row.getDouble("gjennomsnitt_alder")
+                    gjennomsnittsalder = row.getDoubleOrNull("gjennomsnitt_alder") ?: 0.0
                 )
             }
         }
