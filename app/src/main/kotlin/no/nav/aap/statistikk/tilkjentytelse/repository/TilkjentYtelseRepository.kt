@@ -48,7 +48,7 @@ class TilkjentYtelseRepository(
     private fun hentBehandlingId(behandlingReferanse: UUID, connection: DBConnection): Int {
         val sql = "SELECT id FROM behandling WHERE referanse = ?"
 
-        return connection.queryFirst<Int>(sql) {
+        return connection.queryFirst(sql) {
             setParams {
                 setUUID(1, behandlingReferanse)
             }
@@ -58,8 +58,8 @@ class TilkjentYtelseRepository(
         }
     }
 
-    override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
-        val perioderTriple = dbConnection.queryList<Triple<TilkjentYtelsePeriode, UUID, String>>(
+    override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse {
+        val perioderTriple = dbConnection.queryList(
             """SELECT *
 FROM tilkjent_ytelse_periode
          left join tilkjent_ytelse
