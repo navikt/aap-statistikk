@@ -240,7 +240,8 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         val sql = """
             select venteaarsak,
                    count(*),
-                   avg(now() at time zone 'Europe/Oslo' - behandling_historikk.oppdatert_tid)
+                   extract(epoch from
+                           avg(now() at time zone 'Europe/Oslo' - behandling_historikk.oppdatert_tid)) as avg
             from behandling_historikk
             where venteaarsak IS NOT NULL
               and gjeldende = true
