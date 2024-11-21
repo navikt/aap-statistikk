@@ -27,8 +27,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                        behandling_historikk bh
                   where s.id = b.sak_id
                     and b.id = bh.behandling_id
-                    and bh.gjeldende = true
-                    ${typeBehandlingClaus(typeBehandling)}
+                    and bh.gjeldende = true ${typeBehandlingClaus(typeBehandling)}
                     and bh.status = 'AVSLUTTET') fomtom
             group by dag
             order by dag
@@ -54,7 +53,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
     fun antallÅpneBehandlingerOgGjennomsnitt(): AntallÅpneOgGjennomsnitt {
         val sql = """
             select count(*),
-                   extract(epoch from avg(current_timestamp - b.opprettet_tid)) as gjennomsnitt_alder
+                   extract(epoch from avg(current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid)) as gjennomsnitt_alder
             from behandling_historikk bh
                      join public.behandling b on b.id = bh.behandling_id
             where gjeldende = true
@@ -99,7 +98,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
             from
                 behandling b
             where              
-                b.opprettet_tid > current_date - interval '$antallDager days'
+                b.opprettet_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
             group by dag
             order by dag
         """.trimIndent()
@@ -124,7 +123,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                 b.id = bh.behandling_id and
                 bh.gjeldende = true and
                 bh.status = 'AVSLUTTET' and
-                bh.oppdatert_tid > current_date - interval '$antallDager days'
+                bh.oppdatert_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
             group by dag
             order by dag
         """.trimIndent()
@@ -179,8 +178,9 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
-            with dt as (select bh.behandling_id                                       bid,
-                               EXTRACT(EPOCH FROM (current_date - bh.mottatt_tid)) as diff
+            with dt as (select bh.behandling_id                                                       bid,
+                               EXTRACT(EPOCH FROM
+                                       (current_date at time zone 'Europe/Oslo' - bh.mottatt_tid)) as diff
                         from sak s,
                              behandling b,
                              behandling_historikk bh
