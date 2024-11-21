@@ -10,12 +10,10 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.tilDomene
-import no.nav.aap.statistikk.produksjonsstyring.BehandlingPerAvklaringsbehov
-import no.nav.aap.statistikk.produksjonsstyring.BeregnAntallBehandlinger
-import no.nav.aap.statistikk.produksjonsstyring.BøtteFordeling
-import no.nav.aap.statistikk.produksjonsstyring.ProduksjonsstyringRepository
+import no.nav.aap.statistikk.produksjonsstyring.*
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -189,6 +187,16 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 totalt = v.totalt
             )
         })
+    }
+
+    route("/behandlinger/på-vent").get<Unit, List<VenteårsakOgGjennomsnitt>>(
+        TagModule(listOf(Tags.Produksjonsstyring))
+    ) {
+        val venteårsakOgGjennomsnitt = transactionExecutor.withinTransaction { connection ->
+            val repo = ProduksjonsstyringRepository(connection)
+            repo.venteÅrsakOgGjennomsnitt()
+        }
+        respond(venteårsakOgGjennomsnitt)
     }
 
 }

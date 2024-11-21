@@ -15,6 +15,12 @@ data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalde
 
 data class BøtteFordeling(val bøtte: Int, val antall: Int)
 
+data class VenteårsakOgGjennomsnitt(
+    val årsak: String,
+    val antall: Int,
+    val gjennomsnittligAlder: Double
+)
+
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun hentBehandlingstidPerDag(typeBehandling: TypeBehandling? = null): List<BehandlingstidPerDag> {
@@ -226,6 +232,28 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         return connection.queryList(sql) {
             setRowMapper {
                 BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
+            }
+        }
+    }
+
+    fun venteÅrsakOgGjennomsnitt(): List<VenteårsakOgGjennomsnitt> {
+        val sql = """
+            select venteaarsak,
+                   count(*),
+                   avg(now() at time zone 'Europe/Oslo' - behandling_historikk.oppdatert_tid)
+            from behandling_historikk
+            where venteaarsak IS NOT NULL
+              and gjeldende = true
+            group by venteaarsak;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setRowMapper {
+                VenteårsakOgGjennomsnitt(
+                    årsak = it.getString("venteaarsak"),
+                    antall = it.getInt("count"),
+                    gjennomsnittligAlder = it.getDouble("avg")
+                )
             }
         }
     }
