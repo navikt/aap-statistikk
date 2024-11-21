@@ -114,6 +114,14 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons)
     }
 
+    route("/behandling-per-steggruppe").get<Unit, List<BehandlingPerSteggruppe>>(modules) { _ ->
+        val respons = transactionExecutor.withinTransaction {
+            ProduksjonsstyringRepository(it).antallBehandlingerPerSteggruppe()
+        }
+
+        respond(respons)
+    }
+
     route("/behandlinger/fordeling-åpne-behandlinger").get<FordelingInput, List<FordelingÅpneBehandlinger>>(
         modules,
         info(

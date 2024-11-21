@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
+import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import java.time.LocalDate
@@ -8,6 +9,8 @@ import java.time.temporal.ChronoUnit
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingPerAvklaringsbehov(val antall: Int, val behov: String)
+
+data class BehandlingPerSteggruppe(val steggruppe: StegGruppe, val antall: Int)
 
 data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
@@ -91,6 +94,24 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                 BehandlingPerAvklaringsbehov(
                     antall = row.getInt("count"),
                     behov = row.getStringOrNull("gjeldende_avklaringsbehov") ?: "UKJENT"
+                )
+            }
+        }
+    }
+
+    fun antallBehandlingerPerSteggruppe(): List<BehandlingPerSteggruppe> {
+        val sql = """
+            select steggruppe, count(*)
+            from behandling_historikk
+            where steggruppe is not null and gjeldende = true
+            group by steggruppe;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setRowMapper { row ->
+                BehandlingPerSteggruppe(
+                    steggruppe = row.getEnum("steggruppe"),
+                    antall = row.getInt("count")
                 )
             }
         }
