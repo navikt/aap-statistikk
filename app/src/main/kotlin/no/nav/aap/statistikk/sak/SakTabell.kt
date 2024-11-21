@@ -10,21 +10,6 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-/*
-* Mangler:
-*  - utbetaltTid
-*  - forventetOppstartTid
-*  - sakYtelse
-*  - behandlingStatus
-*  - behandlingResultat
-*  - resultatBegrunnelse
-*  - behandlingMetode (manuell, automatisk, etc)
-*  - ansvarligbeslutter
-*  - ansvarligenhet
-*  - tilbakekreveløp (behandlingtype tilbekakreving - har vi dette?)
-*  - FunksjonellPeriodeFom - samme
-*  - Vilkårsprøving (egen tabell)
- */
 class SakTabell : BQTable<BQBehandling> {
     companion object {
         const val TABLE_NAME = "sak"
@@ -81,6 +66,14 @@ class SakTabell : BQTable<BQBehandling> {
                     .setDescription("Angir om søknaden har kommet inn via digital søknadsdialog eller om den er scannet (sendt per post). Mulige verdier: DIGITAL/PAPIR.")
                     .build()
 
+            val behandlingMetode =
+                Field.newBuilder("behandlingMetode", StandardSQLTypeName.STRING).setDescription(
+                    """
+                Kode som angir om behandlingen er manuell eller automatisk. Det er den akkumulerte verdien som er interessant, det vil si at
+                hvis behandlingen har hatt en manuell hendelse bør fremtidige rader ha verdien MANUELL (selv om enkelthendelsene kan ha vært automatiske).
+            """.trimIndent()
+                ).build()
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
@@ -121,14 +114,6 @@ class SakTabell : BQTable<BQBehandling> {
                 Kode som angir en begrunnelse til resultat ved avslag- typisk: vilkårsprøvingen feilet, dublett, teknisk avvik, etc.
 
                 For behandlingstype klage: Angi begrunnelse ved resultat omgjøring - typisk: feil lovanvendelse, endret faktum, saksbehandlingsfeil, etc.
-            """.trimIndent()
-                ).build()
-
-            val behandlingMetode =
-                Field.newBuilder("behandlingMetode", StandardSQLTypeName.STRING).setDescription(
-                    """
-                Kode som angir om behandlingen er manuell eller automatisk. Det er den akkumulerte verdien som er interessant, det vil si at
-                hvis behandlingen har hatt en manuell hendelse bør fremtidige rader ha verdien MANUELL (selv om enkelthendelsene kan ha vært automatiske).
             """.trimIndent()
                 ).build()
 

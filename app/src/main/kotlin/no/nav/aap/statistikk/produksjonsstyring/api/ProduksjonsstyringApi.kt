@@ -10,7 +10,6 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.produksjonsstyring.*
@@ -21,9 +20,15 @@ data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingstidPerDagInput(@PathParam("typebehandling") val typeBehandling: TypeBehandling?)
 
-data class BehandlingUtviklingsUtviklingInput(@QueryParam("Hvor mange dager å lage fordelingpå.") val antallDager: Int = 7)
+data class BehandlingUtviklingsUtviklingInput(@QueryParam("Hvor mange dager å lage fordeling på.") val antallDager: Int = 7)
 
-data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int)
+data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int? = 7)
+
+data class ÅpneBehandlingerInput(
+    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
+)
 
 data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
 
@@ -92,15 +97,19 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         info(description = "Henter alle behandlinger som er lukket i de siste n dager, og regner ut snittalderen på disse.")
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(req.antallDager)
+            ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(
+                req.antallDager ?: 7
+            )
         }
 
         respond(respons)
     }
 
-    route("/åpne-behandlinger").get<Unit, AntallÅpneOgGjennomsnitt>(modules) { _ ->
-        val respons = transactionExecutor.withinTransaction {
-            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt()
+    route("/åpne-behandlinger").get<ÅpneBehandlingerInput, AntallÅpneOgGjennomsnitt>(modules) { req ->
+        val respons = transactionExecutor.withinTransaction { it ->
+            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(
+                (req.behandlingstyper
+                    ?: listOf(TypeBehandling.Førstegangsbehandling)).map { it.tilDomene() })
         }
 
         respond(AntallÅpneOgGjennomsnitt(respons.antallÅpne, respons.gjennomsnittsalder))
