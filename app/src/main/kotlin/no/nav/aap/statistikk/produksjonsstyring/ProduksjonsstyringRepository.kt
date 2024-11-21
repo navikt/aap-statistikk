@@ -109,7 +109,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
             order by dag
         """.trimIndent()
 
-        return connection.queryList<AntallPerDag>(sql) {
+        return connection.queryList(sql) {
             setRowMapper {
                 AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
             }
@@ -170,7 +170,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                 bh.status != 'AVSLUTTET';
         """.trimIndent()
 
-        return connection.queryFirst<Int>(sql) {
+        return connection.queryFirst(sql) {
             setRowMapper { it.getInt("antall") }
         }
 

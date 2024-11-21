@@ -22,6 +22,10 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
     return this.filter { it.status.erÅpent() }.map { it.definisjon.type }.firstOrNull()?.toString()
 }
 
+fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {
+    return this.filter { it.status.erÅpent() }.map { it.definisjon.løsesISteg }.firstOrNull()
+}
+
 fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
     return this
         .filter { it.definisjon.behovType == Definisjon.BehovType.VENTEPUNKT }

@@ -77,10 +77,10 @@ class HendelsesServiceTest {
                 status = BehandlingStatus.AVSLUTTET,
                 opprettetTid = LocalDateTime.now().minusWeeks(4),
                 mottattTid = LocalDateTime.now().minusWeeks(4).truncatedTo(ChronoUnit.SECONDS),
-                søknadsformat = SøknadsFormat.PAPIR,
                 versjon = Versjon(
                     verdi = "1111"
-                )
+                ),
+                søknadsformat = SøknadsFormat.PAPIR,
             )
         )
 

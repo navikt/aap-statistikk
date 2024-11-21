@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.sak.Sak
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -29,6 +30,7 @@ data class Behandling(
     val snapShotId: Long? = null,
     val gjeldendeAvklaringsBehov: String? = null,
     val venteÅrsak: String? = null,
+    val gjeldendeStegGruppe: StegGruppe? = null,
 ) {
     init {
         // Skal oppgis med sekund-presisjon

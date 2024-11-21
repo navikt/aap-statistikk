@@ -31,10 +31,10 @@ class SkjermingServiceTest {
         status = BehandlingStatus.UTREDES,
         opprettetTid = LocalDateTime.now(),
         mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-        søknadsformat = SøknadsFormat.PAPIR,
         versjon = Versjon(
             verdi = "xxx"
-        )
+        ),
+        søknadsformat = SøknadsFormat.PAPIR,
     )
 
     @Test

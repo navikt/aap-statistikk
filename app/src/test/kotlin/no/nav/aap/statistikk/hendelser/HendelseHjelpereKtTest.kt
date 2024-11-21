@@ -39,6 +39,7 @@ class HendelseHjelpereKtTest {
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isEqualTo("Z99400")
     }
 
+
     @Test
     fun `om behandlingen nettopp er opprettet, er det ingen menneskelige saksbehandlere`() {
         val liste = listOf(
@@ -60,6 +61,14 @@ class HendelseHjelpereKtTest {
             )
         )
         assertThat(liste.sistePersonPåBehandling()).isNull()
+    }
+
+
+    @Test
+    fun `kan utlede gjeldende stegtype`() {
+        assertThat(ufullførtBehandlingEndringer.utledGjeldendeStegType()).isEqualTo(
+            StegType.FATTE_VEDTAK
+        )
     }
 
     @Test
