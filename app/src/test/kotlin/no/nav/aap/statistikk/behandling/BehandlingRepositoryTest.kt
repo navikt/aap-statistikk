@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.testutils.Postgres
@@ -7,6 +8,7 @@ import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -30,10 +32,11 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf("123", "456", "123456789"),
                     gjeldendeAvklaringsBehov = "0559",
-                    søknadsformat = SøknadsFormat.PAPIR,
-                    venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER"
+                    venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
+                    gjeldendeStegGruppe = StegGruppe.BREV
                 )
             )
         }
@@ -47,6 +50,7 @@ class BehandlingRepositoryTest {
         assertThat(uthentet.gjeldendeAvklaringsBehov).isEqualTo("0559")
         assertThat(uthentet.søknadsformat).isEqualTo(SøknadsFormat.PAPIR)
         assertThat(uthentet.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
+        assertThat(uthentet.gjeldendeStegGruppe).isEqualTo(StegGruppe.BREV)
     }
 
     @Test
@@ -65,8 +69,8 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
-                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -82,8 +86,8 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
-                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
@@ -111,7 +115,7 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR
+                    søknadsformat = SøknadsFormat.PAPIR,
                 )
             )
         }
@@ -126,7 +130,7 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx2"),
-                    søknadsformat = SøknadsFormat.DIGITAL
+                    søknadsformat = SøknadsFormat.DIGITAL,
                 )
             )
         }
@@ -154,7 +158,7 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR
+                    søknadsformat = SøknadsFormat.PAPIR,
                 )
             )
         }
@@ -169,7 +173,7 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx2"),
-                    søknadsformat = SøknadsFormat.PAPIR
+                    søknadsformat = SøknadsFormat.PAPIR,
                 )
             )
         }
@@ -184,7 +188,7 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.DIGITAL
+                    søknadsformat = SøknadsFormat.DIGITAL,
                 )
             )
         }
@@ -199,7 +203,7 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx2"),
-                    søknadsformat = SøknadsFormat.DIGITAL
+                    søknadsformat = SøknadsFormat.DIGITAL,
                 )
             )
         }
@@ -228,14 +232,14 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf("123", "456", "123456789"),
                     gjeldendeAvklaringsBehov = "0559",
-                    søknadsformat = SøknadsFormat.PAPIR
                 )
             )
         }
 
-        org.junit.jupiter.api.assertThrows<Exception> {
+        assertThrows<Exception> {
             dataSource.transaction {
                 it.execute("INSERT INTO behandling_historikk (behandling_id, versjon_id, gjeldende, oppdatert_tid, mottatt_tid, status, siste_saksbehandler, gjeldende_avklaringsbehov) VALUES (?,?,?,?,?,?,?,?)") {
                     setParams {

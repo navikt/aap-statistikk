@@ -287,11 +287,11 @@ fun opprettTestBehandling(dataSource: DataSource, referanse: UUID, sak: Sak): Be
             referanse = referanse,
             sak = sak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
             status = BehandlingStatus.UTREDES,
+            opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
             mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
             versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.PAPIR
+            søknadsformat = SøknadsFormat.PAPIR,
         )
         val id = BehandlingRepository(it).opprettBehandling(
             behandling

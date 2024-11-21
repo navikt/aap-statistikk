@@ -71,11 +71,11 @@ SELECT COALESCE(
         }
 
         val historikkId = dbConnection.executeReturnKey(
-            """
-INSERT INTO behandling_historikk (behandling_id,
+            """INSERT INTO behandling_historikk (behandling_id,
                                   versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
-                                  status, siste_saksbehandler, gjeldende_avklaringsbehov, soknadsformat, venteaarsak)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  status, siste_saksbehandler, gjeldende_avklaringsbehov,
+                                  soknadsformat, venteaarsak, steggruppe)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -88,7 +88,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.sisteSaksbehandler)
                 setString(c++, behandling.gjeldendeAvklaringsBehov)
                 setEnumName(c++, behandling.søknadsformat)
-                setString(c, behandling.venteÅrsak)
+                setString(c++, behandling.venteÅrsak)
+                setEnumName(c, behandling.gjeldendeStegGruppe)
             }
         }
 
@@ -126,6 +127,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
        bh.venteaarsak               as bh_venteaarsak,
        bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
        bh.soknadsformat             as bh_soknadsformat,
+       bh.steggruppe                as bh_steggruppe,
        v.versjon                    as v_versjon,
        rp.rp_ident                  as rp_ident
 FROM behandling b
@@ -170,6 +172,7 @@ WHERE b.referanse = ?"""
        bh.venteaarsak               as bh_venteaarsak,
        bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
        bh.soknadsformat             as bh_soknadsformat,
+       bh.steggruppe                as bh_steggruppe,
        bh.id                        as bh_id,
        v.versjon                    as v_versjon,
        rp.rp_ident                  as rp_ident
@@ -234,17 +237,18 @@ WHERE b.id = ?"""
             sakStatus = it.getEnum("sh_sak_status")
         ),
         typeBehandling = it.getString("b_type").let { TypeBehandling.valueOf(it) },
+        status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
         opprettetTid = it.getLocalDateTime("b_opprettet_tid"),
         mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
         versjon = Versjon(verdi = it.getString("v_versjon"), id = it.getLong("bh_versjon_id")),
-        status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
-        snapShotId = it.getLong("bh_id"),
-        relaterteIdenter = it.getArray("rp_ident", String::class),
+        søknadsformat = it.getEnum("bh_soknadsformat"),
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
+        relaterteIdenter = it.getArray("rp_ident", String::class),
         relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id"),
+        snapShotId = it.getLong("bh_id"),
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
             ?.ifBlank { null },
-        søknadsformat = it.getEnum("bh_soknadsformat"),
-        venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null }
+        venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
+        gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe")
     )
 }
