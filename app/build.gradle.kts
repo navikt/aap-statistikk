@@ -9,7 +9,7 @@ plugins {
 
 val ktorVersion = "3.0.1"
 val mockkVersion = "1.13.13"
-val komponenterVersjon = "1.0.63"
+val komponenterVersjon = "1.0.67"
 val behandlingsflytversjon = "0.0.50"
 
 application {
