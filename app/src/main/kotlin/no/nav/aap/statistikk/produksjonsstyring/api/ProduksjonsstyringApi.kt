@@ -18,11 +18,20 @@ import java.time.temporal.ChronoUnit
 
 data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
 
-data class BehandlingstidPerDagInput(@PathParam("typebehandling") val typeBehandling: TypeBehandling?)
+data class BehandlingstidPerDagInput(
+    @PathParam(
+        "typebehandling. Deprecated, vil bytte om til queryparam.", deprecated = true
+    ) val typeBehandling: TypeBehandling?,
+)
 
 data class BehandlingUtviklingsUtviklingInput(@QueryParam("Hvor mange dager å lage fordeling på.") val antallDager: Int = 7)
 
-data class AlderSisteDager(@PathParam("Antall dager å regne på") val antallDager: Int? = 7)
+data class AlderSisteDager(
+    @PathParam("Antall dager å regne på") val antallDager: Int? = 7,
+    @QueryParam(description = "For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
+)
 
 data class ÅpneBehandlingerInput(
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
@@ -36,8 +45,7 @@ data class FordelingÅpneBehandlinger(val bøtte: Int, val antall: Int) {
     companion object {
         fun fraBøtteFordeling(bøtteFordeling: BøtteFordeling): FordelingÅpneBehandlinger {
             return FordelingÅpneBehandlinger(
-                bøtte = bøtteFordeling.bøtte,
-                antall = bøtteFordeling.antall
+                bøtte = bøtteFordeling.bøtte, antall = bøtteFordeling.antall
             )
         }
     }
@@ -47,8 +55,7 @@ data class FordelingLukkedeBehandlinger(val bøtte: Int, val antall: Int) {
     companion object {
         fun fraBøtteFordeling(bøtteFordeling: BøtteFordeling): FordelingLukkedeBehandlinger {
             return FordelingLukkedeBehandlinger(
-                bøtte = bøtteFordeling.bøtte,
-                antall = bøtteFordeling.antall
+                bøtte = bøtteFordeling.bøtte, antall = bøtteFordeling.antall
             )
         }
     }
@@ -65,10 +72,7 @@ data class FordelingInput(
 }
 
 data class BehandlinEndringerPerDag(
-    val dato: LocalDate,
-    val nye: Int = 0,
-    val avsluttede: Int = 0,
-    val totalt: Int = 0
+    val dato: LocalDate, val nye: Int = 0, val avsluttede: Int = 0, val totalt: Int = 0
 )
 
 enum class Tags(override val description: String) : APITag {
@@ -98,8 +102,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(
-                req.antallDager ?: 7
-            )
+                req.antallDager
+                ?: 7,
+                req.behandlingstyper?.map { it.tilDomene() }
+                    ?: listOf(no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling))
         }
 
         respond(respons)
@@ -132,8 +138,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     }
 
     route("/behandlinger/fordeling-åpne-behandlinger").get<FordelingInput, List<FordelingÅpneBehandlinger>>(
-        modules,
-        info(
+        modules, info(
             description = """
             Returnerer en liste over fordelingen på åpne behandlinger. Bøtte nr 1 teller antall
             behandlinger som er enhet * bøtteStørrelse gammel . Bøtte nr antallBøtter + 1 teller
@@ -144,21 +149,18 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
         respond(transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).alderÅpneBehandlinger(
-                bøttestørrelse = req.bøtteStørrelse ?: 1,
-                enhet = when (req.enhet) {
+                bøttestørrelse = req.bøtteStørrelse ?: 1, enhet = when (req.enhet) {
                     FordelingInput.Tidsenhet.DAG -> ChronoUnit.DAYS
                     FordelingInput.Tidsenhet.UKE -> ChronoUnit.WEEKS
                     FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
-                },
-                antallBøtter = req.antallBøtter ?: 30
+                }, antallBøtter = req.antallBøtter ?: 30
             ).map { FordelingÅpneBehandlinger.fraBøtteFordeling(it) }
         })
     }
 
     route("/behandlinger/fordeling-lukkede-behandlinger").get<FordelingInput, List<FordelingLukkedeBehandlinger>>(
-        modules,
-        info(
+        modules, info(
             description = """
             Returnerer en liste over behandlingstiden på lukkede behandlinger. Bøtte nr 1 teller antall
             behandlinger som er enhet * bøtteStørrelse gammel . Bøtte nr antallBøtter + 1 teller
@@ -169,14 +171,12 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
         respond(transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).alderLukkedeBehandlinger(
-                bøttestørrelse = req.bøtteStørrelse ?: 1,
-                enhet = when (req.enhet) {
+                bøttestørrelse = req.bøtteStørrelse ?: 1, enhet = when (req.enhet) {
                     FordelingInput.Tidsenhet.DAG -> ChronoUnit.DAYS
                     FordelingInput.Tidsenhet.UKE -> ChronoUnit.WEEKS
                     FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
-                },
-                antallBøtter = req.antallBøtter ?: 30
+                }, antallBøtter = req.antallBøtter ?: 30
             ).map { FordelingLukkedeBehandlinger.fraBøtteFordeling(it) }
         })
     }
@@ -191,17 +191,12 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
             val antallAvsluttede = repo.antallAvsluttedeBehandlingerPerDag(antallDager)
             val antallÅpneBehandlinger = repo.antallÅpneBehandlinger()
             BeregnAntallBehandlinger.antallBehandlingerPerDag(
-                antallNye,
-                antallAvsluttede,
-                antallÅpneBehandlinger
+                antallNye, antallAvsluttede, antallÅpneBehandlinger
             )
         }
         respond(antallBehandlinger.map { (k, v) ->
             BehandlinEndringerPerDag(
-                dato = k,
-                nye = v.nye,
-                avsluttede = v.avsluttede,
-                totalt = v.totalt
+                dato = k, nye = v.nye, avsluttede = v.avsluttede, totalt = v.totalt
             )
         })
     }

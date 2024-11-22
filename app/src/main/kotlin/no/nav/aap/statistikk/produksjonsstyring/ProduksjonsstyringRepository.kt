@@ -172,16 +172,27 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun alderPåFerdigeBehandlingerSisteDager(antallDager: Int): Double {
+    fun alderPåFerdigeBehandlingerSisteDager(
+        antallDager: Int,
+        behandlingsTyper: List<TypeBehandling>
+    ): Double {
         val sql = """
             select avg(extract(epoch from bh.oppdatert_tid - bh.mottatt_tid))
             from behandling_historikk bh
             where status = 'AVSLUTTET'
+              and and (b.type = ANY(?::text[]) or ${'$'}1 is null)
               and bh.oppdatert_tid > current_date - interval '$antallDager days';
 
         """.trimIndent()
 
         return connection.queryFirst(sql) {
+            setParams {
+                if (behandlingsTyper.isEmpty()) {
+                    setString(1, null)
+                } else {
+                    setArray(1, behandlingsTyper.map { it.toString() })
+                }
+            }
             setRowMapper {
                 it.getDouble("avg")
             }
