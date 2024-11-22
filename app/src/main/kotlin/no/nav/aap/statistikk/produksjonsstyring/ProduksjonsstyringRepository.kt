@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.produksjonsstyring
 
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.Params
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -26,7 +27,7 @@ data class VenteårsakOgGjennomsnitt(
 
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
-    fun hentBehandlingstidPerDag(typeBehandling: TypeBehandling? = null): List<BehandlingstidPerDag> {
+    fun hentBehandlingstidPerDag(behandlingsTyper: List<TypeBehandling>): List<BehandlingstidPerDag> {
         val sql = """
             select date_trunc('day', tom) dag, avg(EXTRACT(EPOCH FROM (tom - fom))) as snitt
             from (select bh.mottatt_tid   fom,
@@ -36,7 +37,8 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                        behandling_historikk bh
                   where s.id = b.sak_id
                     and b.id = bh.behandling_id
-                    and bh.gjeldende = true ${typeBehandlingClaus(typeBehandling)}
+                    and bh.gjeldende = true 
+                    and (b.type = ANY(?::text[]) or ${'$'}1 is null)
                     and bh.status = 'AVSLUTTET') fomtom
             group by dag
             order by dag
@@ -45,10 +47,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
         return connection.queryList(sql) {
             setParams {
-                var count = 1
-                if (typeBehandling != null) {
-                    setString(count++, typeBehandling.name)
-                }
+                setBehandlingsTyperParam(behandlingsTyper)
             }
             setRowMapper { row ->
                 BehandlingstidPerDag(
@@ -73,12 +72,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
         return connection.queryFirst(sql) {
             setParams {
-                if (behandlingsTyper.isNotEmpty()) {
-                    setArray(1, behandlingsTyper.map { it.toString() })
-                } else {
-                    // string fordi setArray ikke støtter null
-                    setString(1, null)
-                }
+                setBehandlingsTyperParam(behandlingsTyper)
             }
             setRowMapper { row ->
                 AntallÅpneOgGjennomsnitt(
@@ -89,17 +83,22 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlingerPerAvklaringsbehov(): List<BehandlingPerAvklaringsbehov> {
+    fun antallÅpneBehandlingerPerAvklaringsbehov(behandlingsTyper: List<TypeBehandling>): List<BehandlingPerAvklaringsbehov> {
         val sql = """
             select count(*), gjeldende_avklaringsbehov
             from behandling_historikk
+                     join behandling b on b.id = behandling_historikk.behandling_id
             where gjeldende = true
               and status != 'AVSLUTTET'
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
             group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
 
         return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
             setRowMapper { row ->
                 BehandlingPerAvklaringsbehov(
                     antall = row.getInt("count"),
@@ -109,15 +108,21 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallBehandlingerPerSteggruppe(): List<BehandlingPerSteggruppe> {
+    fun antallBehandlingerPerSteggruppe(behandlingsTyper: List<TypeBehandling>): List<BehandlingPerSteggruppe> {
         val sql = """
             select steggruppe, count(*)
             from behandling_historikk
-            where steggruppe is not null and gjeldende = true
+                     join behandling b on b.id = behandling_historikk.behandling_id
+            where steggruppe is not null
+              and gjeldende = true
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
             group by steggruppe;
         """.trimIndent()
 
         return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
             setRowMapper { row ->
                 BehandlingPerSteggruppe(
                     steggruppe = row.getEnum("steggruppe"),
@@ -127,20 +132,24 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallNyeBehandlingerPerDag(antallDager: Int = 7): List<AntallPerDag> {
+    fun antallNyeBehandlingerPerDag(
+        antallDager: Int = 7,
+        behandlingsTyper: List<TypeBehandling>
+    ): List<AntallPerDag> {
         val sql = """
-            select
-                date(b.opprettet_tid) as dag,
-                count(*) antall
-            from
-                behandling b
-            where              
-                b.opprettet_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
+            select date(b.opprettet_tid) as dag,
+                   count(*)                 antall
+            from behandling b
+            where b.opprettet_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
             group by dag
             order by dag
         """.trimIndent()
 
         return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
             setRowMapper {
                 AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
             }
@@ -148,24 +157,28 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     }
 
-    fun antallAvsluttedeBehandlingerPerDag(antallDager: Int = 7): List<AntallPerDag> {
+    fun antallAvsluttedeBehandlingerPerDag(
+        antallDager: Int = 7,
+        behandlingsTyper: List<TypeBehandling>
+    ): List<AntallPerDag> {
         val sql = """
-            select
-                date(bh.oppdatert_tid) as dag,
-                count(*) antall
-            from
-                behandling b,
-                behandling_historikk bh
-            where
-                b.id = bh.behandling_id and
-                bh.gjeldende = true and
-                bh.status = 'AVSLUTTET' and
-                bh.oppdatert_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
+            select date(bh.oppdatert_tid) as dag,
+                   count(*)                  antall
+            from behandling b,
+                 behandling_historikk bh
+            where b.id = bh.behandling_id
+              and bh.gjeldende = true
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+              and bh.status = 'AVSLUTTET'
+              and bh.oppdatert_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
             group by dag
             order by dag
         """.trimIndent()
 
         return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
             setRowMapper {
                 AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
             }
@@ -179,40 +192,36 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         val sql = """
             select avg(extract(epoch from bh.oppdatert_tid - bh.mottatt_tid))
             from behandling_historikk bh
+                     join behandling b on b.id = bh.behandling_id
             where status = 'AVSLUTTET'
-              and and (b.type = ANY(?::text[]) or ${'$'}1 is null)
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
               and bh.oppdatert_tid > current_date - interval '$antallDager days';
-
         """.trimIndent()
-
         return connection.queryFirst(sql) {
             setParams {
-                if (behandlingsTyper.isEmpty()) {
-                    setString(1, null)
-                } else {
-                    setArray(1, behandlingsTyper.map { it.toString() })
-                }
+                setBehandlingsTyperParam(behandlingsTyper)
             }
             setRowMapper {
-                it.getDouble("avg")
+                it.getDoubleOrNull("avg") ?: 0.0
             }
         }
     }
 
-    fun antallÅpneBehandlinger(): Int {
+    fun antallÅpneBehandlinger(behandlingsTyper: List<TypeBehandling>): Int {
         val sql = """            
-            select
-                count(b.id) antall
-            from
-                behandling b,
-                behandling_historikk bh
-            where
-                b.id = bh.behandling_id and
-                bh.gjeldende = true and
-                bh.status != 'AVSLUTTET';
+            select count(b.id) antall
+            from behandling b,
+                 behandling_historikk bh
+            where b.id = bh.behandling_id
+              and bh.gjeldende = true
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+              and bh.status != 'AVSLUTTET';
         """.trimIndent()
 
         return connection.queryFirst(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
             setRowMapper { it.getInt("antall") }
         }
 
@@ -235,7 +244,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                         where s.id = b.sak_id
                           and b.id = bh.behandling_id
                           and bh.gjeldende = true
-                          and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+                          and (b.type = ANY (?::text[]) or $1 is null)
                           and bh.status != 'AVSLUTTET')
             select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
             from dt
@@ -244,11 +253,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
         return connection.queryList(sql) {
             setParams {
-                if (behandlingsTyper.isEmpty()) {
-                    setString(1, null)
-                } else {
-                    setArray(1, behandlingsTyper.map { it.toString() })
-                }
+                setBehandlingsTyperParam(behandlingsTyper)
             }
             setRowMapper {
                 BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
@@ -272,7 +277,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                         where s.id = b.sak_id
                           and b.id = bh.behandling_id
                           and bh.gjeldende = true
-                          and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+                          and (b.type = ANY (?::text[]) or $1 is null)
                           and bh.status = 'AVSLUTTET')
             select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
             from dt
@@ -281,11 +286,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
         return connection.queryList(sql) {
             setParams {
-                if (behandlingsTyper.isEmpty()) {
-                    setString(1, null)
-                } else {
-                    setArray(1, behandlingsTyper.map { it.toString() })
-                }
+                setBehandlingsTyperParam(behandlingsTyper)
             }
             setRowMapper {
                 BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
@@ -293,19 +294,32 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun venteÅrsakOgGjennomsnitt(): List<VenteårsakOgGjennomsnitt> {
+    private fun Params.setBehandlingsTyperParam(behandlingsTyper: List<TypeBehandling>) {
+        if (behandlingsTyper.isEmpty()) {
+            setString(1, null)
+        } else {
+            setArray(1, behandlingsTyper.map { it.toString() })
+        }
+    }
+
+    fun venteÅrsakOgGjennomsnitt(behandlingsTyper: List<TypeBehandling>): List<VenteårsakOgGjennomsnitt> {
         val sql = """
             select venteaarsak,
                    count(*),
                    extract(epoch from
                            avg(now() at time zone 'Europe/Oslo' - behandling_historikk.oppdatert_tid)) as avg
             from behandling_historikk
+                     join behandling b on b.id = behandling_historikk.behandling_id
             where venteaarsak IS NOT NULL
               and gjeldende = true
+              and (b.type = ANY (?::text[]) or $1 is null)
             group by venteaarsak;
         """.trimIndent()
 
         return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
             setRowMapper {
                 VenteårsakOgGjennomsnitt(
                     årsak = it.getString("venteaarsak"),
