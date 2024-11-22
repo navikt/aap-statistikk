@@ -7,5 +7,6 @@ interface SakRepository {
     fun hentSak(saksnummer: String): Sak
     fun hentSakEllernull(saksnummer: String): Sak?
     fun settInnSak(sak: Sak): SakId
+    fun oppdaterSak(sak: Sak)
     fun tellSaker(): Int
 }

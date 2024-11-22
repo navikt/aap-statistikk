@@ -27,7 +27,7 @@ class HendelsesService(
     private val behandlingRepository: IBehandlingRepository,
     private val meterRegistry: MeterRegistry,
     private val sakStatistikkService: SaksStatistikkService,
-    private val clock: Clock = Clock.systemUTC()
+    private val clock: Clock = Clock.systemDefaultZone()
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
         val person = hentEllerSettInnPerson(hendelse.ident)
@@ -109,6 +109,13 @@ class HendelsesService(
                 )
             )
             sak = sakRepository.hentSak(sakId)
+        } else {
+            sakRepository.oppdaterSak(
+                sak.copy(
+                    sakStatus = sakStatus.tilDomene(),
+                    sistOppdatert = LocalDateTime.now(clock)
+                )
+            )
         }
         return sak
     }

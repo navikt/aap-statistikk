@@ -342,12 +342,17 @@ class FakeSakRepository : SakRepository {
 
     override fun hentSakEllernull(saksnummer: String): Sak? {
         return saker.values.firstOrNull { it.saksnummer == saksnummer }
+            ?.also { requireNotNull(it.id) }
     }
 
     override fun settInnSak(sak: Sak): SakId {
         val id = saker.size.toLong()
         saker[id] = sak.copy(id = id)
         return id
+    }
+
+    override fun oppdaterSak(sak: Sak) {
+        saker[sak.id!!] = sak.copy(sistOppdatert = LocalDateTime.now())
     }
 
     override fun tellSaker(): Int {
