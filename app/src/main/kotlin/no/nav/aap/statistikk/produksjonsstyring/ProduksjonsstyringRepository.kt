@@ -221,9 +221,9 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
     fun alderÅpneBehandlinger(
         bøttestørrelse: Int = 1,
         enhet: ChronoUnit = ChronoUnit.DAYS,
-        antallBøtter: Int = 30
+        antallBøtter: Int = 30,
+        behandlingsTyper: List<TypeBehandling> = emptyList()
     ): List<BøtteFordeling> {
-
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
             with dt as (select bh.behandling_id                                                       bid,
@@ -235,7 +235,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                         where s.id = b.sak_id
                           and b.id = bh.behandling_id
                           and bh.gjeldende = true
-                          and b.type = 'Førstegangsbehandling'
+                          and (b.type = ANY (?::text[]) or ${'$'}1 is null)
                           and bh.status != 'AVSLUTTET')
             select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
             from dt
@@ -243,6 +243,13 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         """.trimIndent()
 
         return connection.queryList(sql) {
+            setParams {
+                if (behandlingsTyper.isEmpty()) {
+                    setString(1, null)
+                } else {
+                    setArray(1, behandlingsTyper.map { it.toString() })
+                }
+            }
             setRowMapper {
                 BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
             }
@@ -252,11 +259,12 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
     fun alderLukkedeBehandlinger(
         bøttestørrelse: Int = 1,
         enhet: ChronoUnit = ChronoUnit.DAYS,
-        antallBøtter: Int = 30
+        antallBøtter: Int = 30,
+        behandlingsTyper: List<TypeBehandling> = emptyList()
     ): List<BøtteFordeling> {
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
-            with dt as (select bh.behandling_id                                       bid,
+            with dt as (select bh.behandling_id                                           bid,
                                EXTRACT(EPOCH FROM (bh.oppdatert_tid - bh.mottatt_tid)) as diff
                         from sak s,
                              behandling b,
@@ -264,7 +272,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                         where s.id = b.sak_id
                           and b.id = bh.behandling_id
                           and bh.gjeldende = true
-                          and b.type = 'Førstegangsbehandling'
+                          and (b.type = ANY (?::text[]) or ${'$'}1 is null)
                           and bh.status = 'AVSLUTTET')
             select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
             from dt
@@ -272,6 +280,13 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         """.trimIndent()
 
         return connection.queryList(sql) {
+            setParams {
+                if (behandlingsTyper.isEmpty()) {
+                    setString(1, null)
+                } else {
+                    setArray(1, behandlingsTyper.map { it.toString() })
+                }
+            }
             setRowMapper {
                 BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
             }

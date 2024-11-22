@@ -64,7 +64,10 @@ data class FordelingLukkedeBehandlinger(val bøtte: Int, val antall: Int) {
 data class FordelingInput(
     @QueryParam("Hvor mange bøtter skal åpne behandlinger plasseres i?") val antallBøtter: Int?,
     @QueryParam("Week, month, day, etc.") val enhet: Tidsenhet = Tidsenhet.DAG,
-    @QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?
+    @QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?,
+    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
 ) {
     enum class Tidsenhet {
         DAG, UKE, MÅNED, ÅR,
@@ -103,7 +106,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(
                 req.antallDager
-                ?: 7,
+                    ?: 7,
                 req.behandlingstyper?.map { it.tilDomene() }
                     ?: listOf(no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling))
         }
@@ -154,7 +157,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                     FordelingInput.Tidsenhet.UKE -> ChronoUnit.WEEKS
                     FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
-                }, antallBøtter = req.antallBøtter ?: 30
+                }, antallBøtter = req.antallBøtter ?: 30,
+                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() } ?: listOf()
             ).map { FordelingÅpneBehandlinger.fraBøtteFordeling(it) }
         })
     }
@@ -176,7 +180,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                     FordelingInput.Tidsenhet.UKE -> ChronoUnit.WEEKS
                     FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
-                }, antallBøtter = req.antallBøtter ?: 30
+                }, antallBøtter = req.antallBøtter ?: 30,
+                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() } ?: listOf()
             ).map { FordelingLukkedeBehandlinger.fraBøtteFordeling(it) }
         })
     }
