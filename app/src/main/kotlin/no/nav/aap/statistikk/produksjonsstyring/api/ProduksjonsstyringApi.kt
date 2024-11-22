@@ -24,7 +24,31 @@ data class BehandlingstidPerDagInput(
     ) val typeBehandling: TypeBehandling?,
 )
 
-data class BehandlingUtviklingsUtviklingInput(@QueryParam("Hvor mange dager å lage fordeling på.") val antallDager: Int = 7)
+data class BehandlingerPåVentInput(
+    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
+)
+
+
+data class BehandlingerPerAvklaringsbehovInput(
+    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
+)
+
+data class BehandlingerPerSteggruppeInput(
+    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
+)
+
+data class BehandlingUtviklingsUtviklingInput(
+    @QueryParam("Hvor mange dager å lage fordeling på.") val antallDager: Int = 7,
+    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
+)
 
 data class AlderSisteDager(
     @PathParam("Antall dager å regne på") val antallDager: Int? = 7,
@@ -93,7 +117,11 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(req.typeBehandling?.tilDomene())
+            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(req.typeBehandling?.let {
+                listOf(
+                    it.tilDomene()
+                )
+            } ?: listOf())
         }
 
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
@@ -124,17 +152,23 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(AntallÅpneOgGjennomsnitt(respons.antallÅpne, respons.gjennomsnittsalder))
     }
 
-    route("/behandling-per-avklaringsbehov").get<Unit, List<BehandlingPerAvklaringsbehov>>(modules) { _ ->
+    route("/behandling-per-avklaringsbehov").get<BehandlingerPerAvklaringsbehovInput, List<BehandlingPerAvklaringsbehov>>(
+        modules
+    ) { req ->
         val respons = transactionExecutor.withinTransaction {
-            ProduksjonsstyringRepository(it).antallÅpneBehandlingerPerAvklaringsbehov()
+            ProduksjonsstyringRepository(it).antallÅpneBehandlingerPerAvklaringsbehov(req.behandlingstyper?.map { it.tilDomene() }
+                ?: listOf())
         }
 
         respond(respons)
     }
 
-    route("/behandling-per-steggruppe").get<Unit, List<BehandlingPerSteggruppe>>(modules) { _ ->
-        val respons = transactionExecutor.withinTransaction {
-            ProduksjonsstyringRepository(it).antallBehandlingerPerSteggruppe()
+    route("/behandling-per-steggruppe").get<BehandlingerPerSteggruppeInput, List<BehandlingPerSteggruppe>>(
+        modules
+    ) { req ->
+        val respons = transactionExecutor.withinTransaction { conn ->
+            ProduksjonsstyringRepository(conn).antallBehandlingerPerSteggruppe(req.behandlingstyper?.map { it.tilDomene() }
+                ?: listOf())
         }
 
         respond(respons)
@@ -181,7 +215,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                     FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
                 }, antallBøtter = req.antallBøtter ?: 30,
-                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() } ?: listOf()
+                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() }.orEmpty()
             ).map { FordelingLukkedeBehandlinger.fraBøtteFordeling(it) }
         })
     }
@@ -192,9 +226,11 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val antallDager = req.antallDager
         val antallBehandlinger = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
-            val antallNye = repo.antallNyeBehandlingerPerDag(antallDager)
-            val antallAvsluttede = repo.antallAvsluttedeBehandlingerPerDag(antallDager)
-            val antallÅpneBehandlinger = repo.antallÅpneBehandlinger()
+            val behandlingstyper = req.behandlingstyper?.map { it.tilDomene() }.orEmpty()
+            val antallNye = repo.antallNyeBehandlingerPerDag(antallDager, behandlingstyper)
+            val antallAvsluttede =
+                repo.antallAvsluttedeBehandlingerPerDag(antallDager, behandlingstyper)
+            val antallÅpneBehandlinger = repo.antallÅpneBehandlinger(behandlingstyper)
             BeregnAntallBehandlinger.antallBehandlingerPerDag(
                 antallNye, antallAvsluttede, antallÅpneBehandlinger
             )
@@ -206,12 +242,12 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         })
     }
 
-    route("/behandlinger/på-vent").get<Unit, List<VenteårsakOgGjennomsnitt>>(
+    route("/behandlinger/på-vent").get<BehandlingerPåVentInput, List<VenteårsakOgGjennomsnitt>>(
         TagModule(listOf(Tags.Produksjonsstyring))
-    ) {
+    ) { req ->
         val venteårsakOgGjennomsnitt = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
-            repo.venteÅrsakOgGjennomsnitt()
+            repo.venteÅrsakOgGjennomsnitt(req.behandlingstyper?.map { it.tilDomene() } ?: listOf())
         }
         respond(venteårsakOgGjennomsnitt)
     }
