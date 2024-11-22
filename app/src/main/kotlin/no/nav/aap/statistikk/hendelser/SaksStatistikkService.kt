@@ -8,13 +8,10 @@ import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.Sak
-import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-
-private val logger = LoggerFactory.getLogger("SaksStatistikkService")
 
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,

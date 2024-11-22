@@ -104,8 +104,16 @@ WHERE sak.saksnummer = ?
             }
         }
 
+        oppdaterSak(sak.copy(id = sakId))
+
+        return sakId
+    }
+
+    override fun oppdaterSak(sak: Sak) {
+        val sakId = requireNotNull(sak.id)
+
         dbConnection.execute("UPDATE sak_historikk SET gjeldende = FALSE where sak_id = ?") {
-            setParams { setLong(1, sak.id) }
+            setParams { setLong(1, sakId) }
         }
 
         dbConnection.executeReturnKey("INSERT INTO sak_historikk (gjeldende, oppdatert_tid, sak_id, sak_status) VALUES (?, ?, ?, ?)") {
@@ -113,12 +121,10 @@ WHERE sak.saksnummer = ?
                 var c = 1
                 setBoolean(c++, true)
                 setLocalDateTime(c++, sak.sistOppdatert)
-                setLong(c++, sakId)
+                setLong(c++, sak.id)
                 setString(c++, sak.sakStatus.toString())
             }
         }
-
-        return sakId
 
     }
 
