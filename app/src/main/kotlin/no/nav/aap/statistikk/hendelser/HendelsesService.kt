@@ -46,7 +46,8 @@ class HendelsesService(
             behandlingId,
             hendelse.versjon,
             hendelse.hendelsesTidspunkt,
-            vedtakTidspunkt = vedtakTid
+            vedtakTidspunkt = vedtakTid,
+            erManuell = hendelse.avklaringsbehov.erManuell()
         )
         meterRegistry.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")

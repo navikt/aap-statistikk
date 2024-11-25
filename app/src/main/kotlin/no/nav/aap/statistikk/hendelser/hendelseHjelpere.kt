@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
@@ -32,4 +33,11 @@ fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
         .flatMap { it.endringer }
         .maxByOrNull { it.tidsstempel }
         ?.årsakTilSattPåVent?.toString()
+}
+
+/**
+ * Eneste automatiske avklaringsbehov er 9002, "Bestille brev".
+ */
+fun List<AvklaringsbehovHendelseDto>.erManuell(): Boolean {
+    return this.any { it.definisjon.type != AvklaringsbehovKode.`9002` }
 }

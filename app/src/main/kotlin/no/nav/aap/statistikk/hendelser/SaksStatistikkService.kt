@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
+import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.Sak
 import java.time.Clock
@@ -26,6 +27,7 @@ class SaksStatistikkService(
         versjon: String,
         hendelsesTidspunkt: LocalDateTime,
         vedtakTidspunkt: LocalDateTime?,
+        erManuell: Boolean,
     ) {
         val behandling = behandlingRepository.hent(behandlingId)
         val saksbehandler =
@@ -56,7 +58,8 @@ class SaksStatistikkService(
             opprettetAv = KELVIN,
             saksbehandler = saksbehandler,
             vedtakTid = vedtakTidspunkt?.truncatedTo(ChronoUnit.SECONDS),
-            søknadsFormat = behandling.søknadsformat
+            søknadsFormat = behandling.søknadsformat,
+            behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
         )
         bigQueryRepository.lagre(bqSak)
     }
