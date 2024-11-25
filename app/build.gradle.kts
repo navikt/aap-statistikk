@@ -50,7 +50,7 @@ dependencies {
 
     implementation("no.nav:ktor-openapi-generator:1.0.46")
     implementation("no.nav.aap.behandlingsflyt:kontrakt:$behandlingsflytversjon")
-    implementation("com.google.cloud:google-cloud-bigquery:2.43.3")
+    implementation("com.google.cloud:google-cloud-bigquery:2.44.0")
 
 
     testImplementation(kotlin("test"))
