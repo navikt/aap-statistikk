@@ -45,7 +45,8 @@ class SakTabellTest {
                 endretTid = endretTid,
                 opprettetAv = KELVIN,
                 saksbehandler = "1234",
-                søknadsFormat = SøknadsFormat.DIGITAL
+                søknadsFormat = SøknadsFormat.DIGITAL,
+                behandlingMetode = BehandlingMetode.MANUELL
             )
         )
 
@@ -67,5 +68,6 @@ class SakTabellTest {
         assertThat(uthentetInnslag.saksbehandler).isEqualTo("1234")
         assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(100, ChronoUnit.MILLIS))
         assertThat(uthentetInnslag.søknadsFormat).isEqualTo(SøknadsFormat.DIGITAL)
+        assertThat(uthentetInnslag.behandlingMetode).isEqualTo(BehandlingMetode.MANUELL)
     }
 }

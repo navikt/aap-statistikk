@@ -178,6 +178,7 @@ class SakTabell : BQTable<BQBehandling> {
                 saksbehandler,
                 vedtakTid,
                 søknadsFormat,
+                behandlingMetode,
 
                 // Ikke implementert ennå
                 behandlingStatus,
@@ -187,7 +188,6 @@ class SakTabell : BQTable<BQBehandling> {
                 sakUtland,
                 behandlingResultat,
                 resultatBegrunnelse,
-                behandlingMetode,
                 ansvarligBeslutter,
                 ansvarligEnhet,
                 tilbakekrevbeløp,
@@ -222,6 +222,8 @@ class SakTabell : BQTable<BQBehandling> {
         val vedtakTid =
             if (!fieldValueList.get("vedtakTid").isNull) fieldValueList.get("vedtakTid").stringValue else null
 
+        val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
+
         return BQBehandling(
             saksnummer = saksnummer,
             behandlingUUID = behandlingUuid,
@@ -251,7 +253,8 @@ class SakTabell : BQTable<BQBehandling> {
             opprettetAv = opprettetAv,
             saksbehandler = saksbehandler,
             vedtakTid = vedtakTid?.let { LocalDateTime.parse(it) },
-            søknadsFormat = SøknadsFormat.valueOf(søknadsFormat)
+            søknadsFormat = SøknadsFormat.valueOf(søknadsFormat),
+            behandlingMetode = if (behandlingMetode == "MANUELL") BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
         )
     }
 
@@ -277,7 +280,8 @@ class SakTabell : BQTable<BQBehandling> {
                 "opprettetAv" to value.opprettetAv,
                 "saksbehandler" to value.saksbehandler,
                 "vedtakTid" to value.vedtakTid?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "soknadsformat" to value.søknadsFormat.toString()
+                "soknadsformat" to value.søknadsFormat.toString(),
+                "behandlingMetode" to value.behandlingMetode.toString(),
             )
         )
     }

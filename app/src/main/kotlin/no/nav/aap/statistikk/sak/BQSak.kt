@@ -22,6 +22,7 @@ data class BQBehandling(
     val vedtakTid: LocalDateTime? = null,
     val søknadsFormat: SøknadsFormat,
     val saksbehandler: String?,
+    val behandlingMetode: BehandlingMetode,
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)
@@ -35,6 +36,10 @@ data class BQBehandling(
         )
         require(vedtakTid == null || vedtakTid.truncatedTo(SECONDS).isEqual(vedtakTid))
     }
+}
+
+enum class BehandlingMetode {
+    MANUELL, AUTOMATISK
 }
 
 /**
