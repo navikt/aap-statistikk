@@ -51,6 +51,7 @@ class SaksStatistikkService(
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
+            relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
             ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt.truncatedTo(
                 ChronoUnit.SECONDS // SJEKK OPP DENNE, er iverksettes før avsluttet
             ) else null,

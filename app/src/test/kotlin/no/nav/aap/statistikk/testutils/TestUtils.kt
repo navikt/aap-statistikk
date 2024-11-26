@@ -380,30 +380,29 @@ class FakePersonRepository : IPersonRepository {
 }
 
 class FakeBehandlingRepository : IBehandlingRepository {
-    private val behandlinger = mutableListOf<Behandling>()
+    private val behandlinger = mutableMapOf<Long, Behandling>()
+    private var nextId = 0L;
     override fun opprettBehandling(behandling: Behandling): Long {
-        behandlinger.add(behandling)
-        return (behandlinger.size - 1).toLong()
+        val id = nextId
+        behandlinger[id] = behandling.copy(id = id)
+        nextId++
+        return id
     }
 
     override fun oppdaterBehandling(behandling: Behandling) {
-        behandlinger[behandling.id!!.toInt()] = behandling
+        behandlinger[behandling.id!!] = behandling
     }
 
     override fun hent(referanse: UUID): Behandling? {
-        val behandling = behandlinger.firstOrNull { it.referanse == referanse }
-        if (behandling != null) {
-            return behandling.copy(id = behandlinger.indexOf(behandling).toLong())
-        }
-        return null
+        return behandlinger.asIterable().firstOrNull { it.value.referanse == referanse }?.value
     }
 
     override fun hent(id: Long): Behandling {
-        return behandlinger[id.toInt()]
+        return behandlinger[id]!!
     }
 
     override fun hentEllerNull(id: Long): Behandling? {
-        return behandlinger.getOrNull(id.toInt())
+        return behandlinger[id]
     }
 
     override fun tellFullførteBehandlinger(): Long {
