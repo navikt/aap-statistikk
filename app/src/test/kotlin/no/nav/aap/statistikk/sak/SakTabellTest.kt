@@ -48,7 +48,8 @@ class SakTabellTest {
                 søknadsFormat = SøknadsFormat.DIGITAL,
                 behandlingMetode = BehandlingMetode.MANUELL,
                 relatertBehandlingUUID = "123",
-                relatertFagsystem = "Kelvin"
+                relatertFagsystem = "Kelvin",
+                fagsystemNavn = "Kelvin"
             )
         )
 
@@ -73,5 +74,6 @@ class SakTabellTest {
         assertThat(uthentetInnslag.behandlingMetode).isEqualTo(BehandlingMetode.MANUELL)
         assertThat(uthentetInnslag.relatertBehandlingUUID).isEqualTo("123")
         assertThat(uthentetInnslag.relatertFagsystem).isEqualTo("Kelvin")
+        assertThat(uthentetInnslag.fagsystemNavn).isEqualTo("Kelvin")
     }
 }
