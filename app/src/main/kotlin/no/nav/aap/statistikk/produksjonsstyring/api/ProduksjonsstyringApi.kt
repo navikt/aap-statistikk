@@ -19,9 +19,9 @@ import java.time.temporal.ChronoUnit
 data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingstidPerDagInput(
-    @PathParam(
-        "typebehandling. Deprecated, vil bytte om til queryparam.", deprecated = true
-    ) val typeBehandling: TypeBehandling?,
+    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    )
 )
 
 data class BehandlingerPåVentInput(
@@ -117,11 +117,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(req.typeBehandling?.let {
-                listOf(
-                    it.tilDomene()
-                )
-            } ?: listOf())
+            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(
+                req.behandlingstyper?.map { it.tilDomene() } ?: listOf())
         }
 
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })

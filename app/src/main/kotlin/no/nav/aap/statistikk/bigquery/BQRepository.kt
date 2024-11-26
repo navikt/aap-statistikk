@@ -27,21 +27,20 @@ class BQRepository(
 
     override fun lagre(payload: Vilkårsresultat) {
         logger.info("Lagrer vilkårsresultat.")
-        val flatetListe = payload.vilkår
-            .flatMap { v ->
-                v.perioder.map {
-                    BQVilkårsResultatPeriode(
-                        saksnummer = payload.saksnummer,
-                        behandlingsReferanse = payload.behandlingsReferanse,
-                        behandlingsType = payload.behandlingsType,
-                        vilkårtype = v.vilkårType,
-                        fraDato = it.fraDato,
-                        tilDato = it.tilDato,
-                        utfall = it.utfall,
-                        manuellVurdering = it.manuellVurdering
-                    )
-                }
+        val flatetListe = payload.vilkår.flatMap { v ->
+            v.perioder.map {
+                BQVilkårsResultatPeriode(
+                    saksnummer = payload.saksnummer,
+                    behandlingsReferanse = payload.behandlingsReferanse,
+                    behandlingsType = payload.behandlingsType,
+                    vilkårtype = v.vilkårType,
+                    fraDato = it.fraDato,
+                    tilDato = it.tilDato,
+                    utfall = it.utfall,
+                    manuellVurdering = it.manuellVurdering
+                )
             }
+        }
         client.insertMany(vilkårsVurderingTabell, flatetListe)
     }
 
@@ -63,8 +62,7 @@ class BQRepository(
     override fun lagre(payload: BeregningsGrunnlagBQ) {
         logger.info("Lagrer beregningsgrunnlag.")
         client.insert(
-            beregningsGrunnlagTabell,
-            payload
+            beregningsGrunnlagTabell, payload
         )
     }
 
@@ -79,6 +77,7 @@ class BQRepository(
     }
 
     override fun toString(): String {
-        return "BQRepository(client=$client, vilkårsVurderingTabell=$vilkårsVurderingTabell)"
+        return "BQRepository(behandlingTabell=$behandlingTabell, client=$client, vilkårsVurderingTabell=$vilkårsVurderingTabell, tilkjentYtelseTabell=$tilkjentYtelseTabell, beregningsGrunnlagTabell=$beregningsGrunnlagTabell, sakTabell=$sakTabell)"
     }
+
 }
