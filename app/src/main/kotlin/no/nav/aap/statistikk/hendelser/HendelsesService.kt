@@ -78,18 +78,20 @@ class HendelsesService(
         val relatertBehadling =
             relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
 
-        val behandlingId =
+        val behandlingId = if (eksisterendeBehandlingId != null) {
+            behandlingRepository.oppdaterBehandling(
+                behandling.copy(
+                    id = eksisterendeBehandlingId,
+                    relatertBehandlingId = relatertBehadling?.id
+                )
+            )
             eksisterendeBehandlingId
-                ?.also {
-                    behandlingRepository.oppdaterBehandling(
-                        behandling.copy(
-                            id = eksisterendeBehandlingId,
-                            relatertBehandlingId = relatertBehadling?.id
-                        )
-                    )
-                }
-                ?: (behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
-                    .also { meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()) })
+        } else {
+            val id = behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
+            logger.info("Opprettet behandling")
+            meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()).increment()
+            id
+        }
         return behandlingId
     }
 

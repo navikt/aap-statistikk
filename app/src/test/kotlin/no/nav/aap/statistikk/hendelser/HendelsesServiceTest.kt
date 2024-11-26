@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -103,7 +104,71 @@ class HendelsesServiceTest {
         )
 
         assertThat(behandlingRepository.hent(relatertUUID)).isNotNull()
+        assertThat(bigQueryRepository.saker).hasSize(1)
+        assertThat(bigQueryRepository.saker.first().saksnummer).isEqualTo("1234")
+        assertThat(bigQueryRepository.saker.first().relatertFagsystem).isEqualTo("Kelvin")
+        assertThat(bigQueryRepository.saker.first().relatertBehandlingUUID).isEqualTo(relatertUUID.toString())
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
+        assertThat(
+            simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
+        ).isEqualTo(0.0) // Fordi behandlingen allerede eksisterer
+    }
+
+    @Test
+    fun `teller opprettet behandling`() {
+        val bigQueryRepository = FakeBQRepository()
+        val currentInstant = Instant.now()
+        val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
+        val behandlingRepository = FakeBehandlingRepository()
+        val simpleMeterRegistry = SimpleMeterRegistry()
+        val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
+        val sakRepository = FakeSakRepository()
+        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+
+        val hendelsesService = HendelsesService(
+            sakRepository = sakRepository,
+            personRepository = FakePersonRepository(),
+            behandlingRepository = behandlingRepository,
+            avsluttetBehandlingService = AvsluttetBehandlingService(
+                tilkjentYtelseRepositoryFactory = FakeTilkjentYtelseRepository(),
+                beregningsgrunnlagRepositoryFactory = FakeBeregningsgrunnlagRepository(),
+                vilkårsResultatRepositoryFactory = FakeVilkårsResultatRepository(),
+                bqRepository = bigQueryRepository,
+                behandlingRepository = behandlingRepository,
+                skjermingService = skjermingService,
+                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
+            ),
+            clock = clock,
+            meterRegistry = simpleMeterRegistry,
+            sakStatistikkService = SaksStatistikkService(
+                behandlingRepository = behandlingRepository,
+                bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
+                bigQueryRepository = bigQueryRepository,
+                skjermingService = skjermingService,
+                clock = clock
+            )
+        )
+
+        hendelsesService.prosesserNyHendelse(
+            StoppetBehandling(
+                saksnummer = "1234",
+                behandlingReferanse = UUID.randomUUID(),
+                behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
+                behandlingStatus = Status.OPPRETTET,
+                behandlingType = Førstegangsbehandling,
+                ident = "234",
+                versjon = "dsad",
+                avklaringsbehov = listOf(),
+                mottattTid = LocalDateTime.now().minusDays(1),
+                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
+                hendelsesTidspunkt = LocalDateTime.now()
+            )
+        )
+
+        assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
+        assertThat(
+            simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
+        ).isEqualTo(1.0) // Fordi behandlingen allerede eksisterer
     }
 
 
