@@ -25,6 +25,11 @@ class SakTabell : BQTable<BQBehandling> {
             val relatertBehandlingUUid =
                 Field.newBuilder("relatertBehandlingUUid", StandardSQLTypeName.STRING)
                     .setMode(Field.Mode.NULLABLE).build()
+            val relatertFagsystem =
+                Field.newBuilder("relatertFagsystem", StandardSQLTypeName.STRING)
+                    .setMode(Field.Mode.NULLABLE)
+                    .setDescription("Hvis feltet relatertBehandlingId er populert, er denne populert med 'KELVIN'.")
+                    .build()
             val behandlingType = Field.of("behandlingType", StandardSQLTypeName.STRING)
             val ferdigbehandletTid =
                 Field.newBuilder("ferdigbehandletTid", StandardSQLTypeName.DATETIME)
@@ -165,6 +170,7 @@ class SakTabell : BQTable<BQBehandling> {
                 saksnummmer,
                 behandlingUuid,
                 relatertBehandlingUUid,
+                relatertFagsystem,
                 behandlingType,
                 ferdigbehandletTid,
                 endretTid,
@@ -205,6 +211,7 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
         val relatertBehandlingUUid =
             if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
+        val relatertFagsystem = fieldValueList.get("relatertFagsystem").stringValue
         val ferdigbehandletTid =
             if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
         val tekniskTid = fieldValueList.get("tekniskTid").timestampValue
@@ -228,6 +235,7 @@ class SakTabell : BQTable<BQBehandling> {
             saksnummer = saksnummer,
             behandlingUUID = behandlingUuid,
             relatertBehandlingUUID = relatertBehandlingUUid,
+            relatertFagsystem = relatertFagsystem,
             tekniskTid = LocalDateTime.ofInstant(
                 Instant.ofEpochSecond(
                     tekniskTid / (1000 * 1000),
@@ -265,6 +273,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
                 "relatertBehandlingUUid" to value.relatertBehandlingUUID,
+                "relatertFagsystem" to value.relatertFagsystem,
                 "behandlingType" to value.behandlingType,
                 "aktorId" to value.aktorId,
                 "tekniskTid" to value.tekniskTid.toInstant(ZoneOffset.UTC).toEpochMilli() / 1000.0,
