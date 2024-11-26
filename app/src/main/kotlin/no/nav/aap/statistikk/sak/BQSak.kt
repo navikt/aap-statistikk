@@ -8,6 +8,7 @@ data class BQBehandling(
     val sekvensNummer: Long,
     val behandlingUUID: String,
     val relatertBehandlingUUID: String? = null,
+    val relatertFagsystem: String? = null,
     val ferdigbehandletTid: LocalDateTime? = null,
     val behandlingType: String,
     val aktorId: String,
