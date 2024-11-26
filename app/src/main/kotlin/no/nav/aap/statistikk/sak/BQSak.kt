@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
 data class BQBehandling(
+    val fagsystemNavn: String = "Kelvin",
     val sekvensNummer: Long,
     val behandlingUUID: String,
     val relatertBehandlingUUID: String? = null,

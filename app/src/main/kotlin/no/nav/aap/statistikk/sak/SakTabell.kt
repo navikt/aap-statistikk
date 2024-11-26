@@ -20,6 +20,7 @@ class SakTabell : BQTable<BQBehandling> {
     override val version: Int = 0
     override val schema: Schema
         get() {
+            val fagsystemNavn = Field.of("fagsystemNavn", StandardSQLTypeName.STRING)
             val saksnummmer = Field.of("saksnummer", StandardSQLTypeName.STRING)
             val behandlingUuid = Field.of("behandlingUuid", StandardSQLTypeName.STRING)
             val relatertBehandlingUUid =
@@ -166,6 +167,7 @@ class SakTabell : BQTable<BQBehandling> {
 
 
             return Schema.of(
+                fagsystemNavn,
                 sekvensNummer,
                 saksnummmer,
                 behandlingUuid,
@@ -207,11 +209,13 @@ class SakTabell : BQTable<BQBehandling> {
         }
 
     override fun parseRow(fieldValueList: FieldValueList): BQBehandling {
+        val fagsystemNavn = fieldValueList.get("fagsystemNavn").stringValue
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
         val relatertBehandlingUUid =
             if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
-        val relatertFagsystem = fieldValueList.get("relatertFagsystem").stringValue
+        val relatertFagsystem =
+            if (!fieldValueList.get("relatertFagsystem").isNull) fieldValueList.get("relatertFagsystem").stringValue else null
         val ferdigbehandletTid =
             if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
         val tekniskTid = fieldValueList.get("tekniskTid").timestampValue
@@ -232,6 +236,7 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
 
         return BQBehandling(
+            fagsystemNavn = fagsystemNavn,
             saksnummer = saksnummer,
             behandlingUUID = behandlingUuid,
             relatertBehandlingUUID = relatertBehandlingUUid,
@@ -269,6 +274,7 @@ class SakTabell : BQTable<BQBehandling> {
     override fun toRow(value: BQBehandling): InsertAllRequest.RowToInsert {
         return InsertAllRequest.RowToInsert.of(
             mapOf(
+                "fagsystemNavn" to value.fagsystemNavn,
                 "sekvensnummer" to value.sekvensNummer,
                 "saksnummer" to value.saksnummer,
                 "behandlingUuid" to value.behandlingUUID,
