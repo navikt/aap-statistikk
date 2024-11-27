@@ -42,7 +42,7 @@ class IntegrationTest {
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = "4LFK2S0"
         val hendelseFørCopy = behandlingHendelse(saksnummer, behandlingReferanse)
-        val avsluttetBehandling = avsluttetBehandlingDTO(behandlingReferanse, saksnummer)
+        val avsluttetBehandling = avsluttetBehandlingDTO()
 
         val hendelse = gjørHendelseAvsluttet(hendelseFørCopy)
 
