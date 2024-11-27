@@ -1,12 +1,13 @@
 package no.nav.aap.statistikk.vilkårsresultat
 
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import java.time.LocalDate
 import java.util.*
 
 data class Vilkårsresultat(
     val saksnummer: String,
     val behandlingsReferanse: UUID,
-    val behandlingsType: String,
+    val behandlingsType: TypeBehandling,
     val vilkår: List<Vilkår>
 )
 

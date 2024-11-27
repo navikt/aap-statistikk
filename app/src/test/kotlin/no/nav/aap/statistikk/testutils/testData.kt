@@ -37,7 +37,7 @@ fun avsluttetBehandlingDTO(referanse: UUID, saksnummer: String): AvsluttetBehand
             )
         ),
         vilkårsResultat = VilkårsResultatDTO(
-            typeBehandling = "førstegangsbehandling",
+            typeBehandling = TypeBehandling.Førstegangsbehandling,
             vilkår = listOf(
                 VilkårDTO(
                     vilkårType = Vilkårtype.ALDERSVILKÅRET, perioder = listOf(

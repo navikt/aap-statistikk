@@ -32,7 +32,7 @@ class BQRepository(
                 BQVilkårsResultatPeriode(
                     saksnummer = payload.saksnummer,
                     behandlingsReferanse = payload.behandlingsReferanse,
-                    behandlingsType = payload.behandlingsType,
+                    behandlingsType = payload.behandlingsType.toString(),
                     vilkårtype = v.vilkårType,
                     fraDato = it.fraDato,
                     tilDato = it.tilDato,
