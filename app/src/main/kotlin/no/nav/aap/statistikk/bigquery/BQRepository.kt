@@ -36,7 +36,7 @@ class BQRepository(
                     vilkårtype = v.vilkårType,
                     fraDato = it.fraDato,
                     tilDato = it.tilDato,
-                    utfall = it.utfall,
+                    utfall = it.utfall.toString(),
                     manuellVurdering = it.manuellVurdering
                 )
             }

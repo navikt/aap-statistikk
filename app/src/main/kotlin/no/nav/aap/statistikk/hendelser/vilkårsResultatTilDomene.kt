@@ -1,13 +1,16 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Utfall
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsPeriodeDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsResultatDTO
 import no.nav.aap.statistikk.vilkårsresultat.*
+import no.nav.aap.statistikk.vilkårsresultat.Utfall.*
 import java.util.*
 
 fun VilkårsResultatDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
-    return Vilkårsresultat(saksnummer = saksnummer,
+    return Vilkårsresultat(
+        saksnummer = saksnummer,
         behandlingsType = this.typeBehandling.tilDomene(),
         behandlingsReferanse = behandlingsReferanse,
         vilkår = this.vilkår.map { it.tilDomene() })
@@ -23,11 +26,20 @@ private fun VilkårsPeriodeDTO.tilDomene(): VilkårsPeriode {
     return VilkårsPeriode(
         fraDato = this.fraDato,
         tilDato = this.tilDato,
-        utfall = this.utfall.toString(),
+        utfall = this.utfall.tilDomene(),
         manuellVurdering = this.manuellVurdering,
         innvilgelsesårsak = this.innvilgelsesårsak,
         avslagsårsak = this.avslagsårsak
     )
+}
+
+private fun Utfall.tilDomene(): no.nav.aap.statistikk.vilkårsresultat.Utfall {
+    return when (this) {
+        Utfall.IKKE_VURDERT -> IKKE_VURDERT
+        Utfall.IKKE_RELEVANT -> IKKE_RELEVANT
+        Utfall.OPPFYLT -> OPPFYLT
+        Utfall.IKKE_OPPFYLT -> IKKE_OPPFYLT
+    }
 }
 
 

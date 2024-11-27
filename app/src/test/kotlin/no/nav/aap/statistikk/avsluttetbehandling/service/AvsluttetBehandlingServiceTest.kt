@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Utfall
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -76,7 +75,7 @@ class AvsluttetBehandlingServiceTest {
                                 fraDato = LocalDate.now().minusYears(2),
                                 tilDato = LocalDate.now().plusDays(3),
                                 manuellVurdering = false,
-                                utfall = "OPPFYLT"
+                                utfall = no.nav.aap.statistikk.vilkårsresultat.Utfall.OPPFYLT
                             )
                         )
                     )
@@ -187,7 +186,7 @@ class AvsluttetBehandlingServiceTest {
                             VilkårsPeriode(
                                 fraDato = LocalDate.now().minusYears(2),
                                 tilDato = LocalDate.now(),
-                                utfall = Utfall.OPPFYLT.name,
+                                utfall = Utfall.OPPFYLT,
                                 manuellVurdering = true
                             )
                         )
