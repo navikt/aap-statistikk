@@ -113,7 +113,7 @@ val modules = TagModule(listOf(Tags.Produksjonsstyring))
 fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     transactionExecutor: TransactionExecutor
 ) {
-    route("/behandlingstid/").get<BehandlingstidPerDagInput, List<BehandlingstidPerDagDTO>>(
+    route("/behandlingstid").get<BehandlingstidPerDagInput, List<BehandlingstidPerDagDTO>>(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
