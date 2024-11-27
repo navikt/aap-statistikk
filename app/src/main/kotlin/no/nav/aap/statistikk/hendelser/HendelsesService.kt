@@ -36,7 +36,12 @@ class HendelsesService(
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
 
         if (hendelse.behandlingStatus == Status.AVSLUTTET) {
-            avsluttetBehandlingService.lagre(hendelse.avsluttetBehandling!!.tilDomene())
+            avsluttetBehandlingService.lagre(
+                hendelse.avsluttetBehandling!!.tilDomene(
+                    hendelse.saksnummer,
+                    hendelse.behandlingReferanse
+                )
+            )
         }
 
         val vedtakTid = hendelse.avklaringsbehov.utledVedtakTid()
