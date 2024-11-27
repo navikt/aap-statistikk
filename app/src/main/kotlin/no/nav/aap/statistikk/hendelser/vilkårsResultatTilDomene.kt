@@ -8,7 +8,7 @@ import java.util.*
 
 fun VilkårsResultatDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
     return Vilkårsresultat(saksnummer = saksnummer,
-        behandlingsType = this.typeBehandling,
+        behandlingsType = this.typeBehandling.tilDomene(),
         behandlingsReferanse = behandlingsReferanse,
         vilkår = this.vilkår.map { it.tilDomene() })
 }

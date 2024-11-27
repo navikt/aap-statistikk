@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
@@ -66,7 +67,7 @@ class AvsluttetBehandlingServiceTest {
             ),
             vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
-                behandlingsType = "Førstegangsbehandling",
+                behandlingsType = TypeBehandling.Førstegangsbehandling,
                 saksnummer = saksnummer,
                 vilkår = listOf(
                     Vilkår(
@@ -177,7 +178,7 @@ class AvsluttetBehandlingServiceTest {
             ),
             vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
-                behandlingsType = "Førstegangsbehandling",
+                behandlingsType = TypeBehandling.Førstegangsbehandling,
                 saksnummer = saksnummer,
                 vilkår = listOf(
                     Vilkår(

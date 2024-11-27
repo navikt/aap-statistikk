@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.vilkårsresultat.repository
 
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.vilkårsresultat.Vilkår
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
@@ -19,7 +20,7 @@ data class VilkårsResultatEntity(
         return Vilkårsresultat(
             saksnummer,
             behandlingsReferanse,
-            typeBehandling,
+            TypeBehandling.valueOf(typeBehandling),
             vilkår.map { it: VilkårEntity -> it.tilVilkår() })
     }
 
