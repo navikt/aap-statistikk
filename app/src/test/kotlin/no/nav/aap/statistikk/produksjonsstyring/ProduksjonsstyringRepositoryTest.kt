@@ -128,10 +128,7 @@ class ProduksjonsstyringRepositoryTest {
 
             if (!åpen) {
                 val avsluttetBehandlingHendelse = hendelse.copy(
-                    avsluttetBehandling = avsluttetBehandlingDTO(
-                        referanse = hendelse.behandlingReferanse,
-                        saksnummer = hendelse.saksnummer
-                    ),
+                    avsluttetBehandling = avsluttetBehandlingDTO(),
                     behandlingStatus = Status.AVSLUTTET
                 )
                 hendelsesService.prosesserNyHendelse(avsluttetBehandlingHendelse)

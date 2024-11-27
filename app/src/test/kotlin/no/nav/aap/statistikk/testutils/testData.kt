@@ -16,10 +16,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 
-fun avsluttetBehandlingDTO(referanse: UUID, saksnummer: String): AvsluttetBehandlingDTO {
+fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
     return AvsluttetBehandlingDTO(
-        behandlingsReferanse = referanse,
-        saksnummer = saksnummer,
         tilkjentYtelse = TilkjentYtelseDTO(
             perioder = listOf(
                 TilkjentYtelsePeriodeDTO(
