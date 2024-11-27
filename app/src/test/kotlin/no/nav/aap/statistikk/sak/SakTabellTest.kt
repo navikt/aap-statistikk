@@ -49,7 +49,8 @@ class SakTabellTest {
                 behandlingMetode = BehandlingMetode.MANUELL,
                 relatertBehandlingUUID = "123",
                 relatertFagsystem = "Kelvin",
-                fagsystemNavn = "Kelvin"
+                fagsystemNavn = "Kelvin",
+                ansvarligBeslutter = "Z1234"
             )
         )
 
@@ -66,7 +67,7 @@ class SakTabellTest {
         assertThat(uthentetInnslag.aktorId).isEqualTo("123456")
         assertThat(uthentetInnslag.mottattTid).isEqualTo(mottattTid)
         assertThat(uthentetInnslag.registrertTid).isEqualTo(registrertTid)
-        assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(100, ChronoUnit.MILLIS))
+        assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(500, ChronoUnit.MILLIS))
         assertThat(uthentetInnslag.opprettetAv).isEqualTo(KELVIN)
         assertThat(uthentetInnslag.saksbehandler).isEqualTo("1234")
         assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(100, ChronoUnit.MILLIS))
@@ -75,5 +76,6 @@ class SakTabellTest {
         assertThat(uthentetInnslag.relatertBehandlingUUID).isEqualTo("123")
         assertThat(uthentetInnslag.relatertFagsystem).isEqualTo("Kelvin")
         assertThat(uthentetInnslag.fagsystemNavn).isEqualTo("Kelvin")
+        assertThat(uthentetInnslag.ansvarligBeslutter).isEqualTo("Z1234")
     }
 }

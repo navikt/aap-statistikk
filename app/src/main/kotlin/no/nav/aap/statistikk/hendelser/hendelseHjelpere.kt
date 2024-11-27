@@ -5,6 +5,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import java.time.LocalDateTime
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
+
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     return this
@@ -33,6 +35,20 @@ fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
         .flatMap { it.endringer }
         .maxByOrNull { it.tidsstempel }
         ?.årsakTilSattPåVent?.toString()
+}
+
+/**
+ * Ansvarlig beslutter er saksbehandleren som avsluttet Avklaringsbehov 5099, som
+ * er "Fatte vedtak"
+ */
+fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
+    return this
+        .asSequence()
+        .filter { it.definisjon.type == AvklaringsbehovKode.`5099` }
+        .flatMap { it.endringer }
+        .filter { it.status == EndringStatus.AVSLUTTET }
+        .map { it.endretAv }
+        .firstOrNull()
 }
 
 /**

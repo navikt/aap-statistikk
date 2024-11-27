@@ -40,6 +40,7 @@ class HendelsesService(
         }
 
         val vedtakTid = hendelse.avklaringsbehov.utledVedtakTid()
+        val ansvarligBeslutter = hendelse.avklaringsbehov.utledAnsvarligBeslutter()
 
         sakStatistikkService.lagreSakInfoTilBigquery(
             sak,
@@ -47,7 +48,8 @@ class HendelsesService(
             hendelse.versjon,
             hendelse.hendelsesTidspunkt,
             vedtakTidspunkt = vedtakTid,
-            erManuell = hendelse.avklaringsbehov.erManuell()
+            erManuell = hendelse.avklaringsbehov.erManuell(),
+            ansvarligBeslutter = ansvarligBeslutter
         )
         meterRegistry.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
@@ -87,7 +89,8 @@ class HendelsesService(
             )
             eksisterendeBehandlingId
         } else {
-            val id = behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
+            val id =
+                behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
             logger.info("Opprettet behandling")
             meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()).increment()
             id

@@ -21,6 +21,7 @@ data class BQBehandling(
     val avsender: String,
     val mottattTid: LocalDateTime,
     val opprettetAv: String,
+    val ansvarligBeslutter: String?,
     val vedtakTid: LocalDateTime? = null,
     val søknadsFormat: SøknadsFormat,
     val saksbehandler: String?,
