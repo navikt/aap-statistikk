@@ -75,7 +75,6 @@ fun avsluttetBehandlingDTO(referanse: UUID, saksnummer: String): AvsluttetBehand
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
             ),
         ),
-        hendelsesTidspunkt = LocalDateTime.now()
     )
 }
 
