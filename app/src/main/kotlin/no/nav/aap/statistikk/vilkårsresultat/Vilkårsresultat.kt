@@ -12,12 +12,16 @@ data class Vilkårsresultat(
 )
 
 
-data class Vilkår(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriode>)
+data class Vilkår(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriode>) {
+    fun harPerioderSomErOppfylt(): Boolean {
+        return perioder.any { it.utfall == Utfall.OPPFYLT }
+    }
+}
 
 data class VilkårsPeriode(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val utfall: String,
+    val utfall: Utfall,
     val manuellVurdering: Boolean,
     // Er disse interessante? Er de strenger?
     val innvilgelsesårsak: String? = null,
@@ -30,6 +34,10 @@ enum class Vilkårtype {
     BISTANDSVILKÅRET, MEDLEMSKAP,
     GRUNNLAGET,
     SYKEPENGEERSTATNING
+}
+
+enum class Utfall {
+    IKKE_VURDERT, IKKE_RELEVANT, OPPFYLT, IKKE_OPPFYLT
 }
 
 // endringslogikk

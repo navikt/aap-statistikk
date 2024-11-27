@@ -32,7 +32,7 @@ class VilkårsresultatRepositoryTest {
                             id = null,
                             LocalDate.now().minusDays(5),
                             LocalDate.now(),
-                            "utfall",
+                            Utfall.IKKE_OPPFYLT.toString(),
                             false,
                             null,
                             null
@@ -41,7 +41,7 @@ class VilkårsresultatRepositoryTest {
                             id = null,
                             LocalDate.now().minusDays(3),
                             LocalDate.now(),
-                            "utfall2",
+                            Utfall.IKKE_OPPFYLT.toString(),
                             false,
                             null,
                             null
@@ -55,7 +55,7 @@ class VilkårsresultatRepositoryTest {
                             id = null,
                             LocalDate.now().minusDays(5),
                             LocalDate.now(),
-                            "utf3all",
+                            Utfall.IKKE_OPPFYLT.toString(),
                             false,
                             null,
                             null
@@ -64,7 +64,7 @@ class VilkårsresultatRepositoryTest {
                             id = null,
                             LocalDate.now().minusDays(3),
                             LocalDate.now(),
-                            "utfa4ll2",
+                            Utfall.OPPFYLT.toString(),
                             true,
                             null,
                             null
@@ -84,15 +84,19 @@ class VilkårsresultatRepositoryTest {
         val hentetUt = dataSource.transaction {
             VilkårsresultatRepository(it).hentVilkårsResultat(generertId)
         }
-        assertThat(hentetUt!!.tilVilkårsResultat(
-            saksnummer =saksnummer,
-            behandlingsReferanse = randomUUID,
-            typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
-        )).isEqualTo(vilkårsResultatEntity.tilVilkårsResultat(
-            saksnummer = saksnummer,
-            behandlingsReferanse = randomUUID,
-            typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
-        ))
+        assertThat(
+            hentetUt!!.tilVilkårsResultat(
+                saksnummer = saksnummer,
+                behandlingsReferanse = randomUUID,
+                typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
+            )
+        ).isEqualTo(
+            vilkårsResultatEntity.tilVilkårsResultat(
+                saksnummer = saksnummer,
+                behandlingsReferanse = randomUUID,
+                typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
+            )
+        )
     }
 
     @Test

@@ -1,10 +1,7 @@
 package no.nav.aap.statistikk.vilkårsresultat.repository
 
 import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.vilkårsresultat.Vilkår
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsPeriode
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
+import no.nav.aap.statistikk.vilkårsresultat.*
 import java.time.LocalDate
 import java.util.*
 
@@ -67,7 +64,7 @@ data class VilkårsPeriodeEntity(
         return VilkårsPeriode(
             fraDato,
             tilDato,
-            utfall,
+            Utfall.valueOf(utfall),
             manuellVurdering,
             innvilgelsesårsak,
             avslagsårsak
@@ -80,7 +77,7 @@ data class VilkårsPeriodeEntity(
                 null,
                 vilkårsPeriode.fraDato,
                 vilkårsPeriode.tilDato,
-                vilkårsPeriode.utfall,
+                vilkårsPeriode.utfall.toString(),
                 vilkårsPeriode.manuellVurdering,
                 vilkårsPeriode.innvilgelsesårsak,
                 vilkårsPeriode.avslagsårsak
