@@ -80,6 +80,13 @@ class SakTabell : BQTable<BQBehandling> {
             """.trimIndent()
                 ).build()
 
+            val ansvarligBeslutter =
+                Field.newBuilder("ansvarligBeslutter", StandardSQLTypeName.STRING).setDescription(
+                    """
+                    Ved krav om totrinnskontroll skal dette feltet innholde Nav-Ident til ansvarlig beslutter.
+                """.trimIndent()
+                ).build()
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
@@ -121,13 +128,6 @@ class SakTabell : BQTable<BQBehandling> {
 
                 For behandlingstype klage: Angi begrunnelse ved resultat omgjøring - typisk: feil lovanvendelse, endret faktum, saksbehandlingsfeil, etc.
             """.trimIndent()
-                ).build()
-
-            val ansvarligBeslutter =
-                Field.newBuilder("ansvarligBeslutter", StandardSQLTypeName.STRING).setDescription(
-                    """
-                    Ved krav om totrinnskontroll skal dette feltet innholde Nav-Ident til ansvarlig beslutter.
-                """.trimIndent()
                 ).build()
 
             val ansvarligEnhet =
@@ -227,6 +227,8 @@ class SakTabell : BQTable<BQBehandling> {
         val avsender = fieldValueList.get("avsender").stringValue
         val sekvensNummer = fieldValueList.get("sekvensnummer").longValue
         val aktorId = fieldValueList.get("aktorId").stringValue
+        val ansvarligBeslutter =
+            if (!fieldValueList.get("ansvarligBeslutter").isNull) fieldValueList.get("ansvarligBeslutter").stringValue else null
         val opprettetAv = fieldValueList.get("opprettetAv").stringValue
         val saksbehandler = fieldValueList.get("saksbehandler").stringValue
         val søknadsFormat = fieldValueList.get("soknadsformat").stringValue
@@ -268,6 +270,7 @@ class SakTabell : BQTable<BQBehandling> {
             vedtakTid = vedtakTid?.let { LocalDateTime.parse(it) },
             søknadsFormat = SøknadsFormat.valueOf(søknadsFormat),
             behandlingMetode = if (behandlingMetode == "MANUELL") BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
+            ansvarligBeslutter = ansvarligBeslutter
         )
     }
 
@@ -297,6 +300,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "vedtakTid" to value.vedtakTid?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "soknadsformat" to value.søknadsFormat.toString(),
                 "behandlingMetode" to value.behandlingMetode.toString(),
+                "ansvarligBeslutter" to value.ansvarligBeslutter,
             )
         )
     }

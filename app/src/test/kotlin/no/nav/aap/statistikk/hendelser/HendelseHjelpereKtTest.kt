@@ -29,7 +29,7 @@ class HendelseHjelpereKtTest {
     @Test
     fun `kan hente ut siste person som jobbet på en behandling fra en hendelse`() {
         assertThat(avklaringsbehovHendelser.sistePersonPåBehandling()).isNotNull()
-        assertThat(avklaringsbehovHendelser.sistePersonPåBehandling()).isEqualTo("Z994573")
+        assertThat(avklaringsbehovHendelser.sistePersonPåBehandling()).isEqualTo("Z9945700")
     }
 
     @Test
@@ -79,8 +79,13 @@ class HendelseHjelpereKtTest {
     }
 
     @Test
-    fun `returnerer null for avsluttet behandling`() {
+    fun `gjeldende avklaringsbehov er null for avsluttet behandling`() {
         assertThat(avklaringsbehovHendelser.utledGjeldendeAvklaringsBehov()).isNull()
+    }
+
+    @Test
+    fun `ansvarlig beslutter kan hentes ut`() {
+        assertThat(avklaringsbehovHendelser.utledAnsvarligBeslutter()).isEqualTo("Z9945700")
     }
 
     @Test
@@ -274,7 +279,7 @@ val avklaringsbehovHendelser = listOf(
             EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T11:12:01.293"),
-                endretAv = "Z994573"
+                endretAv = "Z9945700"
             )
         )
     )

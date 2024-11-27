@@ -28,10 +28,12 @@ class SaksStatistikkService(
         hendelsesTidspunkt: LocalDateTime,
         vedtakTidspunkt: LocalDateTime?,
         erManuell: Boolean,
+        ansvarligBeslutter: String?
     ) {
         val behandling = behandlingRepository.hent(behandlingId)
+        val erSkjermet = skjermingService.erSkjermet(behandling)
         val saksbehandler =
-            if (skjermingService.erSkjermet(behandling)) "-5" else behandling.sisteSaksbehandler
+            if (erSkjermet) "-5" else behandling.sisteSaksbehandler
 
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
@@ -56,6 +58,7 @@ class SaksStatistikkService(
                 ChronoUnit.SECONDS // SJEKK OPP DENNE, er iverksettes før avsluttet
             ) else null,
             endretTid = hendelsesTidspunkt,
+            ansvarligBeslutter = if (erSkjermet && ansvarligBeslutter !== null) "-5" else ansvarligBeslutter,
             opprettetAv = KELVIN,
             saksbehandler = saksbehandler,
             vedtakTid = vedtakTidspunkt?.truncatedTo(ChronoUnit.SECONDS),
