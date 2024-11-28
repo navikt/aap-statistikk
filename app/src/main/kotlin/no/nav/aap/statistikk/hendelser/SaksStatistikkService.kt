@@ -64,7 +64,18 @@ class SaksStatistikkService(
             vedtakTid = vedtakTidspunkt?.truncatedTo(ChronoUnit.SECONDS),
             søknadsFormat = behandling.søknadsformat,
             behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
+            behandlingStatus = behandlingStatus(behandling.status),
         )
         bigQueryRepository.lagre(bqSak)
+    }
+
+    fun behandlingStatus(status: BehandlingStatus): String {
+        // TODO: når klage er implementert, må dette fikses her
+        return when (status) {
+            BehandlingStatus.OPPRETTET -> "REGISTRERT"
+            BehandlingStatus.UTREDES -> "UNDER_BEHANDLING"
+            BehandlingStatus.IVERKSETTES -> "AVSLUTTET"
+            BehandlingStatus.AVSLUTTET -> "AVSLUTTET"
+        }
     }
 }

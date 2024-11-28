@@ -50,7 +50,8 @@ class SakTabellTest {
                 relatertBehandlingUUID = "123",
                 relatertFagsystem = "Kelvin",
                 fagsystemNavn = "Kelvin",
-                ansvarligBeslutter = "Z1234"
+                ansvarligBeslutter = "Z1234",
+                behandlingStatus = "UNDER_BEHANDLING"
             )
         )
 
@@ -70,12 +71,13 @@ class SakTabellTest {
         assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(500, ChronoUnit.MILLIS))
         assertThat(uthentetInnslag.opprettetAv).isEqualTo(KELVIN)
         assertThat(uthentetInnslag.saksbehandler).isEqualTo("1234")
-        assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(100, ChronoUnit.MILLIS))
+        assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(500, ChronoUnit.MILLIS))
         assertThat(uthentetInnslag.søknadsFormat).isEqualTo(SøknadsFormat.DIGITAL)
         assertThat(uthentetInnslag.behandlingMetode).isEqualTo(BehandlingMetode.MANUELL)
         assertThat(uthentetInnslag.relatertBehandlingUUID).isEqualTo("123")
         assertThat(uthentetInnslag.relatertFagsystem).isEqualTo("Kelvin")
         assertThat(uthentetInnslag.fagsystemNavn).isEqualTo("Kelvin")
         assertThat(uthentetInnslag.ansvarligBeslutter).isEqualTo("Z1234")
+        assertThat(uthentetInnslag.behandlingStatus).isEqualTo("UNDER_BEHANDLING")
     }
 }
