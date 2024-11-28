@@ -187,9 +187,9 @@ class SakTabell : BQTable<BQBehandling> {
                 vedtakTid,
                 søknadsFormat,
                 behandlingMetode,
+                behandlingStatus,
 
                 // Ikke implementert ennå
-                behandlingStatus,
                 utbetaltTid,
                 forventOppstartTid,
                 sakYtelse,
@@ -234,6 +234,7 @@ class SakTabell : BQTable<BQBehandling> {
         val søknadsFormat = fieldValueList.get("soknadsformat").stringValue
         val vedtakTid =
             if (!fieldValueList.get("vedtakTid").isNull) fieldValueList.get("vedtakTid").stringValue else null
+        val behandlingStatus = fieldValueList.get("behandlingStatus").stringValue
 
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
 
@@ -270,7 +271,8 @@ class SakTabell : BQTable<BQBehandling> {
             vedtakTid = vedtakTid?.let { LocalDateTime.parse(it) },
             søknadsFormat = SøknadsFormat.valueOf(søknadsFormat),
             behandlingMetode = if (behandlingMetode == "MANUELL") BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
-            ansvarligBeslutter = ansvarligBeslutter
+            ansvarligBeslutter = ansvarligBeslutter,
+            behandlingStatus = behandlingStatus
         )
     }
 
@@ -301,6 +303,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "soknadsformat" to value.søknadsFormat.toString(),
                 "behandlingMetode" to value.behandlingMetode.toString(),
                 "ansvarligBeslutter" to value.ansvarligBeslutter,
+                "behandlingStatus" to value.behandlingStatus,
             )
         )
     }
