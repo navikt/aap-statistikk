@@ -57,13 +57,11 @@ data class AlderSisteDager(
     )
 )
 
-data class ÅpneBehandlingerInput(
-    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
-        TypeBehandling.Førstegangsbehandling
-    )
+data class AntallÅpneOgTypeOgGjennomsnittsalder(
+    val antallÅpne: Int,
+    val behandlingstype: TypeBehandling,
+    val gjennomsnittsalder: Double
 )
-
-data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
 
 data class FordelingÅpneBehandlinger(val bøtte: Int, val antall: Int) {
     companion object {
@@ -139,14 +137,25 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons)
     }
 
-    route("/åpne-behandlinger").get<ÅpneBehandlingerInput, AntallÅpneOgGjennomsnitt>(modules) { req ->
-        val respons = transactionExecutor.withinTransaction { it ->
-            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(
-                (req.behandlingstyper
-                    ?: listOf(TypeBehandling.Førstegangsbehandling)).map { it.tilDomene() })
+    route("/åpne-behandlinger-per-behandlingstype").get<Unit, List<AntallÅpneOgTypeOgGjennomsnittsalder>>(
+        modules
+    ) {
+        val respons = transactionExecutor.withinTransaction {
+            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt()
         }
 
-        respond(AntallÅpneOgGjennomsnitt(respons.antallÅpne, respons.gjennomsnittsalder))
+        respond(respons.map {
+            AntallÅpneOgTypeOgGjennomsnittsalder(
+                antallÅpne = it.antallÅpne,
+                behandlingstype = when (it.behandlingstype) {
+                    no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling
+                    no.nav.aap.statistikk.behandling.TypeBehandling.Revurdering -> TypeBehandling.Revurdering
+                    no.nav.aap.statistikk.behandling.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
+                    no.nav.aap.statistikk.behandling.TypeBehandling.Klage -> TypeBehandling.Klage
+                },
+                gjennomsnittsalder = it.gjennomsnittsalder
+            )
+        })
     }
 
     route("/behandling-per-avklaringsbehov").get<BehandlingerPerAvklaringsbehovInput, List<BehandlingPerAvklaringsbehov>>(

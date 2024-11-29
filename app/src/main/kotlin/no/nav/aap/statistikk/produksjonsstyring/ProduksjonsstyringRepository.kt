@@ -15,7 +15,11 @@ data class BehandlingPerSteggruppe(val steggruppe: StegGruppe, val antall: Int)
 
 data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
-data class AntallÅpneOgGjennomsnitt(val antallÅpne: Int, val gjennomsnittsalder: Double)
+data class AntallÅpneOgTypeOgGjennomsnittsalderDTO(
+    val antallÅpne: Int,
+    val behandlingstype: TypeBehandling,
+    val gjennomsnittsalder: Double
+)
 
 data class BøtteFordeling(val bøtte: Int, val antall: Int)
 
@@ -58,25 +62,24 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlingerOgGjennomsnitt(behandlingsTyper: List<TypeBehandling>): AntallÅpneOgGjennomsnitt {
+    fun antallÅpneBehandlingerOgGjennomsnitt(): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
         val sql = """
-            select count(*),
+            select type,
+                   count(*),
                    extract(epoch from
                            avg(current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid)) as gjennomsnitt_alder
             from behandling_historikk bh
                      join public.behandling b on b.id = bh.behandling_id
             where gjeldende = true
-              and (b.type = ANY(?::text[]) or $1 is null)
-              and status != 'AVSLUTTET' 
+              and status != 'AVSLUTTET'
+            group by b.type
         """.trimIndent()
 
-        return connection.queryFirst(sql) {
-            setParams {
-                setBehandlingsTyperParam(behandlingsTyper)
-            }
+        return connection.queryList(sql) {
             setRowMapper { row ->
-                AntallÅpneOgGjennomsnitt(
+                AntallÅpneOgTypeOgGjennomsnittsalderDTO(
                     antallÅpne = row.getInt("count"),
+                    behandlingstype = row.getEnum("type"),
                     gjennomsnittsalder = row.getDoubleOrNull("gjennomsnitt_alder") ?: 0.0
                 )
             }
