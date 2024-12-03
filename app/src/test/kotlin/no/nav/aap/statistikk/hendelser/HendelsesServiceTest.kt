@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.*
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
@@ -99,7 +100,8 @@ class HendelsesServiceTest {
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
-                relatertBehandling = relatertUUID
+                relatertBehandling = relatertUUID,
+                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
             )
         )
 
@@ -161,7 +163,8 @@ class HendelsesServiceTest {
                 avklaringsbehov = listOf(),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
-                hendelsesTidspunkt = LocalDateTime.now()
+                hendelsesTidspunkt = LocalDateTime.now(),
+                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
             )
         )
 
@@ -213,13 +216,14 @@ class HendelsesServiceTest {
                 behandlingReferanse = UUID.randomUUID(),
                 behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
                 behandlingStatus = Status.OPPRETTET,
-                behandlingType = no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering,
+                behandlingType = Revurdering,
                 ident = "234",
                 versjon = "dsad",
                 avklaringsbehov = listOf(),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
-                hendelsesTidspunkt = LocalDateTime.now()
+                hendelsesTidspunkt = LocalDateTime.now(),
+                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
             )
         )
 

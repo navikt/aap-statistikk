@@ -9,10 +9,13 @@ import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.Sak
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+
+private val logger = LoggerFactory.getLogger(SaksStatistikkService::class.java)
 
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
@@ -65,7 +68,12 @@ class SaksStatistikkService(
             søknadsFormat = behandling.søknadsformat,
             behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             behandlingStatus = behandlingStatus(behandling.status),
+            behandlingÅrsak = behandling.årsaker.first()
         )
+
+        if (behandling.årsaker.size > 1) {
+            logger.warn("Behandling med referanse ${behandling.referanse} hadde mer enn én årsak. Avgir den første.")
+        }
         bigQueryRepository.lagre(bqSak)
     }
 

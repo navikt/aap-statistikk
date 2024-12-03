@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.hendelser
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
@@ -77,7 +78,8 @@ class HendelsesService(
             gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov(),
             søknadsformat = dto.soknadsFormat.tilDomene(),
             venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
-            gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe
+            gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
+            årsaker = dto.årsakTilBehandling.map { it.tilDomene() }
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 
@@ -170,5 +172,17 @@ fun Kanal.tilDomene(): SøknadsFormat {
     return when (this) {
         Kanal.DIGITAL -> SøknadsFormat.DIGITAL
         Kanal.PAPIR -> SøknadsFormat.PAPIR
+    }
+}
+
+fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilBehandling {
+    return when (this) {
+        ÅrsakTilBehandling.SØKNAD -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SØKNAD
+        ÅrsakTilBehandling.AKTIVITETSMELDING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.AKTIVITETSMELDING
+        ÅrsakTilBehandling.MELDEKORT -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.MELDEKORT
+        ÅrsakTilBehandling.LEGEERKLÆRING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.LEGEERKLÆRING
+        ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING
+        ÅrsakTilBehandling.DIALOGMELDING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.DIALOGMELDING
+        ÅrsakTilBehandling.G_REGULERING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.G_REGULERING
     }
 }

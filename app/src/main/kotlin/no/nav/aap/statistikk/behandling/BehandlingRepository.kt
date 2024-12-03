@@ -17,9 +17,9 @@ class BehandlingRepository(
 
     override fun opprettBehandling(behandling: Behandling): Long {
         val behandlingId = dbConnection.executeReturnKey(
-            """
-INSERT INTO behandling (sak_id, referanse, type, opprettet_tid, forrige_behandling_id)
-VALUES (?, ?, ?, ?, ?)"""
+            """INSERT INTO behandling (sak_id, referanse, type, opprettet_tid, forrige_behandling_id,
+                        aarsaker_til_behandling)
+VALUES (?, ?, ?, ?, ?, ?)"""
         ) {
             setParams {
                 setLong(1, behandling.sak.id!!)
@@ -27,6 +27,7 @@ VALUES (?, ?, ?, ?, ?)"""
                 setString(3, behandling.typeBehandling.toString())
                 setLocalDateTime(4, behandling.opprettetTid)
                 setLong(5, behandling.relatertBehandlingId)
+                setArray(6, behandling.årsaker.map { it.name })
             }
         }
         oppdaterBehandling(behandling.copy(id = behandlingId))
@@ -67,6 +68,13 @@ SELECT COALESCE(
         ) {
             setParams { ident ->
                 setString(1, ident)
+            }
+        }
+
+        dbConnection.execute("UPDATE behandling SET aarsaker_til_behandling = ? WHERE id = ?") {
+            setParams {
+                setArray(1, behandling.årsaker.map { it.name })
+                setLong(2, behandlingId)
             }
         }
 
@@ -112,6 +120,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
        b.type                       as b_type,
        b.opprettet_tid              as b_opprettet_tid,
        b.forrige_behandling_id      as b_forrige_behandling_id,
+       b.aarsaker_til_behandling    as b_aarsaker_til_behandling,
        s.id                         as s_id,
        s.saksnummer                 as s_saksnummer,
        sh.oppdatert_tid             as sh_oppdatert_tid,
@@ -158,6 +167,7 @@ WHERE b.referanse = ?"""
        b.type                       as b_type,
        b.opprettet_tid              as b_opprettet_tid,
        b.forrige_behandling_id      as b_forrige_behandling_id,
+       b.aarsaker_til_behandling    as b_aarsaker_til_behandling,
        s.id                         as s_id,
        s.saksnummer                 as s_saksnummer,
        sh.oppdatert_tid             as sh_oppdatert_tid,
@@ -249,6 +259,8 @@ WHERE b.id = ?"""
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
             ?.ifBlank { null },
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
-        gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe")
+        gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
+        årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
+            .map { ÅrsakTilBehandling.valueOf(it) }
     )
 }

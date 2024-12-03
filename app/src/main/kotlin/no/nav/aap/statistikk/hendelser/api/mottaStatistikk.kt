@@ -14,6 +14,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
@@ -86,7 +87,8 @@ val exampleRequestStoppetBehandling = StoppetBehandling(
     mottattTid = LocalDateTime.now().minusDays(1),
     sakStatus = SakStatus.LØPENDE,
     hendelsesTidspunkt = LocalDateTime.now(),
-    behandlingStatus = Status.OPPRETTET
+    behandlingStatus = Status.OPPRETTET,
+    årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
 )
 
 

@@ -36,7 +36,8 @@ class BehandlingRepositoryTest {
                     relaterteIdenter = listOf("123", "456", "123456789"),
                     gjeldendeAvklaringsBehov = "0559",
                     venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
-                    gjeldendeStegGruppe = StegGruppe.BREV
+                    gjeldendeStegGruppe = StegGruppe.BREV,
+                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
                 )
             )
         }
@@ -51,6 +52,10 @@ class BehandlingRepositoryTest {
         assertThat(uthentet.søknadsformat).isEqualTo(SøknadsFormat.PAPIR)
         assertThat(uthentet.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
         assertThat(uthentet.gjeldendeStegGruppe).isEqualTo(StegGruppe.BREV)
+        assertThat(uthentet.årsaker).containsExactlyInAnyOrder(
+            ÅrsakTilBehandling.SØKNAD,
+            ÅrsakTilBehandling.G_REGULERING
+        )
     }
 
     @Test
