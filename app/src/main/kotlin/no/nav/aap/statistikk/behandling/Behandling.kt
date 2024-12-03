@@ -31,6 +31,7 @@ data class Behandling(
     val gjeldendeAvklaringsBehov: String? = null,
     val venteÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
+    val årsaker: List<ÅrsakTilBehandling> = listOf()
 ) {
     init {
         // Skal oppgis med sekund-presisjon
@@ -58,4 +59,14 @@ enum class TypeBehandling {
     Revurdering,
     Tilbakekreving,
     Klage;
+}
+
+enum class ÅrsakTilBehandling {
+    SØKNAD,
+    AKTIVITETSMELDING,
+    MELDEKORT,
+    LEGEERKLÆRING,
+    AVVIST_LEGEERKLÆRING,
+    DIALOGMELDING,
+    G_REGULERING
 }

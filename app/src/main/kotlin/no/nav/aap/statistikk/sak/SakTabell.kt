@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.sak
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.Instant
 import java.time.LocalDateTime
@@ -86,6 +87,9 @@ class SakTabell : BQTable<BQBehandling> {
                     Ved krav om totrinnskontroll skal dette feltet innholde Nav-Ident til ansvarlig beslutter.
                 """.trimIndent()
                 ).build()
+
+            val behandlingÅrsak = Field.newBuilder("behandlingAarsak", StandardSQLTypeName.STRING)
+                .setDescription("Kode som angir årsak til opprettelse av behandling.").build()
 
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
@@ -188,6 +192,8 @@ class SakTabell : BQTable<BQBehandling> {
                 søknadsFormat,
                 behandlingMetode,
                 behandlingStatus,
+                behandlingÅrsak,
+                ansvarligBeslutter,
 
                 // Ikke implementert ennå
                 utbetaltTid,
@@ -196,7 +202,6 @@ class SakTabell : BQTable<BQBehandling> {
                 sakUtland,
                 behandlingResultat,
                 resultatBegrunnelse,
-                ansvarligBeslutter,
                 ansvarligEnhet,
                 tilbakekrevbeløp,
                 funksjonellPeriodeFom,
@@ -235,6 +240,7 @@ class SakTabell : BQTable<BQBehandling> {
         val vedtakTid =
             if (!fieldValueList.get("vedtakTid").isNull) fieldValueList.get("vedtakTid").stringValue else null
         val behandlingStatus = fieldValueList.get("behandlingStatus").stringValue
+        val behandlingÅrsak = fieldValueList.get("behandlingAarsak").stringValue
 
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
 
@@ -272,7 +278,8 @@ class SakTabell : BQTable<BQBehandling> {
             søknadsFormat = SøknadsFormat.valueOf(søknadsFormat),
             behandlingMetode = if (behandlingMetode == "MANUELL") BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             ansvarligBeslutter = ansvarligBeslutter,
-            behandlingStatus = behandlingStatus
+            behandlingStatus = behandlingStatus,
+            behandlingÅrsak = ÅrsakTilBehandling.valueOf(behandlingÅrsak)
         )
     }
 
@@ -304,6 +311,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "behandlingMetode" to value.behandlingMetode.toString(),
                 "ansvarligBeslutter" to value.ansvarligBeslutter,
                 "behandlingStatus" to value.behandlingStatus,
+                "behandlingAarsak" to value.behandlingÅrsak.toString(),
             )
         )
     }

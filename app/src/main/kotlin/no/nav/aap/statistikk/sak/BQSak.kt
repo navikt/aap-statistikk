@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.sak
 
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 
@@ -28,6 +29,7 @@ data class BQBehandling(
     val saksbehandler: String?,
     val behandlingMetode: BehandlingMetode,
     val behandlingStatus: String,
+    val behandlingÅrsak: ÅrsakTilBehandling
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)

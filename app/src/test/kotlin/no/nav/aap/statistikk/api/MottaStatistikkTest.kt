@@ -12,6 +12,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
@@ -94,7 +95,8 @@ class MottaStatistikkTest {
                         versjon = "UKJENT",
                         mottattTid = mottattTid,
                         sakStatus = SakStatus.UTREDES,
-                        hendelsesTidspunkt = hendelsesTidspunkt
+                        hendelsesTidspunkt = hendelsesTidspunkt,
+                        årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
                     )
                 )
             )
@@ -113,7 +115,8 @@ class MottaStatistikkTest {
                     versjon = "UKJENT",
                     mottattTid = mottattTid,
                     sakStatus = SakStatus.UTREDES,
-                    hendelsesTidspunkt = hendelsesTidspunkt
+                    hendelsesTidspunkt = hendelsesTidspunkt,
+                    årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
                 )
             )
         )
@@ -209,7 +212,8 @@ class MottaStatistikkTest {
             versjon = "UKJENT",
             mottattTid = LocalDateTime.now().minusDays(1),
             sakStatus = SakStatus.UTREDES,
-            hendelsesTidspunkt = LocalDateTime.now()
+            hendelsesTidspunkt = LocalDateTime.now(),
+            årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
         )
 
         val hendelse2 = hendelse.copy(hendelsesTidspunkt = LocalDateTime.now().plusSeconds(0))
@@ -378,7 +382,8 @@ class MottaStatistikkTest {
             versjon = "UKJENT",
             mottattTid = LocalDateTime.now().minusDays(1),
             sakStatus = SakStatus.UTREDES,
-            hendelsesTidspunkt = LocalDateTime.now()
+            hendelsesTidspunkt = LocalDateTime.now(),
+            årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
         )
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)

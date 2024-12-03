@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.sak
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling
+import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
@@ -51,7 +52,8 @@ class SakTabellTest {
                 relatertFagsystem = "Kelvin",
                 fagsystemNavn = "Kelvin",
                 ansvarligBeslutter = "Z1234",
-                behandlingStatus = "UNDER_BEHANDLING"
+                behandlingStatus = "UNDER_BEHANDLING",
+                behandlingÅrsak = ÅrsakTilBehandling.SØKNAD
             )
         )
 

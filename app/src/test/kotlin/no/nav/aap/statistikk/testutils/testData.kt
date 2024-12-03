@@ -7,13 +7,13 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 
 
 fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
@@ -155,6 +155,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
         versjon = UUID.randomUUID().toString(),
         mottattTid = LocalDateTime.now().minusDays(1),
         sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
-        hendelsesTidspunkt = LocalDateTime.now()
+        hendelsesTidspunkt = LocalDateTime.now(),
+        årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
     )
 }
