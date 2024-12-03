@@ -29,6 +29,12 @@ data class VenteårsakOgGjennomsnitt(
     val gjennomsnittligAlder: Double
 )
 
+data class BehandlingAarsakAntallGjennomsnitt(
+    val årsak: String,
+    val antall: String,
+    val gjennomsnittligAlder: String
+)
+
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun hentBehandlingstidPerDag(behandlingsTyper: List<TypeBehandling>): List<BehandlingstidPerDag> {
@@ -328,6 +334,34 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                     årsak = it.getString("venteaarsak"),
                     antall = it.getInt("count"),
                     gjennomsnittligAlder = it.getDouble("avg")
+                )
+            }
+        }
+    }
+
+    fun antallBehandlingerPerÅrsak(behandlingsTyper: List<TypeBehandling>): List<BehandlingAarsakAntallGjennomsnitt> {
+        val sql = """
+select unnest(b.aarsaker_til_behandling)                                       as aarsak,
+       count(*),
+       extract(epoch from avg(current_timestamp at time zone 'Europe/Oslo' -
+                                                             b.opprettet_tid)) as avg_alder
+from behandling b
+         join behandling_historikk bh on b.id = bh.behandling_id
+where (b.type = ANY (?::text[]) or ${'$'}1 is null)
+  and  bh.gjeldende = true
+  and bh.status != 'AVSLUTTET'
+group by aarsak;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
+            setRowMapper {
+                BehandlingAarsakAntallGjennomsnitt(
+                    årsak = it.getString("aarsak"),
+                    antall = it.getString("count"),
+                    gjennomsnittligAlder = it.getString("avg_alder")
                 )
             }
         }
