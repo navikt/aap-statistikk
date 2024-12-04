@@ -223,7 +223,7 @@ class HendelsesServiceTest {
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
-                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
+                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
             )
         )
 
@@ -232,6 +232,7 @@ class HendelsesServiceTest {
         assertThat(bigQueryRepository.saker.first().tekniskTid).isEqualTo(
             LocalDateTime.now(clock)
         )
+        assertThat(bigQueryRepository.saker.first().behandlingÅrsak).isEqualTo("SØKNAD,G_REGULERING")
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
     }
 }
