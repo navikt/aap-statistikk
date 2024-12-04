@@ -279,7 +279,7 @@ class SakTabell : BQTable<BQBehandling> {
             behandlingMetode = if (behandlingMetode == "MANUELL") BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             ansvarligBeslutter = ansvarligBeslutter,
             behandlingStatus = behandlingStatus,
-            behandlingÅrsak = ÅrsakTilBehandling.valueOf(behandlingÅrsak)
+            behandlingÅrsak = behandlingÅrsak
         )
     }
 

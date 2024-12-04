@@ -68,7 +68,7 @@ class SaksStatistikkService(
             søknadsFormat = behandling.søknadsformat,
             behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             behandlingStatus = behandlingStatus(behandling.status),
-            behandlingÅrsak = behandling.årsaker.first()
+            behandlingÅrsak = behandling.årsaker.joinToString(",")
         )
 
         if (behandling.årsaker.size > 1) {

@@ -29,7 +29,7 @@ data class BQBehandling(
     val saksbehandler: String?,
     val behandlingMetode: BehandlingMetode,
     val behandlingStatus: String,
-    val behandlingÅrsak: ÅrsakTilBehandling
+    val behandlingÅrsak: String
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)

@@ -53,7 +53,7 @@ class SakTabellTest {
                 fagsystemNavn = "Kelvin",
                 ansvarligBeslutter = "Z1234",
                 behandlingStatus = "UNDER_BEHANDLING",
-                behandlingÅrsak = ÅrsakTilBehandling.SØKNAD
+                behandlingÅrsak = ÅrsakTilBehandling.SØKNAD.toString()
             )
         )
 
