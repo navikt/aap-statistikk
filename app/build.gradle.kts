@@ -7,7 +7,7 @@ plugins {
     application
 }
 
-val ktorVersion = "3.0.1"
+val ktorVersion = "3.0.2"
 val mockkVersion = "1.13.13"
 val komponenterVersjon = "1.0.72"
 val behandlingsflytversjon = "0.0.68"
