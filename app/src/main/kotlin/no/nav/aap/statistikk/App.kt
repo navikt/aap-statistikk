@@ -115,7 +115,8 @@ fun Application.startUp(
             }
         }, jobber = listOf(
             lagreStoppetHendelseJobb
-        )
+        ),
+        prometheus = prometheusMeterRegistry,
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
