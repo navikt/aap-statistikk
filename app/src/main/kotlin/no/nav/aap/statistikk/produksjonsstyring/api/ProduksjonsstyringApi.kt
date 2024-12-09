@@ -70,12 +70,6 @@ data class BehandlingAarsakAntallGjennomsnittInput(
     )
 )
 
-data class BehandlingAarsakAntallGjennomsnitt(
-    val årsak: String,
-    val antall: String,
-    val gjennomsnittligAlder: String
-)
-
 data class FordelingÅpneBehandlinger(val bøtte: Int, val antall: Int) {
     companion object {
         fun fraBøtteFordeling(bøtteFordeling: BøtteFordeling): FordelingÅpneBehandlinger {
