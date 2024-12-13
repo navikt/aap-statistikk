@@ -31,8 +31,8 @@ data class VenteårsakOgGjennomsnitt(
 
 data class BehandlingAarsakAntallGjennomsnitt(
     val årsak: String,
-    val antall: String,
-    val gjennomsnittligAlder: String
+    val antall: Int,
+    val gjennomsnittligAlder: Double
 )
 
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
@@ -360,8 +360,8 @@ group by aarsak;
             setRowMapper {
                 BehandlingAarsakAntallGjennomsnitt(
                     årsak = it.getString("aarsak"),
-                    antall = it.getString("count"),
-                    gjennomsnittligAlder = it.getString("avg_alder")
+                    antall = it.getInt("count"),
+                    gjennomsnittligAlder = it.getDouble("avg_alder")
                 )
             }
         }
