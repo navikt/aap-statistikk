@@ -9,8 +9,9 @@ plugins {
 
 val ktorVersion = "3.0.2"
 val mockkVersion = "1.13.13"
-val komponenterVersjon = "1.0.89"
+val komponenterVersjon = "1.0.91"
 val behandlingsflytversjon = "0.0.68"
+val flywayVersion = "11.1.0"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -37,8 +38,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.12")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
-    implementation("org.flywaydb:flyway-core:11.0.1")
-    implementation("org.flywaydb:flyway-database-postgresql:11.1.0")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     runtimeOnly("org.postgresql:postgresql:42.7.4")
     implementation("com.zaxxer:HikariCP:6.2.1")
 
@@ -48,8 +49,11 @@ dependencies {
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
-    implementation("no.nav:ktor-openapi-generator:1.0.50")
+    implementation("no.nav:ktor-openapi-generator:1.0.63")
     implementation("no.nav.aap.behandlingsflyt:kontrakt:$behandlingsflytversjon")
+    implementation("no.nav.aap.oppgave:api-kontrakt:0.0.32")
+    implementation("no.nav.aap.postmottak:kontrakt:0.0.21")
+
     implementation("com.google.cloud:google-cloud-bigquery:2.44.0")
 
 
