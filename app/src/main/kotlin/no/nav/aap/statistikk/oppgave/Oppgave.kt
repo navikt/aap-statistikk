@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.oppgave.verdityper.Status
 import no.nav.aap.statistikk.person.Person
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -59,6 +58,8 @@ data class OppgaveHendelse(
  * Event sourcing ;)
  */
 fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
+    require(this.isNotEmpty())
+
     return this.sortedBy { it.mottattTidspunkt }
         .fold<OppgaveHendelse, Oppgave?>(null) { acc, hendelse ->
             if (acc == null) {

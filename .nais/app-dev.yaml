@@ -60,6 +60,7 @@ spec:
       rules:
         - application: behandlingsflyt
         - application: produksjonsstyring
+        - application: oppgave
         - application: paw-patrol
         - application: azure-token-generator
           namespace: aura
