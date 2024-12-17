@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser.api
 
 import com.papsign.ktor.openapigen.APITag
+import com.papsign.ktor.openapigen.route.EndpointInfo
 import com.papsign.ktor.openapigen.route.TagModule
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
@@ -18,6 +19,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
+import no.nav.aap.oppgave.statistikk.HendelseType
+import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -120,6 +123,15 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             responder.respond(
                 HttpStatusCode.Accepted, "{}", pipeline
             )
+        }
+    }
+    route("/oppgave") {
+        post<Unit, String, OppgaveHendelse>(
+            TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("OppgaveHendelse"),
+        ) { _, dto ->
+            transactionExecutor.withinTransaction { conn ->
+                log.info("Got DTO: $dto")
+            }
         }
     }
 }
