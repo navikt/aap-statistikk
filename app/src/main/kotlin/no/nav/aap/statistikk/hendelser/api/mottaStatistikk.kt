@@ -24,6 +24,7 @@ import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobbUtfører
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -131,6 +132,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 log.info("Got DTO: $dto")
+                jobbAppender.leggTil(conn, JobbInput(LagreOppgaveHendelseJobbUtfører))
             }
 
             responder.respond(
