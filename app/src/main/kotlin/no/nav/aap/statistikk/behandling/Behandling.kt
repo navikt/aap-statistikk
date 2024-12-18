@@ -34,18 +34,12 @@ data class Behandling(
     val venteÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<ÅrsakTilBehandling> = listOf(),
-    val oppgaver: List<Oppgave> = listOf()
 ) {
     init {
         // Skal oppgis med sekund-presisjon
         require(
             mottattTid.truncatedTo(ChronoUnit.SECONDS).isEqual(mottattTid)
         ) { "Vil ha mottattTid på sekund-oppløsning" }
-    }
-
-    fun enhet(): Enhet? {
-        // TODO: definert som siste enhet som jobbet på oppgaven
-        return oppgaver.firstOrNull()?.enhet
     }
 }
 
