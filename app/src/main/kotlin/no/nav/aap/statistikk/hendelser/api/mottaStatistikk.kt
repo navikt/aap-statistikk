@@ -132,6 +132,10 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             transactionExecutor.withinTransaction { conn ->
                 log.info("Got DTO: $dto")
             }
+
+            responder.respond(
+                HttpStatusCode.Accepted, "{}", pipeline
+            )
         }
     }
 }
