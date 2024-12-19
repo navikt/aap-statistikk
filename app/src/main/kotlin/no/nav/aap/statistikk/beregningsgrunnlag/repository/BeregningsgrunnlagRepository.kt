@@ -52,9 +52,13 @@ class BeregningsgrunnlagRepository(
     }
 
     private fun hentBehandlingsReferanseId(dbConnection: DBConnection, referanse: UUID): Long {
-        val sql = "SELECT id FROM behandling WHERE referanse = ?"
+        val sql = """SELECT b.id
+FROM behandling b
+         JOIN behandling_referanse br
+              on b.referanse_id = br.id
+WHERE br.referanse = ?"""
 
-        return dbConnection.queryFirst<Long>(sql) {
+        return dbConnection.queryFirst(sql) {
             setParams {
                 setUUID(1, referanse)
             }
@@ -205,12 +209,13 @@ select grunnlag.id                                    as gr_id,
        gu.uforegrad                                   as gu_uforegrad,
        gu.ufore_inntekter_fra_foregaende_ar           as gu_ufore_inntekter_fra_foregaende_ar,
        gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    as gu_ufore_ytterligere_nedsatt_arbeidsevne_ar,
-       b.referanse                                    as b_referanse
+       br.referanse                                   as b_referanse
 from grunnlag
          left outer join grunnlag_11_19 as g on grunnlag.id = g.grunnlag_id
          left outer join grunnlag_yrkesskade as gy on g.id = gy.beregningsgrunnlag_id
          left outer join grunnlag_ufore as gu on g.id = gu.grunnlag_11_19_id
          left outer join behandling as b on b.id = grunnlag.behandling_id
+         left outer join behandling_referanse br on b.referanse_id = br.id
             """
         return dbConnection.queryList(sql) {
             setRowMapper { row ->

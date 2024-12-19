@@ -2,12 +2,8 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.util.UUID
-
-typealias Beregningsgrunnlag = MedBehandlingsreferanse<IBeregningsGrunnlag>
 
 // TODO legg til inntekt
 data class BeregningsGrunnlagBQ(

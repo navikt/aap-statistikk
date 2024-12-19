@@ -9,6 +9,27 @@ class OppgaveRepository(private val dbConnection: DBConnection) {
     fun lagreOppgave(oppgave: Oppgave): Long {
         require(oppgave.enhet.id != null)
 
+       val behandlingsReferanseId =  oppgave.behandlingReferanse?.let { behandling ->
+            val sqlVersjon = """WITH ny_ref AS (
+    INSERT INTO behandling_referanse (referanse)
+        VALUES (?)
+        ON CONFLICT DO NOTHING
+        RETURNING id)
+SELECT COALESCE(
+               (SELECT id FROM ny_ref),
+               (SELECT id FROM behandling_referanse WHERE behandling_referanse.referanse = ?)
+       ) AS id;"""
+
+            dbConnection.queryFirst(sqlVersjon) {
+                setParams {
+                    setUUID(1, oppgave.behandlingReferanse.referanse)
+                    setUUID(2, oppgave.behandlingReferanse.referanse)
+                }
+                setRowMapper { row -> row.getLong("id") }
+            }
+        }
+
+
         val reservasjonId = if (oppgave.reservasjon != null) {
             val settInnReservasjonSql = """
     INSERT INTO reservasjon (reservert_av, opprettet_tid)
@@ -23,7 +44,7 @@ class OppgaveRepository(private val dbConnection: DBConnection) {
         } else null
 
         val sql = """
-            insert into oppgave (person_id, behandling_id, enhet_id, status, opprettet_tidspunkt,
+            insert into oppgave (person_id, behandling_referanse_id, enhet_id, status, opprettet_tidspunkt,
                                  reservasjon_id)
             values (?, ?, ?, ?, ?, ?)
         """.trimIndent()
@@ -31,7 +52,7 @@ class OppgaveRepository(private val dbConnection: DBConnection) {
         return dbConnection.executeReturnKey(sql) {
             setParams {
                 setLong(1, oppgave.person?.id)
-                setLong(2, oppgave.forBehandling)
+                setLong(2, behandlingsReferanseId)
                 setLong(3, oppgave.enhet.id)
                 setEnumName(4, oppgave.status)
                 setLocalDateTime(5, oppgave.opprettetTidspunkt)
@@ -42,21 +63,21 @@ class OppgaveRepository(private val dbConnection: DBConnection) {
 
     fun hentOppgaverForEnhet(enhet: Enhet): List<Oppgave> {
         val sql = """
-            select o.id                  as o_id,
-                   o.person_id           as o_person_id,
-                   o.behandling_id       as o_behandling_id,
-                   o.enhet_id            as o_enhet_id,
-                   o.status              as o_status,
-                   o.opprettet_tidspunkt as o_opprettet_tidspunkt,
-                   o.reservasjon_id      as o_reservasjon_id,
-                   e.id                  as e_id,
-                   e.kode                as e_kode,
-                   p.id                  as p_id,
-                   p.ident               as p_ident,
-                   r.reservert_av        as r_reservert_av,
-                   r.opprettet_tid       as r_opprettet_tid,
-                   s.id                  as s_id,
-                   s.nav_ident           as s_nav_ident
+            select o.id                      as o_id,
+                   o.person_id               as o_person_id,
+                   o.behandling_referanse_id as o_behandling_referanse_id,
+                   o.enhet_id                as o_enhet_id,
+                   o.status                  as o_status,
+                   o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
+                   o.reservasjon_id          as o_reservasjon_id,
+                   e.id                      as e_id,
+                   e.kode                    as e_kode,
+                   p.id                      as p_id,
+                   p.ident                   as p_ident,
+                   r.reservert_av            as r_reservert_av,
+                   r.opprettet_tid           as r_opprettet_tid,
+                   s.id                      as s_id,
+                   s.nav_ident               as s_nav_ident
             from oppgave o
                      join enhet e on o.enhet_id = e.id
                      left join person p on o.person_id = p.id
@@ -85,33 +106,34 @@ class OppgaveRepository(private val dbConnection: DBConnection) {
         },
         status = it.getEnum("o_status"),
         opprettetTidspunkt = it.getLocalDateTime("o_opprettet_tidspunkt"),
-        forBehandling = it.getLongOrNull("o_behandling_id"),
+        behandlingReferanse = null, // it.getLongOrNull("o_behandling_id"), TODO
         hendelser = listOf() // TODO
     )
 
     fun hentOppgaverForBehandling(behandlingId: BehandlingId): List<Oppgave> {
         val sql = """
-            select o.id                  as o_id,
-                   o.person_id           as o_person_id,
-                   o.behandling_id       as o_behandling_id,
-                   o.enhet_id            as o_enhet_id,
-                   o.status              as o_status,
-                   o.opprettet_tidspunkt as o_opprettet_tidspunkt,
-                   o.reservasjon_id      as o_reservasjon_id,
-                   e.id                  as e_id,
-                   e.kode                as e_kode,
-                   p.id                  as p_id,
-                   p.ident               as p_ident,
-                   r.reservert_av        as r_reservert_av,
-                   r.opprettet_tid       as r_opprettet_tid,
-                   s.id                  as s_id,
-                   s.nav_ident           as s_nav_ident
+            select o.id                      as o_id,
+                   o.person_id               as o_person_id,
+                   o.behandling_referanse_id as o_behandling_referanse_id,
+                   o.enhet_id                as o_enhet_id,
+                   o.status                  as o_status,
+                   o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
+                   o.reservasjon_id          as o_reservasjon_id,
+                   e.id                      as e_id,
+                   e.kode                    as e_kode,
+                   p.id                      as p_id,
+                   p.ident                   as p_ident,
+                   r.reservert_av            as r_reservert_av,
+                   r.opprettet_tid           as r_opprettet_tid,
+                   s.id                      as s_id,
+                   s.nav_ident               as s_nav_ident
             from oppgave o
                      join enhet e on o.enhet_id = e.id
                      join person p on o.person_id = p.id
+                     join behandling b on b.id = o.behandling_referanse_id 
                      left join reservasjon r on r.id = o.reservasjon_id
                      left join saksbehandler s on s.id = r.reservert_av
-            where behandling_id = ?
+            where b.id = ?
         """.trimIndent()
 
         return dbConnection.queryList(sql) {
@@ -129,7 +151,7 @@ class OppgaveRepository(private val dbConnection: DBConnection) {
                     },
                     status = it.getEnum("o_status"),
                     opprettetTidspunkt = it.getLocalDateTime("o_opprettet_tidspunkt"),
-                    forBehandling = it.getLong("o_behandling_id"),
+                    behandlingReferanse = null, // it.getLong("o_behandling_id"), TODO
                     reservasjon = it.getLongOrNull("o_reservasjon_id")?.let { reservasjon ->
                         Reservasjon(
                             reservertAv = Saksbehandler(

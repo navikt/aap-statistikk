@@ -367,9 +367,5 @@ group by aarsak;
         }
     }
 
-    private fun typeBehandlingClaus(typeBehandling: TypeBehandling?): String {
-        if (typeBehandling == null) return ""
-        return "and b.type = ?"
-    }
 }
 
