@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.person.Person
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -14,6 +13,8 @@ enum class Oppgavestatus {
 
 data class Oppgave(
     val id: Long? = null,
+    val identifikator: Long,
+    val avklaringsbehov: String,
     val enhet: Enhet,
     val person: Person?,
     val status: Oppgavestatus,
@@ -64,15 +65,6 @@ data class OppgaveHendelse(
     }
 }
 
-interface BehandlingResolver {
-    fun resolve(behandlingReferanse: UUID): BehandlingId
-}
-
-/// Hmm, hva er best??
-interface SaksbehandlerResolver {
-    fun resolve(saksbehandler: String): Saksbehandler
-}
-
 /**
  * Event sourcing ;)
  */
@@ -95,7 +87,9 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                             referanse = it
                         )
                     },
-                    reservasjon = reservasjon
+                    reservasjon = reservasjon,
+                    identifikator = hendelse.oppgaveId,
+                    avklaringsbehov = hendelse.avklaringsbehovKode
                 )
             } else {
                 if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident) {
@@ -104,6 +98,11 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                 if (hendelse.behandlingRef != null && acc.behandlingReferanse != null && hendelse.behandlingRef != acc.behandlingReferanse.referanse) {
                     logger.warn("Behandlings-referanse har endret seg på en oppgave. Var ${acc.behandlingReferanse}, nå ${hendelse.behandlingRef}")
                 }
+                require(hendelse.oppgaveId == acc.identifikator) { "Skal kun aggregere oppgaver med samme id. Fikk ${hendelse.oppgaveId} og ${acc.id}." }
+                if (hendelse.avklaringsbehovKode != acc.avklaringsbehov) {
+                    logger.warn("Fant oppgave med ikke-unikt avklaringsbehov. Ignorerer.")
+                }
+
                 acc.copy(
                     hendelser = acc.hendelser + hendelse,
                     enhet = Enhet(kode = hendelse.enhet),

@@ -49,7 +49,6 @@ class LagreOppgaveJobbUtførerTest {
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                behandlingRepository = BehandlingRepository(it),
                 personRepository = PersonRepository(it),
                 oppgaveRepository = OppgaveRepository(it),
                 enhetRepository = EnhetRepository(it),
@@ -64,37 +63,107 @@ class LagreOppgaveJobbUtførerTest {
         assertThat(oppgaverPåBehandling).isNotEmpty
         val førsteOppgave = oppgaverPåBehandling.first()
         assertThat(førsteOppgave.enhet.kode).isEqualTo("NAVKontor123")
-//        assertThat(førsteOppgave.forBehandling).isEqualTo(behandling.id!!)
+        assertThat(førsteOppgave.behandlingReferanse!!.referanse).isEqualTo(behandling.referanse)
         assertThat(førsteOppgave.person?.id).isNotNull
 
         assertThat(førsteOppgave.reservasjon).isNotNull
     }
 
     @Test
-    fun `oppgave urelatert til person og behandling`(@Postgres dataSource: DataSource) {
-        val enhet = "NAVKontor456"
-        val oppgaveId = 124L
-        dataSource.transaction {
-            OppgaveHendelseRepository(it).lagreHendelse(
-                OppgaveHendelse(
-                    hendelse = HendelseType.OPPRETTET,
-                    mottattTidspunkt = LocalDateTime.now(),
-                    journalpostId = 123,
-                    enhet = enhet,
-                    avklaringsbehovKode = "POST_MOTTAK_NOE",
-                    status = Oppgavestatus.OPPRETTET,
-                    opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
-                    endretAv = "SaksbehandlerEndret4232",
-                    endretTidspunkt = LocalDateTime.now(),
-                    oppgaveId = oppgaveId
-                )
+    fun `oppdaterer oppgave-objekt ved nye hendelser skal, ikke lager nye`(@Postgres dataSource: DataSource) {
+        val behandling = settOppEksisterendeBehandling(dataSource)
+        val oppgaveId = 123L
+
+        settInnOppgaveHendelse(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                personIdent = "12345678901",
+                saksnummer = "S12345",
+                behandlingRef = behandling.referanse,
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "Kode123",
+                status = Oppgavestatus.OPPRETTET,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
+                opprettetTidspunkt = LocalDateTime.now(),
+                endretAv = "SaksbehandlerEndret123",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId
             )
-        }
+        )
 
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                behandlingRepository = BehandlingRepository(it),
+                personRepository = PersonRepository(it),
+                oppgaveRepository = OppgaveRepository(it),
+                enhetRepository = EnhetRepository(it),
+                saksbehandlerRepository = SaksbehandlerRepository(it)
+            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveId.toString()))
+        }
+
+        val oppgaverPåBehandling = dataSource.transaction {
+            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+        }
+
+        assertThat(oppgaverPåBehandling.size).isEqualTo(1)
+
+        settInnOppgaveHendelse(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "POST_MOTTAK_NOE",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
+                endretAv = "SaksbehandlerEndret4232",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId
+            )
+        )
+
+        dataSource.transaction {
+            LagreOppgaveJobbUtfører(
+                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
+                personRepository = PersonRepository(it),
+                oppgaveRepository = OppgaveRepository(it),
+                enhetRepository = EnhetRepository(it),
+                saksbehandlerRepository = SaksbehandlerRepository(it)
+            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveId.toString()))
+        }
+
+        val oppgaverPåBehandling2 = dataSource.transaction {
+            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+        }
+
+        assertThat(oppgaverPåBehandling2.size).isEqualTo(1)
+    }
+
+    @Test
+    fun `oppgave urelatert til person og behandling`(@Postgres dataSource: DataSource) {
+        val enhet = "NAVKontor456"
+        val oppgaveId = 124L
+        settInnOppgaveHendelse(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                journalpostId = 123,
+                enhet = enhet,
+                avklaringsbehovKode = "POST_MOTTAK_NOE",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
+                endretAv = "SaksbehandlerEndret4232",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId
+            )
+        )
+
+        dataSource.transaction {
+            LagreOppgaveJobbUtfører(
+                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
                 personRepository = PersonRepository(it),
                 oppgaveRepository = OppgaveRepository(it),
                 enhetRepository = EnhetRepository(it),
@@ -110,6 +179,18 @@ class LagreOppgaveJobbUtførerTest {
         assertThat(oppgaverForEnhet).isNotEmpty
         assertThat(oppgaverForEnhet.first().enhet.kode).isEqualTo("NAVKontor456")
 
+    }
+
+    private fun settInnOppgaveHendelse(
+        dataSource: DataSource,
+        xxx: (OppgaveHendelse.() -> OppgaveHendelse)? = null,
+        oppgaveHendelse: OppgaveHendelse,
+    ) {
+        dataSource.transaction {
+            OppgaveHendelseRepository(it).lagreHendelse(
+                oppgaveHendelse
+            )
+        }
     }
 
 

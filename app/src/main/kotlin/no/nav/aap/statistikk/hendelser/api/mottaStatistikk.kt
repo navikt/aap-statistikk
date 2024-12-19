@@ -133,11 +133,20 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 log.info("Got DTO: $dto")
+
+                val encodedSaksNummer = dto.oppgaveDto.saksnummer?.let { stringToNumber(it) }
+                dto.oppgaveDto.behandlingRef?.let { stringToNumber(it.toString()) }
+
                 jobbAppender.leggTil(
                     conn,
                     JobbInput(LagreOppgaveHendelseJobbUtfører).medPayload(
                         DefaultJsonMapper.toJson(dto.tilDomene())
-                    )
+                    ).let {
+                        if (encodedSaksNummer != null) {
+                            it.forSak(encodedSaksNummer)
+                        }
+                        it
+                    }
                 )
             }
 
