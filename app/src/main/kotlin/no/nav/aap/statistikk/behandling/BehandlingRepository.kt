@@ -16,14 +16,32 @@ class BehandlingRepository(
 ) : IBehandlingRepository {
 
     override fun opprettBehandling(behandling: Behandling): Long {
+        val sqlVersjon = """WITH ny_ref AS (
+    INSERT INTO behandling_referanse (referanse)
+        VALUES (?)
+        ON CONFLICT DO NOTHING
+        RETURNING id)
+SELECT COALESCE(
+               (SELECT id FROM ny_ref),
+               (SELECT id FROM behandling_referanse WHERE behandling_referanse.referanse = ?)
+       ) AS id;"""
+
+        val xxId = dbConnection.queryFirst(sqlVersjon) {
+            setParams {
+                setUUID(1, behandling.referanse)
+                setUUID(2, behandling.referanse)
+            }
+            setRowMapper { row -> row.getLong("id") }
+        }
+
         val behandlingId = dbConnection.executeReturnKey(
-            """INSERT INTO behandling (sak_id, referanse, type, opprettet_tid, forrige_behandling_id,
+            """INSERT INTO behandling (sak_id, referanse_id, type, opprettet_tid, forrige_behandling_id,
                         aarsaker_til_behandling)
 VALUES (?, ?, ?, ?, ?, ?)"""
         ) {
             setParams {
                 setLong(1, behandling.sak.id!!)
-                setUUID(2, behandling.referanse)
+                setLong(2, xxId)
                 setString(3, behandling.typeBehandling.toString())
                 setLocalDateTime(4, behandling.opprettetTid)
                 setLong(5, behandling.relatertBehandlingId)
@@ -116,11 +134,12 @@ WHERE ident = ?""", behandling.relaterteIdenter
     override fun hent(referanse: UUID): Behandling? {
         return dbConnection.queryFirstOrNull(
             """SELECT b.id                         as b_id,
-       b.referanse                  as b_referanse,
+       b.referanse_id               as b_referanse,
        b.type                       as b_type,
        b.opprettet_tid              as b_opprettet_tid,
        b.forrige_behandling_id      as b_forrige_behandling_id,
        b.aarsaker_til_behandling    as b_aarsaker_til_behandling,
+       br.referanse                 as br_referanse,
        s.id                         as s_id,
        s.saksnummer                 as s_saksnummer,
        sh.oppdatert_tid             as sh_oppdatert_tid,
@@ -143,6 +162,7 @@ FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
          JOIN person p on p.id = s.person_id
+         JOIN behandling_referanse br on b.referanse_id = br.id
          JOIN (SELECT * FROM behandling_historikk bh WHERE bh.gjeldende = TRUE) bh
               on b.id = bh.behandling_id
          JOIN versjon v on v.id = bh.versjon_id
@@ -151,7 +171,7 @@ FROM behandling b
                              JOIN person pr ON rp.person_id = pr.id
                     GROUP BY rp.behandling_id) rp
                    on rp.behandling_id = bh.id
-WHERE b.referanse = ?"""
+WHERE br.referanse = ?"""
         ) {
             setParams {
                 setUUID(1, referanse)
@@ -163,7 +183,7 @@ WHERE b.referanse = ?"""
     }
 
     private val hentMedId = """SELECT b.id                         as b_id,
-       b.referanse                  as b_referanse,
+       br.referanse                 as br_referanse,
        b.type                       as b_type,
        b.opprettet_tid              as b_opprettet_tid,
        b.forrige_behandling_id      as b_forrige_behandling_id,
@@ -187,6 +207,7 @@ WHERE b.referanse = ?"""
        v.versjon                    as v_versjon,
        rp.rp_ident                  as rp_ident
 FROM behandling b
+         JOIN behandling_referanse br on b.referanse_id = br.id
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
          JOIN person p on p.id = s.person_id
@@ -234,7 +255,7 @@ WHERE b.id = ?"""
 
     private fun mapBehandling(it: Row) = Behandling(
         id = it.getLong("b_id"),
-        referanse = it.getUUID("b_referanse"),
+        referanse = it.getUUID("br_referanse"),
         sak = Sak(
             id = it.getLong("s_id"),
             saksnummer = it.getString("s_saksnummer"),

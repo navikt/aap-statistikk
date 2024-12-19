@@ -46,7 +46,10 @@ class TilkjentYtelseRepository(
     }
 
     private fun hentBehandlingId(behandlingReferanse: UUID, connection: DBConnection): Int {
-        val sql = "SELECT id FROM behandling WHERE referanse = ?"
+        val sql = """SELECT b.id
+FROM behandling b
+         join behandling_referanse br on b.referanse_id = br.id
+WHERE br.referanse = ?"""
 
         return connection.queryFirst(sql) {
             setParams {
@@ -65,6 +68,7 @@ FROM tilkjent_ytelse_periode
          left join tilkjent_ytelse
                    on tilkjent_ytelse.id = tilkjent_ytelse_periode.tilkjent_ytelse_id
          left join behandling on behandling.id = tilkjent_ytelse.behandling_id
+         left join behandling_referanse br on br.id = behandling.referanse_id
          left join sak on sak.id = behandling.sak_id
 WHERE tilkjent_ytelse.id = ?"""
         ) {

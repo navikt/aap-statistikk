@@ -58,17 +58,17 @@ class VilkårsresultatRepository(
         return uthentetId
     }
 
-    override fun hentVilkårsResultat(vilkårResultatId: Long): VilkårsResultatEntity? {
-        val preparedSqlStatement = """
-SELECT vr.id         as vr_id,
+    override fun hentVilkårsResultat(vilkårResultatId: Long): VilkårsResultatEntity {
+        val preparedSqlStatement = """SELECT vr.id         as vr_id,
        s.saksnummer  as s_saksnummer,
        b.type        as b_type,
-       b.referanse   as b_referanse,
+       br.referanse  as br_referanse,
        v.id             v_id,
        v.vilkar_type as v_vilkar_type
 FROM VILKARSRESULTAT vr
          LEFT JOIN VILKAR v ON vr.id = v.vilkarresult_id
          LEFT JOIN behandling b on vr.behandling_id = b.id
+         LEFT JOIN behandling_referanse br on b.referanse_id = br.id
          LEFT JOIN sak s on s.id = b.sak_id
 WHERE vr.id = ?;
             """
@@ -86,7 +86,7 @@ WHERE vr.id = ?;
                 val id = it.getLong("vr_id")
                 val saksNummer = it.getString("s_saksnummer")
                 val typeBehandling = it.getString("b_type")
-                val behandlingsReferanse = it.getString("b_referanse")
+                val behandlingsReferanse = it.getString("br_referanse")
 
                 val vilkårId = it.getLong("v_id")
                 val vilkårType = it.getString("v_vilkar_type")

@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.person.Person
 import org.slf4j.LoggerFactory
@@ -20,9 +19,11 @@ data class Oppgave(
     val status: Oppgavestatus,
     val opprettetTidspunkt: LocalDateTime,
     val reservasjon: Reservasjon? = null,
-    val forBehandling: BehandlingId? = null,
+    val behandlingReferanse: BehandlingReferanse? = null,
     val hendelser: List<OppgaveHendelse>
 )
+
+data class BehandlingReferanse(val id: Long? = null, val referanse: UUID)
 
 data class Reservasjon(
     val id: Long? = null,
@@ -64,7 +65,7 @@ data class OppgaveHendelse(
 }
 
 interface BehandlingResolver {
-    fun resolve(behandlingReferanse: UUID): Behandling
+    fun resolve(behandlingReferanse: UUID): BehandlingId
 }
 
 /// Hmm, hva er best??
@@ -75,7 +76,7 @@ interface SaksbehandlerResolver {
 /**
  * Event sourcing ;)
  */
-fun List<OppgaveHendelse>.tilOppgave(behandlingResolver: BehandlingResolver): Oppgave {
+fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
     require(this.isNotEmpty())
 
     return this.sortedBy { it.mottattTidspunkt }
@@ -89,12 +90,19 @@ fun List<OppgaveHendelse>.tilOppgave(behandlingResolver: BehandlingResolver): Op
                     status = hendelse.status,
                     opprettetTidspunkt = hendelse.mottattTidspunkt,
                     hendelser = listOf(hendelse),
-                    forBehandling = hendelse.behandlingRef?.let { behandlingResolver.resolve(it).id },
+                    behandlingReferanse = hendelse.behandlingRef?.let {
+                        BehandlingReferanse(
+                            referanse = it
+                        )
+                    },
                     reservasjon = reservasjon
                 )
             } else {
                 if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident) {
-                    logger.warn("Person har endret seg på oppgave. Var ${acc.person}, nå ${hendelse.personIdent}")
+                    logger.warn("Person har endret seg på en oppgave. Var ${acc.person}, nå ${hendelse.personIdent}")
+                }
+                if (hendelse.behandlingRef != null && acc.behandlingReferanse != null && hendelse.behandlingRef != acc.behandlingReferanse.referanse) {
+                    logger.warn("Behandlings-referanse har endret seg på en oppgave. Var ${acc.behandlingReferanse}, nå ${hendelse.behandlingRef}")
                 }
                 acc.copy(
                     hendelser = acc.hendelser + hendelse,

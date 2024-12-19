@@ -5,13 +5,11 @@ import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.PersonRepository
 import org.slf4j.LoggerFactory
-import java.util.*
 
 private val logger = LoggerFactory.getLogger(LagreOppgaveJobbUtfører::class.java)
 
@@ -30,11 +28,7 @@ class LagreOppgaveJobbUtfører(
 
         val hendelser = oppgaveHendelseRepository.hentHendelserForId(hendelse)
 
-        val oppgave = hendelser.tilOppgave(object : BehandlingResolver {
-            override fun resolve(behandlingReferanse: UUID): Behandling {
-                return behandlingRepository.hent(behandlingReferanse)!!
-            }
-        })
+        val oppgave = hendelser.tilOppgave()
 
         val saksbehandlerMedId = oppgave.reservasjon?.let {
             saksbehandlerRepository.hentSaksbehandler(it.reservertAv.ident)
