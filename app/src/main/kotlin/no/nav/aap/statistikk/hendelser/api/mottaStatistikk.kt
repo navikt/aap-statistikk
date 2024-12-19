@@ -25,6 +25,7 @@ import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobbUtfører
+import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -135,7 +136,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                 jobbAppender.leggTil(
                     conn,
                     JobbInput(LagreOppgaveHendelseJobbUtfører).medPayload(
-                        DefaultJsonMapper.toJson(dto)
+                        DefaultJsonMapper.toJson(dto.tilDomene())
                     )
                 )
             }
@@ -145,6 +146,36 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             )
         }
     }
+}
+
+fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
+    val oppgaveDto = this.oppgaveDto
+    return no.nav.aap.statistikk.oppgave.OppgaveHendelse(
+        hendelse = when (this.hendelse) {
+            HendelseType.OPPRETTET -> no.nav.aap.statistikk.oppgave.HendelseType.OPPRETTET
+            HendelseType.GJENÅPNET -> no.nav.aap.statistikk.oppgave.HendelseType.GJENÅPNET
+            HendelseType.RESERVERT -> no.nav.aap.statistikk.oppgave.HendelseType.RESERVERT
+            HendelseType.AVRESERVERT -> no.nav.aap.statistikk.oppgave.HendelseType.AVRESERVERT
+            HendelseType.LUKKET -> no.nav.aap.statistikk.oppgave.HendelseType.LUKKET
+        },
+        oppgaveId = requireNotNull(oppgaveDto.id) { "Trenger oppgave-ID for å skille mellom oppgavehendelser" },
+        mottattTidspunkt = LocalDateTime.now(),
+        personIdent = oppgaveDto.personIdent,
+        saksnummer = oppgaveDto.saksnummer,
+        behandlingRef = oppgaveDto.behandlingRef,
+        journalpostId = oppgaveDto.journalpostId,
+        enhet = oppgaveDto.enhet,
+        avklaringsbehovKode = oppgaveDto.avklaringsbehovKode,
+        status = when (oppgaveDto.status) {
+            no.nav.aap.oppgave.verdityper.Status.OPPRETTET -> Oppgavestatus.OPPRETTET
+            no.nav.aap.oppgave.verdityper.Status.AVSLUTTET -> Oppgavestatus.AVSLUTTET
+        },
+        reservertAv = oppgaveDto.reservertAv,
+        reservertTidspunkt = oppgaveDto.reservertTidspunkt,
+        opprettetTidspunkt = oppgaveDto.opprettetTidspunkt,
+        endretAv = oppgaveDto.endretAv,
+        endretTidspunkt = oppgaveDto.endretTidspunkt,
+    )
 }
 
 private fun stringToNumber(string: String): Long {

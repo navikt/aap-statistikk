@@ -46,12 +46,7 @@ class IntegrationTest {
 
         val hendelse = gjørHendelseAvsluttet(hendelseFørCopy)
 
-        val bigQueryClient = BigQueryClient(config, mapOf())
-
-        // Hack fordi emulator ikke støtter migrering
-        schemaRegistry.forEach { (_, schema) ->
-            bigQueryClient.create(schema)
-        }
+        val bigQueryClient = bigQueryClient(config)
 
         testKlientNoInjection(
             dbConfig,
@@ -116,6 +111,18 @@ class IntegrationTest {
             )
         }
     }
+
+    private fun bigQueryClient(config: BigQueryConfig): BigQueryClient {
+        val client = BigQueryClient(config, mapOf())
+
+        // Hack fordi emulator ikke støtter migrering
+        schemaRegistry.forEach { (_, schema) ->
+            client.create(schema)
+        }
+
+        return client
+    }
+
 
     private fun gjørHendelseAvsluttet(hendelseFørCopy: StoppetBehandling) =
         hendelseFørCopy.copy(
