@@ -5,7 +5,6 @@ import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.PersonRepository
@@ -16,7 +15,6 @@ private val logger = LoggerFactory.getLogger(LagreOppgaveJobbUtfører::class.jav
 
 class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
-    private val behandlingRepository: BehandlingRepository,
     private val personRepository: PersonRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val enhetRepository: EnhetRepository,
@@ -50,13 +48,20 @@ class LagreOppgaveJobbUtfører(
             medId
         }
 
-        oppgaveRepository.lagreOppgave(
-            oppgave.copy(
-                enhet = enhetMedId,
-                person = personMedId,
-                reservasjon = oppgave.reservasjon?.copy(reservertAv = saksbehandlerMedId!!)
-            )
+        val eksisterendeOppgave = oppgaveRepository.hentOppgave(oppgave.identifikator)
+
+
+        val oppgaveMedOppdaterteFelter = oppgave.copy(
+            enhet = enhetMedId,
+            person = personMedId,
+            reservasjon = oppgave.reservasjon?.copy(reservertAv = saksbehandlerMedId!!)
         )
+
+        if (eksisterendeOppgave != null) {
+            oppgaveRepository.oppdaterOppgave(oppgaveMedOppdaterteFelter.copy(id = eksisterendeOppgave.id))
+        } else {
+            oppgaveRepository.lagreOppgave(oppgaveMedOppdaterteFelter)
+        }
     }
 
     companion object : Jobb {
@@ -67,7 +72,6 @@ class LagreOppgaveJobbUtfører(
         override fun konstruer(connection: DBConnection): LagreOppgaveJobbUtfører {
             return LagreOppgaveJobbUtfører(
                 OppgaveHendelseRepository(connection),
-                BehandlingRepository(connection),
                 PersonRepository(connection),
                 OppgaveRepository(connection),
                 EnhetRepository(connection),

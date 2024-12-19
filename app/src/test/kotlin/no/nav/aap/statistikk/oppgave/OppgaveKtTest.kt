@@ -30,6 +30,6 @@ class OppgaveKtTest {
 
         val oppgave = hendelser.tilOppgave()
 
-        assertThat(oppgave.enhet!!.kode).isEqualTo("NAVKontor123")
+        assertThat(oppgave.enhet.kode).isEqualTo("NAVKontor123")
     }
 }
