@@ -132,7 +132,12 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 log.info("Got DTO: $dto")
-                jobbAppender.leggTil(conn, JobbInput(LagreOppgaveHendelseJobbUtfører))
+                jobbAppender.leggTil(
+                    conn,
+                    JobbInput(LagreOppgaveHendelseJobbUtfører).medPayload(
+                        DefaultJsonMapper.toJson(dto)
+                    )
+                )
             }
 
             responder.respond(
