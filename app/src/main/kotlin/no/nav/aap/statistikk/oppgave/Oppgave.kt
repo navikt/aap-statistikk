@@ -32,6 +32,7 @@ data class Reservasjon(
 
 enum class HendelseType {
     OPPRETTET,
+    GJENÅPNET,
     RESERVERT,
     AVRESERVERT,
     LUKKET
