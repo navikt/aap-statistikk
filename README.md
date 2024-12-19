@@ -2,11 +2,11 @@
 
 [![release](https://github.com/navikt/aap-statistikk/actions/workflows/release.yaml/badge.svg)](https://github.com/navikt/aap-statistikk/actions/workflows/release.yaml)
 
-Formålet er å levere statistikk relatert til AAP i ny løsning.
+Formålet er å levere statistikk relatert til AAP.
 
 ## Komme i gang
 
-Bruker gradle wrapper, så bare klon og kjør `./gradlew build`.
+Bruker Gradle wrapper, så bare klon og kjør `./gradlew build`.
 
 ## Henvendelser
 
