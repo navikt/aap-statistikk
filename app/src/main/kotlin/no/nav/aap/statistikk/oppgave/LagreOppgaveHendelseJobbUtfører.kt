@@ -2,17 +2,22 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
+import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 
 
-class LagreOppgaveHendelseJobbUtfører(private val oppgaveHendelseRepository: OppgaveHendelseRepository) :
-    JobbUtfører {
+class LagreOppgaveHendelseJobbUtfører(
+    private val oppgaveHendelseRepository: OppgaveHendelseRepository,
+    private val flytJobbRepository: FlytJobbRepository
+) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val hendelse = DefaultJsonMapper.fromJson<OppgaveHendelse>(input.payload())
 
         oppgaveHendelseRepository.lagreHendelse(hendelse)
+
+        flytJobbRepository.leggTil(JobbInput(LagreOppgaveJobbUtfører).medPayload(hendelse.oppgaveId.toString()))
     }
 
     companion object : Jobb {
@@ -21,7 +26,9 @@ class LagreOppgaveHendelseJobbUtfører(private val oppgaveHendelseRepository: Op
         }
 
         override fun konstruer(connection: DBConnection): LagreOppgaveHendelseJobbUtfører {
-            return LagreOppgaveHendelseJobbUtfører(OppgaveHendelseRepository(connection))
+            return LagreOppgaveHendelseJobbUtfører(
+                OppgaveHendelseRepository(connection), FlytJobbRepository(connection)
+            )
         }
 
         override fun navn(): String {
