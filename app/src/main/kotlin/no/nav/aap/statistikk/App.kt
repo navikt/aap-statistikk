@@ -24,6 +24,7 @@ import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
+import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
@@ -50,6 +51,7 @@ import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 
 
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
@@ -108,20 +110,7 @@ fun Application.startUp(
         skjermingService = SkjermingService(pdlClient),
     )
 
-    val motor = Motor(
-        dataSource = dataSource, antallKammer = 8,
-        logInfoProvider = object : JobbLogInfoProvider {
-            override fun hentInformasjon(
-                connection: DBConnection, jobbInput: JobbInput
-            ): LogInformasjon {
-                return LogInformasjon(mapOf())
-            }
-        },
-        jobber = listOf(
-            lagreStoppetHendelseJobb, LagreOppgaveHendelseJobbUtfører, LagreOppgaveJobbUtfører
-        ),
-        prometheus = prometheusMeterRegistry,
-    )
+    val motor = motor(dataSource, lagreStoppetHendelseJobb, prometheusMeterRegistry)
 
     monitor.subscribe(ApplicationStopPreparing) {
         log.info("Received shutdown event. Closing Hikari connection pool.")
@@ -147,6 +136,27 @@ fun Application.startUp(
     )
 }
 
+private fun motor(
+    dataSource: DataSource,
+    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    prometheusMeterRegistry: PrometheusMeterRegistry
+): Motor {
+    return  Motor(
+        dataSource = dataSource, antallKammer = 8,
+        logInfoProvider = object : JobbLogInfoProvider {
+            override fun hentInformasjon(
+                connection: DBConnection, jobbInput: JobbInput
+            ): LogInformasjon {
+                return LogInformasjon(mapOf())
+            }
+        },
+        jobber = listOf(
+            lagreStoppetHendelseJobb, LagreOppgaveHendelseJobbUtfører, LagreOppgaveJobbUtfører
+        ),
+        prometheus = prometheusMeterRegistry,
+    )
+}
+
 fun Application.module(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
@@ -157,6 +167,9 @@ fun Application.module(
     prometheusMeterRegistry: PrometheusMeterRegistry
 ) {
     motor.start()
+    transactionExecutor.withinTransaction {
+        RetryService(it).enable()
+    }
 
     monitoring(prometheusMeterRegistry)
     statusPages()

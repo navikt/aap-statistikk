@@ -303,7 +303,7 @@ fun opprettTestBehandling(dataSource: DataSource, referanse: UUID, sak: Sak): Be
 
 val noOpTransactionExecutor = object : TransactionExecutor {
     override fun <E> withinTransaction(block: (DBConnection) -> E): E {
-        return block(mockk())
+        return block(mockk(relaxed = true))
     }
 }
 
