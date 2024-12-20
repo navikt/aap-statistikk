@@ -34,7 +34,8 @@ data class BehandlingstidPerDagInput(
 data class BehandlingerPåVentInput(
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
-    )
+    ), @QueryParam("For hvilke enheter. Tom liste betyr alle.")
+    val enheter: List<String>? = listOf()
 )
 
 
@@ -268,7 +269,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val venteårsakOgGjennomsnitt = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
-            repo.venteÅrsakOgGjennomsnitt(req.behandlingstyper.reqTilBehandlingsTypeListe())
+            repo.venteÅrsakOgGjennomsnitt(
+                req.behandlingstyper.reqTilBehandlingsTypeListe(),
+                req.enheter ?: listOf()
+            )
         }
         respond(venteårsakOgGjennomsnitt)
     }
