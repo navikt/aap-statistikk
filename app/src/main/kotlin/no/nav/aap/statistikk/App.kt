@@ -93,8 +93,6 @@ fun Application.startUp(
 
     val bqRepository = BQRepository(bigQueryClient)
 
-    val avsluttetBehandlingCounter = prometheusMeterRegistry.avsluttetBehandlingLagret()
-
     val pdlClient = PdlGraphQLClient(
         pdlConfig = pdlConfig
     )
@@ -106,7 +104,6 @@ fun Application.startUp(
         beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
         vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
         behandlingRepositoryFactory = { BehandlingRepository(it) },
-        avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
         skjermingService = SkjermingService(pdlClient),
     )
 

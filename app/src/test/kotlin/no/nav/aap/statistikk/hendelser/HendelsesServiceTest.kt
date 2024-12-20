@@ -2,10 +2,10 @@ package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.*
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
-import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
@@ -47,7 +47,7 @@ class HendelsesServiceTest {
                 bqRepository = bigQueryRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
-                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
+                meterRegistry = simpleMeterRegistry
             ),
             clock = clock,
             meterRegistry = simpleMeterRegistry,
@@ -138,8 +138,8 @@ class HendelsesServiceTest {
                 bqRepository = bigQueryRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
-                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
-            ),
+                meterRegistry = simpleMeterRegistry,
+                ),
             clock = clock,
             meterRegistry = simpleMeterRegistry,
             sakStatistikkService = SaksStatistikkService(
@@ -196,7 +196,7 @@ class HendelsesServiceTest {
                 bqRepository = bigQueryRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
-                avsluttetBehandlingLagretCounter = simpleMeterRegistry.avsluttetBehandlingLagret()
+                meterRegistry = simpleMeterRegistry,
             ),
             clock = clock,
             meterRegistry = simpleMeterRegistry,
@@ -223,7 +223,10 @@ class HendelsesServiceTest {
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
-                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
+                årsakTilBehandling = listOf(
+                    ÅrsakTilBehandling.SØKNAD,
+                    ÅrsakTilBehandling.G_REGULERING
+                )
             )
         )
 

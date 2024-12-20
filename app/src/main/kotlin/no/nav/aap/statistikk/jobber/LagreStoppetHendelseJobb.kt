@@ -22,7 +22,6 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatReposi
 class LagreStoppetHendelseJobb(
     private val bqRepository: IBQRepository,
     private val meterRegistry: MeterRegistry,
-    private val avsluttetBehandlingLagretCounter: Counter,
     private val bigQueryKvitteringRepository: (DBConnection) -> IBigQueryKvitteringRepository,
     private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
     private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
@@ -40,7 +39,7 @@ class LagreStoppetHendelseJobb(
                 bqRepository = bqRepository,
                 behandlingRepository = behandlingRepositoryFactory(connection),
                 skjermingService = skjermingService,
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingLagretCounter,
+                meterRegistry = meterRegistry,
             ),
             personRepository = PersonRepository(connection),
             behandlingRepository = BehandlingRepository(connection),

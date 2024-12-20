@@ -4,7 +4,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -106,7 +105,7 @@ class ProduksjonsstyringRepositoryTest {
                     bqRepository = bqRepository,
                     behandlingRepository = BehandlingRepository(conn),
                     skjermingService = skjermingService,
-                    avsluttetBehandlingLagretCounter = meterRegistry.avsluttetBehandlingLagret()
+                    meterRegistry = meterRegistry,
                 ),
                 personRepository = PersonRepository(conn),
                 behandlingRepository = BehandlingRepository(conn),
