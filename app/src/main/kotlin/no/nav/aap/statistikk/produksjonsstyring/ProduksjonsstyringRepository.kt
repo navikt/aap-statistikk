@@ -278,28 +278,37 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         bøttestørrelse: Int = 1,
         enhet: ChronoUnit = ChronoUnit.DAYS,
         antallBøtter: Int = 30,
-        behandlingsTyper: List<TypeBehandling> = emptyList()
+        behandlingsTyper: List<TypeBehandling> = emptyList(),
+        enheter: List<String>
     ): List<BøtteFordeling> {
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
-            with dt as (select bh.behandling_id                                           bid,
-                               EXTRACT(EPOCH FROM (bh.oppdatert_tid - bh.mottatt_tid)) as diff
-                        from sak s,
-                             behandling b,
-                             behandling_historikk bh
-                        where s.id = b.sak_id
-                          and b.id = bh.behandling_id
-                          and bh.gjeldende = true
-                          and (b.type = ANY (?::text[]) or $1 is null)
-                          and bh.status = 'AVSLUTTET')
-            select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
-            from dt
-            group by bucket;
+WITH dt AS (SELECT bh.behandling_id                                        AS bid,
+                   EXTRACT(EPOCH FROM (bh.oppdatert_tid - bh.mottatt_tid)) AS diff
+            FROM behandling_historikk bh
+                     JOIN behandling b ON bh.behandling_id = b.id
+                     JOIN sak s ON b.sak_id = s.id
+                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                  FROM oppgave o
+                                                  WHERE o.behandling_referanse_id = b.referanse_id
+                                                  LIMIT 1)
+            WHERE bh.gjeldende = true
+              AND (b.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
+              AND bh.status = 'AVSLUTTET')
+SELECT width_bucket(diff, 0, $totaltSekunder, $antallBøtter) AS bucket, count(*)
+FROM dt
+GROUP BY bucket;
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper {
                 BøtteFordeling(it.getInt("bucket"), it.getInt("count"))

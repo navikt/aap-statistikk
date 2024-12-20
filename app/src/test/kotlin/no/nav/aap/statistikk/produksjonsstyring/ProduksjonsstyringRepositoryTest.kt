@@ -75,7 +75,8 @@ class ProduksjonsstyringRepositoryTest {
         )
 
         val res = dataSource.transaction {
-            val alderÅpneBehandlinger = ProduksjonsstyringRepository(it).alderLukkedeBehandlinger()
+            val alderÅpneBehandlinger =
+                ProduksjonsstyringRepository(it).alderLukkedeBehandlinger(enheter = listOf())
             alderÅpneBehandlinger
         }
 
