@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.produksjonsstyring.api
 import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
+import com.papsign.ktor.openapigen.annotations.type.string.pattern.RegularExpression
 import com.papsign.ktor.openapigen.route.TagModule
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
@@ -44,7 +45,9 @@ data class FordelingInput(
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
     ),
-    @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+    @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<@RegularExpression(
+        pattern = "[0-9]{4}[0-9]{2}?"
+    ) String>? = listOf()
 ) {
     enum class Tidsenhet {
         DAG, UKE, MÅNED, ÅR,
@@ -139,14 +142,17 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     data class BehandlingerPerAvklaringsbehovInput(
         @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
-        )
+        ),
+        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
     route("/behandling-per-avklaringsbehov").get<BehandlingerPerAvklaringsbehovInput, List<BehandlingPerAvklaringsbehov>>(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).antallÅpneBehandlingerPerAvklaringsbehov(req.behandlingstyper?.map { it.tilDomene() }
-                ?: listOf())
+            ProduksjonsstyringRepository(conn).antallÅpneBehandlingerPerAvklaringsbehov(
+                req.behandlingstyper.reqTilBehandlingsTypeListe(),
+                req.enheter ?: listOf()
+            )
         }
 
         respond(respons)

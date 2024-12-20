@@ -37,7 +37,10 @@ data class BehandlingAarsakAntallGjennomsnitt(
 
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
-    fun hentBehandlingstidPerDag(behandlingsTyper: List<TypeBehandling>, enheter: List<String>): List<BehandlingstidPerDag> {
+    fun hentBehandlingstidPerDag(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
+    ): List<BehandlingstidPerDag> {
         val sql = """
             select date_trunc('day', bh.oppdatert_tid)                             dag,
                    avg(EXTRACT(EPOCH FROM (bh.oppdatert_tid - bh.mottatt_tid))) as snitt
@@ -116,14 +119,22 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlingerPerAvklaringsbehov(behandlingsTyper: List<TypeBehandling>): List<BehandlingPerAvklaringsbehov> {
+    fun antallÅpneBehandlingerPerAvklaringsbehov(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
+    ): List<BehandlingPerAvklaringsbehov> {
         val sql = """
             select count(*), gjeldende_avklaringsbehov
             from behandling_historikk
                      join behandling b on b.id = behandling_historikk.behandling_id
+                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                  FROM oppgave o
+                                                  WHERE o.behandling_referanse_id = b.referanse_id
+                                                  LIMIT 1)
             where gjeldende = true
               and status != 'AVSLUTTET'
               and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
             group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
@@ -131,6 +142,11 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper { row ->
                 BehandlingPerAvklaringsbehov(
