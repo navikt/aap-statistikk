@@ -17,7 +17,10 @@ class LagreOppgaveHendelseJobbUtfører(
 
         oppgaveHendelseRepository.lagreHendelse(hendelse)
 
-        flytJobbRepository.leggTil(JobbInput(LagreOppgaveJobbUtfører).medPayload(hendelse.oppgaveId.toString()))
+        flytJobbRepository.leggTil(
+            JobbInput(LagreOppgaveJobbUtfører).medPayload(hendelse.oppgaveId.toString())
+                .forSak(hendelse.oppgaveId)
+        )
     }
 
     companion object : Jobb {
