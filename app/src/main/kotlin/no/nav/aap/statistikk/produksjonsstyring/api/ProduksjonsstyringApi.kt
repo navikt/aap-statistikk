@@ -105,7 +105,9 @@ data class FordelingInput(
     @QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?,
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
-    )
+    ),
+    @QueryParam("For hvilke enheter. Tom liste betyr alle.")
+    val enheter: List<String>? = listOf()
 ) {
     enum class Tidsenhet {
         DAG, UKE, MÅNED, ÅR,
@@ -237,7 +239,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                     FordelingInput.Tidsenhet.MÅNED -> ChronoUnit.MONTHS
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
                 }, antallBøtter = req.antallBøtter ?: 30,
-                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() }.orEmpty()
+                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() }.orEmpty(),
+                enheter = req.enheter.orEmpty()
             ).map { FordelingLukkedeBehandlinger.fraBøtteFordeling(it) }
         })
     }
