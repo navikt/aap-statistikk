@@ -85,8 +85,6 @@ class LagreOppgaveJobbUtførerTest {
                 enhet = "NAVKontor123",
                 avklaringsbehovKode = "Kode123",
                 status = Oppgavestatus.OPPRETTET,
-                reservertAv = "Saksbehandler123",
-                reservertTidspunkt = LocalDateTime.now(),
                 opprettetTidspunkt = LocalDateTime.now(),
                 endretAv = "SaksbehandlerEndret123",
                 endretTidspunkt = LocalDateTime.now(),
@@ -121,7 +119,9 @@ class LagreOppgaveJobbUtførerTest {
                 opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId
+                oppgaveId = oppgaveId,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
             )
         )
 

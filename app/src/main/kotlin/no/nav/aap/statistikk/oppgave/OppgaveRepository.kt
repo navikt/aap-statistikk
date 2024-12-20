@@ -98,8 +98,8 @@ SELECT COALESCE(
 
             val reservasjonId = dbConnection.executeReturnKey(sql) {
                 setParams {
-                    setLocalDateTime(1, oppgave.reservasjon.reservasjonOpprettet)
-                    setLong(2, oppgave.reservasjon.id)
+                    setLong(1, oppgave.reservasjon.reservertAv.id)
+                    setLocalDateTime(2, oppgave.reservasjon.reservasjonOpprettet)
                 }
             }
 
