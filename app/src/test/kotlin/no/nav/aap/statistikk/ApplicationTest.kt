@@ -6,8 +6,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.testutils.*

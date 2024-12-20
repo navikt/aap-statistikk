@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
+import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører

@@ -18,7 +18,7 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
+import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
