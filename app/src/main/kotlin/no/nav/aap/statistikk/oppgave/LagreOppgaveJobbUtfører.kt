@@ -84,7 +84,7 @@ class LagreOppgaveJobbUtfører(
         }
 
         override fun type(): String {
-            return "konverterOppgavehendelserTilModell"
+            return "statistikk.konverterOppgavehendelserTilModell"
         }
     }
 }

@@ -39,7 +39,7 @@ class LagreOppgaveHendelseJobbUtfører(
         }
 
         override fun type(): String {
-            return "lagreOppgaveHendelsejob"
+            return "statistikk.lagreOppgaveHendelseJobb"
         }
     }
 }
