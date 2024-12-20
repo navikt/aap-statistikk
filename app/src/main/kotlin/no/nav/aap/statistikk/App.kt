@@ -88,7 +88,7 @@ fun Application.startUp(
         PrometheusConfig.DEFAULT
     )
 
-    val flyway = Flyway(dbConfig)
+    val flyway = Flyway(dbConfig, prometheusMeterRegistry)
     val dataSource = flyway.createAndMigrateDataSource()
 
     val bqRepository = BQRepository(bigQueryClient)
