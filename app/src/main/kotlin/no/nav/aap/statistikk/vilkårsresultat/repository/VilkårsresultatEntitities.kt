@@ -18,14 +18,14 @@ data class VilkårsResultatEntity(
             saksnummer,
             behandlingsReferanse,
             TypeBehandling.valueOf(typeBehandling),
-            vilkår.map { it: VilkårEntity -> it.tilVilkår() })
+            vilkår.map { it.tilVilkår() })
     }
 
     companion object {
         fun fraDomene(vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity {
             return VilkårsResultatEntity(
                 null,
-                vilkårsresultat.vilkår.map { it: Vilkår -> VilkårEntity.fraDomene(it) }
+                vilkårsresultat.vilkår.map { VilkårEntity.fraDomene(it) }
             )
         }
     }
@@ -45,7 +45,7 @@ data class VilkårEntity(
             return VilkårEntity(
                 null,
                 vilkår.vilkårType.toString(),
-                vilkår.perioder.map { it: VilkårsPeriode -> VilkårsPeriodeEntity.fraDomene(it) }
+                vilkår.perioder.map { VilkårsPeriodeEntity.fraDomene(it) }
             )
         }
     }

@@ -307,7 +307,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    private fun Params.setBehandlingsTyperParam(behandlingsTyper: List<TypeBehandling>, enheter: List<String> = emptyList()) {
+    private fun Params.setBehandlingsTyperParam(behandlingsTyper: List<TypeBehandling>) {
         if (behandlingsTyper.isEmpty()) {
             setString(1, null)
         } else {
