@@ -1,12 +1,12 @@
 package no.nav.aap.statistikk
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -39,7 +39,6 @@ class ApplicationTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = meterRegistry.avsluttetBehandlingLagret(),
                 skjermingService = SkjermingService(FakePdlClient())
             ),
         ) { url, client ->
@@ -149,8 +148,6 @@ class ApplicationTest {
         val bqRepository = FakeBQRepository()
         val meterRegistry = SimpleMeterRegistry()
 
-        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
-
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
@@ -164,7 +161,6 @@ class ApplicationTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 skjermingService = SkjermingService(FakePdlClient()),
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter
             ),
         ) { url, client ->
             client.post<StoppetBehandling, Any>(

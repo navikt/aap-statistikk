@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
+import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -22,7 +23,7 @@ class AvsluttetBehandlingService(
     private val bqRepository: IBQRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val skjermingService: SkjermingService,
-    private val avsluttetBehandlingLagretCounter: Counter,
+    private val meterRegistry: MeterRegistry
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
 
@@ -61,7 +62,7 @@ class AvsluttetBehandlingService(
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }
-        avsluttetBehandlingLagretCounter.increment()
+        meterRegistry.avsluttetBehandlingLagret().increment()
     }
 
     private fun lagreAvsluttetBehandlingIBigQuery(

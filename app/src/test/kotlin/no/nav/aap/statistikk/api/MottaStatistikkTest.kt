@@ -62,9 +62,6 @@ class MottaStatistikkTest {
         val bqRepository = FakeBQRepository()
         val meterRegistry = SimpleMeterRegistry()
 
-        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
-        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
-
         val mottattTid = LocalDateTime.now().minusDays(1)
         testKlient(
             noOpTransactionExecutor,
@@ -78,7 +75,6 @@ class MottaStatistikkTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
                 skjermingService = SkjermingService(FakePdlClient())
             )
         ) { url, client ->
@@ -223,8 +219,6 @@ class MottaStatistikkTest {
         val bqRepository = FakeBQRepository()
         val meterRegistry = SimpleMeterRegistry()
 
-        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
-
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
@@ -234,7 +228,6 @@ class MottaStatistikkTest {
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
-            avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
             skjermingService = skjermingService
         )
 
@@ -403,7 +396,6 @@ class MottaStatistikkTest {
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
-            avsluttetBehandlingLagretCounter = avsluttetBehandlingCounter,
             skjermingService = skjermingService
         )
         val motor = Motor(

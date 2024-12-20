@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
-import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -75,7 +75,7 @@ class AvsluttetBehandlingServiceTest {
                                 fraDato = LocalDate.now().minusYears(2),
                                 tilDato = LocalDate.now().plusDays(3),
                                 manuellVurdering = false,
-                                utfall = no.nav.aap.statistikk.vilkårsresultat.Utfall.OPPFYLT
+                                utfall = Utfall.OPPFYLT
                             )
                         )
                     )
@@ -111,7 +111,7 @@ class AvsluttetBehandlingServiceTest {
             val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 it,
                 bigQuery,
-                counter
+                meterRegistry
             )
 
             avsluttetBehandlingService.lagre(avsluttetBehandling)
@@ -144,7 +144,7 @@ class AvsluttetBehandlingServiceTest {
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
         assertThat(uthentetTilkjentYtelse).isNotNull()
-        assertThat(uthentetTilkjentYtelse!!.perioder).hasSize(2)
+        assertThat(uthentetTilkjentYtelse.perioder).hasSize(2)
         assertThat(uthentetTilkjentYtelse.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
         assertThat(counter.count()).isEqualTo(1.0)
     }
@@ -220,12 +220,12 @@ class AvsluttetBehandlingServiceTest {
             val (_, service) = konstruerAvsluttetBehandlingService(
                 it,
                 bigQuery,
-                counter
+                meterRegistry
             )
             service.lagre(avsluttetBehandling)
         }
         val uthentet =  dataSource.transaction {
-            dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }!!
+            dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
         }
 
         assertThat(uthentet.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
@@ -235,7 +235,7 @@ class AvsluttetBehandlingServiceTest {
     private fun konstruerAvsluttetBehandlingService(
         dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig,
-        counter: Counter
+        meterRegistry: MeterRegistry
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
         val bqRepository = BQRepository(bigQueryClient)
@@ -248,7 +248,7 @@ class AvsluttetBehandlingServiceTest {
                 bqRepository,
                 behandlingRepository = BehandlingRepository(dbConnection),
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
-                avsluttetBehandlingLagretCounter = counter
+                meterRegistry
             )
         return Pair(bigQueryClient, service)
     }
