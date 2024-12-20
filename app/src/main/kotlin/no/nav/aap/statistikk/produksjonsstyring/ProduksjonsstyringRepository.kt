@@ -37,19 +37,21 @@ data class BehandlingAarsakAntallGjennomsnitt(
 
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
-    fun hentBehandlingstidPerDag(behandlingsTyper: List<TypeBehandling>): List<BehandlingstidPerDag> {
+    fun hentBehandlingstidPerDag(behandlingsTyper: List<TypeBehandling>, enheter: List<String>): List<BehandlingstidPerDag> {
         val sql = """
-            select date_trunc('day', tom) dag, avg(EXTRACT(EPOCH FROM (tom - fom))) as snitt
-            from (select bh.mottatt_tid   fom,
-                         bh.oppdatert_tid tom
-                  from sak s,
-                       behandling b,
-                       behandling_historikk bh
-                  where s.id = b.sak_id
-                    and b.id = bh.behandling_id
-                    and bh.gjeldende = true 
-                    and (b.type = ANY(?::text[]) or ${'$'}1 is null)
-                    and bh.status = 'AVSLUTTET') fomtom
+            select date_trunc('day', bh.oppdatert_tid)                             dag,
+                   avg(EXTRACT(EPOCH FROM (bh.oppdatert_tid - bh.mottatt_tid))) as snitt
+            from behandling_historikk bh
+                     join behandling b on bh.behandling_id = b.id
+                     join sak s on b.sak_id = s.id
+                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                  FROM oppgave o
+                                                  WHERE o.behandling_referanse_id = b.referanse_id
+                                                  LIMIT 1)
+            where bh.gjeldende = true
+              and bh.status = 'AVSLUTTET'
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
             group by dag
             order by dag
         """.trimIndent()
@@ -58,6 +60,11 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper { row ->
                 BehandlingstidPerDag(
