@@ -220,19 +220,30 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun alderPåFerdigeBehandlingerSisteDager(
         antallDager: Int,
-        behandlingsTyper: List<TypeBehandling>
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
     ): Double {
         val sql = """
             select avg(extract(epoch from bh.oppdatert_tid - bh.mottatt_tid))
             from behandling_historikk bh
                      join behandling b on b.id = bh.behandling_id
+                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                  FROM oppgave o
+                                                  WHERE o.behandling_referanse_id = b.referanse_id
+                                                  LIMIT 1)
             where status = 'AVSLUTTET'
               and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
               and bh.oppdatert_tid > current_date - interval '$antallDager days';
         """.trimIndent()
         return connection.queryFirst(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper {
                 it.getDoubleOrNull("avg") ?: 0.0
