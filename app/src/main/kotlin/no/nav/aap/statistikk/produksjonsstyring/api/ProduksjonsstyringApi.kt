@@ -86,7 +86,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @PathParam("Antall dager å regne på") val antallDager: Int? = 7,
         @QueryParam(description = "For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
-        )
+        ),
+        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
     route("/behandlingstid/lukkede-siste-dager/{antallDager}").get<AlderSisteDager, Double>(
         modules,
@@ -95,9 +96,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(
                 req.antallDager
-                ?: 7,
+                    ?: 7,
                 req.behandlingstyper?.map { it.tilDomene() }
-                    ?: listOf(no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling))
+                    ?: listOf(no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling),
+                req.enheter.orEmpty())
         }
 
         respond(respons)
@@ -179,7 +181,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).alderÅpneBehandlinger(
                 bøttestørrelse = req.bøtteStørrelse
-                ?: 1,
+                    ?: 1,
                 enhet = when (req.enhet) {
                     FordelingInput.Tidsenhet.DAG -> ChronoUnit.DAYS
                     FordelingInput.Tidsenhet.UKE -> ChronoUnit.WEEKS
