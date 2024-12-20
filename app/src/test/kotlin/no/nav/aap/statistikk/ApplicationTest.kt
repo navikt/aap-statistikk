@@ -150,7 +150,6 @@ class ApplicationTest {
         val meterRegistry = SimpleMeterRegistry()
 
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
-        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
 
         testKlient(
             noOpTransactionExecutor,

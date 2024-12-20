@@ -8,7 +8,10 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import java.util.*
 
 
-fun AvsluttetBehandlingDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID): AvsluttetBehandling {
+fun AvsluttetBehandlingDTO.tilDomene(
+    saksnummer: String,
+    behandlingsReferanse: UUID
+): AvsluttetBehandling {
     return AvsluttetBehandling(
         tilkjentYtelse = tilkjentYtelse.tilDomene(
             saksnummer,
