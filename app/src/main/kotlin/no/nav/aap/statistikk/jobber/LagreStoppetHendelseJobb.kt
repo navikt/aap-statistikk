@@ -58,7 +58,7 @@ class LagreStoppetHendelseJobb(
     }
 
     override fun type(): String {
-        return "lagreHendelse"
+        return "statistikk.lagreHendelse"
     }
 
     override fun navn(): String {
