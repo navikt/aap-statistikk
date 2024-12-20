@@ -74,7 +74,7 @@ class LagreOppgaveJobbUtførerTest {
         val behandling = settOppEksisterendeBehandling(dataSource)
         val oppgaveId = 123L
 
-        settInnOppgaveHendelse(
+        settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -92,23 +92,14 @@ class LagreOppgaveJobbUtførerTest {
             )
         )
 
-        dataSource.transaction {
-            LagreOppgaveJobbUtfører(
-                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                personRepository = PersonRepository(it),
-                oppgaveRepository = OppgaveRepository(it),
-                enhetRepository = EnhetRepository(it),
-                saksbehandlerRepository = SaksbehandlerRepository(it)
-            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveId.toString()))
-        }
-
         val oppgaverPåBehandling = dataSource.transaction {
             OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
         }
 
         assertThat(oppgaverPåBehandling.size).isEqualTo(1)
 
-        settInnOppgaveHendelse(
+        // Reservere
+        settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -125,15 +116,21 @@ class LagreOppgaveJobbUtførerTest {
             )
         )
 
-        dataSource.transaction {
-            LagreOppgaveJobbUtfører(
-                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                personRepository = PersonRepository(it),
-                oppgaveRepository = OppgaveRepository(it),
-                enhetRepository = EnhetRepository(it),
-                saksbehandlerRepository = SaksbehandlerRepository(it)
-            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveId.toString()))
-        }
+        // Avreservere
+        settInnOppgaveHendelseOgUtførerJobb(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "POST_MOTTAK_NOE",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
+                endretAv = "SaksbehandlerEndret4232",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId,
+            )
+        )
 
         val oppgaverPåBehandling2 = dataSource.transaction {
             OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
@@ -146,7 +143,7 @@ class LagreOppgaveJobbUtførerTest {
     fun `oppgave urelatert til person og behandling`(@Postgres dataSource: DataSource) {
         val enhet = "NAVKontor456"
         val oppgaveId = 124L
-        settInnOppgaveHendelse(
+        settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -161,16 +158,6 @@ class LagreOppgaveJobbUtførerTest {
             )
         )
 
-        dataSource.transaction {
-            LagreOppgaveJobbUtfører(
-                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                personRepository = PersonRepository(it),
-                oppgaveRepository = OppgaveRepository(it),
-                enhetRepository = EnhetRepository(it),
-                saksbehandlerRepository = SaksbehandlerRepository(it)
-            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveId.toString()))
-        }
-
         val oppgaverForEnhet = dataSource.transaction {
             val uthentetEnhet = EnhetRepository(it).hentEnhet(enhet)!!
             OppgaveRepository(it).hentOppgaverForEnhet(uthentetEnhet)
@@ -181,15 +168,24 @@ class LagreOppgaveJobbUtførerTest {
 
     }
 
-    private fun settInnOppgaveHendelse(
+    private fun settInnOppgaveHendelseOgUtførerJobb(
         dataSource: DataSource,
-        xxx: (OppgaveHendelse.() -> OppgaveHendelse)? = null,
         oppgaveHendelse: OppgaveHendelse,
     ) {
         dataSource.transaction {
             OppgaveHendelseRepository(it).lagreHendelse(
                 oppgaveHendelse
             )
+        }
+
+        dataSource.transaction {
+            LagreOppgaveJobbUtfører(
+                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
+                personRepository = PersonRepository(it),
+                oppgaveRepository = OppgaveRepository(it),
+                enhetRepository = EnhetRepository(it),
+                saksbehandlerRepository = SaksbehandlerRepository(it)
+            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveHendelse.oppgaveId.toString()))
         }
     }
 
