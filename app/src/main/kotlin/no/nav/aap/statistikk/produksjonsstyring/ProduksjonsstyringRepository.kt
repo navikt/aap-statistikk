@@ -68,7 +68,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlingerOgGjennomsnitt(): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
+    fun antallÅpneBehandlingerOgGjennomsnitt(behandlingsTyper: List<TypeBehandling>): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
         val sql = """
             select type,
                    count(*),
@@ -78,10 +78,14 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                      join public.behandling b on b.id = bh.behandling_id
             where gjeldende = true
               and status != 'AVSLUTTET'
+              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
             group by b.type
         """.trimIndent()
 
         return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+            }
             setRowMapper { row ->
                 AntallÅpneOgTypeOgGjennomsnittsalderDTO(
                     antallÅpne = row.getInt("count"),
