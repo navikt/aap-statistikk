@@ -307,7 +307,7 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    private fun Params.setBehandlingsTyperParam(behandlingsTyper: List<TypeBehandling>) {
+    private fun Params.setBehandlingsTyperParam(behandlingsTyper: List<TypeBehandling>, enheter: List<String> = emptyList()) {
         if (behandlingsTyper.isEmpty()) {
             setString(1, null)
         } else {
@@ -343,7 +343,10 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallBehandlingerPerÅrsak(behandlingsTyper: List<TypeBehandling>): List<BehandlingAarsakAntallGjennomsnitt> {
+    fun antallBehandlingerPerÅrsak(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
+    ): List<BehandlingAarsakAntallGjennomsnitt> {
         val sql = """
 select unnest(b.aarsaker_til_behandling)                                       as aarsak,
        count(*),
@@ -351,15 +354,25 @@ select unnest(b.aarsaker_til_behandling)                                       a
                                                              b.opprettet_tid)) as avg_alder
 from behandling b
          join behandling_historikk bh on b.id = bh.behandling_id
+         LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                      FROM oppgave o
+                                      WHERE o.behandling_referanse_id = b.referanse_id
+                                      LIMIT 1)
 where (b.type = ANY (?::text[]) or ${'$'}1 is null)
-  and  bh.gjeldende = true
+  and bh.gjeldende = true
+  and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
   and bh.status != 'AVSLUTTET'
-group by aarsak;
+group by aarsak;;
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper {
                 BehandlingAarsakAntallGjennomsnitt(

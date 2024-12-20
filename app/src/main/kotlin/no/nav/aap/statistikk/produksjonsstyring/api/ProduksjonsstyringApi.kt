@@ -73,7 +73,9 @@ data class AntallÅpneOgTypeOgGjennomsnittsalder(
 data class BehandlingAarsakAntallGjennomsnittInput(
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
-    )
+    ),
+    @QueryParam("For hvilke enheter. Tom liste betyr alle.")
+    val enheter: List<String>? = listOf()
 )
 
 data class FordelingÅpneBehandlinger(val bøtte: Int, val antall: Int) {
@@ -276,7 +278,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val årsakOgGjennomsnitt = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallBehandlingerPerÅrsak(
-                req.behandlingstyper.reqTilBehandlingsTypeListe()
+                req.behandlingstyper.reqTilBehandlingsTypeListe(), req.enheter ?: listOf()
             )
         }
 
