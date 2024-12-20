@@ -17,7 +17,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
-import no.nav.aap.komponenter.httpklient.json.DefaultJsonMapper
+import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
