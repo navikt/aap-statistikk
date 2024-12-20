@@ -20,7 +20,9 @@ import java.time.temporal.ChronoUnit
 data class ÅpneBehandlingerPerBehandlingstypeInput(
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
-    )
+    ),
+    @QueryParam("For hvilke enheter. Tom liste betyr alle.")
+    val enheter: List<String>? = listOf()
 )
 
 data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
@@ -55,7 +57,9 @@ data class BehandlingUtviklingsUtviklingInput(
     @QueryParam("Hvor mange dager å lage fordeling på.") val antallDager: Int = 7,
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
-    )
+    ),
+    @QueryParam("For hvilke enheter. Tom liste betyr alle.")
+    val enheter: List<String>? = listOf()
 )
 
 data class AlderSisteDager(
@@ -159,7 +163,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction {
-            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(req.behandlingstyper.reqTilBehandlingsTypeListe())
+            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(
+                req.behandlingstyper.reqTilBehandlingsTypeListe(),
+                req.enheter ?: listOf()
+            )
         }
 
         respond(respons.map {

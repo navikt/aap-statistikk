@@ -68,7 +68,10 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallÅpneBehandlingerOgGjennomsnitt(behandlingsTyper: List<TypeBehandling>): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
+    fun antallÅpneBehandlingerOgGjennomsnitt(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
+    ): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
         val sql = """
             select type,
                    count(*),
@@ -76,15 +79,25 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
                            avg(current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid)) as gjennomsnitt_alder
             from behandling_historikk bh
                      join public.behandling b on b.id = bh.behandling_id
+                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                  FROM oppgave o
+                                                  WHERE o.behandling_referanse_id = b.referanse_id
+                                                  LIMIT 1)
             where gjeldende = true
               and status != 'AVSLUTTET'
               and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
             group by b.type
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper { row ->
                 AntallÅpneOgTypeOgGjennomsnittsalderDTO(
@@ -324,7 +337,10 @@ GROUP BY bucket;
         }
     }
 
-    fun venteÅrsakOgGjennomsnitt(behandlingsTyper: List<TypeBehandling>, enheter: List<String>): List<VenteårsakOgGjennomsnitt> {
+    fun venteÅrsakOgGjennomsnitt(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
+    ): List<VenteårsakOgGjennomsnitt> {
         val sql = """
             select venteaarsak,
                    count(*),
