@@ -157,20 +157,33 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         }
     }
 
-    fun antallBehandlingerPerSteggruppe(behandlingsTyper: List<TypeBehandling>): List<BehandlingPerSteggruppe> {
+    fun antallBehandlingerPerSteggruppe(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
+    ): List<BehandlingPerSteggruppe> {
         val sql = """
             select steggruppe, count(*)
             from behandling_historikk
                      join behandling b on b.id = behandling_historikk.behandling_id
+                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                  FROM oppgave o
+                                                  WHERE o.behandling_referanse_id = b.referanse_id
+                                                  LIMIT 1)
             where steggruppe is not null
               and gjeldende = true
               and (b.type = ANY (?::text[]) or ${'$'}1 is null)
+              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
             group by steggruppe;
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper { row ->
                 BehandlingPerSteggruppe(

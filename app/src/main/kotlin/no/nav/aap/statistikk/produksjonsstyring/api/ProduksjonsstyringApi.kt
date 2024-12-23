@@ -161,14 +161,17 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     data class BehandlingerPerSteggruppeInput(
         @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
-        )
+        ),
+        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
     route("/behandling-per-steggruppe").get<BehandlingerPerSteggruppeInput, List<BehandlingPerSteggruppe>>(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).antallBehandlingerPerSteggruppe(req.behandlingstyper?.map { it.tilDomene() }
-                ?: listOf())
+            ProduksjonsstyringRepository(conn).antallBehandlingerPerSteggruppe(
+                req.behandlingstyper.reqTilBehandlingsTypeListe(),
+                req.enheter.orEmpty()
+            )
         }
 
         respond(respons)
