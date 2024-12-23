@@ -104,10 +104,17 @@ SELECT COALESCE(
             }
 
             // Oppdater referanse
-            dbConnection.execute("update oppgave set reservasjon_id = ? where id = ?") {
+            dbConnection.execute(
+                """
+update oppgave
+set reservasjon_id  = ?,
+    avklaringsbehov = ?
+where id = ?"""
+            ) {
                 setParams {
                     setLong(1, reservasjonId)
-                    setLong(2, oppgave.id)
+                    setString(2, oppgave.avklaringsbehov)
+                    setLong(3, oppgave.id)
                 }
             }
         }
