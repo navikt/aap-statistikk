@@ -6,6 +6,7 @@ import io.ktor.server.routing.*
 import kotlinx.html.*
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.oppgave.OppgaveRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 
 internal fun Routing.oversiktRoute(transactionExecutor: TransactionExecutor) {
@@ -17,6 +18,9 @@ internal fun Routing.oversiktRoute(transactionExecutor: TransactionExecutor) {
         }
         val antallFullførteBehandlinger = transactionExecutor.withinTransaction {
             BehandlingRepository(it).tellFullførteBehandlinger()
+        }
+        val antallOppgaver = transactionExecutor.withinTransaction {
+            OppgaveRepository(it).antallOppgaver()
         }
         call.respondHtml(HttpStatusCode.Companion.OK) {
             head {
@@ -33,6 +37,9 @@ internal fun Routing.oversiktRoute(transactionExecutor: TransactionExecutor) {
                 }
                 p {
                     +"Antall fullførte behandlinger: $antallFullførteBehandlinger"
+                }
+                p {
+                    +"Antall oppgaver: $antallOppgaver"
                 }
             }
         }
