@@ -16,6 +16,7 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 Interne henvendelser kan sendes via Slack i kanalen `#po-aap-team-aap`.
 
+
 ## Oppdatere Gradle wrapper
 
 For å oppdatere Gradle wrapper: 
