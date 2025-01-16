@@ -2,6 +2,8 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.enhet.EnhetRepository
+import no.nav.aap.statistikk.oppgave.*
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestPerson
@@ -21,6 +23,25 @@ class BehandlingRepositoryTest {
         val sak = opprettTestSak(dataSource, "123456789", person)
 
         val referanse = UUID.randomUUID()
+
+        val enhet = dataSource.transaction {
+            val enhetUtenId = Enhet(kode = "1337")
+            enhetUtenId.copy(id = EnhetRepository(it).lagreEnhet(enhetUtenId))
+        }
+        dataSource.transaction {
+            OppgaveRepository(it).lagreOppgave(
+                Oppgave(
+                    identifikator = 123,
+                    avklaringsbehov = "1337",
+                    enhet = enhet,
+                    person = person,
+                    status = Oppgavestatus.OPPRETTET,
+                    behandlingReferanse = BehandlingReferanse(referanse = referanse),
+                    opprettetTidspunkt = LocalDateTime.now(),
+                    hendelser = listOf()
+                )
+            )
+        }
 
         dataSource.transaction {
             BehandlingRepository(it).opprettBehandling(
@@ -56,6 +77,7 @@ class BehandlingRepositoryTest {
             ÅrsakTilBehandling.SØKNAD,
             ÅrsakTilBehandling.G_REGULERING
         )
+        assertThat(uthentet.behandlendeEnhet).isEqualTo(enhet)
     }
 
     @Test

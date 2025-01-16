@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.oppgave.Enhet
-import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.sak.Sak
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -15,6 +14,7 @@ data class Versjon(
 
 /**
  * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
+ * @param behandlendeEnhet Hvilket NAV-kontor som eier behandlingen. Utledet som siste enhet på en oppgave tilhørende behandlingen.
  */
 data class Behandling(
     val id: Long? = null,
@@ -34,6 +34,7 @@ data class Behandling(
     val venteÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<ÅrsakTilBehandling> = listOf(),
+    val behandlendeEnhet: Enhet? = null,
 ) {
     init {
         // Skal oppgis med sekund-presisjon

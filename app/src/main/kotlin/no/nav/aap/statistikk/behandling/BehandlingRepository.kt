@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.statistikk.oppgave.Enhet
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import java.time.Clock
@@ -26,7 +27,7 @@ SELECT COALESCE(
                (SELECT id FROM behandling_referanse WHERE behandling_referanse.referanse = ?)
        ) AS id;"""
 
-        val xxId = dbConnection.queryFirst(sqlVersjon) {
+        val id = dbConnection.queryFirst(sqlVersjon) {
             setParams {
                 setUUID(1, behandling.referanse)
                 setUUID(2, behandling.referanse)
@@ -41,7 +42,7 @@ VALUES (?, ?, ?, ?, ?, ?)"""
         ) {
             setParams {
                 setLong(1, behandling.sak.id!!)
-                setLong(2, xxId)
+                setLong(2, id)
                 setString(3, behandling.typeBehandling.toString())
                 setLocalDateTime(4, behandling.opprettetTid)
                 setLong(5, behandling.relatertBehandlingId)
@@ -157,7 +158,9 @@ WHERE ident = ?""", behandling.relaterteIdenter
        bh.soknadsformat             as bh_soknadsformat,
        bh.steggruppe                as bh_steggruppe,
        v.versjon                    as v_versjon,
-       rp.rp_ident                  as rp_ident
+       rp.rp_ident                  as rp_ident,
+       e.id                         as e_id,
+       e.kode                       as e_kode
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
@@ -171,6 +174,11 @@ FROM behandling b
                              JOIN person pr ON rp.person_id = pr.id
                     GROUP BY rp.behandling_id) rp
                    on rp.behandling_id = bh.id
+         left join enhet e on e.id = (select o.enhet_id
+                                      from oppgave o
+                                      where o.behandling_referanse_id = b.referanse_id
+                                      order by o.opprettet_tidspunkt desc
+                                      limit 1)
 WHERE br.referanse = ?"""
         ) {
             setParams {
@@ -205,7 +213,9 @@ WHERE br.referanse = ?"""
        bh.steggruppe                as bh_steggruppe,
        bh.id                        as bh_id,
        v.versjon                    as v_versjon,
-       rp.rp_ident                  as rp_ident
+       rp.rp_ident                  as rp_ident,
+       e.id                         as e_id,
+       e.kode                       as e_kode
 FROM behandling b
          JOIN behandling_referanse br on b.referanse_id = br.id
          JOIN sak s on b.sak_id = s.id
@@ -219,6 +229,11 @@ FROM behandling b
                              JOIN person pr ON rp.person_id = pr.id
                     GROUP BY rp.behandling_id) rp
                    on rp.behandling_id = bh.id
+         left join enhet e on e.id = (select o.enhet_id
+                                      from oppgave o
+                                      where o.behandling_referanse_id = b.referanse_id
+                                      order by o.opprettet_tidspunkt desc
+                                      limit 1)
 WHERE b.id = ?"""
 
     override fun hent(id: Long): Behandling {
@@ -281,6 +296,8 @@ WHERE b.id = ?"""
             ?.ifBlank { null },
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
+        behandlendeEnhet = it.getLongOrNull("e_id")
+            ?.let { id -> Enhet(id = id, kode = it.getString("e_kode")) },
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
             .map { ÅrsakTilBehandling.valueOf(it) }
     )
