@@ -86,9 +86,9 @@ SELECT COALESCE(
         } else {
             // Først fjern evnt eksisterende reservasjoner
             val gammelReservasjonId =
-                dbConnection.queryFirst("select reservasjon_id from oppgave where id = ?") {
+                dbConnection.queryFirstOrNull("select reservasjon_id from oppgave where id = ?") {
                     setParams { setLong(1, oppgave.id) }
-                    setRowMapper { it.getLong("reservasjon_id") }
+                    setRowMapper { it.getLongOrNull("reservasjon_id") }
                 }
 
             dbConnection.execute("update oppgave set reservasjon_id = null where id = ?") {
