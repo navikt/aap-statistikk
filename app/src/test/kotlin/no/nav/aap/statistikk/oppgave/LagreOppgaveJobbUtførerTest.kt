@@ -140,6 +140,63 @@ class LagreOppgaveJobbUtførerTest {
     }
 
     @Test
+    fun `reservere oppgave på annen person`(@Postgres dataSource: DataSource) {
+        val behandling = settOppEksisterendeBehandling(dataSource)
+        val oppgaveId = 123L
+
+        settInnOppgaveHendelseOgUtførerJobb(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                personIdent = "12345678901",
+                saksnummer = "S12345",
+                behandlingRef = behandling.referanse,
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "Kode123",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now(),
+                endretAv = "SaksbehandlerEndret123",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId,
+                reservertAv = "MEGET_VIKTIG_PERSON",
+                reservertTidspunkt = LocalDateTime.now(),
+            )
+        )
+
+        val oppgaverPåBehandling = dataSource.transaction {
+            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+        }
+
+        assertThat(oppgaverPåBehandling.size).isEqualTo(1)
+
+        // Reservere
+        settInnOppgaveHendelseOgUtførerJobb(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "POST_MOTTAK_NOE",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
+                endretAv = "SaksbehandlerEndret4232",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
+            )
+        )
+
+        val oppgaverPåBehandling2 = dataSource.transaction {
+            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+        }
+
+        assertThat(oppgaverPåBehandling2.size).isEqualTo(1)
+    }
+
+
+    @Test
     fun `oppgave urelatert til person og behandling`(@Postgres dataSource: DataSource) {
         val enhet = "NAVKontor456"
         val oppgaveId = 124L

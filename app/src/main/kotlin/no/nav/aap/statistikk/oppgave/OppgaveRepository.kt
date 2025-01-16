@@ -85,9 +85,21 @@ SELECT COALESCE(
             }
         } else {
             // Først fjern evnt eksisterende reservasjoner
-            dbConnection.execute("delete from reservasjon where id in (select reservasjon_id from oppgave where id = ?)") {
+            val gammelReservasjonId =
+                dbConnection.queryFirst("select reservasjon_id from oppgave where id = ?") {
+                    setParams { setLong(1, oppgave.id) }
+                    setRowMapper { it.getLong("reservasjon_id") }
+                }
+
+            dbConnection.execute("update oppgave set reservasjon_id = null where id = ?") {
                 setParams {
                     setLong(1, oppgave.id)
+                }
+            }
+
+            dbConnection.execute("delete from reservasjon where id = ?") {
+                setParams {
+                    setLong(1, gammelReservasjonId)
                 }
             }
 
@@ -196,6 +208,7 @@ where id = ?"""
         },
         reservasjon = it.getLongOrNull("o_reservasjon_id")?.let { reservasjon ->
             Reservasjon(
+                id = it.getLong("o_reservasjon_id"),
                 reservertAv = Saksbehandler(
                     id = it.getLong("r_reservert_av"),
                     ident = it.getString("s_nav_ident")
