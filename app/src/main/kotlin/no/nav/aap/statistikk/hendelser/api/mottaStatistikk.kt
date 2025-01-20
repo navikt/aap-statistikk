@@ -8,7 +8,7 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
@@ -52,6 +52,7 @@ val avklaringsbehov = listOf(
             løsesAv = listOf(Rolle.SAKSBEHANDLER)
 
         ),
+        avklaringsbehovDefinisjon = AVKLAR_STUDENT,
         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
         endringer = listOf(
             EndringDTO(
@@ -71,6 +72,7 @@ val avklaringsbehov = listOf(
             løsesISteg = StegType.AVKLAR_SYKDOM,
             løsesAv = listOf(Rolle.VEILEDER)
         ),
+        avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
         endringer = listOf(
             EndringDTO(

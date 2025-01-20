@@ -2,6 +2,7 @@ package no.nav.aap.statistikk
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.FATTE_VEDTAK
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
@@ -135,6 +136,7 @@ class IntegrationTest {
                         løsesISteg = StegType.FATTE_VEDTAK,
                         løsesAv = listOf(Rolle.SAKSBEHANDLER)
                     ),
+                    avklaringsbehovDefinisjon = FATTE_VEDTAK,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(
                         EndringDTO(

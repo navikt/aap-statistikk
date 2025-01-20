@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
@@ -138,6 +138,7 @@ class MottaStatistikkTest {
                         løsesISteg = StegType.AVKLAR_SYKDOM,
                         løsesAv = listOf(Rolle.VEILEDER)
                     ),
+                    avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         EndringDTO(
@@ -163,6 +164,7 @@ class MottaStatistikkTest {
                         løsesISteg = StegType.VURDER_BISTANDSBEHOV,
                         løsesAv = listOf(Rolle.VEILEDER)
                     ),
+                    avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         EndringDTO(
@@ -188,6 +190,7 @@ class MottaStatistikkTest {
                         løsesISteg = StegType.KVALITETSSIKRING,
                         løsesAv = listOf(Rolle.SAKSBEHANDLER)
                     ),
+                    avklaringsbehovDefinisjon = KVALITETSSIKRING,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                     endringer = listOf(
                         EndringDTO(
@@ -308,6 +311,7 @@ class MottaStatistikkTest {
                         løsesISteg = StegType.AVKLAR_SYKDOM,
                         løsesAv = listOf(Rolle.VEILEDER)
                     ),
+                    avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         EndringDTO(
@@ -333,6 +337,7 @@ class MottaStatistikkTest {
                         løsesISteg = StegType.VURDER_BISTANDSBEHOV,
                         løsesAv = listOf(Rolle.VEILEDER)
                     ),
+                    avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
                         EndringDTO(
@@ -358,6 +363,7 @@ class MottaStatistikkTest {
                         løsesISteg = StegType.KVALITETSSIKRING,
                         løsesAv = listOf(Rolle.SAKSBEHANDLER)
                     ),
+                    avklaringsbehovDefinisjon = KVALITETSSIKRING,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                     endringer = listOf(
                         EndringDTO(
