@@ -23,6 +23,7 @@ import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tilgang.Rolle
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.*
@@ -131,7 +132,8 @@ class IntegrationTest {
                     definisjon = DefinisjonDTO(
                         type = AvklaringsbehovKode.`5098`,
                         behovType = BehovType.MANUELT_PÅKREVD,
-                        løsesISteg = StegType.FATTE_VEDTAK
+                        løsesISteg = StegType.FATTE_VEDTAK,
+                        løsesAv = listOf(Rolle.SAKSBEHANDLER)
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(

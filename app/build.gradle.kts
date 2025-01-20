@@ -11,6 +11,7 @@ val ktorVersion = "3.0.3"
 val mockkVersion = "1.13.14"
 val komponenterVersjon = "1.0.112"
 val behandlingsflytversjon = "0.0.108"
+val tilgangVersjon = "0.0.89"
 val flywayVersion = "11.1.1"
 val oppgaveVersjon = "0.0.40"
 val testContainersVersion = "1.20.4"
@@ -52,6 +53,8 @@ dependencies {
 
     implementation("no.nav:ktor-openapi-generator:1.0.72")
     implementation("no.nav.aap.behandlingsflyt:kontrakt:$behandlingsflytversjon")
+    implementation("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
+
     implementation("no.nav.aap.oppgave:api-kontrakt:$oppgaveVersjon")
     implementation("no.nav.aap.postmottak:kontrakt:0.0.21")
 

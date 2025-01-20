@@ -39,6 +39,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
+import tilgang.Rolle
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.*
@@ -134,7 +135,8 @@ class MottaStatistikkTest {
                     definisjon = DefinisjonDTO(
                         type = AvklaringsbehovKode.`5003`,
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.AVKLAR_SYKDOM
+                        løsesISteg = StegType.AVKLAR_SYKDOM,
+                        løsesAv = listOf(Rolle.VEILEDER)
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -158,7 +160,8 @@ class MottaStatistikkTest {
                     definisjon = DefinisjonDTO(
                         type = AvklaringsbehovKode.`5006`,
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.VURDER_BISTANDSBEHOV
+                        løsesISteg = StegType.VURDER_BISTANDSBEHOV,
+                        løsesAv = listOf(Rolle.VEILEDER)
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -182,7 +185,8 @@ class MottaStatistikkTest {
                     definisjon = DefinisjonDTO(
                         type = AvklaringsbehovKode.`5097`,
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.KVALITETSSIKRING
+                        løsesISteg = StegType.KVALITETSSIKRING,
+                        løsesAv = listOf(Rolle.SAKSBEHANDLER)
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                     endringer = listOf(
@@ -301,7 +305,8 @@ class MottaStatistikkTest {
                     definisjon = DefinisjonDTO(
                         type = AvklaringsbehovKode.`5003`,
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.AVKLAR_SYKDOM
+                        løsesISteg = StegType.AVKLAR_SYKDOM,
+                        løsesAv = listOf(Rolle.VEILEDER)
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -325,7 +330,8 @@ class MottaStatistikkTest {
                     definisjon = DefinisjonDTO(
                         type = AvklaringsbehovKode.`5006`,
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.VURDER_BISTANDSBEHOV
+                        løsesISteg = StegType.VURDER_BISTANDSBEHOV,
+                        løsesAv = listOf(Rolle.VEILEDER)
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -349,7 +355,8 @@ class MottaStatistikkTest {
                     definisjon = DefinisjonDTO(
                         type = AvklaringsbehovKode.`5097`,
                         behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.KVALITETSSIKRING
+                        løsesISteg = StegType.KVALITETSSIKRING,
+                        løsesAv = listOf(Rolle.SAKSBEHANDLER)
                     ),
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                     endringer = listOf(
