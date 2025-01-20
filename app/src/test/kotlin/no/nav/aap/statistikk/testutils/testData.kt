@@ -5,7 +5,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
@@ -86,12 +85,6 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
         ident = "14890097570",
         avklaringsbehov = listOf(
             AvklaringsbehovHendelseDto(
-                definisjon = DefinisjonDTO(
-                    type = AvklaringsbehovKode.`5003`,
-                    behovType = BehovType.MANUELT_PÅKREVD,
-                    løsesISteg = StegType.AVKLAR_SYKDOM,
-                    løsesAv = listOf(Rolle.VEILEDER)
-                ),
                 avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
@@ -110,12 +103,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 )
             ),
             AvklaringsbehovHendelseDto(
-                definisjon = DefinisjonDTO(
-                    type = AvklaringsbehovKode.`5006`,
-                    behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                    løsesISteg = StegType.VURDER_BISTANDSBEHOV,
-                    løsesAv = listOf(Rolle.VEILEDER)
-                ),
+                avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
                     EndringDTO(
@@ -133,12 +121,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 )
             ),
             AvklaringsbehovHendelseDto(
-                definisjon = DefinisjonDTO(
-                    type = AvklaringsbehovKode.`5097`,
-                    behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                    løsesISteg = StegType.KVALITETSSIKRING,
-                    løsesAv = listOf(Rolle.VEILEDER)
-                ),
+                avklaringsbehovDefinisjon = KVALITETSSIKRING,
                 status = EndringStatus.valueOf("AVSLUTTET"),
                 endringer = listOf(
                     EndringDTO(

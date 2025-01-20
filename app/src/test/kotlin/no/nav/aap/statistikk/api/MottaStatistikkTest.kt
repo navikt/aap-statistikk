@@ -9,7 +9,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
@@ -132,12 +131,6 @@ class MottaStatistikkTest {
             ident = "14890097570",
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`5003`,
-                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.AVKLAR_SYKDOM,
-                        løsesAv = listOf(Rolle.VEILEDER)
-                    ),
                     avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -158,12 +151,6 @@ class MottaStatistikkTest {
                         )
                     )
                 ), AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`5006`,
-                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.VURDER_BISTANDSBEHOV,
-                        løsesAv = listOf(Rolle.VEILEDER)
-                    ),
                     avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -184,12 +171,6 @@ class MottaStatistikkTest {
                         )
                     )
                 ), AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`5097`,
-                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.KVALITETSSIKRING,
-                        løsesAv = listOf(Rolle.SAKSBEHANDLER)
-                    ),
                     avklaringsbehovDefinisjon = KVALITETSSIKRING,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                     endringer = listOf(
@@ -305,12 +286,6 @@ class MottaStatistikkTest {
             ident = "14890097570",
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`5003`,
-                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.AVKLAR_SYKDOM,
-                        løsesAv = listOf(Rolle.VEILEDER)
-                    ),
                     avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -331,12 +306,6 @@ class MottaStatistikkTest {
                         )
                     )
                 ), AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`5006`,
-                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.VURDER_BISTANDSBEHOV,
-                        løsesAv = listOf(Rolle.VEILEDER)
-                    ),
                     avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                     endringer = listOf(
@@ -357,12 +326,6 @@ class MottaStatistikkTest {
                         )
                     )
                 ), AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`5097`,
-                        behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                        løsesISteg = StegType.KVALITETSSIKRING,
-                        løsesAv = listOf(Rolle.SAKSBEHANDLER)
-                    ),
                     avklaringsbehovDefinisjon = KVALITETSSIKRING,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
                     endringer = listOf(

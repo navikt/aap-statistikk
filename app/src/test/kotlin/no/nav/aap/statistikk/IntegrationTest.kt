@@ -5,7 +5,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.FATTE_VEDTAK
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
@@ -130,12 +129,6 @@ class IntegrationTest {
         hendelseFørCopy.copy(
             avklaringsbehov = hendelseFørCopy.avklaringsbehov + listOf(
                 AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`5098`,
-                        behovType = BehovType.MANUELT_PÅKREVD,
-                        løsesISteg = StegType.FATTE_VEDTAK,
-                        løsesAv = listOf(Rolle.SAKSBEHANDLER)
-                    ),
                     avklaringsbehovDefinisjon = FATTE_VEDTAK,
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(
