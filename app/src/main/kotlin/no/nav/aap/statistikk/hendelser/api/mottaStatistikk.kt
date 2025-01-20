@@ -27,6 +27,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobbUtfører
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import org.slf4j.LoggerFactory
+import tilgang.Rolle
 import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.IntStream
@@ -47,7 +48,8 @@ val avklaringsbehov = listOf(
         definisjon = DefinisjonDTO(
             type = AvklaringsbehovKode.`5001`,
             behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.AVKLAR_STUDENT
+            løsesISteg = StegType.AVKLAR_STUDENT,
+            løsesAv = listOf(Rolle.SAKSBEHANDLER)
 
         ),
         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
@@ -66,7 +68,8 @@ val avklaringsbehov = listOf(
         definisjon = DefinisjonDTO(
             type = AvklaringsbehovKode.`5003`,
             behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.AVKLAR_SYKDOM
+            løsesISteg = StegType.AVKLAR_SYKDOM,
+            løsesAv = listOf(Rolle.VEILEDER)
         ),
         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
         endringer = listOf(

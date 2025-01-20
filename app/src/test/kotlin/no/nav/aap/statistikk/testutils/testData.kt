@@ -9,6 +9,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
+import tilgang.Rolle
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -88,7 +89,8 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 definisjon = DefinisjonDTO(
                     type = AvklaringsbehovKode.`5003`,
                     behovType = BehovType.MANUELT_PÅKREVD,
-                    løsesISteg = StegType.AVKLAR_SYKDOM
+                    løsesISteg = StegType.AVKLAR_SYKDOM,
+                    løsesAv = listOf(Rolle.VEILEDER)
                 ),
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
@@ -110,7 +112,8 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 definisjon = DefinisjonDTO(
                     type = AvklaringsbehovKode.`5006`,
                     behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                    løsesISteg = StegType.VURDER_BISTANDSBEHOV
+                    løsesISteg = StegType.VURDER_BISTANDSBEHOV,
+                    løsesAv = listOf(Rolle.VEILEDER)
                 ),
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
@@ -132,7 +135,8 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                 definisjon = DefinisjonDTO(
                     type = AvklaringsbehovKode.`5097`,
                     behovType = BehovType.valueOf("MANUELT_PÅKREVD"),
-                    løsesISteg = StegType.KVALITETSSIKRING
+                    løsesISteg = StegType.KVALITETSSIKRING,
+                    løsesAv = listOf(Rolle.VEILEDER)
                 ),
                 status = EndringStatus.valueOf("AVSLUTTET"),
                 endringer = listOf(
