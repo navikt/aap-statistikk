@@ -10,9 +10,10 @@ plugins {
 val ktorVersion = "3.0.3"
 val mockkVersion = "1.13.14"
 val komponenterVersjon = "1.0.112"
-val behandlingsflytversjon = "0.0.107"
+val behandlingsflytversjon = "0.0.108"
 val flywayVersion = "11.1.1"
 val oppgaveVersjon = "0.0.40"
+val testContainersVersion = "1.20.4"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -62,14 +63,14 @@ dependencies {
     testImplementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("org.assertj:assertj-core:3.27.3")
-    testImplementation("org.testcontainers:postgresql:1.20.4")
+    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testImplementation("org.testcontainers:gcloud:1.20.4")
-    testImplementation("org.testcontainers:junit-jupiter:1.20.4")
+    testImplementation("org.testcontainers:gcloud:$testContainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
 }
 
 repositories {
