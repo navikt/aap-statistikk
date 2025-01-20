@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.testutils
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
@@ -92,6 +92,7 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
                     løsesISteg = StegType.AVKLAR_SYKDOM,
                     løsesAv = listOf(Rolle.VEILEDER)
                 ),
+                avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
                 status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
                 endringer = listOf(
                     EndringDTO(
