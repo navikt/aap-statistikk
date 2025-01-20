@@ -1,12 +1,9 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.BESTILL_LEGEERKLÆRING_KODE
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
@@ -48,12 +45,6 @@ class HendelseHjelpereKtTest {
     fun `om behandlingen nettopp er opprettet, er det ingen menneskelige saksbehandlere`() {
         val liste = listOf(
             AvklaringsbehovHendelseDto(
-                definisjon = DefinisjonDTO(
-                    type = AvklaringsbehovKode.`5001`,
-                    behovType = BehovType.MANUELT_PÅKREVD,
-                    løsesISteg = StegType.AVKLAR_STUDENT,
-                    løsesAv = listOf(Rolle.SAKSBEHANDLER)
-                ),
                 avklaringsbehovDefinisjon = AVKLAR_STUDENT,
                 status = EndringStatus.OPPRETTET,
                 endringer = listOf(
@@ -103,12 +94,6 @@ class HendelseHjelpereKtTest {
     fun `utleder nyeste venteårsak`() {
         val input: List<AvklaringsbehovHendelseDto> =
             listOf<AvklaringsbehovHendelseDto>() + AvklaringsbehovHendelseDto(
-                definisjon = DefinisjonDTO(
-                    type = AvklaringsbehovKode.`9001`,
-                    behovType = BehovType.VENTEPUNKT,
-                    løsesISteg = StegType.AVKLAR_SYKDOM,
-                    løsesAv = listOf(Rolle.VEILEDER, Rolle.SAKSBEHANDLER)
-                ),
                 avklaringsbehovDefinisjon = MANUELT_SATT_PÅ_VENT,
                 status = Status.OPPRETTET,
                 endringer = listOf(
@@ -120,12 +105,6 @@ class HendelseHjelpereKtTest {
                     )
                 )
             ) + AvklaringsbehovHendelseDto(
-                definisjon = DefinisjonDTO(
-                    type = AvklaringsbehovKode.`9001`,
-                    behovType = BehovType.VENTEPUNKT,
-                    løsesISteg = StegType.BEREGN_TILKJENT_YTELSE,
-                    løsesAv = listOf(Rolle.SAKSBEHANDLER)
-                ),
                 avklaringsbehovDefinisjon = FASTSETT_BEREGNINGSTIDSPUNKT,
                 status = Status.OPPRETTET,
                 endringer = listOf(
@@ -150,12 +129,6 @@ class HendelseHjelpereKtTest {
     fun `er ikke hos NAY, men sykdomssteget`() {
         val hosSykdomsSteget = listOf(
             AvklaringsbehovHendelseDto(
-                definisjon = DefinisjonDTO(
-                    type = AvklaringsbehovKode.`5003`,
-                    behovType = BehovType.MANUELT_PÅKREVD,
-                    løsesISteg = StegType.AVKLAR_SYKDOM,
-                    løsesAv = listOf(Rolle.VEILEDER)
-                ),
                 avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
                 status = EndringStatus.OPPRETTET,
                 endringer = listOf(
@@ -175,12 +148,7 @@ class HendelseHjelpereKtTest {
 
 val avklaringsbehovHendelser = listOf(
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5003`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.AVKLAR_SYKDOM,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
+
         avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
@@ -205,12 +173,7 @@ val avklaringsbehovHendelser = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5005`,
-            behovType = BehovType.MANUELT_FRIVILLIG,
-            løsesISteg = StegType.FRITAK_MELDEPLIKT,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
+
         avklaringsbehovDefinisjon = FRITAK_MELDEPLIKT,
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
@@ -229,12 +192,6 @@ val avklaringsbehovHendelser = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5006`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.VURDER_BISTANDSBEHOV,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
         avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
@@ -251,12 +208,6 @@ val avklaringsbehovHendelser = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5008`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.FASTSETT_BEREGNINGSTIDSPUNKT,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = FASTSETT_BEREGNINGSTIDSPUNKT,
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
@@ -273,12 +224,6 @@ val avklaringsbehovHendelser = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5097`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.KVALITETSSIKRING,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = KVALITETSSIKRING,
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
@@ -295,12 +240,6 @@ val avklaringsbehovHendelser = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5098`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.FORESLÅ_VEDTAK,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = FORESLÅ_VEDTAK,
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
@@ -317,12 +256,6 @@ val avklaringsbehovHendelser = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5099`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.FATTE_VEDTAK,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = FATTE_VEDTAK,
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
@@ -342,12 +275,6 @@ val avklaringsbehovHendelser = listOf(
 
 val ufullførtBehandlingEndringer = listOf(
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5003`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.AVKLAR_SYKDOM,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
         avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
@@ -366,12 +293,6 @@ val ufullførtBehandlingEndringer = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5004`,
-            behovType = BehovType.MANUELT_FRIVILLIG,
-            løsesISteg = StegType.FASTSETT_ARBEIDSEVNE,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
         avklaringsbehovDefinisjon = FASTSETT_ARBEIDSEVNE,
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
@@ -396,12 +317,6 @@ val ufullførtBehandlingEndringer = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5005`,
-            behovType = BehovType.MANUELT_FRIVILLIG,
-            løsesISteg = StegType.FRITAK_MELDEPLIKT,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
         avklaringsbehovDefinisjon = FRITAK_MELDEPLIKT,
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
@@ -420,12 +335,6 @@ val ufullførtBehandlingEndringer = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5006`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.VURDER_BISTANDSBEHOV,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
         avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
         status = EndringStatus.KVALITETSSIKRET,
         endringer = listOf(
@@ -444,12 +353,6 @@ val ufullførtBehandlingEndringer = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5097`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.KVALITETSSIKRING,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = KVALITETSSIKRING,
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
@@ -468,12 +371,6 @@ val ufullførtBehandlingEndringer = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5098`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.FORESLÅ_VEDTAK,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = FORESLÅ_VEDTAK,
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
@@ -492,12 +389,6 @@ val ufullførtBehandlingEndringer = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5099`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.FATTE_VEDTAK,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = FATTE_VEDTAK,
         status = EndringStatus.OPPRETTET,
         endringer = listOf(
@@ -513,12 +404,6 @@ val ufullførtBehandlingEndringer = listOf(
 
 val sattPåVentPåNAYSteg = listOf(
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5003`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.AVKLAR_SYKDOM,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
         avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
@@ -553,12 +438,6 @@ val sattPåVentPåNAYSteg = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5006`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.VURDER_BISTANDSBEHOV,
-            løsesAv = listOf(Rolle.VEILEDER)
-        ),
         avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
         status = EndringStatus.AVSLUTTET,
         endringer = listOf(
@@ -593,11 +472,6 @@ val sattPåVentPåNAYSteg = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`5097`,
-            behovType = BehovType.MANUELT_PÅKREVD,
-            løsesISteg = StegType.KVALITETSSIKRING, løsesAv = listOf(Rolle.SAKSBEHANDLER)
-        ),
         avklaringsbehovDefinisjon = KVALITETSSIKRING,
         status = EndringStatus.OPPRETTET,
         endringer = listOf(
@@ -625,12 +499,7 @@ val sattPåVentPåNAYSteg = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-        definisjon = DefinisjonDTO(
-            type = AvklaringsbehovKode.`9003`,
-            behovType = BehovType.VENTEPUNKT,
-            løsesISteg = StegType.KVALITETSSIKRING,
-            løsesAv = listOf(Rolle.SAKSBEHANDLER, Rolle.VEILEDER)
-        ),
+
         avklaringsbehovDefinisjon = BESTILL_LEGEERKLÆRING,
         status = EndringStatus.OPPRETTET,
         endringer = listOf(
