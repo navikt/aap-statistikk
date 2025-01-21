@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.KELVIN
+import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
@@ -43,8 +44,7 @@ class SaksStatistikkService(
 
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
-        val ansvarligEnhet =
-            if (erHosNAY) NAY_NASJONAL_KØ_KODE else behandling.behandlendeEnhet?.kode
+        val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
 
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
@@ -82,6 +82,16 @@ class SaksStatistikkService(
             logger.warn("Behandling med referanse ${behandling.referanse} hadde mer enn én årsak. Avgir den første.")
         }
         bigQueryRepository.lagre(bqSak)
+    }
+
+    private fun ansvarligEnhet(
+        erHosNAY: Boolean,
+        behandling: Behandling
+    ): String? {
+        if (skjermingService.erSkjermet(behandling)) {
+            return "-5"
+        }
+        return if (erHosNAY) NAY_NASJONAL_KØ_KODE else behandling.behandlendeEnhet?.kode
     }
 
     fun behandlingStatus(status: BehandlingStatus): String {
