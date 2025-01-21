@@ -48,6 +48,9 @@ data class BQBehandling(
         if (ansvarligEnhetKode == null) {
             logger.info("Fant ikke ansvarlig enhet for behandling $behandlingUUID med saksnummer $saksnummer.")
         }
+        if (saksbehandler == null) {
+            logger.info("Fant ikke saksbehandler for behandling $behandlingUUID med saksnummer $saksnummer.")
+        }
     }
 }
 
