@@ -1,14 +1,11 @@
 package no.nav.aap.statistikk.testutils
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
-import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
-import tilgang.Rolle
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -76,6 +73,27 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
     )
 }
 
+fun avklaringsbehovHendelse(): AvklaringsbehovHendelseDto {
+    return AvklaringsbehovHendelseDto(
+        avklaringsbehovDefinisjon = FRITAK_MELDEPLIKT,
+        status = EndringStatus.OPPRETTET,
+        endringer = listOf(
+            EndringDTO(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.parse("2024-10-28T09:12:55.558"),
+                frist = null,
+                endretAv = "Z994573"
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2024-10-28T09:12:55.607"),
+                frist = null,
+                endretAv = "Z994573"
+            )
+        )
+    )
+}
+
 fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBehandling {
     return StoppetBehandling(
         saksnummer = saksnummer,
@@ -104,10 +122,10 @@ fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBe
             ),
             AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
-                status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
                 endringer = listOf(
                     EndringDTO(
-                        status = EndringStatus.valueOf("OPPRETTET"),
+                        status = EndringStatus.AVSLUTTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                         frist = null,
                         endretAv = "Kelvin"

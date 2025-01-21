@@ -91,6 +91,15 @@ class SakTabell : BQTable<BQBehandling> {
             val behandlingÅrsak = Field.newBuilder("behandlingAarsak", StandardSQLTypeName.STRING)
                 .setDescription("Kode som angir årsak til opprettelse av behandling.").build()
 
+            val ansvarligEnhet =
+                Field.newBuilder("ansvarligEnhet", StandardSQLTypeName.STRING).setDescription(
+                    """
+                    Organisasjons-Id til NAV-enhet som har ansvaret for behandlingen (hvis nasjonal kø benyttes skal denne Org-IDen benyttes her).
+
+                    For behandlingstype klage: Viktig ved oversendelse til KA-instans, hvor vi forventer en 42-enhet
+                """.trimIndent()
+                ).build()
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
@@ -132,15 +141,6 @@ class SakTabell : BQTable<BQBehandling> {
 
                 For behandlingstype klage: Angi begrunnelse ved resultat omgjøring - typisk: feil lovanvendelse, endret faktum, saksbehandlingsfeil, etc.
             """.trimIndent()
-                ).build()
-
-            val ansvarligEnhet =
-                Field.newBuilder("ansvarligEnhet", StandardSQLTypeName.STRING).setDescription(
-                    """
-                    Organisasjons-Id til NAV-enhet som har ansvaret for behandlingen (hvis nasjonal kø benyttes skal denne Org-IDen benyttes her).
-
-                    For behandlingstype klage: Viktig ved oversendelse til KA-instans, hvor vi forventer en 42-enhet
-                """.trimIndent()
                 ).build()
 
             val tilbakekrevbeløp =
@@ -194,6 +194,7 @@ class SakTabell : BQTable<BQBehandling> {
                 behandlingStatus,
                 behandlingÅrsak,
                 ansvarligBeslutter,
+                ansvarligEnhet,
 
                 // Ikke implementert ennå
                 utbetaltTid,
@@ -202,7 +203,6 @@ class SakTabell : BQTable<BQBehandling> {
                 sakUtland,
                 behandlingResultat,
                 resultatBegrunnelse,
-                ansvarligEnhet,
                 tilbakekrevbeløp,
                 funksjonellPeriodeFom,
                 funksjonellPeriodeTom,
@@ -243,6 +243,7 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingÅrsak = fieldValueList.get("behandlingAarsak").stringValue
 
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
+        val ansvarligEnhet = fieldValueList.get("ansvarligEnhet").stringValue
 
         return BQBehandling(
             fagsystemNavn = fagsystemNavn,
@@ -279,7 +280,8 @@ class SakTabell : BQTable<BQBehandling> {
             behandlingMetode = if (behandlingMetode == "MANUELL") BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             ansvarligBeslutter = ansvarligBeslutter,
             behandlingStatus = behandlingStatus,
-            behandlingÅrsak = behandlingÅrsak
+            behandlingÅrsak = behandlingÅrsak,
+            ansvarligEnhetKode = ansvarligEnhet,
         )
     }
 
@@ -311,7 +313,8 @@ class SakTabell : BQTable<BQBehandling> {
                 "behandlingMetode" to value.behandlingMetode.toString(),
                 "ansvarligBeslutter" to value.ansvarligBeslutter,
                 "behandlingStatus" to value.behandlingStatus,
-                "behandlingAarsak" to value.behandlingÅrsak.toString(),
+                "behandlingAarsak" to value.behandlingÅrsak,
+                "ansvarligEnhet" to value.ansvarligEnhetKode,
             )
         )
     }

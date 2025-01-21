@@ -1,13 +1,10 @@
 package no.nav.aap.statistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.BehovType
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.FATTE_VEDTAK
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
@@ -23,7 +20,6 @@ import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import tilgang.Rolle
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.*

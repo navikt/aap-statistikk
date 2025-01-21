@@ -1,9 +1,11 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -96,7 +98,11 @@ class HendelsesServiceTest {
                 behandlingType = Revurdering,
                 ident = "234",
                 versjon = "dsad",
-                avklaringsbehov = listOf(),
+                avklaringsbehov = listOf(AvklaringsbehovHendelseDto(
+                    avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                    endringer = listOf()
+                )),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
@@ -160,7 +166,13 @@ class HendelsesServiceTest {
                 behandlingType = Førstegangsbehandling,
                 ident = "234",
                 versjon = "dsad",
-                avklaringsbehov = listOf(),
+                avklaringsbehov = listOf(
+                    AvklaringsbehovHendelseDto(
+                        avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
+                        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                        endringer = listOf()
+                    )
+                ),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
@@ -219,7 +231,7 @@ class HendelsesServiceTest {
                 behandlingType = Revurdering,
                 ident = "234",
                 versjon = "dsad",
-                avklaringsbehov = listOf(),
+                avklaringsbehov = listOf(avklaringsbehovHendelse()),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),

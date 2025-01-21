@@ -47,6 +47,7 @@ class HendelsesService(
 
         val vedtakTid = hendelse.avklaringsbehov.utledVedtakTid()
         val ansvarligBeslutter = hendelse.avklaringsbehov.utledAnsvarligBeslutter()
+        val erHosNAY = hendelse.avklaringsbehov.hosNAY()
 
         sakStatistikkService.lagreSakInfoTilBigquery(
             sak,
@@ -55,7 +56,8 @@ class HendelsesService(
             hendelse.hendelsesTidspunkt,
             vedtakTidspunkt = vedtakTid,
             erManuell = hendelse.avklaringsbehov.erManuell(),
-            ansvarligBeslutter = ansvarligBeslutter
+            ansvarligBeslutter = ansvarligBeslutter,
+            erHosNAY = erHosNAY
         )
         meterRegistry.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
