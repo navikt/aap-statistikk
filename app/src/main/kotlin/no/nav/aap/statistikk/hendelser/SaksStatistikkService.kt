@@ -17,6 +17,8 @@ import java.time.temporal.ChronoUnit
 
 private val logger = LoggerFactory.getLogger(SaksStatistikkService::class.java)
 
+private const val NAY_NASJONAL_KØ_KODE = "4491"
+
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
     private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
@@ -31,7 +33,8 @@ class SaksStatistikkService(
         hendelsesTidspunkt: LocalDateTime,
         vedtakTidspunkt: LocalDateTime?,
         erManuell: Boolean,
-        ansvarligBeslutter: String?
+        ansvarligBeslutter: String?,
+        erHosNAY: Boolean
     ) {
         val behandling = behandlingRepository.hent(behandlingId)
         val erSkjermet = skjermingService.erSkjermet(behandling)
@@ -39,6 +42,9 @@ class SaksStatistikkService(
             if (erSkjermet) "-5" else behandling.sisteSaksbehandler
 
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
+
+        val ansvarligEnhet =
+            if (erHosNAY) NAY_NASJONAL_KØ_KODE else behandling.behandlendeEnhet?.kode
 
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
@@ -68,7 +74,8 @@ class SaksStatistikkService(
             søknadsFormat = behandling.søknadsformat,
             behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             behandlingStatus = behandlingStatus(behandling.status),
-            behandlingÅrsak = behandling.årsaker.joinToString(",")
+            behandlingÅrsak = behandling.årsaker.joinToString(","),
+            ansvarligEnhetKode = ansvarligEnhet
         )
 
         if (behandling.årsaker.size > 1) {

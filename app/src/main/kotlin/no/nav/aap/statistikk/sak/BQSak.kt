@@ -1,10 +1,12 @@
 package no.nav.aap.statistikk.sak
 
-import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.SøknadsFormat
-import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
+import kotlin.math.log
+
+private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
 
 data class BQBehandling(
     val fagsystemNavn: String = "Kelvin",
@@ -29,7 +31,8 @@ data class BQBehandling(
     val saksbehandler: String?,
     val behandlingMetode: BehandlingMetode,
     val behandlingStatus: String,
-    val behandlingÅrsak: String
+    val behandlingÅrsak: String,
+    val ansvarligEnhetKode: String?,
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)
@@ -42,6 +45,9 @@ data class BQBehandling(
                 .isEqual(ferdigbehandletTid)
         )
         require(vedtakTid == null || vedtakTid.truncatedTo(SECONDS).isEqual(vedtakTid))
+        if (ansvarligEnhetKode == null) {
+            logger.info("Fant ikke ansvarlig enhet for behandling $behandlingUUID med saksnummer $saksnummer.")
+        }
     }
 }
 

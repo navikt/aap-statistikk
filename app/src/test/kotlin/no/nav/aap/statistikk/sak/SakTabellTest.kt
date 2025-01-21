@@ -53,7 +53,8 @@ class SakTabellTest {
                 fagsystemNavn = "Kelvin",
                 ansvarligBeslutter = "Z1234",
                 behandlingStatus = "UNDER_BEHANDLING",
-                behandlingÅrsak = ÅrsakTilBehandling.SØKNAD.toString()
+                behandlingÅrsak = ÅrsakTilBehandling.SØKNAD.toString(),
+                ansvarligEnhetKode = "1337"
             )
         )
 
@@ -81,5 +82,6 @@ class SakTabellTest {
         assertThat(uthentetInnslag.fagsystemNavn).isEqualTo("Kelvin")
         assertThat(uthentetInnslag.ansvarligBeslutter).isEqualTo("Z1234")
         assertThat(uthentetInnslag.behandlingStatus).isEqualTo("UNDER_BEHANDLING")
+        assertThat(uthentetInnslag.ansvarligEnhetKode).isEqualTo("1337")
     }
 }

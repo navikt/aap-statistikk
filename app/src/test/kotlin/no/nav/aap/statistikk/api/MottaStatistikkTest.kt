@@ -4,7 +4,6 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -12,7 +11,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
@@ -20,6 +18,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
+import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -38,7 +37,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
-import tilgang.Rolle
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.*
@@ -132,19 +130,15 @@ class MottaStatistikkTest {
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelseDto(
                     avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
                     endringer = listOf(
                         EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "OPPRETTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "AVSLUTTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                             frist = null,
                             endretAv = "Z994573"
@@ -152,19 +146,15 @@ class MottaStatistikkTest {
                     )
                 ), AvklaringsbehovHendelseDto(
                     avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
                     endringer = listOf(
                         EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "OPPRETTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                             frist = null,
-                            endretAv = "Kelvin"
+                            endretAv = KELVIN
                         ), EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "AVSLUTTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
                             frist = null,
                             endretAv = "Z994573"
@@ -172,19 +162,15 @@ class MottaStatistikkTest {
                     )
                 ), AvklaringsbehovHendelseDto(
                     avklaringsbehovDefinisjon = KVALITETSSIKRING,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(
                         EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "OPPRETTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "AVSLUTTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                             frist = null,
                             endretAv = "Z994573"
@@ -287,19 +273,15 @@ class MottaStatistikkTest {
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelseDto(
                     avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(
                         EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "OPPRETTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "AVSLUTTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                             frist = null,
                             endretAv = "Z994573"
@@ -307,19 +289,15 @@ class MottaStatistikkTest {
                     )
                 ), AvklaringsbehovHendelseDto(
                     avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
                     endringer = listOf(
                         EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "OPPRETTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "AVSLUTTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
                             frist = null,
                             endretAv = "Z994573"
@@ -327,19 +305,15 @@ class MottaStatistikkTest {
                     )
                 ), AvklaringsbehovHendelseDto(
                     avklaringsbehovDefinisjon = KVALITETSSIKRING,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf("AVSLUTTET"),
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                     endringer = listOf(
                         EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "OPPRETTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                             frist = null,
                             endretAv = "Kelvin"
                         ), EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.valueOf(
-                                "AVSLUTTET"
-                            ),
+                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                             tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                             frist = null,
                             endretAv = "Z994573"
@@ -415,7 +389,7 @@ class MottaStatistikkTest {
             val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
 
             assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
-            assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5003")
+            assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5006")
             assertThat(uthentetSak.saksnummer).isEqualTo(hendelse.saksnummer)
             assertThat(uthentetBehandling?.sak?.saksnummer).isEqualTo(hendelse.saksnummer)
             assertThat(uthentetBehandling?.opprettetTid).isEqualTo(
