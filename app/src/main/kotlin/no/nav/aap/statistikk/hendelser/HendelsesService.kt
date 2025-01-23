@@ -40,7 +40,8 @@ class HendelsesService(
             avsluttetBehandlingService.lagre(
                 hendelse.avsluttetBehandling!!.tilDomene(
                     hendelse.saksnummer,
-                    hendelse.behandlingReferanse
+                    hendelse.behandlingReferanse,
+                    hendelse.hendelsesTidspunkt,
                 )
             )
         }

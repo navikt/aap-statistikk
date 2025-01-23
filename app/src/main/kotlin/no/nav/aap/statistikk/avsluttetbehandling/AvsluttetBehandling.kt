@@ -3,14 +3,22 @@ package no.nav.aap.statistikk.avsluttetbehandling
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 data class AvsluttetBehandling(
-    val saksnummer: String,
     val behandlingsReferanse: UUID,
+    val avsluttetTidspunkt: LocalDateTime,
     val tilkjentYtelse: TilkjentYtelse,
     val vilkårsresultat: Vilkårsresultat,
-    val beregningsgrunnlag: IBeregningsGrunnlag?
+    val beregningsgrunnlag: IBeregningsGrunnlag?,
+    val diagnoser: Diagnoser?
+)
+
+data class Diagnoser(
+    val kodeverk: String,
+    val diagnosekode: String,
+    val bidiagnoser: List<String>
 )
 
 enum class UføreType {
@@ -19,6 +27,7 @@ enum class UføreType {
 
 data class MedBehandlingsreferanse<out V>(val behandlingsReferanse: UUID, val value: V)
 
+@Suppress("EnumEntryName")
 enum class GrunnlagType {
     Grunnlag11_19 {
         override fun toString() = "11_19"

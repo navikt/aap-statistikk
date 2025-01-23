@@ -5,12 +5,16 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.data.TemporalOffset
+import org.assertj.core.data.TemporalUnitLessThanOffset
+import org.assertj.core.data.TemporalUnitOffset
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalUnit
 import javax.sql.DataSource
 
 class SakRepositoryImplTest {
@@ -49,11 +53,11 @@ class SakRepositoryImplTest {
         assertThat(sak.sakStatus).isEqualTo(
             SakStatus.UTREDES
         )
-        assertThat(sak.sistOppdatert.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(
+        assertThat(sak.sistOppdatert).isCloseTo(
             LocalDateTime.ofInstant(
                 now,
                 ZoneId.systemDefault()
-            ).truncatedTo(ChronoUnit.SECONDS)
+            ), TemporalUnitLessThanOffset(1, ChronoUnit.SECONDS)
         )
     }
 
