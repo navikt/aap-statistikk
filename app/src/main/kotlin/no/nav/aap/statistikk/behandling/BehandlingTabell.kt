@@ -2,10 +2,9 @@ package no.nav.aap.statistikk.behandling
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.bigquery.BQTable
-import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 data class BQYtelseBehandling(
@@ -51,7 +50,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 "referanse" to value.referanse.toString(),
                 "brukerFnr" to value.brukerFnr,
                 "behandlingsType" to value.behandlingsType.toString(),
-                "datoAvsluttet" to value.datoAvsluttet.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "datoAvsluttet" to value.datoAvsluttet.truncatedTo(ChronoUnit.MILLIS)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             )
         )
     }
