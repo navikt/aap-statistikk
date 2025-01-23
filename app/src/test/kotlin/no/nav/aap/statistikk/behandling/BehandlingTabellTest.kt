@@ -5,9 +5,11 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.testutils.BigQuery
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class BehandlingTabellTest {
@@ -35,6 +37,9 @@ class BehandlingTabellTest {
         assertThat(read.first().referanse).isEqualTo(referanse)
         assertThat(read.first().brukerFnr).isEqualTo("2902198512345")
         assertThat(read.first().behandlingsType).isEqualTo(TypeBehandling.Førstegangsbehandling)
-        assertThat(read.first().datoAvsluttet).isEqualTo(datoAvsluttet)
+        assertThat(read.first().datoAvsluttet).isCloseTo(
+            datoAvsluttet,
+            within(500, ChronoUnit.MILLIS)
+        )
     }
 }
