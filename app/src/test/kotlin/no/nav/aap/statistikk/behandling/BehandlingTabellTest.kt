@@ -6,6 +6,8 @@ import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.testutils.BigQuery
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class BehandlingTabellTest {
@@ -17,11 +19,13 @@ class BehandlingTabellTest {
 
         val referanse = UUID.randomUUID()
 
+        val datoAvsluttet = LocalDateTime.now()
         client.insert(
             tabell, BQYtelseBehandling(
                 referanse = referanse,
                 brukerFnr = "2902198512345",
-                behandlingsType = TypeBehandling.Førstegangsbehandling
+                behandlingsType = TypeBehandling.Førstegangsbehandling,
+                datoAvsluttet = datoAvsluttet,
             )
         )
 
@@ -31,5 +35,6 @@ class BehandlingTabellTest {
         assertThat(read.first().referanse).isEqualTo(referanse)
         assertThat(read.first().brukerFnr).isEqualTo("2902198512345")
         assertThat(read.first().behandlingsType).isEqualTo(TypeBehandling.Førstegangsbehandling)
+        assertThat(read.first().datoAvsluttet).isEqualTo(datoAvsluttet)
     }
 }

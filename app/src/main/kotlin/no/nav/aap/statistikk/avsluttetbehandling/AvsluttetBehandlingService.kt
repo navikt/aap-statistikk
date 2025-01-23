@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
 
 class AvsluttetBehandlingService(
@@ -73,7 +74,8 @@ class AvsluttetBehandlingService(
             BQYtelseBehandling(
                 referanse = avsluttetBehandling.behandlingsReferanse,
                 brukerFnr = behandling.sak.person.ident,
-                behandlingsType = behandling.typeBehandling
+                behandlingsType = behandling.typeBehandling,
+                datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt
             )
         )
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
@@ -82,7 +84,7 @@ class AvsluttetBehandlingService(
             bqRepository.lagre(
                 tilBqGrunnlag(
                     avsluttetBehandling.behandlingsReferanse,
-                    avsluttetBehandling.saksnummer,
+                    behandling.sak.saksnummer,
                     avsluttetBehandling.beregningsgrunnlag
                 )
             )

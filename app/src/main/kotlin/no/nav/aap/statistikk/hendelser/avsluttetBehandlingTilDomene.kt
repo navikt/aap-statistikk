@@ -2,15 +2,18 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
+import java.time.LocalDateTime
 import java.util.*
 
 
 fun AvsluttetBehandlingDTO.tilDomene(
     saksnummer: String,
-    behandlingsReferanse: UUID
+    behandlingsReferanse: UUID,
+    avsluttetTidspunkt: LocalDateTime
 ): AvsluttetBehandling {
     return AvsluttetBehandling(
         tilkjentYtelse = tilkjentYtelse.tilDomene(
@@ -19,8 +22,9 @@ fun AvsluttetBehandlingDTO.tilDomene(
         ),
         vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse),
         beregningsgrunnlag = if (beregningsGrunnlag == null) null else tilDomene(beregningsGrunnlag!!),
+        diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
         behandlingsReferanse = behandlingsReferanse,
-        saksnummer = saksnummer
+        avsluttetTidspunkt = avsluttetTidspunkt
     )
 }
 
@@ -92,7 +96,7 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
         )
     }
     if (grunnlagYrkesskade != null) {
-        var beregningsGrunnlag: IBeregningsGrunnlag? = null;
+        var beregningsGrunnlag: IBeregningsGrunnlag? = null
         if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre != null) {
             beregningsGrunnlag = tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre!!)
         } else if (beregningsgrunnlagDTO.grunnlagYrkesskade!!.beregningsgrunnlag.grunnlagYrkesskade != null) {

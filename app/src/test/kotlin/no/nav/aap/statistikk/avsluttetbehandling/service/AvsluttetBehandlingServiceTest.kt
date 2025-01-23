@@ -7,8 +7,11 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
+import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingTabell
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
@@ -31,6 +34,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -45,20 +49,21 @@ class AvsluttetBehandlingServiceTest {
 
         opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
 
+        val datoNå = LocalDate.now()
         val avsluttetBehandling = AvsluttetBehandling(
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse,
                 saksnummer = saksnummer,
                 perioder = listOf(
                     TilkjentYtelsePeriode(
-                        fraDato = LocalDate.now().minusYears(1),
-                        tilDato = LocalDate.now().plusDays(1),
+                        fraDato = datoNå.minusYears(1),
+                        tilDato = datoNå.plusDays(1),
                         dagsats = 1337.420,
                         gradering = 90.0
                     ),
                     TilkjentYtelsePeriode(
-                        fraDato = LocalDate.now().minusYears(3),
-                        tilDato = LocalDate.now().minusYears(2),
+                        fraDato = datoNå.minusYears(3),
+                        tilDato = datoNå.minusYears(2),
                         dagsats = 1234.0,
                         gradering = 45.0
                     )
@@ -72,8 +77,8 @@ class AvsluttetBehandlingServiceTest {
                     Vilkår(
                         vilkårType = Vilkårtype.ALDERSVILKÅRET, perioder = listOf(
                             VilkårsPeriode(
-                                fraDato = LocalDate.now().minusYears(2),
-                                tilDato = LocalDate.now().plusDays(3),
+                                fraDato = datoNå.minusYears(2),
+                                tilDato = datoNå.plusDays(3),
                                 manuellVurdering = false,
                                 utfall = Utfall.OPPFYLT
                             )
@@ -100,8 +105,13 @@ class AvsluttetBehandlingServiceTest {
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
             ),
+            diagnoser = Diagnoser(
+                kodeverk = "KODEVERK",
+                diagnosekode = "KOLERA",
+                bidiagnoser = listOf("PEST")
+            ),
             behandlingsReferanse = behandlingReferanse,
-            saksnummer = saksnummer,
+            avsluttetTidspunkt = datoNå.atStartOfDay()
         )
 
         val meterRegistry = SimpleMeterRegistry()
@@ -120,9 +130,16 @@ class AvsluttetBehandlingServiceTest {
         }
 
 
+        val utlestFraBehandlingTabell = bigQueryClient.read(BehandlingTabell()).first()
         val utlestVilkårsVurderingFraBigQuery = bigQueryClient.read(VilkårsVurderingTabell())
         val utlestTilkjentYtelseFraBigQuery = bigQueryClient.read(TilkjentYtelseTabell())
 
+        assertThat(utlestFraBehandlingTabell).isEqualTo(BQYtelseBehandling(
+            referanse = avsluttetBehandling.behandlingsReferanse,
+            brukerFnr = "29021946",
+            behandlingsType = TypeBehandling.Førstegangsbehandling,
+            datoAvsluttet = datoNå.atStartOfDay(),
+        ))
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
         assertThat(utlestVilkårsVurderingFraBigQuery.first().behandlingsReferanse).isEqualTo(
             avsluttetBehandling.vilkårsresultat.behandlingsReferanse
@@ -212,8 +229,13 @@ class AvsluttetBehandlingServiceTest {
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
             ),
+            diagnoser = Diagnoser(
+                kodeverk = "KODEVERK",
+                diagnosekode = "KOLERA",
+                bidiagnoser = listOf("PEST")
+            ),
             behandlingsReferanse = behandlingReferanse,
-            saksnummer = saksnummer,
+            avsluttetTidspunkt = LocalDateTime.now()
         )
 
         dataSource.transaction {
@@ -224,7 +246,7 @@ class AvsluttetBehandlingServiceTest {
             )
             service.lagre(avsluttetBehandling)
         }
-        val uthentet =  dataSource.transaction {
+        val uthentet = dataSource.transaction {
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
         }
 

@@ -80,7 +80,9 @@ fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
         this.filterNot { it.avklaringsbehovDefinisjon.løsesAv.size > 1 }.maxByOrNull {
             it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
         }
-    if (nyesteAvklaringsbehov == null) return false
+
+    // Helautomatiske behandlinger velges å skje hos NAY
+    if (nyesteAvklaringsbehov == null) return true
 
     return nyesteAvklaringsbehov.avklaringsbehovDefinisjon.løsesAv.only() in listOf(
         Rolle.SAKSBEHANDLER,
