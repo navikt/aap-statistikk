@@ -76,10 +76,16 @@ fun List<AvklaringsbehovHendelseDto>.erManuell(): Boolean {
  * avklaringsbehov.
  */
 fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
-    return this
-        .filterNot { it.avklaringsbehovDefinisjon.løsesAv.size > 1 }.maxByOrNull {
+    val nyesteAvklaringsbehov =
+        this.filterNot { it.avklaringsbehovDefinisjon.løsesAv.size > 1 }.maxByOrNull {
             it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
-        }!!.avklaringsbehovDefinisjon.løsesAv.only() in listOf(Rolle.SAKSBEHANDLER, Rolle.BESLUTTER)
+        }
+    if (nyesteAvklaringsbehov == null) return false
+
+    return nyesteAvklaringsbehov.avklaringsbehovDefinisjon.løsesAv.only() in listOf(
+        Rolle.SAKSBEHANDLER,
+        Rolle.BESLUTTER
+    )
 }
 
 fun <T> List<T>.only(): T {
