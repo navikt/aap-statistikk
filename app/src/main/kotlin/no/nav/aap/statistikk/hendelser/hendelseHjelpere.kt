@@ -86,7 +86,8 @@ fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
 
     return nyesteAvklaringsbehov.avklaringsbehovDefinisjon.løsesAv.only() in listOf(
         Rolle.SAKSBEHANDLER_NASJONAL,
-        Rolle.BESLUTTER
+        Rolle.BESLUTTER,
+        Rolle.SAKSBEHANDLER
     )
 }
 
