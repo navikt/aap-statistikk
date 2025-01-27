@@ -2,9 +2,7 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
-import no.nav.aap.statistikk.behandling.BQYtelseBehandling
-import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
@@ -14,13 +12,13 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.*
 
 class AvsluttetBehandlingService(
     private val tilkjentYtelseRepositoryFactory: ITilkjentYtelseRepository,
     private val beregningsgrunnlagRepositoryFactory: IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepositoryFactory: IVilkårsresultatRepository,
+    private val diagnoseRepository: DiagnoseRepository,
     private val bqRepository: IBQRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val skjermingService: SkjermingService,
@@ -29,6 +27,7 @@ class AvsluttetBehandlingService(
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
 
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
+        lagreDiagnose(avsluttetBehandling)
 
         val uthentetBehandling =
             behandlingRepository.hent(avsluttetBehandling.behandlingsReferanse)
@@ -66,6 +65,19 @@ class AvsluttetBehandlingService(
         meterRegistry.avsluttetBehandlingLagret().increment()
     }
 
+    private fun lagreDiagnose(avsluttetBehandling: AvsluttetBehandling) {
+        if (avsluttetBehandling.diagnoser != null) {
+            diagnoseRepository.lagre(
+                DiagnoseEntity.fraDomene(
+                    avsluttetBehandling.diagnoser,
+                    avsluttetBehandling.behandlingsReferanse
+                )
+            )
+        } else {
+            logger.info("Ingen diagnose på behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
+        }
+    }
+
     private fun lagreAvsluttetBehandlingIBigQuery(
         avsluttetBehandling: AvsluttetBehandling,
         behandling: Behandling
@@ -75,7 +87,10 @@ class AvsluttetBehandlingService(
                 referanse = avsluttetBehandling.behandlingsReferanse,
                 brukerFnr = behandling.sak.person.ident,
                 behandlingsType = behandling.typeBehandling,
-                datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt
+                datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt,
+                kodeverk = avsluttetBehandling.diagnoser?.kodeverk,
+                diagnosekode = avsluttetBehandling.diagnoser?.diagnosekode,
+                bidiagnoser = avsluttetBehandling.diagnoser?.bidiagnoser
             )
         )
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)

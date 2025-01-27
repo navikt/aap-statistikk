@@ -28,6 +28,9 @@ class BehandlingTabellTest {
                 brukerFnr = "2902198512345",
                 behandlingsType = TypeBehandling.Førstegangsbehandling,
                 datoAvsluttet = datoAvsluttet,
+                kodeverk = "IC23",
+                diagnosekode = "PEST",
+                bidiagnoser = listOf("KOLERA", "BOLIGSKADE"),
             )
         )
 
@@ -41,5 +44,8 @@ class BehandlingTabellTest {
             datoAvsluttet,
             within(500, ChronoUnit.MILLIS)
         )
+        assertThat(read.first().kodeverk).isEqualTo("IC23")
+        assertThat(read.first().diagnosekode).isEqualTo("PEST")
+        assertThat(read.first().bidiagnoser).isEqualTo(listOf("KOLERA", "BOLIGSKADE"))
     }
 }

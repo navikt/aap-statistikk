@@ -12,6 +12,9 @@ data class BQYtelseBehandling(
     val brukerFnr: String,
     val behandlingsType: TypeBehandling,
     val datoAvsluttet: LocalDateTime,
+    val kodeverk: String?,
+    val diagnosekode: String?,
+    val bidiagnoser: List<String>?
 )
 
 class BehandlingTabell : BQTable<BQYtelseBehandling> {
@@ -27,7 +30,25 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val brukerFnr = Field.of("brukerFnr", StandardSQLTypeName.STRING)
             val behandlingsType = Field.of("behandlingsType", StandardSQLTypeName.STRING)
             val datoAvsluttet = Field.of("datoAvsluttet", StandardSQLTypeName.DATETIME)
-            return Schema.of(referanse, behandlingsType, brukerFnr, datoAvsluttet)
+            val kodeverk = Field.of("kodeverk", StandardSQLTypeName.STRING)
+            val diagnosekode = Field.of("diagnosekode", StandardSQLTypeName.STRING)
+            val bidiagnoser = Field.newBuilder(
+                "bidiagnoser",
+                StandardSQLTypeName.STRUCT,
+                Field.of("kode", StandardSQLTypeName.STRING)
+            )
+                .setMode(Field.Mode.REPEATED)
+                .build();
+
+            return Schema.of(
+                referanse,
+                behandlingsType,
+                brukerFnr,
+                datoAvsluttet,
+                kodeverk,
+                diagnosekode,
+                bidiagnoser
+            )
         }
 
     override fun parseRow(fieldValueList: FieldValueList): BQYtelseBehandling {
@@ -35,12 +56,19 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         val brukerFnr = fieldValueList.get("brukerFnr").stringValue
         val behandlingsType = fieldValueList.get("behandlingsType").stringValue
         val datoAvsluttet = LocalDateTime.parse(fieldValueList.get("datoAvsluttet").stringValue)
+        val kodeverk = fieldValueList.get("kodeverk").stringValue
+        val diagnosekode = fieldValueList.get("diagnosekode").stringValue
+        val bidiagnoser =
+            fieldValueList.get("bidiagnoser").repeatedValue.map { it.recordValue[0].stringValue }
 
         return BQYtelseBehandling(
             UUID.fromString(referanse),
             brukerFnr,
             behandlingsType = behandlingsType.let { TypeBehandling.valueOf(it) },
-            datoAvsluttet = datoAvsluttet
+            datoAvsluttet = datoAvsluttet,
+            kodeverk = kodeverk,
+            diagnosekode = diagnosekode,
+            bidiagnoser = bidiagnoser
         )
     }
 
@@ -52,6 +80,13 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 "behandlingsType" to value.behandlingsType.toString(),
                 "datoAvsluttet" to value.datoAvsluttet.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "kodeverk" to value.kodeverk,
+                "diagnosekode" to value.diagnosekode,
+                "bidiagnoser" to value.bidiagnoser?.map {
+                    mapOf(
+                        "kode" to it
+                    )
+                }
             )
         )
     }

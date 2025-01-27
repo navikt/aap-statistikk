@@ -49,6 +49,7 @@ class HendelsesServiceTest {
                 bqRepository = bigQueryRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
+                diagnoseRepository = FakeDiagnoseRepository(),
                 meterRegistry = simpleMeterRegistry
             ),
             clock = clock,
@@ -144,6 +145,7 @@ class HendelsesServiceTest {
                 bqRepository = bigQueryRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
+                diagnoseRepository = FakeDiagnoseRepository(),
                 meterRegistry = simpleMeterRegistry,
                 ),
             clock = clock,
@@ -208,6 +210,7 @@ class HendelsesServiceTest {
                 bqRepository = bigQueryRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
+                diagnoseRepository = FakeDiagnoseRepository(),
                 meterRegistry = simpleMeterRegistry,
             ),
             clock = clock,

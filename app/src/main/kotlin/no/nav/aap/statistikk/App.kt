@@ -26,6 +26,7 @@ import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
@@ -104,6 +105,7 @@ fun Application.startUp(
         beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
         vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
         behandlingRepositoryFactory = { BehandlingRepository(it) },
+        diagnoseRepository = { DiagnoseRepositoryImpl(it) },
         skjermingService = SkjermingService(pdlClient),
     )
 
@@ -138,7 +140,7 @@ private fun motor(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     prometheusMeterRegistry: PrometheusMeterRegistry
 ): Motor {
-    return  Motor(
+    return Motor(
         dataSource = dataSource, antallKammer = 8,
         logInfoProvider = object : JobbLogInfoProvider {
             override fun hentInformasjon(

@@ -9,10 +9,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.behandling.BQYtelseBehandling
-import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.behandling.BehandlingTabell
-import no.nav.aap.statistikk.behandling.TypeBehandling
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
@@ -139,6 +136,9 @@ class AvsluttetBehandlingServiceTest {
             brukerFnr = "29021946",
             behandlingsType = TypeBehandling.Førstegangsbehandling,
             datoAvsluttet = datoNå.atStartOfDay(),
+            kodeverk = "KODEVERK",
+            diagnosekode = "KOLERA",
+            bidiagnoser = listOf("PEST"),
         ))
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
         assertThat(utlestVilkårsVurderingFraBigQuery.first().behandlingsReferanse).isEqualTo(
@@ -267,6 +267,7 @@ class AvsluttetBehandlingServiceTest {
                 TilkjentYtelseRepository(dbConnection),
                 BeregningsgrunnlagRepository(dbConnection),
                 VilkårsresultatRepository(dbConnection),
+                diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
                 bqRepository,
                 behandlingRepository = BehandlingRepository(dbConnection),
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),

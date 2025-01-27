@@ -8,6 +8,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.testutils.*
@@ -33,18 +34,18 @@ class ApplicationTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepository, meterRegistry,
+                bqRepository,
+                meterRegistry,
                 bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 skjermingService = SkjermingService(FakePdlClient())
             ),
         ) { url, client ->
-            @Language("JSON")
-            val body =
-                """{
+            @Language("JSON") val body = """{
   "saksnummer": "123456789",
   "sakStatus": "OPPRETTET",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
@@ -85,10 +86,8 @@ class ApplicationTest {
 }"""
 
             client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"),
-                PostRequest(
-                    DefaultJsonMapper.fromJson(body),
-                    contentType = ContentType.APPLICATION_JSON
+                URI.create("$url/stoppetBehandling"), PostRequest(
+                    DefaultJsonMapper.fromJson(body), contentType = ContentType.APPLICATION_JSON
                 )
             )
 
@@ -101,9 +100,7 @@ class ApplicationTest {
     fun `godtar payload med ukjente felter`(
         @Fakes azureConfig: AzureConfig
     ) {
-        @Language("JSON")
-        val payload =
-            """{
+        @Language("JSON") val payload = """{
   "saksnummer": "123456789",
   "sakStatus": "OPPRETTET",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
@@ -160,6 +157,7 @@ class ApplicationTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 skjermingService = SkjermingService(FakePdlClient()),
             ),
         ) { url, client ->

@@ -73,7 +73,8 @@ class MottaStatistikkTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                skjermingService = SkjermingService(FakePdlClient())
+                skjermingService = SkjermingService(FakePdlClient()),
+                diagnoseRepository = { FakeDiagnoseRepository() }
             )
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -202,6 +203,7 @@ class MottaStatistikkTest {
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
+            diagnoseRepository = { FakeDiagnoseRepository() },
             skjermingService = skjermingService
         )
 
@@ -346,6 +348,7 @@ class MottaStatistikkTest {
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
+            diagnoseRepository = { FakeDiagnoseRepository() },
             skjermingService = skjermingService
         )
         val motor = Motor(
