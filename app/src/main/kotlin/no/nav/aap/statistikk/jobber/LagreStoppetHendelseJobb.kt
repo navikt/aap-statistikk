@@ -6,6 +6,7 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQRepository
@@ -25,6 +26,7 @@ class LagreStoppetHendelseJobb(
     private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
     private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
+    private val diagnoseRepository: (DBConnection) -> DiagnoseRepository,
     private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
     private val skjermingService: SkjermingService,
 ) : Jobb {
@@ -35,6 +37,7 @@ class LagreStoppetHendelseJobb(
                 tilkjentYtelseRepositoryFactory = tilkjentYtelseRepositoryFactory(connection),
                 beregningsgrunnlagRepositoryFactory = beregningsgrunnlagRepositoryFactory(connection),
                 vilkårsResultatRepositoryFactory = vilkårsResultatRepositoryFactory(connection),
+                diagnoseRepository = diagnoseRepository(connection),
                 bqRepository = bqRepository,
                 behandlingRepository = behandlingRepositoryFactory(connection),
                 skjermingService = skjermingService,

@@ -410,6 +410,17 @@ class FakeBehandlingRepository : IBehandlingRepository {
     }
 }
 
+class FakeDiagnoseRepository : DiagnoseRepository {
+    override fun lagre(diagnoseEntity: DiagnoseEntity): Long {
+        TODO("Not yet implemented")
+    }
+
+    override fun hentForBehandling(behandlingReferanse: UUID): DiagnoseEntity {
+        TODO("Not yet implemented")
+    }
+
+}
+
 class FakeBQRepository : IBQRepository {
     val vilkårsresultater = mutableListOf<Vilkårsresultat>()
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
