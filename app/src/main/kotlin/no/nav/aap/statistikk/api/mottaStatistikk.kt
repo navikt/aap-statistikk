@@ -1,11 +1,11 @@
-package no.nav.aap.statistikk.hendelser.api
+package no.nav.aap.statistikk.api
 
-import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.route.EndpointInfo
 import com.papsign.ktor.openapigen.route.TagModule
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
+import com.papsign.ktor.openapigen.route.status
 import io.ktor.http.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.AVKLAR_STUDENT
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.AVKLAR_SYKDOM
@@ -33,12 +33,6 @@ import kotlin.math.roundToLong
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
-
-enum class Tags(override val description: String) : APITag {
-    MottaStatistikk(
-        "Dette endepunktet brukes for å motta statistikk ved stopp i behandlingen."
-    ),
-}
 
 val avklaringsbehov = listOf(
     AvklaringsbehovHendelseDto(
@@ -91,7 +85,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
     jobbAppender: JobbAppender,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
 ) {
-    route("/stoppetBehandling") {
+    route("/stoppetBehandling").status(HttpStatusCode.Accepted) {
         post<Unit, String, StoppetBehandling>(
             TagModule(listOf(Tags.MottaStatistikk)),
             exampleRequest = exampleRequestStoppetBehandling
@@ -116,7 +110,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             )
         }
     }
-    route("/oppgave") {
+    route("/oppgave").status(HttpStatusCode.Accepted) {
         post<Unit, String, OppgaveHendelse>(
             TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("OppgaveHendelse"),
         ) { _, dto ->

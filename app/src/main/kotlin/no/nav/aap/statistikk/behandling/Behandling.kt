@@ -56,12 +56,17 @@ enum class BehandlingStatus {
     AVSLUTTET;
 }
 
+enum class KildeSystem {
+    Behandlingsflyt, Postmottak
+}
 
-enum class TypeBehandling {
-    Førstegangsbehandling,
-    Revurdering,
-    Tilbakekreving,
-    Klage;
+enum class TypeBehandling(val kildeSystem: KildeSystem) {
+    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt),
+    Revurdering(kildeSystem = KildeSystem.Behandlingsflyt),
+    Tilbakekreving(kildeSystem = KildeSystem.Behandlingsflyt),
+    Klage(kildeSystem = KildeSystem.Behandlingsflyt),
+    Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak),
+    Journalføring(kildeSystem = KildeSystem.Postmottak)
 }
 
 enum class ÅrsakTilBehandling {

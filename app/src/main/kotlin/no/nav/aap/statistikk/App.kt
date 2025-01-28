@@ -36,7 +36,7 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.hendelser.api.mottaStatistikk
+import no.nav.aap.statistikk.api.mottaStatistikk
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
@@ -46,7 +46,7 @@ import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.pdl.PdlGraphQLClient
 import no.nav.aap.statistikk.pdl.SkjermingService
-import no.nav.aap.statistikk.produksjonsstyring.api.hentBehandlingstidPerDag
+import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
