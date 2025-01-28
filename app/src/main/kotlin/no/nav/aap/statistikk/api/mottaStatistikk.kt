@@ -19,6 +19,7 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
+import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -136,6 +137,13 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             responder.respond(
                 HttpStatusCode.Accepted, "{}", pipeline
             )
+        }
+    }
+    route("/postmottak").status(HttpStatusCode.Accepted) {
+        post<Unit, String, DokumentflytStoppetHendelse>(
+            TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("DokumentflytStoppetHendelse"),
+        ) { _, dto ->
+            log.info("Got DTO: $dto")
         }
     }
 }
