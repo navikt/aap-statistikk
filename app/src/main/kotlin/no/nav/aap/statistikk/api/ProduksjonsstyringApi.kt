@@ -1,6 +1,5 @@
-package no.nav.aap.statistikk.produksjonsstyring.api
+package no.nav.aap.statistikk.api
 
-import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.annotations.type.string.pattern.RegularExpression
@@ -52,13 +51,6 @@ data class FordelingInput(
     enum class Tidsenhet {
         DAG, UKE, MÅNED, ÅR,
     }
-}
-
-
-enum class Tags(override val description: String) : APITag {
-    Produksjonsstyring(
-        "Endepunkter relatert til produksjonsstyring."
-    ),
 }
 
 val modules = TagModule(listOf(Tags.Produksjonsstyring))
@@ -116,7 +108,9 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     )
 
     data class AntallÅpneOgTypeOgGjennomsnittsalder(
-        val antallÅpne: Int, val behandlingstype: TypeBehandling, val gjennomsnittsalder: Double
+        val antallÅpne: Int,
+        val behandlingstype: no.nav.aap.statistikk.behandling.TypeBehandling,
+        val gjennomsnittsalder: Double
     )
     route("/åpne-behandlinger-per-behandlingstype").get<ÅpneBehandlingerPerBehandlingstypeInput, List<AntallÅpneOgTypeOgGjennomsnittsalder>>(
         modules
@@ -129,12 +123,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
         respond(respons.map {
             AntallÅpneOgTypeOgGjennomsnittsalder(
-                antallÅpne = it.antallÅpne, behandlingstype = when (it.behandlingstype) {
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Revurdering -> TypeBehandling.Revurdering
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Klage -> TypeBehandling.Klage
-                }, gjennomsnittsalder = it.gjennomsnittsalder
+                antallÅpne = it.antallÅpne, behandlingstype = it.behandlingstype,
+                gjennomsnittsalder = it.gjennomsnittsalder
             )
         })
     }

@@ -15,6 +15,7 @@ val tilgangVersjon = "0.0.94"
 val flywayVersion = "11.2.0"
 val oppgaveVersjon = "0.0.41"
 val testContainersVersion = "1.20.4"
+val postmottakVersjon = "0.0.28"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -25,6 +26,7 @@ tasks.register<JavaExec>("runTestApp") {
     mainClass.set("no.nav.aap.statistikk.TestAppKt")
     workingDir = rootDir
 }
+
 
 dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
@@ -56,7 +58,7 @@ dependencies {
     implementation("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
 
     implementation("no.nav.aap.oppgave:api-kontrakt:$oppgaveVersjon")
-    implementation("no.nav.aap.postmottak:kontrakt:0.0.21")
+    implementation("no.nav.aap.postmottak:kontrakt:$postmottakVersjon")
 
     implementation("com.google.cloud:google-cloud-bigquery:2.46.0")
 
