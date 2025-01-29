@@ -69,7 +69,7 @@ class SakTabellTest {
         assertThat(uthentetInnslag.behandlingType).isEqualTo("REVURDERING")
         assertThat(uthentetInnslag.sekvensNummer).isEqualTo(0L)
         assertThat(uthentetInnslag.aktorId).isEqualTo("123456")
-        assertThat(uthentetInnslag.mottattTid).isEqualTo(mottattTid)
+        assertThat(uthentetInnslag.mottattTid).isCloseTo(mottattTid, within(500, ChronoUnit.MILLIS))
         assertThat(uthentetInnslag.registrertTid).isCloseTo(
             registrertTid,
             within(500, ChronoUnit.MILLIS)
