@@ -43,6 +43,8 @@ import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -84,6 +86,7 @@ fun <E> testKlient(
     ),
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
+    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
     val res: E?;
@@ -111,6 +114,7 @@ fun <E> testKlient(
             },
             lagreStoppetHendelseJobb,
             lagreOppgaveHendelseJobb,
+            lagrePostmottakHendelseJobb,
             PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         )
     }.start()
@@ -247,7 +251,7 @@ fun opprettTestHendelse(
 
     val personMedId = opprettTestPerson(dataSource, ident)
 
-    val sak = opprettTestSak(dataSource, saksnummer, Person(ident, id = personMedId.id))
+    val sak = opprettTestSak(dataSource, saksnummer, Person(ident, id = personMedId.id()))
 
     val behandling = opprettTestBehandling(
         dataSource,
@@ -264,9 +268,7 @@ fun opprettTestHendelse(
 fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     return dataSource.transaction { conn ->
         val personRepository = PersonRepository(conn)
-        val id =
-            personRepository.hentPerson(ident)?.id ?: personRepository.lagrePerson(Person(ident))
-        Person(ident, id)
+        PersonService(personRepository).hentEllerLagrePerson(ident)
     }
 }
 

@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.vilkårsresultat.repository
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
 

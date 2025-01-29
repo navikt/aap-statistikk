@@ -2,8 +2,8 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
@@ -59,12 +59,11 @@ class DiagnoseRepositoryImplTest {
         behandlingReferanse: UUID
     ) {
         val ident = "214"
-        val personRepository = PersonRepository(it)
-        val id = personRepository.lagrePerson(Person(ident = ident))
+        val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
 
         val sak = Sak(
             saksnummer = "ABCDE",
-            person = Person("214").copy(id = id),
+            person = person,
             sakStatus = SakStatus.LØPENDE,
             sistOppdatert = LocalDateTime.now()
         )

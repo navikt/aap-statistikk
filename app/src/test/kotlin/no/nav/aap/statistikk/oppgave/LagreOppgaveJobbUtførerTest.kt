@@ -65,7 +65,7 @@ class LagreOppgaveJobbUtførerTest {
         val førsteOppgave = oppgaverPåBehandling.first()
         assertThat(førsteOppgave.enhet.kode).isEqualTo("NAVKontor123")
         assertThat(førsteOppgave.behandlingReferanse!!.referanse).isEqualTo(behandling.referanse)
-        assertThat(førsteOppgave.person?.id).isNotNull
+        assertThat(førsteOppgave.person?.id()).isNotNull
 
         assertThat(førsteOppgave.reservasjon).isNotNull
     }
@@ -256,7 +256,7 @@ class LagreOppgaveJobbUtførerTest {
             val id = PersonRepository(it).lagrePerson(personUtenId)
             val sak = Sak(
                 saksnummer = "123",
-                person = personUtenId.copy(id = id),
+                person = personUtenId.medId(id),
                 sakStatus = SakStatus.OPPRETTET,
                 sistOppdatert = LocalDateTime.now()
             )

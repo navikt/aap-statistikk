@@ -18,6 +18,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.mdc.NoExtraLogInfoProvider
+import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
+import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingRepository
@@ -27,10 +29,13 @@ import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
+import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
@@ -79,7 +84,7 @@ class MottaStatistikkTest {
                 skjermingService = SkjermingService(FakePdlClient()),
                 personService = { PersonService(FakePersonRepository()) },
                 diagnoseRepository = { FakeDiagnoseRepository() }
-            ), LagreOppgaveHendelseJobb(meterRegistry)
+            ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(
@@ -213,6 +218,7 @@ class MottaStatistikkTest {
         )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val motor = Motor(
             dataSource = dataSource,
@@ -239,7 +245,7 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb
+            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb, lagrePostmottakHendelseJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -361,6 +367,7 @@ class MottaStatistikkTest {
         )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val motor = Motor(
             dataSource = dataSource,
@@ -376,7 +383,7 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb
+            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb, lagrePostmottakHendelseJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -414,6 +421,90 @@ class MottaStatistikkTest {
 
             assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
             assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
+        }
+
+        motor.stop()
+    }
+
+    @Test
+    fun `kan motta postmottak-hendelse, og jobb blir utført`(
+        @Postgres dataSource: DataSource,
+        @Fakes azureConfig: AzureConfig
+    ) {
+        val referanse = UUID.randomUUID()
+        val hendelse = DokumentflytStoppetHendelse(
+            journalpostId = JournalpostId(23),
+            ident = "323",
+            referanse = referanse,
+            behandlingType = no.nav.aap.postmottak.kontrakt.behandling.TypeBehandling.Journalføring,
+            status = no.nav.aap.postmottak.kontrakt.behandling.Status.OPPRETTET,
+            avklaringsbehov = listOf(),
+            opprettetTidspunkt = LocalDateTime.now(),
+            hendelsesTidspunkt = LocalDateTime.now(),
+            saksnummer = null
+        )
+        val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+
+        val bqRepository = FakeBQRepository()
+        val meterRegistry = SimpleMeterRegistry()
+
+        val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
+        val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
+
+        val skjermingService = SkjermingService(FakePdlClient())
+
+        val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+            bqRepository, meterRegistry,
+            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+            tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
+            beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
+            vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
+            diagnoseRepository = { FakeDiagnoseRepository() },
+            personService = { PersonService(PersonRepository(it)) },
+            skjermingService = skjermingService
+        )
+
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
+
+        val motor = Motor(
+            dataSource = dataSource,
+            antallKammer = 2,
+            logInfoProvider = NoExtraLogInfoProvider,
+            jobber = listOf(lagreStoppetHendelseJobb, lagrePostmottakHendelseJobb)
+        )
+
+        val jobbAppender = MotorJobbAppender(dataSource)
+
+        testKlient(
+            transactionExecutor,
+            motor,
+            jobbAppender,
+            azureConfig,
+            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb, lagrePostmottakHendelseJobb
+        ) { url, client ->
+
+            client.post<DokumentflytStoppetHendelse, Any>(
+                URI.create("$url/postmottak"),
+                PostRequest(hendelse)
+            )
+
+            dataSource.transaction(readOnly = true) {
+                ventPåSvar(
+                    {
+                        PostmottakBehandlingRepository(
+                            it
+                        ).hentEksisterendeBehandling(referanse)
+                    },
+                    { it != null })
+            }
+        }
+
+        dataSource.transaction {
+            assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
+            assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(0.0)
+            assertThat(meterRegistry.lagretPostmottakHendelse().count()).isEqualTo(1.0)
         }
 
         motor.stop()

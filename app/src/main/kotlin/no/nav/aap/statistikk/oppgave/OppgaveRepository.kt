@@ -51,7 +51,7 @@ SELECT COALESCE(
 
         return dbConnection.executeReturnKey(sql) {
             setParams {
-                setLong(1, oppgave.person?.id)
+                setLong(1, oppgave.person?.id())
                 setLong(2, behandlingsReferanseId)
                 setLong(3, oppgave.enhet.id)
                 setEnumName(4, oppgave.status)
