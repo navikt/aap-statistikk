@@ -157,10 +157,11 @@ fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
     return no.nav.aap.statistikk.oppgave.OppgaveHendelse(
         hendelse = when (this.hendelse) {
             HendelseType.OPPRETTET -> no.nav.aap.statistikk.oppgave.HendelseType.OPPRETTET
-            HendelseType.GJENÅPNET -> no.nav.aap.statistikk.oppgave.HendelseType.GJENÅPNET
+            HendelseType.GJENÅPNET -> no.nav.aap.statistikk.oppgave.HendelseType.OPPDATERT
             HendelseType.RESERVERT -> no.nav.aap.statistikk.oppgave.HendelseType.RESERVERT
             HendelseType.AVRESERVERT -> no.nav.aap.statistikk.oppgave.HendelseType.AVRESERVERT
             HendelseType.LUKKET -> no.nav.aap.statistikk.oppgave.HendelseType.LUKKET
+            HendelseType.OPPDATERT -> no.nav.aap.statistikk.oppgave.HendelseType.OPPDATERT
         },
         oppgaveId = requireNotNull(oppgaveDto.id) { "Trenger oppgave-ID for å skille mellom oppgavehendelser" },
         mottattTidspunkt = LocalDateTime.now(),
