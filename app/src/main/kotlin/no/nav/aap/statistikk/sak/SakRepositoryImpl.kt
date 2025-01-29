@@ -79,7 +79,7 @@ WHERE sak.saksnummer = ?
     )
 
     override fun settInnSak(sak: Sak): Long {
-        val personId = requireNotNull(sak.person.id)
+        val personId = requireNotNull(sak.person.id())
 
         val query = """
             WITH INSERTED AS (

@@ -23,6 +23,6 @@ class PersonRepositoryTest {
         assertThat(uthentet?.ident).isEqualTo(
             ident
         )
-        assertThat(uthentet?.id).isNotNull()
+        assertThat(uthentet?.id()).isNotNull()
     }
 }

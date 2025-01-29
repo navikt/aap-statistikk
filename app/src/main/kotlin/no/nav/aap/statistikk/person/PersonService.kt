@@ -8,7 +8,7 @@ class PersonService(private val personRepository: IPersonRepository) {
 
         if (uthentet == null) {
             val id = personRepository.lagrePerson(person)
-            return person.copy(id = id)
+            return person.medId(id = id)
         }
 
         return uthentet

@@ -17,3 +17,6 @@ fun MeterRegistry.nyBehandlingOpprettet(type: TypeBehandling) =
 
 fun MeterRegistry.oppgaveHendelseMottatt() =
     this.counter("statistikk_oppgave_hendelse_mottatt_total")
+
+fun MeterRegistry.lagretPostmottakHendelse() =
+    this.counter("statistikk_lagret_postmottak_hendelse_total")

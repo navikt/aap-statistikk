@@ -49,6 +49,7 @@ import no.nav.aap.statistikk.pdl.PdlGraphQLClient
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -113,11 +114,13 @@ fun Application.startUp(
     )
 
     val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(prometheusMeterRegistry)
+    val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(prometheusMeterRegistry)
     val motor = motor(
         dataSource,
         lagreStoppetHendelseJobb,
         prometheusMeterRegistry,
-        lagreOppgaveHendelseJobb
+        lagreOppgaveHendelseJobb,
+        lagrePostmottakHendelseJobb
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
@@ -141,6 +144,7 @@ fun Application.startUp(
         motorApiCallback,
         lagreStoppetHendelseJobb,
         lagreOppgaveHendelseJobb,
+        lagrePostmottakHendelseJobb,
         prometheusMeterRegistry
     )
 }
@@ -149,7 +153,8 @@ private fun motor(
     dataSource: DataSource,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     prometheusMeterRegistry: PrometheusMeterRegistry,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb
+    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
+    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -163,7 +168,8 @@ private fun motor(
         jobber = listOf(
             lagreStoppetHendelseJobb,
             lagreOppgaveHendelseJobb,
-            LagreOppgaveJobbUtfører
+            LagreOppgaveJobbUtfører,
+            lagrePostmottakHendelseJobb,
         ),
         prometheus = prometheusMeterRegistry,
     )
@@ -177,6 +183,7 @@ fun Application.module(
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
+    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     prometheusMeterRegistry: PrometheusMeterRegistry
 ) {
     motor.start()
@@ -207,6 +214,7 @@ fun Application.module(
                     jobbAppender,
                     lagreStoppetHendelseJobb,
                     lagreOppgaveHendelseJobb,
+                    lagrePostmottakHendelseJobb
                 )
                 hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()

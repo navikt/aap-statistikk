@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -46,7 +47,8 @@ class ApplicationTest {
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient())
-            ), LagreOppgaveHendelseJobb(meterRegistry)
+            ), LagreOppgaveHendelseJobb(meterRegistry),
+            LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             @Language("JSON") val body = """{
   "saksnummer": "123456789",
@@ -163,7 +165,7 @@ class ApplicationTest {
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
-            ), LagreOppgaveHendelseJobb(meterRegistry)
+            ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(
