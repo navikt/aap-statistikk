@@ -35,6 +35,7 @@ import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.pdl.Gradering
 import no.nav.aap.statistikk.pdl.PdlClient
@@ -82,6 +83,7 @@ fun <E> testKlient(
         clientSecret = "xxx",
     ),
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
     val res: E?;
@@ -108,6 +110,7 @@ fun <E> testKlient(
 
             },
             lagreStoppetHendelseJobb,
+            lagreOppgaveHendelseJobb,
             PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         )
     }.start()

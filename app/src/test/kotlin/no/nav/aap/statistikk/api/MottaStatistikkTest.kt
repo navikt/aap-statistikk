@@ -27,6 +27,7 @@ import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -78,7 +79,7 @@ class MottaStatistikkTest {
                 skjermingService = SkjermingService(FakePdlClient()),
                 personService = { PersonService(FakePersonRepository()) },
                 diagnoseRepository = { FakeDiagnoseRepository() }
-            )
+            ), LagreOppgaveHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(
@@ -211,6 +212,8 @@ class MottaStatistikkTest {
             skjermingService = skjermingService
         )
 
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 8,
@@ -236,7 +239,7 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            lagreStoppetHendelseJobb
+            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -356,6 +359,9 @@ class MottaStatistikkTest {
             personService = { PersonService(PersonRepository(it)) },
             skjermingService = skjermingService
         )
+
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+
         val motor = Motor(
             dataSource = dataSource,
             antallKammer = 2,
@@ -370,7 +376,7 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            lagreStoppetHendelseJobb
+            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(

@@ -23,6 +23,7 @@ import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobbUtfører
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import org.slf4j.LoggerFactory
@@ -85,6 +86,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
 ) {
     route("/stoppetBehandling").status(HttpStatusCode.Accepted) {
         post<Unit, String, StoppetBehandling>(
@@ -123,7 +125,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 
                 jobbAppender.leggTil(
                     conn,
-                    JobbInput(LagreOppgaveHendelseJobbUtfører).medPayload(
+                    JobbInput(lagreOppgaveHendelseJobb).medPayload(
                         DefaultJsonMapper.toJson(dto.tilDomene())
                     ).let {
                         if (encodedSaksNummer != null) {

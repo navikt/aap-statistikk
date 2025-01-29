@@ -41,7 +41,7 @@ import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
-import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobbUtfører
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobbUtfører
 import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.pdl.PdlConfig
@@ -112,7 +112,13 @@ fun Application.startUp(
         personService = { PersonService(PersonRepository(it)) }
     )
 
-    val motor = motor(dataSource, lagreStoppetHendelseJobb, prometheusMeterRegistry)
+    val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(prometheusMeterRegistry)
+    val motor = motor(
+        dataSource,
+        lagreStoppetHendelseJobb,
+        prometheusMeterRegistry,
+        lagreOppgaveHendelseJobb
+    )
 
     monitor.subscribe(ApplicationStopPreparing) {
         log.info("Received shutdown event. Closing Hikari connection pool.")
@@ -134,6 +140,7 @@ fun Application.startUp(
         azureConfig,
         motorApiCallback,
         lagreStoppetHendelseJobb,
+        lagreOppgaveHendelseJobb,
         prometheusMeterRegistry
     )
 }
@@ -141,7 +148,8 @@ fun Application.startUp(
 private fun motor(
     dataSource: DataSource,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
-    prometheusMeterRegistry: PrometheusMeterRegistry
+    prometheusMeterRegistry: PrometheusMeterRegistry,
+    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -153,7 +161,9 @@ private fun motor(
             }
         },
         jobber = listOf(
-            lagreStoppetHendelseJobb, LagreOppgaveHendelseJobbUtfører, LagreOppgaveJobbUtfører
+            lagreStoppetHendelseJobb,
+            lagreOppgaveHendelseJobb,
+            LagreOppgaveJobbUtfører
         ),
         prometheus = prometheusMeterRegistry,
     )
@@ -166,6 +176,7 @@ fun Application.module(
     azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     prometheusMeterRegistry: PrometheusMeterRegistry
 ) {
     motor.start()
@@ -195,6 +206,7 @@ fun Application.module(
                     transactionExecutor,
                     jobbAppender,
                     lagreStoppetHendelseJobb,
+                    lagreOppgaveHendelseJobb,
                 )
                 hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()
