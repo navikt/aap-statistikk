@@ -13,7 +13,7 @@ import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
 import no.nav.aap.statistikk.pdl.SkjermingService
-import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
@@ -28,6 +28,7 @@ class LagreStoppetHendelseJobb(
     private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
     private val diagnoseRepository: (DBConnection) -> DiagnoseRepository,
     private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
+    private val personService: (DBConnection) -> PersonService,
     private val skjermingService: SkjermingService,
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
@@ -43,7 +44,7 @@ class LagreStoppetHendelseJobb(
                 skjermingService = skjermingService,
                 meterRegistry = meterRegistry,
             ),
-            personRepository = PersonRepository(connection),
+            personService = personService(connection),
             behandlingRepository = BehandlingRepository(connection),
             meterRegistry = meterRegistry,
             sakStatistikkService = SaksStatistikkService(

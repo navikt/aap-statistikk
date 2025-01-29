@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.FakePdlClient
@@ -109,7 +110,7 @@ class ProduksjonsstyringRepositoryTest {
                     diagnoseRepository = DiagnoseRepositoryImpl(conn),
                     meterRegistry = meterRegistry,
                 ),
-                personRepository = PersonRepository(conn),
+                personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
                 meterRegistry = meterRegistry,
                 sakStatistikkService = SaksStatistikkService(

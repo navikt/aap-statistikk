@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
@@ -49,7 +50,7 @@ class LagreOppgaveJobbUtførerTest {
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                personRepository = PersonRepository(it),
+                personService = PersonService(PersonRepository(it)),
                 oppgaveRepository = OppgaveRepository(it),
                 enhetRepository = EnhetRepository(it),
                 saksbehandlerRepository = SaksbehandlerRepository(it)
@@ -238,7 +239,7 @@ class LagreOppgaveJobbUtførerTest {
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                personRepository = PersonRepository(it),
+                personService = PersonService(PersonRepository(it)),
                 oppgaveRepository = OppgaveRepository(it),
                 enhetRepository = EnhetRepository(it),
                 saksbehandlerRepository = SaksbehandlerRepository(it)

@@ -28,6 +28,8 @@ import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.pdl.SkjermingService
+import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
@@ -74,6 +76,7 @@ class MottaStatistikkTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 skjermingService = SkjermingService(FakePdlClient()),
+                personService = { PersonService(FakePersonRepository()) },
                 diagnoseRepository = { FakeDiagnoseRepository() }
             )
         ) { url, client ->
@@ -204,6 +207,7 @@ class MottaStatistikkTest {
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
+            personService = { PersonService(PersonRepository(it)) },
             skjermingService = skjermingService
         )
 
@@ -349,6 +353,7 @@ class MottaStatistikkTest {
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
+            personService = { PersonService(PersonRepository(it)) },
             skjermingService = skjermingService
         )
         val motor = Motor(

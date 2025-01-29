@@ -25,6 +25,8 @@ import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
+import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
+import no.nav.aap.statistikk.api.mottaStatistikk
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -36,7 +38,6 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.api.mottaStatistikk
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
@@ -46,7 +47,8 @@ import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.pdl.PdlGraphQLClient
 import no.nav.aap.statistikk.pdl.SkjermingService
-import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
+import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -107,6 +109,7 @@ fun Application.startUp(
         behandlingRepositoryFactory = { BehandlingRepository(it) },
         diagnoseRepository = { DiagnoseRepositoryImpl(it) },
         skjermingService = SkjermingService(pdlClient),
+        personService = { PersonService(PersonRepository(it)) }
     )
 
     val motor = motor(dataSource, lagreStoppetHendelseJobb, prometheusMeterRegistry)

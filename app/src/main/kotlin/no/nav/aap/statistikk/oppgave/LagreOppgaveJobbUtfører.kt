@@ -8,6 +8,7 @@ import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(LagreOppgaveJobbUtfører::class.java)
@@ -15,7 +16,7 @@ private val logger = LoggerFactory.getLogger(LagreOppgaveJobbUtfører::class.jav
 
 class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
-    private val personRepository: PersonRepository,
+    private val personService: PersonService,
     private val oppgaveRepository: OppgaveRepository,
     private val enhetRepository: EnhetRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository
@@ -36,9 +37,8 @@ class LagreOppgaveJobbUtfører(
                 )
         }
 
-        val personMedId = oppgave.person?.let {
-            personRepository.hentPerson(it.ident) ?: it.copy(id = personRepository.lagrePerson(it))
-        }
+        val personMedId =
+            oppgave.person?.let { personService.hentEllerLagrePerson(oppgave.person.ident) }
 
         val enhetMedId = oppgave.enhet.let {
             val id = enhetRepository.lagreEnhet(it)
@@ -72,7 +72,7 @@ class LagreOppgaveJobbUtfører(
         override fun konstruer(connection: DBConnection): LagreOppgaveJobbUtfører {
             return LagreOppgaveJobbUtfører(
                 OppgaveHendelseRepository(connection),
-                PersonRepository(connection),
+                PersonService(PersonRepository(connection)),
                 OppgaveRepository(connection),
                 EnhetRepository(connection),
                 SaksbehandlerRepository(connection)

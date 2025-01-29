@@ -8,8 +8,8 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.nyBehandlingOpprettet
-import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.verdityper.dokument.Kanal
@@ -24,14 +24,14 @@ private val logger = LoggerFactory.getLogger("HendelsesService")
 class HendelsesService(
     private val sakRepository: SakRepository,
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
-    private val personRepository: IPersonRepository,
+    private val personService: PersonService,
     private val behandlingRepository: IBehandlingRepository,
     private val meterRegistry: MeterRegistry,
     private val sakStatistikkService: SaksStatistikkService,
     private val clock: Clock = Clock.systemDefaultZone()
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
-        val person = hentEllerSettInnPerson(hendelse.ident)
+        val person = personService.hentEllerLagrePerson(hendelse.ident)
         val sak = hentEllerSettInnSak(person, hendelse.saksnummer, hendelse.sakStatus)
 
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
@@ -134,17 +134,7 @@ class HendelsesService(
             )
         }
         return sak
-    }
-
-    private fun hentEllerSettInnPerson(ident: String): Person {
-        var person = personRepository.hentPerson(ident)
-        if (person == null) {
-            personRepository.lagrePerson(Person(ident))
-        }
-        person = personRepository.hentPerson(ident)!!
-        return person
-    }
-}
+    } }
 
 private fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus {
     return when (this) {
