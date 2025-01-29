@@ -144,6 +144,8 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("DokumentflytStoppetHendelse"),
         ) { _, dto ->
             log.info("Got DTO: $dto")
+
+            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
         }
     }
 }
