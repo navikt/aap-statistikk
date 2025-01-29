@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.testutils.*
@@ -40,7 +41,6 @@ class HendelsesServiceTest {
 
         val hendelsesService = HendelsesService(
             sakRepository = sakRepository,
-            personRepository = FakePersonRepository(),
             behandlingRepository = behandlingRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepositoryFactory = FakeTilkjentYtelseRepository(),
@@ -54,6 +54,7 @@ class HendelsesServiceTest {
             ),
             clock = clock,
             meterRegistry = simpleMeterRegistry,
+            personService = PersonService(FakePersonRepository()),
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
@@ -99,11 +100,13 @@ class HendelsesServiceTest {
                 behandlingType = Revurdering,
                 ident = "234",
                 versjon = "dsad",
-                avklaringsbehov = listOf(AvklaringsbehovHendelseDto(
-                    avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                    endringer = listOf()
-                )),
+                avklaringsbehov = listOf(
+                    AvklaringsbehovHendelseDto(
+                        avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
+                        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                        endringer = listOf()
+                    )
+                ),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
@@ -136,7 +139,7 @@ class HendelsesServiceTest {
 
         val hendelsesService = HendelsesService(
             sakRepository = sakRepository,
-            personRepository = FakePersonRepository(),
+            personService = PersonService(FakePersonRepository()),
             behandlingRepository = behandlingRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepositoryFactory = FakeTilkjentYtelseRepository(),
@@ -147,7 +150,7 @@ class HendelsesServiceTest {
                 skjermingService = skjermingService,
                 diagnoseRepository = FakeDiagnoseRepository(),
                 meterRegistry = simpleMeterRegistry,
-                ),
+            ),
             clock = clock,
             meterRegistry = simpleMeterRegistry,
             sakStatistikkService = SaksStatistikkService(
@@ -201,7 +204,7 @@ class HendelsesServiceTest {
 
         val hendelsesService = HendelsesService(
             sakRepository = FakeSakRepository(),
-            personRepository = FakePersonRepository(),
+            personService = PersonService(FakePersonRepository()),
             behandlingRepository = behandlingRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepositoryFactory = FakeTilkjentYtelseRepository(),

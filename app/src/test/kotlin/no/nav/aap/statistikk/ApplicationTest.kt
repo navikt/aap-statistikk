@@ -11,6 +11,7 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -42,6 +43,7 @@ class ApplicationTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
+                personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient())
             ),
         ) { url, client ->
@@ -158,6 +160,7 @@ class ApplicationTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
+                personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
             ),
         ) { url, client ->
