@@ -10,6 +10,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.*
@@ -45,7 +46,7 @@ class ApplicationTest {
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient())
-            ),
+            ), LagreOppgaveHendelseJobb(meterRegistry)
         ) { url, client ->
             @Language("JSON") val body = """{
   "saksnummer": "123456789",
@@ -162,7 +163,7 @@ class ApplicationTest {
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
-            ),
+            ), LagreOppgaveHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(

@@ -50,7 +50,6 @@ class LagreOppgaveJobbUtfører(
 
         val eksisterendeOppgave = oppgaveRepository.hentOppgave(oppgave.identifikator)
 
-
         val oppgaveMedOppdaterteFelter = oppgave.copy(
             enhet = enhetMedId,
             person = personMedId,

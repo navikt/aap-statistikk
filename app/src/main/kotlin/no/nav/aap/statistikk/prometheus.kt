@@ -14,3 +14,6 @@ fun MeterRegistry.avsluttetBehandlingLagret() = this.counter(
 
 fun MeterRegistry.nyBehandlingOpprettet(type: TypeBehandling) =
     this.counter("statistikk_ny_behandling_opprettet_total", listOf(Tag.of("type", type.name)))
+
+fun MeterRegistry.oppgaveHendelseMottatt() =
+    this.counter("statistikk_oppgave_hendelse_mottatt_total")
