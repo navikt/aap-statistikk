@@ -37,7 +37,9 @@ enum class HendelseType {
     RESERVERT,
     AVRESERVERT,
     LUKKET,
-    OPPDATERT
+    OPPDATERT,
+    @Deprecated("Skal bort, men må fjerne fra db først")
+    GJENÅPNET
 }
 
 /**
