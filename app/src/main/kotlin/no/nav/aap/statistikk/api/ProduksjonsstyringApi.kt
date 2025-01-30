@@ -9,9 +9,8 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
-import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.produksjonsstyring.*
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -42,7 +41,6 @@ data class FordelingInput(
     @QueryParam("Week, month, day, etc.") val enhet: Tidsenhet = Tidsenhet.DAG,
     @QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?,
     @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
-        TypeBehandling.Førstegangsbehandling
     ),
     @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<@RegularExpression(
         pattern = "[0-9]{4}[0-9]{2}?"
@@ -92,9 +90,9 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
             ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(
                 req.antallDager
                     ?: 7,
-                req.behandlingstyper?.map { it.tilDomene() }
-                    ?: listOf(no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling),
-                req.enheter.orEmpty())
+                req.behandlingstyper.orEmpty(),
+                req.enheter.orEmpty()
+            )
         }
 
         respond(respons)
@@ -117,7 +115,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(
-                req.behandlingstyper.reqTilBehandlingsTypeListe(), req.enheter ?: listOf()
+                req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
             )
         }
 
@@ -140,7 +138,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).antallÅpneBehandlingerPerAvklaringsbehov(
-                req.behandlingstyper.reqTilBehandlingsTypeListe(),
+                req.behandlingstyper.orEmpty(),
                 req.enheter ?: listOf()
             )
         }
@@ -159,7 +157,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).antallBehandlingerPerSteggruppe(
-                req.behandlingstyper.reqTilBehandlingsTypeListe(),
+                req.behandlingstyper.orEmpty(),
                 req.enheter.orEmpty()
             )
         }
@@ -188,7 +186,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
                 },
                 antallBøtter = req.antallBøtter ?: 30,
-                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() } ?: listOf())
+                behandlingsTyper = req.behandlingstyper.orEmpty(),
+            )
                 .map { FordelingÅpneBehandlinger.fraBøtteFordeling(it) }
         })
     }
@@ -213,7 +212,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                     FordelingInput.Tidsenhet.ÅR -> ChronoUnit.YEARS
                 },
                 antallBøtter = req.antallBøtter ?: 30,
-                behandlingsTyper = req.behandlingstyper?.map { it.tilDomene() }.orEmpty(),
+                behandlingsTyper = req.behandlingstyper.orEmpty(),
                 enheter = req.enheter.orEmpty()
             ).map { FordelingLukkedeBehandlinger.fraBøtteFordeling(it) }
         })
@@ -236,7 +235,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val antallDager = req.antallDager
         val antallBehandlinger = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
-            val behandlingstyper = req.behandlingstyper.reqTilBehandlingsTypeListe()
+            val behandlingstyper = req.behandlingstyper.orEmpty()
             val antallNye = repo.antallNyeBehandlingerPerDag(antallDager, behandlingstyper)
             val antallAvsluttede =
                 repo.antallAvsluttedeBehandlingerPerDag(antallDager, behandlingstyper)
@@ -264,7 +263,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val venteårsakOgGjennomsnitt = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
             repo.venteÅrsakOgGjennomsnitt(
-                req.behandlingstyper.reqTilBehandlingsTypeListe(), req.enheter ?: listOf()
+                req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
             )
         }
         respond(venteårsakOgGjennomsnitt)
@@ -281,7 +280,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val årsakOgGjennomsnitt = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallBehandlingerPerÅrsak(
-                req.behandlingstyper.reqTilBehandlingsTypeListe(), req.enheter ?: listOf()
+                req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
             )
         }
 
@@ -292,8 +291,4 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         })
     }
 
-}
-
-private fun List<TypeBehandling>?.reqTilBehandlingsTypeListe(): List<no.nav.aap.statistikk.behandling.TypeBehandling> {
-    return (this?.map { it.tilDomene() } ?: listOf())
 }
