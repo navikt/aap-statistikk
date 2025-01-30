@@ -37,6 +37,10 @@ class PostmottakBehandling(
         return this
     }
 
+    fun status(): String {
+        return this.endringer.find { it.gjeldende }!!.status
+    }
+
     /**
      * Få et ikke-muterbar view av endringer-listen.
      */

@@ -3,9 +3,11 @@ package no.nav.aap.statistikk.postmottak
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.person.Person
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class PostmottakBehandlingRepository(private val dbConnection: DBConnection) {
+    private val logger = LoggerFactory.getLogger(PostmottakBehandlingRepository::class.java)
     fun opprettBehandling(behandling: PostmottakBehandling): Long {
         val sql = """
             INSERT INTO postmottak_behandling(journalpost_id, referanse, person_id, type_behandling,
@@ -41,6 +43,7 @@ class PostmottakBehandlingRepository(private val dbConnection: DBConnection) {
             }
         }
 
+        logger.info("Opprettet postmottak-behandling med ID: $id. Referanse: ${behandling.referanse}")
         return id
     }
 
@@ -78,8 +81,8 @@ class PostmottakBehandlingRepository(private val dbConnection: DBConnection) {
             setRowMapper {
                 PostmottakOppdatering(
                     gjeldende = it.getBoolean("gjeldende"),
-                    sisteSaksbehandler = it.getString("siste_saksbehandler"),
-                    gjeldendeAvklaringsBehov = it.getString("gjeldende_avklaringsbehov"),
+                    sisteSaksbehandler = it.getStringOrNull("siste_saksbehandler"),
+                    gjeldendeAvklaringsBehov = it.getStringOrNull("gjeldende_avklaringsbehov"),
                     status = it.getString("status"),
                     oppdatertTid = it.getLocalDateTime("oppdatert_tid")
                 )
