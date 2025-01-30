@@ -54,6 +54,8 @@ with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
                                                  where o.behandling_referanse_id in (select br.id
                                                                                      from behandling_referanse br
                                                                                      where br.referanse = pb.referanse))
+           where pbh.gjeldende = true
+             and pbh.status = 'AVSLUTTET'
            union
            select date_trunc('day', bh.oppdatert_tid) dag,
                   bh.oppdatert_tid as                 oppdatert_tid,
@@ -72,6 +74,8 @@ with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
 select dag,
        avg(extract(epoch from (u.oppdatert_tid - u.mottatt_tid))) as snitt
 from u
+where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
+  and (enhet = ANY (?::text[]) or ${'$'}2 is null)
 group by dag
 order by dag;
         """.trimIndent()

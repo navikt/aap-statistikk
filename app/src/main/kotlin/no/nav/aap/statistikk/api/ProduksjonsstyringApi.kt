@@ -59,8 +59,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     transactionExecutor: TransactionExecutor
 ) {
     data class BehandlingstidPerDagInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
-            TypeBehandling.Førstegangsbehandling
+        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<no.nav.aap.statistikk.behandling.TypeBehandling>? = listOf(
         ),
         @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
@@ -70,8 +69,9 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         modules
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(req.behandlingstyper?.map { it.tilDomene() }
-                ?: listOf(), req.enheter.orEmpty())
+            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(
+                req.behandlingstyper ?: listOf(), req.enheter.orEmpty()
+            )
         }
 
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
