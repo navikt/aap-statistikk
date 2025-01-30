@@ -42,21 +42,38 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         enheter: List<String>
     ): List<BehandlingstidPerDag> {
         val sql = """
-            select date_trunc('day', bh.oppdatert_tid)                             dag,
-                   avg(EXTRACT(EPOCH FROM (bh.oppdatert_tid - bh.mottatt_tid))) as snitt
-            from behandling_historikk bh
-                     join behandling b on bh.behandling_id = b.id
-                     join sak s on b.sak_id = s.id
-                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
-                                                  FROM oppgave o
-                                                  WHERE o.behandling_referanse_id = b.referanse_id
-                                                  LIMIT 1)
-            where bh.gjeldende = true
-              and bh.status = 'AVSLUTTET'
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
-            group by dag
-            order by dag
+with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
+                  pbh.oppdatert_tid  as                oppdatert_tid,
+                  pb.mottatt_tid     as                mottatt_tid,
+                  pb.type_behandling as                type_behandling,
+                  e.kode             as                enhet
+           from postmottak_behandling_historikk pbh
+                    join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
+                    left join enhet e on e.id = (select o.enhet_id
+                                                 from oppgave o
+                                                 where o.behandling_referanse_id in (select br.id
+                                                                                     from behandling_referanse br
+                                                                                     where br.referanse = pb.referanse))
+           union
+           select date_trunc('day', bh.oppdatert_tid) dag,
+                  bh.oppdatert_tid as                 oppdatert_tid,
+                  bh.mottatt_tid   as                 mottatt_tid,
+                  b.type           as                 type_behandling,
+                  e.kode           as                 enhet
+           from behandling_historikk bh
+                    join behandling b on bh.behandling_id = b.id
+                    join sak s on b.sak_id = s.id
+                    LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                 FROM oppgave o
+                                                 WHERE o.behandling_referanse_id = b.referanse_id
+                                                 LIMIT 1)
+           where bh.gjeldende = true
+             and bh.status = 'AVSLUTTET')
+select dag,
+       avg(extract(epoch from (u.oppdatert_tid - u.mottatt_tid))) as snitt
+from u
+group by dag
+order by dag;
         """.trimIndent()
 
 
