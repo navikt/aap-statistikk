@@ -5,7 +5,9 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.postmottak.kontrakt.avklaringsbehov.Status
 import no.nav.aap.postmottak.kontrakt.behandling.TypeBehandling
+import no.nav.aap.postmottak.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.person.Person
@@ -81,6 +83,15 @@ fun DokumentflytStoppetHendelse.tilDomene(person: Person): PostmottakBehandling 
         referanse = this.referanse,
         behandlingType = this.behandlingType.tilDomene(),
         mottattTid = this.hendelsesTidspunkt,
+        endringer = mutableListOf(
+            PostmottakOppdatering(
+                gjeldende = true,
+                status = this.status.name,
+                oppdatertTid = this.hendelsesTidspunkt,
+                sisteSaksbehandler = this.avklaringsbehov.sistePersonPåBehandling(),
+                gjeldendeAvklaringsBehov = this.avklaringsbehov.utledGjeldendeAvklaringsBehov()
+            )
+        )
     )
 }
 
@@ -89,4 +100,29 @@ fun TypeBehandling.tilDomene(): no.nav.aap.statistikk.behandling.TypeBehandling 
         TypeBehandling.DokumentHåndtering -> no.nav.aap.statistikk.behandling.TypeBehandling.Dokumenthåndtering
         TypeBehandling.Journalføring -> no.nav.aap.statistikk.behandling.TypeBehandling.Journalføring
     }
+}
+
+/**
+ * Nøyaktig samme logikk som [no.nav.aap.statistikk.hendelser.sistePersonPåBehandling]. Finnes måte å unngå å duplisere kode?
+ */
+fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
+    return this.flatMap { it.endringer }
+        .filter { it.endretAv.lowercase() != "Kelvin".lowercase() }
+        .maxByOrNull { it.tidsstempel }?.endretAv
+}
+
+fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
+    return this
+        .filter {
+            setOf(
+                Status.OPPRETTET,
+                Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                Status.SENDT_TILBAKE_FRA_BESLUTTER
+            ).contains(it.status)
+        }
+        .sortedByDescending {
+            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
+        }
+        .map { it.avklaringsbehovDefinisjon.kode }
+        .firstOrNull()?.toString()
 }
