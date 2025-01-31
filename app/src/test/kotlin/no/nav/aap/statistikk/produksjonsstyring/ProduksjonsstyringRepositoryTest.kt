@@ -82,7 +82,7 @@ class ProduksjonsstyringRepositoryTest {
         }
 
         assertThat(res).hasSize(2)
-        assertThat(res).containsExactly(
+        assertThat(res).containsExactlyInAnyOrder(
             BøtteFordeling(bøtte = 2, antall = 1),
             BøtteFordeling(bøtte = 3, antall = 2)
         )
