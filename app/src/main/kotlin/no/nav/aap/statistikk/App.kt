@@ -13,6 +13,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
@@ -184,7 +185,7 @@ fun Application.module(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    prometheusMeterRegistry: PrometheusMeterRegistry
+    prometheusMeterRegistry: MeterRegistry,
 ) {
     motor.start()
     transactionExecutor.withinTransaction {
@@ -225,11 +226,13 @@ fun Application.module(
 }
 
 
-private fun Application.monitoring(prometheus: PrometheusMeterRegistry) {
+private fun Application.monitoring(prometheus: MeterRegistry) {
     routing {
         route("/actuator") {
             get("/metrics") {
-                call.respond(prometheus.scrape())
+                if (prometheus is PrometheusMeterRegistry) {
+                    call.respond(prometheus.scrape())
+                }
             }
             get("/live") {
                 // TODO: logic here
