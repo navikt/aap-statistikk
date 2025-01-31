@@ -60,7 +60,7 @@ with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
                                                                                      where br.referanse = pb.referanse))
            where pbh.gjeldende = true
              and pbh.status = 'AVSLUTTET'
-           union
+           union all
            select date_trunc('day', bh.oppdatert_tid) dag,
                   bh.oppdatert_tid as                 oppdatert_tid,
                   bh.mottatt_tid   as                 mottatt_tid,
@@ -119,7 +119,7 @@ with u as (select b.type                                                        
                                                  LIMIT 1)
            where gjeldende = true
              and status != 'AVSLUTTET'
-           union
+           union all
            select pb.type_behandling                                            as type,
                   current_timestamp at time zone 'Europe/Oslo' - pb.mottatt_tid as alder,
                   e.kode                                                        as enhet
@@ -175,7 +175,7 @@ with u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode a
                                                  LIMIT 1)
            where gjeldende = true
              and status != 'AVSLUTTET'
-           union
+           union all
            select gjeldende_avklaringsbehov, type_behandling as type, e.kode as enhet
            from postmottak_behandling_historikk
                     join postmottak_behandling pb
@@ -361,29 +361,56 @@ group by gjeldende_avklaringsbehov;
         bøttestørrelse: Int = 1,
         enhet: ChronoUnit = ChronoUnit.DAYS,
         antallBøtter: Int = 30,
-        behandlingsTyper: List<TypeBehandling> = emptyList()
+        behandlingsTyper: List<TypeBehandling> = emptyList(),
+        enheter: List<String> = emptyList()
     ): List<BøtteFordeling> {
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
-            with dt as (select bh.behandling_id                                                       bid,
-                               EXTRACT(EPOCH FROM
-                                       (current_timestamp at time zone 'Europe/Oslo' - bh.mottatt_tid)) as diff
-                        from sak s,
-                             behandling b,
-                             behandling_historikk bh
-                        where s.id = b.sak_id
-                          and b.id = bh.behandling_id
-                          and bh.gjeldende = true
-                          and (b.type = ANY (?::text[]) or $1 is null)
-                          and bh.status != 'AVSLUTTET')
-            select width_bucket(diff, 0, $totaltSekunder, $antallBøtter) as bucket, count(*)
-            from dt
-            group by bucket;
+            with u as (select pb.mottatt_tid     as mottatt_tid,
+                              pb.type_behandling as type,
+                              e.kode             as enhet
+                       from postmottak_behandling_historikk pbh
+                                join postmottak_behandling pb
+                                     on pbh.postmottak_behandling_id = pb.id
+                                left join enhet e ON e.id = (select o.enhet_id
+                                                             from oppgave o
+                                                             where o.behandling_referanse_id in (select br.id
+                                                                                                 from behandling_referanse br
+                                                                                                 where br.referanse = pb.referanse))
+                       where pbh.status != 'AVSLUTTET'
+                         and gjeldende = true
+                       union all
+                       select bh.mottatt_tid as mottatt_tid,
+                              b.type         as type,
+                              e.kode         as enhet
+                       from behandling_historikk bh
+                                join behandling b on b.id = bh.behandling_id
+                                LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                             FROM oppgave o
+                                                             WHERE o.behandling_referanse_id = b.referanse_id
+                                                             LIMIT 1)
+                       where b.id = bh.behandling_id
+                         and bh.gjeldende = true
+                         and bh.status != 'AVSLUTTET')
+            select width_bucket(EXTRACT(EPOCH FROM
+                                        (current_timestamp at time zone 'Europe/Oslo' - mottatt_tid)), 0,
+                                $totaltSekunder, $antallBøtter) as bucket,
+                   count(*)
+            from u
+            where (type = ANY (?::text[]) or ${'$'}1 is null)
+              and (enhet = ANY (?::text[]) or ${'$'}2 is null)
+            group by bucket
+            order by bucket;
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper {
                 BøtteFordeling(it.getInt("bucket"), it.getInt("count"))
