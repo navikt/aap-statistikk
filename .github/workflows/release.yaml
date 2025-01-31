@@ -24,9 +24,9 @@ jobs:
       actions: read
       checks: write
       id-token: write
-    uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
+    uses: navikt/aap-workflows/.github/workflows/gradle-build-githubapp.yml@main
     with:
-      publish-typescript: false # Inntil vi får ordnet PAT
+      publish-typescript: true
       generate-openapi-command: gradle genererOpenApi
       app-navn: statistikk
     secrets: inherit
