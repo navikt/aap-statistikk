@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
+import com.papsign.ktor.openapigen.annotations.properties.description.Description
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
@@ -9,7 +10,10 @@ import java.time.temporal.ChronoUnit
 
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
-data class BehandlingPerAvklaringsbehov(val antall: Int, val behov: String)
+data class BehandlingPerAvklaringsbehov(
+    val antall: Int,
+    @property:Description("Avklaringsbehovkoden.") val behov: String
+)
 
 data class BehandlingPerSteggruppe(val steggruppe: StegGruppe, val antall: Int)
 
@@ -213,6 +217,7 @@ group by gjeldende_avklaringsbehov;
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>
     ): List<BehandlingPerSteggruppe> {
+        // TODO!
         val sql = """
             select steggruppe, count(*)
             from behandling_historikk
@@ -246,7 +251,7 @@ group by gjeldende_avklaringsbehov;
         }
     }
 
-    fun antallNyeBehandlingerPerDag(
+    fun opprettedeBehandlingerPerDag(
         antallDager: Int = 7,
         behandlingsTyper: List<TypeBehandling>
     ): List<AntallPerDag> {
@@ -362,7 +367,7 @@ group by gjeldende_avklaringsbehov;
         val sql = """
             with dt as (select bh.behandling_id                                                       bid,
                                EXTRACT(EPOCH FROM
-                                       (current_date at time zone 'Europe/Oslo' - bh.mottatt_tid)) as diff
+                                       (current_timestamp at time zone 'Europe/Oslo' - bh.mottatt_tid)) as diff
                         from sak s,
                              behandling b,
                              behandling_historikk bh

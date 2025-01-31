@@ -65,7 +65,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
     data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
     route("/behandlingstid").get<BehandlingstidPerDagInput, List<BehandlingstidPerDagDTO>>(
-        modules
+        modules,
+        EndpointInfo(summary = "For en gitt dag, hva er gjennomsnittlig alder på alle behandlinger som ble avsluttet på denne dagen.")
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(
@@ -112,7 +113,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val gjennomsnittsalder: Double
     )
     route("/åpne-behandlinger-per-behandlingstype").get<ÅpneBehandlingerPerBehandlingstypeInput, List<AntallÅpneOgTypeOgGjennomsnittsalder>>(
-        modules
+        modules,
+        EndpointInfo(summary = "Antall åpne behandlinger og gjennomsnittsalder på dem per behandlingstype.")
     ) { req ->
         val respons = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(
@@ -235,11 +237,12 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     route("/behandlinger/utvikling").get<BehandlingUtviklingsUtviklingInput, List<BehandlinEndringerPerDag>>(
         TagModule(listOf(Tags.Produksjonsstyring))
     ) { req ->
+        // TODO!!
         val antallDager = req.antallDager
         val antallBehandlinger = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
             val behandlingstyper = req.behandlingstyper.orEmpty()
-            val antallNye = repo.antallNyeBehandlingerPerDag(antallDager, behandlingstyper)
+            val antallNye = repo.opprettedeBehandlingerPerDag(antallDager, behandlingstyper)
             val antallAvsluttede =
                 repo.antallAvsluttedeBehandlingerPerDag(antallDager, behandlingstyper)
             val antallÅpneBehandlinger = repo.antallÅpneBehandlinger(behandlingstyper)
