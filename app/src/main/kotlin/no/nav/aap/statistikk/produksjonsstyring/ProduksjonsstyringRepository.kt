@@ -104,21 +104,38 @@ order by dag;
         enheter: List<String>
     ): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
         val sql = """
-            select type,
-                   count(*),
-                   extract(epoch from
-                           avg(current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid)) as gjennomsnitt_alder
-            from behandling_historikk bh
-                     join public.behandling b on b.id = bh.behandling_id
-                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
-                                                  FROM oppgave o
-                                                  WHERE o.behandling_referanse_id = b.referanse_id
-                                                  LIMIT 1)
-            where gjeldende = true
-              and status != 'AVSLUTTET'
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
-            group by b.type
+with u as (select b.type                                                         as type,
+                  current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid as alder,
+                  e.kode                                                         as enhet
+           from behandling_historikk bh
+                    join behandling b on b.id = bh.behandling_id
+                    LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                 FROM oppgave o
+                                                 WHERE o.behandling_referanse_id = b.referanse_id
+                                                 LIMIT 1)
+           where gjeldende = true
+             and status != 'AVSLUTTET'
+           union
+           select pb.type_behandling                                            as type,
+                  current_timestamp at time zone 'Europe/Oslo' - pb.mottatt_tid as alder,
+                  e.kode                                                        as enhet
+           from postmottak_behandling_historikk pbh
+                    join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
+                    LEFT JOIN enhet e ON e.id = (select o.enhet_id
+                                                 from oppgave o
+                                                 where o.behandling_referanse_id in (select br.id
+                                                                                     from behandling_referanse br
+                                                                                     where br.referanse = pb.referanse))
+           where gjeldende = true
+             and status != 'AVSLUTTET')
+select type,
+       count(*),
+       extract(epoch from
+               avg(alder)) as gjennomsnitt_alder
+from u
+where (type = ANY (?::text[]) or ${'$'}1 is null)
+  and (u.enhet = ANY (?::text[]) or ${'$'}2 is null)
+group by type;
         """.trimIndent()
 
         return connection.queryList(sql) {

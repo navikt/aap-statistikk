@@ -57,7 +57,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     transactionExecutor: TransactionExecutor
 ) {
     data class BehandlingstidPerDagInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<no.nav.aap.statistikk.behandling.TypeBehandling>? = listOf(
+        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         ),
         @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
@@ -107,7 +107,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
     data class AntallÅpneOgTypeOgGjennomsnittsalder(
         val antallÅpne: Int,
-        val behandlingstype: no.nav.aap.statistikk.behandling.TypeBehandling,
+        val behandlingstype: TypeBehandling,
         val gjennomsnittsalder: Double
     )
     route("/åpne-behandlinger-per-behandlingstype").get<ÅpneBehandlingerPerBehandlingstypeInput, List<AntallÅpneOgTypeOgGjennomsnittsalder>>(
