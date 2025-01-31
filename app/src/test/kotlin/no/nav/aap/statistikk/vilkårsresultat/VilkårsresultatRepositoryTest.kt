@@ -106,9 +106,6 @@ class VilkårsresultatRepositoryTest {
 
         val (behandlingId, _) = opprettTestHendelse(dataSource, randomUUID, saksnummer)
 
-        // lagre
-        val behandlingsReferanse = randomUUID.toString()
-
         val vilkårsresultat = VilkårsResultatEntity(
             id = null, listOf(
                 VilkårEntity(
