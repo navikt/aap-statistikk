@@ -25,6 +25,9 @@ jobs:
       checks: write
       id-token: write
     uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
+    with:
+      publish-typescript: 'true'
+      generate-openapi-command: gradle genererOpenApi
     secrets: inherit
 
   dev:

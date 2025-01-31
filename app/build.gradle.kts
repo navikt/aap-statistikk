@@ -27,6 +27,12 @@ tasks.register<JavaExec>("runTestApp") {
     workingDir = rootDir
 }
 
+tasks.register<JavaExec>("genererOpenApi") {
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("no.nav.aap.statistikk.GenererOpenApiJsonKt")
+    workingDir = rootDir
+}
+
 
 dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
