@@ -28,6 +28,7 @@ jobs:
     with:
       publish-typescript: true
       generate-openapi-command: gradle genererOpenApi
+      app-navn: statistikk
     secrets: inherit
 
   dev:
