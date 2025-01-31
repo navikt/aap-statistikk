@@ -192,6 +192,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 },
                 antallBøtter = req.antallBøtter ?: 30,
                 behandlingsTyper = req.behandlingstyper.orEmpty(),
+                enheter = req.enheter.orEmpty()
             )
                 .map { FordelingÅpneBehandlinger.fraBøtteFordeling(it) }
         })
