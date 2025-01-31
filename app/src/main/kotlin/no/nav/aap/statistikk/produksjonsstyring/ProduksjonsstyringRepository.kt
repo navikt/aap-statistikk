@@ -162,18 +162,32 @@ group by type;
         enheter: List<String>
     ): List<BehandlingPerAvklaringsbehov> {
         val sql = """
-            select count(*), gjeldende_avklaringsbehov
-            from behandling_historikk
-                     join behandling b on b.id = behandling_historikk.behandling_id
-                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
-                                                  FROM oppgave o
-                                                  WHERE o.behandling_referanse_id = b.referanse_id
-                                                  LIMIT 1)
-            where gjeldende = true
-              and status != 'AVSLUTTET'
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
-            group by gjeldende_avklaringsbehov;
+with u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode as enhet
+           from behandling_historikk
+                    join behandling b on b.id = behandling_historikk.behandling_id
+                    LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                                 FROM oppgave o
+                                                 WHERE o.behandling_referanse_id = b.referanse_id
+                                                 LIMIT 1)
+           where gjeldende = true
+             and status != 'AVSLUTTET'
+           union
+           select gjeldende_avklaringsbehov, type_behandling as type, e.kode as enhet
+           from postmottak_behandling_historikk
+                    join postmottak_behandling pb
+                         on postmottak_behandling_historikk.postmottak_behandling_id = pb.id
+                    LEFT JOIN enhet e ON e.id = (select o.enhet_id
+                                                 from oppgave o
+                                                 where o.behandling_referanse_id in (select br.id
+                                                                                     from behandling_referanse br
+                                                                                     where br.referanse = pb.referanse))
+           where gjeldende = true
+             and status != 'AVSLUTTET')
+select gjeldende_avklaringsbehov, count(*)
+from u
+where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
+  and (enhet = ANY (?::text[]) or ${'$'}2 is null)
+group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
 

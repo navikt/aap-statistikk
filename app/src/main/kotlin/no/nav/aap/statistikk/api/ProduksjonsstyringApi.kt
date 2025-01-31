@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.api
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.annotations.type.string.pattern.RegularExpression
+import com.papsign.ktor.openapigen.route.EndpointInfo
 import com.papsign.ktor.openapigen.route.TagModule
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
@@ -134,7 +135,9 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
     route("/behandling-per-avklaringsbehov").get<BehandlingerPerAvklaringsbehovInput, List<BehandlingPerAvklaringsbehov>>(
-        modules
+        modules, EndpointInfo(
+            summary = "Antall åpne behandlinger per avklaringsbehov.",
+        )
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).antallÅpneBehandlingerPerAvklaringsbehov(
