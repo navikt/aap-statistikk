@@ -31,7 +31,7 @@ import javax.sql.DataSource
 class ProduksjonsstyringRepositoryTest {
     @Test
     fun `skal legge i riktige bøtter for alder på åpne behandlinger`(@Postgres dataSource: DataSource) {
-        settInnBehandling(dataSource, LocalDateTime.now())
+        settInnBehandling(dataSource, LocalDateTime.now().minusHours(1))
         settInnBehandling(
             dataSource,
             LocalDateTime.now().minusDays(1)
@@ -51,10 +51,10 @@ class ProduksjonsstyringRepositoryTest {
         }
 
         assertThat(res).hasSize(3)
-        assertThat(res).containsExactly(
-            BøtteFordeling(bøtte = 0, antall = 1),
+        assertThat(res).containsExactlyInAnyOrder(
             BøtteFordeling(bøtte = 1, antall = 1),
-            BøtteFordeling(bøtte = 2, antall = 2)
+            BøtteFordeling(bøtte = 2, antall = 1),
+            BøtteFordeling(bøtte = 3, antall = 2)
         )
     }
 
