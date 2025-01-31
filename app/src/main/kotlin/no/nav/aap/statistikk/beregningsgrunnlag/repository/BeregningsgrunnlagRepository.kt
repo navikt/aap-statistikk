@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
-import org.slf4j.LoggerFactory
 import java.util.*
 
 
@@ -17,8 +17,6 @@ interface IBeregningsgrunnlagRepository {
     fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long
     fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>>
 }
-
-private val logger = LoggerFactory.getLogger(BeregningsgrunnlagRepository::class.java)
 
 
 class BeregningsgrunnlagRepository(
@@ -34,7 +32,11 @@ class BeregningsgrunnlagRepository(
         val beregningsGrunnlagVerdi = beregningsGrunnlag.value
 
         val baseGrunnlagId =
-            lagreBaseGrunnlag(dbConnection, beregningsGrunnlagVerdi.type().toString(), behandlingsReferanseId)
+            lagreBaseGrunnlag(
+                dbConnection,
+                beregningsGrunnlagVerdi.type(),
+                behandlingsReferanseId
+            )
 
         return when (beregningsGrunnlagVerdi) {
             is IBeregningsGrunnlag.Grunnlag_11_19 -> {
@@ -70,14 +72,14 @@ WHERE br.referanse = ?"""
 
     private fun lagreBaseGrunnlag(
         connection: DBConnection,
-        type: String,
+        type: GrunnlagType,
         behandlingId: BehandlingId
     ): Long {
-        val sql = "INSERT INTO GRUNNLAG(type, behandling_id) VALUES (?, ?) ";
+        val sql = "INSERT INTO GRUNNLAG(type, behandling_id) VALUES (?, ?) "
 
         return connection.executeReturnKey(sql) {
             setParams {
-                setString(1, type)
+                setString(1, type.toString())
                 setLong(2, behandlingId)
             }
         }
@@ -88,7 +90,7 @@ WHERE br.referanse = ?"""
         baseGrunnlagId: Long,
         beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagYrkesskade
     ): Long {
-        val grunnlagType: String;
+        val grunnlagType: String
         val id = when (beregningsGrunnlag.beregningsgrunnlag) {
             is IBeregningsGrunnlag.Grunnlag_11_19 -> {
                 grunnlagType = "normal"
@@ -241,7 +243,7 @@ from grunnlag
                     }
                 }
 
-                MedBehandlingsreferanse<IBeregningsGrunnlag>(
+                MedBehandlingsreferanse(
                     behandlingsReferanse = referanse,
                     value = grunnlagsType
                 )
@@ -290,6 +292,7 @@ from grunnlag
         )
     }
 
+    @Suppress("FunctionName")
     private fun hentGrunnlag11_19(grunnlagUføreRs: Row): IBeregningsGrunnlag.Grunnlag_11_19 {
         val typeRef
                 : TypeReference<Map<Int, Double>> =
@@ -305,6 +308,7 @@ from grunnlag
         return grunnlag11_19
     }
 
+    @Suppress("FunctionName")
     private fun lagre11_19(
         connection: DBConnection,
         baseGrunnlagId: Long,
