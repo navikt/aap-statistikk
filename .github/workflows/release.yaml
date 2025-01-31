@@ -26,7 +26,7 @@ jobs:
       id-token: write
     uses: navikt/aap-workflows/.github/workflows/gradle-build-githubapp.yml@main
     with:
-      publish-typescript: true
+      publish-typescript:  false
       generate-openapi-command: "gradle genererOpenApi"
       app-navn: statistikk
     secrets: inherit
