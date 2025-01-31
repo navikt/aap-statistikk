@@ -16,7 +16,7 @@ import javax.sql.DataSource
 class PostmottakBehandlingRepositoryTest {
     @Test
     fun `lagre og hente ut igjen`(@Postgres dataSource: DataSource) {
-        val oppdatertTid = LocalDateTime.now()
+        val oppdatertTid = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
         val behandling = opprettBehandling(
             dataSource, PostmottakBehandling(
                 journalpostId = 213,
@@ -38,7 +38,7 @@ class PostmottakBehandlingRepositoryTest {
 
         val uthentet = hentUtBehandling(dataSource, behandling)
 
-        assertEquals(behandling, uthentet)
+        assertThat(uthentet).isEqualTo(behandling)
     }
 
     @Test
