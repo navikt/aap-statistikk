@@ -31,6 +31,7 @@ class BehandlingTabellTest {
                 kodeverk = "IC23",
                 diagnosekode = "PEST",
                 bidiagnoser = listOf("KOLERA", "BOLIGSKADE"),
+                radEndret = LocalDateTime.now()
             )
         )
 

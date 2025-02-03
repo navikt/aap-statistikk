@@ -12,6 +12,8 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
+import java.time.Clock
+import java.time.LocalDateTime
 import java.util.*
 
 class AvsluttetBehandlingService(
@@ -22,7 +24,8 @@ class AvsluttetBehandlingService(
     private val bqRepository: IBQRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val skjermingService: SkjermingService,
-    private val meterRegistry: MeterRegistry
+    private val meterRegistry: MeterRegistry,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
 
@@ -90,7 +93,8 @@ class AvsluttetBehandlingService(
                 datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt,
                 kodeverk = avsluttetBehandling.diagnoser?.kodeverk,
                 diagnosekode = avsluttetBehandling.diagnoser?.diagnosekode,
-                bidiagnoser = avsluttetBehandling.diagnoser?.bidiagnoser
+                bidiagnoser = avsluttetBehandling.diagnoser?.bidiagnoser,
+                radEndret = LocalDateTime.now(clock)
             )
         )
         bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
