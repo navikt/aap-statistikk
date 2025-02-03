@@ -24,7 +24,7 @@ jobs:
       actions: read
       checks: write
       id-token: write
-    uses: navikt/aap-workflows/.github/workflows/gradle-build-githubapp.yml@main
+    uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
     with:
       publish-typescript:  false
       generate-openapi-command: "gradle genererOpenApi"
