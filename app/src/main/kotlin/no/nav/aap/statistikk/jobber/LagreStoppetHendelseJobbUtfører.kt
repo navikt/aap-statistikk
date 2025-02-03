@@ -1,9 +1,9 @@
 package no.nav.aap.statistikk.jobber
 
-import no.nav.aap.motor.JobbInput
-import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.motor.JobbInput
+import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import org.slf4j.LoggerFactory
 
@@ -14,7 +14,7 @@ class LagreStoppetHendelseJobbUtfører(
 
     override fun utfør(input: JobbInput) {
         val dto = DefaultJsonMapper.fromJson<StoppetBehandling>(input.payload())
-        logger.info("Got message: $dto")
+        logger.info("Got message: ${input.payload()}")
 
         hendelsesService.prosesserNyHendelse(dto)
     }
