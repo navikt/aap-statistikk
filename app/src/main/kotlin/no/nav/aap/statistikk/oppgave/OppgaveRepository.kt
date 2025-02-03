@@ -9,7 +9,7 @@ class OppgaveRepository(private val dbConnection: DBConnection) {
     fun lagreOppgave(oppgave: Oppgave): Long {
         require(oppgave.enhet.id != null)
 
-        val behandlingsReferanseId = oppgave.behandlingReferanse?.let { behandling ->
+        val behandlingsReferanseId = oppgave.behandlingReferanse?.let {
             val sqlVersjon = """WITH ny_ref AS (
     INSERT INTO behandling_referanse (referanse)
         VALUES (?)
@@ -22,8 +22,8 @@ SELECT COALESCE(
 
             dbConnection.queryFirst(sqlVersjon) {
                 setParams {
-                    setUUID(1, oppgave.behandlingReferanse.referanse)
-                    setUUID(2, oppgave.behandlingReferanse.referanse)
+                    setUUID(1, it.referanse)
+                    setUUID(2, it.referanse)
                 }
                 setRowMapper { row -> row.getLong("id") }
             }
