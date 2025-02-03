@@ -1,14 +1,12 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.IBQRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -16,10 +14,7 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.testutils.FakePdlClient
-import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
-import no.nav.aap.statistikk.testutils.behandlingHendelse
+import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -31,18 +26,19 @@ import javax.sql.DataSource
 class ProduksjonsstyringRepositoryTest {
     @Test
     fun `skal legge i riktige bøtter for alder på åpne behandlinger`(@Postgres dataSource: DataSource) {
-        settInnBehandling(dataSource, LocalDateTime.now().minusHours(1))
+        val nå = LocalDateTime.now()
+        settInnBehandling(dataSource, nå.minusHours(1))
         settInnBehandling(
             dataSource,
-            LocalDateTime.now().minusDays(1)
+            nå.minusDays(3)
         )
         settInnBehandling(
             dataSource,
-            LocalDateTime.now().minusDays(2)
+            nå.minusDays(5)
         )
         settInnBehandling(
             dataSource,
-            LocalDateTime.now().minusDays(2)
+            nå.minusDays(5)
         )
 
         val res = dataSource.transaction {
@@ -51,10 +47,11 @@ class ProduksjonsstyringRepositoryTest {
         }
 
         assertThat(res).hasSize(3)
+        println(res)
         assertThat(res).containsExactlyInAnyOrder(
             BøtteFordeling(bøtte = 1, antall = 1),
-            BøtteFordeling(bøtte = 2, antall = 1),
-            BøtteFordeling(bøtte = 3, antall = 2)
+            BøtteFordeling(bøtte = 4, antall = 1),
+            BøtteFordeling(bøtte = 6, antall = 2)
         )
     }
 
@@ -94,7 +91,7 @@ class ProduksjonsstyringRepositoryTest {
         åpen: Boolean = true
     ) =
         dataSource.transaction { conn ->
-            val bqRepository = mockk<IBQRepository>(relaxed = true)
+            val bqRepository = FakeBQRepository()
 
             val skjermingService = SkjermingService(FakePdlClient())
             val meterRegistry = SimpleMeterRegistry()
