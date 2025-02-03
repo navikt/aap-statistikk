@@ -134,7 +134,8 @@ class HendelsesService(
             )
         }
         return sak
-    } }
+    }
+}
 
 private fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus {
     return when (this) {
@@ -177,5 +178,8 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING
         ÅrsakTilBehandling.DIALOGMELDING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.DIALOGMELDING
         ÅrsakTilBehandling.G_REGULERING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.G_REGULERING
+        ÅrsakTilBehandling.REVURDER_MEDLEMSKAP -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_MEDLEMSSKAP
+        ÅrsakTilBehandling.REVURDER_YRKESSKADE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_YRKESSKADE
+        ÅrsakTilBehandling.REVURDER_BEREGNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_BEREGNING
     }
 }
