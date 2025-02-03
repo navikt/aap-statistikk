@@ -14,7 +14,7 @@ class LagreStoppetHendelseJobbUtfører(
 
     override fun utfør(input: JobbInput) {
         val dto = DefaultJsonMapper.fromJson<StoppetBehandling>(input.payload())
-        logger.info("Got message: ${input.payload()}")
+        logger.atInfo().setMessage("Got message.").addKeyValue("dto", dto).log()
 
         hendelsesService.prosesserNyHendelse(dto)
     }
