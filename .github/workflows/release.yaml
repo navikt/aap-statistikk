@@ -27,7 +27,7 @@ jobs:
     uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
     with:
       publish-typescript:  false
-      generate-openapi-command: "gradle genererOpenApi"
+      generate-openapi-command: gradle genererOpenApi
       app-navn: statistikk
     secrets: inherit
 
