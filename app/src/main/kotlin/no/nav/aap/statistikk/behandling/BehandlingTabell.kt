@@ -14,7 +14,8 @@ data class BQYtelseBehandling(
     val datoAvsluttet: LocalDateTime,
     val kodeverk: String?,
     val diagnosekode: String?,
-    val bidiagnoser: List<String>?
+    val bidiagnoser: List<String>?,
+    val radEndret: LocalDateTime
 )
 
 class BehandlingTabell : BQTable<BQYtelseBehandling> {
@@ -40,6 +41,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 .setMode(Field.Mode.REPEATED)
                 .build();
 
+            val radEndret = Field.of("radEndret", StandardSQLTypeName.DATETIME)
+
             return Schema.of(
                 referanse,
                 behandlingsType,
@@ -47,7 +50,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 datoAvsluttet,
                 kodeverk,
                 diagnosekode,
-                bidiagnoser
+                bidiagnoser,
+                radEndret
             )
         }
 
@@ -60,6 +64,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         val diagnosekode = fieldValueList.get("diagnosekode").stringValue
         val bidiagnoser =
             fieldValueList.get("bidiagnoser").repeatedValue.map { it.recordValue[0].stringValue }
+        val radEndret = LocalDateTime.parse(fieldValueList.get("radEndret").stringValue)
 
         return BQYtelseBehandling(
             UUID.fromString(referanse),
@@ -68,7 +73,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             datoAvsluttet = datoAvsluttet,
             kodeverk = kodeverk,
             diagnosekode = diagnosekode,
-            bidiagnoser = bidiagnoser
+            bidiagnoser = bidiagnoser,
+            radEndret = radEndret
         )
     }
 
@@ -86,7 +92,9 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                     mapOf(
                         "kode" to it
                     )
-                }
+                },
+                "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             )
         )
     }

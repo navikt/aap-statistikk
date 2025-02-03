@@ -30,8 +30,7 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatReposit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.*
 import java.util.*
 import javax.sql.DataSource
 
@@ -114,11 +113,13 @@ class AvsluttetBehandlingServiceTest {
         val meterRegistry = SimpleMeterRegistry()
         val counter = meterRegistry.avsluttetBehandlingLagret()
 
+        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
         val bigQueryClient = dataSource.transaction {
             val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 it,
                 bigQuery,
-                meterRegistry
+                meterRegistry,
+                clock = clock
             )
 
             avsluttetBehandlingService.lagre(avsluttetBehandling)
@@ -131,15 +132,18 @@ class AvsluttetBehandlingServiceTest {
         val utlestVilkårsVurderingFraBigQuery = bigQueryClient.read(VilkårsVurderingTabell())
         val utlestTilkjentYtelseFraBigQuery = bigQueryClient.read(TilkjentYtelseTabell())
 
-        assertThat(utlestFraBehandlingTabell).isEqualTo(BQYtelseBehandling(
-            referanse = avsluttetBehandling.behandlingsReferanse,
-            brukerFnr = "29021946",
-            behandlingsType = TypeBehandling.Førstegangsbehandling,
-            datoAvsluttet = datoNå.atStartOfDay(),
-            kodeverk = "KODEVERK",
-            diagnosekode = "KOLERA",
-            bidiagnoser = listOf("PEST"),
-        ))
+        assertThat(utlestFraBehandlingTabell).isEqualTo(
+            BQYtelseBehandling(
+                referanse = avsluttetBehandling.behandlingsReferanse,
+                brukerFnr = "29021946",
+                behandlingsType = TypeBehandling.Førstegangsbehandling,
+                datoAvsluttet = datoNå.atStartOfDay(),
+                kodeverk = "KODEVERK",
+                diagnosekode = "KOLERA",
+                bidiagnoser = listOf("PEST"),
+                radEndret = LocalDateTime.now(clock).truncatedTo(java.time.temporal.ChronoUnit.MILLIS),
+            )
+        )
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
         assertThat(utlestVilkårsVurderingFraBigQuery.first().behandlingsReferanse).isEqualTo(
             avsluttetBehandling.vilkårsresultat.behandlingsReferanse
@@ -257,7 +261,8 @@ class AvsluttetBehandlingServiceTest {
     private fun konstruerAvsluttetBehandlingService(
         dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig,
-        meterRegistry: MeterRegistry
+        meterRegistry: MeterRegistry,
+        clock: Clock = Clock.systemUTC()
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
         val bqRepository = BQRepository(bigQueryClient)
@@ -271,7 +276,8 @@ class AvsluttetBehandlingServiceTest {
                 bqRepository,
                 behandlingRepository = BehandlingRepository(dbConnection),
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
-                meterRegistry
+                meterRegistry,
+                clock = clock
             )
         return Pair(bigQueryClient, service)
     }
