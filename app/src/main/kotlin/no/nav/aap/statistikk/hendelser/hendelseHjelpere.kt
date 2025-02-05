@@ -4,7 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
-import tilgang.Rolle
+import no.nav.aap.tilgang.Rolle
 import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 
@@ -87,7 +87,6 @@ fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
     return nyesteAvklaringsbehov.avklaringsbehovDefinisjon.løsesAv.only() in listOf(
         Rolle.SAKSBEHANDLER_NASJONAL,
         Rolle.BESLUTTER,
-        Rolle.SAKSBEHANDLER
     )
 }
 
