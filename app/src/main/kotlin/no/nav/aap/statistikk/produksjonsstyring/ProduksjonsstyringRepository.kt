@@ -180,7 +180,7 @@ with u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode a
            from postmottak_behandling_historikk
                     join postmottak_behandling pb
                          on postmottak_behandling_historikk.postmottak_behandling_id = pb.id
-                    LEFT JOIN enhet e ON e.id = (select o.enhet_id
+                    LEFT JOIN enhet e ON e.id in (select o.enhet_id
                                                  from oppgave o
                                                  where o.behandling_referanse_id in (select br.id
                                                                                      from behandling_referanse br
