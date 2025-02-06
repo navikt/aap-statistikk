@@ -113,7 +113,7 @@ with u as (select b.type                                                        
                   e.kode                                                         as enhet
            from behandling_historikk bh
                     join behandling b on b.id = bh.behandling_id
-                    LEFT JOIN enhet e ON e.id in (SELECT o.enhet_id
+                    LEFT JOIN enhet e ON e.id in (SELECT distinct o.enhet_id
                                                  FROM oppgave o
                                                  WHERE o.behandling_referanse_id = b.referanse_id
                                                  LIMIT 1)
@@ -125,7 +125,7 @@ with u as (select b.type                                                        
                   e.kode                                                        as enhet
            from postmottak_behandling_historikk pbh
                     join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
-                    LEFT JOIN enhet e ON e.id = (select o.enhet_id
+                    LEFT JOIN enhet e ON e.id = (select distinct o.enhet_id
                                                  from oppgave o
                                                  where o.behandling_referanse_id in (select br.id
                                                                                      from behandling_referanse br
