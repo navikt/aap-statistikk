@@ -53,7 +53,7 @@ with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
                   e.kode             as                enhet
            from postmottak_behandling_historikk pbh
                     join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
-                    left join enhet e on e.id in (select o.enhet_id
+                    left join enhet e on e.id = (select distinct o.enhet_id
                                                  from oppgave o
                                                  where o.behandling_referanse_id in (select br.id
                                                                                      from behandling_referanse br
@@ -69,7 +69,7 @@ with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
            from behandling_historikk bh
                     join behandling b on bh.behandling_id = b.id
                     join sak s on b.sak_id = s.id
-                    LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                    LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                                  FROM oppgave o
                                                  WHERE o.behandling_referanse_id = b.referanse_id
                                                  LIMIT 1)
@@ -372,7 +372,7 @@ group by gjeldende_avklaringsbehov;
                        from postmottak_behandling_historikk pbh
                                 join postmottak_behandling pb
                                      on pbh.postmottak_behandling_id = pb.id
-                                left join enhet e ON e.id = (select o.enhet_id
+                                left join enhet e ON e.id in (select distinct o.enhet_id
                                                              from oppgave o
                                                              where o.behandling_referanse_id in (select br.id
                                                                                                  from behandling_referanse br
@@ -385,7 +385,7 @@ group by gjeldende_avklaringsbehov;
                               e.kode         as enhet
                        from behandling_historikk bh
                                 join behandling b on b.id = bh.behandling_id
-                                LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                                LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                                              FROM oppgave o
                                                              WHERE o.behandling_referanse_id = b.referanse_id
                                                              LIMIT 1)
