@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.bigquery.BQTable
-import java.util.UUID
+import java.util.*
 
 // TODO legg til inntekt
 data class BeregningsGrunnlagBQ(
