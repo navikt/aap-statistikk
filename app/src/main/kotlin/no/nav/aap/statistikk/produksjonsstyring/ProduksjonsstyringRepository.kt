@@ -433,7 +433,7 @@ with u as (select pb.mottatt_tid     as mottatt_tid,
            from postmottak_behandling_historikk pbh
                     join postmottak_behandling pb
                          on pbh.postmottak_behandling_id = pb.id
-                    left join enhet e ON e.id = (select o.enhet_id
+                    left join enhet e ON e.id in (select o.enhet_id
                                                  from oppgave o
                                                  where o.behandling_referanse_id in (select br.id
                                                                                      from behandling_referanse br
