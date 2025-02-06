@@ -169,7 +169,7 @@ group by type;
 with u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode as enhet
            from behandling_historikk
                     join behandling b on b.id = behandling_historikk.behandling_id
-                    LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                    LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                                  FROM oppgave o
                                                  WHERE o.behandling_referanse_id = b.referanse_id
                                                  LIMIT 1)
@@ -180,7 +180,7 @@ with u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode a
            from postmottak_behandling_historikk
                     join postmottak_behandling pb
                          on postmottak_behandling_historikk.postmottak_behandling_id = pb.id
-                    LEFT JOIN enhet e ON e.id in (select o.enhet_id
+                    LEFT JOIN enhet e ON e.id in (select distinct o.enhet_id
                                                  from oppgave o
                                                  where o.behandling_referanse_id in (select br.id
                                                                                      from behandling_referanse br
@@ -222,7 +222,7 @@ group by gjeldende_avklaringsbehov;
             select steggruppe, count(*)
             from behandling_historikk
                      join behandling b on b.id = behandling_historikk.behandling_id
-                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                     LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                                   FROM oppgave o
                                                   WHERE o.behandling_referanse_id = b.referanse_id
                                                   LIMIT 1)
@@ -313,7 +313,7 @@ group by gjeldende_avklaringsbehov;
             select avg(extract(epoch from bh.oppdatert_tid - bh.mottatt_tid))
             from behandling_historikk bh
                      join behandling b on b.id = bh.behandling_id
-                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                     LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                                   FROM oppgave o
                                                   WHERE o.behandling_referanse_id = b.referanse_id
                                                   LIMIT 1)
@@ -433,7 +433,7 @@ with u as (select pb.mottatt_tid     as mottatt_tid,
            from postmottak_behandling_historikk pbh
                     join postmottak_behandling pb
                          on pbh.postmottak_behandling_id = pb.id
-                    left join enhet e ON e.id in (select o.enhet_id
+                    left join enhet e ON e.id in (select distinct o.enhet_id
                                                  from oppgave o
                                                  where o.behandling_referanse_id in (select br.id
                                                                                      from behandling_referanse br
@@ -446,7 +446,7 @@ with u as (select pb.mottatt_tid     as mottatt_tid,
                   e.kode         as enhet
            from behandling_historikk bh
                     join behandling b on b.id = bh.behandling_id
-                    LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                    LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                                  FROM oppgave o
                                                  WHERE o.behandling_referanse_id = b.referanse_id
                                                  LIMIT 1)
@@ -498,7 +498,7 @@ order by bucket;
                            avg(now() at time zone 'Europe/Oslo' - behandling_historikk.oppdatert_tid)) as avg
             from behandling_historikk
                      join behandling b on b.id = behandling_historikk.behandling_id
-                     LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+                     LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                                   FROM oppgave o
                                                   WHERE o.behandling_referanse_id = b.referanse_id
                                                   LIMIT 1)
@@ -539,7 +539,7 @@ select unnest(b.aarsaker_til_behandling)                                       a
                                                              b.opprettet_tid)) as avg_alder
 from behandling b
          join behandling_historikk bh on b.id = bh.behandling_id
-         LEFT JOIN enhet e ON e.id = (SELECT o.enhet_id
+         LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                       FROM oppgave o
                                       WHERE o.behandling_referanse_id = b.referanse_id
                                       LIMIT 1)
