@@ -125,8 +125,8 @@ class HendelseHjelpereKtTest {
     }
 
     @Test
-    fun `er hos NAY`() {
-        assertThat(sattPåVentPåNAYSteg.hosNAY()).isTrue()
+    fun `kvalitetssikrer hos lokalkontor`() {
+        assertThat(sattPåVentPåKvalitetssikringNAYSteg.hosNAY()).isFalse()
     }
 
     @Test
@@ -406,7 +406,7 @@ val ufullførtBehandlingEndringer = listOf(
     )
 )
 
-val sattPåVentPåNAYSteg = listOf(
+val sattPåVentPåKvalitetssikringNAYSteg = listOf(
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
         status = EndringStatus.AVSLUTTET,

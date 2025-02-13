@@ -72,8 +72,8 @@ fun List<AvklaringsbehovHendelseDto>.erManuell(): Boolean {
 }
 
 /**
- * Vi utleder at behandlingen er hos NAY om gjeldende avklaringsbehov er et avklaringsbehov som løses av en [tilgang.Rolle.SAKSBEHANDLER]. Om dette ikke er unikt, se på forrige
- * avklaringsbehov.
+ * Vi utleder at behandlingen er hos NAY om gjeldende avklaringsbehov er et avklaringsbehov som løses av en [no.nav.aap.tilgang.Rolle.SAKSBEHANDLER_OPPFOLGING].
+ * Om dette ikke er unikt, se på forrige avklaringsbehov.
  */
 fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
     val nyesteAvklaringsbehov =
