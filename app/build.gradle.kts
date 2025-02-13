@@ -10,12 +10,12 @@ plugins {
 val ktorVersion = "3.1.0"
 val mockkVersion = "1.13.16"
 val komponenterVersjon = "1.0.135"
-val behandlingsflytversjon = "0.0.143"
+val behandlingsflytversjon = "0.0.153"
 val tilgangVersjon = "1.0.2"
 val flywayVersion = "11.3.1"
 val oppgaveVersjon = "0.0.46"
 val testContainersVersion = "1.20.4"
-val postmottakVersjon = "0.0.41"
+val postmottakVersjon = "0.0.44"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
