@@ -28,7 +28,7 @@ enum class RettighetsType(val hjemmel: String) {
     SYKEPENGEERSTATNING(hjemmel = "§ 11-13"),
     STUDENT(hjemmel = "§ 11-14"),
     ARBEIDSSØKER(hjemmel = "§ 11-17"),
-    VURDERES_FOR_UFØRETYGD(hjemmel = "§ 11-18"),
+    VURDERES_FOR_UFØRETRYGD(hjemmel = "§ 11-18"),
 }
 
 

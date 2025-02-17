@@ -34,7 +34,8 @@ fun AvsluttetBehandlingDTO.tilDomene(
                     RettighetsType.SYKEPENGEERSTATNING -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.SYKEPENGEERSTATNING
                     RettighetsType.STUDENT -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.STUDENT
                     RettighetsType.ARBEIDSSØKER -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.ARBEIDSSØKER
-                    RettighetsType.VURDERES_FOR_UFØRETYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETYGD
+                    RettighetsType.VURDERES_FOR_UFØRETYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETRYGD
+                    RettighetsType.VURDERES_FOR_UFØRETRYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETRYGD
                 }
             )
         }.orEmpty(),
