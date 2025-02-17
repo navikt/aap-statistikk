@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
@@ -22,6 +24,18 @@ class BehandlingTabellTest {
         val referanse = UUID.randomUUID()
 
         val datoAvsluttet = LocalDateTime.now()
+        val rettighetsPerioder = listOf(
+            RettighetstypePeriode(
+                fraDato = LocalDate.now(),
+                tilDato = LocalDate.now().plusDays(1),
+                rettighetstype = RettighetsType.STUDENT
+            ),
+            RettighetstypePeriode(
+                fraDato = LocalDate.now().plusDays(5),
+                tilDato = LocalDate.now().plusDays(3),
+                rettighetstype = RettighetsType.BISTANDSBEHOV
+            )
+        )
         client.insert(
             tabell, BQYtelseBehandling(
                 referanse = referanse,
@@ -31,7 +45,8 @@ class BehandlingTabellTest {
                 kodeverk = "IC23",
                 diagnosekode = "PEST",
                 bidiagnoser = listOf("KOLERA", "BOLIGSKADE"),
-                radEndret = LocalDateTime.now()
+                radEndret = LocalDateTime.now(),
+                rettighetsPerioder = rettighetsPerioder
             )
         )
 
@@ -48,5 +63,6 @@ class BehandlingTabellTest {
         assertThat(read.first().kodeverk).isEqualTo("IC23")
         assertThat(read.first().diagnosekode).isEqualTo("PEST")
         assertThat(read.first().bidiagnoser).isEqualTo(listOf("KOLERA", "BOLIGSKADE"))
+        assertThat(read.first().rettighetsPerioder).isEqualTo(rettighetsPerioder)
     }
 }

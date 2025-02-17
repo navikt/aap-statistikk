@@ -1,7 +1,10 @@
 package no.nav.aap.statistikk.behandling
 
 import com.google.cloud.bigquery.*
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BQTable
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -15,6 +18,7 @@ data class BQYtelseBehandling(
     val kodeverk: String?,
     val diagnosekode: String?,
     val bidiagnoser: List<String>?,
+    val rettighetsPerioder: List<RettighetstypePeriode>,
     val radEndret: LocalDateTime
 )
 
@@ -40,6 +44,13 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             )
                 .setMode(Field.Mode.REPEATED)
                 .build();
+            val rettighetstypePeriode = Field.newBuilder(
+                "rettighetstypePerioder",
+                StandardSQLTypeName.STRUCT,
+                Field.of("fraDato", StandardSQLTypeName.DATE),
+                Field.of("tilDato", StandardSQLTypeName.DATE),
+                Field.of("rettighetstype", StandardSQLTypeName.STRING)
+            ).setMode(Field.Mode.REPEATED).build()
 
             val radEndret = Field.of("radEndret", StandardSQLTypeName.DATETIME)
 
@@ -51,6 +62,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 kodeverk,
                 diagnosekode,
                 bidiagnoser,
+                rettighetstypePeriode,
                 radEndret
             )
         }
@@ -66,6 +78,15 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             fieldValueList.get("bidiagnoser").repeatedValue.map { it.recordValue[0].stringValue }
         val radEndret = LocalDateTime.parse(fieldValueList.get("radEndret").stringValue)
 
+        val rettighetstypePerioder = fieldValueList.get("rettighetstypePerioder").repeatedValue
+            .map {
+                RettighetstypePeriode(
+                    fraDato = LocalDate.parse(it.recordValue[0].stringValue),
+                    tilDato = LocalDate.parse(it.recordValue[1].stringValue),
+                    rettighetstype = RettighetsType.valueOf(it.recordValue[2].stringValue)
+                )
+            }
+
         return BQYtelseBehandling(
             UUID.fromString(referanse),
             brukerFnr,
@@ -74,6 +95,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             kodeverk = kodeverk,
             diagnosekode = diagnosekode,
             bidiagnoser = bidiagnoser,
+            rettighetsPerioder = rettighetstypePerioder,
             radEndret = radEndret
         )
     }
@@ -91,6 +113,13 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 "bidiagnoser" to value.bidiagnoser?.map {
                     mapOf(
                         "kode" to it
+                    )
+                },
+                "rettighetstypePerioder" to value.rettighetsPerioder.map { periode ->
+                    mapOf(
+                        "fraDato" to periode.fraDato.toString(),
+                        "tilDato" to periode.tilDato.toString(),
+                        "rettighetstype" to periode.rettighetstype.toString()
                     )
                 },
                 "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
