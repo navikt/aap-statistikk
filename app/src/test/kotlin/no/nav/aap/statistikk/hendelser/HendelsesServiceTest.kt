@@ -71,9 +71,7 @@ class HendelsesServiceTest {
             sakStatus = SakStatus.LØPENDE,
             sistOppdatert = LocalDateTime.now()
         )
-        sakRepository.settInnSak(
-            sak
-        )
+        sakRepository.settInnSak(sak)
 
         val relatertUUID = UUID.randomUUID()
         behandlingRepository.opprettBehandling(
