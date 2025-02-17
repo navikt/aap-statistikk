@@ -96,6 +96,7 @@ class SaksStatistikkService(
 
     fun behandlingStatus(status: BehandlingStatus): String {
         // TODO: når klage er implementert, må dette fikses her
+        // TODO: få inn retur fra kvalitetssikrer her, og ventegrunner
         return when (status) {
             BehandlingStatus.OPPRETTET -> "REGISTRERT"
             BehandlingStatus.UTREDES -> "UNDER_BEHANDLING"

@@ -25,7 +25,7 @@ fun AvsluttetBehandlingDTO.tilDomene(
         beregningsgrunnlag = if (beregningsGrunnlag == null) null else tilDomene(beregningsGrunnlag!!),
         diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
         behandlingsReferanse = behandlingsReferanse,
-        rettighetstypeperioder = this.rettighetstypePerioder?.map {
+        rettighetstypeperioder = this.rettighetstypePerioder.map {
             RettighetstypePeriode(
                 it.fraDato,
                 it.tilDato,
@@ -34,7 +34,6 @@ fun AvsluttetBehandlingDTO.tilDomene(
                     RettighetsType.SYKEPENGEERSTATNING -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.SYKEPENGEERSTATNING
                     RettighetsType.STUDENT -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.STUDENT
                     RettighetsType.ARBEIDSSØKER -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.ARBEIDSSØKER
-                    RettighetsType.VURDERES_FOR_UFØRETYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETRYGD
                     RettighetsType.VURDERES_FOR_UFØRETRYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETRYGD
                 }
             )
@@ -100,7 +99,7 @@ fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.Grunnla
 
 fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag {
     val grunnlagYrkesskade = beregningsgrunnlagDTO.grunnlagYrkesskade
-    val grunnlag11_19dto = beregningsgrunnlagDTO.grunnlag11_19dto
+    @Suppress("LocalVariableName") val grunnlag11_19dto = beregningsgrunnlagDTO.grunnlag11_19dto
     val grunnlagUføre = beregningsgrunnlagDTO.grunnlagUføre
     if (grunnlag11_19dto != null) {
         return IBeregningsGrunnlag.Grunnlag_11_19(
