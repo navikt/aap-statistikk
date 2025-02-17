@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.avsluttetbehandling
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -12,8 +13,24 @@ data class AvsluttetBehandling(
     val tilkjentYtelse: TilkjentYtelse,
     val vilkårsresultat: Vilkårsresultat,
     val beregningsgrunnlag: IBeregningsGrunnlag?,
-    val diagnoser: Diagnoser?
+    val diagnoser: Diagnoser?,
+    val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList()
 )
+
+data class RettighetstypePeriode(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate,
+    val rettighetstype: RettighetsType
+)
+
+enum class RettighetsType(val hjemmel: String) {
+    BISTANDSBEHOV(hjemmel = "§ 11-6"),
+    SYKEPENGEERSTATNING(hjemmel = "§ 11-13"),
+    STUDENT(hjemmel = "§ 11-14"),
+    ARBEIDSSØKER(hjemmel = "§ 11-17"),
+    VURDERES_FOR_UFØRETYGD(hjemmel = "§ 11-18"),
+}
+
 
 data class Diagnoser(
     val kodeverk: String,
@@ -67,7 +84,7 @@ sealed interface IBeregningsGrunnlag {
     data class GrunnlagUføre(
         val grunnlag: Double,
         val type: UføreType,
-        val grunnlag11_19: Grunnlag_11_19,
+        @Suppress("PropertyName") val grunnlag11_19: Grunnlag_11_19,
         val uføregrad: Int,
         val uføreInntekterFraForegåendeÅr: Map<Int, Double>,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,

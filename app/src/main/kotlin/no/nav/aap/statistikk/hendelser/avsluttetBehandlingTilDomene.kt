@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import java.time.LocalDateTime
@@ -24,6 +25,19 @@ fun AvsluttetBehandlingDTO.tilDomene(
         beregningsgrunnlag = if (beregningsGrunnlag == null) null else tilDomene(beregningsGrunnlag!!),
         diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
         behandlingsReferanse = behandlingsReferanse,
+        rettighetstypeperioder = this.rettighetstypePerioder?.map {
+            RettighetstypePeriode(
+                it.fraDato,
+                it.tilDato,
+                when (it.rettighetstype) {
+                    RettighetsType.BISTANDSBEHOV -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.BISTANDSBEHOV
+                    RettighetsType.SYKEPENGEERSTATNING -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.SYKEPENGEERSTATNING
+                    RettighetsType.STUDENT -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.STUDENT
+                    RettighetsType.ARBEIDSSØKER -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.ARBEIDSSØKER
+                    RettighetsType.VURDERES_FOR_UFØRETYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETYGD
+                }
+            )
+        }.orEmpty(),
         avsluttetTidspunkt = avsluttetTidspunkt
     )
 }

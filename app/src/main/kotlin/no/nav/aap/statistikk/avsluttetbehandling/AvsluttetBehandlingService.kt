@@ -23,6 +23,7 @@ class AvsluttetBehandlingService(
     private val diagnoseRepository: DiagnoseRepository,
     private val bqRepository: IBQRepository,
     private val behandlingRepository: IBehandlingRepository,
+    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val skjermingService: SkjermingService,
     private val meterRegistry: MeterRegistry,
     private val clock: Clock = Clock.systemDefaultZone(),
@@ -59,6 +60,11 @@ class AvsluttetBehandlingService(
                 )
             )
         }
+
+        rettighetstypeperiodeRepository.lagre(
+            avsluttetBehandling.behandlingsReferanse,
+            avsluttetBehandling.rettighetstypeperioder
+        )
 
         if (!skjermingService.erSkjermet(uthentetBehandling)) {
             lagreAvsluttetBehandlingIBigQuery(avsluttetBehandling, uthentetBehandling)

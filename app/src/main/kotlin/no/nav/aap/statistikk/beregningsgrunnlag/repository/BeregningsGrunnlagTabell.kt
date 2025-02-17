@@ -37,7 +37,7 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
     override val version: Int = 1
     override val schema: Schema
         get() {
-            val sak_id = Field.of("sakId", StandardSQLTypeName.STRING)
+            val sakId = Field.of("sakId", StandardSQLTypeName.STRING)
             val behandlingsreferanse = Field.of("behandlingsreferanse", StandardSQLTypeName.STRING)
             val type = Field.of("type", StandardSQLTypeName.STRING)
             val grunnlaget = Field.of("grunnlaget", StandardSQLTypeName.FLOAT64)
@@ -74,7 +74,7 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
                 Field.of("yrkesskadeGrunnlagEtterYrkesskadeFordel", StandardSQLTypeName.FLOAT64)
 
             return Schema.of(
-                sak_id,
+                sakId,
                 behandlingsreferanse,
                 type,
                 grunnlaget,
