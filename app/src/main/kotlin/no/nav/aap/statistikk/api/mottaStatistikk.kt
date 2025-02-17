@@ -100,12 +100,12 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                 val stringified = DefaultJsonMapper.toJson(dto)
 
                 val encodedSaksNummer = stringToNumber(dto.saksnummer)
-                val encodedBehandlingsUUID = stringToNumber(dto.behandlingReferanse.toString())
 
                 jobbAppender.leggTil(
                     conn,
-                    JobbInput(lagreStoppetHendelseJobb).medPayload(stringified).medCallId()
-                        .forBehandling(encodedSaksNummer, encodedBehandlingsUUID)
+                    JobbInput(lagreStoppetHendelseJobb)
+                        .medPayload(stringified).medCallId()
+                        .forSak(encodedSaksNummer)
                 )
             }
 
