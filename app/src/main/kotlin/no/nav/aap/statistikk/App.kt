@@ -28,6 +28,7 @@ import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
 import no.nav.aap.statistikk.api.mottaStatistikk
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -111,7 +112,8 @@ fun Application.startUp(
         behandlingRepositoryFactory = { BehandlingRepository(it) },
         diagnoseRepository = { DiagnoseRepositoryImpl(it) },
         skjermingService = SkjermingService(pdlClient),
-        personService = { PersonService(PersonRepository(it)) }
+        personService = { PersonService(PersonRepository(it)) },
+        rettighetstypeperiodeRepository = { RettighetstypeperiodeRepository(it) }
     )
 
     val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(prometheusMeterRegistry)

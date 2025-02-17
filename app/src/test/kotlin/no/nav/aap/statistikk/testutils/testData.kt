@@ -70,6 +70,7 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
             ),
         ),
+        rettighetstypePerioder = listOf(),
     )
 }
 

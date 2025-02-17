@@ -46,6 +46,7 @@ class ApplicationTest {
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
+                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
                 skjermingService = SkjermingService(FakePdlClient())
             ), LagreOppgaveHendelseJobb(meterRegistry),
             LagrePostmottakHendelseJobb(meterRegistry)
@@ -164,6 +165,7 @@ class ApplicationTest {
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
+                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
                 skjermingService = SkjermingService(FakePdlClient()),
             ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->

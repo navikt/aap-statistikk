@@ -5,10 +5,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.BQRepository
@@ -47,6 +44,8 @@ class AvsluttetBehandlingServiceTest {
 
         val datoNå = LocalDate.now()
         val avsluttetBehandling = AvsluttetBehandling(
+            behandlingsReferanse = behandlingReferanse,
+            avsluttetTidspunkt = datoNå.atStartOfDay(),
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse,
                 saksnummer = saksnummer,
@@ -106,8 +105,13 @@ class AvsluttetBehandlingServiceTest {
                 diagnosekode = "KOLERA",
                 bidiagnoser = listOf("PEST")
             ),
-            behandlingsReferanse = behandlingReferanse,
-            avsluttetTidspunkt = datoNå.atStartOfDay()
+            rettighetstypeperioder = listOf(
+                RettighetstypePeriode(
+                    datoNå.minusYears(1),
+                    datoNå.minusYears(2),
+                    rettighetstype = RettighetsType.BISTANDSBEHOV
+                )
+            )
         )
 
         val meterRegistry = SimpleMeterRegistry()
@@ -141,7 +145,8 @@ class AvsluttetBehandlingServiceTest {
                 kodeverk = "KODEVERK",
                 diagnosekode = "KOLERA",
                 bidiagnoser = listOf("PEST"),
-                radEndret = LocalDateTime.now(clock).truncatedTo(java.time.temporal.ChronoUnit.MILLIS),
+                radEndret = LocalDateTime.now(clock)
+                    .truncatedTo(java.time.temporal.ChronoUnit.MILLIS),
             )
         )
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
@@ -183,14 +188,17 @@ class AvsluttetBehandlingServiceTest {
 
         opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
 
+        val nå = LocalDate.now()
         val avsluttetBehandling = AvsluttetBehandling(
+            behandlingsReferanse = behandlingReferanse,
+            avsluttetTidspunkt = LocalDateTime.now(),
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse,
                 saksnummer = saksnummer,
                 perioder = listOf(
                     TilkjentYtelsePeriode(
-                        fraDato = LocalDate.now().minusYears(3),
-                        tilDato = LocalDate.now().minusYears(2),
+                        fraDato = nå.minusYears(3),
+                        tilDato = nå.minusYears(2),
                         dagsats = 1234.0,
                         gradering = 45.0
                     )
@@ -205,8 +213,8 @@ class AvsluttetBehandlingServiceTest {
                         vilkårType = Vilkårtype.MEDLEMSKAP,
                         perioder = listOf(
                             VilkårsPeriode(
-                                fraDato = LocalDate.now().minusYears(2),
-                                tilDato = LocalDate.now(),
+                                fraDato = nå.minusYears(2),
+                                tilDato = nå,
                                 utfall = Utfall.OPPFYLT,
                                 manuellVurdering = true
                             )
@@ -238,8 +246,13 @@ class AvsluttetBehandlingServiceTest {
                 diagnosekode = "KOLERA",
                 bidiagnoser = listOf("PEST")
             ),
-            behandlingsReferanse = behandlingReferanse,
-            avsluttetTidspunkt = LocalDateTime.now()
+            rettighetstypeperioder = listOf(
+                RettighetstypePeriode(
+                    nå.minusYears(1),
+                    nå.minusYears(2),
+                    rettighetstype = RettighetsType.BISTANDSBEHOV
+                )
+            )
         )
 
         dataSource.transaction {
@@ -276,8 +289,9 @@ class AvsluttetBehandlingServiceTest {
                 bqRepository,
                 behandlingRepository = BehandlingRepository(dbConnection),
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
-                meterRegistry,
-                clock = clock
+                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
+                meterRegistry = meterRegistry,
+                clock = clock,
             )
         return Pair(bigQueryClient, service)
     }

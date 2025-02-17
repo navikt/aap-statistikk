@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -101,11 +102,12 @@ class ProduksjonsstyringRepositoryTest {
                     tilkjentYtelseRepositoryFactory = TilkjentYtelseRepository(conn),
                     beregningsgrunnlagRepositoryFactory = BeregningsgrunnlagRepository(conn),
                     vilkårsResultatRepositoryFactory = VilkårsresultatRepository(conn),
+                    diagnoseRepository = DiagnoseRepositoryImpl(conn),
                     bqRepository = bqRepository,
                     behandlingRepository = BehandlingRepository(conn),
                     skjermingService = skjermingService,
-                    diagnoseRepository = DiagnoseRepositoryImpl(conn),
                     meterRegistry = meterRegistry,
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
                 ),
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),

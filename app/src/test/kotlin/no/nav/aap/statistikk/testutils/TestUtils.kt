@@ -23,7 +23,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.Client
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
+import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -415,6 +417,20 @@ class FakeBehandlingRepository : IBehandlingRepository {
     }
 }
 
+class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {
+    override fun lagre(
+        behandlingReferanse: UUID,
+        rettighetstypePeriode: List<RettighetstypePeriode>
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun hent(behandlingReferanse: UUID): List<RettighetstypePeriode> {
+        TODO("Not yet implemented")
+    }
+
+}
+
 class FakeDiagnoseRepository : DiagnoseRepository {
     override fun lagre(diagnoseEntity: DiagnoseEntity): Long {
         TODO("Not yet implemented")
@@ -524,4 +540,33 @@ fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
     }
     logger.info("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder.")
     return res
+}
+
+fun forberedDatabase(
+    it: DBConnection,
+    behandlingReferanse: UUID
+) {
+    val ident = "214"
+    val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+
+    val sak = Sak(
+        saksnummer = "ABCDE",
+        person = person,
+        sakStatus = SakStatus.LØPENDE,
+        sistOppdatert = LocalDateTime.now()
+    )
+    val sakId = SakRepositoryImpl(it).settInnSak(sak)
+
+    BehandlingRepository(it).opprettBehandling(
+        Behandling(
+            referanse = behandlingReferanse,
+            sak = sak.copy(id = sakId),
+            typeBehandling = TypeBehandling.Førstegangsbehandling,
+            status = BehandlingStatus.OPPRETTET,
+            opprettetTid = LocalDateTime.now(),
+            mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+            versjon = Versjon("xxx"),
+            søknadsformat = SøknadsFormat.DIGITAL,
+        )
+    )
 }

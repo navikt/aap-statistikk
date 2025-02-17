@@ -83,6 +83,7 @@ class MottaStatistikkTest {
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 skjermingService = SkjermingService(FakePdlClient()),
                 personService = { PersonService(FakePersonRepository()) },
+                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
                 diagnoseRepository = { FakeDiagnoseRepository() }
             ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
@@ -214,6 +215,7 @@ class MottaStatistikkTest {
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
             personService = { PersonService(PersonRepository(it)) },
+            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
             skjermingService = skjermingService
         )
 
@@ -363,6 +365,7 @@ class MottaStatistikkTest {
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
             personService = { PersonService(PersonRepository(it)) },
+            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
             skjermingService = skjermingService
         )
 
@@ -462,6 +465,7 @@ class MottaStatistikkTest {
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
             personService = { PersonService(PersonRepository(it)) },
+            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
             skjermingService = skjermingService
         )
 

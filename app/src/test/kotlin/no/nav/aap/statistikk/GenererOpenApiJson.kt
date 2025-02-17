@@ -24,8 +24,6 @@ import java.net.URI
 import java.nio.charset.StandardCharsets
 import kotlin.test.fail
 
-private val logger = LoggerFactory.getLogger("TestApp")
-
 fun main() {
     val azureFake = Fakes.AzureFake(port = 8081)
     azureFake.start()
@@ -43,29 +41,6 @@ fun main() {
     System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
     System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
-
-
-//    val pgConfig = postgresTestConfig()
-//    logger.info("Postgres Config: $pgConfig")
-    val bqConfig: BigQueryConfig = bigQueryContainer()
-
-    val bigQueryClient = BigQueryClient(bqConfig, schemaRegistry)
-    // Hack fordi emulator ikke støtter migrering
-    schemaRegistry.forEach { (_, schema) ->
-        bigQueryClient.create(schema)
-    }
-
-//    val server = embeddedServer(Netty, port = 8080, watchPaths = listOf("classes")) {
-//        startUp(
-//            pgConfig, AzureConfig(
-//                clientId = "tilgang",
-//                jwksUri = "http://localhost:${azureFake.port()}/jwks",
-//                issuer = "tilgang",
-//                tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
-//                clientSecret = "xxx",
-//            ), bigQueryClient, PdlConfig(url = "...", scope = "xxx")
-//        )
-//    }.start()
 
     val server = embeddedServer(Netty, port = 8080, watchPaths = listOf("classes")) {
         module(
@@ -87,7 +62,7 @@ fun main() {
         responseHandler = DefaultResponseHandler()
     )
 
-    val resp = restClient.get<String>(
+    val resp = restClient.get(
         URI.create("http://localhost:8080/openapi.json"),
         request = GetRequest(),
         mapper = { body, _ -> String(body.readAllBytes(), StandardCharsets.UTF_8) }
