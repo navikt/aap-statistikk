@@ -100,6 +100,7 @@ class AvsluttetBehandlingService(
                 kodeverk = avsluttetBehandling.diagnoser?.kodeverk,
                 diagnosekode = avsluttetBehandling.diagnoser?.diagnosekode,
                 bidiagnoser = avsluttetBehandling.diagnoser?.bidiagnoser,
+                rettighetsPerioder = avsluttetBehandling.rettighetstypeperioder,
                 radEndret = LocalDateTime.now(clock)
             )
         )

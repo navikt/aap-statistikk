@@ -145,6 +145,13 @@ class AvsluttetBehandlingServiceTest {
                 kodeverk = "KODEVERK",
                 diagnosekode = "KOLERA",
                 bidiagnoser = listOf("PEST"),
+                rettighetsPerioder = listOf(
+                    RettighetstypePeriode(
+                        datoNå.minusYears(1),
+                        datoNå.minusYears(2),
+                        rettighetstype = RettighetsType.BISTANDSBEHOV
+                    )
+                ),
                 radEndret = LocalDateTime.now(clock)
                     .truncatedTo(java.time.temporal.ChronoUnit.MILLIS),
             )
