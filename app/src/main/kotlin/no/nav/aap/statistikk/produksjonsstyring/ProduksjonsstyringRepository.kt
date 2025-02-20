@@ -46,18 +46,18 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         enheter: List<String>
     ): List<BehandlingstidPerDag> {
         val sql = """
-with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
+WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+     u as (select date_trunc('day', pbh.oppdatert_tid) dag,
                   pbh.oppdatert_tid  as                oppdatert_tid,
                   pb.mottatt_tid     as                mottatt_tid,
                   pb.type_behandling as                type_behandling,
                   e.kode             as                enhet
            from postmottak_behandling_historikk pbh
                     join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
-                    left join enhet e on e.id = (select distinct o.enhet_id
-                                                 from oppgave o
-                                                 where o.behandling_referanse_id in (select br.id
-                                                                                     from behandling_referanse br
-                                                                                     where br.referanse = pb.referanse))
+                    left join oppgave_enhet oe on pb.referanse = oe.referanse
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where pbh.gjeldende = true
              and pbh.status = 'AVSLUTTET'
            union all
@@ -69,10 +69,8 @@ with u as (select date_trunc('day', pbh.oppdatert_tid) dag,
            from behandling_historikk bh
                     join behandling b on bh.behandling_id = b.id
                     join sak s on b.sak_id = s.id
-                    LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
-                                                 FROM oppgave o
-                                                 WHERE o.behandling_referanse_id = b.referanse_id
-                                                 LIMIT 1)
+                    left join oppgave_enhet oe on oe.id = b.referanse_id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where bh.gjeldende = true
              and bh.status = 'AVSLUTTET')
 select dag,
@@ -108,15 +106,17 @@ order by dag;
         enheter: List<String>
     ): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
         val sql = """
-with u as (select b.type                                                         as type,
+WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+
+     u as (select b.type                                                         as type,
                   current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid as alder,
                   e.kode                                                         as enhet
            from behandling_historikk bh
                     join behandling b on b.id = bh.behandling_id
-                    LEFT JOIN enhet e ON e.id in (SELECT distinct o.enhet_id
-                                                 FROM oppgave o
-                                                 WHERE o.behandling_referanse_id = b.referanse_id
-                                                 LIMIT 1)
+                    left join oppgave_enhet oe on oe.id = b.referanse_id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where gjeldende = true
              and status != 'AVSLUTTET'
            union all
@@ -125,11 +125,8 @@ with u as (select b.type                                                        
                   e.kode                                                        as enhet
            from postmottak_behandling_historikk pbh
                     join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
-                    LEFT JOIN enhet e ON e.id = (select distinct o.enhet_id
-                                                 from oppgave o
-                                                 where o.behandling_referanse_id in (select br.id
-                                                                                     from behandling_referanse br
-                                                                                     where br.referanse = pb.referanse))
+                    left join oppgave_enhet oe on pb.referanse = oe.referanse
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where gjeldende = true
              and status != 'AVSLUTTET')
 select type,
@@ -166,13 +163,14 @@ group by type;
         enheter: List<String>
     ): List<BehandlingPerAvklaringsbehov> {
         val sql = """
-with u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode as enhet
+WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+     u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode as enhet
            from behandling_historikk
                     join behandling b on b.id = behandling_historikk.behandling_id
-                    LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
-                                                 FROM oppgave o
-                                                 WHERE o.behandling_referanse_id = b.referanse_id
-                                                 LIMIT 1)
+                    left join oppgave_enhet oe on oe.id = b.referanse_id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where gjeldende = true
              and status != 'AVSLUTTET'
            union all
@@ -180,11 +178,8 @@ with u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode a
            from postmottak_behandling_historikk
                     join postmottak_behandling pb
                          on postmottak_behandling_historikk.postmottak_behandling_id = pb.id
-                    LEFT JOIN enhet e ON e.id in (select distinct o.enhet_id
-                                                 from oppgave o
-                                                 where o.behandling_referanse_id in (select br.id
-                                                                                     from behandling_referanse br
-                                                                                     where br.referanse = pb.referanse))
+                    left join oppgave_enhet oe on pb.referanse = oe.referanse
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where gjeldende = true
              and status != 'AVSLUTTET')
 select gjeldende_avklaringsbehov, count(*)
@@ -395,10 +390,10 @@ group by gjeldende_avklaringsbehov;
                       $totaltSekunder, $antallBøtter) as bucket,
          count(*)
   from u
-  where (type = ANY (?::text [])
-     or ${'$'}1 is null)
-    and (enhet = ANY (?::text [])
-     or ${'$'}2 is null)
+  where (type = ANY (?::text[])
+      or ${'$'}1 is null)
+    and (enhet = ANY (?::text[])
+      or ${'$'}2 is null)
   
   GROUP BY bucket
   ORDER BY bucket;
@@ -429,17 +424,17 @@ group by gjeldende_avklaringsbehov;
     ): List<BøtteFordeling> {
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
-with u as (select pb.mottatt_tid     as mottatt_tid,
+WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+     u as (select pb.mottatt_tid     as mottatt_tid,
                   pb.type_behandling as type,
                   e.kode             as enhet
            from postmottak_behandling_historikk pbh
                     join postmottak_behandling pb
                          on pbh.postmottak_behandling_id = pb.id
-                    left join enhet e ON e.id in (select distinct o.enhet_id
-                                                 from oppgave o
-                                                 where o.behandling_referanse_id in (select br.id
-                                                                                     from behandling_referanse br
-                                                                                     where br.referanse = pb.referanse))
+                    left join oppgave_enhet oe on pb.referanse = oe.referanse
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where pbh.status = 'AVSLUTTET'
              and gjeldende = true
            union all
@@ -448,10 +443,8 @@ with u as (select pb.mottatt_tid     as mottatt_tid,
                   e.kode         as enhet
            from behandling_historikk bh
                     join behandling b on b.id = bh.behandling_id
-                    LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
-                                                 FROM oppgave o
-                                                 WHERE o.behandling_referanse_id = b.referanse_id
-                                                 LIMIT 1)
+                    left join oppgave_enhet oe on oe.id = b.referanse_id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
            where b.id = bh.behandling_id
              and bh.gjeldende = true
              and bh.status = 'AVSLUTTET')
