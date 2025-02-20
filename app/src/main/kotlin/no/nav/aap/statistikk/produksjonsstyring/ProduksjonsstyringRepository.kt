@@ -366,41 +366,43 @@ group by gjeldende_avklaringsbehov;
     ): List<BøtteFordeling> {
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
-            with u as (select pb.mottatt_tid     as mottatt_tid,
-                              pb.type_behandling as type,
-                              e.kode             as enhet
-                       from postmottak_behandling_historikk pbh
-                                join postmottak_behandling pb
-                                     on pbh.postmottak_behandling_id = pb.id
-                                left join enhet e ON e.id in (select distinct o.enhet_id
-                                                             from oppgave o
-                                                             where o.behandling_referanse_id in (select br.id
-                                                                                                 from behandling_referanse br
-                                                                                                 where br.referanse = pb.referanse))
-                       where pbh.status != 'AVSLUTTET'
-                         and gjeldende = true
-                       union all
-                       select bh.mottatt_tid as mottatt_tid,
-                              b.type         as type,
-                              e.kode         as enhet
-                       from behandling_historikk bh
-                                join behandling b on b.id = bh.behandling_id
-                                LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
-                                                             FROM oppgave o
-                                                             WHERE o.behandling_referanse_id = b.referanse_id
-                                                             LIMIT 1)
-                       where b.id = bh.behandling_id
-                         and bh.gjeldende = true
-                         and bh.status != 'AVSLUTTET')
-            select width_bucket(EXTRACT(EPOCH FROM
-                                        (current_timestamp at time zone 'Europe/Oslo' - mottatt_tid)), 0,
-                                $totaltSekunder, $antallBøtter) as bucket,
-                   count(*)
-            from u
-            where (type = ANY (?::text[]) or ${'$'}1 is null)
-              and (enhet = ANY (?::text[]) or ${'$'}2 is null)
-            group by bucket
-            order by bucket;
+  WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
+                         FROM behandling_referanse br
+                                  JOIN oppgave o ON br.id = o.behandling_referanse_id),
+       u AS (SELECT pb.mottatt_tid     AS mottatt_tid,
+                    pb.type_behandling AS type,
+                    e.kode             AS enhet
+             FROM postmottak_behandling_historikk pbh
+                      JOIN postmottak_behandling pb
+                           ON pbh.postmottak_behandling_id = pb.id
+                      left join oppgave_enhet oe on pb.referanse = oe.referanse
+                      LEFT JOIN enhet e ON e.id = oe.enhet_id
+             WHERE pbh.status != 'AVSLUTTET'
+               AND gjeldende = true
+             UNION ALL
+             SELECT bh.mottatt_tid AS mottatt_tid,
+                    b.type         AS type,
+                    e.kode         AS enhet
+             FROM behandling_historikk bh
+                      JOIN behandling b ON b.id = bh.behandling_id
+                      left join oppgave_enhet oe on oe.id = b.referanse_id
+                      LEFT JOIN enhet e ON e.id = oe.enhet_id
+             WHERE b.id = bh.behandling_id
+               AND bh.gjeldende = true
+               AND bh.status != 'AVSLUTTET')
+  select width_bucket(EXTRACT(EPOCH FROM
+                              (current_timestamp at time zone 'Europe/Oslo' - mottatt_tid)), 0,
+                      $totaltSekunder, $antallBøtter) as bucket,
+         count(*)
+  from u
+  where (type = ANY (?::text [])
+     or ${'$'}1 is null)
+    and (enhet = ANY (?::text [])
+     or ${'$'}2 is null)
+  
+  GROUP BY bucket
+  ORDER BY bucket;
+
         """.trimIndent()
 
         return connection.queryList(sql) {
