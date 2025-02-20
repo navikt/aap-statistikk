@@ -14,7 +14,7 @@ val behandlingsflytversjon = "0.0.159"
 val tilgangVersjon = "1.0.4"
 val flywayVersion = "11.3.2"
 val oppgaveVersjon = "0.0.48"
-val testContainersVersion = "1.20.4"
+val testContainersVersion = "1.20.5"
 val postmottakVersjon = "0.0.45"
 
 application {
