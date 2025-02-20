@@ -84,10 +84,12 @@ fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
     // Helautomatiske behandlinger velges å skje hos NAY
     if (nyesteAvklaringsbehov == null) return true
 
-    return nyesteAvklaringsbehov.avklaringsbehovDefinisjon.løsesAv.only() in listOf(
-        Rolle.SAKSBEHANDLER_NASJONAL,
-        Rolle.BESLUTTER,
-    )
+    return nyesteAvklaringsbehov.avklaringsbehovDefinisjon.løsesAv.all {
+        it in listOf(
+            Rolle.SAKSBEHANDLER_NASJONAL,
+            Rolle.BESLUTTER,
+        )
+    }
 }
 
 fun <T> List<T>.only(): T {
