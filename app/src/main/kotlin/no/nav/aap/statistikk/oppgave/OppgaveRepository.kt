@@ -299,10 +299,4 @@ where id = ?"""
             }
         }
     }
-
-    fun antallOppgaver(): Long {
-        return dbConnection.queryFirst("select count(*) from oppgave") {
-            setRowMapper { it.getLong("count") }
-        }
-    }
 }
