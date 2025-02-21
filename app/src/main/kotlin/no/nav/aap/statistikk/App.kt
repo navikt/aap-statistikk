@@ -45,7 +45,6 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobbUtfører
-import no.nav.aap.statistikk.oversikt.oversiktRoute
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.pdl.PdlGraphQLClient
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -223,7 +222,6 @@ fun Application.module(
                 motorApiCallback()
             }
         }
-        oversiktRoute(transactionExecutor)
     }
 }
 
