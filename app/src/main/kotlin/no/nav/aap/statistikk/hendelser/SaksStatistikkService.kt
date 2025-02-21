@@ -73,7 +73,7 @@ class SaksStatistikkService(
             vedtakTid = vedtakTidspunkt?.truncatedTo(ChronoUnit.SECONDS),
             søknadsFormat = behandling.søknadsformat,
             behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
-            behandlingStatus = behandlingStatus(behandling.status),
+            behandlingStatus = behandlingStatus(behandling),
             behandlingÅrsak = behandling.årsaker.joinToString(","),
             ansvarligEnhetKode = ansvarligEnhet
         )
@@ -94,13 +94,15 @@ class SaksStatistikkService(
         return if (erHosNAY) NAY_NASJONAL_KØ_KODE else behandling.behandlendeEnhet?.kode
     }
 
-    fun behandlingStatus(status: BehandlingStatus): String {
+    fun behandlingStatus(behandling: Behandling): String {
         // TODO: når klage er implementert, må dette fikses her
         // TODO: få inn retur fra kvalitetssikrer her, og ventegrunner
-        return when (status) {
+
+        val venteÅrsak = behandling.venteÅrsak?.let { "_$it" }.orEmpty()
+        return when (behandling.status) {
             BehandlingStatus.OPPRETTET -> "REGISTRERT"
-            BehandlingStatus.UTREDES -> "UNDER_BEHANDLING"
-            BehandlingStatus.IVERKSETTES -> "AVSLUTTET"
+            BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak"
+            BehandlingStatus.IVERKSETTES,
             BehandlingStatus.AVSLUTTET -> "AVSLUTTET"
         }
     }
