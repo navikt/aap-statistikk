@@ -9,7 +9,6 @@ import no.nav.aap.postmottak.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.postmottak.kontrakt.behandling.Status
 import no.nav.aap.postmottak.kontrakt.behandling.TypeBehandling
 import no.nav.aap.postmottak.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.postmottak.kontrakt.hendelse.DefinisjonDTO
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.EndringDTO
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
@@ -58,11 +57,6 @@ class LagrePostmottakHendelseJobbUtførerTest {
             status = Status.OPPRETTET,
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelseDto(
-                    definisjon = DefinisjonDTO(
-                        type = AvklaringsbehovKode.`1339`,
-                        behovType = Definisjon.BehovType.MANUELT_PÅKREVD,
-                        løsesISteg = StegType.AVKLAR_TEMA
-                    ),
                     avklaringsbehovDefinisjon = Definisjon.AVKLAR_TEMA,
                     status = no.nav.aap.postmottak.kontrakt.avklaringsbehov.Status.OPPRETTET,
                     endringer = listOf(
