@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
 import com.papsign.ktor.openapigen.annotations.properties.description.Description
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
@@ -15,7 +16,7 @@ data class BehandlingPerAvklaringsbehov(
     @property:Description("Avklaringsbehovkoden.") val behov: String
 )
 
-data class BehandlingPerSteggruppe(val steggruppe: StegGruppe, val antall: Int)
+data class BehandlingPerSteggruppe(val steggruppe: String, val antall: Int)
 
 data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
@@ -46,9 +47,10 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         enheter: List<String>
     ): List<BehandlingstidPerDag> {
         val sql = """
-WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
+WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
                        FROM behandling_referanse br
-                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+                                LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       GROUP BY br.id, br.referanse),
      u as (select date_trunc('day', pbh.oppdatert_tid) dag,
                   pbh.oppdatert_tid  as                oppdatert_tid,
                   pb.mottatt_tid     as                mottatt_tid,
@@ -189,7 +191,6 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
 group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
-
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
@@ -212,20 +213,34 @@ group by gjeldende_avklaringsbehov;
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>
     ): List<BehandlingPerSteggruppe> {
-        // TODO!
+        // TODO! Trenger steggruppe fra postmottak først
         val sql = """
-            select steggruppe, count(*)
-            from behandling_historikk
-                     join behandling b on b.id = behandling_historikk.behandling_id
-                     LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
-                                                  FROM oppgave o
-                                                  WHERE o.behandling_referanse_id = b.referanse_id
-                                                  LIMIT 1)
-            where steggruppe is not null
-              and gjeldende = true
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
-            group by steggruppe;
+
+WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       GROUP BY br.id, br.referanse),
+     u as (select gjeldende_avklaringsbehov, e.kode as enhet, b.type as type_behandling
+           from behandling_historikk
+                    join behandling b on b.id = behandling_historikk.behandling_id
+                    left join oppgave_enhet oe on b.referanse_id = oe.id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
+           where gjeldende_avklaringsbehov is not null
+             and gjeldende = true
+           union all
+           select gjeldende_avklaringsbehov, e.kode as enhet, pb.type_behandling as type_behandling
+           from postmottak_behandling_historikk pbh
+                    left join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
+                    left join oppgave_enhet oe on pb.referanse = oe.referanse
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
+           where gjeldende_avklaringsbehov is not null
+             and gjeldende = true)
+select gjeldende_avklaringsbehov, count(*)
+from u
+where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
+  and (enhet = ANY (?::text[]) or ${'$'}2 is null)
+group by gjeldende_avklaringsbehov;
+
         """.trimIndent()
 
         return connection.queryList(sql) {
@@ -239,11 +254,12 @@ group by gjeldende_avklaringsbehov;
             }
             setRowMapper { row ->
                 BehandlingPerSteggruppe(
-                    steggruppe = row.getEnum("steggruppe"),
+                    steggruppe = tilSteggruppe(row.getString("gjeldende_avklaringsbehov")),
                     antall = row.getInt("count")
                 )
             }
-        }
+        }.groupBy { it.steggruppe }
+            .map { BehandlingPerSteggruppe(it.key, it.value.sumOf { it.antall }) }
     }
 
     fun opprettedeBehandlingerPerDag(
@@ -275,6 +291,7 @@ group by gjeldende_avklaringsbehov;
         antallDager: Int = 7,
         behandlingsTyper: List<TypeBehandling>
     ): List<AntallPerDag> {
+        // todo
         val sql = """
             select date(bh.oppdatert_tid) as dag,
                    count(*)                  antall
@@ -585,3 +602,17 @@ group by aarsak;;
 
 }
 
+/**
+ * Stygg måte å hente ut steggruppe uavhengig av hvor definisjon kommer fra.
+ *
+ * Burde nok kode om til en "union"-definisjon innad i kodebasen et sted.
+ */
+fun tilSteggruppe(kode: String): String {
+    return try {
+        Definisjon.forKode(kode).løsesISteg.gruppe.toString()
+    } catch (e: IllegalArgumentException) {
+        no.nav.aap.postmottak.kontrakt.avklaringsbehov.Definisjon.forKode(kode).løsesISteg.gruppe.toString()
+    } catch (e: NoSuchElementException) {
+        throw IllegalStateException("Finner ikke for kode $kode")
+    }
+}

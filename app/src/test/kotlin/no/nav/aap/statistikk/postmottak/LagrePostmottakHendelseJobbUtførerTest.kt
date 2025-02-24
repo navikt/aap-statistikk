@@ -113,7 +113,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
         payload: DokumentflytStoppetHendelse
     ): (DBConnection) -> Unit = {
         LagrePostmottakHendelseJobbUtfører(
-            PostmottakBehandlingRepository(it), PersonService(
+            PostmottakBehandlingService(PostmottakBehandlingRepository(it)), PersonService(
                 PersonRepository(it)
             ), meterRegistry
         ).utfør(

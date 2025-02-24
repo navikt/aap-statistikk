@@ -17,7 +17,7 @@ import no.nav.aap.statistikk.person.PersonService
 import org.slf4j.LoggerFactory
 
 class LagrePostmottakHendelseJobbUtfører(
-    private val postmottakBehandlingRepository: PostmottakBehandlingRepository,
+    private val postmottakBehandlingService: PostmottakBehandlingService,
     private val personService: PersonService,
     private val meterRegistry: MeterRegistry
 ) :
@@ -31,21 +31,8 @@ class LagrePostmottakHendelseJobbUtfører(
         val person = personService.hentEllerLagrePerson(hendelse.ident)
 
         val domeneHendelse = hendelse.tilDomene(person)
-
-        val eksisterendeBehandling =
-            postmottakBehandlingRepository.hentEksisterendeBehandling(domeneHendelse.referanse)
-
-        val oppdatertBehandling = if (eksisterendeBehandling == null) {
-            val id =
-                postmottakBehandlingRepository.opprettBehandling(behandling = domeneHendelse)
-            domeneHendelse.medId(id = id)
-        } else {
-            postmottakBehandlingRepository.oppdaterBehandling(
-                domeneHendelse.referanse,
-                behandling = domeneHendelse.endringer().first() // "Only"
-            )
-            postmottakBehandlingRepository.hentEksisterendeBehandling(domeneHendelse.referanse)!!
-        }
+        val oppdatertBehandling =
+            postmottakBehandlingService.oppdaterEllerOpprettBehandling(domeneHendelse)
 
         meterRegistry.lagretPostmottakHendelse().increment()
         logger.info("Fullført prosessering av postmottak-behandling med ID ${oppdatertBehandling.id()}.")
@@ -55,7 +42,11 @@ class LagrePostmottakHendelseJobbUtfører(
 class LagrePostmottakHendelseJobb(private val meterRegistry: MeterRegistry) : Jobb {
     override fun konstruer(connection: DBConnection): LagrePostmottakHendelseJobbUtfører {
         return LagrePostmottakHendelseJobbUtfører(
-            postmottakBehandlingRepository = PostmottakBehandlingRepository(connection),
+            postmottakBehandlingService = PostmottakBehandlingService(
+                PostmottakBehandlingRepository(
+                    connection
+                )
+            ),
             personService = PersonService(
                 PersonRepository(connection)
             ),
