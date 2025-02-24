@@ -305,17 +305,36 @@ group by gjeldende_avklaringsbehov;
         enheter: List<String>
     ): Double {
         val sql = """
-            select avg(extract(epoch from bh.oppdatert_tid - bh.mottatt_tid))
-            from behandling_historikk bh
-                     join behandling b on b.id = bh.behandling_id
-                     LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
-                                                  FROM oppgave o
-                                                  WHERE o.behandling_referanse_id = b.referanse_id
-                                                  LIMIT 1)
-            where status = 'AVSLUTTET'
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-              and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
-              and bh.oppdatert_tid > current_date - interval '$antallDager days';
+WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       GROUP BY br.id, br.referanse),
+     u as (select bh.oppdatert_tid as oppdatert_tid,
+                  bh.mottatt_tid   as mottatt_tid,
+                  b.type           as type_behandling,
+                  e.kode           as enhet
+           FROM behandling_historikk bh
+                    JOIN behandling b ON b.id = bh.behandling_id
+                    LEFT JOIN oppgave_enhet oe ON oe.id = b.referanse_id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
+           WHERE status = 'AVSLUTTET'
+             AND bh.oppdatert_tid > current_date - interval '7 days'
+           union all
+           select pbh.oppdatert_tid,
+                  pb.mottatt_tid,
+                  pb.type_behandling as type_behandling,
+                  e.kode             as enhet
+           from postmottak_behandling_historikk pbh
+                    join postmottak_behandling pb on pbh.postmottak_behandling_id = pb.id
+                    left join oppgave_enhet on pb.referanse = oppgave_enhet.referanse
+                    LEFT JOIN enhet e ON e.id = oppgave_enhet.enhet_id
+           where status = 'AVSLUTTET'
+             and pbh.oppdatert_tid > current_date - interval '$antallDager days')
+select avg(extract(epoch from oppdatert_tid - mottatt_tid))
+from u
+where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
+  and (enhet = ANY (?::text[]) or ${'$'}2 is null)
+
         """.trimIndent()
         return connection.queryFirst(sql) {
             setParams {
