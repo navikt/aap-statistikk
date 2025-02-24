@@ -15,7 +15,7 @@ val tilgangVersjon = "1.0.7"
 val flywayVersion = "11.3.3"
 val oppgaveVersjon = "0.0.48"
 val testContainersVersion = "1.20.5"
-val postmottakVersjon = "0.0.45"
+val postmottakVersjon = "0.0.50"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
