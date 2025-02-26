@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
 import com.google.cloud.bigquery.*
-import no.nav.aap.behandlingsflyt.kontrakt.sak.Saksnummer
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BQTable
@@ -34,37 +33,51 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
     override val schema: Schema
         get() {
             val saksnummer = Field.newBuilder("saksnummer", StandardSQLTypeName.STRING)
-//                .setMode(Field.Mode.REQUIRED)
+                .setDescription("Saksnummer. Ikke-null.")
                 .build()
             val referanse = Field.newBuilder("referanse", StandardSQLTypeName.STRING)
-                .setMode(Field.Mode.REQUIRED).build()
+                .setDescription("Behandlingsreferanse. Unik innenfor sak. Ikke-null.")
+                .build()
             val brukerFnr = Field.newBuilder("brukerFnr", StandardSQLTypeName.STRING)
-                .setMode(Field.Mode.REQUIRED).build()
+                .setDescription("Fødselsnummer. Ikke-null").build()
             val behandlingsType = Field.newBuilder("behandlingsType", StandardSQLTypeName.STRING)
-                .setMode(Field.Mode.REQUIRED).build()
+                .setDescription(
+                    "Behandlingstype. Mulige verdier ${
+                        TypeBehandling.entries.map { it.name }.joinToString { "," }
+                    }"
+                ).build()
             val datoAvsluttet = Field.newBuilder("datoAvsluttet", StandardSQLTypeName.DATETIME)
-                .setMode(Field.Mode.REQUIRED).build()
+                .setDescription("På hvilken dato ble saksbehandlingen avsluttet i Kelvin. Ikke-null.")
+                .build()
             val kodeverk = Field.newBuilder("kodeverk", StandardSQLTypeName.STRING)
+                .setDescription("Kodeverk brukt for diagnose i 11-5-vurderingen. Kan være null om søknaden ble avslått før sykdomsbildet ble vurdert.")
                 .setMode(Field.Mode.NULLABLE).build()
             val diagnosekode = Field.newBuilder("diagnosekode", StandardSQLTypeName.STRING)
+                .setDescription("Samme beskrivelse som for 'kodeverk'.")
                 .setMode(Field.Mode.NULLABLE).build()
             val bidiagnoser = Field.newBuilder(
                 "bidiagnoser",
                 StandardSQLTypeName.STRUCT,
                 Field.of("kode", StandardSQLTypeName.STRING)
             )
+                .setDescription("Samme beskrivelse som for 'kodeverk'.")
                 .setMode(Field.Mode.REPEATED)
                 .build();
             val rettighetstypePeriode = Field.newBuilder(
                 "rettighetstypePerioder",
                 StandardSQLTypeName.STRUCT,
-                Field.of("fraDato", StandardSQLTypeName.DATE),
-                Field.of("tilDato", StandardSQLTypeName.DATE),
-                Field.of("rettighetstype", StandardSQLTypeName.STRING)
-            ).setMode(Field.Mode.REPEATED).build()
+                Field.newBuilder("fraDato", StandardSQLTypeName.DATE)
+                    .setDescription("Fra-og-med-dato for rettighetstypen. Ikke-null").build(),
+                Field.newBuilder("tilDato", StandardSQLTypeName.DATE)
+                    .setDescription("Til-og-med-dato for rettighetstypen. Ikke-null").build(),
+                Field.newBuilder("rettighetstype", StandardSQLTypeName.STRING)
+                    .setDescription("Rettighetstypen. Ikke-null.").build()
+            ).setMode(Field.Mode.REPEATED)
+                .setDescription("Periodisering av rettighetstype. F.eks kan AAP fås som sykepengeerstatning i en periode, og ordniær i en annen.")
+                .build()
 
             val radEndret = Field.newBuilder("radEndret", StandardSQLTypeName.DATETIME)
-                .setMode(Field.Mode.REQUIRED).build()
+                .setDescription("Tidspunkt for siste endring på denne raden.").build()
 
             return Schema.of(
                 saksnummer,
