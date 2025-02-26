@@ -34,7 +34,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
     override val schema: Schema
         get() {
             val saksnummer = Field.newBuilder("saksnummer", StandardSQLTypeName.STRING)
-                .setMode(Field.Mode.REQUIRED).build()
+//                .setMode(Field.Mode.REQUIRED)
+                .build()
             val referanse = Field.newBuilder("referanse", StandardSQLTypeName.STRING)
                 .setMode(Field.Mode.REQUIRED).build()
             val brukerFnr = Field.newBuilder("brukerFnr", StandardSQLTypeName.STRING)
