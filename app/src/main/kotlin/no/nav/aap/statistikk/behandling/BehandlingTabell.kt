@@ -43,7 +43,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val behandlingsType = Field.newBuilder("behandlingsType", StandardSQLTypeName.STRING)
                 .setDescription(
                     "Behandlingstype. Mulige verdier ${
-                        TypeBehandling.entries.map { it.name }.joinToString { "," }
+                        TypeBehandling.entries.map { it.name }.joinToString()
                     }"
                 ).build()
             val datoAvsluttet = Field.newBuilder("datoAvsluttet", StandardSQLTypeName.DATETIME)
