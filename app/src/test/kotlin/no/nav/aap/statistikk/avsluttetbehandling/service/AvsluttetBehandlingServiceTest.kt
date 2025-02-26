@@ -138,6 +138,7 @@ class AvsluttetBehandlingServiceTest {
 
         assertThat(utlestFraBehandlingTabell).isEqualTo(
             BQYtelseBehandling(
+                saksnummer = saksnummer,
                 referanse = avsluttetBehandling.behandlingsReferanse,
                 brukerFnr = "29021946",
                 behandlingsType = TypeBehandling.Førstegangsbehandling,
