@@ -93,6 +93,7 @@ class AvsluttetBehandlingService(
     ) {
         bqRepository.lagre(
             BQYtelseBehandling(
+                saksnummer = behandling.sak.saksnummer,
                 referanse = avsluttetBehandling.behandlingsReferanse,
                 brukerFnr = behandling.sak.person.ident,
                 behandlingsType = behandling.typeBehandling,
