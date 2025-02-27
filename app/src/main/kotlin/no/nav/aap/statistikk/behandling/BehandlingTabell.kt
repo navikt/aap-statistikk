@@ -132,7 +132,6 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         return InsertAllRequest.RowToInsert.of(
             mapOf(
                 "saksnummer" to value.saksnummer,
-                "referanse" to value.referanse.toString(),
                 "behandlingsreferanse" to value.referanse.toString(),
                 "brukerFnr" to value.brukerFnr,
                 "behandlingsType" to value.behandlingsType.toString(),
