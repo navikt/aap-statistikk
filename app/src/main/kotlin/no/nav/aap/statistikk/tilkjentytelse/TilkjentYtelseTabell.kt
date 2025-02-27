@@ -23,7 +23,9 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
     }
 
     private enum class FeltNavn(val feltNavn: String) {
-        SAKSNUMMER("saksnummer"), BEHANDLINGSREFERANSE("behandlingsreferanse"), PERIODER("perioder"), FRA_DATO(
+        SAKSNUMMER("saksnummer"),
+        BEHANDLINGSREFERANSE("behandlingsreferanse"), PERIODER("perioder"),
+        FRA_DATO(
             "fraDato"
         ),
         TIL_DATO("tilDato"), DAGSATS("dagsats"), GRADERING("gradering")
