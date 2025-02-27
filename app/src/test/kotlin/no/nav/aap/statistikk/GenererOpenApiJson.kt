@@ -42,7 +42,7 @@ fun main() {
     System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
 
-    val server = embeddedServer(Netty, port = 8080, watchPaths = listOf("classes")) {
+    val server = embeddedServer(Netty, port = 8080) {
         module(
             transactionExecutor = noOpTransactionExecutor,
             motor = mockk(relaxed = true),

@@ -37,7 +37,7 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
     override val version: Int = 1
     override val schema: Schema
         get() {
-            val sakId = Field.of("sakId", StandardSQLTypeName.STRING)
+            val saksnummer = Field.of("saksnummer", StandardSQLTypeName.STRING)
             val behandlingsreferanse = Field.of("behandlingsreferanse", StandardSQLTypeName.STRING)
             val type = Field.of("type", StandardSQLTypeName.STRING)
             val grunnlaget = Field.of("grunnlaget", StandardSQLTypeName.FLOAT64)
@@ -74,7 +74,7 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
                 Field.of("yrkesskadeGrunnlagEtterYrkesskadeFordel", StandardSQLTypeName.FLOAT64)
 
             return Schema.of(
-                sakId,
+                saksnummer,
                 behandlingsreferanse,
                 type,
                 grunnlaget,
@@ -97,7 +97,7 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
         }
 
     override fun parseRow(fieldValueList: FieldValueList): BeregningsGrunnlagBQ {
-        val sakId = fieldValueList.get("sakId").stringValue
+        val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingsreferanse =
             UUID.fromString(fieldValueList.get("behandlingsreferanse").stringValue)
         val type = GrunnlagType.valueOf(fieldValueList.get("type").stringValue)
@@ -141,7 +141,7 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
                 .let { if (it.isNull) null else it.doubleValue }
 
         return BeregningsGrunnlagBQ(
-            saksnummer = sakId,
+            saksnummer = saksnummer,
             behandlingsreferanse = behandlingsreferanse,
             type = type,
             grunnlaget = grunnlaget,
@@ -167,7 +167,7 @@ class BeregningsGrunnlagTabell : BQTable<BeregningsGrunnlagBQ> {
     override fun toRow(value: BeregningsGrunnlagBQ): InsertAllRequest.RowToInsert {
         return InsertAllRequest.RowToInsert.of(
             mapOf(
-                "sakId" to value.saksnummer,
+                "saksnummer" to value.saksnummer,
                 "behandlingsreferanse" to value.behandlingsreferanse.toString(),
                 "type" to value.type.name,
                 "grunnlaget" to value.grunnlaget,
