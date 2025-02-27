@@ -65,7 +65,7 @@ dependencies {
     implementation("no.nav.aap.oppgave:api-kontrakt:$oppgaveVersjon")
     implementation("no.nav.aap.postmottak:kontrakt:$postmottakVersjon")
 
-    implementation("com.google.cloud:google-cloud-bigquery:2.48.0")
+    implementation("com.google.cloud:google-cloud-bigquery:2.48.1")
 
 
     testImplementation(kotlin("test"))
