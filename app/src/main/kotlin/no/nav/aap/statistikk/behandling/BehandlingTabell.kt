@@ -38,6 +38,9 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val referanse = Field.newBuilder("referanse", StandardSQLTypeName.STRING)
                 .setDescription("Behandlingsreferanse. Unik innenfor sak. Ikke-null.")
                 .build()
+            val behandlingsreferanse = Field.newBuilder("behandlingsreferanse", StandardSQLTypeName.STRING)
+                .setDescription("Behandlingsreferanse. Unik innenfor sak. Ikke-null.")
+                .build()
             val brukerFnr = Field.newBuilder("brukerFnr", StandardSQLTypeName.STRING)
                 .setDescription("Fødselsnummer. Ikke-null").build()
             val behandlingsType = Field.newBuilder("behandlingsType", StandardSQLTypeName.STRING)
@@ -82,6 +85,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             return Schema.of(
                 saksnummer,
                 referanse,
+                behandlingsreferanse,
                 behandlingsType,
                 brukerFnr,
                 datoAvsluttet,
@@ -95,7 +99,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
 
     override fun parseRow(fieldValueList: FieldValueList): BQYtelseBehandling {
         val saksnummer = fieldValueList.get("saksnummer").stringValue
-        val referanse = fieldValueList.get("referanse").stringValue
+        val referanse = fieldValueList.get("behandlingsreferanse").stringValue
         val brukerFnr = fieldValueList.get("brukerFnr").stringValue
         val behandlingsType = fieldValueList.get("behandlingsType").stringValue
         val datoAvsluttet = LocalDateTime.parse(fieldValueList.get("datoAvsluttet").stringValue)
@@ -116,7 +120,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
 
         return BQYtelseBehandling(
             saksnummer = saksnummer,
-            UUID.fromString(referanse),
+            referanse = UUID.fromString(referanse),
             brukerFnr,
             behandlingsType = behandlingsType.let { TypeBehandling.valueOf(it) },
             datoAvsluttet = datoAvsluttet,
@@ -133,6 +137,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             mapOf(
                 "saksnummer" to value.saksnummer,
                 "referanse" to value.referanse.toString(),
+                "behandlingsreferanse" to value.referanse.toString(),
                 "brukerFnr" to value.brukerFnr,
                 "behandlingsType" to value.behandlingsType.toString(),
                 "datoAvsluttet" to value.datoAvsluttet.truncatedTo(ChronoUnit.MILLIS)
