@@ -35,9 +35,6 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val saksnummer = Field.newBuilder("saksnummer", StandardSQLTypeName.STRING)
                 .setDescription("Saksnummer. Ikke-null.")
                 .build()
-            val referanse = Field.newBuilder("referanse", StandardSQLTypeName.STRING)
-                .setDescription("Behandlingsreferanse. Unik innenfor sak. Ikke-null.")
-                .build()
             val behandlingsreferanse = Field.newBuilder("behandlingsreferanse", StandardSQLTypeName.STRING)
                 .setDescription("Behandlingsreferanse. Unik innenfor sak. Ikke-null.")
                 .build()
@@ -84,7 +81,6 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
 
             return Schema.of(
                 saksnummer,
-                referanse,
                 behandlingsreferanse,
                 behandlingsType,
                 brukerFnr,
