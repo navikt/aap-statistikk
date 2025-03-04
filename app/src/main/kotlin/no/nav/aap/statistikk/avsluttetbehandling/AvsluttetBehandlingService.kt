@@ -17,9 +17,9 @@ import java.time.LocalDateTime
 import java.util.*
 
 class AvsluttetBehandlingService(
-    private val tilkjentYtelseRepositoryFactory: ITilkjentYtelseRepository,
-    private val beregningsgrunnlagRepositoryFactory: IBeregningsgrunnlagRepository,
-    private val vilkårsResultatRepositoryFactory: IVilkårsresultatRepository,
+    private val tilkjentYtelseRepository: ITilkjentYtelseRepository,
+    private val beregningsgrunnlagRepository: IBeregningsgrunnlagRepository,
+    private val vilkårsResultatRepository: IVilkårsresultatRepository,
     private val diagnoseRepository: DiagnoseRepository,
     private val bqRepository: IBQRepository,
     private val behandlingRepository: IBehandlingRepository,
@@ -37,7 +37,7 @@ class AvsluttetBehandlingService(
             behandlingRepository.hent(avsluttetBehandling.behandlingsReferanse)
 
         if (uthentetBehandling != null) {
-            vilkårsResultatRepositoryFactory
+            vilkårsResultatRepository
                 .lagreVilkårsResultat(
                     VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat),
                     uthentetBehandling.id!!
@@ -46,14 +46,14 @@ class AvsluttetBehandlingService(
             error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
         }
 
-        tilkjentYtelseRepositoryFactory.lagreTilkjentYtelse(
+        tilkjentYtelseRepository.lagreTilkjentYtelse(
             TilkjentYtelseEntity.fraDomene(
                 avsluttetBehandling.tilkjentYtelse
             )
         )
 
         if (avsluttetBehandling.beregningsgrunnlag != null) {
-            beregningsgrunnlagRepositoryFactory.lagreBeregningsGrunnlag(
+            beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     value = avsluttetBehandling.beregningsgrunnlag,
                     behandlingsReferanse = avsluttetBehandling.behandlingsReferanse

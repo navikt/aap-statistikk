@@ -99,9 +99,9 @@ class ProduksjonsstyringRepositoryTest {
             val hendelsesService = HendelsesService(
                 sakRepository = SakRepositoryImpl(conn),
                 avsluttetBehandlingService = AvsluttetBehandlingService(
-                    tilkjentYtelseRepositoryFactory = TilkjentYtelseRepository(conn),
-                    beregningsgrunnlagRepositoryFactory = BeregningsgrunnlagRepository(conn),
-                    vilkårsResultatRepositoryFactory = VilkårsresultatRepository(conn),
+                    tilkjentYtelseRepository = TilkjentYtelseRepository(conn),
+                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn),
+                    vilkårsResultatRepository = VilkårsresultatRepository(conn),
                     diagnoseRepository = DiagnoseRepositoryImpl(conn),
                     bqRepository = bqRepository,
                     behandlingRepository = BehandlingRepository(conn),

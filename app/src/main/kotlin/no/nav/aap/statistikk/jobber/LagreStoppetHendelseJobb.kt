@@ -37,9 +37,9 @@ class LagreStoppetHendelseJobb(
         val hendelsesService = HendelsesService(
             sakRepository = SakRepositoryImpl(connection),
             avsluttetBehandlingService = AvsluttetBehandlingService(
-                tilkjentYtelseRepositoryFactory = tilkjentYtelseRepositoryFactory(connection),
-                beregningsgrunnlagRepositoryFactory = beregningsgrunnlagRepositoryFactory(connection),
-                vilkårsResultatRepositoryFactory = vilkårsResultatRepositoryFactory(connection),
+                tilkjentYtelseRepository = tilkjentYtelseRepositoryFactory(connection),
+                beregningsgrunnlagRepository = beregningsgrunnlagRepositoryFactory(connection),
+                vilkårsResultatRepository = vilkårsResultatRepositoryFactory(connection),
                 diagnoseRepository = diagnoseRepository(connection),
                 bqRepository = bqRepository,
                 behandlingRepository = behandlingRepositoryFactory(connection),
