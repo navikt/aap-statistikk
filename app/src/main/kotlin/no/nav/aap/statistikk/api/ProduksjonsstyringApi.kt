@@ -238,7 +238,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     route("/behandlinger/utvikling").get<BehandlingUtviklingsUtviklingInput, List<BehandlinEndringerPerDag>>(
         TagModule(listOf(Tags.Produksjonsstyring))
     ) { req ->
-        // TODO!!
+        // TODO!! for å støtte postmottak
         val antallDager = req.antallDager
         val antallBehandlinger = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
