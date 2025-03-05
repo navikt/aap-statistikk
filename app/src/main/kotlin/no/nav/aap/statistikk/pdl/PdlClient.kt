@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.pdl
 
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
@@ -18,7 +19,7 @@ interface PdlClient {
 
 private const val BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING = "B287"
 
-class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
+class PdlGraphQLClient(private val pdlConfig: PdlConfig, meterRegistry: MeterRegistry) : PdlClient {
     private val client = RestClient(
         config = ClientConfig(
             scope = pdlConfig.scope,
@@ -30,7 +31,8 @@ class PdlGraphQLClient(private val pdlConfig: PdlConfig) : PdlClient {
             )
         ),
         tokenProvider = ClientCredentialsTokenProvider,
-        responseHandler = DefaultResponseHandler()
+        responseHandler = DefaultResponseHandler(),
+        prometheus = meterRegistry
     )
 
     override fun hentPersoner(identer: List<String>): List<Person> {
