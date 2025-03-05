@@ -181,5 +181,6 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.REVURDER_MEDLEMSKAP -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_MEDLEMSSKAP
         ÅrsakTilBehandling.REVURDER_YRKESSKADE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_YRKESSKADE
         ÅrsakTilBehandling.REVURDER_BEREGNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_BEREGNING
+        ÅrsakTilBehandling.REVURDER_LOVVALG -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_LOVVALG
     }
 }

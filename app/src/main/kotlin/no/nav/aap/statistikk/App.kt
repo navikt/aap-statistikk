@@ -99,7 +99,7 @@ fun Application.startUp(
     val bqRepository = BQRepository(bigQueryClient)
 
     val pdlClient = PdlGraphQLClient(
-        pdlConfig = pdlConfig
+        pdlConfig = pdlConfig, prometheusMeterRegistry
     )
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         bqRepository,
