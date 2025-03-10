@@ -10,7 +10,7 @@ metadata:
 
 spec:
   ingresses:
-    - https://aap-statistikk.intern.dev.nav.no  
+    - https://aap-statistikk.intern.dev.nav.no
   image: {{image}}
   strategy:
    type: RollingUpdate
@@ -58,6 +58,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: saksbehandling
         - application: behandlingsflyt
         - application: produksjonsstyring
         - application: oppgave
