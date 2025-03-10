@@ -60,7 +60,6 @@ spec:
       rules:
         - application: saksbehandling
         - application: behandlingsflyt
-        - application: produksjonsstyring
         - application: oppgave
         - application: postmottak-backend
         - application: paw-patrol
