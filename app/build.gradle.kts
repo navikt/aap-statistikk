@@ -13,7 +13,7 @@ val komponenterVersjon = "1.0.171"
 val behandlingsflytversjon = "0.0.189"
 val tilgangVersjon = "1.0.15"
 val flywayVersion = "11.3.4"
-val oppgaveVersjon = "0.0.49"
+val oppgaveVersjon = "0.0.50"
 val testContainersVersion = "1.20.6"
 val postmottakVersjon = "0.0.54"
 
