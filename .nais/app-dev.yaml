@@ -64,7 +64,7 @@ spec:
         - application: postmottak-backend
         - application: paw-patrol
         - application: azure-token-generator
-          namespace: aura
+          namespace: nais
           cluster: dev-gcp
     outbound:
       external:
