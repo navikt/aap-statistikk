@@ -183,5 +183,6 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.REVURDER_BEREGNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_BEREGNING
         ÅrsakTilBehandling.REVURDER_LOVVALG -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_LOVVALG
         ÅrsakTilBehandling.KLAGE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.KLAGE
+        ÅrsakTilBehandling.REVURDER_SAMORDNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_SAMORDNING
     }
 }
