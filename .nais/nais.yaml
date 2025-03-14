@@ -63,12 +63,15 @@ spec:
         - application: oppgave
         - application: postmottak-backend
         - application: paw-patrol
-        - application: azure-token-generator
+        {{#if isdev}}
+        - application: saksbehandling-lokal # For lokal utvikling. IKKE kopier denne til prod.yaml
+        - application: azure-token-generator # Ikke i prod :)
           namespace: nais
           cluster: dev-gcp
+        {{/if}}
     outbound:
       external:
-        - host: pdl-api.dev-fss-pub.nais.io
+        - host: {{pdl_url}}
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -81,6 +84,6 @@ spec:
         permission: READWRITE
   env:
     - name: INTEGRASJON_PDL_URL
-      value: https://pdl-api.dev-fss-pub.nais.io/graphql
+      value: https://{{pdl_url}}/graphql
     - name: INTEGRASJON_PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
