@@ -577,7 +577,7 @@ where (b.type = ANY (?::text[]) or ${'$'}1 is null)
   and bh.gjeldende = true
   and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
   and bh.status != 'AVSLUTTET'
-group by aarsak;;
+group by aarsak;
         """.trimIndent()
 
         return connection.queryList(sql) {
