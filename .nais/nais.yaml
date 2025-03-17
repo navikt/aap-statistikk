@@ -82,6 +82,11 @@ spec:
       - name: tester
         cascadingDelete: true  # false for produksjon. Nå kan sletting gjøres ved å slette denne linja
         permission: READWRITE
+      - name: saksstatistikk
+        permission: READWRITE
+      - name: ytelsestatistikk
+        permission: READWRITE
+
   env:
     - name: INTEGRASJON_PDL_URL
       value: https://{{pdl_url}}/graphql
