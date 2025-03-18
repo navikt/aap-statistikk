@@ -1,0 +1,3 @@
+isdev: 0
+pdl_url: pdl-api.prod-fss-pub.nais.io
+pdl_scope: api://prod-fss.pdl.pdl-api/.default
