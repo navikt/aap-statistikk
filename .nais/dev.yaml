@@ -1,2 +1,3 @@
 isdev: true
 pdl_url: pdl-api.dev-fss-pub.nais.io
+pdl_scope: api://dev-fss.pdl.pdl-api/.default

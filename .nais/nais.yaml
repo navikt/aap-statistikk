@@ -9,8 +9,10 @@ metadata:
     sub: statistikk
 
 spec:
+  {{#if isdev}}
   ingresses:
     - https://aap-statistikk.intern.dev.nav.no
+  {{/if}}
   image: {{image}}
   strategy:
    type: RollingUpdate
@@ -75,13 +77,18 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_16
-        tier: db-f1-micro
+        tier: db-custom-1-3840
+        diskAutoresize: true
+        highAvailability: true
+        pointInTimeRecovery: true
         databases:
           - name: hendelser
     bigQueryDatasets:
+      {{#if isdev}}
       - name: tester
         cascadingDelete: true  # false for produksjon. Nå kan sletting gjøres ved å slette denne linja
         permission: READWRITE
+      {{/if}}
       - name: saksstatistikk
         permission: READWRITE
       - name: ytelsestatistikk
@@ -91,4 +98,4 @@ spec:
     - name: INTEGRASJON_PDL_URL
       value: https://{{pdl_url}}/graphql
     - name: INTEGRASJON_PDL_SCOPE
-      value: api://dev-fss.pdl.pdl-api/.default
+      value: {{pdl_scope}}
