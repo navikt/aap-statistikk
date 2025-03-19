@@ -28,7 +28,8 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig
     ) {
         val jobbAppender = MockJobbAppender()
-        val bqRepository = FakeBQRepository()
+        val bqRepository = FakeBQSakRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         testKlient(
@@ -37,6 +38,7 @@ class ApplicationTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
+                bqRepositoryYtelse,
                 bqRepository,
                 meterRegistry,
                 bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
@@ -46,7 +48,7 @@ class ApplicationTest {
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
-                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
+                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 skjermingService = SkjermingService(FakePdlClient())
             ), LagreOppgaveHendelseJobb(meterRegistry),
             LagrePostmottakHendelseJobb(meterRegistry)
@@ -148,7 +150,8 @@ class ApplicationTest {
 }"""
 
         val jobbAppender = MockJobbAppender()
-        val bqRepository = FakeBQRepository()
+        val bqRepository = FakeBQSakRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         testKlient(
@@ -157,7 +160,7 @@ class ApplicationTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepository, meterRegistry,
+                bqRepositoryYtelse, bqRepository, meterRegistry,
                 bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
@@ -165,7 +168,7 @@ class ApplicationTest {
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 personService = { PersonService(FakePersonRepository()) },
-                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
+                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 skjermingService = SkjermingService(FakePdlClient()),
             ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->

@@ -5,7 +5,7 @@ import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.IBQRepository
+import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
@@ -21,7 +21,7 @@ class AvsluttetBehandlingService(
     private val beregningsgrunnlagRepository: IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepository: IVilkårsresultatRepository,
     private val diagnoseRepository: DiagnoseRepository,
-    private val bqRepository: IBQRepository,
+    private val bqRepository: IBQYtelsesstatistikkRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val skjermingService: SkjermingService,

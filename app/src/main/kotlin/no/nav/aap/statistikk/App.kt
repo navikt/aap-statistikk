@@ -32,10 +32,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.BQRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
-import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
-import no.nav.aap.statistikk.bigquery.schemaRegistry
+import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
@@ -68,23 +65,28 @@ fun main() {
         log.error("Uhåndtert feil", e)
     }
     val dbConfig = DbConfig.fraMiljøVariabler()
-    val bgConfig = BigQueryConfigFromEnv()
+    val bgConfigSak = BigQueryConfigFromEnv("saksstatistikk")
+    val bgConfigYtelse = BigQueryConfigFromEnv("ytelsestatistikk")
+    val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistry)
+    val bigQueryClientSak = BigQueryClient(bgConfigSak, schemaRegistry)
+
+
     val azureConfig = azureconfigFraMiljøVariabler()
-    val bigQueryClient = BigQueryClient(bgConfig, schemaRegistry)
     val pdlConfig = PdlConfig(
         url = System.getenv("INTEGRASJON_PDL_URL"),
         scope = System.getenv("INTEGRASJON_PDL_SCOPE")
     )
 
     embeddedServer(Netty, port = 8080) {
-        startUp(dbConfig, azureConfig, bigQueryClient, pdlConfig)
+        startUp(dbConfig, azureConfig, bigQueryClientSak, bigQueryClientYtelse, pdlConfig)
     }.start(wait = true)
 }
 
 fun Application.startUp(
     dbConfig: DbConfig,
     azureConfig: AzureConfig,
-    bigQueryClient: BigQueryClient,
+    bigQueryClientSak: BigQueryClient,
+    bigQueryClientYtelse: BigQueryClient,
     pdlConfig: PdlConfig
 ) {
     log.info("Starter.")
@@ -96,13 +98,15 @@ fun Application.startUp(
     val flyway = Flyway(dbConfig, prometheusMeterRegistry)
     val dataSource = flyway.createAndMigrateDataSource()
 
-    val bqRepository = BQRepository(bigQueryClient)
+    val bqSakRepository = BigQuerySakstatikkRepository(bigQueryClientSak)
+    val bqYtelseRepository = BQYtelseRepository(bigQueryClientYtelse)
 
     val pdlClient = PdlGraphQLClient(
         pdlConfig = pdlConfig, prometheusMeterRegistry
     )
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        bqRepository,
+        bqYtelseRepository,
+        bqSakRepository,
         prometheusMeterRegistry,
         bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
         tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },

@@ -4,7 +4,7 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.bigquery.IBQRepository
+import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.BehandlingMetode
@@ -23,7 +23,7 @@ private const val NAY_NASJONAL_KØ_KODE = "4491"
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
     private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
-    private val bigQueryRepository: IBQRepository,
+    private val bigQueryRepository: IBQSakstatistikkRepository,
     private val skjermingService: SkjermingService,
     private val clock: Clock = systemDefaultZone()
 ) {

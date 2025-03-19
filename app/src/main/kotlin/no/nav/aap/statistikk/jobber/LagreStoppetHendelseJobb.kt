@@ -10,7 +10,8 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.IBQRepository
+import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
+import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -21,7 +22,8 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 
 class LagreStoppetHendelseJobb(
-    private val bqRepository: IBQRepository,
+    private val bqYtelseStatistikk: IBQYtelsesstatistikkRepository,
+    private val bqSakstatikk: IBQSakstatistikkRepository,
     private val meterRegistry: MeterRegistry,
     private val bigQueryKvitteringRepository: (DBConnection) -> IBigQueryKvitteringRepository,
     private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
@@ -41,7 +43,7 @@ class LagreStoppetHendelseJobb(
                 beregningsgrunnlagRepository = beregningsgrunnlagRepositoryFactory(connection),
                 vilkårsResultatRepository = vilkårsResultatRepositoryFactory(connection),
                 diagnoseRepository = diagnoseRepository(connection),
-                bqRepository = bqRepository,
+                bqRepository = bqYtelseStatistikk,
                 behandlingRepository = behandlingRepositoryFactory(connection),
                 skjermingService = skjermingService,
                 meterRegistry = meterRegistry,
@@ -53,7 +55,7 @@ class LagreStoppetHendelseJobb(
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepositoryFactory(connection),
                 bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
-                bigQueryRepository = bqRepository,
+                bigQueryRepository = bqSakstatikk,
                 skjermingService = skjermingService,
             ),
         )

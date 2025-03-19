@@ -29,9 +29,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
-import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.IBQRepository
+import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
@@ -159,6 +157,7 @@ fun <E> testKlientNoInjection(
         startUp(
             dbConfig,
             azureConfig,
+            bigQueryClient,
             bigQueryClient,
             pdlConfig,
         )
@@ -442,11 +441,10 @@ class FakeDiagnoseRepository : DiagnoseRepository {
 
 }
 
-class FakeBQRepository : IBQRepository {
+class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
     val vilkårsresultater = mutableListOf<Vilkårsresultat>()
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
     val beregningsgrunnlag = mutableListOf<BeregningsGrunnlagBQ>()
-    val saker = mutableListOf<BQBehandling>()
     val behandlinger = mutableListOf<BQYtelseBehandling>()
 
     override fun lagre(payload: Vilkårsresultat) {
@@ -466,6 +464,10 @@ class FakeBQRepository : IBQRepository {
     override fun lagre(payload: BQYtelseBehandling) {
         behandlinger.add(payload)
     }
+}
+
+class FakeBQSakRepository : IBQSakstatistikkRepository {
+    val saker = mutableListOf<BQBehandling>()
 
     override fun lagre(payload: BQBehandling) {
         saker.add(payload)

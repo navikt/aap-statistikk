@@ -30,7 +30,9 @@ import java.util.*
 class HendelsesServiceTest {
     @Test
     fun `sette inn med relatert behanding`() {
-        val bigQueryRepository = FakeBQRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
+        val bqRepositorySak = FakeBQSakRepository()
+
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
@@ -47,7 +49,7 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepository = FakeVilkårsResultatRepository(),
                 diagnoseRepository = FakeDiagnoseRepository(),
-                bqRepository = bigQueryRepository,
+                bqRepository = bqRepositoryYtelse,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
                 meterRegistry = simpleMeterRegistry,
@@ -59,7 +61,7 @@ class HendelsesServiceTest {
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
-                bigQueryRepository = bigQueryRepository,
+                bigQueryRepository = bqRepositorySak,
                 skjermingService = skjermingService,
                 clock = clock
             )
@@ -115,10 +117,10 @@ class HendelsesServiceTest {
         )
 
         assertThat(behandlingRepository.hent(relatertUUID)).isNotNull()
-        assertThat(bigQueryRepository.saker).hasSize(1)
-        assertThat(bigQueryRepository.saker.first().saksnummer).isEqualTo("1234")
-        assertThat(bigQueryRepository.saker.first().relatertFagsystem).isEqualTo("Kelvin")
-        assertThat(bigQueryRepository.saker.first().relatertBehandlingUUID).isEqualTo(relatertUUID.toString())
+        assertThat(bqRepositorySak.saker).hasSize(1)
+        assertThat(bqRepositorySak.saker.first().saksnummer).isEqualTo("1234")
+        assertThat(bqRepositorySak.saker.first().relatertFagsystem).isEqualTo("Kelvin")
+        assertThat(bqRepositorySak.saker.first().relatertBehandlingUUID).isEqualTo(relatertUUID.toString())
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
         assertThat(
             simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
@@ -127,7 +129,9 @@ class HendelsesServiceTest {
 
     @Test
     fun `teller opprettet behandling`() {
-        val bigQueryRepository = FakeBQRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
+        val bqRepositorySak = FakeBQSakRepository()
+
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
@@ -145,7 +149,7 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepository = FakeVilkårsResultatRepository(),
                 diagnoseRepository = FakeDiagnoseRepository(),
-                bqRepository = bigQueryRepository,
+                bqRepository = bqRepositoryYtelse,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
                 meterRegistry = simpleMeterRegistry,
@@ -156,7 +160,7 @@ class HendelsesServiceTest {
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
-                bigQueryRepository = bigQueryRepository,
+                bigQueryRepository = bqRepositorySak,
                 skjermingService = skjermingService,
                 clock = clock
             )
@@ -194,7 +198,9 @@ class HendelsesServiceTest {
 
     @Test
     fun `hendelses-service lagrer i bigquery med korrekt tidspunkt`() {
-        val bigQueryRepository = FakeBQRepository()
+        val bqYtelserRepository = FakeBQYtelseRepository()
+        val bqSakRepository = FakeBQSakRepository()
+
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
@@ -211,7 +217,7 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepository = FakeVilkårsResultatRepository(),
                 diagnoseRepository = FakeDiagnoseRepository(),
-                bqRepository = bigQueryRepository,
+                bqRepository = bqYtelserRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
                 meterRegistry = simpleMeterRegistry,
@@ -222,7 +228,7 @@ class HendelsesServiceTest {
             sakStatistikkService = SaksStatistikkService(
                 behandlingRepository = behandlingRepository,
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
-                bigQueryRepository = bigQueryRepository,
+                bigQueryRepository = bqSakRepository,
                 skjermingService = skjermingService,
                 clock = clock
             )
@@ -249,12 +255,12 @@ class HendelsesServiceTest {
             )
         )
 
-        assertThat(bigQueryRepository.saker).hasSize(1)
-        assertThat(bigQueryRepository.saker.first().saksnummer).isEqualTo("1234")
-        assertThat(bigQueryRepository.saker.first().tekniskTid).isEqualTo(
+        assertThat(bqSakRepository.saker).hasSize(1)
+        assertThat(bqSakRepository.saker.first().saksnummer).isEqualTo("1234")
+        assertThat(bqSakRepository.saker.first().tekniskTid).isEqualTo(
             LocalDateTime.now(clock)
         )
-        assertThat(bigQueryRepository.saker.first().behandlingÅrsak).isEqualTo("SØKNAD,G_REGULERING")
+        assertThat(bqSakRepository.saker.first().behandlingÅrsak).isEqualTo("SØKNAD,G_REGULERING")
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
     }
 }

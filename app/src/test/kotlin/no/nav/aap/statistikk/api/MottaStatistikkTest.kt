@@ -65,7 +65,9 @@ class MottaStatistikkTest {
 
         val motor = motorMock()
 
-        val bqRepository = FakeBQRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
+        val bqRepositorySak = FakeBQSakRepository()
+
         val meterRegistry = SimpleMeterRegistry()
 
         val mottattTid = LocalDateTime.now().minusDays(1)
@@ -75,7 +77,7 @@ class MottaStatistikkTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepository, meterRegistry,
+                bqRepositoryYtelse, bqRepositorySak, meterRegistry,
                 bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
@@ -83,7 +85,7 @@ class MottaStatistikkTest {
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 skjermingService = SkjermingService(FakePdlClient()),
                 personService = { PersonService(FakePersonRepository()) },
-                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
+                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 diagnoseRepository = { FakeDiagnoseRepository() }
             ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
@@ -201,13 +203,14 @@ class MottaStatistikkTest {
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-        val bqRepository = FakeBQRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
+        val bqRepositorySak = FakeBQSakRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepository, meterRegistry,
+            bqRepositoryYtelse, bqRepositorySak, meterRegistry,
             bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -215,7 +218,7 @@ class MottaStatistikkTest {
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
             personService = { PersonService(PersonRepository(it)) },
-            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
+            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             skjermingService = skjermingService
         )
 
@@ -348,7 +351,8 @@ class MottaStatistikkTest {
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-        val bqRepository = FakeBQRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
+        val bqRepositorySak = FakeBQSakRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
@@ -357,7 +361,7 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepository, meterRegistry,
+            bqRepositoryYtelse, bqRepositorySak, meterRegistry,
             bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -365,7 +369,7 @@ class MottaStatistikkTest {
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
             personService = { PersonService(PersonRepository(it)) },
-            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
+            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             skjermingService = skjermingService
         )
 
@@ -448,7 +452,9 @@ class MottaStatistikkTest {
         )
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-        val bqRepository = FakeBQRepository()
+        val bqRepositoryYtelse = FakeBQYtelseRepository()
+        val bqRepositorySak = FakeBQSakRepository()
+
         val meterRegistry = SimpleMeterRegistry()
 
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
@@ -457,7 +463,7 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepository, meterRegistry,
+            bqRepositoryYtelse, bqRepositorySak, meterRegistry,
             bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -465,7 +471,7 @@ class MottaStatistikkTest {
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
             personService = { PersonService(PersonRepository(it)) },
-            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository()},
+            rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             skjermingService = skjermingService
         )
 
