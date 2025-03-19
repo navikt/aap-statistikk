@@ -20,7 +20,7 @@
     <logger name="secureLog" level="TRACE" additivity="false">
         <appender-ref ref="secureLog"/>
     </logger>
-
+    <logger name="io.micrometer.prometheusmetrics.PrometheusMeterRegistry" level="ERROR" />
     <root level="INFO">
         <appender-ref ref="json"/>
     </root>
