@@ -95,7 +95,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                 )
             } else {
                 if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident) {
-                    logger.warn("Person har endret seg på en oppgave. Var ${acc.person}, nå ${hendelse.personIdent}")
+                    logger.warn("Person har endret seg på en oppgave. Var ${acc.person.id()}, nå forskjellig.")
                 }
                 if (hendelse.behandlingRef != null && acc.behandlingReferanse != null && hendelse.behandlingRef != acc.behandlingReferanse.referanse) {
                     logger.warn("Behandlings-referanse har endret seg på en oppgave. Var ${acc.behandlingReferanse}, nå ${hendelse.behandlingRef}")

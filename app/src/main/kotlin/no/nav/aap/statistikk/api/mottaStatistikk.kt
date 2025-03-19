@@ -95,8 +95,6 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             exampleRequest = exampleRequestStoppetBehandling
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
-                log.info("Got DTO: $dto")
-
                 val stringified = DefaultJsonMapper.toJson(dto)
 
                 val encodedSaksNummer = stringToNumber(dto.saksnummer)
@@ -119,8 +117,6 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("OppgaveHendelse"),
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
-                log.info("Got DTO: $dto")
-
                 val encodedSaksNummer = dto.oppgaveDto.saksnummer?.let { stringToNumber(it) }
                 dto.oppgaveDto.behandlingRef?.let { stringToNumber(it.toString()) }
 
@@ -146,8 +142,6 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         post<Unit, String, DokumentflytStoppetHendelse>(
             TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("DokumentflytStoppetHendelse"),
         ) { _, dto ->
-            log.info("Got DTO: $dto")
-
             transactionExecutor.withinTransaction { conn ->
                 jobbAppender.leggTil(
                     conn,

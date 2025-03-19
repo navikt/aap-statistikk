@@ -68,13 +68,10 @@ fun main() {
         mapper = { body, _ -> String(body.readAllBytes(), StandardCharsets.UTF_8) }
     )!!
 
-    try {
-        val writer = BufferedWriter(FileWriter("openapi.json"))
-        writer.write(resp)
 
-        writer.close()
-    } catch (_: Exception) {
-        fail()
+    val writer = BufferedWriter(FileWriter("openapi.json"))
+    writer.use {
+        it.write(resp)
     }
 
     server.stop()
