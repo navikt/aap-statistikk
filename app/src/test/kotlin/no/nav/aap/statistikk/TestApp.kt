@@ -39,6 +39,7 @@ fun main() {
     val bqConfig: BigQueryConfig = bigQueryContainer()
 
     val bigQueryClient = BigQueryClient(bqConfig, schemaRegistry)
+    val bigQueryClient2 = BigQueryClient(bqConfig, schemaRegistry)
     // Hack fordi emulator ikke støtter migrering
     schemaRegistry.forEach { (_, schema) ->
         bigQueryClient.create(schema)
@@ -52,7 +53,7 @@ fun main() {
                 issuer = "tilgang",
                 tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
                 clientSecret = "xxx",
-            ), bigQueryClient, PdlConfig(url = "...", scope = "xxx")
+            ), bigQueryClient, bigQueryClient2, PdlConfig(url = "...", scope = "xxx")
         )
     }.start(wait = true)
 }

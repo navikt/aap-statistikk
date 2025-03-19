@@ -4,7 +4,6 @@ import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.BehandlingTabell
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
-import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -14,11 +13,11 @@ import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
 
-private val logger = LoggerFactory.getLogger(BQRepository::class.java)
+private val logger = LoggerFactory.getLogger(BQYtelseRepository::class.java)
 
-class BQRepository(
+class BQYtelseRepository(
     private val client: BigQueryClient
-) : IBQRepository {
+) : IBQYtelsesstatistikkRepository {
     private val vilkårsVurderingTabell = VilkårsVurderingTabell()
     private val tilkjentYtelseTabell = TilkjentYtelseTabell()
     private val beregningsGrunnlagTabell = BeregningsGrunnlagTabell()
@@ -71,13 +70,7 @@ class BQRepository(
         client.insert(behandlingTabell, payload)
     }
 
-    override fun lagre(payload: BQBehandling) {
-        logger.info("Lagrer saksinfo.")
-        client.insert(sakTabell, payload)
-    }
-
     override fun toString(): String {
         return "BQRepository(behandlingTabell=$behandlingTabell, client=$client, vilkårsVurderingTabell=$vilkårsVurderingTabell, tilkjentYtelseTabell=$tilkjentYtelseTabell, beregningsGrunnlagTabell=$beregningsGrunnlagTabell, sakTabell=$sakTabell)"
     }
-
 }

@@ -92,7 +92,8 @@ class ProduksjonsstyringRepositoryTest {
         åpen: Boolean = true
     ) =
         dataSource.transaction { conn ->
-            val bqRepository = FakeBQRepository()
+            val bqRepositoryYtelse = FakeBQYtelseRepository()
+            val bqRepositorySak = FakeBQSakRepository()
 
             val skjermingService = SkjermingService(FakePdlClient())
             val meterRegistry = SimpleMeterRegistry()
@@ -103,7 +104,7 @@ class ProduksjonsstyringRepositoryTest {
                     beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn),
                     vilkårsResultatRepository = VilkårsresultatRepository(conn),
                     diagnoseRepository = DiagnoseRepositoryImpl(conn),
-                    bqRepository = bqRepository,
+                    bqRepository = bqRepositoryYtelse,
                     behandlingRepository = BehandlingRepository(conn),
                     skjermingService = skjermingService,
                     meterRegistry = meterRegistry,
@@ -115,7 +116,7 @@ class ProduksjonsstyringRepositoryTest {
                 sakStatistikkService = SaksStatistikkService(
                     behandlingRepository = BehandlingRepository(conn),
                     bigQueryKvitteringRepository = BigQueryKvitteringRepository(conn),
-                    bigQueryRepository = bqRepository,
+                    bigQueryRepository = bqRepositorySak,
                     skjermingService = skjermingService,
                 )
             )

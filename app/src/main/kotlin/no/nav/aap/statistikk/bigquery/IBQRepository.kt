@@ -6,10 +6,13 @@ import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 
-interface IBQRepository {
+interface IBQSakstatistikkRepository {
+    fun lagre(payload: BQBehandling)
+}
+
+interface IBQYtelsesstatistikkRepository {
     fun lagre(payload: Vilkårsresultat)
     fun lagre(payload: TilkjentYtelse)
     fun lagre(payload: BeregningsGrunnlagBQ)
     fun lagre(payload: BQYtelseBehandling)
-    fun lagre(payload: BQBehandling)
 }

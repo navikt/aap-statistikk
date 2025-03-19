@@ -8,7 +8,7 @@ import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.BQRepository
+import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.bigquery.schemaRegistry
@@ -286,7 +286,7 @@ class AvsluttetBehandlingServiceTest {
         clock: Clock = Clock.systemUTC()
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
-        val bqRepository = BQRepository(bigQueryClient)
+        val bqYtelseRepository = BQYtelseRepository(bigQueryClient)
 
         val service =
             AvsluttetBehandlingService(
@@ -294,7 +294,7 @@ class AvsluttetBehandlingServiceTest {
                 BeregningsgrunnlagRepository(dbConnection),
                 VilkårsresultatRepository(dbConnection),
                 diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
-                bqRepository,
+                bqYtelseRepository,
                 behandlingRepository = BehandlingRepository(dbConnection),
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),

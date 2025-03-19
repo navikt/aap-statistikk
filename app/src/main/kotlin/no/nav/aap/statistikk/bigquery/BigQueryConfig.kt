@@ -7,10 +7,7 @@ interface BigQueryConfig {
     fun bigQueryOptions(): BigQueryOptions
 }
 
-class BigQueryConfigFromEnv : BigQueryConfig {
-    override val dataset: String
-        get() = "tester"
-
+class BigQueryConfigFromEnv(override val dataset: String) : BigQueryConfig {
     override fun bigQueryOptions(): BigQueryOptions {
         val projectId = System.getenv("GCP_TEAM_PROJECT_ID")
         BigQueryOptions.DefaultBigQueryFactory()
