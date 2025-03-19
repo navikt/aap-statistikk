@@ -44,7 +44,7 @@ dependencies {
 
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
-    implementation("ch.qos.logback:logback-classic:1.5.17")
+    implementation("ch.qos.logback:logback-classic:1.5.18")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")
