@@ -184,5 +184,13 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.REVURDER_LOVVALG -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_LOVVALG
         ÅrsakTilBehandling.KLAGE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.KLAGE
         ÅrsakTilBehandling.REVURDER_SAMORDNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_SAMORDNING
+        ÅrsakTilBehandling.LOVVALG_OG_MEDLEMSKAP -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.LOVVALG_OG_MEDLEMSKAP
+        ÅrsakTilBehandling.FORUTGAENDE_MEDLEMSKAP -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.FORUTGAENDE_MEDLEMSKAP
+        ÅrsakTilBehandling.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
+        ÅrsakTilBehandling.BARNETILLEGG -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.BARNETILLEGG
+        ÅrsakTilBehandling.INSTITUSJONSOPPHOLD -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.INSTITUSJONSOPPHOLD
+        ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING
+        ÅrsakTilBehandling.REFUSJONSKRAV -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REFUSJONSKRAV
+        ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
     }
 }
