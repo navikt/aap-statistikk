@@ -34,7 +34,8 @@ enum class Vilkårtype {
     BISTANDSVILKÅRET, MEDLEMSKAP,
     GRUNNLAGET,
     SYKEPENGEERSTATNING,
-    LOVVALG
+    LOVVALG,
+    SAMORDNING
 }
 
 enum class Utfall {
