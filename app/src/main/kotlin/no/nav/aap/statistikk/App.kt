@@ -67,8 +67,8 @@ fun main() {
     val dbConfig = DbConfig.fraMiljøVariabler()
     val bgConfigSak = BigQueryConfigFromEnv("saksstatistikk")
     val bgConfigYtelse = BigQueryConfigFromEnv("ytelsestatistikk")
-    val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistry)
-    val bigQueryClientSak = BigQueryClient(bgConfigSak, schemaRegistry)
+    val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistryYtelseStatistikk)
+    val bigQueryClientSak = BigQueryClient(bgConfigSak, schemaRegistrySakStatistikk)
 
 
     val azureConfig = azureconfigFraMiljøVariabler()
