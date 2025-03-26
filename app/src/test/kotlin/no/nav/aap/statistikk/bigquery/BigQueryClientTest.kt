@@ -6,7 +6,10 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
 import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
 import no.nav.aap.statistikk.testutils.BigQuery
-import no.nav.aap.statistikk.vilkårsresultat.*
+import no.nav.aap.statistikk.testutils.schemaRegistry
+import no.nav.aap.statistikk.vilkårsresultat.BQVilkårsResultatPeriode
+import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test

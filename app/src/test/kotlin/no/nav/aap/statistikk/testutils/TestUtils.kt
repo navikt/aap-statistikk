@@ -572,3 +572,5 @@ fun forberedDatabase(
         )
     )
 }
+
+val schemaRegistry: SchemaRegistry = schemaRegistryYtelseStatistikk + schemaRegistrySakStatistikk

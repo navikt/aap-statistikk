@@ -5,8 +5,8 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.testutils.BigQuery
+import no.nav.aap.statistikk.testutils.schemaRegistry
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

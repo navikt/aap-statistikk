@@ -11,12 +11,8 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRep
 import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.pdl.SkjermingService
-import no.nav.aap.statistikk.testutils.BigQuery
-import no.nav.aap.statistikk.testutils.FakePdlClient
-import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.opprettTestHendelse
+import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode

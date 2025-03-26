@@ -10,19 +10,13 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
-import no.nav.aap.statistikk.bigquery.BigQueryClient
-import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.schemaRegistry
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
-import no.nav.aap.statistikk.testutils.bigQueryContainer
 import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
-import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.net.URI
 import java.nio.charset.StandardCharsets
-import kotlin.test.fail
 
 fun main() {
     val azureFake = Fakes.AzureFake(port = 8081)
