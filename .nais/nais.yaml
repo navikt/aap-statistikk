@@ -84,11 +84,6 @@ spec:
         databases:
           - name: hendelser
     bigQueryDatasets:
-      {{#if isdev}}
-      - name: tester
-        cascadingDelete: true  # false for produksjon. Nå kan sletting gjøres ved å slette denne linja
-        permission: READWRITE
-      {{/if}}
       - name: saksstatistikk
         permission: READWRITE
       - name: ytelsestatistikk
