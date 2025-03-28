@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
@@ -43,16 +44,17 @@ class ProduksjonsstyringRepositoryTest {
         )
 
         val res = dataSource.transaction {
-            val alderÅpneBehandlinger = ProduksjonsstyringRepository(it).alderÅpneBehandlinger()
+            val alderÅpneBehandlinger =
+                ProduksjonsstyringRepository(it).alderÅpneBehandlinger(alderFra = nå, behandlingsTyper = listOf(TypeBehandling.Førstegangsbehandling))
             alderÅpneBehandlinger
         }
 
         assertThat(res).hasSize(3)
         println(res)
         assertThat(res).containsExactlyInAnyOrder(
-            BøtteFordeling(bøtte = 1, antall = 1),
-            BøtteFordeling(bøtte = 3, antall = 1),
-            BøtteFordeling(bøtte = 5, antall = 2)
+            BøtteFordeling(bøtte = 2, antall = 1),
+            BøtteFordeling(bøtte = 4, antall = 1),
+            BøtteFordeling(bøtte = 6, antall = 2)
         )
     }
 
@@ -81,8 +83,8 @@ class ProduksjonsstyringRepositoryTest {
 
         assertThat(res).hasSize(2)
         assertThat(res).containsExactlyInAnyOrder(
-            BøtteFordeling(bøtte = 1, antall = 1),
-            BøtteFordeling(bøtte = 2, antall = 2)
+            BøtteFordeling(bøtte = 2, antall = 1),
+            BøtteFordeling(bøtte = 3, antall = 2)
         )
     }
 
