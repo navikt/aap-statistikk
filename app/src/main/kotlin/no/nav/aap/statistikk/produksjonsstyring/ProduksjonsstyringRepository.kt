@@ -6,6 +6,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
@@ -392,7 +393,8 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
         enhet: ChronoUnit = ChronoUnit.DAYS,
         antallBøtter: Int = 30,
         behandlingsTyper: List<TypeBehandling> = emptyList(),
-        enheter: List<String> = emptyList()
+        enheter: List<String> = emptyList(),
+        alderFra: LocalDateTime = LocalDateTime.now(),
     ): List<BøtteFordeling> {
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
@@ -421,27 +423,27 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
                AND bh.gjeldende = true
                AND bh.status != 'AVSLUTTET')
   select width_bucket(EXTRACT(EPOCH FROM
-                              (current_timestamp at time zone 'Europe/Oslo' - mottatt_tid)), 0,
+                              (?::timestamp at time zone 'Europe/Oslo' - mottatt_tid)), 0,
                       $totaltSekunder, $antallBøtter) as bucket,
          count(*)
   from u
   where (type = ANY (?::text[])
-      or ${'$'}1 is null)
-    and (enhet = ANY (?::text[])
       or ${'$'}2 is null)
+    and (enhet = ANY (?::text[])
+      or ${'$'}3 is null)
   
   GROUP BY bucket
   ORDER BY bucket;
-
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
-                setBehandlingsTyperParam(behandlingsTyper)
+                setLocalDateTime(1, alderFra)
+                setBehandlingsTyperParam(behandlingsTyper, 2)
                 if (enheter.isEmpty()) {
-                    setString(2, null)
+                    setString(3, null)
                 } else {
-                    setArray(2, enheter)
+                    setArray(3, enheter)
                 }
             }
             setRowMapper {
@@ -455,7 +457,8 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
         enhet: ChronoUnit = ChronoUnit.DAYS,
         antallBøtter: Int = 30,
         behandlingsTyper: List<TypeBehandling> = emptyList(),
-        enheter: List<String>
+        enheter: List<String>,
+        alderFra: LocalDateTime = LocalDateTime.now(),
     ): List<BøtteFordeling> {
         val totaltSekunder = enhet.duration.seconds * bøttestørrelse * antallBøtter
         val sql = """
@@ -484,23 +487,24 @@ WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
              and bh.gjeldende = true
              and bh.status = 'AVSLUTTET')
 select width_bucket(EXTRACT(EPOCH FROM
-                            (current_timestamp at time zone 'Europe/Oslo' - mottatt_tid)), 0,
+                            (?::timestamp at time zone 'Europe/Oslo' - mottatt_tid)), 0,
                     $totaltSekunder, $antallBøtter) as bucket,
        count(*)
 from u
-where (type = ANY (?::text[]) or ${'$'}1 is null)
-  and (enhet = ANY (?::text[]) or ${'$'}2 is null)
+where (type = ANY (?::text[]) or ${'$'}2 is null)
+  and (enhet = ANY (?::text[]) or ${'$'}3 is null)
 group by bucket
 order by bucket;
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
-                setBehandlingsTyperParam(behandlingsTyper)
+                setLocalDateTime(1, alderFra)
+                setBehandlingsTyperParam(behandlingsTyper, index = 2)
                 if (enheter.isEmpty()) {
-                    setString(2, null)
+                    setString(3, null)
                 } else {
-                    setArray(2, enheter)
+                    setArray(3, enheter)
                 }
             }
             setRowMapper {
@@ -509,11 +513,14 @@ order by bucket;
         }
     }
 
-    private fun Params.setBehandlingsTyperParam(behandlingsTyper: List<TypeBehandling>) {
+    private fun Params.setBehandlingsTyperParam(
+        behandlingsTyper: List<TypeBehandling>,
+        index: Int = 1
+    ) {
         if (behandlingsTyper.isEmpty()) {
-            setString(1, null)
+            setString(index, null)
         } else {
-            setArray(1, behandlingsTyper.map { it.toString() })
+            setArray(index, behandlingsTyper.map { it.toString() })
         }
     }
 
