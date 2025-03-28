@@ -28,7 +28,7 @@ import javax.sql.DataSource
 class ProduksjonsstyringRepositoryTest {
     @Test
     fun `skal legge i riktige bøtter for alder på åpne behandlinger`(@Postgres dataSource: DataSource) {
-        val nå = LocalDateTime.now()
+        val nå = LocalDateTime.now().plusYears(1)
         settInnBehandling(dataSource, nå.minusDays(1))
         settInnBehandling(
             dataSource,
@@ -45,7 +45,10 @@ class ProduksjonsstyringRepositoryTest {
 
         val res = dataSource.transaction {
             val alderÅpneBehandlinger =
-                ProduksjonsstyringRepository(it).alderÅpneBehandlinger(alderFra = nå, behandlingsTyper = listOf(TypeBehandling.Førstegangsbehandling))
+                ProduksjonsstyringRepository(it).alderÅpneBehandlinger(
+                    alderFra = nå,
+                    behandlingsTyper = listOf(TypeBehandling.Førstegangsbehandling)
+                )
             alderÅpneBehandlinger
         }
 
@@ -60,24 +63,25 @@ class ProduksjonsstyringRepositoryTest {
 
     @Test
     fun `skal legge i riktige bøtter for alder på lukkede behandlinger`(@Postgres dataSource: DataSource) {
-        settInnBehandling(dataSource, LocalDateTime.now())
+        val nå = LocalDateTime.now().plusYears(1)
+        settInnBehandling(dataSource, nå)
         settInnBehandling(
             dataSource,
-            LocalDateTime.now().minusDays(1),
+            nå.minusDays(1),
             åpen = false
         )
         settInnBehandling(
             dataSource,
-            LocalDateTime.now().minusDays(2), åpen = false
+            nå.minusDays(2), åpen = false
         )
         settInnBehandling(
             dataSource,
-            LocalDateTime.now().minusDays(2), åpen = false
+            nå.minusDays(2), åpen = false
         )
 
         val res = dataSource.transaction {
             val alderÅpneBehandlinger =
-                ProduksjonsstyringRepository(it).alderLukkedeBehandlinger(enheter = listOf())
+                ProduksjonsstyringRepository(it).alderLukkedeBehandlinger(enheter = listOf(), alderFra = nå)
             alderÅpneBehandlinger
         }
 
@@ -124,7 +128,7 @@ class ProduksjonsstyringRepositoryTest {
             )
 
             val hendelse = behandlingHendelse(
-                "123",
+                "1236",
                 UUID.randomUUID()
             ).copy(mottattTid = mottattTid)
 
