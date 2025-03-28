@@ -13,7 +13,16 @@ fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     return this
         .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.FATTE_VEDTAK }
         .firstOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }
-        ?.endringer?.firstOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }?.tidsstempel
+        ?.endringer?.sortedBy { it.tidsstempel }
+        ?.lastOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }?.tidsstempel
+}
+
+fun List<AvklaringsbehovHendelseDto>.utledBrevSendtTid(): LocalDateTime? {
+    return this
+        .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.BREV }
+        .firstOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }
+        ?.endringer?.sortedBy { it.tidsstempel }
+        ?.lastOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }?.tidsstempel
 }
 
 fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {

@@ -24,6 +24,8 @@ data class Behandling(
     val status: BehandlingStatus,
     val opprettetTid: LocalDateTime,
     val mottattTid: LocalDateTime,
+    val vedtakstidspunkt: LocalDateTime? = null,
+    val ansvarligBeslutter: String? = null,
     val versjon: Versjon,
     val søknadsformat: SøknadsFormat,
     val sisteSaksbehandler: String? = null,
@@ -41,6 +43,10 @@ data class Behandling(
         require(
             mottattTid.truncatedTo(ChronoUnit.SECONDS).isEqual(mottattTid)
         ) { "Vil ha mottattTid på sekund-oppløsning" }
+
+        require((ansvarligBeslutter != null && vedtakstidspunkt != null) || (ansvarligBeslutter == null && vedtakstidspunkt == null)) {
+            "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null"
+        }
     }
 }
 
@@ -50,10 +56,7 @@ enum class SøknadsFormat {
 
 
 enum class BehandlingStatus {
-    OPPRETTET,
-    UTREDES,
-    IVERKSETTES,
-    AVSLUTTET;
+    OPPRETTET, UTREDES, IVERKSETTES, AVSLUTTET;
 }
 
 enum class KildeSystem {
@@ -61,12 +64,12 @@ enum class KildeSystem {
 }
 
 enum class TypeBehandling(val kildeSystem: KildeSystem) {
-    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt),
-    Revurdering(kildeSystem = KildeSystem.Behandlingsflyt),
-    Tilbakekreving(kildeSystem = KildeSystem.Behandlingsflyt),
-    Klage(kildeSystem = KildeSystem.Behandlingsflyt),
-    Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak),
-    Journalføring(kildeSystem = KildeSystem.Postmottak)
+    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Revurdering(kildeSystem = KildeSystem.Behandlingsflyt), Tilbakekreving(
+        kildeSystem = KildeSystem.Behandlingsflyt
+    ),
+    Klage(kildeSystem = KildeSystem.Behandlingsflyt), Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak), Journalføring(
+        kildeSystem = KildeSystem.Postmottak
+    )
 }
 
 enum class ÅrsakTilBehandling {

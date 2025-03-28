@@ -28,7 +28,7 @@ class ProduksjonsstyringRepositoryTest {
     @Test
     fun `skal legge i riktige bøtter for alder på åpne behandlinger`(@Postgres dataSource: DataSource) {
         val nå = LocalDateTime.now()
-        settInnBehandling(dataSource, nå.minusHours(1))
+        settInnBehandling(dataSource, nå.minusDays(1))
         settInnBehandling(
             dataSource,
             nå.minusDays(3)
@@ -51,8 +51,8 @@ class ProduksjonsstyringRepositoryTest {
         println(res)
         assertThat(res).containsExactlyInAnyOrder(
             BøtteFordeling(bøtte = 1, antall = 1),
-            BøtteFordeling(bøtte = 4, antall = 1),
-            BøtteFordeling(bøtte = 6, antall = 2)
+            BøtteFordeling(bøtte = 3, antall = 1),
+            BøtteFordeling(bøtte = 5, antall = 2)
         )
     }
 
@@ -81,8 +81,8 @@ class ProduksjonsstyringRepositoryTest {
 
         assertThat(res).hasSize(2)
         assertThat(res).containsExactlyInAnyOrder(
-            BøtteFordeling(bøtte = 2, antall = 1),
-            BøtteFordeling(bøtte = 3, antall = 2)
+            BøtteFordeling(bøtte = 1, antall = 1),
+            BøtteFordeling(bøtte = 2, antall = 2)
         )
     }
 

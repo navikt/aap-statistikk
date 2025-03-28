@@ -46,18 +46,13 @@ class HendelsesService(
             )
         }
 
-        val vedtakTid = hendelse.avklaringsbehov.utledVedtakTid()
-        val ansvarligBeslutter = hendelse.avklaringsbehov.utledAnsvarligBeslutter()
         val erHosNAY = hendelse.avklaringsbehov.hosNAY()
 
         sakStatistikkService.lagreSakInfoTilBigquery(
-            sak,
             behandlingId,
-            hendelse.versjon,
             hendelse.hendelsesTidspunkt,
-            vedtakTidspunkt = vedtakTid,
+            // Bør nok modellere historikk på behandling-objektet bedre...
             erManuell = hendelse.avklaringsbehov.erManuell(),
-            ansvarligBeslutter = ansvarligBeslutter,
             erHosNAY = erHosNAY
         )
         meterRegistry.hendelseLagret().increment()
@@ -73,6 +68,8 @@ class HendelsesService(
             sak = sak,
             typeBehandling = dto.behandlingType.tilDomene(),
             opprettetTid = dto.behandlingOpprettetTidspunkt,
+            vedtakstidspunkt = dto.avklaringsbehov.utledVedtakTid(),
+            ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter(),
             mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             status = dto.behandlingStatus.tilDomene(),
             versjon = Versjon(verdi = dto.versjon),
