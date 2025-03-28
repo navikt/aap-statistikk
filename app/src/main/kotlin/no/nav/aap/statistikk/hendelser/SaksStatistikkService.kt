@@ -28,13 +28,9 @@ class SaksStatistikkService(
     private val clock: Clock = systemDefaultZone()
 ) {
     fun lagreSakInfoTilBigquery(
-        sak: Sak,
         behandlingId: Long,
-        versjon: String,
         hendelsesTidspunkt: LocalDateTime,
-        vedtakTidspunkt: LocalDateTime?,
         erManuell: Boolean,
-        ansvarligBeslutter: String?,
         erHosNAY: Boolean
     ) {
         val behandling = behandlingRepository.hent(behandlingId)
@@ -42,7 +38,12 @@ class SaksStatistikkService(
         val saksbehandler =
             if (erSkjermet) "-5" else behandling.sisteSaksbehandler
 
-        val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
+        val versjon = behandling.versjon.verdi
+
+        val sak = behandling.sak
+
+        val sekvensNummer =
+            bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
         val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
 
@@ -64,13 +65,13 @@ class SaksStatistikkService(
             relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
             relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
             ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt.truncatedTo(
-                ChronoUnit.SECONDS // SJEKK OPP DENNE, er iverksettes før avsluttet
+                ChronoUnit.SECONDS
             ) else null,
             endretTid = hendelsesTidspunkt,
-            ansvarligBeslutter = if (erSkjermet && ansvarligBeslutter !== null) "-5" else ansvarligBeslutter,
+            ansvarligBeslutter = if (erSkjermet && behandling.ansvarligBeslutter !== null) "-5" else behandling.ansvarligBeslutter,
             opprettetAv = KELVIN,
             saksbehandler = saksbehandler,
-            vedtakTid = vedtakTidspunkt?.truncatedTo(ChronoUnit.SECONDS),
+            vedtakTid = behandling.vedtakstidspunkt?.truncatedTo(ChronoUnit.SECONDS),
             søknadsFormat = behandling.søknadsformat,
             behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             behandlingStatus = behandlingStatus(behandling),

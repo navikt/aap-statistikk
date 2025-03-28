@@ -100,9 +100,10 @@ SELECT COALESCE(
         val historikkId = dbConnection.executeReturnKey(
             """INSERT INTO behandling_historikk (behandling_id,
                                   versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
+                                  vedtak_tidspunkt, ansvarlig_beslutter,
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   soknadsformat, venteaarsak, steggruppe)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -111,6 +112,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setBoolean(c++, true)
                 setLocalDateTime(c++, LocalDateTime.now(clock))
                 setLocalDateTime(c++, behandling.mottattTid)
+                setLocalDateTime(c++, behandling.vedtakstidspunkt)
+                setString(c++, behandling.ansvarligBeslutter)
                 setString(c++, behandling.status.name)
                 setString(c++, behandling.sisteSaksbehandler)
                 setString(c++, behandling.gjeldendeAvklaringsBehov)
@@ -151,6 +154,8 @@ WHERE ident = ?""", behandling.relaterteIdenter
        bh.status                    as bh_status,
        bh.versjon_id                as bh_versjon_id,
        bh.mottatt_tid               as bh_mottatt_tid,
+       bh.vedtak_tidspunkt          as bh_vedtak_tidspunkt,
+       bh.ansvarlig_beslutter       as bh_ansvarlig_beslutter,
        bh.id                        as bh_id,
        bh.siste_saksbehandler       as bh_siste_saksbehandler,
        bh.venteaarsak               as bh_venteaarsak,
@@ -206,6 +211,8 @@ WHERE br.referanse = ?"""
        bh.status                    as bh_status,
        bh.versjon_id                as bh_versjon_id,
        bh.mottatt_tid               as bh_mottatt_tid,
+       bh.vedtak_tidspunkt          as bh_vedtak_tidspunkt,
+       bh.ansvarlig_beslutter       as bh_ansvarlig_beslutter,
        bh.siste_saksbehandler       as bh_siste_saksbehandler,
        bh.venteaarsak               as bh_venteaarsak,
        bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
@@ -286,6 +293,8 @@ WHERE b.id = ?"""
         status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
         opprettetTid = it.getLocalDateTime("b_opprettet_tid"),
         mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
+        vedtakstidspunkt = it.getLocalDateTimeOrNull("bh_vedtak_tidspunkt"),
+        ansvarligBeslutter = it.getStringOrNull("bh_ansvarlig_beslutter")?.ifBlank { null },
         versjon = Versjon(verdi = it.getString("v_versjon"), id = it.getLong("bh_versjon_id")),
         søknadsformat = it.getEnum("bh_soknadsformat"),
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },

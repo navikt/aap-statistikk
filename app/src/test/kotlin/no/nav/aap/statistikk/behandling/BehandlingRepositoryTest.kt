@@ -43,6 +43,7 @@ class BehandlingRepositoryTest {
             )
         }
 
+        val vedtakstidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS)
         dataSource.transaction {
             BehandlingRepository(it).opprettBehandling(
                 Behandling(
@@ -53,6 +54,8 @@ class BehandlingRepositoryTest {
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
+                    vedtakstidspunkt = vedtakstidspunkt,
+                    ansvarligBeslutter = "Josgeir Dalføre",
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf("123", "456", "123456789"),
                     gjeldendeAvklaringsBehov = "0559",
@@ -73,6 +76,8 @@ class BehandlingRepositoryTest {
         assertThat(uthentet.søknadsformat).isEqualTo(SøknadsFormat.PAPIR)
         assertThat(uthentet.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
         assertThat(uthentet.gjeldendeStegGruppe).isEqualTo(StegGruppe.BREV)
+        assertThat(uthentet.vedtakstidspunkt).isEqualTo(vedtakstidspunkt)
+        assertThat(uthentet.ansvarligBeslutter).isEqualTo("Josgeir Dalføre")
         assertThat(uthentet.årsaker).containsExactlyInAnyOrder(
             ÅrsakTilBehandling.SØKNAD,
             ÅrsakTilBehandling.G_REGULERING
