@@ -38,6 +38,7 @@ enum class HendelseType {
     AVRESERVERT,
     LUKKET,
     OPPDATERT,
+
     @Deprecated("Skal bort, men må fjerne fra db først")
     GJENÅPNET
 }
@@ -54,6 +55,7 @@ data class OppgaveHendelse(
     val behandlingRef: UUID? = null,
     val journalpostId: Long? = null,
     val enhet: String,
+    val oppfolgingsenhet: String? = null,
     val avklaringsbehovKode: String,
     val status: Oppgavestatus,
     val reservertAv: String? = null,
@@ -76,10 +78,11 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
     return this.sortedBy { it.mottattTidspunkt }
         .fold<OppgaveHendelse, Oppgave?>(null) { acc, hendelse ->
             if (acc == null) {
+                val enhet = hendelse.oppfolgingsenhet ?: hendelse.enhet
                 val reservasjon =
                     reservasjon(hendelse)
                 Oppgave(
-                    enhet = Enhet(kode = hendelse.enhet),
+                    enhet = Enhet(kode = enhet),
                     person = hendelse.personIdent?.let { Person(it) },
                     status = hendelse.status,
                     opprettetTidspunkt = hendelse.mottattTidspunkt,
