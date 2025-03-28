@@ -174,6 +174,7 @@ fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
         behandlingRef = oppgaveDto.behandlingRef,
         journalpostId = oppgaveDto.journalpostId,
         enhet = oppgaveDto.enhet,
+        oppfolgingsenhet = oppgaveDto.oppfølgingsenhet,
         avklaringsbehovKode = oppgaveDto.avklaringsbehovKode,
         status = when (oppgaveDto.status) {
             no.nav.aap.oppgave.verdityper.Status.OPPRETTET -> Oppgavestatus.OPPRETTET
