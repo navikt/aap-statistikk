@@ -46,11 +46,12 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>
     ): List<BehandlingstidPerDag> {
+        // TODO se på denne :)
         val sql = """
 WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
                        FROM behandling_referanse br
                                 LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
-                       GROUP BY br.id, br.referanse),
+                       GROUP BY br.id, br.referanse WHERE o.status != 'AVSLUTTET'),
      u as (select date_trunc('day', pbh.oppdatert_tid) dag,
                   pbh.oppdatert_tid  as                oppdatert_tid,
                   pb.mottatt_tid     as                mottatt_tid,
@@ -110,7 +111,8 @@ order by dag;
         val sql = """
 WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
                        FROM behandling_referanse br
-                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'),
 
      u as (select b.type                                                         as type,
                   current_timestamp at time zone 'Europe/Oslo' - b.opprettet_tid as alder,
@@ -167,7 +169,8 @@ group by type;
         val sql = """
 WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
                        FROM behandling_referanse br
-                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'),
      u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode as enhet
            from behandling_historikk
                     join behandling b on b.id = behandling_historikk.behandling_id
@@ -215,10 +218,10 @@ group by gjeldende_avklaringsbehov;
     ): List<BehandlingPerSteggruppe> {
         // TODO! Trenger steggruppe fra postmottak først
         val sql = """
-
 WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
                        FROM behandling_referanse br
                                 LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'
                        GROUP BY br.id, br.referanse),
      u as (select gjeldende_avklaringsbehov, e.kode as enhet, b.type as type_behandling
            from behandling_historikk
@@ -325,6 +328,7 @@ group by gjeldende_avklaringsbehov;
 WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
                        FROM behandling_referanse br
                                 LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'
                        GROUP BY br.id, br.referanse),
      u as (select bh.oppdatert_tid as oppdatert_tid,
                   bh.mottatt_tid   as mottatt_tid,
@@ -400,7 +404,8 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
         val sql = """
   WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
                          FROM behandling_referanse br
-                                  JOIN oppgave o ON br.id = o.behandling_referanse_id),
+                                  JOIN oppgave o ON br.id = o.behandling_referanse_id
+                         WHERE o.status != 'AVSLUTTET'),
        u AS (SELECT pb.mottatt_tid     AS mottatt_tid,
                     pb.type_behandling AS type,
                     e.kode             AS enhet
@@ -464,7 +469,8 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
         val sql = """
 WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
                        FROM behandling_referanse br
-                                JOIN oppgave o ON br.id = o.behandling_referanse_id),
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'),
      u as (select pb.mottatt_tid     as mottatt_tid,
                   pb.type_behandling as type,
                   e.kode             as enhet
@@ -579,6 +585,7 @@ from behandling b
          LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
                                       FROM oppgave o
                                       WHERE o.behandling_referanse_id = b.referanse_id
+                                        AND o.status != 'AVSLUTTET'
                                       LIMIT 1)
 where (b.type = ANY (?::text[]) or ${'$'}1 is null)
   and bh.gjeldende = true
