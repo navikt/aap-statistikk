@@ -37,6 +37,7 @@ data class Behandling(
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<ÅrsakTilBehandling> = listOf(),
     val behandlendeEnhet: Enhet? = null,
+    val hendelser: List<BehandlingHendelse> = listOf(),
 ) {
     init {
         // Skal oppgis med sekund-presisjon
@@ -49,6 +50,10 @@ data class Behandling(
         }
     }
 }
+
+data class BehandlingHendelse(
+    val tidspunkt: LocalDateTime,
+)
 
 enum class SøknadsFormat {
     PAPIR, DIGITAL

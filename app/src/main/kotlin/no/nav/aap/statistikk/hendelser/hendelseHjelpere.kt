@@ -101,6 +101,16 @@ fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
     }
 }
 
+fun erHosNayNy(avklaringsbehovKode: String): Boolean {
+    val definisjon = Definisjon.forKode(avklaringsbehovKode)
+    return definisjon.løsesAv.all {
+        it in listOf(
+            Rolle.SAKSBEHANDLER_NASJONAL,
+            Rolle.BESLUTTER,
+        )
+    }
+}
+
 fun <T> List<T>.only(): T {
     require(this.size == 1) { "Skal ha lengde én, men har lengde ${this.size}: ${this.joinToString(",")}" }
     return this.first()

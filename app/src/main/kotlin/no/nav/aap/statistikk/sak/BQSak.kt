@@ -4,7 +4,6 @@ import no.nav.aap.statistikk.behandling.SøknadsFormat
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
-import kotlin.math.log
 
 private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
 
@@ -33,6 +32,7 @@ data class BQBehandling(
     val behandlingStatus: String,
     val behandlingÅrsak: String,
     val ansvarligEnhetKode: String?,
+    val sakYtelse: String,
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)

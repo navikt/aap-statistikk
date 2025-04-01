@@ -425,7 +425,7 @@ class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {
     }
 
     override fun hent(behandlingReferanse: UUID): List<RettighetstypePeriode> {
-        TODO("Not yet implemented")
+        return emptyList()
     }
 
 }

@@ -37,7 +37,7 @@ fun AvsluttetBehandlingDTO.tilDomene(
                     RettighetsType.VURDERES_FOR_UFØRETRYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETRYGD
                 }
             )
-        }.orEmpty(),
+        },
         avsluttetTidspunkt = avsluttetTidspunkt
     )
 }

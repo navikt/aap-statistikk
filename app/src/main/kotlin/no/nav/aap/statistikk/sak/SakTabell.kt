@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.sak
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.behandling.SøknadsFormat
-import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
 import no.nav.aap.statistikk.bigquery.BQTable
 import java.time.Instant
 import java.time.LocalDateTime
@@ -195,11 +194,11 @@ class SakTabell : BQTable<BQBehandling> {
                 behandlingÅrsak,
                 ansvarligBeslutter,
                 ansvarligEnhet,
+                sakYtelse,
 
                 // Ikke implementert ennå
                 utbetaltTid,
                 forventOppstartTid,
-                sakYtelse,
                 sakUtland,
                 behandlingResultat,
                 resultatBegrunnelse,
@@ -244,6 +243,7 @@ class SakTabell : BQTable<BQBehandling> {
 
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
         val ansvarligEnhet = fieldValueList.get("ansvarligEnhet").stringValue
+        val sakYtelse = fieldValueList.get("sakYtelse").stringValue
 
         return BQBehandling(
             fagsystemNavn = fagsystemNavn,
@@ -282,6 +282,7 @@ class SakTabell : BQTable<BQBehandling> {
             behandlingStatus = behandlingStatus,
             behandlingÅrsak = behandlingÅrsak,
             ansvarligEnhetKode = ansvarligEnhet,
+            sakYtelse = sakYtelse
         )
     }
 
@@ -315,6 +316,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "behandlingStatus" to value.behandlingStatus,
                 "behandlingAarsak" to value.behandlingÅrsak,
                 "ansvarligEnhet" to value.ansvarligEnhetKode,
+                "sakYtelse" to value.sakYtelse,
             )
         )
     }
