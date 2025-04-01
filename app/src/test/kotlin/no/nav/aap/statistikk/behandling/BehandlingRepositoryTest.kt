@@ -9,9 +9,13 @@ import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
@@ -44,8 +48,12 @@ class BehandlingRepositoryTest {
         }
 
         val vedtakstidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS)
+        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
         dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
+            BehandlingRepository(
+                it,
+                clock = clock
+            ).opprettBehandling(
                 Behandling(
                     referanse = referanse,
                     sak = sak,
@@ -83,6 +91,14 @@ class BehandlingRepositoryTest {
             ÅrsakTilBehandling.G_REGULERING
         )
         assertThat(uthentet.behandlendeEnhet).isEqualTo(enhet)
+        assertThat(uthentet.hendelser).satisfiesExactly(
+            {
+                assertThat(it.tidspunkt).isCloseTo(
+                    LocalDateTime.now(clock),
+                    within(500, ChronoUnit.MILLIS)
+                )
+            },
+        )
     }
 
     @Test

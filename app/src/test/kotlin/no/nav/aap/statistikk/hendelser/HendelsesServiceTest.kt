@@ -63,6 +63,7 @@ class HendelsesServiceTest {
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
                 bigQueryRepository = bqRepositorySak,
                 skjermingService = skjermingService,
+                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
                 clock = clock
             )
         )
@@ -162,6 +163,7 @@ class HendelsesServiceTest {
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
                 bigQueryRepository = bqRepositorySak,
                 skjermingService = skjermingService,
+                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
                 clock = clock
             )
         )
@@ -230,6 +232,7 @@ class HendelsesServiceTest {
                 bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
                 bigQueryRepository = bqSakRepository,
                 skjermingService = skjermingService,
+                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
                 clock = clock
             )
         )

@@ -29,32 +29,34 @@ class SakTabellTest {
         val registrertTid = LocalDateTime.now().minusDays(1).plusHours(1)
             .truncatedTo(ChronoUnit.SECONDS)
         val endretTid = LocalDateTime.now()
+        val sakYtelse = "AAP"
 
         val tekniskTid = LocalDateTime.now()
         client.insert(
             sakTabell, BQBehandling(
-                saksnummer = "123",
-                behandlingUUID = referanse.toString(),
-                tekniskTid = tekniskTid,
-                behandlingType = TypeBehandling.Revurdering.toString().uppercase(),
-                avsender = KELVIN,
-                verson = "versjon",
+                fagsystemNavn = "Kelvin",
                 sekvensNummer = 0L,
-                aktorId = "123456",
-                mottattTid = mottattTid,
-                registrertTid = registrertTid,
-                endretTid = endretTid,
-                opprettetAv = KELVIN,
-                saksbehandler = "1234",
-                søknadsFormat = SøknadsFormat.DIGITAL,
-                behandlingMetode = BehandlingMetode.MANUELL,
+                behandlingUUID = referanse.toString(),
                 relatertBehandlingUUID = "123",
                 relatertFagsystem = "Kelvin",
-                fagsystemNavn = "Kelvin",
+                behandlingType = TypeBehandling.Revurdering.toString().uppercase(),
+                aktorId = "123456",
+                saksnummer = "123",
+                tekniskTid = tekniskTid,
+                registrertTid = registrertTid,
+                endretTid = endretTid,
+                verson = "versjon",
+                avsender = KELVIN,
+                mottattTid = mottattTid,
+                opprettetAv = KELVIN,
                 ansvarligBeslutter = "Z1234",
+                søknadsFormat = SøknadsFormat.DIGITAL,
+                saksbehandler = "1234",
+                behandlingMetode = BehandlingMetode.MANUELL,
                 behandlingStatus = "UNDER_BEHANDLING",
                 behandlingÅrsak = ÅrsakTilBehandling.SØKNAD.toString(),
-                ansvarligEnhetKode = "1337"
+                ansvarligEnhetKode = "1337",
+                sakYtelse = sakYtelse
             )
         )
 
@@ -86,5 +88,6 @@ class SakTabellTest {
         assertThat(uthentetInnslag.ansvarligBeslutter).isEqualTo("Z1234")
         assertThat(uthentetInnslag.behandlingStatus).isEqualTo("UNDER_BEHANDLING")
         assertThat(uthentetInnslag.ansvarligEnhetKode).isEqualTo("1337")
+        assertThat(uthentetInnslag.sakYtelse).isEqualTo("AAP")
     }
 }

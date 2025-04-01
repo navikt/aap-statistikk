@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.KELVIN
+import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -9,12 +10,12 @@ import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
-import no.nav.aap.statistikk.sak.Sak
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 private val logger = LoggerFactory.getLogger(SaksStatistikkService::class.java)
 
@@ -22,6 +23,7 @@ private const val NAY_NASJONAL_KØ_KODE = "4491"
 
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
+    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
     private val bigQueryRepository: IBQSakstatistikkRepository,
     private val skjermingService: SkjermingService,
@@ -45,44 +47,68 @@ class SaksStatistikkService(
         val sekvensNummer =
             bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
+        val annenNaySjekk = behandling.gjeldendeAvklaringsBehov?.let { erHosNayNy(it) }
         val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
+
+        val behandlingReferanse = behandling.referanse
+        if (annenNaySjekk != null && erHosNAY != annenNaySjekk) {
+            logger.info("De to NAY-sjekkene er inkonsistente. Behandling-ref: $behandlingReferanse")
+        }
 
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
 
+        val sakYtelse = regnUtSakYtelse(behandlingReferanse)
+
         // TODO - kun om endring siden sist. somehow!?
         val bqSak = BQBehandling(
             sekvensNummer = sekvensNummer,
-            saksnummer = sak.saksnummer,
-            behandlingUUID = behandling.referanse.toString(),
-            behandlingType = behandling.typeBehandling.toString().uppercase(),
-            tekniskTid = LocalDateTime.now(clock),
-            avsender = KELVIN,
-            verson = versjon,
-            aktorId = sak.person.ident,
-            mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-            registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
+            behandlingUUID = behandlingReferanse.toString(),
             relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
             relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
             ferdigbehandletTid = if (behandling.status == BehandlingStatus.AVSLUTTET) hendelsesTidspunkt.truncatedTo(
                 ChronoUnit.SECONDS
             ) else null,
+            behandlingType = behandling.typeBehandling.toString().uppercase(),
+            aktorId = sak.person.ident,
+            saksnummer = sak.saksnummer,
+            tekniskTid = LocalDateTime.now(clock),
+            registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             endretTid = hendelsesTidspunkt,
-            ansvarligBeslutter = if (erSkjermet && behandling.ansvarligBeslutter !== null) "-5" else behandling.ansvarligBeslutter,
+            verson = versjon,
+            avsender = KELVIN,
+            mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             opprettetAv = KELVIN,
-            saksbehandler = saksbehandler,
+            ansvarligBeslutter = if (erSkjermet && behandling.ansvarligBeslutter !== null) "-5" else behandling.ansvarligBeslutter,
             vedtakTid = behandling.vedtakstidspunkt?.truncatedTo(ChronoUnit.SECONDS),
             søknadsFormat = behandling.søknadsformat,
+            saksbehandler = saksbehandler,
             behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
             behandlingStatus = behandlingStatus(behandling),
             behandlingÅrsak = behandling.årsaker.joinToString(","),
-            ansvarligEnhetKode = ansvarligEnhet
+            ansvarligEnhetKode = ansvarligEnhet,
+            sakYtelse = sakYtelse
         )
 
         if (behandling.årsaker.size > 1) {
-            logger.warn("Behandling med referanse ${behandling.referanse} hadde mer enn én årsak. Avgir den første.")
+            logger.warn("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
         }
         bigQueryRepository.lagre(bqSak)
+    }
+
+    private fun regnUtSakYtelse(
+        behandlingReferanse: UUID
+    ): String {
+        val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
+        return if (rettighetstyper.isEmpty()) {
+            "AAP"
+        } else {
+            if (rettighetstyper.size > 1) {
+                logger.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
+            }
+            val førsteRettighetstype = rettighetstyper.first().rettighetstype.name.lowercase()
+            "AAP_$førsteRettighetstype"
+        }
     }
 
     private fun ansvarligEnhet(

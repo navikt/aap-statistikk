@@ -126,6 +126,7 @@ class ProduksjonsstyringRepositoryTest {
                     bigQueryKvitteringRepository = BigQueryKvitteringRepository(conn),
                     bigQueryRepository = bqRepositorySak,
                     skjermingService = skjermingService,
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
                 )
             )
 

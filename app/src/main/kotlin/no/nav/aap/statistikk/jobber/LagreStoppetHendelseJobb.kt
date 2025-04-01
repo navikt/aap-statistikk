@@ -57,6 +57,7 @@ class LagreStoppetHendelseJobb(
                 bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
                 bigQueryRepository = bqSakstatikk,
                 skjermingService = skjermingService,
+                rettighetstypeperiodeRepository = rettighetstypeperiodeRepository(connection),
             ),
         )
         return LagreStoppetHendelseJobbUtfører(

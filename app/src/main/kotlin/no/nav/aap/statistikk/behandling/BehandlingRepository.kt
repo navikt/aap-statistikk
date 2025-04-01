@@ -136,8 +136,9 @@ WHERE ident = ?""", behandling.relaterteIdenter
     }
 
     override fun hent(referanse: UUID): Behandling? {
-        return dbConnection.queryFirstOrNull(
-            """SELECT b.id                         as b_id,
+        val behandling = dbConnection.queryFirstOrNull(
+            """
+SELECT b.id                         as b_id,
        b.referanse_id               as b_referanse,
        b.type                       as b_type,
        b.opprettet_tid              as b_opprettet_tid,
@@ -193,9 +194,25 @@ WHERE br.referanse = ?"""
                 mapBehandling(it)
             }
         }
+
+        val historikk: List<BehandlingHendelse>? = if (behandling != null) {
+            val historikkSpørring = """
+            select bh.oppdatert_tid as bh_opprettet_tidspunkt from behandling_historikk bh where bh.behandling_id = ? order by bh.oppdatert_tid desc 
+        """.trimIndent()
+
+            dbConnection.queryList(historikkSpørring) {
+                setParams { setLong(1, behandling.id!!) }
+                setRowMapper { BehandlingHendelse(tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt")) }
+            }
+        } else null
+
+
+
+        return behandling?.copy(hendelser = historikk.orEmpty())
     }
 
-    private val hentMedId = """SELECT b.id                         as b_id,
+    private val hentMedId = """
+SELECT b.id                         as b_id,
        br.referanse                 as br_referanse,
        b.type                       as b_type,
        b.opprettet_tid              as b_opprettet_tid,
