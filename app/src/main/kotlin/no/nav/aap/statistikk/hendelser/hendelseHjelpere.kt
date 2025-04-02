@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
+import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.tilgang.Rolle
 import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
@@ -101,14 +102,19 @@ fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
     }
 }
 
-fun erHosNayNy(avklaringsbehovKode: String): Boolean {
-    val definisjon = Definisjon.forKode(avklaringsbehovKode)
-    return definisjon.løsesAv.all {
-        it in listOf(
-            Rolle.SAKSBEHANDLER_NASJONAL,
-            Rolle.BESLUTTER,
-        )
-    }
+fun erHosNayNy(hendelser: List<BehandlingHendelse>): Boolean {
+    return hendelser
+            .filterNot { it.avklaringsBehov == null || Definisjon.forKode(it.avklaringsBehov).løsesAv.size > 1 }
+            .maxByOrNull { it.tidspunkt }
+            ?.let {
+                Definisjon.forKode(requireNotNull(it.avklaringsBehov)).løsesAv.all { rolle ->
+                    rolle in listOf(
+                        Rolle.SAKSBEHANDLER_NASJONAL,
+                        Rolle.BESLUTTER
+                    )
+                }
+            } ?: true
+
 }
 
 fun <T> List<T>.only(): T {

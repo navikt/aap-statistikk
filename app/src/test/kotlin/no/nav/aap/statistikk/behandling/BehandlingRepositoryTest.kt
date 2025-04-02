@@ -69,7 +69,8 @@ class BehandlingRepositoryTest {
                     gjeldendeAvklaringsBehov = "0559",
                     venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
                     gjeldendeStegGruppe = StegGruppe.BREV,
-                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
+                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING),
+                    sisteSaksbehandler = "Joark Jorgensen"
                 )
             )
         }
@@ -97,6 +98,7 @@ class BehandlingRepositoryTest {
                     LocalDateTime.now(clock),
                     within(500, ChronoUnit.MILLIS)
                 )
+                assertThat(it.saksbehandler?.ident).isEqualTo("Joark Jorgensen")
             },
         )
     }

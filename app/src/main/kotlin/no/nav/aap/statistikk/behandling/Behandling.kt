@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.oppgave.Enhet
+import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.sak.Sak
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -53,6 +54,8 @@ data class Behandling(
 
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime,
+    val avklaringsBehov: String? = null,
+    val saksbehandler: Saksbehandler? = null
 )
 
 enum class SøknadsFormat {
