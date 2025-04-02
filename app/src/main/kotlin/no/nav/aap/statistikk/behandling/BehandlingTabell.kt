@@ -4,15 +4,20 @@ import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BQTable
+import no.nav.aap.utbetaling.helved.toBase64
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 
+/**
+ * @param utbetalingId Base64-enkodet versjon av [referanse].
+ */
 data class BQYtelseBehandling(
     val saksnummer: String,
     val referanse: UUID,
+    val utbetalingId: String,
     val brukerFnr: String,
     val behandlingsType: TypeBehandling,
     val datoAvsluttet: LocalDateTime,
@@ -35,9 +40,10 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val saksnummer = Field.newBuilder("saksnummer", StandardSQLTypeName.STRING)
                 .setDescription("Saksnummer. Ikke-null.")
                 .build()
-            val behandlingsreferanse = Field.newBuilder("behandlingsreferanse", StandardSQLTypeName.STRING)
-                .setDescription("Behandlingsreferanse. Unik innenfor sak. Ikke-null.")
-                .build()
+            val behandlingsreferanse =
+                Field.newBuilder("behandlingsreferanse", StandardSQLTypeName.STRING)
+                    .setDescription("Behandlingsreferanse. Unik innenfor sak. Ikke-null.")
+                    .build()
             val brukerFnr = Field.newBuilder("brukerFnr", StandardSQLTypeName.STRING)
                 .setDescription("Fødselsnummer. Ikke-null").build()
             val behandlingsType = Field.newBuilder("behandlingsType", StandardSQLTypeName.STRING)
@@ -79,6 +85,10 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val radEndret = Field.newBuilder("radEndret", StandardSQLTypeName.DATETIME)
                 .setDescription("Tidspunkt for siste endring på denne raden.").build()
 
+            val utbetalingId = Field.newBuilder("utbetalingId", StandardSQLTypeName.STRING)
+                .setDescription("Base64-encodet verdi av 'behandlingsreferanse'. Det er denne som sendes til UR.")
+                .build()
+
             return Schema.of(
                 saksnummer,
                 behandlingsreferanse,
@@ -89,7 +99,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 diagnosekode,
                 bidiagnoser,
                 rettighetstypePeriode,
-                radEndret
+                radEndret,
+                utbetalingId
             )
         }
 
@@ -104,6 +115,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         val bidiagnoser =
             fieldValueList.get("bidiagnoser").repeatedValue.map { it.recordValue[0].stringValue }
         val radEndret = LocalDateTime.parse(fieldValueList.get("radEndret").stringValue)
+        val utbetalingId = fieldValueList.get("utbetalingId").stringValue
 
         val rettighetstypePerioder = fieldValueList.get("rettighetstypePerioder").repeatedValue
             .map {
@@ -117,14 +129,15 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         return BQYtelseBehandling(
             saksnummer = saksnummer,
             referanse = UUID.fromString(referanse),
-            brukerFnr,
+            brukerFnr = brukerFnr,
             behandlingsType = behandlingsType.let { TypeBehandling.valueOf(it) },
             datoAvsluttet = datoAvsluttet,
             kodeverk = kodeverk,
             diagnosekode = diagnosekode,
             bidiagnoser = bidiagnoser,
             rettighetsPerioder = rettighetstypePerioder,
-            radEndret = radEndret
+            radEndret = radEndret,
+            utbetalingId = utbetalingId,
         )
     }
 
@@ -152,7 +165,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                     )
                 },
                 "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "utbetalingId" to value.referanse.toBase64()
             )
         )
     }

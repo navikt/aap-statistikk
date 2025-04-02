@@ -20,10 +20,12 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.*
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
+import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.*
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
@@ -150,7 +152,8 @@ class AvsluttetBehandlingServiceTest {
                     )
                 ),
                 radEndret = LocalDateTime.now(clock)
-                    .truncatedTo(java.time.temporal.ChronoUnit.MILLIS),
+                    .truncatedTo(ChronoUnit.MILLIS),
+                utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64()
             )
         )
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
