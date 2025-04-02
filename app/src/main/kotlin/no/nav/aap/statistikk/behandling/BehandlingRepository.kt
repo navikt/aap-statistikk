@@ -193,22 +193,11 @@ WHERE br.referanse = ?"""
             setRowMapper {
                 mapBehandling(it)
             }
+        }?.let { behandling ->
+            behandling.copy(hendelser = hentBehandlingHistorikk(behandling))
         }
 
-        val historikk: List<BehandlingHendelse>? = if (behandling != null) {
-            val historikkSpørring = """
-            select bh.oppdatert_tid as bh_opprettet_tidspunkt from behandling_historikk bh where bh.behandling_id = ? order by bh.oppdatert_tid desc 
-        """.trimIndent()
-
-            dbConnection.queryList(historikkSpørring) {
-                setParams { setLong(1, behandling.id!!) }
-                setRowMapper { BehandlingHendelse(tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt")) }
-            }
-        } else null
-
-
-
-        return behandling?.copy(hendelser = historikk.orEmpty())
+        return behandling
     }
 
     private val hentMedId = """
@@ -261,7 +250,7 @@ FROM behandling b
 WHERE b.id = ?"""
 
     override fun hent(id: Long): Behandling {
-        return dbConnection.queryFirst(
+        val behandling = dbConnection.queryFirst(
             hentMedId
         ) {
             setParams {
@@ -270,8 +259,24 @@ WHERE b.id = ?"""
             setRowMapper {
                 mapBehandling(it)
             }
+        }.let {
+            it.copy(hendelser = hentBehandlingHistorikk(it))
         }
+
+        return behandling
     }
+
+    private fun hentBehandlingHistorikk(behandling: Behandling): List<BehandlingHendelse> =
+        run {
+            val historikkSpørring = """
+                    select bh.oppdatert_tid as bh_opprettet_tidspunkt from behandling_historikk bh where bh.behandling_id = ? order by bh.oppdatert_tid desc 
+                """.trimIndent()
+
+            dbConnection.queryList(historikkSpørring) {
+                setParams { setLong(1, behandling.id!!) }
+                setRowMapper { BehandlingHendelse(tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt")) }
+            }
+        }
 
     override fun hentEllerNull(id: Long): Behandling? {
         return dbConnection.queryFirstOrNull(hentMedId) {

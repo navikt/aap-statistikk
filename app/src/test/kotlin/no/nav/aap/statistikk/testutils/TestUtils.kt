@@ -390,13 +390,25 @@ class FakeBehandlingRepository : IBehandlingRepository {
     private var nextId = 0L;
     override fun opprettBehandling(behandling: Behandling): Long {
         val id = nextId
-        behandlinger[id] = behandling.copy(id = id)
+        behandlinger[id] = behandling.copy(id = id).leggTilHendelse(
+            BehandlingHendelse(
+                tidspunkt = LocalDateTime.now()
+            )
+        )
         nextId++
         return id
     }
 
     override fun oppdaterBehandling(behandling: Behandling) {
-        behandlinger[behandling.id!!] = behandling
+        behandlinger[behandling.id!!] = behandling.leggTilHendelse(
+            BehandlingHendelse(
+                tidspunkt = LocalDateTime.now()
+            )
+        )
+    }
+
+    private fun Behandling.leggTilHendelse(hendelse: BehandlingHendelse): Behandling {
+        return copy(hendelser = this.hendelser + hendelse)
     }
 
     override fun hent(referanse: UUID): Behandling? {

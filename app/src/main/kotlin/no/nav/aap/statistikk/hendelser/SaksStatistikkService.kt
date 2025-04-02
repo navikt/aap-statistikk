@@ -31,7 +31,6 @@ class SaksStatistikkService(
 ) {
     fun lagreSakInfoTilBigquery(
         behandlingId: Long,
-        hendelsesTidspunkt: LocalDateTime,
         erManuell: Boolean,
         erHosNAY: Boolean
     ) {
@@ -59,6 +58,9 @@ class SaksStatistikkService(
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
 
         val sakYtelse = regnUtSakYtelse(behandlingReferanse)
+
+        val behandlingHendelse = behandling.hendelser.last()
+        val hendelsesTidspunkt = behandlingHendelse.tidspunkt
 
         // TODO - kun om endring siden sist. somehow!?
         val bqSak = BQBehandling(

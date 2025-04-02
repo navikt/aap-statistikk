@@ -50,7 +50,6 @@ class HendelsesService(
 
         sakStatistikkService.lagreSakInfoTilBigquery(
             behandlingId,
-            hendelse.hendelsesTidspunkt,
             // Bør nok modellere historikk på behandling-objektet bedre...
             erManuell = hendelse.avklaringsbehov.erManuell(),
             erHosNAY = erHosNAY
