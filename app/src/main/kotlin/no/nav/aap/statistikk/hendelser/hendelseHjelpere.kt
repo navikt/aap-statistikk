@@ -81,6 +81,9 @@ fun List<AvklaringsbehovHendelseDto>.erManuell(): Boolean {
     return this.any { !it.avklaringsbehovDefinisjon.erAutomatisk() }
 }
 
+fun List<BehandlingHendelse>.erManuell(): Boolean {
+    return this.any { !it.avklaringsBehov.isNullOrBlank() && !Definisjon.forKode(it.avklaringsBehov).erAutomatisk() }
+}
 /**
  * Vi utleder at behandlingen er hos NAY om gjeldende avklaringsbehov er et avklaringsbehov som løses av en [no.nav.aap.tilgang.Rolle.SAKSBEHANDLER_OPPFOLGING].
  * Om dette ikke er unikt, se på forrige avklaringsbehov.

@@ -46,20 +46,23 @@ class SaksStatistikkService(
         val sekvensNummer =
             bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
-        val annenNaySjekk = behandling.gjeldendeAvklaringsBehov?.let { erHosNayNy(behandling.hendelser) }
+        val hendelser = behandling.hendelser
+        val annenNaySjekk =
+            behandling.gjeldendeAvklaringsBehov?.let { erHosNayNy(hendelser) }
         val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
 
         val behandlingReferanse = behandling.referanse
         if (annenNaySjekk != null && erHosNAY != annenNaySjekk) {
             logger.info("De to NAY-sjekkene er inkonsistente. Behandling-ref: $behandlingReferanse")
         }
+        logger.info("Er manuell-sjekk gammel: $erManuell. Ny: ${hendelser.erManuell()}. Forskjell: ${erManuell != hendelser.erManuell()}")
 
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
 
         val sakYtelse = regnUtSakYtelse(behandlingReferanse)
 
-        val behandlingHendelse = behandling.hendelser.last()
+        val behandlingHendelse = hendelser.last()
         val hendelsesTidspunkt = behandlingHendelse.tidspunkt
 
         // TODO - kun om endring siden sist. somehow!?
