@@ -46,7 +46,7 @@ class SaksStatistikkService(
         val sekvensNummer =
             bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
-        val annenNaySjekk = behandling.gjeldendeAvklaringsBehov?.let { erHosNayNy(it) }
+        val annenNaySjekk = behandling.gjeldendeAvklaringsBehov?.let { erHosNayNy(behandling.hendelser) }
         val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
 
         val behandlingReferanse = behandling.referanse
@@ -80,6 +80,7 @@ class SaksStatistikkService(
             verson = versjon,
             avsender = KELVIN,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
+            // TODO: ved manuell revurdering må oppretetAv settes til saksbehandler som opprettet manuell revurdering
             opprettetAv = KELVIN,
             ansvarligBeslutter = if (erSkjermet && behandling.ansvarligBeslutter !== null) "-5" else behandling.ansvarligBeslutter,
             vedtakTid = behandling.vedtakstidspunkt?.truncatedTo(ChronoUnit.SECONDS),

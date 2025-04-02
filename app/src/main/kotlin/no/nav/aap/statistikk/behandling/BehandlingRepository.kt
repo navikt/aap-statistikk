@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.statistikk.oppgave.Enhet
+import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import java.time.Clock
@@ -269,12 +270,28 @@ WHERE b.id = ?"""
     private fun hentBehandlingHistorikk(behandling: Behandling): List<BehandlingHendelse> =
         run {
             val historikkSpørring = """
-                    select bh.oppdatert_tid as bh_opprettet_tidspunkt from behandling_historikk bh where bh.behandling_id = ? order by bh.oppdatert_tid desc 
+                    select bh.siste_saksbehandler       as bh_siste_saksbehandler,
+                           bh.oppdatert_tid             as bh_opprettet_tidspunkt,
+                           bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov
+                    from behandling_historikk bh
+                    where bh.behandling_id = ?
+                    order by bh.oppdatert_tid desc 
                 """.trimIndent()
 
             dbConnection.queryList(historikkSpørring) {
                 setParams { setLong(1, behandling.id!!) }
-                setRowMapper { BehandlingHendelse(tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt")) }
+                setRowMapper {
+                    BehandlingHendelse(
+                        tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),
+                        avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov"),
+                        saksbehandler = it.getStringOrNull("bh_siste_saksbehandler")
+                            ?.let { saksbehandler ->
+                                Saksbehandler(
+                                    ident = saksbehandler
+                                )
+                            }
+                    )
+                }
             }
         }
 
