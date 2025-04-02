@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
+import no.nav.aap.utbetaling.helved.toBase64
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
@@ -95,6 +96,7 @@ class AvsluttetBehandlingService(
             BQYtelseBehandling(
                 saksnummer = behandling.sak.saksnummer,
                 referanse = avsluttetBehandling.behandlingsReferanse,
+                utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64(),
                 brukerFnr = behandling.sak.person.ident,
                 behandlingsType = behandling.typeBehandling,
                 datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt,

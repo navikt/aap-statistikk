@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.schemaRegistry
+import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
@@ -47,7 +48,8 @@ class BehandlingTabellTest {
                 diagnosekode = "PEST",
                 bidiagnoser = listOf("KOLERA", "BOLIGSKADE"),
                 radEndret = LocalDateTime.now(),
-                rettighetsPerioder = rettighetsPerioder
+                rettighetsPerioder = rettighetsPerioder,
+                utbetalingId = referanse.toBase64()
             )
         )
 
@@ -66,5 +68,6 @@ class BehandlingTabellTest {
         assertThat(read.first().diagnosekode).isEqualTo("PEST")
         assertThat(read.first().bidiagnoser).isEqualTo(listOf("KOLERA", "BOLIGSKADE"))
         assertThat(read.first().rettighetsPerioder).isEqualTo(rettighetsPerioder)
+        assertThat(read.first().utbetalingId).isEqualTo(referanse.toBase64())
     }
 }

@@ -77,10 +77,12 @@ fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
 /**
  * Eneste automatiske avklaringsbehov er 9002, "Bestille brev".
  */
+@JvmName("erAutomatisk9002")
 fun List<AvklaringsbehovHendelseDto>.erManuell(): Boolean {
     return this.any { !it.avklaringsbehovDefinisjon.erAutomatisk() }
 }
 
+@JvmName("erAutomatisk")
 fun List<BehandlingHendelse>.erManuell(): Boolean {
     return this.any { !it.avklaringsBehov.isNullOrBlank() && !Definisjon.forKode(it.avklaringsBehov).erAutomatisk() }
 }

@@ -16,6 +16,7 @@ val flywayVersion = "11.5.0"
 val oppgaveVersjon = "0.0.55"
 val testContainersVersion = "1.20.6"
 val postmottakVersjon = "0.0.70"
+val utbetalVersjon = "0.0.31"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -64,6 +65,7 @@ dependencies {
 
     implementation("no.nav.aap.oppgave:api-kontrakt:$oppgaveVersjon")
     implementation("no.nav.aap.postmottak:kontrakt:$postmottakVersjon")
+    implementation("no.nav.aap.utbetal:api-kontrakt:$utbetalVersjon")
 
     implementation("com.google.cloud:google-cloud-bigquery:2.49.0")
 
