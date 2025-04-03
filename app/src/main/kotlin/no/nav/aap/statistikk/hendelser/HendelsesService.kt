@@ -46,14 +46,9 @@ class HendelsesService(
             )
         }
 
-        val erHosNAY = hendelse.avklaringsbehov.hosNAY()
+        // TODO: gjør denne til en jobb
+        sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
 
-        sakStatistikkService.lagreSakInfoTilBigquery(
-            behandlingId,
-            // Bør nok modellere historikk på behandling-objektet bedre...
-            erManuell = hendelse.avklaringsbehov.erManuell(),
-            erHosNAY = erHosNAY
-        )
         meterRegistry.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
     }
@@ -97,7 +92,7 @@ class HendelsesService(
         } else {
             val id =
                 behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
-            logger.info("Opprettet behandling")
+            logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
             meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()).increment()
             id
         }

@@ -39,11 +39,6 @@ class HendelseHjelpereKtTest {
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isEqualTo("Z99400")
     }
 
-    @Test
-    fun `komplisert eksempel`() {
-        assertThat(medflere.hosNAY()).isTrue()
-    }
-
 
     @Test
     fun `om behandlingen nettopp er opprettet, er det ingen menneskelige saksbehandlere`() {
@@ -122,31 +117,6 @@ class HendelseHjelpereKtTest {
             )
 
         assertThat(input.utledÅrsakTilSattPåVent()).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
-    }
-
-    @Test
-    fun `kvalitetssikrer hos lokalkontor`() {
-        assertThat(sattPåVentPåKvalitetssikringNAYSteg.hosNAY()).isFalse()
-    }
-
-    @Test
-    fun `er ikke hos NAY, men sykdomssteget`() {
-        val hosSykdomsSteget = listOf(
-            AvklaringsbehovHendelseDto(
-                avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
-                status = EndringStatus.OPPRETTET,
-                endringer = listOf(
-                    EndringDTO(
-                        status = EndringStatus.OPPRETTET,
-                        tidsstempel = LocalDateTime.parse("2024-10-18T10:42:07.925"),
-                        frist = null,
-                        endretAv = "Kelvin"
-                    )
-                )
-            )
-        )
-
-        assertThat(hosSykdomsSteget.hosNAY()).isFalse()
     }
 }
 

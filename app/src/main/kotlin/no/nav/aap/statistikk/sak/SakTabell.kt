@@ -242,7 +242,7 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingÅrsak = fieldValueList.get("behandlingAarsak").stringValue
 
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
-        val ansvarligEnhet = fieldValueList.get("ansvarligEnhet").stringValue
+        val ansvarligEnhet =  if (!fieldValueList.get("ansvarligEnhet").isNull) fieldValueList.get("ansvarligEnhet").stringValue else null
         val sakYtelse = fieldValueList.get("sakYtelse").stringValue
 
         return BQBehandling(

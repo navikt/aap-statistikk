@@ -29,11 +29,8 @@ class SaksStatistikkService(
     private val skjermingService: SkjermingService,
     private val clock: Clock = systemDefaultZone()
 ) {
-    fun lagreSakInfoTilBigquery(
-        behandlingId: Long,
-        erManuell: Boolean,
-        erHosNAY: Boolean
-    ) {
+    fun lagreSakInfoTilBigquery(behandlingId: Long) {
+
         val behandling = behandlingRepository.hent(behandlingId)
         val erSkjermet = skjermingService.erSkjermet(behandling)
         val saksbehandler =
@@ -47,15 +44,12 @@ class SaksStatistikkService(
             bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
         val hendelser = behandling.hendelser
-        val annenNaySjekk =
-            behandling.gjeldendeAvklaringsBehov?.let { erHosNayNy(hendelser) }
+        val erHosNAY = erHosNayNy(hendelser)
         val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
 
         val behandlingReferanse = behandling.referanse
-        if (annenNaySjekk != null && erHosNAY != annenNaySjekk) {
-            logger.info("De to NAY-sjekkene er inkonsistente. Behandling-ref: $behandlingReferanse")
-        }
-        logger.info("Er manuell-sjekk gammel: $erManuell. Ny: ${hendelser.erManuell()}. Forskjell: ${erManuell != hendelser.erManuell()}")
+
+        val erManuell = hendelser.erManuell()
 
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
@@ -83,7 +77,7 @@ class SaksStatistikkService(
             verson = versjon,
             avsender = KELVIN,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-            // TODO: ved manuell revurdering må oppretetAv settes til saksbehandler som opprettet manuell revurdering
+            // TODO: ved manuell revurdering må opprettetAv settes til saksbehandler som opprettet manuell revurdering
             opprettetAv = KELVIN,
             ansvarligBeslutter = if (erSkjermet && behandling.ansvarligBeslutter !== null) "-5" else behandling.ansvarligBeslutter,
             vedtakTid = behandling.vedtakstidspunkt?.truncatedTo(ChronoUnit.SECONDS),

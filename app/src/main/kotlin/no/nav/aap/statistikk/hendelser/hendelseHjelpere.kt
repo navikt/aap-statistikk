@@ -86,26 +86,6 @@ fun List<AvklaringsbehovHendelseDto>.erManuell(): Boolean {
 fun List<BehandlingHendelse>.erManuell(): Boolean {
     return this.any { !it.avklaringsBehov.isNullOrBlank() && !Definisjon.forKode(it.avklaringsBehov).erAutomatisk() }
 }
-/**
- * Vi utleder at behandlingen er hos NAY om gjeldende avklaringsbehov er et avklaringsbehov som løses av en [no.nav.aap.tilgang.Rolle.SAKSBEHANDLER_OPPFOLGING].
- * Om dette ikke er unikt, se på forrige avklaringsbehov.
- */
-fun List<AvklaringsbehovHendelseDto>.hosNAY(): Boolean {
-    val nyesteAvklaringsbehov =
-        this.filterNot { it.avklaringsbehovDefinisjon.løsesAv.size > 1 }.maxByOrNull {
-            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
-        }
-
-    // Helautomatiske behandlinger velges å skje hos NAY
-    if (nyesteAvklaringsbehov == null) return true
-
-    return nyesteAvklaringsbehov.avklaringsbehovDefinisjon.løsesAv.all {
-        it in listOf(
-            Rolle.SAKSBEHANDLER_NASJONAL,
-            Rolle.BESLUTTER,
-        )
-    }
-}
 
 fun erHosNayNy(hendelser: List<BehandlingHendelse>): Boolean {
     return hendelser

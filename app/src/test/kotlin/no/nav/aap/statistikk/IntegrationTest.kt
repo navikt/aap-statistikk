@@ -9,6 +9,7 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
@@ -44,6 +45,7 @@ class IntegrationTest {
 
         val bigQueryClient = bigQueryClient(config)
 
+        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
         testKlientNoInjection(
             dbConfig,
             pdlConfig = pdlConfig,
@@ -55,13 +57,19 @@ class IntegrationTest {
                 PostRequest(hendelse)
             )
 
-            ventPåSvar(
+            testUtil.ventPåSvar()
+            val behandling = ventPåSvar(
                 { dataSource.transaction { BehandlingRepository(it).hent(behandlingReferanse) } },
                 { it != null }
             )
+            assertThat(behandling).isNotNull
 
-            val bqSaker = ventPåSvar({ bigQueryClient.read(SakTabell()) },
+            testUtil.ventPåSvar()
+            val bqSaker = ventPåSvar(
+                { bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() })
+            assertThat(bqSaker).isNotNull
+            assertThat(bqSaker).hasSize(1)
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
             client.post<StoppetBehandling, Any>(
@@ -75,7 +83,8 @@ class IntegrationTest {
             )
 
             // Sekvensnummer økes med 1 med ny info på sak
-            val bqSaker2 = ventPåSvar({ bigQueryClient.read(SakTabell()) },
+            val bqSaker2 = ventPåSvar(
+                { bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() && t.size > 1 })
             assertThat(bqSaker2!![1].sekvensNummer).isEqualTo(2)
 
@@ -90,7 +99,8 @@ class IntegrationTest {
             assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
             assertThat(vilkårsVurderingRad.saksnummer).isEqualTo(saksnummer)
 
-            val sakRespons = ventPåSvar({ bigQueryClient.read(SakTabell()) },
+            val sakRespons = ventPåSvar(
+                { bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() })
 
             assertThat(sakRespons).hasSize(2)

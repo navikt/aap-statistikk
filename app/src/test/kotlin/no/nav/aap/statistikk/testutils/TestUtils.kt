@@ -539,20 +539,24 @@ class FakePdlClient(val identerHemmelig: Map<String, Boolean> = emptyMap()) : Pd
 fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
     var res: E? = null;
     val timeInMillis = measureTimeMillis {
-        val maxTid = LocalDateTime.now().plusSeconds(20)
+        val maxTid = LocalDateTime.now().plusSeconds(10)
         var suksess = false;
         while (maxTid.isAfter(LocalDateTime.now()) && !suksess) {
             try {
                 res = getter()
                 if (res != null && predicate(res)) {
+                    println("!!!!!")
                     suksess = true
                 }
-            } catch (e: Exception) {
+            } finally {
                 Thread.sleep(50L)
             }
         }
     }
-    logger.info("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder.")
+    logger.info("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder. Res null: ${res == null}")
+    if (res == null) {
+        logger.info("Ventet på svar, men svaret er null.")
+    }
     return res
 }
 
