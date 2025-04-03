@@ -71,6 +71,7 @@ dependencies {
 
 
     testImplementation(kotlin("test"))
+    testImplementation("no.nav.aap.kelvin:motor-test-utils:$komponenterVersjon")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("com.nimbusds:nimbus-jose-jwt:10.0.2")
     testImplementation("io.mockk:mockk:${mockkVersion}")

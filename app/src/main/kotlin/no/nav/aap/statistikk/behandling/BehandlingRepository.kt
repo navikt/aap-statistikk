@@ -197,7 +197,6 @@ WHERE br.referanse = ?"""
         }?.let { behandling ->
             behandling.copy(hendelser = hentBehandlingHistorikk(behandling))
         }
-
         return behandling
     }
 
