@@ -87,7 +87,9 @@ class MottaStatistikkTest {
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
                 jobbAppender = jobbAppender,
-            ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
+            ),
+            LagreOppgaveHendelseJobb(meterRegistry, jobbAppender),
+            LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(
@@ -209,6 +211,7 @@ class MottaStatistikkTest {
 
         val skjermingService = SkjermingService(FakePdlClient())
 
+        val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
             bqRepositoryYtelse,
             meterRegistry,
@@ -220,10 +223,10 @@ class MottaStatistikkTest {
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             personService = { PersonService(PersonRepository(it)) },
             skjermingService = skjermingService,
-            jobbAppender = MockJobbAppender()
+            jobbAppender = jobbAppender1
         )
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
@@ -380,6 +383,7 @@ class MottaStatistikkTest {
 
         val skjermingService = SkjermingService(FakePdlClient())
 
+        val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
             bqRepositoryYtelse,
             meterRegistry,
@@ -391,10 +395,10 @@ class MottaStatistikkTest {
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             personService = { PersonService(PersonRepository(it)) },
             skjermingService = skjermingService,
-            jobbAppender = MockJobbAppender()
+            jobbAppender = jobbAppender1
         )
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
@@ -492,6 +496,7 @@ class MottaStatistikkTest {
 
         val skjermingService = SkjermingService(FakePdlClient())
 
+        val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
             bqRepositoryYtelse,
             meterRegistry,
@@ -503,10 +508,10 @@ class MottaStatistikkTest {
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             personService = { PersonService(PersonRepository(it)) },
             skjermingService = skjermingService,
-            jobbAppender = MockJobbAppender()
+            jobbAppender = jobbAppender1
         )
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(

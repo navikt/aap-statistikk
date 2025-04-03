@@ -49,7 +49,7 @@ class ApplicationTest {
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
                 jobbAppender = mockk()
-            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry),
+            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, mockk()),
             lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             @Language("JSON") val body = """{
@@ -169,7 +169,9 @@ class ApplicationTest {
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
                 jobbAppender = mockk()
-            ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
+            ),
+            LagreOppgaveHendelseJobb(meterRegistry, mockk()),
+            LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(

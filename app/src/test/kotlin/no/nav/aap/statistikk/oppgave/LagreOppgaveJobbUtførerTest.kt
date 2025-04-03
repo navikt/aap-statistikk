@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.oppgave
 
+import io.mockk.*
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.*
@@ -11,6 +12,7 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
+import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -47,14 +49,25 @@ class LagreOppgaveJobbUtførerTest {
             )
         }
 
+        val lagreSakInfotilBigQueryCallback = mockk<(BehandlingId) -> Unit>()
+        every { lagreSakInfotilBigQueryCallback.invoke(any()) } just runs
+
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
                 personService = PersonService(PersonRepository(it)),
                 oppgaveRepository = OppgaveRepository(it),
                 enhetRepository = EnhetRepository(it),
-                saksbehandlerRepository = SaksbehandlerRepository(it)
-            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveId.toString()))
+                saksbehandlerRepository = SaksbehandlerRepository(it),
+                BehandlingRepository(it),
+                lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
+            ).utfør(
+                JobbInput(
+                    LagreOppgaveJobb(
+                        jobbAppender = MockJobbAppender()
+                    )
+                ).medPayload(oppgaveId.toString())
+            )
         }
 
         val oppgaverPåBehandling = dataSource.transaction {
@@ -68,6 +81,9 @@ class LagreOppgaveJobbUtførerTest {
         assertThat(førsteOppgave.person?.id()).isNotNull
 
         assertThat(førsteOppgave.reservasjon).isNotNull
+
+        verify { lagreSakInfotilBigQueryCallback.invoke(behandling.id!!) }
+        checkUnnecessaryStub(lagreSakInfotilBigQueryCallback)
     }
 
     @Test
@@ -236,14 +252,19 @@ class LagreOppgaveJobbUtførerTest {
             )
         }
 
+        val lagreSakInfotilBigQueryCallback = mockk<(BehandlingId) -> Unit>()
+        every { lagreSakInfotilBigQueryCallback.invoke(any()) } just runs
+
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
                 personService = PersonService(PersonRepository(it)),
                 oppgaveRepository = OppgaveRepository(it),
                 enhetRepository = EnhetRepository(it),
-                saksbehandlerRepository = SaksbehandlerRepository(it)
-            ).utfør(JobbInput(LagreOppgaveJobbUtfører).medPayload(oppgaveHendelse.oppgaveId.toString()))
+                saksbehandlerRepository = SaksbehandlerRepository(it),
+                behandlingRepository = BehandlingRepository(it),
+                lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
+            ).utfør(JobbInput(LagreOppgaveJobb(MockJobbAppender())).medPayload(oppgaveHendelse.oppgaveId.toString()))
         }
     }
 
