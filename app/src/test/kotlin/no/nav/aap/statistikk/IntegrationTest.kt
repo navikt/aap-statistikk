@@ -10,10 +10,15 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.motor.testutil.TestUtil
+import no.nav.aap.oppgave.OppgaveDto
+import no.nav.aap.oppgave.statistikk.HendelseType
+import no.nav.aap.oppgave.statistikk.OppgaveHendelse
+import no.nav.aap.oppgave.verdityper.Behandlingstype
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.hendelser.utledGjeldendeAvklaringsBehov
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.testutils.*
@@ -57,20 +62,45 @@ class IntegrationTest {
                 PostRequest(hendelse)
             )
 
+            client.post<OppgaveHendelse, Any>(URI.create("$url/oppgave"), PostRequest(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveDto = OppgaveDto(
+                        id = 1,
+                        personIdent = hendelse.ident,
+                        saksnummer = hendelse.saksnummer,
+                        behandlingRef = hendelse.behandlingReferanse,
+                        enhet = "0400",
+                        oppfølgingsenhet = null,
+                        behandlingOpprettet = hendelse.behandlingOpprettetTidspunkt,
+                        avklaringsbehovKode = hendelse.avklaringsbehov.utledGjeldendeAvklaringsBehov()!!,
+                        status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
+                        behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
+                        reservertAv = "Karl Korrodheid",
+                        reservertTidspunkt = LocalDateTime.now(),
+                        opprettetAv = "Kelvin",
+                        opprettetTidspunkt = LocalDateTime.now(),
+                    )
+                )
+            ))
+
             testUtil.ventPåSvar()
             val behandling = ventPåSvar(
                 { dataSource.transaction { BehandlingRepository(it).hent(behandlingReferanse) } },
                 { it != null }
             )
             assertThat(behandling).isNotNull
+            assertThat(behandling!!.behandlendeEnhet!!.kode).isEqualTo("0400")
 
             testUtil.ventPåSvar()
             val bqSaker = ventPåSvar(
-                { bigQueryClient.read(SakTabell()) },
-                { t -> t !== null && t.isNotEmpty() })
+                { bigQueryClient.read(SakTabell()).sortedBy { it.sekvensNummer } },
+                { t -> t !== null && t.isNotEmpty() && t.size == 2 })
             assertThat(bqSaker).isNotNull
-            assertThat(bqSaker).hasSize(1)
+            assertThat(bqSaker).hasSize(2)
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
+
+            assertThat(bqSaker[1].ansvarligEnhetKode).isEqualTo("0400")
 
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"),
@@ -85,8 +115,9 @@ class IntegrationTest {
             // Sekvensnummer økes med 1 med ny info på sak
             val bqSaker2 = ventPåSvar(
                 { bigQueryClient.read(SakTabell()) },
-                { t -> t !== null && t.isNotEmpty() && t.size > 1 })
-            assertThat(bqSaker2!![1].sekvensNummer).isEqualTo(2)
+                { t -> t !== null && t.isNotEmpty() && t.size > 2 })
+            assertThat(bqSaker2!!).hasSize(3)
+            assertThat(bqSaker2!![2].sekvensNummer).isEqualTo(3)
 
             val bigQueryRespons =
                 ventPåSvar(
@@ -103,7 +134,7 @@ class IntegrationTest {
                 { bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(sakRespons).hasSize(2)
+            assertThat(sakRespons).hasSize(3)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("Z994573")
             assertThat(sakRespons.first().vedtakTid).isEqualTo(
                 LocalDateTime.of(

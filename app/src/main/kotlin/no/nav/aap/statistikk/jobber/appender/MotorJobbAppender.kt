@@ -20,6 +20,10 @@ class MotorJobbAppender(
         connection: DBConnection,
         behandlingId: BehandlingId
     ) {
-        leggTil(connection, JobbInput(lagreSakinfoTilBigQueryJobb).medPayload(behandlingId))
+        leggTil(
+            connection,
+            // For sak = behandlingId. Husk at "sak" er funksjonalt bare en concurrency-key
+            JobbInput(lagreSakinfoTilBigQueryJobb).medPayload(behandlingId).forSak(behandlingId)
+        )
     }
 }

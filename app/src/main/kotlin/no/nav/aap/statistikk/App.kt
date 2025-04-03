@@ -41,7 +41,7 @@ import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
-import no.nav.aap.statistikk.oppgave.LagreOppgaveJobbUtfører
+import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.pdl.PdlGraphQLClient
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -128,7 +128,8 @@ fun Application.startUp(
         jobbAppender = motorJobbAppender,
     )
 
-    val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(prometheusMeterRegistry)
+    val lagreOppgaveHendelseJobb =
+        LagreOppgaveHendelseJobb(prometheusMeterRegistry, motorJobbAppender)
     val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(prometheusMeterRegistry)
     val motor = motor(
         dataSource,
@@ -136,7 +137,10 @@ fun Application.startUp(
         prometheusMeterRegistry,
         lagreOppgaveHendelseJobb,
         lagrePostmottakHendelseJobb,
-        lagreSakinfoTilBigQueryJobb
+        lagreSakinfoTilBigQueryJobb,
+        LagreOppgaveJobb(
+            jobbAppender = motorJobbAppender
+        )
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
@@ -171,7 +175,8 @@ private fun motor(
     prometheusMeterRegistry: PrometheusMeterRegistry,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
+    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
+    lagreOppgaveJobb: LagreOppgaveJobb
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -185,7 +190,7 @@ private fun motor(
         jobber = listOf(
             lagreStoppetHendelseJobb,
             lagreOppgaveHendelseJobb,
-            LagreOppgaveJobbUtfører,
+            lagreOppgaveJobb,
             lagrePostmottakHendelseJobb,
             lagreSakinfoTilBigQueryJobb,
         ),

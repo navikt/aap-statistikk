@@ -37,8 +37,11 @@ class HendelsesService(
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
 
         if (hendelse.behandlingStatus == Status.AVSLUTTET) {
+            // TODO: legg denne i en jobb
+            val avsluttetBehandling =
+                requireNotNull(hendelse.avsluttetBehandling) { "Om behandlingen er avsluttet, så må avsluttetBehandling være ikke-null." }
             avsluttetBehandlingService.lagre(
-                hendelse.avsluttetBehandling!!.tilDomene(
+                avsluttetBehandling.tilDomene(
                     hendelse.saksnummer,
                     hendelse.behandlingReferanse,
                     hendelse.hendelsesTidspunkt,
