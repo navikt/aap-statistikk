@@ -89,7 +89,7 @@ fun <E> testKlient(
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
-    val res: E?;
+    val res: E?
 
     System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
     System.setProperty("azure.app.client.id", azureConfig.clientId)
@@ -139,7 +139,7 @@ fun <E> testKlientNoInjection(
     bigQueryClient: BigQueryClient,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
-    val res: E?;
+    val res: E?
 
     System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
     System.setProperty("azure.app.client.id", azureConfig.clientId)
@@ -212,7 +212,7 @@ fun postgresTestConfig(): DbConfig {
 
 
 fun bigQueryContainer(): BigQueryConfig {
-    val container = BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3");
+    val container = BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3")
     container.start()
 
     val url = container.emulatorHttpEndpoint
@@ -322,6 +322,7 @@ fun motorMock(): Motor {
 
 class MockJobbAppender : JobbAppender {
     var jobber = mutableListOf<JobbInput>()
+    private var bigQueryJobber = mutableListOf<BehandlingId>()
 
     override fun leggTil(
         connection: DBConnection,
@@ -330,8 +331,12 @@ class MockJobbAppender : JobbAppender {
         jobber.add(jobb)
     }
 
-    override fun leggTil(jobb: JobbInput) {
-        jobber.add(jobb)
+    override fun leggTilLagreSakTilBigQueryJobb(
+        connection: DBConnection,
+        behandlingId: BehandlingId
+    ) {
+        logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId.")
+        bigQueryJobber.add(behandlingId)
     }
 }
 
@@ -367,7 +372,7 @@ class FakeSakRepository : SakRepository {
 }
 
 class FakeBigQueryKvitteringRepository : IBigQueryKvitteringRepository {
-    var kvitteringer = 0L
+    private var kvitteringer = 0L
     override fun lagreKvitteringForSak(sak: Sak, behandling: Behandling): Long {
         return kvitteringer++
     }
@@ -387,7 +392,7 @@ class FakePersonRepository : IPersonRepository {
 
 class FakeBehandlingRepository : IBehandlingRepository {
     private val behandlinger = mutableMapOf<Long, Behandling>()
-    private var nextId = 0L;
+    private var nextId = 0L
     override fun opprettBehandling(behandling: Behandling): Long {
         val id = nextId
         behandlinger[id] = behandling.copy(id = id).leggTilHendelse(
@@ -396,10 +401,13 @@ class FakeBehandlingRepository : IBehandlingRepository {
             )
         )
         nextId++
+
+        logger.info("Opprettet behandling med ID $id")
         return id
     }
 
     override fun oppdaterBehandling(behandling: Behandling) {
+        logger.info("Oppdaterte behandling med ID ${behandling.id}")
         behandlinger[behandling.id!!] = behandling.leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now()
@@ -490,7 +498,7 @@ class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
     private val tilkjentYtelser = mutableMapOf<Int, TilkjentYtelseEntity>()
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
         tilkjentYtelser.put(tilkjentYtelser.size, tilkjentYtelse)
-        return (tilkjentYtelser.size - 1).toLong();
+        return (tilkjentYtelser.size - 1).toLong()
     }
 
     override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
@@ -499,7 +507,7 @@ class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
 }
 
 class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
-    val vilkår = mutableMapOf<Long, VilkårsResultatEntity>()
+    private val vilkår = mutableMapOf<Long, VilkårsResultatEntity>()
 
     override fun lagreVilkårsResultat(
         vilkårsresultat: VilkårsResultatEntity,
@@ -537,15 +545,14 @@ class FakePdlClient(val identerHemmelig: Map<String, Boolean> = emptyMap()) : Pd
 }
 
 fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
-    var res: E? = null;
+    var res: E? = null
     val timeInMillis = measureTimeMillis {
         val maxTid = LocalDateTime.now().plusSeconds(10)
-        var suksess = false;
+        var suksess = false
         while (maxTid.isAfter(LocalDateTime.now()) && !suksess) {
             try {
                 res = getter()
                 if (res != null && predicate(res)) {
-                    println("!!!!!")
                     suksess = true
                 }
             } finally {

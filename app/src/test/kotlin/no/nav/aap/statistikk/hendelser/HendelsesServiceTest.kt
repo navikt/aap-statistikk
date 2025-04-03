@@ -1,6 +1,9 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.mockk.checkUnnecessaryStub
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling
@@ -31,7 +34,6 @@ class HendelsesServiceTest {
     @Test
     fun `sette inn med relatert behanding`() {
         val bqRepositoryYtelse = FakeBQYtelseRepository()
-        val bqRepositorySak = FakeBQSakRepository()
 
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
@@ -41,9 +43,10 @@ class HendelsesServiceTest {
         val sakRepository = FakeSakRepository()
         val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
 
+        val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
+
         val hendelsesService = HendelsesService(
             sakRepository = sakRepository,
-            behandlingRepository = behandlingRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
@@ -55,17 +58,11 @@ class HendelsesServiceTest {
                 meterRegistry = simpleMeterRegistry,
                 rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
             ),
-            clock = clock,
-            meterRegistry = simpleMeterRegistry,
             personService = PersonService(FakePersonRepository()),
-            sakStatistikkService = SaksStatistikkService(
-                behandlingRepository = behandlingRepository,
-                bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
-                bigQueryRepository = bqRepositorySak,
-                skjermingService = skjermingService,
-                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                clock = clock
-            )
+            behandlingRepository = behandlingRepository,
+            meterRegistry = simpleMeterRegistry,
+            opprettBigQueryLagringCallback = opprettBigQueryLagringCallback,
+            clock = clock
         )
 
         val sak = Sak(
@@ -92,11 +89,11 @@ class HendelsesServiceTest {
             )
         )
 
-
+        val behandlingReferanse = UUID.randomUUID()
         hendelsesService.prosesserNyHendelse(
             StoppetBehandling(
                 saksnummer = "1234",
-                behandlingReferanse = UUID.randomUUID(),
+                behandlingReferanse = behandlingReferanse,
                 behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
                 behandlingStatus = Status.OPPRETTET,
                 behandlingType = Revurdering,
@@ -117,21 +114,22 @@ class HendelsesServiceTest {
             )
         )
 
-        assertThat(behandlingRepository.hent(relatertUUID)).isNotNull()
-        assertThat(bqRepositorySak.saker).hasSize(1)
-        assertThat(bqRepositorySak.saker.first().saksnummer).isEqualTo("1234")
-        assertThat(bqRepositorySak.saker.first().relatertFagsystem).isEqualTo("Kelvin")
-        assertThat(bqRepositorySak.saker.first().relatertBehandlingUUID).isEqualTo(relatertUUID.toString())
+        val uthentet = behandlingRepository.hent(behandlingReferanse)
+        assertThat(uthentet).isNotNull()
+
+        verify { opprettBigQueryLagringCallback(uthentet!!.id!!) }
+
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
         assertThat(
             simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
         ).isEqualTo(0.0) // Fordi behandlingen allerede eksisterer
+
+        checkUnnecessaryStub(opprettBigQueryLagringCallback)
     }
 
     @Test
     fun `teller opprettet behandling`() {
         val bqRepositoryYtelse = FakeBQYtelseRepository()
-        val bqRepositorySak = FakeBQSakRepository()
 
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
@@ -143,8 +141,6 @@ class HendelsesServiceTest {
 
         val hendelsesService = HendelsesService(
             sakRepository = sakRepository,
-            personService = PersonService(FakePersonRepository()),
-            behandlingRepository = behandlingRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
@@ -156,16 +152,11 @@ class HendelsesServiceTest {
                 meterRegistry = simpleMeterRegistry,
                 rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             ),
-            clock = clock,
+            personService = PersonService(FakePersonRepository()),
+            behandlingRepository = behandlingRepository,
             meterRegistry = simpleMeterRegistry,
-            sakStatistikkService = SaksStatistikkService(
-                behandlingRepository = behandlingRepository,
-                bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
-                bigQueryRepository = bqRepositorySak,
-                skjermingService = skjermingService,
-                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                clock = clock
-            )
+            opprettBigQueryLagringCallback = { MockJobbAppender() },
+            clock = clock
         )
 
         hendelsesService.prosesserNyHendelse(
@@ -195,75 +186,5 @@ class HendelsesServiceTest {
         assertThat(
             simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
         ).isEqualTo(1.0) // Fordi behandlingen allerede eksisterer
-    }
-
-
-    @Test
-    fun `hendelses-service lagrer i bigquery med korrekt tidspunkt`() {
-        val bqYtelserRepository = FakeBQYtelseRepository()
-        val bqSakRepository = FakeBQSakRepository()
-
-        val currentInstant = Instant.now()
-        val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
-        val behandlingRepository = FakeBehandlingRepository()
-        val simpleMeterRegistry = SimpleMeterRegistry()
-        val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
-        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
-
-        val hendelsesService = HendelsesService(
-            sakRepository = FakeSakRepository(),
-            personService = PersonService(FakePersonRepository()),
-            behandlingRepository = behandlingRepository,
-            avsluttetBehandlingService = AvsluttetBehandlingService(
-                tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                diagnoseRepository = FakeDiagnoseRepository(),
-                bqRepository = bqYtelserRepository,
-                behandlingRepository = behandlingRepository,
-                skjermingService = skjermingService,
-                meterRegistry = simpleMeterRegistry,
-                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
-            ),
-            clock = clock,
-            meterRegistry = simpleMeterRegistry,
-            sakStatistikkService = SaksStatistikkService(
-                behandlingRepository = behandlingRepository,
-                bigQueryKvitteringRepository = FakeBigQueryKvitteringRepository(),
-                bigQueryRepository = bqSakRepository,
-                skjermingService = skjermingService,
-                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                clock = clock
-            )
-        )
-
-
-        hendelsesService.prosesserNyHendelse(
-            StoppetBehandling(
-                saksnummer = "1234",
-                behandlingReferanse = UUID.randomUUID(),
-                behandlingOpprettetTidspunkt = LocalDateTime.now(clock),
-                behandlingStatus = Status.OPPRETTET,
-                behandlingType = Revurdering,
-                ident = "234",
-                versjon = "dsad",
-                avklaringsbehov = listOf(avklaringsbehovHendelse()),
-                mottattTid = LocalDateTime.now().minusDays(1),
-                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
-                hendelsesTidspunkt = LocalDateTime.now(),
-                årsakTilBehandling = listOf(
-                    ÅrsakTilBehandling.SØKNAD,
-                    ÅrsakTilBehandling.G_REGULERING
-                )
-            )
-        )
-
-        assertThat(bqSakRepository.saker).hasSize(1)
-        assertThat(bqSakRepository.saker.first().saksnummer).isEqualTo("1234")
-        assertThat(bqSakRepository.saker.first().tekniskTid).isEqualTo(
-            LocalDateTime.now(clock)
-        )
-        assertThat(bqSakRepository.saker.first().behandlingÅrsak).isEqualTo("SØKNAD,G_REGULERING")
-        assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
     }
 }

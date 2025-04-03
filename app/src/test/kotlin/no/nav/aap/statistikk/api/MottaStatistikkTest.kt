@@ -24,6 +24,7 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
+import no.nav.aap.statistikk.bigquery.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.tilDomene
@@ -36,7 +37,6 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -66,7 +66,6 @@ class MottaStatistikkTest {
         val motor = motorMock()
 
         val bqRepositoryYtelse = FakeBQYtelseRepository()
-        val bqRepositorySak = FakeBQSakRepository()
 
         val meterRegistry = SimpleMeterRegistry()
 
@@ -77,16 +76,17 @@ class MottaStatistikkTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepositoryYtelse, bqRepositorySak, meterRegistry,
-                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+                bqRepositoryYtelse,
+                meterRegistry,
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
+                diagnoseRepository = { FakeDiagnoseRepository() },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
-                skjermingService = SkjermingService(FakePdlClient()),
-                personService = { PersonService(FakePersonRepository()) },
                 rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
-                diagnoseRepository = { FakeDiagnoseRepository() }
+                personService = { PersonService(FakePersonRepository()) },
+                skjermingService = SkjermingService(FakePdlClient()),
+                jobbAppender = jobbAppender,
             ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -204,37 +204,43 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
         val bqRepositoryYtelse = FakeBQYtelseRepository()
-        val bqRepositorySak = FakeBQSakRepository()
+        val bqStatistikkRepository = FakeBQSakRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepositoryYtelse, bqRepositorySak, meterRegistry,
-            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+            bqRepositoryYtelse,
+            meterRegistry,
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
-            behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
-            personService = { PersonService(PersonRepository(it)) },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
-            skjermingService = skjermingService
+            personService = { PersonService(PersonRepository(it)) },
+            skjermingService = skjermingService,
+            jobbAppender = MockJobbAppender()
         )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
-        val motor = Motor(
-            dataSource = dataSource,
-            antallKammer = 8,
-            logInfoProvider = NoExtraLogInfoProvider,
-            jobber = listOf(
-                lagreStoppetHendelseJobb
-            )
+        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
+            bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+            behandlingRepositoryFactory = { FakeBehandlingRepository() },
+            bqSakstatikk = bqStatistikkRepository,
+            skjermingService = skjermingService
         )
 
-        val jobbAppender = MotorJobbAppender(dataSource)
+        val motor = opprettMotor(
+            dataSource,
+            lagreStoppetHendelseJobb,
+            lagreSakinfoTilBigQueryJobb,
+            lagrePostmottakHendelseJobb
+        )
+
+        val jobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
 
         val logger =
             LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger
@@ -279,6 +285,20 @@ class MottaStatistikkTest {
 
         motor.stop()
     }
+
+    private fun opprettMotor(
+        dataSource: DataSource,
+        lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+        lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
+        lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb
+    ) = Motor(
+        dataSource = dataSource,
+        antallKammer = 8,
+        logInfoProvider = NoExtraLogInfoProvider,
+        jobber = listOf(
+            lagreStoppetHendelseJobb, lagreSakinfoTilBigQueryJobb, lagrePostmottakHendelseJobb
+        )
+    )
 
     @Test
     fun `kan motta mer avansert object`(
@@ -352,7 +372,7 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
         val bqRepositoryYtelse = FakeBQYtelseRepository()
-        val bqRepositorySak = FakeBQSakRepository()
+        val bqStatistikkRepository = FakeBQSakRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
@@ -361,29 +381,39 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepositoryYtelse, bqRepositorySak, meterRegistry,
-            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+            bqRepositoryYtelse,
+            meterRegistry,
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
-            behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
-            personService = { PersonService(PersonRepository(it)) },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
-            skjermingService = skjermingService
+            personService = { PersonService(PersonRepository(it)) },
+            skjermingService = skjermingService,
+            jobbAppender = MockJobbAppender()
         )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
-        val motor = Motor(
-            dataSource = dataSource,
-            antallKammer = 2,
-            logInfoProvider = NoExtraLogInfoProvider,
-            jobber = listOf(lagreStoppetHendelseJobb)
+        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
+            bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+            behandlingRepositoryFactory = { FakeBehandlingRepository() },
+            bqSakstatikk = bqStatistikkRepository,
+            skjermingService = skjermingService
         )
 
-        val jobbAppender = MotorJobbAppender(dataSource)
+
+        val motor = opprettMotor(
+            dataSource,
+            lagreStoppetHendelseJobb,
+            lagreSakinfoTilBigQueryJobb,
+            lagrePostmottakHendelseJobb
+        )
+
+
+        val jobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
 
         testKlient(
             transactionExecutor,
@@ -463,29 +493,37 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepositoryYtelse, bqRepositorySak, meterRegistry,
-            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+            bqRepositoryYtelse,
+            meterRegistry,
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
-            behandlingRepositoryFactory = { BehandlingRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
-            personService = { PersonService(PersonRepository(it)) },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
-            skjermingService = skjermingService
+            personService = { PersonService(PersonRepository(it)) },
+            skjermingService = skjermingService,
+            jobbAppender = MockJobbAppender()
         )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
-        val motor = Motor(
-            dataSource = dataSource,
-            antallKammer = 2,
-            logInfoProvider = NoExtraLogInfoProvider,
-            jobber = listOf(lagreStoppetHendelseJobb, lagrePostmottakHendelseJobb)
+        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
+            bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+            behandlingRepositoryFactory = { FakeBehandlingRepository() },
+            bqSakstatikk = bqRepositorySak,
+            skjermingService = skjermingService
         )
 
-        val jobbAppender = MotorJobbAppender(dataSource)
+        val motor = opprettMotor(
+            dataSource,
+            lagreStoppetHendelseJobb,
+            lagreSakinfoTilBigQueryJobb,
+            lagrePostmottakHendelseJobb
+        )
+
+        val jobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
 
         testKlient(
             transactionExecutor,
