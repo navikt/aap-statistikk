@@ -104,19 +104,28 @@ fun Application.startUp(
     val pdlClient = PdlGraphQLClient(
         pdlConfig = pdlConfig, prometheusMeterRegistry
     )
+    val skjermingService = SkjermingService(pdlClient)
+    val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
+        bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+        behandlingRepositoryFactory = { BehandlingRepository(it) },
+        bqSakstatikk = bqSakRepository,
+        skjermingService = skjermingService
+    )
+
+    val motorJobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
+
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         bqYtelseRepository,
-        bqSakRepository,
         prometheusMeterRegistry,
-        bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
         tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
         beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
         vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
-        behandlingRepositoryFactory = { BehandlingRepository(it) },
         diagnoseRepository = { DiagnoseRepositoryImpl(it) },
-        skjermingService = SkjermingService(pdlClient),
+        behandlingRepositoryFactory = { BehandlingRepository(it) },
+        rettighetstypeperiodeRepository = { RettighetstypeperiodeRepository(it) },
         personService = { PersonService(PersonRepository(it)) },
-        rettighetstypeperiodeRepository = { RettighetstypeperiodeRepository(it) }
+        skjermingService = skjermingService,
+        jobbAppender = motorJobbAppender,
     )
 
     val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(prometheusMeterRegistry)
@@ -126,7 +135,8 @@ fun Application.startUp(
         lagreStoppetHendelseJobb,
         prometheusMeterRegistry,
         lagreOppgaveHendelseJobb,
-        lagrePostmottakHendelseJobb
+        lagrePostmottakHendelseJobb,
+        lagreSakinfoTilBigQueryJobb
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
@@ -145,7 +155,7 @@ fun Application.startUp(
     module(
         transactionExecutor,
         motor,
-        MotorJobbAppender(dataSource),
+        motorJobbAppender,
         azureConfig,
         motorApiCallback,
         lagreStoppetHendelseJobb,
@@ -160,7 +170,8 @@ private fun motor(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     prometheusMeterRegistry: PrometheusMeterRegistry,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb
+    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -176,6 +187,7 @@ private fun motor(
             lagreOppgaveHendelseJobb,
             LagreOppgaveJobbUtfører,
             lagrePostmottakHendelseJobb,
+            lagreSakinfoTilBigQueryJobb,
         ),
         prometheus = prometheusMeterRegistry,
     )

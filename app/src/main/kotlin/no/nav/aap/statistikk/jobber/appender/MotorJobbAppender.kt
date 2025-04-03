@@ -1,12 +1,14 @@
 package no.nav.aap.statistikk.jobber.appender
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
-import javax.sql.DataSource
+import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.bigquery.LagreSakinfoTilBigQueryJobb
 
-class MotorJobbAppender(private val dataSource: DataSource) : JobbAppender {
+class MotorJobbAppender(
+    private val lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
+) : JobbAppender {
     override fun leggTil(
         connection: DBConnection,
         jobb: JobbInput
@@ -14,9 +16,10 @@ class MotorJobbAppender(private val dataSource: DataSource) : JobbAppender {
         FlytJobbRepository(connection).leggTil(jobb)
     }
 
-    override fun leggTil(jobb: JobbInput) {
-        dataSource.transaction {
-            leggTil(it, jobb)
-        }
+    override fun leggTilLagreSakTilBigQueryJobb(
+        connection: DBConnection,
+        behandlingId: BehandlingId
+    ) {
+        leggTil(connection, JobbInput(lagreSakinfoTilBigQueryJobb).medPayload(behandlingId))
     }
 }

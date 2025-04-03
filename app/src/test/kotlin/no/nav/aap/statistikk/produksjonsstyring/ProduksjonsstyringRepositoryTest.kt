@@ -10,11 +10,9 @@ import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
-import no.nav.aap.statistikk.hendelser.SaksStatistikkService
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -101,7 +99,6 @@ class ProduksjonsstyringRepositoryTest {
     ) =
         dataSource.transaction { conn ->
             val bqRepositoryYtelse = FakeBQYtelseRepository()
-            val bqRepositorySak = FakeBQSakRepository()
 
             val skjermingService = SkjermingService(FakePdlClient())
             val meterRegistry = SimpleMeterRegistry()
@@ -121,13 +118,7 @@ class ProduksjonsstyringRepositoryTest {
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
                 meterRegistry = meterRegistry,
-                sakStatistikkService = SaksStatistikkService(
-                    behandlingRepository = BehandlingRepository(conn),
-                    bigQueryKvitteringRepository = BigQueryKvitteringRepository(conn),
-                    bigQueryRepository = bqRepositorySak,
-                    skjermingService = skjermingService,
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
-                )
+                opprettBigQueryLagringCallback = {MockJobbAppender()}
             )
 
             val hendelse = behandlingHendelse(

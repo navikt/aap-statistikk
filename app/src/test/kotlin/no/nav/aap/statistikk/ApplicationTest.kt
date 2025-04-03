@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.post
@@ -28,30 +29,28 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig
     ) {
         val jobbAppender = MockJobbAppender()
-        val bqRepository = FakeBQSakRepository()
         val bqRepositoryYtelse = FakeBQYtelseRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         testKlient(
-            noOpTransactionExecutor,
-            motorMock(),
-            jobbAppender,
-            azureConfig,
-            LagreStoppetHendelseJobb(
+            transactionExecutor = noOpTransactionExecutor,
+            motor = motorMock(),
+            jobbAppender = jobbAppender,
+            azureConfig = azureConfig,
+            lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
                 bqRepositoryYtelse,
-                bqRepository,
                 meterRegistry,
-                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
-                personService = { PersonService(FakePersonRepository()) },
+                behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
-                skjermingService = SkjermingService(FakePdlClient())
-            ), LagreOppgaveHendelseJobb(meterRegistry),
-            LagrePostmottakHendelseJobb(meterRegistry)
+                personService = { PersonService(FakePersonRepository()) },
+                skjermingService = SkjermingService(FakePdlClient()),
+                jobbAppender = mockk()
+            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry),
+            lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             @Language("JSON") val body = """{
   "saksnummer": "123456789",
@@ -150,7 +149,6 @@ class ApplicationTest {
 }"""
 
         val jobbAppender = MockJobbAppender()
-        val bqRepository = FakeBQSakRepository()
         val bqRepositoryYtelse = FakeBQYtelseRepository()
         val meterRegistry = SimpleMeterRegistry()
 
@@ -160,16 +158,17 @@ class ApplicationTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepositoryYtelse, bqRepository, meterRegistry,
-                bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
+                bqRepositoryYtelse,
+                meterRegistry,
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
-                personService = { PersonService(FakePersonRepository()) },
+                behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
+                personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
+                jobbAppender = mockk()
             ), LagreOppgaveHendelseJobb(meterRegistry), LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
