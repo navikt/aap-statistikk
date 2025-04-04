@@ -4,5 +4,5 @@ import java.util.*
 
 interface DiagnoseRepository {
     fun lagre(diagnoseEntity: DiagnoseEntity): Long
-    fun hentForBehandling(behandlingReferanse: UUID): DiagnoseEntity
+    fun hentForBehandling(behandlingReferanse: UUID): DiagnoseEntity?
 }

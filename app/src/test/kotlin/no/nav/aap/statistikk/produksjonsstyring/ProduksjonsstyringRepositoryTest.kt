@@ -82,7 +82,10 @@ class ProduksjonsstyringRepositoryTest {
 
         val res = dataSource.transaction {
             val alderÅpneBehandlinger =
-                ProduksjonsstyringRepository(it).alderLukkedeBehandlinger(enheter = listOf(), alderFra = nå)
+                ProduksjonsstyringRepository(it).alderLukkedeBehandlinger(
+                    enheter = listOf(),
+                    alderFra = nå
+                )
             alderÅpneBehandlinger
         }
 
@@ -114,12 +117,16 @@ class ProduksjonsstyringRepositoryTest {
                     skjermingService = skjermingService,
                     meterRegistry = meterRegistry,
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
-                    ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(bqRepositoryYtelse),
+                    ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
+                        bqRepositoryYtelse,
+                        RettighetstypeperiodeRepository(conn),
+                        DiagnoseRepositoryImpl(conn)
+                    ),
                 ),
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
                 meterRegistry = meterRegistry,
-                opprettBigQueryLagringCallback = {MockJobbAppender()}
+                opprettBigQueryLagringCallback = { MockJobbAppender() }
             )
 
             val hendelse = behandlingHendelse(

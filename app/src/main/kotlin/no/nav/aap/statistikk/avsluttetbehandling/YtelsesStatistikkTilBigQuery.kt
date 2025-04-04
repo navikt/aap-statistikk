@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.utbetaling.helved.toBase64
@@ -11,24 +12,29 @@ import java.util.*
 
 class YtelsesStatistikkTilBigQuery(
     private val bqRepository: IBQYtelsesstatistikkRepository,
+    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
+    private val diagnoseRepository: DiagnoseRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) {
     fun lagre(
         avsluttetBehandling: AvsluttetBehandling,
         behandling: Behandling
     ) {
+        val rettighetstypeperioder = rettighetstypeperiodeRepository.hent(behandling.referanse)
+        val diagnoser = diagnoseRepository.hentForBehandling(behandling.referanse)
+
         bqRepository.lagre(
             BQYtelseBehandling(
                 saksnummer = behandling.sak.saksnummer,
-                referanse = avsluttetBehandling.behandlingsReferanse,
-                utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64(),
+                referanse = behandling.referanse,
+                utbetalingId = behandling.referanse.toBase64(),
                 brukerFnr = behandling.sak.person.ident,
                 behandlingsType = behandling.typeBehandling,
                 datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt,
                 kodeverk = avsluttetBehandling.diagnoser?.kodeverk,
-                diagnosekode = avsluttetBehandling.diagnoser?.diagnosekode,
-                bidiagnoser = avsluttetBehandling.diagnoser?.bidiagnoser,
-                rettighetsPerioder = avsluttetBehandling.rettighetstypeperioder,
+                diagnosekode = diagnoser?.diagnosekode,
+                bidiagnoser = diagnoser?.bidiagnoser,
+                rettighetsPerioder = rettighetstypeperioder,
                 radEndret = LocalDateTime.now(clock)
             )
         )

@@ -15,6 +15,11 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStat
 
 fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
     return AvsluttetBehandlingDTO(
+        diagnoser = Diagnoser(
+            kodeverk = "12",
+            diagnosekode = "asd",
+            bidiagnoser = listOf("kjernekraft", "atmosfærer")
+        ),
         tilkjentYtelse = TilkjentYtelseDTO(
             perioder = listOf(
                 TilkjentYtelsePeriodeDTO(

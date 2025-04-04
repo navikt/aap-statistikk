@@ -62,27 +62,29 @@ class IntegrationTest {
                 PostRequest(hendelse)
             )
 
-            client.post<OppgaveHendelse, Any>(URI.create("$url/oppgave"), PostRequest(
-                OppgaveHendelse(
-                    hendelse = HendelseType.OPPRETTET,
-                    oppgaveDto = OppgaveDto(
-                        id = 1,
-                        personIdent = hendelse.ident,
-                        saksnummer = hendelse.saksnummer,
-                        behandlingRef = hendelse.behandlingReferanse,
-                        enhet = "0400",
-                        oppfølgingsenhet = null,
-                        behandlingOpprettet = hendelse.behandlingOpprettetTidspunkt,
-                        avklaringsbehovKode = hendelse.avklaringsbehov.utledGjeldendeAvklaringsBehov()!!,
-                        status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
-                        behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
-                        reservertAv = "Karl Korrodheid",
-                        reservertTidspunkt = LocalDateTime.now(),
-                        opprettetAv = "Kelvin",
-                        opprettetTidspunkt = LocalDateTime.now(),
+            client.post<OppgaveHendelse, Any>(
+                URI.create("$url/oppgave"), PostRequest(
+                    OppgaveHendelse(
+                        hendelse = HendelseType.OPPRETTET,
+                        oppgaveDto = OppgaveDto(
+                            id = 1,
+                            personIdent = hendelse.ident,
+                            saksnummer = hendelse.saksnummer,
+                            behandlingRef = hendelse.behandlingReferanse,
+                            enhet = "0400",
+                            oppfølgingsenhet = null,
+                            behandlingOpprettet = hendelse.behandlingOpprettetTidspunkt,
+                            avklaringsbehovKode = hendelse.avklaringsbehov.utledGjeldendeAvklaringsBehov()!!,
+                            status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
+                            behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
+                            reservertAv = "Karl Korrodheid",
+                            reservertTidspunkt = LocalDateTime.now(),
+                            opprettetAv = "Kelvin",
+                            opprettetTidspunkt = LocalDateTime.now(),
+                        )
                     )
                 )
-            ))
+            )
 
             testUtil.ventPåSvar()
             val behandling = ventPåSvar(
@@ -117,7 +119,7 @@ class IntegrationTest {
                 { bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() && t.size > 2 })
             assertThat(bqSaker2!!).hasSize(3)
-            assertThat(bqSaker2!![2].sekvensNummer).isEqualTo(3)
+            assertThat(bqSaker2[2].sekvensNummer).isEqualTo(3)
 
             val bigQueryRespons =
                 ventPåSvar(
