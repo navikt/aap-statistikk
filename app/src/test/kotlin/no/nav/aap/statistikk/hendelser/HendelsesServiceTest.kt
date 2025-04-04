@@ -46,24 +46,18 @@ class HendelsesServiceTest {
 
         val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
 
-        val hendelsesService = HendelsesService(
-            sakRepository = sakRepository,
-            avsluttetBehandlingService = AvsluttetBehandlingService(
-                tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                diagnoseRepository = FakeDiagnoseRepository(),
-                behandlingRepository = behandlingRepository,
-                skjermingService = skjermingService,
-                meterRegistry = simpleMeterRegistry,
-                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(bqRepositoryYtelse)
-            ),
-            personService = PersonService(FakePersonRepository()),
-            behandlingRepository = behandlingRepository,
-            meterRegistry = simpleMeterRegistry,
-            opprettBigQueryLagringCallback = opprettBigQueryLagringCallback,
-            clock = clock
+        val rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
+        val diagnoseRepository = FakeDiagnoseRepository()
+        val hendelsesService = konstruerHendelsesService(
+            sakRepository,
+            diagnoseRepository,
+            behandlingRepository,
+            skjermingService,
+            simpleMeterRegistry,
+            rettighetstypeperiodeRepository,
+            bqRepositoryYtelse,
+            opprettBigQueryLagringCallback,
+            clock
         )
 
         val sak = Sak(
@@ -128,6 +122,40 @@ class HendelsesServiceTest {
         checkUnnecessaryStub(opprettBigQueryLagringCallback)
     }
 
+    private fun konstruerHendelsesService(
+        sakRepository: FakeSakRepository,
+        diagnoseRepository: FakeDiagnoseRepository,
+        behandlingRepository: FakeBehandlingRepository,
+        skjermingService: SkjermingService,
+        simpleMeterRegistry: SimpleMeterRegistry,
+        rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
+        bqRepositoryYtelse: FakeBQYtelseRepository,
+        opprettBigQueryLagringCallback: (BehandlingId) -> Unit,
+        clock: Clock
+    ) = HendelsesService(
+        sakRepository = sakRepository,
+        avsluttetBehandlingService = AvsluttetBehandlingService(
+            tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+            beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+            vilkårsResultatRepository = FakeVilkårsResultatRepository(),
+            diagnoseRepository = diagnoseRepository,
+            behandlingRepository = behandlingRepository,
+            skjermingService = skjermingService,
+            meterRegistry = simpleMeterRegistry,
+            rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
+            ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
+                bqRepositoryYtelse,
+                rettighetstypeperiodeRepository,
+                diagnoseRepository
+            )
+        ),
+        personService = PersonService(FakePersonRepository()),
+        behandlingRepository = behandlingRepository,
+        meterRegistry = simpleMeterRegistry,
+        opprettBigQueryLagringCallback = opprettBigQueryLagringCallback,
+        clock = clock
+    )
+
     @Test
     fun `teller opprettet behandling`() {
         val bqRepositoryYtelse = FakeBQYtelseRepository()
@@ -140,24 +168,17 @@ class HendelsesServiceTest {
         val sakRepository = FakeSakRepository()
         val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
 
-        val hendelsesService = HendelsesService(
-            sakRepository = sakRepository,
-            avsluttetBehandlingService = AvsluttetBehandlingService(
-                tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                diagnoseRepository = FakeDiagnoseRepository(),
-                behandlingRepository = behandlingRepository,
-                skjermingService = skjermingService,
-                meterRegistry = simpleMeterRegistry,
-                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(bqRepositoryYtelse),
-            ),
-            personService = PersonService(FakePersonRepository()),
-            behandlingRepository = behandlingRepository,
-            meterRegistry = simpleMeterRegistry,
-            opprettBigQueryLagringCallback = { MockJobbAppender() },
-            clock = clock
+        val rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
+        val hendelsesService = konstruerHendelsesService(
+            sakRepository,
+            FakeDiagnoseRepository(),
+            behandlingRepository,
+            skjermingService,
+            simpleMeterRegistry,
+            rettighetstypeperiodeRepository,
+            bqRepositoryYtelse,
+            { MockJobbAppender() },
+            clock
         )
 
         hendelsesService.prosesserNyHendelse(

@@ -53,7 +53,7 @@ VALUES ((SELECT b.id
         return id
     }
 
-    override fun hentForBehandling(behandlingReferanse: UUID): DiagnoseEntity {
+    override fun hentForBehandling(behandlingReferanse: UUID): DiagnoseEntity? {
         val sql = """
          SELECT d.kodeverk as d_kodeverk, d.diagnosekode as d_diagnosekode, d.bidiagnoser as d_bidiagnoser
          from diagnose d
@@ -63,7 +63,7 @@ VALUES ((SELECT b.id
                                   WHERE br.referanse = ?)
         """.trimIndent()
 
-        return dbConnection.queryFirst<DiagnoseEntity>(sql) {
+        return dbConnection.queryFirstOrNull(sql) {
             setParams {
                 setUUID(1, behandlingReferanse)
             }

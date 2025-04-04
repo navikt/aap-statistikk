@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepositor
 import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
+import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
@@ -47,6 +48,8 @@ class LagreStoppetHendelseJobb(
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository(connection),
                 ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
                     bqRepository = bqYtelseStatistikk,
+                    rettighetstypeperiodeRepository = rettighetstypeperiodeRepository(connection),
+                    diagnoseRepository = DiagnoseRepositoryImpl(connection)
                 )
             ),
             personService = personService(connection),

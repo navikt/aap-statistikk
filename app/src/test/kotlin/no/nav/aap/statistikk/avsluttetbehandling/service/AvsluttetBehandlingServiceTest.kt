@@ -299,6 +299,8 @@ class AvsluttetBehandlingServiceTest {
                 meterRegistry = meterRegistry,
                 ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
                     bqYtelseRepository,
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
+                    diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
                     clock
                 ),
             )
