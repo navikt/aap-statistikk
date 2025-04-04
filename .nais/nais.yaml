@@ -17,9 +17,6 @@ spec:
   strategy:
    type: RollingUpdate
   port: 8080
-  replicas:
-    max: 1
-    min: 1
   resources:
     limits:
       memory: 1024Mi
