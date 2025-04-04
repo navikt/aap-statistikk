@@ -293,12 +293,14 @@ class AvsluttetBehandlingServiceTest {
                 BeregningsgrunnlagRepository(dbConnection),
                 VilkårsresultatRepository(dbConnection),
                 diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
-                bqYtelseRepository,
                 behandlingRepository = BehandlingRepository(dbConnection),
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                 meterRegistry = meterRegistry,
-                clock = clock,
+                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
+                    bqYtelseRepository,
+                    clock
+                ),
             )
         return Pair(bigQueryClient, service)
     }
