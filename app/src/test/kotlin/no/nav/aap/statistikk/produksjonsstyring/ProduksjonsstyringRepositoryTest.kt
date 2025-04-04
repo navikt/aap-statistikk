@@ -5,6 +5,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
+import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.behandling.TypeBehandling
@@ -109,11 +110,11 @@ class ProduksjonsstyringRepositoryTest {
                     beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn),
                     vilkårsResultatRepository = VilkårsresultatRepository(conn),
                     diagnoseRepository = DiagnoseRepositoryImpl(conn),
-                    bqRepository = bqRepositoryYtelse,
                     behandlingRepository = BehandlingRepository(conn),
                     skjermingService = skjermingService,
                     meterRegistry = meterRegistry,
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
+                    ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(bqRepositoryYtelse),
                 ),
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),

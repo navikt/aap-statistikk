@@ -12,6 +12,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
+import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.nyBehandlingOpprettet
@@ -52,11 +53,11 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepository = FakeVilkårsResultatRepository(),
                 diagnoseRepository = FakeDiagnoseRepository(),
-                bqRepository = bqRepositoryYtelse,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
                 meterRegistry = simpleMeterRegistry,
-                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
+                rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(bqRepositoryYtelse)
             ),
             personService = PersonService(FakePersonRepository()),
             behandlingRepository = behandlingRepository,
@@ -146,11 +147,11 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepository = FakeVilkårsResultatRepository(),
                 diagnoseRepository = FakeDiagnoseRepository(),
-                bqRepository = bqRepositoryYtelse,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
                 meterRegistry = simpleMeterRegistry,
                 rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(bqRepositoryYtelse),
             ),
             personService = PersonService(FakePersonRepository()),
             behandlingRepository = behandlingRepository,

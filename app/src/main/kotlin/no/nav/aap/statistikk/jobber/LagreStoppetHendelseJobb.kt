@@ -6,6 +6,7 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
+import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -40,11 +41,13 @@ class LagreStoppetHendelseJobb(
                 beregningsgrunnlagRepository = beregningsgrunnlagRepositoryFactory(connection),
                 vilkårsResultatRepository = vilkårsResultatRepositoryFactory(connection),
                 diagnoseRepository = diagnoseRepository(connection),
-                bqRepository = bqYtelseStatistikk,
                 behandlingRepository = behandlingRepositoryFactory(connection),
                 skjermingService = skjermingService,
                 meterRegistry = meterRegistry,
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository(connection),
+                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
+                    bqRepository = bqYtelseStatistikk,
+                )
             ),
             personService = personService(connection),
             behandlingRepository = BehandlingRepository(connection),
