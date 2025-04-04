@@ -28,7 +28,7 @@ fun List<AvklaringsbehovHendelseDto>.utledBrevSendtTid(): LocalDateTime? {
 
 fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
     return this.flatMap { it.endringer }
-        .filter { it.endretAv.lowercase() != "Kelvin".lowercase() }
+        .filter { it.endretAv.lowercase() != "Kelvin".lowercase() && it.endretAv.lowercase() != "Brevløsning".lowercase() }
         .maxByOrNull { it.tidsstempel }?.endretAv
 }
 
@@ -84,21 +84,24 @@ fun List<AvklaringsbehovHendelseDto>.erManuell(): Boolean {
 
 @JvmName("erAutomatisk")
 fun List<BehandlingHendelse>.erManuell(): Boolean {
-    return this.any { !it.avklaringsBehov.isNullOrBlank() && !Definisjon.forKode(it.avklaringsBehov).erAutomatisk() }
+    return this.any {
+        !it.avklaringsBehov.isNullOrBlank() && !Definisjon.forKode(it.avklaringsBehov)
+            .erAutomatisk()
+    }
 }
 
 fun erHosNayNy(hendelser: List<BehandlingHendelse>): Boolean {
     return hendelser
-            .filterNot { it.avklaringsBehov == null || Definisjon.forKode(it.avklaringsBehov).løsesAv.size > 1 }
-            .maxByOrNull { it.tidspunkt }
-            ?.let {
-                Definisjon.forKode(requireNotNull(it.avklaringsBehov)).løsesAv.all { rolle ->
-                    rolle in listOf(
-                        Rolle.SAKSBEHANDLER_NASJONAL,
-                        Rolle.BESLUTTER
-                    )
-                }
-            } ?: true
+        .filterNot { it.avklaringsBehov == null || Definisjon.forKode(it.avklaringsBehov).løsesAv.size > 1 }
+        .maxByOrNull { it.tidspunkt }
+        ?.let {
+            Definisjon.forKode(requireNotNull(it.avklaringsBehov)).løsesAv.all { rolle ->
+                rolle in listOf(
+                    Rolle.SAKSBEHANDLER_NASJONAL,
+                    Rolle.BESLUTTER
+                )
+            }
+        } ?: true
 
 }
 
