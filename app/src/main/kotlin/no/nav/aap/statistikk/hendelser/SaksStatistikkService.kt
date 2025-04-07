@@ -129,7 +129,7 @@ class SaksStatistikkService(
         return when (behandling.status) {
             BehandlingStatus.OPPRETTET -> "REGISTRERT"
             BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak"
-            BehandlingStatus.IVERKSETTES,
+            BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
             BehandlingStatus.AVSLUTTET -> "AVSLUTTET"
         }
     }
