@@ -99,6 +99,8 @@ class SakTabell : BQTable<BQBehandling> {
                 """.trimIndent()
                 ).build()
 
+            val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
@@ -120,8 +122,6 @@ class SakTabell : BQTable<BQBehandling> {
                     "Kode som angir hvor vidt saken er for utland eller nasjonal å anses. Se begrepskatalogen: https://jira.adeo.no/browse/BEGREP-1611#"
                 ).build()
 
-            val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
-
             val behandlingResultat =
                 Field.newBuilder("behandlingResultat", StandardSQLTypeName.STRING).setDescription(
                     """
@@ -139,7 +139,7 @@ class SakTabell : BQTable<BQBehandling> {
                 Kode som angir en begrunnelse til resultat ved avslag- typisk: vilkårsprøvingen feilet, dublett, teknisk avvik, etc.
 
                 For behandlingstype klage: Angi begrunnelse ved resultat omgjøring - typisk: feil lovanvendelse, endret faktum, saksbehandlingsfeil, etc.
-            """.trimIndent()
+              """.trimIndent()
                 ).build()
 
             val tilbakekrevbeløp =
@@ -242,7 +242,8 @@ class SakTabell : BQTable<BQBehandling> {
         val behandlingÅrsak = fieldValueList.get("behandlingAarsak").stringValue
 
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
-        val ansvarligEnhet =  if (!fieldValueList.get("ansvarligEnhet").isNull) fieldValueList.get("ansvarligEnhet").stringValue else null
+        val ansvarligEnhet =
+            if (!fieldValueList.get("ansvarligEnhet").isNull) fieldValueList.get("ansvarligEnhet").stringValue else null
         val sakYtelse = fieldValueList.get("sakYtelse").stringValue
 
         return BQBehandling(

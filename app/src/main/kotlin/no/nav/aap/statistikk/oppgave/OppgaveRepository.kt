@@ -45,8 +45,8 @@ SELECT COALESCE(
 
         val sql = """
             insert into oppgave (person_id, behandling_referanse_id, enhet_id, status, opprettet_tidspunkt,
-                                 reservasjon_id, identifikator)
-            values (?, ?, ?, ?, ?, ?, ?)
+                                 reservasjon_id, identifikator, avklaringsbehov)
+            values (?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
         return dbConnection.executeReturnKey(sql) {
@@ -58,6 +58,7 @@ SELECT COALESCE(
                 setLocalDateTime(5, oppgave.opprettetTidspunkt)
                 setLong(6, reservasjonId)
                 setLong(7, oppgave.identifikator)
+                setString(8, oppgave.avklaringsbehov)
             }
         }
     }

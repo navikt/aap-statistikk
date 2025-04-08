@@ -520,6 +520,10 @@ class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
     override fun hentVilkårsResultat(vilkårResultatId: Long): VilkårsResultatEntity? {
         TODO("Not yet implemented")
     }
+
+    override fun hentForBehandling(behandlingsReferanse: UUID): VilkårsResultatEntity {
+        TODO("Not yet implemented")
+    }
 }
 
 class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {

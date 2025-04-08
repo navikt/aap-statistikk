@@ -23,6 +23,7 @@ import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
+import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URI
@@ -131,6 +132,7 @@ class IntegrationTest {
 
             assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
             assertThat(vilkårsVurderingRad.saksnummer).isEqualTo(saksnummer)
+            assertThat(vilkårsVurderingRad.vilkårtype).isEqualTo(Vilkårtype.ALDERSVILKÅRET)
 
             val sakRespons = ventPåSvar(
                 { bigQueryClient.read(SakTabell()) },
