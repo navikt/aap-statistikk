@@ -47,7 +47,7 @@ data class Behandling(
         ) { "Vil ha mottattTid på sekund-oppløsning" }
 
         require((ansvarligBeslutter != null && vedtakstidspunkt != null) || (ansvarligBeslutter == null && vedtakstidspunkt == null)) {
-            "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null"
+            "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null. Har ansvarlig beslutter: $ansvarligBeslutter, har vedtakstidspunkt: $vedtakstidspunkt"
         }
     }
 }
