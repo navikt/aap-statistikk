@@ -21,6 +21,7 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.utledGjeldendeAvklaringsBehov
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
+import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
@@ -43,7 +44,7 @@ class IntegrationTest {
     ) {
 
         val behandlingReferanse = UUID.randomUUID()
-        val saksnummer = "4LFK2S0"
+        val saksnummer = "4LFK2S0".tilSaksnummer()
         val hendelseFørCopy = behandlingHendelse(saksnummer, behandlingReferanse)
         val avsluttetBehandling = avsluttetBehandlingDTO()
 

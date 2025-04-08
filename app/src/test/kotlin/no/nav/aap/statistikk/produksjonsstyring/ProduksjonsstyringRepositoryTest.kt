@@ -15,6 +15,7 @@ import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
@@ -122,6 +123,7 @@ class ProduksjonsstyringRepositoryTest {
                         RettighetstypeperiodeRepository(conn),
                         DiagnoseRepositoryImpl(conn),
                         VilkårsresultatRepository(conn),
+                        TilkjentYtelseRepository(conn),
                     ),
                 ),
                 personService = PersonService(PersonRepository(conn)),
@@ -131,7 +133,7 @@ class ProduksjonsstyringRepositoryTest {
             )
 
             val hendelse = behandlingHendelse(
-                "1236",
+                "1236".tilSaksnummer(),
                 UUID.randomUUID()
             ).copy(mottattTid = mottattTid)
 

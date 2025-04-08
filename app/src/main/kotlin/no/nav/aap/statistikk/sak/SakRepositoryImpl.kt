@@ -44,10 +44,10 @@ FROM sak
 WHERE sak.saksnummer = ?
         """
 
-    override fun hentSak(saksnummer: String): Sak {
+    override fun hentSak(saksnummer: Saksnummer): Sak {
         return dbConnection.queryFirst(HENT_SAK_QUERY) {
             setParams {
-                setString(1, saksnummer)
+                setString(1, saksnummer.value)
             }
             setRowMapper { row ->
                 sakRowMapper(row)
@@ -55,10 +55,10 @@ WHERE sak.saksnummer = ?
         }
     }
 
-    override fun hentSakEllernull(saksnummer: String): Sak? {
+    override fun hentSakEllernull(saksnummer: Saksnummer): Sak? {
         return dbConnection.queryFirstOrNull<Sak>(HENT_SAK_QUERY) {
             setParams {
-                setString(1, saksnummer)
+                setString(1, saksnummer.value)
             }
             setRowMapper { row ->
                 sakRowMapper(row)
@@ -68,7 +68,7 @@ WHERE sak.saksnummer = ?
 
     private fun sakRowMapper(row: Row) = Sak(
         id = row.getLong("s_id"),
-        saksnummer = row.getString("s_saksnummer"),
+        saksnummer = row.getString("s_saksnummer").let(::Saksnummer),
         person = Person(
             ident = row.getString("p_ident"),
             id = row.getLong("s_person_id"),
@@ -95,9 +95,9 @@ WHERE sak.saksnummer = ?
 
         val sakId = dbConnection.queryFirst(query) {
             setParams {
-                setString(1, sak.saksnummer)
+                setString(1, sak.saksnummer.value)
                 setLong(2, personId)
-                setString(3, sak.saksnummer)
+                setString(3, sak.saksnummer.value)
             }
             setRowMapper { row ->
                 row.getLong("id")

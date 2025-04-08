@@ -70,7 +70,7 @@ class SaksStatistikkService(
             ) else null,
             behandlingType = behandling.typeBehandling.toString().uppercase(),
             aktorId = sak.person.ident,
-            saksnummer = sak.saksnummer,
+            saksnummer = sak.saksnummer.value,
             tekniskTid = LocalDateTime.now(clock),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             endretTid = hendelsesTidspunkt,

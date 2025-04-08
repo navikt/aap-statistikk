@@ -12,6 +12,7 @@ import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.pdl.SkjermingService
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -36,7 +37,7 @@ class AvsluttetBehandlingServiceTest {
         @BigQuery bigQuery: BigQueryConfig
     ) {
         val behandlingReferanse = UUID.randomUUID()
-        val saksnummer = "xxxx"
+        val saksnummer = Saksnummer("xxxx")
 
         opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
 
@@ -188,7 +189,7 @@ class AvsluttetBehandlingServiceTest {
         @BigQuery bigQuery: BigQueryConfig
     ) {
         val behandlingReferanse = UUID.randomUUID()
-        val saksnummer = "xxxx"
+        val saksnummer = Saksnummer("xxxx")
 
         val meterRegistry = SimpleMeterRegistry()
         val counter = meterRegistry.avsluttetBehandlingLagret()
@@ -302,6 +303,7 @@ class AvsluttetBehandlingServiceTest {
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                     diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
                     vilkårsresultatRepository = VilkårsresultatRepository(dbConnection),
+                    tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
                     clock
                 ),
             )

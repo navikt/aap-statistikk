@@ -12,6 +12,7 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
@@ -276,7 +277,7 @@ class LagreOppgaveJobbUtførerTest {
             )
             val id = PersonRepository(it).lagrePerson(personUtenId)
             val sak = Sak(
-                saksnummer = "123",
+                saksnummer = Saksnummer("123"),
                 person = personUtenId.medId(id),
                 sakStatus = SakStatus.OPPRETTET,
                 sistOppdatert = LocalDateTime.now()

@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.oppgave.Enhet
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.Saksnummer
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
@@ -318,7 +319,7 @@ WHERE b.id = ?"""
         referanse = it.getUUID("br_referanse"),
         sak = Sak(
             id = it.getLong("s_id"),
-            saksnummer = it.getString("s_saksnummer"),
+            saksnummer = Saksnummer(it.getString("s_saksnummer")),
             person = Person(
                 ident = it.getString("p_ident"),
                 id = it.getLong("p_id"),

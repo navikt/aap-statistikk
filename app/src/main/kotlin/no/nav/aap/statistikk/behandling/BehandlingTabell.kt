@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BQTable
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.utbetaling.helved.toBase64
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,7 +16,7 @@ import java.util.*
  * @param utbetalingId Base64-enkodet versjon av [referanse].
  */
 data class BQYtelseBehandling(
-    val saksnummer: String,
+    val saksnummer: Saksnummer,
     val referanse: UUID,
     val utbetalingId: String,
     val brukerFnr: String,
@@ -105,7 +106,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         }
 
     override fun parseRow(fieldValueList: FieldValueList): BQYtelseBehandling {
-        val saksnummer = fieldValueList.get("saksnummer").stringValue
+        val saksnummer = fieldValueList.get("saksnummer").stringValue.let(::Saksnummer)
         val referanse = fieldValueList.get("behandlingsreferanse").stringValue
         val brukerFnr = fieldValueList.get("brukerFnr").stringValue
         val behandlingsType = fieldValueList.get("behandlingsType").stringValue
@@ -144,7 +145,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
     override fun toRow(value: BQYtelseBehandling): InsertAllRequest.RowToInsert {
         return InsertAllRequest.RowToInsert.of(
             mapOf(
-                "saksnummer" to value.saksnummer,
+                "saksnummer" to value.saksnummer.value,
                 "behandlingsreferanse" to value.referanse.toString(),
                 "brukerFnr" to value.brukerFnr,
                 "behandlingsType" to value.behandlingsType.toString(),

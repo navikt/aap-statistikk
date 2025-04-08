@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype
 import no.nav.aap.statistikk.behandling.TypeBehandling
+import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
@@ -20,7 +21,7 @@ class VilkårsresultatRepositoryTest {
     @Test
     fun `fungerer å lagre vilkårs-resultat og hente inn igjen`(@Postgres dataSource: DataSource) {
         val randomUUID = UUID.randomUUID()
-        val saksnummer = "ABCDE"
+        val saksnummer = "ABCDE".tilSaksnummer()
         val (behandlingId, _) = opprettTestHendelse(dataSource, randomUUID, saksnummer)
 
         val vilkårsResultatEntity = VilkårsResultatEntity(
@@ -107,7 +108,7 @@ class VilkårsresultatRepositoryTest {
     @Test
     fun `kun ett vilkårsresultat per behandling - skal få exception`(@Postgres dataSource: DataSource) {
         val randomUUID = UUID.randomUUID()
-        val saksnummer = "saksnummer"
+        val saksnummer = "saksnummer".tilSaksnummer()
 
         val (behandlingId, _) = opprettTestHendelse(dataSource, randomUUID, saksnummer)
 

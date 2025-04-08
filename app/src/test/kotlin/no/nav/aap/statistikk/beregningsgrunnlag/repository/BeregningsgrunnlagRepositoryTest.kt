@@ -1,22 +1,23 @@
 package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
+import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 class BeregningsgrunnlagRepositoryTest {
     @Test
     fun `sette inn rent 11-19`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
-        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
 
         val grunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
             grunnlag = 20000.0,
@@ -55,7 +56,7 @@ class BeregningsgrunnlagRepositoryTest {
     @Test
     fun `sette inn grunnlag yrkesskade`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
-        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
@@ -107,7 +108,7 @@ class BeregningsgrunnlagRepositoryTest {
     @Test
     fun `sette inn grunnlag yrkesskade med uføre`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
-        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,
@@ -170,7 +171,7 @@ class BeregningsgrunnlagRepositoryTest {
     @Test
     fun `sette inn grunnlag uføre`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
-        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
 
         val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre =
             IBeregningsGrunnlag.GrunnlagUføre(
@@ -221,11 +222,11 @@ class BeregningsgrunnlagRepositoryTest {
     @Test
     fun `sette inn to beregningsgrunnlag`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
-        opprettTestHendelse(dataSource, behandlingsReferanse, "ABCDE")
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
 
         val behandlingsReferanse2 = UUID.randomUUID()
 
-        opprettTestHendelse(dataSource, behandlingsReferanse2, "ABCDF")
+        opprettTestHendelse(dataSource, behandlingsReferanse2, Saksnummer("ABCDF"))
 
         val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
             grunnlaget = 25000.0,

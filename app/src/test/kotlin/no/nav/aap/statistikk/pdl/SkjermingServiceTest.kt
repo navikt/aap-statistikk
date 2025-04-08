@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.FakePdlClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -20,7 +21,7 @@ class SkjermingServiceTest {
     private val behandling = Behandling(
         referanse = UUID.randomUUID(),
         sak = Sak(
-            saksnummer = "234",
+            saksnummer = Saksnummer("234"),
             person = Person(
                 ident = "130289"
             ),

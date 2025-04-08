@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.tilkjentytelse
 
+import no.nav.aap.statistikk.sak.Saksnummer
 import java.time.LocalDate
 import java.util.*
 
@@ -11,7 +12,7 @@ data class TilkjentYtelsePeriode(
 )
 
 data class TilkjentYtelse(
-    val saksnummer: String,
+    val saksnummer: Saksnummer,
     val behandlingsReferanse: UUID,
     val perioder: List<TilkjentYtelsePeriode>
 )

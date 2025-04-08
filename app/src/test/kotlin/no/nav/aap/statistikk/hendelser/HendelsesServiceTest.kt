@@ -21,6 +21,7 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -61,7 +62,7 @@ class HendelsesServiceTest {
         )
 
         val sak = Sak(
-            saksnummer = "ABCDE",
+            saksnummer = Saksnummer("ABCDE"),
             person = Person("123"),
             sakStatus = SakStatus.LØPENDE,
             sistOppdatert = LocalDateTime.now()
@@ -134,10 +135,11 @@ class HendelsesServiceTest {
         clock: Clock
     ): HendelsesService {
         val vilkårsresultatRepository = FakeVilkårsResultatRepository()
+        val tilkjentYtelseRepository = FakeTilkjentYtelseRepository()
         return HendelsesService(
             sakRepository = sakRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
-                tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+                tilkjentYtelseRepository = tilkjentYtelseRepository,
                 beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
                 vilkårsResultatRepository = vilkårsresultatRepository,
                 diagnoseRepository = diagnoseRepository,
@@ -149,7 +151,8 @@ class HendelsesServiceTest {
                     bqRepositoryYtelse,
                     rettighetstypeperiodeRepository,
                     diagnoseRepository,
-                    vilkårsresultatRepository = vilkårsresultatRepository
+                    vilkårsresultatRepository = vilkårsresultatRepository,
+                    tilkjentYtelseRepository = tilkjentYtelseRepository,
                 )
             ),
             personService = PersonService(FakePersonRepository()),

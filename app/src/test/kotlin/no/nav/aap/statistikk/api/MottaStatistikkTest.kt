@@ -38,6 +38,7 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
@@ -447,18 +448,18 @@ class MottaStatistikkTest {
             val hendelsesRepository = SakRepositoryImpl(
                 it
             )
-            val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer)
+            val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer.let(::Saksnummer))
             val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
 
             assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
             assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5006")
-            assertThat(uthentetSak.saksnummer).isEqualTo(hendelse.saksnummer)
-            assertThat(uthentetBehandling?.sak?.saksnummer).isEqualTo(hendelse.saksnummer)
-            assertThat(uthentetBehandling?.opprettetTid).isEqualTo(
+            assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
+            assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
+            assertThat(uthentetBehandling.opprettetTid).isEqualTo(
                 hendelse.behandlingOpprettetTidspunkt
             )
-            assertThat(uthentetBehandling?.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
-            assertThat(uthentetBehandling?.status).isEqualTo(hendelse.behandlingStatus.tilDomene())
+            assertThat(uthentetBehandling.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
+            assertThat(uthentetBehandling.status).isEqualTo(hendelse.behandlingStatus.tilDomene())
 
             assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
             assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)

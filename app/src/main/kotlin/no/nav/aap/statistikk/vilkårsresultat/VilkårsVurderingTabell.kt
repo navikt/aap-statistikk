@@ -6,11 +6,12 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
 import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
 import no.nav.aap.statistikk.bigquery.BQTable
+import no.nav.aap.statistikk.sak.Saksnummer
 import java.time.LocalDate
 import java.util.*
 
 data class BQVilkårsResultatPeriode(
-    val saksnummer: String,
+    val saksnummer: Saksnummer,
     val behandlingsReferanse: UUID,
     val behandlingsType: String,
     val vilkårtype: Vilkårtype,
@@ -65,7 +66,7 @@ class VilkårsVurderingTabell : BQTable<BQVilkårsResultatPeriode> {
 
 
     override fun parseRow(fieldValueList: FieldValueList): BQVilkårsResultatPeriode {
-        val saksnummer = hentVerdi(fieldValueList, FeltNavn.SAKSNUMMER)
+        val saksnummer = hentVerdi(fieldValueList, FeltNavn.SAKSNUMMER).let(::Saksnummer)
         val behandlingsType = hentVerdi(fieldValueList, FeltNavn.BEHANDLINGSTYPE)
         val behandlingsReferanse = hentVerdi(fieldValueList, FeltNavn.BEHANDLINGSREFERANSE)
         val vilkårType = hentVerdi(fieldValueList, FeltNavn.VILKÅR_TYPE)
@@ -93,7 +94,7 @@ class VilkårsVurderingTabell : BQTable<BQVilkårsResultatPeriode> {
         // TODO: bruke ID?
         return RowToInsert.of(
             mapOf(
-                FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer,
+                FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer.value,
                 FeltNavn.BEHANDLINGSTYPE.feltNavn to value.behandlingsType,
                 FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsReferanse.toString(),
                 FeltNavn.VILKÅR_TYPE.feltNavn to value.vilkårtype.toString(),
