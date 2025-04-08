@@ -71,7 +71,9 @@ class LagreOppgaveJobbUtfører(
         if (oppgave.behandlingReferanse != null) {
             val behandling = behandlingRepository.hent(oppgave.behandlingReferanse.referanse)
 
-            lagreSakInfotilBigQueryCallback(behandling!!.id!!) // TODO
+            if (behandling != null) {
+                lagreSakInfotilBigQueryCallback(behandling.id!!)
+            }
         }
     }
 }

@@ -87,7 +87,7 @@ class SaksStatistikkService(
             behandlingStatus = behandlingStatus(behandling),
             behandlingÅrsak = behandling.årsaker.joinToString(","),
             ansvarligEnhetKode = ansvarligEnhet,
-            sakYtelse = sakYtelse
+            sakYtelse = "AAP"
         )
 
         if (behandling.årsaker.size > 1) {
