@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.sak
 
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
@@ -18,7 +17,7 @@ import javax.sql.DataSource
 class SakRepositoryImplTest {
     @Test
     fun `sett inn sak og hent ut igjen`(@Postgres dataSource: DataSource) {
-        val saksnummer = "1234"
+        val saksnummer = Saksnummer("1234")
         val now = Instant.now()
 
         dataSource.transaction {
@@ -60,7 +59,7 @@ class SakRepositoryImplTest {
 
     @Test
     fun `oppdatere sak`(@Postgres dataSource: DataSource) {
-        val saksnummer = "1234"
+        val saksnummer = Saksnummer("1234")
         val now = Instant.now()
 
         // Sette inn
@@ -103,7 +102,7 @@ class SakRepositoryImplTest {
             sakRepositoryImpl.hentSak(sak.id!!)
         }
 
-        assertThat(uthentet.saksnummer).isEqualTo("1234")
+        assertThat(uthentet.saksnummer).isEqualTo("1234".tilSaksnummer())
         assertThat(uthentet.sistOppdatert.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(
             LocalDateTime.ofInstant(
                 now,

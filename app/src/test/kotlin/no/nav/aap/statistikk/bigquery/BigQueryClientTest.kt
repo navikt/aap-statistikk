@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.FieldValueList
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
 import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.schemaRegistry
 import no.nav.aap.statistikk.vilkårsresultat.BQVilkårsResultatPeriode
@@ -86,7 +87,7 @@ class BigQueryClientTest {
 
         val behandlingsReferanse = UUID.randomUUID()
         val vilkårsResult = BQVilkårsResultatPeriode(
-            "123", behandlingsReferanse, "behandling",
+            Saksnummer("123"), behandlingsReferanse, "behandling",
             fraDato = LocalDate.now().minusWeeks(2),
             tilDato = LocalDate.now().minusDays(1),
             utfall = "utfall",
@@ -98,7 +99,7 @@ class BigQueryClientTest {
         val uthentetResultat = client.read(vilkårsVurderingTabell)
 
         assertThat(uthentetResultat.size).isEqualTo(1)
-        assertThat(uthentetResultat.first().saksnummer).isEqualTo("123")
+        assertThat(uthentetResultat.first().saksnummer.value).isEqualTo("123")
         assertThat(uthentetResultat.first().behandlingsReferanse).isEqualTo(behandlingsReferanse)
         assertThat(uthentetResultat.first().behandlingsType).isEqualTo("behandling")
         assertThat(uthentetResultat.first().vilkårtype).isEqualTo(Vilkårtype.GRUNNLAGET)

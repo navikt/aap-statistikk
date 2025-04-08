@@ -5,6 +5,8 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.oppgave.*
 import no.nav.aap.statistikk.sak.SakStatus
+import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak
@@ -24,7 +26,7 @@ class BehandlingRepositoryTest {
     @Test
     fun `sette inn og hente ut igjen`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
-        val sak = opprettTestSak(dataSource, "123456789", person)
+        val sak = opprettTestSak(dataSource, "123456789".let(::Saksnummer), person)
 
         val referanse = UUID.randomUUID()
 
@@ -106,7 +108,7 @@ class BehandlingRepositoryTest {
     @Test
     fun `lagre to ganger med eksisterende versjon`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
-        val sak = opprettTestSak(dataSource, "123456789", person)
+        val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
         dataSource.transaction {
@@ -151,7 +153,7 @@ class BehandlingRepositoryTest {
     @Test
     fun `lagre oppdatert behandling, henter ut nyeste info`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
-        val sak = opprettTestSak(dataSource, "123456789", person)
+        val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
 
@@ -193,7 +195,7 @@ class BehandlingRepositoryTest {
     @Test
     fun `telle antall fullførte behandlinger`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
-        val sak = opprettTestSak(dataSource, "123456789", person)
+        val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
         val referanse2 = UUID.randomUUID()
@@ -268,7 +270,7 @@ class BehandlingRepositoryTest {
     @Test
     fun `prøve å sette inn flere med gjeldende = true skal feile`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
-        val sak = opprettTestSak(dataSource, "123456789", person)
+        val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
 

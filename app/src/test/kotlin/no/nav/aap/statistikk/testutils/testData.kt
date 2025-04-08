@@ -6,6 +6,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.statistikk.sak.Saksnummer
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -100,9 +101,9 @@ fun avklaringsbehovHendelse(): AvklaringsbehovHendelseDto {
     )
 }
 
-fun behandlingHendelse(saksnummer: String, behandlingReferanse: UUID): StoppetBehandling {
+fun behandlingHendelse(saksnummer: Saksnummer, behandlingReferanse: UUID): StoppetBehandling {
     return StoppetBehandling(
-        saksnummer = saksnummer,
+        saksnummer = saksnummer.value,
         behandlingReferanse = behandlingReferanse,
         behandlingStatus = Status.OPPRETTET,
         behandlingType = TypeBehandling.Førstegangsbehandling,

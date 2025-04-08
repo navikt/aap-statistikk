@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepository
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.verdityper.dokument.Kanal
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -33,7 +34,10 @@ class HendelsesService(
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
         val person = personService.hentEllerLagrePerson(hendelse.ident)
-        val sak = hentEllerSettInnSak(person, hendelse.saksnummer, hendelse.sakStatus)
+        val saksnummer = hendelse.saksnummer.let(::Saksnummer)
+
+        val sak =
+            hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus)
 
         val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
 
@@ -43,7 +47,7 @@ class HendelsesService(
                 requireNotNull(hendelse.avsluttetBehandling) { "Om behandlingen er avsluttet, så må avsluttetBehandling være ikke-null." }
             avsluttetBehandlingService.lagre(
                 avsluttetBehandling.tilDomene(
-                    hendelse.saksnummer,
+                    saksnummer,
                     hendelse.behandlingReferanse,
                     hendelse.hendelsesTidspunkt,
                 )
@@ -109,7 +113,7 @@ class HendelsesService(
 
     private fun hentEllerSettInnSak(
         person: Person,
-        saksnummer: String,
+        saksnummer: Saksnummer,
         sakStatus: SakStatus
     ): Sak {
         var sak = sakRepository.hentSakEllernull(saksnummer)

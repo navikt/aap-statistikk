@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -16,11 +17,11 @@ class TilkjentYtelseRepositoryTest {
     @Test
     fun `kun én lagret tilkjent ytelse per behandlingsreferanse`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
-        opprettTestHendelse(dataSource, behandlingsReferanse, "123456789")
+        opprettTestHendelse(dataSource, behandlingsReferanse, "123456789".tilSaksnummer())
 
         val tilkjentYtelse =
             TilkjentYtelseEntity(
-                saksnummer = "ABCDE",
+                saksnummer = "ABCDE".tilSaksnummer(),
                 behandlingsReferanse = behandlingsReferanse,
                 perioder = listOf()
             )
@@ -41,7 +42,7 @@ class TilkjentYtelseRepositoryTest {
     @Test
     fun `lagre og hente ut tilkjent ytelse`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
-        val saksnummer = "ABCDE"
+        val saksnummer = "ABCDE".tilSaksnummer()
 
         val tilkjentYtelse =
             TilkjentYtelse(

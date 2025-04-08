@@ -246,7 +246,7 @@ fun bigQueryContainer(): BigQueryConfig {
 fun opprettTestHendelse(
     dataSource: DataSource,
     randomUUID: UUID,
-    saksnummer: String
+    saksnummer: Saksnummer
 ): Pair<BehandlingId, SakId> {
     val ident = "29021946"
 
@@ -273,7 +273,7 @@ fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     }
 }
 
-fun opprettTestSak(dataSource: DataSource, saksnummer: String, person: Person): Sak {
+fun opprettTestSak(dataSource: DataSource, saksnummer: Saksnummer, person: Person): Sak {
     return dataSource.transaction {
         val sak = Sak(
             saksnummer = saksnummer,
@@ -347,11 +347,11 @@ class FakeSakRepository : SakRepository {
         throw IllegalArgumentException("Fant ikke sak med id $sakID")
     }
 
-    override fun hentSak(saksnummer: String): Sak {
+    override fun hentSak(saksnummer: Saksnummer): Sak {
         return saker.values.firstOrNull { it.saksnummer == saksnummer }!!
     }
 
-    override fun hentSakEllernull(saksnummer: String): Sak? {
+    override fun hentSakEllernull(saksnummer: Saksnummer): Sak? {
         return saker.values.firstOrNull { it.saksnummer == saksnummer }
             ?.also { requireNotNull(it.id) }
     }
@@ -501,7 +501,11 @@ class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
         return (tilkjentYtelser.size - 1).toLong()
     }
 
-    override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse? {
+    override fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse {
+        TODO("Not yet implemented")
+    }
+
+    override fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
         TODO("Not yet implemented")
     }
 }
@@ -579,7 +583,7 @@ fun forberedDatabase(
     val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
 
     val sak = Sak(
-        saksnummer = "ABCDE",
+        saksnummer = "ABCDE".tilSaksnummer(),
         person = person,
         sakStatus = SakStatus.LØPENDE,
         sistOppdatert = LocalDateTime.now()

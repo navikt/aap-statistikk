@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.vilkårsresultat.repository
 
 import no.nav.aap.statistikk.behandling.TypeBehandling
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.vilkårsresultat.*
 import java.time.LocalDate
 import java.util.*
@@ -10,7 +11,7 @@ data class VilkårsResultatEntity(
     val vilkår: List<VilkårEntity>
 ) {
     fun tilVilkårsResultat(
-        saksnummer: String,
+        saksnummer: Saksnummer,
         behandlingsReferanse: UUID,
         typeBehandling: String
     ): Vilkårsresultat {

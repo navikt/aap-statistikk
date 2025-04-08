@@ -3,9 +3,14 @@ package no.nav.aap.statistikk.sak
 import no.nav.aap.statistikk.person.Person
 import java.time.LocalDateTime
 
+@JvmInline
+value class Saksnummer(val value: String)
+
+fun String.tilSaksnummer() = Saksnummer(this)
+
 data class Sak(
     val id: Long? = null,
-    val saksnummer: String,
+    val saksnummer: Saksnummer,
     val person: Person,
     val sakStatus: SakStatus,
     val sistOppdatert: LocalDateTime,

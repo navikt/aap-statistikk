@@ -6,10 +6,11 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert
 import com.google.cloud.bigquery.Schema
 import com.google.cloud.bigquery.StandardSQLTypeName
 import no.nav.aap.statistikk.bigquery.BQTable
+import no.nav.aap.statistikk.sak.Saksnummer
 import java.time.LocalDate
 
 data class BQTilkjentYtelse(
-    val saksnummer: String,
+    val saksnummer: Saksnummer,
     val behandlingsreferanse: String,
     val fraDato: LocalDate,
     val tilDato: LocalDate,
@@ -45,7 +46,8 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
 
 
     override fun parseRow(fieldValueList: FieldValueList): BQTilkjentYtelse {
-        val saksnummer = fieldValueList.get(FeltNavn.SAKSNUMMER.feltNavn).stringValue
+        val saksnummer =
+            fieldValueList.get(FeltNavn.SAKSNUMMER.feltNavn).stringValue.let(::Saksnummer)
         val behandlingsReferanse =
             fieldValueList.get(FeltNavn.BEHANDLINGSREFERANSE.feltNavn).stringValue
         val fraDato = LocalDate.parse(fieldValueList.get(FeltNavn.FRA_DATO.feltNavn).stringValue)
@@ -66,7 +68,7 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
     override fun toRow(value: BQTilkjentYtelse): RowToInsert {
         return RowToInsert.of(
             mapOf(
-                FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer,
+                FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer.value,
                 FeltNavn.BEHANDLINGSREFERANSE.feltNavn to value.behandlingsreferanse,
                 FeltNavn.FRA_DATO.feltNavn to value.fraDato.toString(),
                 FeltNavn.TIL_DATO.feltNavn to value.tilDato.toString(),

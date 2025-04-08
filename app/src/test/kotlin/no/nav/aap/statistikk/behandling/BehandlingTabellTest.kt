@@ -4,6 +4,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.schemaRegistry
 import no.nav.aap.utbetaling.helved.toBase64
@@ -39,7 +40,7 @@ class BehandlingTabellTest {
         )
         client.insert(
             tabell, BQYtelseBehandling(
-                saksnummer = "123XXX",
+                saksnummer = Saksnummer("123XXX"),
                 referanse = referanse,
                 brukerFnr = "2902198512345",
                 behandlingsType = TypeBehandling.Førstegangsbehandling,
@@ -56,7 +57,7 @@ class BehandlingTabellTest {
         val read = client.read(tabell)
 
         assertThat(read.size).isEqualTo(1)
-        assertThat(read.first().saksnummer).isEqualTo("123XXX")
+        assertThat(read.first().saksnummer.value).isEqualTo("123XXX")
         assertThat(read.first().referanse).isEqualTo(referanse)
         assertThat(read.first().brukerFnr).isEqualTo("2902198512345")
         assertThat(read.first().behandlingsType).isEqualTo(TypeBehandling.Førstegangsbehandling)

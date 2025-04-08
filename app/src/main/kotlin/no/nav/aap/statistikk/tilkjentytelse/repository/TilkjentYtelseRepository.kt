@@ -1,6 +1,8 @@
 package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
@@ -11,7 +13,8 @@ private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.jav
 
 interface ITilkjentYtelseRepository {
     fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long
-    fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse?
+    fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse
+    fun hentForBehandling(behandlingId: UUID): TilkjentYtelse
 }
 
 class TilkjentYtelseRepository(
@@ -73,26 +76,52 @@ FROM tilkjent_ytelse_periode
 WHERE tilkjent_ytelse.id = ?"""
         ) {
             setParams { setInt(1, tilkjentYtelseId) }
-            setRowMapper { row ->
-                val fraDato = row.getLocalDate("fra_dato")
-                val tilDato = row.getLocalDate("til_dato")
-                val dagsats = row.getBigDecimal("dagsats").toDouble()
-                val gradering = row.getBigDecimal("gradering").toDouble()
-
-                Triple(
-                    TilkjentYtelsePeriode(
-                        fraDato = fraDato,
-                        tilDato = tilDato,
-                        dagsats = dagsats,
-                        gradering = gradering
-                    ), row.getUUID("referanse"), row.getString("saksnummer")
-                )
-            }
+            setRowMapper(mapTilkjentTriple())
         }
 
         val saksnummer = perioderTriple.first().third
         val behandlingsReferanse = perioderTriple.first().second
 
-        return TilkjentYtelse(saksnummer, behandlingsReferanse, perioderTriple.map { it.first })
+        return TilkjentYtelse(
+            saksnummer.let(::Saksnummer),
+            behandlingsReferanse,
+            perioderTriple.map { it.first })
+    }
+
+    override fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
+        val perioderTriple = dbConnection.queryList(
+            """SELECT *
+FROM tilkjent_ytelse_periode
+         left join tilkjent_ytelse
+                   on tilkjent_ytelse.id = tilkjent_ytelse_periode.tilkjent_ytelse_id
+         left join behandling on behandling.id = tilkjent_ytelse.behandling_id
+         left join behandling_referanse br on br.id = behandling.referanse_id
+         left join sak on sak.id = behandling.sak_id
+WHERE br.referanse = ?"""
+        ) {
+            setParams { setUUID(1, behandlingId) }
+            setRowMapper(mapTilkjentTriple())
+        }
+
+        val saksnummer = perioderTriple.first().third
+        val behandlingsReferanse = perioderTriple.first().second
+
+        return TilkjentYtelse(saksnummer.let(::Saksnummer), behandlingsReferanse, perioderTriple.map { it.first })
+    }
+
+    private fun mapTilkjentTriple(): (Row) -> Triple<TilkjentYtelsePeriode, UUID, String> = { row ->
+        val fraDato = row.getLocalDate("fra_dato")
+        val tilDato = row.getLocalDate("til_dato")
+        val dagsats = row.getBigDecimal("dagsats").toDouble()
+        val gradering = row.getBigDecimal("gradering").toDouble()
+
+        Triple(
+            TilkjentYtelsePeriode(
+                fraDato = fraDato,
+                tilDato = tilDato,
+                dagsats = dagsats,
+                gradering = gradering
+            ), row.getUUID("referanse"), row.getString("saksnummer")
+        )
     }
 }

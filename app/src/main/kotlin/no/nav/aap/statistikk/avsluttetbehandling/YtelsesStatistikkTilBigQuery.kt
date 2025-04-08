@@ -5,6 +5,8 @@ import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
+import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.utbetaling.helved.toBase64
 import java.time.Clock
@@ -16,6 +18,7 @@ class YtelsesStatistikkTilBigQuery(
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val diagnoseRepository: DiagnoseRepository,
     private val vilkårsresultatRepository: IVilkårsresultatRepository,
+    private val tilkjentYtelseRepository: ITilkjentYtelseRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) {
     fun lagre(
@@ -32,6 +35,8 @@ class YtelsesStatistikkTilBigQuery(
                 behandling.typeBehandling.name
             )
 
+        val tilkjentYtelse = tilkjentYtelseRepository.hentForBehandling(behandling.referanse)
+
         bqRepository.lagre(
             BQYtelseBehandling(
                 saksnummer = behandling.sak.saksnummer,
@@ -40,7 +45,7 @@ class YtelsesStatistikkTilBigQuery(
                 brukerFnr = behandling.sak.person.ident,
                 behandlingsType = behandling.typeBehandling,
                 datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt,
-                kodeverk = avsluttetBehandling.diagnoser?.kodeverk,
+                kodeverk = diagnoser?.kodeverk,
                 diagnosekode = diagnoser?.diagnosekode,
                 bidiagnoser = diagnoser?.bidiagnoser,
                 rettighetsPerioder = rettighetstypeperioder,
@@ -48,7 +53,7 @@ class YtelsesStatistikkTilBigQuery(
             )
         )
         bqRepository.lagre(vilkårsResultat)
-        bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)
+        bqRepository.lagre(tilkjentYtelse)
         if (avsluttetBehandling.beregningsgrunnlag != null) {
             bqRepository.lagre(
                 tilBqGrunnlag(
@@ -62,12 +67,12 @@ class YtelsesStatistikkTilBigQuery(
 
     private fun tilBqGrunnlag(
         behandlingsreferanse: UUID,
-        saksnummer: String,
+        saksnummer: Saksnummer,
         value: IBeregningsGrunnlag
     ): BeregningsGrunnlagBQ {
         return when (value) {
             is IBeregningsGrunnlag.GrunnlagUføre -> BeregningsGrunnlagBQ(
-                saksnummer = saksnummer,
+                saksnummer = saksnummer.value,
                 behandlingsreferanse = behandlingsreferanse,
                 type = GrunnlagType.Grunnlag_Ufore,
                 grunnlaget = value.grunnlag,
@@ -91,7 +96,7 @@ class YtelsesStatistikkTilBigQuery(
                 }
 
                 BeregningsGrunnlagBQ(
-                    saksnummer = saksnummer,
+                    saksnummer = saksnummer.value,
                     behandlingsreferanse = behandlingsreferanse,
                     type = GrunnlagType.GrunnlagYrkesskade,
                     grunnlaget = value.grunnlaget,
@@ -114,7 +119,7 @@ class YtelsesStatistikkTilBigQuery(
             }
 
             is IBeregningsGrunnlag.Grunnlag_11_19 -> BeregningsGrunnlagBQ(
-                saksnummer = saksnummer,
+                saksnummer = saksnummer.value,
                 behandlingsreferanse = behandlingsreferanse,
                 type = GrunnlagType.Grunnlag11_19,
                 grunnlaget = value.grunnlag,

@@ -4,11 +4,12 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Utfall
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsPeriodeDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsResultatDTO
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.vilkårsresultat.*
 import no.nav.aap.statistikk.vilkårsresultat.Utfall.*
 import java.util.*
 
-fun VilkårsResultatDTO.tilDomene(saksnummer: String, behandlingsReferanse: UUID): Vilkårsresultat {
+fun VilkårsResultatDTO.tilDomene(saksnummer: Saksnummer, behandlingsReferanse: UUID): Vilkårsresultat {
     return Vilkårsresultat(
         saksnummer = saksnummer,
         behandlingsType = this.typeBehandling.tilDomene(),
