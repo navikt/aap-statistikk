@@ -7,7 +7,7 @@ import no.nav.aap.statistikk.person.Person
 
 class OppgaveRepository(private val dbConnection: DBConnection) {
     fun lagreOppgave(oppgave: Oppgave): Long {
-        require(oppgave.enhet.id != null)
+        require(oppgave.enhet.id != null) { "Enhet-ID må være satt på enhet-objektet i oppgave." }
 
         val behandlingsReferanseId = oppgave.behandlingReferanse?.let {
             val sqlVersjon = """WITH ny_ref AS (
