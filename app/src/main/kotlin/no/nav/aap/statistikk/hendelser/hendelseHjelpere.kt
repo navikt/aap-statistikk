@@ -68,6 +68,7 @@ fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
     return this
         .asSequence()
         .filter { it.avklaringsbehovDefinisjon.kode == AvklaringsbehovKode.`5099` }
+        .filter { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }
         .flatMap { it.endringer }
         .filter { it.status == EndringStatus.AVSLUTTET }
         .map { it.endretAv }

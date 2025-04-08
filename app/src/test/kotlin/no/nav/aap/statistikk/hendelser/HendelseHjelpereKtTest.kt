@@ -85,6 +85,56 @@ class HendelseHjelpereKtTest {
     }
 
     @Test
+    fun `ansvarlig beslutter er null om avklaringsbehovet ikke er avsluttet`() {
+        val hendelser = listOf(AvklaringsbehovHendelseDto(
+            avklaringsbehovDefinisjon = FATTE_VEDTAK,
+            status = Status.OPPRETTET,
+            endringer = listOf(
+                EndringDTO(
+                    status = Status.OPPRETTET,
+                    tidsstempel = LocalDateTime.parse("2025-04-08T09:03:54.371"),
+                    endretAv = "Kelvin",
+                ),
+                EndringDTO(
+                    status = Status.AVSLUTTET,
+                    tidsstempel = LocalDateTime.parse("2025-04-08T09:04:14.935"),
+                    endretAv = "Z994573",
+                ),
+                EndringDTO(
+                    status = Status.OPPRETTET,
+                    tidsstempel = LocalDateTime.parse("2025-04-08T09:04:15.080"),
+                    endretAv = "Kelvin",
+                ),
+            ),
+        ))
+
+        assertThat(hendelser.utledAnsvarligBeslutter()).isNull()
+    }
+
+    @Test
+    fun `ansvarlig beslutter er ikke-null om avklaringsbehovet er avsluttet`() {
+        val hendelser = listOf(AvklaringsbehovHendelseDto(
+            avklaringsbehovDefinisjon = FATTE_VEDTAK,
+            status = Status.AVSLUTTET,
+            endringer = listOf(
+                EndringDTO(
+                    status = Status.OPPRETTET,
+                    tidsstempel = LocalDateTime.parse("2025-04-08T09:03:54.371"),
+                    endretAv = "Kelvin",
+                ),
+                EndringDTO(
+                    status = Status.AVSLUTTET,
+                    tidsstempel = LocalDateTime.parse("2025-04-08T09:04:14.935"),
+                    endretAv = "Z994573",
+                ),
+            ),
+        ))
+
+        assertThat(hendelser.utledAnsvarligBeslutter()).isNotNull()
+        assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("Z994573")
+    }
+
+    @Test
     fun `å utlede venteårsak gir null om ingen er gitt`() {
         assertThat(avklaringsbehovHendelser.utledÅrsakTilSattPåVent()).isNull()
     }
