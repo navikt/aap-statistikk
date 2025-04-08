@@ -124,6 +124,7 @@ class ProduksjonsstyringRepositoryTest {
                         DiagnoseRepositoryImpl(conn),
                         VilkårsresultatRepository(conn),
                         TilkjentYtelseRepository(conn),
+                        beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn),
                     ),
                 ),
                 personService = PersonService(PersonRepository(conn)),

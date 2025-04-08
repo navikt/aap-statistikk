@@ -136,11 +136,12 @@ class HendelsesServiceTest {
     ): HendelsesService {
         val vilkårsresultatRepository = FakeVilkårsResultatRepository()
         val tilkjentYtelseRepository = FakeTilkjentYtelseRepository()
+        val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
         return HendelsesService(
             sakRepository = sakRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
-                beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+                beregningsgrunnlagRepository = beregningsgrunnlagRepository,
                 vilkårsResultatRepository = vilkårsresultatRepository,
                 diagnoseRepository = diagnoseRepository,
                 behandlingRepository = behandlingRepository,
@@ -153,6 +154,7 @@ class HendelsesServiceTest {
                     diagnoseRepository,
                     vilkårsresultatRepository = vilkårsresultatRepository,
                     tilkjentYtelseRepository = tilkjentYtelseRepository,
+                    beregningsgrunnlagRepository = beregningsgrunnlagRepository,
                 )
             ),
             personService = PersonService(FakePersonRepository()),

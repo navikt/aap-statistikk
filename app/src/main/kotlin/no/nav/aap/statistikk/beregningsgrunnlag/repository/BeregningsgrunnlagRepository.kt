@@ -15,7 +15,7 @@ import java.util.*
 
 interface IBeregningsgrunnlagRepository {
     fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long
-    fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>>
+    fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>>
 }
 
 
@@ -179,9 +179,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         }
     }
 
-    override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
-        val sql = """
-select grunnlag.id                                    as gr_id,
+    override fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
+        val sql = """select grunnlag.id                                    as gr_id,
        grunnlag.type                                  as gr_type,
        g.id                                           as g_id,
        g.grunnlag_id                                  as g_grunnlag_id,
@@ -218,10 +217,12 @@ from grunnlag
          left outer join grunnlag_ufore as gu on g.id = gu.grunnlag_11_19_id
          left outer join behandling as b on b.id = grunnlag.behandling_id
          left outer join behandling_referanse br on b.referanse_id = br.id
+where br.referanse = ?
             """
         return dbConnection.queryList(sql) {
+            setParams { setUUID(1, referanse) }
             setRowMapper { row ->
-                val referanse = row.getUUID("b_referanse")
+                val ref = row.getUUID("b_referanse")
 
                 val type = row.getString("gr_type")
 
@@ -244,7 +245,7 @@ from grunnlag
                 }
 
                 MedBehandlingsreferanse(
-                    behandlingsReferanse = referanse,
+                    behandlingsReferanse = ref,
                     value = grunnlagsType
                 )
             }

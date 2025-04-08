@@ -537,7 +537,7 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
         return grunnlag.indexOf(beregningsGrunnlag).toLong()
     }
 
-    override fun hentBeregningsGrunnlag(): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
+    override fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         return grunnlag
     }
 }
