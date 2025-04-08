@@ -52,6 +52,7 @@ class LagreStoppetHendelseJobb(
                     diagnoseRepository = DiagnoseRepositoryImpl(connection),
                     vilkårsresultatRepository = vilkårsResultatRepositoryFactory(connection),
                     tilkjentYtelseRepository = tilkjentYtelseRepositoryFactory(connection),
+                    beregningsgrunnlagRepository = beregningsgrunnlagRepositoryFactory(connection),
                 )
             ),
             personService = personService(connection),

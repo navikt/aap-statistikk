@@ -304,6 +304,7 @@ class AvsluttetBehandlingServiceTest {
                     diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
                     vilkårsresultatRepository = VilkårsresultatRepository(dbConnection),
                     tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
+                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dbConnection),
                     clock
                 ),
             )

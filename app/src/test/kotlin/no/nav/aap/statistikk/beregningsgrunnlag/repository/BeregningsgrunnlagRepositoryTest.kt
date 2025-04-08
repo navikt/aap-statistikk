@@ -40,7 +40,7 @@ class BeregningsgrunnlagRepositoryTest {
         val hentBeregningsGrunnlag = dataSource.transaction {
             BeregningsgrunnlagRepository(
                 it
-            ).hentBeregningsGrunnlag()
+            ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
@@ -93,7 +93,7 @@ class BeregningsgrunnlagRepositoryTest {
             dataSource.transaction {
                 BeregningsgrunnlagRepository(
                     it
-                ).hentBeregningsGrunnlag()
+                ).hentBeregningsGrunnlag(behandlingsReferanse)
             }
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
@@ -155,7 +155,7 @@ class BeregningsgrunnlagRepositoryTest {
         val hentBeregningsGrunnlag = dataSource.transaction {
             BeregningsgrunnlagRepository(
                 it
-            ).hentBeregningsGrunnlag()
+            ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
         assertThat(hentBeregningsGrunnlag).hasSize(1)
@@ -206,7 +206,7 @@ class BeregningsgrunnlagRepositoryTest {
         val uthentet = dataSource.transaction {
             BeregningsgrunnlagRepository(
                 it
-            ).hentBeregningsGrunnlag()
+            ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
         assertThat(uthentet).hasSize(1)
@@ -303,13 +303,23 @@ class BeregningsgrunnlagRepositoryTest {
             dataSource.transaction {
                 BeregningsgrunnlagRepository(
                     it
-                ).hentBeregningsGrunnlag()
+                ).hentBeregningsGrunnlag(behandlingsReferanse)
             }
 
-        assertThat(uthentet).hasSize(2)
+        assertThat(uthentet).hasSize(1)
         assertThat(uthentet.map { it.value }).containsOnly(
             grunnlagUfore,
-            grunnlagYrkesskade
+        )
+
+        val uthentet2 = dataSource.transaction {
+            BeregningsgrunnlagRepository(
+                it
+            ).hentBeregningsGrunnlag(behandlingsReferanse2)
+        }
+
+        assertThat(uthentet2).hasSize(1)
+        assertThat(uthentet2.map { it.value }).containsOnly(
+            grunnlagYrkesskade,
         )
     }
 }
