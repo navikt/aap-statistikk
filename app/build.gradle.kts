@@ -57,6 +57,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
     implementation("no.nav:ktor-openapi-generator:1.0.101")

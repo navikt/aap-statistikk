@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
@@ -59,6 +60,11 @@ class HendelsesService(
         dto: StoppetBehandling,
         sak: Sak
     ): Long {
+
+        if (!Miljø.erProd()) {
+            logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
+        }
+
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
