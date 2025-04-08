@@ -132,29 +132,33 @@ class HendelsesServiceTest {
         bqRepositoryYtelse: FakeBQYtelseRepository,
         opprettBigQueryLagringCallback: (BehandlingId) -> Unit,
         clock: Clock
-    ) = HendelsesService(
-        sakRepository = sakRepository,
-        avsluttetBehandlingService = AvsluttetBehandlingService(
-            tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-            beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-            vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-            diagnoseRepository = diagnoseRepository,
+    ): HendelsesService {
+        val vilkårsresultatRepository = FakeVilkårsResultatRepository()
+        return HendelsesService(
+            sakRepository = sakRepository,
+            avsluttetBehandlingService = AvsluttetBehandlingService(
+                tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+                beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+                vilkårsResultatRepository = vilkårsresultatRepository,
+                diagnoseRepository = diagnoseRepository,
+                behandlingRepository = behandlingRepository,
+                skjermingService = skjermingService,
+                meterRegistry = simpleMeterRegistry,
+                rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
+                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
+                    bqRepositoryYtelse,
+                    rettighetstypeperiodeRepository,
+                    diagnoseRepository,
+                    vilkårsresultatRepository = vilkårsresultatRepository
+                )
+            ),
+            personService = PersonService(FakePersonRepository()),
             behandlingRepository = behandlingRepository,
-            skjermingService = skjermingService,
             meterRegistry = simpleMeterRegistry,
-            rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
-            ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
-                bqRepositoryYtelse,
-                rettighetstypeperiodeRepository,
-                diagnoseRepository
-            )
-        ),
-        personService = PersonService(FakePersonRepository()),
-        behandlingRepository = behandlingRepository,
-        meterRegistry = simpleMeterRegistry,
-        opprettBigQueryLagringCallback = opprettBigQueryLagringCallback,
-        clock = clock
-    )
+            opprettBigQueryLagringCallback = opprettBigQueryLagringCallback,
+            clock = clock
+        )
+    }
 
     @Test
     fun `teller opprettet behandling`() {

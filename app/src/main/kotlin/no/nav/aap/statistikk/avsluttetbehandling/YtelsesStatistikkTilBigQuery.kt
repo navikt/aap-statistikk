@@ -5,6 +5,7 @@ import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.utbetaling.helved.toBase64
 import java.time.Clock
 import java.time.LocalDateTime
@@ -14,6 +15,7 @@ class YtelsesStatistikkTilBigQuery(
     private val bqRepository: IBQYtelsesstatistikkRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val diagnoseRepository: DiagnoseRepository,
+    private val vilkårsresultatRepository: IVilkårsresultatRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) {
     fun lagre(
@@ -22,6 +24,13 @@ class YtelsesStatistikkTilBigQuery(
     ) {
         val rettighetstypeperioder = rettighetstypeperiodeRepository.hent(behandling.referanse)
         val diagnoser = diagnoseRepository.hentForBehandling(behandling.referanse)
+
+        val vilkårsResultat =
+            vilkårsresultatRepository.hentForBehandling(behandling.referanse).tilVilkårsResultat(
+                behandling.sak.saksnummer,
+                behandling.referanse,
+                behandling.typeBehandling.name
+            )
 
         bqRepository.lagre(
             BQYtelseBehandling(
@@ -38,7 +47,7 @@ class YtelsesStatistikkTilBigQuery(
                 radEndret = LocalDateTime.now(clock)
             )
         )
-        bqRepository.lagre(avsluttetBehandling.vilkårsresultat)
+        bqRepository.lagre(vilkårsResultat)
         bqRepository.lagre(avsluttetBehandling.tilkjentYtelse)
         if (avsluttetBehandling.beregningsgrunnlag != null) {
             bqRepository.lagre(

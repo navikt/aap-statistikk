@@ -301,6 +301,7 @@ class AvsluttetBehandlingServiceTest {
                     bqYtelseRepository,
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                     diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
+                    vilkårsresultatRepository = VilkårsresultatRepository(dbConnection),
                     clock
                 ),
             )

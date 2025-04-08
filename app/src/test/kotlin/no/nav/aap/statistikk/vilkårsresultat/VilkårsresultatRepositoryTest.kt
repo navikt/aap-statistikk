@@ -85,7 +85,7 @@ class VilkårsresultatRepositoryTest {
             VilkårsresultatRepository(it).hentVilkårsResultat(generertId)
         }
         assertThat(
-            hentetUt!!.tilVilkårsResultat(
+            hentetUt.tilVilkårsResultat(
                 saksnummer = saksnummer,
                 behandlingsReferanse = randomUUID,
                 typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
@@ -97,6 +97,11 @@ class VilkårsresultatRepositoryTest {
                 typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
             )
         )
+
+        val hentUtMedReferanse =
+            dataSource.transaction { VilkårsresultatRepository(it).hentForBehandling(randomUUID) }
+
+        assertThat(hentUtMedReferanse).isEqualTo(hentetUt)
     }
 
     @Test

@@ -120,7 +120,8 @@ class ProduksjonsstyringRepositoryTest {
                     ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
                         bqRepositoryYtelse,
                         RettighetstypeperiodeRepository(conn),
-                        DiagnoseRepositoryImpl(conn)
+                        DiagnoseRepositoryImpl(conn),
+                        VilkårsresultatRepository(conn),
                     ),
                 ),
                 personService = PersonService(PersonRepository(conn)),

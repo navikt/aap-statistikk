@@ -49,7 +49,8 @@ class LagreStoppetHendelseJobb(
                 ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
                     bqRepository = bqYtelseStatistikk,
                     rettighetstypeperiodeRepository = rettighetstypeperiodeRepository(connection),
-                    diagnoseRepository = DiagnoseRepositoryImpl(connection)
+                    diagnoseRepository = DiagnoseRepositoryImpl(connection),
+                    vilkårsresultatRepository = vilkårsResultatRepositoryFactory(connection),
                 )
             ),
             personService = personService(connection),
