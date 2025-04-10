@@ -276,7 +276,7 @@ WHERE b.id = ?"""
                            bh.status                    as bh_status
                     from behandling_historikk bh
                     where bh.behandling_id = ?
-                    order by bh.oppdatert_tid desc 
+                    order by bh.oppdatert_tid asc 
                 """.trimIndent()
 
             dbConnection.queryList(historikkSpørring) {
