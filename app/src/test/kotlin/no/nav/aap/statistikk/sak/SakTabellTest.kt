@@ -11,9 +11,11 @@ import no.nav.aap.statistikk.testutils.schemaRegistry
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.function.BiPredicate
 
 class SakTabellTest {
     @Test
@@ -34,8 +36,8 @@ class SakTabellTest {
         val tekniskTid = LocalDateTime.now()
         client.insert(
             sakTabell, BQBehandling(
-                fagsystemNavn = "Kelvin",
-                sekvensNummer = 0L,
+                fagsystemNavn = KELVIN,
+                sekvensNummer = 1L,
                 behandlingUUID = referanse.toString(),
                 relatertBehandlingUUID = "123",
                 relatertFagsystem = "Kelvin",
@@ -64,30 +66,40 @@ class SakTabellTest {
 
         assertThat(uthentet.size).isEqualTo(1)
         val uthentetInnslag = uthentet.first()
-        assertThat(uthentetInnslag.saksnummer).isEqualTo("123")
-        assertThat(uthentetInnslag.behandlingUUID).isEqualTo(
-            referanse.toString()
-        )
-        assertThat(uthentetInnslag.behandlingType).isEqualTo("REVURDERING")
-        assertThat(uthentetInnslag.sekvensNummer).isEqualTo(0L)
-        assertThat(uthentetInnslag.aktorId).isEqualTo("123456")
-        assertThat(uthentetInnslag.mottattTid).isCloseTo(mottattTid, within(500, ChronoUnit.MILLIS))
-        assertThat(uthentetInnslag.registrertTid).isCloseTo(
-            registrertTid,
-            within(500, ChronoUnit.MILLIS)
-        )
-        assertThat(uthentetInnslag.endretTid).isCloseTo(endretTid, within(500, ChronoUnit.MILLIS))
-        assertThat(uthentetInnslag.opprettetAv).isEqualTo(KELVIN)
-        assertThat(uthentetInnslag.saksbehandler).isEqualTo("1234")
-        assertThat(uthentetInnslag.tekniskTid).isCloseTo(tekniskTid, within(500, ChronoUnit.MILLIS))
-        assertThat(uthentetInnslag.søknadsFormat).isEqualTo(SøknadsFormat.DIGITAL)
-        assertThat(uthentetInnslag.behandlingMetode).isEqualTo(BehandlingMetode.MANUELL)
-        assertThat(uthentetInnslag.relatertBehandlingUUID).isEqualTo("123")
-        assertThat(uthentetInnslag.relatertFagsystem).isEqualTo("Kelvin")
-        assertThat(uthentetInnslag.fagsystemNavn).isEqualTo("Kelvin")
-        assertThat(uthentetInnslag.ansvarligBeslutter).isEqualTo("Z1234")
-        assertThat(uthentetInnslag.behandlingStatus).isEqualTo("UNDER_BEHANDLING")
-        assertThat(uthentetInnslag.ansvarligEnhetKode).isEqualTo("1337")
-        assertThat(uthentetInnslag.sakYtelse).isEqualTo("AAP")
+
+        val dataComparator: BiPredicate<LocalDateTime, LocalDateTime> =
+            BiPredicate { a, b -> Duration.between(a, b).toMillis() < 1000 }
+
+        assertThat(uthentetInnslag).usingRecursiveComparison()
+            .withEqualsForType(dataComparator, LocalDateTime::class.java)
+            .isEqualTo(
+                BQBehandling(
+                    fagsystemNavn = "KELVIN",
+                    sekvensNummer = 1,
+                    behandlingUUID = referanse.toString(),
+                    relatertBehandlingUUID = "123",
+                    relatertFagsystem = "Kelvin",
+                    ferdigbehandletTid = null, //
+                    behandlingType = "REVURDERING",
+                    aktorId = "123456",
+                    saksnummer = "123",
+                    tekniskTid = tekniskTid,
+                    registrertTid = registrertTid,
+                    endretTid = endretTid,
+                    verson = "versjon",
+                    avsender = KELVIN,
+                    mottattTid = mottattTid,
+                    opprettetAv = KELVIN,
+                    ansvarligBeslutter = "Z1234",
+                    vedtakTid = null, //
+                    søknadsFormat = SøknadsFormat.DIGITAL,
+                    saksbehandler = "1234",
+                    behandlingMetode = BehandlingMetode.MANUELL,
+                    behandlingStatus = "UNDER_BEHANDLING",
+                    behandlingÅrsak = "SØKNAD",
+                    ansvarligEnhetKode = "1337",
+                    sakYtelse = "AAP"
+                )
+            )
     }
 }

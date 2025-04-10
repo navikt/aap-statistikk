@@ -8,14 +8,12 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import java.time.LocalDateTime
 import java.util.*
 
 
 fun AvsluttetBehandlingDTO.tilDomene(
     saksnummer: Saksnummer,
-    behandlingsReferanse: UUID,
-    avsluttetTidspunkt: LocalDateTime
+    behandlingsReferanse: UUID
 ): AvsluttetBehandling {
     return AvsluttetBehandling(
         tilkjentYtelse = tilkjentYtelse.tilDomene(
@@ -39,7 +37,6 @@ fun AvsluttetBehandlingDTO.tilDomene(
                 }
             )
         },
-        avsluttetTidspunkt = avsluttetTidspunkt
     )
 }
 

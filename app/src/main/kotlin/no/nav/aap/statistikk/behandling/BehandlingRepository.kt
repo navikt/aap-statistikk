@@ -272,7 +272,8 @@ WHERE b.id = ?"""
             val historikkSpørring = """
                     select bh.siste_saksbehandler       as bh_siste_saksbehandler,
                            bh.oppdatert_tid             as bh_opprettet_tidspunkt,
-                           bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov
+                           bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
+                           bh.status                    as bh_status
                     from behandling_historikk bh
                     where bh.behandling_id = ?
                     order by bh.oppdatert_tid desc 
@@ -289,7 +290,8 @@ WHERE b.id = ?"""
                                 Saksbehandler(
                                     ident = saksbehandler
                                 )
-                            }
+                            },
+                        status = it.getEnum("bh_status")
                     )
                 }
             }

@@ -5,7 +5,6 @@ import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -52,7 +51,7 @@ class YtelsesStatistikkTilBigQuery(
                 utbetalingId = behandling.referanse.toBase64(),
                 brukerFnr = behandling.sak.person.ident,
                 behandlingsType = behandling.typeBehandling,
-                datoAvsluttet = avsluttetBehandling.avsluttetTidspunkt,
+                datoAvsluttet = behandling.avsluttetTid(),
                 kodeverk = diagnoser?.kodeverk,
                 diagnosekode = diagnoser?.diagnosekode,
                 bidiagnoser = diagnoser?.bidiagnoser,

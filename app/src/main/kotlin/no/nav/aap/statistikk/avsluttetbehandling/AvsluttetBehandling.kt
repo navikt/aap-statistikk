@@ -9,7 +9,6 @@ import java.util.*
 
 data class AvsluttetBehandling(
     val behandlingsReferanse: UUID,
-    val avsluttetTidspunkt: LocalDateTime,
     val tilkjentYtelse: TilkjentYtelse,
     val vilkårsresultat: Vilkårsresultat,
     val beregningsgrunnlag: IBeregningsGrunnlag?,
