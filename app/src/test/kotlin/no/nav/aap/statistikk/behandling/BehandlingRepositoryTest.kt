@@ -103,6 +103,18 @@ class BehandlingRepositoryTest {
                 assertThat(it.saksbehandler?.ident).isEqualTo("Joark Jorgensen")
             },
         )
+
+        dataSource.transaction {
+            BehandlingRepository(it).oppdaterBehandling(
+                uthentet.copy(
+                    venteÅrsak = "XXX"
+                )
+            )
+        }
+
+        val uthentet2 = dataSource.transaction { BehandlingRepository(it).hent(uthentet.referanse) }
+
+        assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 -> c1.tidspunkt.compareTo(c2.tidspunkt) }
     }
 
     @Test
