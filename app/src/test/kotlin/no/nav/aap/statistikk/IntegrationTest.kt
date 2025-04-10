@@ -23,6 +23,7 @@ import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
@@ -134,6 +135,17 @@ class IntegrationTest {
             assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
             assertThat(vilkårsVurderingRad.saksnummer).isEqualTo(saksnummer)
             assertThat(vilkårsVurderingRad.vilkårtype).isEqualTo(Vilkårtype.ALDERSVILKÅRET)
+
+            val tilkjentBigQuery = ventPåSvar(
+                { bigQueryClient.read(TilkjentYtelseTabell()) },
+                { t -> t !== null && t.isNotEmpty() })
+
+            assertThat(tilkjentBigQuery!!).hasSize(2)
+            val tilkjentYtelse = tilkjentBigQuery.first()
+            assertThat(tilkjentYtelse.behandlingsreferanse).isEqualTo(behandlingReferanse.toString())
+            assertThat(tilkjentYtelse.dagsats).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder[0].dagsats)
+            assertThat(tilkjentBigQuery[1].dagsats).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder[1].dagsats)
+
 
             val sakRespons = ventPåSvar(
                 { bigQueryClient.read(SakTabell()) },

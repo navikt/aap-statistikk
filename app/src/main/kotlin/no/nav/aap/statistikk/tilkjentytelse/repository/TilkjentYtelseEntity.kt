@@ -22,7 +22,8 @@ data class TilkjentYtelseEntity(
                     TilkjentYtelsePeriodeEntity.fraDomene(
                         it
                     )
-                })
+                }
+            )
         }
     }
 }
@@ -33,6 +34,10 @@ data class TilkjentYtelsePeriodeEntity(
     val tilDato: LocalDate,
     val dagsats: Double,
     val gradering: Double,
+    val redusertDagsats: Double = dagsats * gradering / 100.0,
+    val antallBarn: Int = 0,
+    val barnetilleggSats: Double = 37.0,
+    val barnetillegg: Double = 0.0
 ) {
     companion object {
         fun fraDomene(tilkjentYtelsePeriode: TilkjentYtelsePeriode): TilkjentYtelsePeriodeEntity {
@@ -41,6 +46,10 @@ data class TilkjentYtelsePeriodeEntity(
                 tilDato = tilkjentYtelsePeriode.tilDato,
                 dagsats = tilkjentYtelsePeriode.dagsats,
                 gradering = tilkjentYtelsePeriode.gradering,
+                redusertDagsats = tilkjentYtelsePeriode.redusertDagsats,
+                antallBarn = tilkjentYtelsePeriode.antallBarn,
+                barnetilleggSats = tilkjentYtelsePeriode.barnetilleggSats,
+                barnetillegg = tilkjentYtelsePeriode.barnetillegg,
             )
         }
     }

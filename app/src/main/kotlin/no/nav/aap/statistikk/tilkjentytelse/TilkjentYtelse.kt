@@ -8,7 +8,11 @@ data class TilkjentYtelsePeriode(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
     val dagsats: Double,
-    val gradering: Double
+    val gradering: Double,
+    val redusertDagsats: Double = dagsats * gradering / 100.0,
+    val antallBarn: Int = 0,
+    val barnetilleggSats: Double = 37.0,
+    val barnetillegg: Double = 0.0
 )
 
 data class TilkjentYtelse(

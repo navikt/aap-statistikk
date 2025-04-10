@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
+import java.util.function.BiPredicate
 import javax.sql.DataSource
+import kotlin.math.abs
 
 class TilkjentYtelseRepositoryTest {
     @Test
@@ -53,13 +55,18 @@ class TilkjentYtelseRepositoryTest {
                         fraDato = LocalDate.now().minusYears(1),
                         tilDato = LocalDate.now().plusDays(1),
                         dagsats = 1337.420,
-                        gradering = 90.0
-                    ),
+                        gradering = 90.0,
+                        redusertDagsats = 1337.420 * 0.9,
+                        ),
                     TilkjentYtelsePeriode(
                         fraDato = LocalDate.now().minusYears(3),
                         tilDato = LocalDate.now().minusYears(2),
                         dagsats = 1234.0,
-                        gradering = 45.0
+                        gradering = 45.0,
+                        redusertDagsats = 1234.0 * 0.45,
+                        antallBarn = 1,
+                        barnetilleggSats = 37.0,
+                        barnetillegg = 37.0
                     )
                 )
             )
@@ -80,9 +87,16 @@ class TilkjentYtelseRepositoryTest {
         val uthentet = dataSource.transaction { conn ->
             val tilkjentYtelseRepository = TilkjentYtelseRepository(conn)
             tilkjentYtelseRepository.hentTilkjentYtelse(id.toInt())
-        }!!
+        }
 
-        assertThat(uthentet.perioder).isEqualTo(tilkjentYtelse.perioder)
+        assertThat(uthentet.perioder)
+            .usingRecursiveComparison()
+            .withEqualsForType(
+                { a, b -> abs(a.toDouble() - b.toDouble()) < 0.00001 },
+                java.lang.Double::class.java
+            )
+            .isEqualTo(tilkjentYtelse.perioder)
+
         assertThat(uthentet.saksnummer).isEqualTo(tilkjentYtelse.saksnummer)
         assertThat(uthentet.behandlingsReferanse).isEqualTo(tilkjentYtelse.behandlingsReferanse)
     }

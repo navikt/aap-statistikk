@@ -61,13 +61,13 @@ class AvsluttetBehandlingServiceTest {
                         fraDato = datoNå.minusYears(1),
                         tilDato = datoNå.plusDays(1),
                         dagsats = 1337.420,
-                        gradering = 90.0
+                        gradering = 90.0,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = datoNå.minusYears(3),
                         tilDato = datoNå.minusYears(2),
                         dagsats = 1234.0,
-                        gradering = 45.0
+                        gradering = 45.0,
                     )
                 )
             ),
@@ -229,7 +229,8 @@ class AvsluttetBehandlingServiceTest {
                         fraDato = nå.minusYears(3),
                         tilDato = nå.minusYears(2),
                         dagsats = 1234.0,
-                        gradering = 45.0
+                        gradering = 45.0,
+                        redusertDagsats = 1234.0 * 0.45,
                     )
                 )
             ),
@@ -296,7 +297,14 @@ class AvsluttetBehandlingServiceTest {
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
         }
 
-        assertThat(uthentet.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
+        assertThat(uthentet.perioder).usingRecursiveComparison()
+            .withEqualsForType(
+                { a, b -> abs(a.toDouble() - b.toDouble()) < 0.00001 },
+                java.lang.Double::class.java
+            )
+            .ignoringCollectionOrder()
+            .isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
+
         assertThat(counter.count()).isEqualTo(1.0)
     }
 

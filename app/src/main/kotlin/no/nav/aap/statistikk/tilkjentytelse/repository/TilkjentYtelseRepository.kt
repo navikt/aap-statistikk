@@ -30,7 +30,9 @@ class TilkjentYtelseRepository(
             }
 
         val sql =
-            "INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID) VALUES (?, ?, ?, ?, ?)"
+            """INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID,
+                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         tilkjentYtelse.perioder.forEach { periode ->
             dbConnection.execute(sql) {
                 setParams {
@@ -39,6 +41,10 @@ class TilkjentYtelseRepository(
                     setBigDecimal(3, BigDecimal.valueOf(periode.dagsats))
                     setBigDecimal(4, BigDecimal.valueOf(periode.gradering))
                     setLong(5, nøkkel)
+                    setDouble(6, periode.redusertDagsats)
+                    setInt(7, periode.antallBarn)
+                    setDouble(8, periode.barnetilleggSats)
+                    setDouble(9, periode.barnetillegg)
                 }
             }
         }
@@ -106,7 +112,10 @@ WHERE br.referanse = ?"""
         val saksnummer = perioderTriple.first().third
         val behandlingsReferanse = perioderTriple.first().second
 
-        return TilkjentYtelse(saksnummer.let(::Saksnummer), behandlingsReferanse, perioderTriple.map { it.first })
+        return TilkjentYtelse(
+            saksnummer.let(::Saksnummer),
+            behandlingsReferanse,
+            perioderTriple.map { it.first })
     }
 
     private fun mapTilkjentTriple(): (Row) -> Triple<TilkjentYtelsePeriode, UUID, String> = { row ->
@@ -114,13 +123,21 @@ WHERE br.referanse = ?"""
         val tilDato = row.getLocalDate("til_dato")
         val dagsats = row.getBigDecimal("dagsats").toDouble()
         val gradering = row.getBigDecimal("gradering").toDouble()
+        val redusertDagsats = row.getDouble("redusert_dagsats")
+        val antallBarn = row.getInt("antall_barn")
+        val barnetilleggSats = row.getDouble("barnetillegg_sats")
+        val barnetillegg = row.getDouble("barnetillegg")
 
         Triple(
             TilkjentYtelsePeriode(
                 fraDato = fraDato,
                 tilDato = tilDato,
                 dagsats = dagsats,
-                gradering = gradering
+                gradering = gradering,
+                redusertDagsats = redusertDagsats,
+                antallBarn = antallBarn,
+                barnetilleggSats = barnetilleggSats,
+                barnetillegg = barnetillegg,
             ), row.getUUID("referanse"), row.getString("saksnummer")
         )
     }
