@@ -112,8 +112,9 @@ class HendelsesServiceTest {
 
         val uthentet = behandlingRepository.hent(behandlingReferanse)
         assertThat(uthentet).isNotNull()
+        assertThat(uthentet!!.relatertBehandlingId).isNotNull()
 
-        verify { opprettBigQueryLagringCallback(uthentet!!.id!!) }
+        verify { opprettBigQueryLagringCallback(uthentet.id!!) }
 
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
         assertThat(

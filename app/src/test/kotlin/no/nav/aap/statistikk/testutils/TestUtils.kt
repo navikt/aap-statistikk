@@ -246,7 +246,9 @@ fun bigQueryContainer(): BigQueryConfig {
 fun opprettTestHendelse(
     dataSource: DataSource,
     randomUUID: UUID,
-    saksnummer: Saksnummer
+    saksnummer: Saksnummer,
+    status: BehandlingStatus = BehandlingStatus.UTREDES,
+    opprettetTidspunkt: LocalDateTime = LocalDateTime.now()
 ): Pair<BehandlingId, SakId> {
     val ident = "29021946"
 
@@ -258,6 +260,8 @@ fun opprettTestHendelse(
         dataSource,
         randomUUID,
         sak,
+        status,
+        opprettetTidspunkt
     )
 
     val sakId = sak.id!!
@@ -287,22 +291,34 @@ fun opprettTestSak(dataSource: DataSource, saksnummer: Saksnummer, person: Perso
     }
 }
 
-fun opprettTestBehandling(dataSource: DataSource, referanse: UUID, sak: Sak): Behandling {
+fun opprettTestBehandling(
+    dataSource: DataSource,
+    referanse: UUID,
+    sak: Sak,
+    status: BehandlingStatus = BehandlingStatus.UTREDES,
+    opprettetTidspunkt: LocalDateTime = LocalDateTime.now()
+): Behandling {
+    val behandling = Behandling(
+        referanse = referanse,
+        sak = sak,
+        typeBehandling = TypeBehandling.Førstegangsbehandling,
+        status = status,
+        opprettetTid = opprettetTidspunkt,
+        mottattTid = opprettetTidspunkt.truncatedTo(ChronoUnit.SECONDS),
+        versjon = Versjon(UUID.randomUUID().toString()),
+        søknadsformat = SøknadsFormat.PAPIR,
+    )
     return dataSource.transaction {
-        val behandling = Behandling(
-            referanse = referanse,
-            sak = sak,
-            typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.UTREDES,
-            opprettetTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-            mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-            versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.PAPIR,
-        )
-        val id = BehandlingRepository(it).opprettBehandling(
-            behandling
-        )
-
+        val repo = BehandlingRepository(it)
+        val uthentet = repo.hent(referanse)
+        val id = if (uthentet != null) {
+            repo.oppdaterBehandling(behandling.copy(id = uthentet.id))
+            uthentet.id
+        } else {
+            BehandlingRepository(it).opprettBehandling(
+                behandling
+            )
+        }
         behandling.copy(id)
     }
 }
@@ -397,7 +413,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
         val id = nextId
         behandlinger[id] = behandling.copy(id = id).leggTilHendelse(
             BehandlingHendelse(
-                tidspunkt = LocalDateTime.now()
+                tidspunkt = LocalDateTime.now(),
+                status = behandling.status
             )
         )
         nextId++
@@ -410,7 +427,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
         logger.info("Oppdaterte behandling med ID ${behandling.id}")
         behandlinger[behandling.id!!] = behandling.leggTilHendelse(
             BehandlingHendelse(
-                tidspunkt = LocalDateTime.now()
+                tidspunkt = LocalDateTime.now(),
+                status = behandling.status
             )
         )
     }

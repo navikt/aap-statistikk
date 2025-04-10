@@ -49,7 +49,6 @@ class HendelsesService(
                 avsluttetBehandling.tilDomene(
                     saksnummer,
                     hendelse.behandlingReferanse,
-                    hendelse.hendelsesTidspunkt,
                 )
             )
         }
@@ -89,9 +88,7 @@ class HendelsesService(
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 
-        val relatertBehandlingUUID = dto.relatertBehandling
-        val relatertBehadling =
-            relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
+        val relatertBehadling = hentRelatertBehandling(dto)
 
         val behandlingId = if (eksisterendeBehandlingId != null) {
             behandlingRepository.oppdaterBehandling(
@@ -100,6 +97,7 @@ class HendelsesService(
                     relatertBehandlingId = relatertBehadling?.id
                 )
             )
+            logger.info("Oppdaterte behandling med referanse ${behandling.referanse} og id $eksisterendeBehandlingId.")
             eksisterendeBehandlingId
         } else {
             val id =
@@ -109,6 +107,13 @@ class HendelsesService(
             id
         }
         return behandlingId
+    }
+
+    private fun hentRelatertBehandling(dto: StoppetBehandling): Behandling? {
+        val relatertBehandlingUUID = dto.relatertBehandling
+        val relatertBehadling =
+            relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
+        return relatertBehadling
     }
 
     private fun hentEllerSettInnSak(

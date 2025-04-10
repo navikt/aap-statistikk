@@ -28,7 +28,9 @@ import java.math.BigDecimal
 import java.time.*
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.function.BiPredicate
 import javax.sql.DataSource
+import kotlin.math.abs
 
 class AvsluttetBehandlingServiceTest {
     @Test
@@ -39,12 +41,18 @@ class AvsluttetBehandlingServiceTest {
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = Saksnummer("xxxx")
 
-        opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
+        val opprettetTidspunkt = LocalDateTime.now()
+        opprettTestHendelse(
+            dataSource,
+            behandlingReferanse,
+            saksnummer,
+            status = BehandlingStatus.AVSLUTTET,
+            opprettetTidspunkt = opprettetTidspunkt
+        )
 
         val datoNå = LocalDate.now()
         val avsluttetBehandling = AvsluttetBehandling(
             behandlingsReferanse = behandlingReferanse,
-            avsluttetTidspunkt = datoNå.atStartOfDay(),
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse,
                 saksnummer = saksnummer,
@@ -135,28 +143,36 @@ class AvsluttetBehandlingServiceTest {
         val utlestVilkårsVurderingFraBigQuery = bigQueryClient.read(VilkårsVurderingTabell())
         val utlestTilkjentYtelseFraBigQuery = bigQueryClient.read(TilkjentYtelseTabell())
 
-        assertThat(utlestFraBehandlingTabell).isEqualTo(
-            BQYtelseBehandling(
-                saksnummer = saksnummer,
-                referanse = avsluttetBehandling.behandlingsReferanse,
-                brukerFnr = "29021946",
-                behandlingsType = TypeBehandling.Førstegangsbehandling,
-                datoAvsluttet = datoNå.atStartOfDay(),
-                kodeverk = "KODEVERK",
-                diagnosekode = "KOLERA",
-                bidiagnoser = listOf("PEST"),
-                rettighetsPerioder = listOf(
-                    RettighetstypePeriode(
-                        datoNå.minusYears(1),
-                        datoNå.minusYears(2),
-                        rettighetstype = RettighetsType.BISTANDSBEHOV
-                    )
-                ),
-                radEndret = LocalDateTime.now(clock)
-                    .truncatedTo(ChronoUnit.MILLIS),
-                utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64()
+        val datoSammenligner: BiPredicate<LocalDateTime, LocalDateTime> = BiPredicate { t, u ->
+            abs(
+                t.toEpochSecond(ZoneOffset.UTC) - u.toEpochSecond(ZoneOffset.UTC)
+            ) < 1
+        }
+        assertThat(utlestFraBehandlingTabell).usingRecursiveComparison()
+            .withEqualsForFields(datoSammenligner, "datoAvsluttet")
+            .isEqualTo(
+                BQYtelseBehandling(
+                    saksnummer = saksnummer,
+                    referanse = avsluttetBehandling.behandlingsReferanse,
+                    brukerFnr = "29021946",
+                    behandlingsType = TypeBehandling.Førstegangsbehandling,
+                    datoAvsluttet = opprettetTidspunkt,
+                    kodeverk = "KODEVERK",
+                    diagnosekode = "KOLERA",
+                    bidiagnoser = listOf("PEST"),
+                    rettighetsPerioder = listOf(
+                        RettighetstypePeriode(
+                            datoNå.minusYears(1),
+                            datoNå.minusYears(2),
+                            rettighetstype = RettighetsType.BISTANDSBEHOV
+                        )
+                    ),
+                    radEndret = LocalDateTime.now(clock)
+                        .truncatedTo(ChronoUnit.MILLIS),
+                    utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64()
+                )
             )
-        )
+
         assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
         assertThat(utlestVilkårsVurderingFraBigQuery.first().behandlingsReferanse).isEqualTo(
             avsluttetBehandling.vilkårsresultat.behandlingsReferanse
@@ -195,11 +211,16 @@ class AvsluttetBehandlingServiceTest {
         val counter = meterRegistry.avsluttetBehandlingLagret()
 
         opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
+        opprettTestHendelse(
+            dataSource,
+            behandlingReferanse,
+            saksnummer,
+            status = BehandlingStatus.AVSLUTTET
+        )
 
         val nå = LocalDate.now()
         val avsluttetBehandling = AvsluttetBehandling(
             behandlingsReferanse = behandlingReferanse,
-            avsluttetTidspunkt = LocalDateTime.now(),
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse,
                 saksnummer = saksnummer,
