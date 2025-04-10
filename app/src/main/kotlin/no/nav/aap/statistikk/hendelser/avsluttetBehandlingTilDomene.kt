@@ -40,7 +40,10 @@ fun AvsluttetBehandlingDTO.tilDomene(
     )
 }
 
-fun TilkjentYtelseDTO.tilDomene(saksnummer: Saksnummer, behandlingsReferanse: UUID): TilkjentYtelse {
+fun TilkjentYtelseDTO.tilDomene(
+    saksnummer: Saksnummer,
+    behandlingsReferanse: UUID
+): TilkjentYtelse {
     return TilkjentYtelse(
         saksnummer = saksnummer,
         behandlingsReferanse = behandlingsReferanse,
@@ -53,7 +56,11 @@ fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
         fraDato = fraDato,
         tilDato = tilDato,
         dagsats = dagsats,
-        gradering
+        redusertDagsats = redusertDagsats,
+        gradering = gradering,
+        antallBarn = antallBarn,
+        barnetilleggSats = barnetilleggSats,
+        barnetillegg = barnetillegg
     )
 }
 

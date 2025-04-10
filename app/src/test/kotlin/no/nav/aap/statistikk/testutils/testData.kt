@@ -27,13 +27,21 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                     fraDato = LocalDate.now().minusYears(1),
                     tilDato = LocalDate.now().plusDays(1),
                     dagsats = 1337.420,
-                    gradering = 90.0
+                    gradering = 90.0,
+                    redusertDagsats = 1337.420 * 90.0 / 100.0,
+                    antallBarn = 1,
+                    barnetilleggSats = 37.0,
+                    barnetillegg = 37.0
                 ),
                 TilkjentYtelsePeriodeDTO(
                     fraDato = LocalDate.now().minusYears(3),
                     tilDato = LocalDate.now().minusYears(2),
                     dagsats = 1234.0,
-                    gradering = 45.0
+                    gradering = 45.0,
+                    redusertDagsats = 1337.420 * 45.0 / 100.0,
+                    antallBarn = 1,
+                    barnetilleggSats = 37.0,
+                    barnetillegg = 37.0
                 )
             )
         ),
