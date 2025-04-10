@@ -50,12 +50,19 @@ data class Behandling(
             "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null. Har ansvarlig beslutter: $ansvarligBeslutter, har vedtakstidspunkt: $vedtakstidspunkt"
         }
     }
+
+    fun avsluttetTid(): LocalDateTime {
+        return hendelser
+            .filter { it.status == BehandlingStatus.AVSLUTTET }
+            .maxOf { it.tidspunkt }
+    }
 }
 
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
-    val saksbehandler: Saksbehandler? = null
+    val saksbehandler: Saksbehandler? = null,
+    val status: BehandlingStatus,
 )
 
 enum class SøknadsFormat {
