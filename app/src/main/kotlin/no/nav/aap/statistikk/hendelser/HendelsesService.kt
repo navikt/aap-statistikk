@@ -81,6 +81,7 @@ class HendelsesService(
             relaterteIdenter = dto.identerForSak,
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
             gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov(),
+            gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
             søknadsformat = dto.soknadsFormat.tilDomene(),
             venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
             gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
@@ -200,5 +201,6 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING
         ÅrsakTilBehandling.REFUSJONSKRAV -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REFUSJONSKRAV
         ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
+        ÅrsakTilBehandling.SØKNAD_TRUKKET -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SØKNAD_TRUKKET
     }
 }

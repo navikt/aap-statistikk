@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
@@ -40,6 +41,16 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
         }
         .map { it.avklaringsbehovDefinisjon.kode }
         .firstOrNull()?.toString()
+}
+
+fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
+    return this
+        .filter { it.status.erÅpent() }
+        .sortedByDescending {
+            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
+        }
+        .map { it.status }
+        .firstOrNull()
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {

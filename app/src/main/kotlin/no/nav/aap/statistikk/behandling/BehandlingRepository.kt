@@ -272,11 +272,12 @@ WHERE b.id = ?"""
             val historikkSpørring = """
                     select bh.siste_saksbehandler       as bh_siste_saksbehandler,
                            bh.oppdatert_tid             as bh_opprettet_tidspunkt,
+                           bh.venteaarsak               as bh_venteaarsak,
                            bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
                            bh.status                    as bh_status
                     from behandling_historikk bh
                     where bh.behandling_id = ?
-                    order by bh.oppdatert_tid asc 
+                    order by bh.oppdatert_tid
                 """.trimIndent()
 
             dbConnection.queryList(historikkSpørring) {
@@ -285,6 +286,7 @@ WHERE b.id = ?"""
                     BehandlingHendelse(
                         tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),
                         avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov"),
+                        venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
                         saksbehandler = it.getStringOrNull("bh_siste_saksbehandler")
                             ?.let { saksbehandler ->
                                 Saksbehandler(
@@ -346,9 +348,9 @@ WHERE b.id = ?"""
             ?.ifBlank { null },
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
-        behandlendeEnhet = it.getLongOrNull("e_id")
-            ?.let { id -> Enhet(id = id, kode = it.getString("e_kode")) },
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
-            .map { ÅrsakTilBehandling.valueOf(it) }
+            .map { ÅrsakTilBehandling.valueOf(it) },
+        behandlendeEnhet = it.getLongOrNull("e_id")
+            ?.let { id -> Enhet(id = id, kode = it.getString("e_kode")) }
     )
 }

@@ -85,6 +85,7 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
             ),
         ),
         rettighetstypePerioder = listOf(),
+        resultat = ResultatKode.AVSLAG
     )
 }
 

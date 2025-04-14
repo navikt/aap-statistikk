@@ -58,7 +58,8 @@ class SakTabellTest {
                 behandlingStatus = "UNDER_BEHANDLING",
                 behandlingÅrsak = ÅrsakTilBehandling.SØKNAD.toString(),
                 ansvarligEnhetKode = "1337",
-                sakYtelse = sakYtelse
+                sakYtelse = sakYtelse,
+                behandlingResultat = "AX"
             )
         )
 
@@ -98,7 +99,8 @@ class SakTabellTest {
                     behandlingStatus = "UNDER_BEHANDLING",
                     behandlingÅrsak = "SØKNAD",
                     ansvarligEnhetKode = "1337",
-                    sakYtelse = "AAP"
+                    sakYtelse = "AAP",
+                    behandlingResultat = "AX"
                 )
             )
     }
