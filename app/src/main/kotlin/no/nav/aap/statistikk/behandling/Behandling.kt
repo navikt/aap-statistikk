@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.sak.Sak
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 
 data class Versjon(
     val verdi: String,
@@ -34,6 +35,7 @@ data class Behandling(
     val relatertBehandlingId: Long? = null,
     val snapShotId: Long? = null,
     val gjeldendeAvklaringsBehov: String? = null,
+    val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,
     val venteÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<ÅrsakTilBehandling> = listOf(),
@@ -46,8 +48,10 @@ data class Behandling(
             mottattTid.truncatedTo(ChronoUnit.SECONDS).isEqual(mottattTid)
         ) { "Vil ha mottattTid på sekund-oppløsning" }
 
-        require((ansvarligBeslutter != null && vedtakstidspunkt != null) || (ansvarligBeslutter == null && vedtakstidspunkt == null)) {
-            "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null. Har ansvarlig beslutter: $ansvarligBeslutter, har vedtakstidspunkt: $vedtakstidspunkt"
+        if (typeBehandling == TypeBehandling.Førstegangsbehandling) {
+            require((ansvarligBeslutter != null && vedtakstidspunkt != null) || (ansvarligBeslutter == null && vedtakstidspunkt == null)) {
+                "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null. Har ansvarlig beslutter: $ansvarligBeslutter, har vedtakstidspunkt: $vedtakstidspunkt"
+            }
         }
     }
 
@@ -61,6 +65,7 @@ data class Behandling(
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
+    val venteÅrsak: String? = null,
     val saksbehandler: Saksbehandler? = null,
     val status: BehandlingStatus,
 )
@@ -109,4 +114,5 @@ enum class ÅrsakTilBehandling {
     SAMORDNING_OG_AVREGNING,
     REFUSJONSKRAV,
     UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT,
+    SØKNAD_TRUKKET
 }

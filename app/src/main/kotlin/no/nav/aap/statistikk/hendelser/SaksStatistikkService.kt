@@ -87,6 +87,7 @@ class SaksStatistikkService(
             behandlingStatus = behandlingStatus(behandling),
             behandlingÅrsak = behandling.årsaker.joinToString(","),
             ansvarligEnhetKode = ansvarligEnhet,
+            behandlingResultat = null,
             sakYtelse = "AAP"
         )
 
@@ -118,6 +119,7 @@ class SaksStatistikkService(
         if (skjermingService.erSkjermet(behandling)) {
             return "-5"
         }
+        // TODO! Hvordan fange opp 4438 her?
         return if (erHosNAY) NAY_NASJONAL_KØ_KODE else behandling.behandlendeEnhet?.kode
     }
 

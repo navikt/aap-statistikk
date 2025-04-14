@@ -101,6 +101,17 @@ class SakTabell : BQTable<BQBehandling> {
 
             val behandlingStatus = Field.of("behandlingStatus", StandardSQLTypeName.STRING)
 
+            val behandlingResultat =
+                Field.newBuilder("behandlingResultat", StandardSQLTypeName.STRING).setDescription(
+                    """
+                Kode som angir resultatet på behandling - typisk: avbrutt, innvilget, delvis innvilget, henlagt av tekniske hensyn, etc.
+
+                For behandlingstype klage: Angi behandlingsresultat fra vedtaksinstans, selv om det ikke er et endelig resultat på behandlingen - typisk: Fastholdt, omgjort.
+
+                Resultat er forventet hvis status for eksempel Avsluttet (enten produsert eller avbrutt)
+                  """
+                ).build()
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
@@ -120,17 +131,6 @@ class SakTabell : BQTable<BQBehandling> {
             val sakUtland =
                 Field.newBuilder("sakUtland", StandardSQLTypeName.STRING).setDescription(
                     "Kode som angir hvor vidt saken er for utland eller nasjonal å anses. Se begrepskatalogen: https://jira.adeo.no/browse/BEGREP-1611#"
-                ).build()
-
-            val behandlingResultat =
-                Field.newBuilder("behandlingResultat", StandardSQLTypeName.STRING).setDescription(
-                    """
-                Kode som angir resultatet på behandling - typisk: avbrutt, innvilget, delvis innvilget, henlagt av tekniske hensyn, etc.
-
-                For behandlingstype klage: Angi behandlingsresultat fra vedtaksinstans, selv om det ikke er et endelig resultat på behandlingen - typisk: Fastholdt, omgjort.
-
-                Resultat er forventet hvis status for eksempel Avsluttet (enten produsert eller avbrutt)
-                  """
                 ).build()
 
             val resultatBegrunnelse =
@@ -195,12 +195,12 @@ class SakTabell : BQTable<BQBehandling> {
                 ansvarligBeslutter,
                 ansvarligEnhet,
                 sakYtelse,
+                behandlingResultat,
 
                 // Ikke implementert ennå
                 utbetaltTid,
                 forventOppstartTid,
                 sakUtland,
-                behandlingResultat,
                 resultatBegrunnelse,
                 tilbakekrevbeløp,
                 funksjonellPeriodeFom,
@@ -216,12 +216,9 @@ class SakTabell : BQTable<BQBehandling> {
         val fagsystemNavn = fieldValueList.get("fagsystemNavn").stringValue
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
-        val relatertBehandlingUUid =
-            if (!fieldValueList.get("relatertBehandlingUUid").isNull) fieldValueList.get("relatertBehandlingUUid").stringValue else null
-        val relatertFagsystem =
-            if (!fieldValueList.get("relatertFagsystem").isNull) fieldValueList.get("relatertFagsystem").stringValue else null
-        val ferdigbehandletTid =
-            if (!fieldValueList.get("ferdigbehandletTid").isNull) fieldValueList.get("ferdigbehandletTid").stringValue else null
+        val relatertBehandlingUUid = fieldValueList.hentEllerNull("relatertBehandlingUUid")
+        val relatertFagsystem = fieldValueList.hentEllerNull("relatertFagsystem")
+        val ferdigbehandletTid = fieldValueList.hentEllerNull("ferdigbehandletTid")
         val tekniskTid = fieldValueList.get("tekniskTid").timestampValue
         val mottattTid = fieldValueList.get("mottattTid").stringValue
         val endretTid = fieldValueList.get("endretTid").timestampValue
@@ -231,20 +228,17 @@ class SakTabell : BQTable<BQBehandling> {
         val avsender = fieldValueList.get("avsender").stringValue
         val sekvensNummer = fieldValueList.get("sekvensnummer").longValue
         val aktorId = fieldValueList.get("aktorId").stringValue
-        val ansvarligBeslutter =
-            if (!fieldValueList.get("ansvarligBeslutter").isNull) fieldValueList.get("ansvarligBeslutter").stringValue else null
+        val ansvarligBeslutter = fieldValueList.hentEllerNull("ansvarligBeslutter")
         val opprettetAv = fieldValueList.get("opprettetAv").stringValue
         val saksbehandler = fieldValueList.get("saksbehandler").stringValue
         val søknadsFormat = fieldValueList.get("soknadsformat").stringValue
-        val vedtakTid =
-            if (!fieldValueList.get("vedtakTid").isNull) fieldValueList.get("vedtakTid").stringValue else null
+        val vedtakTid = fieldValueList.hentEllerNull("vedtakTid")
         val behandlingStatus = fieldValueList.get("behandlingStatus").stringValue
         val behandlingÅrsak = fieldValueList.get("behandlingAarsak").stringValue
-
         val behandlingMetode = fieldValueList.get("behandlingMetode").stringValue
-        val ansvarligEnhet =
-            if (!fieldValueList.get("ansvarligEnhet").isNull) fieldValueList.get("ansvarligEnhet").stringValue else null
+        val ansvarligEnhet = fieldValueList.hentEllerNull("ansvarligEnhet")
         val sakYtelse = fieldValueList.get("sakYtelse").stringValue
+        val behandlingResultat = fieldValueList.hentEllerNull("behandlingResultat")
 
         return BQBehandling(
             fagsystemNavn = fagsystemNavn,
@@ -283,8 +277,13 @@ class SakTabell : BQTable<BQBehandling> {
             behandlingStatus = behandlingStatus,
             behandlingÅrsak = behandlingÅrsak,
             ansvarligEnhetKode = ansvarligEnhet,
-            sakYtelse = sakYtelse
+            sakYtelse = sakYtelse,
+            behandlingResultat = behandlingResultat,
         )
+    }
+
+    private fun FieldValueList.hentEllerNull(feltNavn: String): String? {
+        return if (!get(feltNavn).isNull) get(feltNavn).stringValue else null
     }
 
     override fun toRow(value: BQBehandling): InsertAllRequest.RowToInsert {
@@ -318,6 +317,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "behandlingAarsak" to value.behandlingÅrsak,
                 "ansvarligEnhet" to value.ansvarligEnhetKode,
                 "sakYtelse" to value.sakYtelse,
+                "behandlingResultat" to value.behandlingResultat,
             )
         )
     }

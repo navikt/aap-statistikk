@@ -9,13 +9,13 @@ plugins {
 
 val ktorVersion = "3.1.2"
 val mockkVersion = "1.14.0"
-val komponenterVersjon = "1.0.218"
-val behandlingsflytversjon = "0.0.249"
-val tilgangVersjon = "1.0.49"
 val flywayVersion = "11.7.0"
-val oppgaveVersjon = "0.0.57"
 val testContainersVersion = "1.20.6"
-val postmottakVersjon = "0.0.74"
+val komponenterVersjon = "1.0.217"
+val behandlingsflytversjon = "0.0.252"
+val tilgangVersjon = "1.0.49"
+val oppgaveVersjon = "0.0.56"
+val postmottakVersjon = "0.0.75"
 val utbetalVersjon = "0.0.33"
 
 application {

@@ -63,16 +63,16 @@ class BehandlingRepositoryTest {
                     status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx"),
                     vedtakstidspunkt = vedtakstidspunkt,
                     ansvarligBeslutter = "Josgeir Dalføre",
+                    versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
+                    sisteSaksbehandler = "Joark Jorgensen",
                     relaterteIdenter = listOf("123", "456", "123456789"),
                     gjeldendeAvklaringsBehov = "0559",
                     venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
                     gjeldendeStegGruppe = StegGruppe.BREV,
-                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING),
-                    sisteSaksbehandler = "Joark Jorgensen"
+                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
                 )
             )
         }
