@@ -38,10 +38,12 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
+        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
+
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = Saksnummer("xxxx")
 
-        val opprettetTidspunkt = LocalDateTime.now()
+        val opprettetTidspunkt = LocalDateTime.now(clock)
         opprettTestHendelse(
             dataSource,
             behandlingReferanse,
@@ -124,7 +126,6 @@ class AvsluttetBehandlingServiceTest {
         val meterRegistry = SimpleMeterRegistry()
         val counter = meterRegistry.avsluttetBehandlingLagret()
 
-        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
         val bigQueryClient = dataSource.transaction {
             val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 it,
@@ -334,7 +335,8 @@ class AvsluttetBehandlingServiceTest {
                     vilkårsresultatRepository = VilkårsresultatRepository(dbConnection),
                     tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
                     beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dbConnection),
-                    clock
+                    behandlingRepository = BehandlingRepository(dbConnection),
+                    clock = clock
                 ),
             )
         return Pair(bigQueryClient, service)

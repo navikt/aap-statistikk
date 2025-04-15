@@ -53,6 +53,7 @@ class LagreStoppetHendelseJobb(
                     vilkårsresultatRepository = vilkårsResultatRepositoryFactory(connection),
                     tilkjentYtelseRepository = tilkjentYtelseRepositoryFactory(connection),
                     beregningsgrunnlagRepository = beregningsgrunnlagRepositoryFactory(connection),
+                    behandlingRepository = behandlingRepositoryFactory(connection),
                 )
             ),
             personService = personService(connection),

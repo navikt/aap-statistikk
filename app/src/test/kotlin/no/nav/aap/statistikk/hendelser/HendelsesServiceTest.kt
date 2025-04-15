@@ -151,6 +151,7 @@ class HendelsesServiceTest {
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
                 ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
                     bqRepositoryYtelse,
+                    behandlingRepository,
                     rettighetstypeperiodeRepository,
                     diagnoseRepository,
                     vilkårsresultatRepository = vilkårsresultatRepository,

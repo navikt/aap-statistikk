@@ -63,7 +63,7 @@ class AvsluttetBehandlingService(
         )
 
         if (!skjermingService.erSkjermet(uthentetBehandling)) {
-            ytelsesStatistikkTilBigQuery.lagre(avsluttetBehandling, uthentetBehandling)
+            ytelsesStatistikkTilBigQuery.lagre(uthentetBehandling.referanse)
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }

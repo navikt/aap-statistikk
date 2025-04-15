@@ -1,9 +1,6 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.komponenter.miljo.Miljø
-import no.nav.aap.statistikk.behandling.BQYtelseBehandling
-import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.DiagnoseRepository
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
@@ -18,6 +15,7 @@ import java.util.*
 
 class YtelsesStatistikkTilBigQuery(
     private val bqRepository: IBQYtelsesstatistikkRepository,
+    private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val diagnoseRepository: DiagnoseRepository,
     private val vilkårsresultatRepository: IVilkårsresultatRepository,
@@ -28,10 +26,9 @@ class YtelsesStatistikkTilBigQuery(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun lagre(
-        avsluttetBehandling: AvsluttetBehandling,
-        behandling: Behandling
-    ) {
+    fun lagre(behandlingReferanse: UUID) {
+        val behandling =
+            requireNotNull(behandlingRepository.hent(behandlingReferanse)) { "Prøver å lagre en ikke-eksistereden behandling med referanse $behandlingReferanse" }
         val rettighetstypeperioder = rettighetstypeperiodeRepository.hent(behandling.referanse)
         val diagnoser = diagnoseRepository.hentForBehandling(behandling.referanse)
 
@@ -61,36 +58,21 @@ class YtelsesStatistikkTilBigQuery(
         )
         bqRepository.lagre(vilkårsResultat)
         bqRepository.lagre(tilkjentYtelse)
-        if (avsluttetBehandling.beregningsgrunnlag != null) {
-            val beregningsgrunnlag =
-                beregningsgrunnlagRepository.hentBeregningsGrunnlag(behandling.referanse)
-                    .firstOrNull()
 
-            val tilGrunnlag = beregningsgrunnlag?.let {
-                tilBqGrunnlag(
-                    behandling.referanse,
-                    behandling.sak.saksnummer,
-                    beregningsgrunnlag.value
-                )
-            }
+        val beregningsGrunnlag =
+            beregningsgrunnlagRepository.hentBeregningsGrunnlag(behandling.referanse)
+                .firstOrNull()
 
-            val avsluttedBehandlingGrunnlag = tilBqGrunnlag(
-                avsluttetBehandling.behandlingsReferanse,
+        val tilGrunnlag = beregningsGrunnlag?.let {
+            tilBqGrunnlag(
+                behandling.referanse,
                 behandling.sak.saksnummer,
-                avsluttetBehandling.beregningsgrunnlag
+                it.value,
             )
+        }
 
-            if (tilGrunnlag != avsluttedBehandlingGrunnlag) {
-                val ekstraInfoOmDev = if (!Miljø.erProd()) {
-                    "Fra payload: $avsluttedBehandlingGrunnlag, fra repository: $tilGrunnlag. Behandling: ${behandling.referanse}."
-                } else ""
-
-                log.info("Beregningsgrunnlag fra repository er ulikt det fra payload. $ekstraInfoOmDev")
-            }
-
-            bqRepository.lagre(
-                avsluttedBehandlingGrunnlag
-            )
+        if (tilGrunnlag != null) {
+            bqRepository.lagre(tilGrunnlag)
         }
     }
 
