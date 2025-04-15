@@ -104,8 +104,9 @@ SELECT COALESCE(
                                   versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
                                   vedtak_tidspunkt, ansvarlig_beslutter,
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
-                                  soknadsformat, venteaarsak, steggruppe)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  gjeldende_avklaringsbehov_status,
+                                  soknadsformat, venteaarsak, steggruppe, retur_aarsak)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -119,9 +120,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.status.name)
                 setString(c++, behandling.sisteSaksbehandler)
                 setString(c++, behandling.gjeldendeAvklaringsBehov)
+                setString(c++, behandling.gjeldendeAvklaringsbehovStatus?.name)
                 setEnumName(c++, behandling.søknadsformat)
                 setString(c++, behandling.venteÅrsak)
-                setEnumName(c, behandling.gjeldendeStegGruppe)
+                setEnumName(c++, behandling.gjeldendeStegGruppe)
+                setString(c++, behandling.returÅrsak)
             }
         }
 
@@ -139,36 +142,37 @@ WHERE ident = ?""", behandling.relaterteIdenter
 
     override fun hent(referanse: UUID): Behandling? {
         val behandling = dbConnection.queryFirstOrNull(
-            """
-SELECT b.id                         as b_id,
-       b.referanse_id               as b_referanse,
-       b.type                       as b_type,
-       b.opprettet_tid              as b_opprettet_tid,
-       b.forrige_behandling_id      as b_forrige_behandling_id,
-       b.aarsaker_til_behandling    as b_aarsaker_til_behandling,
-       br.referanse                 as br_referanse,
-       s.id                         as s_id,
-       s.saksnummer                 as s_saksnummer,
-       sh.oppdatert_tid             as sh_oppdatert_tid,
-       sh.sak_status                as sh_sak_status,
-       sh.id                        as sh_id,
-       p.ident                      as p_ident,
-       p.id                         as p_id,
-       bh.status                    as bh_status,
-       bh.versjon_id                as bh_versjon_id,
-       bh.mottatt_tid               as bh_mottatt_tid,
-       bh.vedtak_tidspunkt          as bh_vedtak_tidspunkt,
-       bh.ansvarlig_beslutter       as bh_ansvarlig_beslutter,
-       bh.id                        as bh_id,
-       bh.siste_saksbehandler       as bh_siste_saksbehandler,
-       bh.venteaarsak               as bh_venteaarsak,
-       bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
-       bh.soknadsformat             as bh_soknadsformat,
-       bh.steggruppe                as bh_steggruppe,
-       v.versjon                    as v_versjon,
-       rp.rp_ident                  as rp_ident,
-       e.id                         as e_id,
-       e.kode                       as e_kode
+            """SELECT b.id                                as b_id,
+       b.referanse_id                      as b_referanse,
+       b.type                              as b_type,
+       b.opprettet_tid                     as b_opprettet_tid,
+       b.forrige_behandling_id             as b_forrige_behandling_id,
+       b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
+       br.referanse                        as br_referanse,
+       s.id                                as s_id,
+       s.saksnummer                        as s_saksnummer,
+       sh.oppdatert_tid                    as sh_oppdatert_tid,
+       sh.sak_status                       as sh_sak_status,
+       sh.id                               as sh_id,
+       p.ident                             as p_ident,
+       p.id                                as p_id,
+       bh.status                           as bh_status,
+       bh.versjon_id                       as bh_versjon_id,
+       bh.mottatt_tid                      as bh_mottatt_tid,
+       bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
+       bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
+       bh.id                               as bh_id,
+       bh.siste_saksbehandler              as bh_siste_saksbehandler,
+       bh.venteaarsak                      as bh_venteaarsak,
+       bh.retur_aarsak                     as bh_retur_aarsak,
+       bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
+       bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+       bh.soknadsformat                    as bh_soknadsformat,
+       bh.steggruppe                       as bh_steggruppe,
+       v.versjon                           as v_versjon,
+       rp.rp_ident                         as rp_ident,
+       e.id                                as e_id,
+       e.kode                              as e_kode
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
@@ -201,35 +205,36 @@ WHERE br.referanse = ?"""
         return behandling
     }
 
-    private val hentMedId = """
-SELECT b.id                         as b_id,
-       br.referanse                 as br_referanse,
-       b.type                       as b_type,
-       b.opprettet_tid              as b_opprettet_tid,
-       b.forrige_behandling_id      as b_forrige_behandling_id,
-       b.aarsaker_til_behandling    as b_aarsaker_til_behandling,
-       s.id                         as s_id,
-       s.saksnummer                 as s_saksnummer,
-       sh.oppdatert_tid             as sh_oppdatert_tid,
-       sh.sak_status                as sh_sak_status,
-       sh.id                        as sh_id,
-       p.ident                      as p_ident,
-       p.id                         as p_id,
-       bh.status                    as bh_status,
-       bh.versjon_id                as bh_versjon_id,
-       bh.mottatt_tid               as bh_mottatt_tid,
-       bh.vedtak_tidspunkt          as bh_vedtak_tidspunkt,
-       bh.ansvarlig_beslutter       as bh_ansvarlig_beslutter,
-       bh.siste_saksbehandler       as bh_siste_saksbehandler,
-       bh.venteaarsak               as bh_venteaarsak,
-       bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
-       bh.soknadsformat             as bh_soknadsformat,
-       bh.steggruppe                as bh_steggruppe,
-       bh.id                        as bh_id,
-       v.versjon                    as v_versjon,
-       rp.rp_ident                  as rp_ident,
-       e.id                         as e_id,
-       e.kode                       as e_kode
+    private val hentMedId = """SELECT b.id                                as b_id,
+       br.referanse                        as br_referanse,
+       b.type                              as b_type,
+       b.opprettet_tid                     as b_opprettet_tid,
+       b.forrige_behandling_id             as b_forrige_behandling_id,
+       b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
+       s.id                                as s_id,
+       s.saksnummer                        as s_saksnummer,
+       sh.oppdatert_tid                    as sh_oppdatert_tid,
+       sh.sak_status                       as sh_sak_status,
+       sh.id                               as sh_id,
+       p.ident                             as p_ident,
+       p.id                                as p_id,
+       bh.status                           as bh_status,
+       bh.versjon_id                       as bh_versjon_id,
+       bh.mottatt_tid                      as bh_mottatt_tid,
+       bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
+       bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
+       bh.siste_saksbehandler              as bh_siste_saksbehandler,
+       bh.venteaarsak                      as bh_venteaarsak,
+       bh.retur_aarsak                     as bh_retur_aarsak,
+       bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
+       bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+       bh.soknadsformat                    as bh_soknadsformat,
+       bh.steggruppe                       as bh_steggruppe,
+       bh.id                               as bh_id,
+       v.versjon                           as v_versjon,
+       rp.rp_ident                         as rp_ident,
+       e.id                                as e_id,
+       e.kode                              as e_kode
 FROM behandling b
          JOIN behandling_referanse br on b.referanse_id = br.id
          JOIN sak s on b.sak_id = s.id
@@ -270,14 +275,16 @@ WHERE b.id = ?"""
     private fun hentBehandlingHistorikk(behandling: Behandling): List<BehandlingHendelse> =
         run {
             val historikkSpørring = """
-                    select bh.siste_saksbehandler       as bh_siste_saksbehandler,
-                           bh.oppdatert_tid             as bh_opprettet_tidspunkt,
-                           bh.venteaarsak               as bh_venteaarsak,
-                           bh.gjeldende_avklaringsbehov as bh_gjeldende_avklaringsbehov,
-                           bh.status                    as bh_status
-                    from behandling_historikk bh
-                    where bh.behandling_id = ?
-                    order by bh.oppdatert_tid
+       select bh.siste_saksbehandler              as bh_siste_saksbehandler,
+              bh.oppdatert_tid                    as bh_opprettet_tidspunkt,
+              bh.venteaarsak                      as bh_venteaarsak,
+              bh.retur_aarsak                     as bh_retur_aarsak,
+              bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
+              bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+              bh.status                           as bh_status
+       from behandling_historikk bh
+       where bh.behandling_id = ?
+       order by bh.oppdatert_tid
                 """.trimIndent()
 
             dbConnection.queryList(historikkSpørring) {
@@ -286,7 +293,9 @@ WHERE b.id = ?"""
                     BehandlingHendelse(
                         tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),
                         avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov"),
+                        avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
                         venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
+                        returÅrsak = it.getStringOrNull("bh_retur_aarsak"),
                         saksbehandler = it.getStringOrNull("bh_siste_saksbehandler")
                             ?.let { saksbehandler ->
                                 Saksbehandler(
@@ -346,7 +355,9 @@ WHERE b.id = ?"""
         snapShotId = it.getLong("bh_id"),
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
             ?.ifBlank { null },
+        gjeldendeAvklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
+        returÅrsak = it.getStringOrNull("bh_retur_aarsak")?.ifBlank { null },
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
             .map { ÅrsakTilBehandling.valueOf(it) },

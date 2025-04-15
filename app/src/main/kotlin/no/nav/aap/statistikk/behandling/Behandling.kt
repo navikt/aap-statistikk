@@ -37,6 +37,7 @@ data class Behandling(
     val gjeldendeAvklaringsBehov: String? = null,
     val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,
     val venteÅrsak: String? = null,
+    val returÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<ÅrsakTilBehandling> = listOf(),
     val behandlendeEnhet: Enhet? = null,
@@ -65,7 +66,9 @@ data class Behandling(
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
+    val avklaringsbehovStatus: AvklaringsbehovStatus? = null,
     val venteÅrsak: String? = null,
+    val returÅrsak: String? = null,
     val saksbehandler: Saksbehandler? = null,
     val status: BehandlingStatus,
 )

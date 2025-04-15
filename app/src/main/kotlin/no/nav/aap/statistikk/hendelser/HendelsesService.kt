@@ -84,6 +84,7 @@ class HendelsesService(
             gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
             søknadsformat = dto.soknadsFormat.tilDomene(),
             venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
+            returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
             gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
             årsaker = dto.årsakTilBehandling.map { it.tilDomene() }
         )

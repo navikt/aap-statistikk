@@ -4,6 +4,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilRetur
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.tilgang.Rolle
@@ -14,17 +16,37 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStat
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     return this
         .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.FATTE_VEDTAK }
-        .firstOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }
+        .firstOrNull { it.status == Status.AVSLUTTET }
         ?.endringer?.sortedBy { it.tidsstempel }
-        ?.lastOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }?.tidsstempel
+        ?.lastOrNull { it.status == Status.AVSLUTTET }?.tidsstempel
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledBrevSendtTid(): LocalDateTime? {
     return this
         .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.BREV }
-        .firstOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }
-        ?.endringer?.sortedBy { it.tidsstempel }
-        ?.lastOrNull { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }?.tidsstempel
+        .firstOrNull { it.status == Status.AVSLUTTET }
+        ?.endringer
+        ?.filter { it.status.returnert() }
+        ?.sortedBy { it.tidsstempel }
+        ?.lastOrNull { it.status == Status.AVSLUTTET }?.tidsstempel
+}
+
+fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
+    endringer.maxBy { it.tidsstempel }.tidsstempel
+
+fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
+    return this
+        .filter { it.status.returnert() }
+        .maxByOrNull { it.tidspunktSisteEndring() }
+        ?.endringer
+        ?.maxByOrNull { it.tidsstempel }?.årsakTilRetur?.firstOrNull()?.årsak
+}
+
+fun Status.returnert(): Boolean = when (this) {
+    Status.SENDT_TILBAKE_FRA_BESLUTTER,
+    Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER -> true
+
+    else -> false
 }
 
 fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
@@ -47,7 +69,7 @@ fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
     return this
         .filter { it.status.erÅpent() }
         .sortedByDescending {
-            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
+            it.endringer.maxBy { endring -> endring.tidsstempel }.tidsstempel
         }
         .map { it.status }
         .firstOrNull()
@@ -79,7 +101,7 @@ fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
     return this
         .asSequence()
         .filter { it.avklaringsbehovDefinisjon.kode == AvklaringsbehovKode.`5099` }
-        .filter { it.status == no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET }
+        .filter { it.status == Status.AVSLUTTET }
         .flatMap { it.endringer }
         .filter { it.status == EndringStatus.AVSLUTTET }
         .map { it.endretAv }
