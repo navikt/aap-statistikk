@@ -42,6 +42,11 @@ class HendelseHjelpereKtTest {
         assertThat(returHendelser.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGLENDE_UTREDNING)
     }
 
+    @Test
+    fun `utled årsak til retur ekte`() {
+        assertThat(ekteEksempel.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE)
+        assertThat(ekteEksempel.sisteAvklaringsbehovStatus()).isEqualTo(Status.SENDT_TILBAKE_FRA_BESLUTTER)
+    }
 
     @Test
     fun `om behandlingen nettopp er opprettet, er det ingen menneskelige saksbehandlere`() {
@@ -225,7 +230,6 @@ val avklaringsbehovHendelser = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-
         avklaringsbehovDefinisjon = FRITAK_MELDEPLIKT,
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
@@ -949,3 +953,133 @@ val medflere = listOf(
     )
 )
 
+
+val ekteEksempel = listOf(
+    AvklaringsbehovHendelseDto(
+        avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
+        status = Status.SENDT_TILBAKE_FRA_BESLUTTER,
+        endringer = listOf(
+            EndringDTO(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T12:46:13.515"),
+                frist = null,
+                endretAv = "Kelvin",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T12:46:23.688"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T12:46:37.237"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T12:47:01.276"),
+                frist = null,
+                endretAv = "Kelvin",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T12:47:27.891"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T12:47:39.533"),
+                frist = null,
+                endretAv = "Kelvin",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:05:17.706"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:05:26.511"),
+                frist = null,
+                endretAv = "Kelvin",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:07:59.934"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.KVALITETSSIKRET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:08:09.089"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:10:18.716"),
+                frist = null,
+                endretAv = "Kelvin",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:24:44.463"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:26:02.921"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = listOf(ÅrsakTilRetur(årsak = ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE))
+            ),
+            EndringDTO(
+                status = EndringStatus.AVSLUTTET,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:26:15.263"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = emptyList()
+            ),
+            EndringDTO(
+                status = EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER,
+                tidsstempel = LocalDateTime.parse("2025-04-15T13:26:59.746"),
+                frist = null,
+                endretAv = "Z994573",
+                årsakTilSattPåVent = null,
+                årsakTilRetur = listOf(ÅrsakTilRetur(årsak = ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE))
+            )
+        ),
+        typeBrev = null
+    )
+)

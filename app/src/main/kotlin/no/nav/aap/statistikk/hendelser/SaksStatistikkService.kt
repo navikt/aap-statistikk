@@ -152,10 +152,10 @@ class SaksStatistikkService(
     fun behandlingStatus(behandling: Behandling): String {
         // TODO: når klage er implementert, må dette fikses her
 
-        val venteÅrsak = behandling.venteÅrsak?.let { "_$it" }.orEmpty()
+        val venteÅrsak = behandling.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
         val returStatus = behandling.gjeldendeAvklaringsbehovStatus
             ?.takeIf { it.returnert() }
-            ?.let { "_${it.name.lowercase()}" }.orEmpty()
+            ?.let { "_${it.name.uppercase()}" }.orEmpty()
 
 
         return when (behandling.status) {

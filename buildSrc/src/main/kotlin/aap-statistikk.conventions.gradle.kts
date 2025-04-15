@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
+    jacoco
 }
 
 group = "no.nav.aap.statistikk"
@@ -34,6 +35,10 @@ testing {
 tasks.test {
     useJUnitPlatform()
     maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
 }
 
 kotlin {
