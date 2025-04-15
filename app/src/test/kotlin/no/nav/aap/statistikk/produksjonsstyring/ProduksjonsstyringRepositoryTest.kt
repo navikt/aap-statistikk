@@ -120,6 +120,7 @@ class ProduksjonsstyringRepositoryTest {
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
                     ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
                         bqRepositoryYtelse,
+                        behandlingRepository = BehandlingRepository(conn),
                         RettighetstypeperiodeRepository(conn),
                         DiagnoseRepositoryImpl(conn),
                         VilkårsresultatRepository(conn),
