@@ -59,7 +59,8 @@ class SakTabellTest {
                 behandlingÅrsak = ÅrsakTilBehandling.SØKNAD.toString(),
                 ansvarligEnhetKode = "1337",
                 sakYtelse = sakYtelse,
-                behandlingResultat = "AX"
+                behandlingResultat = "AX",
+                resultatBegrunnelse = "BEGRUNNELSE"
             )
         )
 
@@ -100,7 +101,8 @@ class SakTabellTest {
                     behandlingÅrsak = "SØKNAD",
                     ansvarligEnhetKode = "1337",
                     sakYtelse = "AAP",
-                    behandlingResultat = "AX"
+                    behandlingResultat = "AX",
+                    resultatBegrunnelse = "BEGRUNNELSE"
                 )
             )
     }
