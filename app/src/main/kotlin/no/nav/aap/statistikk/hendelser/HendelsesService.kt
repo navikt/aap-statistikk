@@ -203,5 +203,6 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.REFUSJONSKRAV -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REFUSJONSKRAV
         ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
         ÅrsakTilBehandling.SØKNAD_TRUKKET -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SØKNAD_TRUKKET
+        ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE
     }
 }
