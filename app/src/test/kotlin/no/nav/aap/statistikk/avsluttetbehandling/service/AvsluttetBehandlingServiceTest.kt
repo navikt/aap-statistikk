@@ -52,7 +52,7 @@ class AvsluttetBehandlingServiceTest {
             opprettetTidspunkt = opprettetTidspunkt
         )
 
-        val datoNå = LocalDate.now()
+        val datoNå = LocalDate.now(clock)
         val avsluttetBehandling = AvsluttetBehandling(
             behandlingsReferanse = behandlingReferanse,
             tilkjentYtelse = TilkjentYtelse(
