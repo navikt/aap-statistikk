@@ -38,7 +38,7 @@ class AvsluttetBehandlingServiceTest {
         @Postgres dataSource: DataSource,
         @BigQuery bigQuery: BigQueryConfig
     ) {
-        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
+        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Moscow"))
 
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = Saksnummer("xxxx")
@@ -49,7 +49,8 @@ class AvsluttetBehandlingServiceTest {
             behandlingReferanse,
             saksnummer,
             status = BehandlingStatus.AVSLUTTET,
-            opprettetTidspunkt = opprettetTidspunkt
+            opprettetTidspunkt = opprettetTidspunkt,
+            clock
         )
 
         val datoNå = LocalDate.now(clock)
@@ -318,13 +319,14 @@ class AvsluttetBehandlingServiceTest {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
         val bqYtelseRepository = BQYtelseRepository(bigQueryClient)
 
+        val behandlingRepository = BehandlingRepository(dbConnection, clock)
         val service =
             AvsluttetBehandlingService(
                 TilkjentYtelseRepository(dbConnection),
                 BeregningsgrunnlagRepository(dbConnection),
                 VilkårsresultatRepository(dbConnection),
                 diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
-                behandlingRepository = BehandlingRepository(dbConnection),
+                behandlingRepository = behandlingRepository,
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                 meterRegistry = meterRegistry,
@@ -335,7 +337,7 @@ class AvsluttetBehandlingServiceTest {
                     vilkårsresultatRepository = VilkårsresultatRepository(dbConnection),
                     tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
                     beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dbConnection),
-                    behandlingRepository = BehandlingRepository(dbConnection),
+                    behandlingRepository = behandlingRepository,
                     clock = clock
                 ),
             )

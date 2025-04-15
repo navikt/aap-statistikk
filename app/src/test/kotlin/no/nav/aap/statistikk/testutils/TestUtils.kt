@@ -61,6 +61,7 @@ import org.testcontainers.utility.MountableFile
 import java.io.InputStream
 import java.net.URI
 import java.nio.file.Path
+import java.time.Clock
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -248,7 +249,8 @@ fun opprettTestHendelse(
     randomUUID: UUID,
     saksnummer: Saksnummer,
     status: BehandlingStatus = BehandlingStatus.UTREDES,
-    opprettetTidspunkt: LocalDateTime = LocalDateTime.now()
+    opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    clock: Clock = Clock.systemDefaultZone()
 ): Pair<BehandlingId, SakId> {
     val ident = "29021946"
 
@@ -261,8 +263,11 @@ fun opprettTestHendelse(
         randomUUID,
         sak,
         status,
-        opprettetTidspunkt
+        opprettetTidspunkt,
+        clock
     )
+
+    println("Nå: ${LocalDateTime.now(clock)}. Behandlingopprettet: ${behandling.opprettetTid}}")
 
     val sakId = sak.id!!
     val behandlingId = behandling.id!!
@@ -296,7 +301,8 @@ fun opprettTestBehandling(
     referanse: UUID,
     sak: Sak,
     status: BehandlingStatus = BehandlingStatus.UTREDES,
-    opprettetTidspunkt: LocalDateTime = LocalDateTime.now()
+    opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    clock: Clock = Clock.systemDefaultZone()
 ): Behandling {
     val behandling = Behandling(
         referanse = referanse,
@@ -309,13 +315,13 @@ fun opprettTestBehandling(
         søknadsformat = SøknadsFormat.PAPIR,
     )
     return dataSource.transaction {
-        val repo = BehandlingRepository(it)
+        val repo = BehandlingRepository(it, clock = clock)
         val uthentet = repo.hent(referanse)
         val id = if (uthentet != null) {
             repo.oppdaterBehandling(behandling.copy(id = uthentet.id))
             uthentet.id
         } else {
-            BehandlingRepository(it).opprettBehandling(
+            BehandlingRepository(it, clock).opprettBehandling(
                 behandling
             )
         }
