@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.enhet.EnhetRepository
@@ -70,7 +71,9 @@ class BehandlingRepositoryTest {
                     sisteSaksbehandler = "Joark Jorgensen",
                     relaterteIdenter = listOf("123", "456", "123456789"),
                     gjeldendeAvklaringsBehov = "0559",
+                    gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
                     venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
+                    returÅrsak = "MANGELFULL_BEGRUNNELSE",
                     gjeldendeStegGruppe = StegGruppe.BREV,
                     årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
                 )
@@ -94,6 +97,7 @@ class BehandlingRepositoryTest {
             ÅrsakTilBehandling.G_REGULERING
         )
         assertThat(uthentet.behandlendeEnhet).isEqualTo(enhet)
+        assertThat(uthentet.gjeldendeAvklaringsbehovStatus).isEqualTo(Status.OPPRETTET)
         assertThat(uthentet.hendelser).satisfiesExactly(
             {
                 assertThat(it.tidspunkt).isCloseTo(
@@ -101,8 +105,10 @@ class BehandlingRepositoryTest {
                     within(500, ChronoUnit.MILLIS)
                 )
                 assertThat(it.saksbehandler?.ident).isEqualTo("Joark Jorgensen")
+                assertThat(it.avklaringsbehovStatus).isEqualTo(Status.OPPRETTET)
             },
         )
+        assertThat(uthentet.returÅrsak).isEqualTo("MANGELFULL_BEGRUNNELSE")
 
         dataSource.transaction {
             BehandlingRepository(it).oppdaterBehandling(

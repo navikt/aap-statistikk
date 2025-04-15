@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.Behandling
@@ -15,7 +16,6 @@ import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 private val logger = LoggerFactory.getLogger(SaksStatistikkService::class.java)
 
@@ -54,12 +54,10 @@ class SaksStatistikkService(
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
 
-        val sakYtelse = regnUtSakYtelse(behandlingReferanse)
 
         val behandlingHendelse = hendelser.last()
         val hendelsesTidspunkt = behandlingHendelse.tidspunkt
 
-        // TODO - kun om endring siden sist. somehow!?
         val bqSak = BQBehandling(
             sekvensNummer = sekvensNummer,
             behandlingUUID = behandlingReferanse.toString(),
@@ -87,28 +85,57 @@ class SaksStatistikkService(
             behandlingStatus = behandlingStatus(behandling),
             behandlingÅrsak = behandling.årsaker.joinToString(","),
             ansvarligEnhetKode = ansvarligEnhet,
-            behandlingResultat = null,
+            behandlingResultat = regnUtBehandlingResultat(behandling),
+            resultatBegrunnelse = resultatBegrunnelse(behandling),
             sakYtelse = "AAP"
         )
 
         if (behandling.årsaker.size > 1) {
             logger.warn("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
         }
+
+        // TODO - kun lagre om endring siden sist
         bigQueryRepository.lagre(bqSak)
     }
 
-    private fun regnUtSakYtelse(
-        behandlingReferanse: UUID
-    ): String {
-        val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
-        return if (rettighetstyper.isEmpty()) {
-            "AAP"
-        } else {
-            if (rettighetstyper.size > 1) {
-                logger.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
+    /**
+     * Om behandlingen er returnert fra kvalitetssikrer, skal dette være returårsaken.
+     *
+     * TODO: begrunnelse ved avslag/innvilgelse
+     */
+    private fun resultatBegrunnelse(behandling: Behandling): String? {
+        if (behandling.hendelser.last().avklaringsbehovStatus?.returnert() == true) {
+            return behandling.hendelser.last().returÅrsak
+        }
+        return null
+    }
+
+    /**
+     * For en avsluttet behandling, tolkes dette som rettighetstype.
+     */
+    private fun regnUtBehandlingResultat(
+        behandling: Behandling
+    ): String? {
+        return when (behandling.status) {
+            BehandlingStatus.OPPRETTET -> null
+            BehandlingStatus.UTREDES -> null
+            BehandlingStatus.IVERKSETTES -> null
+            BehandlingStatus.AVSLUTTET -> {
+                val behandlingReferanse = behandling.referanse
+                val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
+                return if (rettighetstyper.isEmpty()) {
+                    // Hva med avslag?
+                    "AAP"
+                } else {
+                    if (rettighetstyper.size > 1) {
+                        logger.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
+                    }
+                    // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
+                    val førsteRettighetstype =
+                        rettighetstyper.first().rettighetstype.name.lowercase()
+                    "AAP_$førsteRettighetstype"
+                }
             }
-            val førsteRettighetstype = rettighetstyper.first().rettighetstype.name.lowercase()
-            "AAP_$førsteRettighetstype"
         }
     }
 
@@ -125,12 +152,16 @@ class SaksStatistikkService(
 
     fun behandlingStatus(behandling: Behandling): String {
         // TODO: når klage er implementert, må dette fikses her
-        // TODO: få inn retur fra kvalitetssikrer her, og ventegrunner
 
         val venteÅrsak = behandling.venteÅrsak?.let { "_$it" }.orEmpty()
+        val returStatus = behandling.gjeldendeAvklaringsbehovStatus
+            ?.takeIf { it.returnert() }
+            ?.let { "_${it.name.lowercase()}" }.orEmpty()
+
+
         return when (behandling.status) {
             BehandlingStatus.OPPRETTET -> "REGISTRERT"
-            BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak"
+            BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
             BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
             BehandlingStatus.AVSLUTTET -> "AVSLUTTET"
         }

@@ -112,6 +112,15 @@ class SakTabell : BQTable<BQBehandling> {
                   """
                 ).build()
 
+            val resultatBegrunnelse =
+                Field.newBuilder("resultatBegrunnelse", StandardSQLTypeName.STRING).setDescription(
+                    """
+                Kode som angir en begrunnelse til resultat ved avslag- typisk: vilkårsprøvingen feilet, dublett, teknisk avvik, etc.
+
+                For behandlingstype klage: Angi begrunnelse ved resultat omgjøring - typisk: feil lovanvendelse, endret faktum, saksbehandlingsfeil, etc.
+              """.trimIndent()
+                ).build()
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
@@ -131,15 +140,6 @@ class SakTabell : BQTable<BQBehandling> {
             val sakUtland =
                 Field.newBuilder("sakUtland", StandardSQLTypeName.STRING).setDescription(
                     "Kode som angir hvor vidt saken er for utland eller nasjonal å anses. Se begrepskatalogen: https://jira.adeo.no/browse/BEGREP-1611#"
-                ).build()
-
-            val resultatBegrunnelse =
-                Field.newBuilder("resultatBegrunnelse", StandardSQLTypeName.STRING).setDescription(
-                    """
-                Kode som angir en begrunnelse til resultat ved avslag- typisk: vilkårsprøvingen feilet, dublett, teknisk avvik, etc.
-
-                For behandlingstype klage: Angi begrunnelse ved resultat omgjøring - typisk: feil lovanvendelse, endret faktum, saksbehandlingsfeil, etc.
-              """.trimIndent()
                 ).build()
 
             val tilbakekrevbeløp =
@@ -196,12 +196,12 @@ class SakTabell : BQTable<BQBehandling> {
                 ansvarligEnhet,
                 sakYtelse,
                 behandlingResultat,
+                resultatBegrunnelse,
 
                 // Ikke implementert ennå
                 utbetaltTid,
                 forventOppstartTid,
                 sakUtland,
-                resultatBegrunnelse,
                 tilbakekrevbeløp,
                 funksjonellPeriodeFom,
                 funksjonellPeriodeTom,
@@ -239,6 +239,7 @@ class SakTabell : BQTable<BQBehandling> {
         val ansvarligEnhet = fieldValueList.hentEllerNull("ansvarligEnhet")
         val sakYtelse = fieldValueList.get("sakYtelse").stringValue
         val behandlingResultat = fieldValueList.hentEllerNull("behandlingResultat")
+        val resultatBegrunnelse = fieldValueList.hentEllerNull("resultatBegrunnelse")
 
         return BQBehandling(
             fagsystemNavn = fagsystemNavn,
@@ -279,6 +280,7 @@ class SakTabell : BQTable<BQBehandling> {
             ansvarligEnhetKode = ansvarligEnhet,
             sakYtelse = sakYtelse,
             behandlingResultat = behandlingResultat,
+            resultatBegrunnelse = resultatBegrunnelse,
         )
     }
 
@@ -318,6 +320,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "ansvarligEnhet" to value.ansvarligEnhetKode,
                 "sakYtelse" to value.sakYtelse,
                 "behandlingResultat" to value.behandlingResultat,
+                "resultatBegrunnelse" to value.resultatBegrunnelse,
             )
         )
     }

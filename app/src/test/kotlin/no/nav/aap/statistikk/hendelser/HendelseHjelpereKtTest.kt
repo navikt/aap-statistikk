@@ -3,9 +3,7 @@ package no.nav.aap.statistikk.hendelser
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -37,6 +35,11 @@ class HendelseHjelpereKtTest {
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isNotNull()
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isNotEqualTo("Kelvin")
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isEqualTo("Z99400")
+    }
+
+    @Test
+    fun `utled årsak til retur`() {
+        assertThat(returHendelser.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGLENDE_UTREDNING)
     }
 
 
@@ -86,49 +89,53 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `ansvarlig beslutter er null om avklaringsbehovet ikke er avsluttet`() {
-        val hendelser = listOf(AvklaringsbehovHendelseDto(
-            avklaringsbehovDefinisjon = FATTE_VEDTAK,
-            status = Status.OPPRETTET,
-            endringer = listOf(
-                EndringDTO(
-                    status = Status.OPPRETTET,
-                    tidsstempel = LocalDateTime.parse("2025-04-08T09:03:54.371"),
-                    endretAv = "Kelvin",
+        val hendelser = listOf(
+            AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = FATTE_VEDTAK,
+                status = Status.OPPRETTET,
+                endringer = listOf(
+                    EndringDTO(
+                        status = Status.OPPRETTET,
+                        tidsstempel = LocalDateTime.parse("2025-04-08T09:03:54.371"),
+                        endretAv = "Kelvin",
+                    ),
+                    EndringDTO(
+                        status = Status.AVSLUTTET,
+                        tidsstempel = LocalDateTime.parse("2025-04-08T09:04:14.935"),
+                        endretAv = "Z994573",
+                    ),
+                    EndringDTO(
+                        status = Status.OPPRETTET,
+                        tidsstempel = LocalDateTime.parse("2025-04-08T09:04:15.080"),
+                        endretAv = "Kelvin",
+                    ),
                 ),
-                EndringDTO(
-                    status = Status.AVSLUTTET,
-                    tidsstempel = LocalDateTime.parse("2025-04-08T09:04:14.935"),
-                    endretAv = "Z994573",
-                ),
-                EndringDTO(
-                    status = Status.OPPRETTET,
-                    tidsstempel = LocalDateTime.parse("2025-04-08T09:04:15.080"),
-                    endretAv = "Kelvin",
-                ),
-            ),
-        ))
+            )
+        )
 
         assertThat(hendelser.utledAnsvarligBeslutter()).isNull()
     }
 
     @Test
     fun `ansvarlig beslutter er ikke-null om avklaringsbehovet er avsluttet`() {
-        val hendelser = listOf(AvklaringsbehovHendelseDto(
-            avklaringsbehovDefinisjon = FATTE_VEDTAK,
-            status = Status.AVSLUTTET,
-            endringer = listOf(
-                EndringDTO(
-                    status = Status.OPPRETTET,
-                    tidsstempel = LocalDateTime.parse("2025-04-08T09:03:54.371"),
-                    endretAv = "Kelvin",
+        val hendelser = listOf(
+            AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = FATTE_VEDTAK,
+                status = Status.AVSLUTTET,
+                endringer = listOf(
+                    EndringDTO(
+                        status = Status.OPPRETTET,
+                        tidsstempel = LocalDateTime.parse("2025-04-08T09:03:54.371"),
+                        endretAv = "Kelvin",
+                    ),
+                    EndringDTO(
+                        status = Status.AVSLUTTET,
+                        tidsstempel = LocalDateTime.parse("2025-04-08T09:04:14.935"),
+                        endretAv = "Z994573",
+                    ),
                 ),
-                EndringDTO(
-                    status = Status.AVSLUTTET,
-                    tidsstempel = LocalDateTime.parse("2025-04-08T09:04:14.935"),
-                    endretAv = "Z994573",
-                ),
-            ),
-        ))
+            )
+        )
 
         assertThat(hendelser.utledAnsvarligBeslutter()).isNotNull()
         assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("Z994573")
@@ -170,9 +177,30 @@ class HendelseHjelpereKtTest {
     }
 }
 
+val returHendelser = listOf(
+    AvklaringsbehovHendelseDto(
+        avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
+        status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+        endringer = listOf(
+            EndringDTO(
+                status = EndringStatus.OPPRETTET,
+                tidsstempel = LocalDateTime.parse("2024-10-18T10:42:07.925"),
+                frist = null,
+                endretAv = "Kelvin"
+            ),
+            EndringDTO(
+                status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                årsakTilRetur = listOf(ÅrsakTilRetur(ÅrsakTilReturKode.MANGLENDE_UTREDNING)),
+                tidsstempel = LocalDateTime.parse("2024-10-18T10:53:45.371"),
+                frist = null,
+                endretAv = "Z994573"
+            )
+        )
+    )
+)
+
 val avklaringsbehovHendelser = listOf(
     AvklaringsbehovHendelseDto(
-
         avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
         status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
@@ -551,14 +579,14 @@ val medflere = listOf(
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T13:27:34.783"),
                 frist = null,
                 endretAv = "Z994553",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.459"),
                 frist = null,
                 endretAv = "Z994553",
@@ -568,17 +596,17 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
-        status  = EndringStatus.TOTRINNS_VURDERT,
+        status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T13:27:35.151"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T13:59:00.982"),
                 frist = null,
                 endretAv = "Z994553",
@@ -592,14 +620,14 @@ val medflere = listOf(
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T14:04:30.185"),
                 frist = null,
                 endretAv = "Z994553",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:51:10.818"),
                 frist = null,
                 endretAv = "Z994553",
@@ -613,7 +641,7 @@ val medflere = listOf(
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.467"),
                 frist = null,
                 endretAv = "Z994553",
@@ -623,17 +651,17 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
-        status  = EndringStatus.TOTRINNS_VURDERT,
+        status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T13:59:01.673"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T13:59:18.666"),
                 frist = null,
                 endretAv = "Z994553",
@@ -647,7 +675,7 @@ val medflere = listOf(
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:51:15.631"),
                 frist = null,
                 endretAv = "Z994553",
@@ -661,7 +689,7 @@ val medflere = listOf(
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.476"),
                 frist = null,
                 endretAv = "Z994553",
@@ -671,24 +699,24 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = FASTSETT_BEREGNINGSTIDSPUNKT,
-        status  = EndringStatus.TOTRINNS_VURDERT,
+        status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:52:20.688"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:54:17.208"),
                 frist = null,
                 endretAv = "Z994553",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.494"),
                 frist = null,
                 endretAv = "Z994553",
@@ -698,24 +726,24 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = AVKLAR_BARNETILLEGG,
-        status  = EndringStatus.TOTRINNS_VURDERT,
+        status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:55:15.794"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:57:29.767"),
                 frist = null,
                 endretAv = "Z994553",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.512"),
                 frist = null,
                 endretAv = "Z994553",
@@ -725,24 +753,24 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = AVKLAR_SONINGSFORRHOLD,
-        status  = EndringStatus.TOTRINNS_VURDERT,
+        status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:57:32.760"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:58:22.622"),
                 frist = null,
                 endretAv = "Z994553",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.522"),
                 frist = null,
                 endretAv = "Z994553",
@@ -752,24 +780,24 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = AVKLAR_YRKESSKADE,
-        status  = EndringStatus.TOTRINNS_VURDERT,
+        status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:51:25.608"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:52:19.329"),
                 frist = null,
                 endretAv = "Z994553",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.485"),
                 frist = null,
                 endretAv = "Z994553",
@@ -779,17 +807,17 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = FASTSETT_YRKESSKADEINNTEKT,
-        status  = EndringStatus.TOTRINNS_VURDERT,
+        status = EndringStatus.TOTRINNS_VURDERT,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:54:18.458"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:55:11.476"),
                 frist = null,
                 endretAv = "Z994553",
@@ -803,7 +831,7 @@ val medflere = listOf(
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.TOTRINNS_VURDERT,
+                status = EndringStatus.TOTRINNS_VURDERT,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.502"),
                 frist = null,
                 endretAv = "Z994553",
@@ -813,31 +841,31 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = KVALITETSSIKRING,
-        status  = EndringStatus.AVSLUTTET,
+        status = EndringStatus.AVSLUTTET,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T13:59:19.189"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-10T13:59:54.206"),
                 frist = null,
                 endretAv = "Z994553",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:51:16.425"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:51:24.503"),
                 frist = null,
                 endretAv = "Z994553",
@@ -847,17 +875,17 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = FORESLÅ_VEDTAK,
-        status  = EndringStatus.AVSLUTTET,
+        status = EndringStatus.AVSLUTTET,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T08:58:25.607"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:10:21.532"),
                 frist = null,
                 endretAv = "Z994553",
@@ -871,7 +899,7 @@ val medflere = listOf(
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:10:58.276"),
                 frist = null,
                 endretAv = "Z994553",
@@ -881,17 +909,17 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = FATTE_VEDTAK,
-        status  = EndringStatus.AVSLUTTET,
+        status = EndringStatus.AVSLUTTET,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:10:24.193"),
                 frist = null,
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = null
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.531"),
                 frist = null,
                 endretAv = "Z994553",
@@ -901,17 +929,17 @@ val medflere = listOf(
     ),
     AvklaringsbehovHendelseDto(
         avklaringsbehovDefinisjon = BESTILL_BREV,
-        status  = EndringStatus.AVSLUTTET,
+        status = EndringStatus.AVSLUTTET,
         endringer = listOf(
             EndringDTO(
-                status  = EndringStatus.OPPRETTET,
+                status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:13.770"),
                 frist = LocalDate.parse("2025-01-22"),
                 endretAv = "Kelvin",
                 årsakTilSattPåVent = ÅrsakTilSettPåVent.VENTER_PÅ_MASKINELL_AVKLARING
             ),
             EndringDTO(
-                status  = EndringStatus.AVSLUTTET,
+                status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2025-01-21T09:13:14.902"),
                 frist = null,
                 endretAv = "Brevløsning",

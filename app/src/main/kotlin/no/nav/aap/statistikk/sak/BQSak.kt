@@ -32,6 +32,7 @@ data class BQBehandling(
     val behandlingStatus: String,
     val behandlingÅrsak: String,
     val behandlingResultat: String? = null,
+    val resultatBegrunnelse: String? = null,
     val ansvarligEnhetKode: String?,
     val sakYtelse: String,
 ) {
