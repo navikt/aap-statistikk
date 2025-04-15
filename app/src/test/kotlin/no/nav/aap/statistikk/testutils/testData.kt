@@ -8,6 +8,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.statistikk.sak.Saksnummer
 import java.math.BigDecimal
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -89,28 +90,11 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
     )
 }
 
-fun avklaringsbehovHendelse(): AvklaringsbehovHendelseDto {
-    return AvklaringsbehovHendelseDto(
-        avklaringsbehovDefinisjon = FRITAK_MELDEPLIKT,
-        status = EndringStatus.OPPRETTET,
-        endringer = listOf(
-            EndringDTO(
-                status = EndringStatus.OPPRETTET,
-                tidsstempel = LocalDateTime.parse("2024-10-28T09:12:55.558"),
-                frist = null,
-                endretAv = "Z994573"
-            ),
-            EndringDTO(
-                status = EndringStatus.AVSLUTTET,
-                tidsstempel = LocalDateTime.parse("2024-10-28T09:12:55.607"),
-                frist = null,
-                endretAv = "Z994573"
-            )
-        )
-    )
-}
-
-fun behandlingHendelse(saksnummer: Saksnummer, behandlingReferanse: UUID): StoppetBehandling {
+fun behandlingHendelse(
+    saksnummer: Saksnummer,
+    behandlingReferanse: UUID,
+    clock: Clock = Clock.systemDefaultZone()
+): StoppetBehandling {
     return StoppetBehandling(
         saksnummer = saksnummer.value,
         behandlingReferanse = behandlingReferanse,
@@ -175,9 +159,9 @@ fun behandlingHendelse(saksnummer: Saksnummer, behandlingReferanse: UUID): Stopp
         ),
         behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
         versjon = UUID.randomUUID().toString(),
-        mottattTid = LocalDateTime.now().minusDays(1),
+        mottattTid = LocalDateTime.now(clock).minusDays(1),
         sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
-        hendelsesTidspunkt = LocalDateTime.now(),
+        hendelsesTidspunkt = LocalDateTime.now(clock),
         årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
     )
 }
