@@ -57,7 +57,7 @@ data class BQBehandling(
 }
 
 enum class BehandlingMetode {
-    MANUELL, AUTOMATISK
+    MANUELL, AUTOMATISK, KVALITETSSIKRING, FATTE_VEDTAK
 }
 
 /**

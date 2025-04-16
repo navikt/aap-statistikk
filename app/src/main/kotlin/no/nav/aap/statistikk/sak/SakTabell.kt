@@ -273,7 +273,7 @@ class SakTabell : BQTable<BQBehandling> {
             saksbehandler = saksbehandler,
             vedtakTid = vedtakTid?.let { LocalDateTime.parse(it) },
             søknadsFormat = SøknadsFormat.valueOf(søknadsFormat),
-            behandlingMetode = if (behandlingMetode == "MANUELL") BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
+            behandlingMetode = BehandlingMetode.valueOf(behandlingMetode),
             ansvarligBeslutter = ansvarligBeslutter,
             behandlingStatus = behandlingStatus,
             behandlingÅrsak = behandlingÅrsak,
