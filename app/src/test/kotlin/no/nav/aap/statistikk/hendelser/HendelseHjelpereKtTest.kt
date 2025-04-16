@@ -7,6 +7,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -47,12 +48,17 @@ class HendelseHjelpereKtTest {
     fun `ekte data, verifiser`() {
         assertThat(ekte2.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.ANNET)
         assertThat(ekte2.sisteAvklaringsbehovStatus()).isEqualTo(Status.SENDT_TILBAKE_FRA_BESLUTTER)
+
+        assertThat(ekte2.utledGjeldendeStegType()).isEqualTo(StegType.AVKLAR_SYKDOM)
+        assertThat(ekte2.utledGjeldendeAvklaringsBehov()).isEqualTo(AVKLAR_SYKDOM.kode.toString())
     }
 
     @Test
     fun `utled årsak til retur ekte`() {
         assertThat(ekteEksempel.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE)
         assertThat(ekteEksempel.sisteAvklaringsbehovStatus()).isEqualTo(Status.SENDT_TILBAKE_FRA_BESLUTTER)
+
+        assertThat(ekteEksempel.utledGjeldendeStegType()).isEqualTo(StegType.VURDER_BISTANDSBEHOV)
     }
 
     @Test
@@ -1091,176 +1097,212 @@ val ekteEksempel = listOf(
     )
 )
 
+@Language("JSON")
 val ekte2 = """
-    [ {
-      "avklaringsbehovDefinisjon" : {
-        "kode" : "5003",
-        "type" : "MANUELT_PÅKREVD",
-        "løsesISteg" : "AVKLAR_SYKDOM",
-        "kreverToTrinn" : true,
-        "kvalitetssikres" : true,
-        "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5003",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "AVKLAR_SYKDOM",
+          "kreverToTrinn": true,
+          "kvalitetssikres": true,
+          "løsesAv": [
+            "SAKSBEHANDLER_OPPFOLGING"
+          ]
+        },
+        "status": "SENDT_TILBAKE_FRA_BESLUTTER",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2025-04-15T12:45:18.34",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T12:46:13.213",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+            "tidsstempel": "2025-04-15T12:47:01.268",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [
+              {
+                "årsak": "MANGLENDE_UTREDNING"
+              }
+            ]
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T12:47:18.256",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+            "tidsstempel": "2025-04-15T12:47:39.525",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [
+              {
+                "årsak": "MANGLENDE_UTREDNING"
+              }
+            ]
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T13:05:09.137",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+            "tidsstempel": "2025-04-15T13:05:26.495",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [
+              {
+                "årsak": "MANGLENDE_UTREDNING"
+              }
+            ]
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T13:07:55.93",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "KVALITETSSIKRET",
+            "tidsstempel": "2025-04-15T13:08:09.083",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "SENDT_TILBAKE_FRA_BESLUTTER",
+            "tidsstempel": "2025-04-15T13:10:18.705",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [
+              {
+                "årsak": "ANNET"
+              }
+            ]
+          }
+        ],
+        "typeBrev": null
       },
-      "status" : "SENDT_TILBAKE_FRA_BESLUTTER",
-      "endringer" : [ {
-        "status" : "OPPRETTET",
-        "tidsstempel" : "2025-04-15T12:45:18.34",
-        "frist" : null,
-        "endretAv" : "Kelvin",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T12:46:13.213",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
-        "tidsstempel" : "2025-04-15T12:47:01.268",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ {
-          "årsak" : "MANGLENDE_UTREDNING"
-        } ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T12:47:18.256",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
-        "tidsstempel" : "2025-04-15T12:47:39.525",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ {
-          "årsak" : "MANGLENDE_UTREDNING"
-        } ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T13:05:09.137",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
-        "tidsstempel" : "2025-04-15T13:05:26.495",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ {
-          "årsak" : "MANGLENDE_UTREDNING"
-        } ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T13:07:55.93",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "KVALITETSSIKRET",
-        "tidsstempel" : "2025-04-15T13:08:09.083",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "SENDT_TILBAKE_FRA_BESLUTTER",
-        "tidsstempel" : "2025-04-15T13:10:18.705",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ {
-          "årsak" : "ANNET"
-        } ]
-      } ],
-      "typeBrev" : null
-    }, {
-      "avklaringsbehovDefinisjon" : {
-        "kode" : "5006",
-        "type" : "MANUELT_PÅKREVD",
-        "løsesISteg" : "VURDER_BISTANDSBEHOV",
-        "kreverToTrinn" : true,
-        "kvalitetssikres" : true,
-        "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
-      },
-      "status" : "OPPRETTET",
-      "endringer" : [ {
-        "status" : "OPPRETTET",
-        "tidsstempel" : "2025-04-15T12:46:13.515",
-        "frist" : null,
-        "endretAv" : "Kelvin",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T12:46:23.688",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T12:46:37.237",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "OPPRETTET",
-        "tidsstempel" : "2025-04-15T12:47:01.276",
-        "frist" : null,
-        "endretAv" : "Kelvin",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T12:47:27.891",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "OPPRETTET",
-        "tidsstempel" : "2025-04-15T12:47:39.533",
-        "frist" : null,
-        "endretAv" : "Kelvin",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T13:05:17.706",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "OPPRETTET",
-        "tidsstempel" : "2025-04-15T13:05:26.511",
-        "frist" : null,
-        "endretAv" : "Kelvin",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "AVSLUTTET",
-        "tidsstempel" : "2025-04-15T13:07:59.934",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
-        "årsakTilRetur" : [ ]
-      }, {
-        "status" : "KVALITETSSIKRET",
-        "tidsstempel" : "2025-04-15T13:08:09.089",
-        "frist" : null,
-        "endretAv" : "Z994573",
-        "årsakTilSattPåVent" : null,
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5006",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "VURDER_BISTANDSBEHOV",
+          "kreverToTrinn": true,
+          "kvalitetssikres": true,
+          "løsesAv": [
+            "SAKSBEHANDLER_OPPFOLGING"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2025-04-15T12:46:13.515",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T12:46:23.688",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T12:46:37.237",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2025-04-15T12:47:01.276",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T12:47:27.891",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2025-04-15T12:47:39.533",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T13:05:17.706",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2025-04-15T13:05:26.511",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2025-04-15T13:07:59.934",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": []
+          },
+          {
+            "status": "KVALITETSSIKRET",
+            "tidsstempel": "2025-04-15T13:08:09.089",
+            "frist": null,
+            "endretAv": "Z994573",
+            "årsakTilSattPåVent": null,
         "årsakTilRetur" : [ ]
       }, {
         "status" : "OPPRETTET",

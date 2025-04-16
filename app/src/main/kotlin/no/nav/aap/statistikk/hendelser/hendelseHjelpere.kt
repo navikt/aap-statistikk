@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.hendelser
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
@@ -9,25 +8,24 @@ import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.tilgang.Rolle
 import java.time.LocalDateTime
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     return this
-        .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.FATTE_VEDTAK }
-        .firstOrNull { it.status == Status.AVSLUTTET }
+        .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
+        .onlyOrNull()
         ?.endringer?.sortedBy { it.tidsstempel }
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.tidsstempel
 }
 
-fun List<AvklaringsbehovHendelseDto>.utledBrevSendtTid(): LocalDateTime? {
-    return this
-        .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.BREV }
-        .firstOrNull { it.status == Status.AVSLUTTET }
-        ?.endringer
-        ?.filter { it.status.returnert() }
-        ?.sortedBy { it.tidsstempel }
-        ?.lastOrNull { it.status == Status.AVSLUTTET }?.tidsstempel
+/**
+ * Ansvarlig beslutter er saksbehandleren som avsluttet Avklaringsbehov 5099, som
+ * er "Fatte vedtak"
+ */
+fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
+    return this.filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
+        .onlyOrNull()
+        ?.endringer?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
 }
 
 fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
@@ -36,7 +34,7 @@ fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
 fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
     return this
         .filter { it.status.returnert() }
-        .maxByOrNull { it.tidspunktSisteEndring() }
+        .minByOrNull { it.tidspunktSisteEndring() }
         ?.endringer
         ?.maxByOrNull { it.tidsstempel }?.årsakTilRetur?.firstOrNull()?.årsak
 }
@@ -55,57 +53,33 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
-    return this
-        .filter { it.status.erÅpent() }
-        .sortedByDescending {
-            it.tidspunktSisteEndring()
-        }
-        .map { it.avklaringsbehovDefinisjon.kode }
-        .firstOrNull()?.toString()
+    return this.førsteÅpneAvklaringsbehov()
+        ?.avklaringsbehovDefinisjon?.kode?.toString()
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
+    return this.førsteÅpneAvklaringsbehov()?.status
+}
+
+fun List<AvklaringsbehovHendelseDto>.førsteÅpneAvklaringsbehov(): AvklaringsbehovHendelseDto? {
     return this
-        .filter { it.status.erÅpent() }
-        .sortedBy {
-            it.tidspunktSisteEndring()
-        }
-        .firstOrNull()
-        ?.status
+        .filter { it.status.erÅpent() && !it.avklaringsbehovDefinisjon.erVentebehov() }
+        .minByOrNull { it.tidspunktSisteEndring() }
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {
-    return this
-        .filter { it.status.erÅpent() }
-        .sortedByDescending {
-            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
-        }
-        .map { it.avklaringsbehovDefinisjon.løsesISteg }
-        .firstOrNull()
+    return this.førsteÅpneAvklaringsbehov()?.avklaringsbehovDefinisjon?.løsesISteg
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
     return this
-        .filter { it.avklaringsbehovDefinisjon.type == Definisjon.BehovType.VENTEPUNKT }
+        .filter { it.status.erÅpent() }
+        .filter { it.avklaringsbehovDefinisjon.erVentebehov() && !it.avklaringsbehovDefinisjon.erBrevVentebehov() }
         .flatMap { it.endringer }
         .maxByOrNull { it.tidsstempel }
         ?.årsakTilSattPåVent?.toString()
 }
 
-/**
- * Ansvarlig beslutter er saksbehandleren som avsluttet Avklaringsbehov 5099, som
- * er "Fatte vedtak"
- */
-fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
-    return this
-        .asSequence()
-        .filter { it.avklaringsbehovDefinisjon.kode == AvklaringsbehovKode.`5099` }
-        .filter { it.status == Status.AVSLUTTET }
-        .flatMap { it.endringer }
-        .filter { it.status == EndringStatus.AVSLUTTET }
-        .map { it.endretAv }
-        .firstOrNull()
-}
 
 /**
  * Eneste automatiske avklaringsbehov er 9002, "Bestille brev".
