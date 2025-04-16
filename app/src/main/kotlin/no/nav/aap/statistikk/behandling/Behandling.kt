@@ -54,6 +54,10 @@ data class Behandling(
                 "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null. Har ansvarlig beslutter: $ansvarligBeslutter, har vedtakstidspunkt: $vedtakstidspunkt"
             }
         }
+
+        require(hendelser.sortedBy { it.tidspunkt }
+            .zipWithNext { a, b -> a.tidspunkt <= b.tidspunkt }
+            .all { it }) { "Hendelser må være sortert." }
     }
 
     fun avsluttetTid(): LocalDateTime {
@@ -66,7 +70,7 @@ data class Behandling(
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
-    val avklaringsbehovStatus: AvklaringsbehovStatus? = null,
+    val avklaringsbehovStatus: AvklaringsbehovStatus?,
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
     val saksbehandler: Saksbehandler? = null,

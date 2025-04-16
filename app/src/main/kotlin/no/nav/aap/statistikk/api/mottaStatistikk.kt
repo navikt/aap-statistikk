@@ -102,7 +102,8 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                 jobbAppender.leggTil(
                     conn,
                     JobbInput(lagreStoppetHendelseJobb)
-                        .medPayload(stringified).medCallId()
+                        .medPayload(stringified)
+                        .medCallId()
                         .forSak(encodedSaksNummer)
                 )
             }
@@ -129,7 +130,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                             it.forSak(encodedSaksNummer)
                         }
                         it
-                    }
+                    }.medCallId()
                 )
             }
 
@@ -147,7 +148,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                     conn,
                     JobbInput(lagrePostmottakHendelseJobb).medPayload(
                         DefaultJsonMapper.toJson(dto)
-                    )
+                    ).medCallId()
                 )
             }
 
@@ -188,7 +189,7 @@ fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
     )
 }
 
-private fun stringToNumber(string: String): Long {
+fun stringToNumber(string: String): Long {
     return IntStream.range(0, string.length)
         .mapToObj() { 10.0.pow(it.toDouble()) * string[it].code }
         .reduce { acc, curr -> acc + curr }.orElse(0.0).mod(1_000_000.0).roundToLong()

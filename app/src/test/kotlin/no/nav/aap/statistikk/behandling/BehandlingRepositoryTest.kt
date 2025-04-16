@@ -116,11 +116,18 @@ class BehandlingRepositoryTest {
                     venteÅrsak = "XXX"
                 )
             )
+
+            BehandlingRepository(it).oppdaterBehandling(
+                uthentet.copy(
+                    venteÅrsak = "ABC"
+                )
+            )
         }
 
         val uthentet2 = dataSource.transaction { BehandlingRepository(it).hent(uthentet.referanse) }
 
         assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 -> c1.tidspunkt.compareTo(c2.tidspunkt) }
+        assertThat(uthentet2.hendelser.size).isEqualTo(3)
     }
 
     @Test

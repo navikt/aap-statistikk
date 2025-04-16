@@ -1,24 +1,39 @@
 package no.nav.aap.statistikk
 
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.FATTE_VEDTAK
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.motor.FlytJobbRepository
+import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.oppgave.OppgaveDto
 import no.nav.aap.oppgave.statistikk.HendelseType
-import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.oppgave.verdityper.Behandlingstype
+import no.nav.aap.statistikk.api.stringToNumber
+import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.utledGjeldendeAvklaringsBehov
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
+import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.sak.tilSaksnummer
@@ -28,13 +43,180 @@ import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
+import java.io.InputStream
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
+import no.nav.aap.statistikk.oppgave.OppgaveHendelse as DomeneOppgaveHendelse
 
 @Fakes
 class IntegrationTest {
+
+    data class Jobbdump(
+        val payload: String,
+        val type: String,
+        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+        @JsonProperty("opprettet_tid") val opprettetTid: LocalDateTime
+    )
+
+    data class Dump(val jobb: List<Jobbdump>)
+
+    sealed interface HendelseData {
+        val opprettetTidspunkt: LocalDateTime
+        val data: Any
+    }
+
+    data class BehandlingHendelseData(
+        override val data: StoppetBehandling,
+        override val opprettetTidspunkt: LocalDateTime
+    ) : HendelseData
+
+    data class OppgaveHendelseData(
+        override val data: DomeneOppgaveHendelse,
+        override val opprettetTidspunkt: LocalDateTime
+    ) : HendelseData
+
+    private val logger = LoggerFactory.getLogger(IntegrationTest::class.java)
+
+    @Test
+    fun `dump av ekte hendelser`(
+        @Postgres dbConfig: DbConfig,
+        @Postgres dataSource: DataSource,
+        @BigQuery config: BigQueryConfig,
+        @Fakes azureConfig: AzureConfig,
+        @Fakes pdlConfig: PdlConfig,
+    ) {
+        // hent på nytt slik: select payload, opprettet_tid, type from jobb where sak_id = 783332 order by opprettet_tid
+        // og lagre output som json
+        val lines = object {}.javaClass.getResource("/hendelser_public_jobb.json")?.readText()
+        assertThat(lines).isNotNull
+
+        val value = """
+            {"jobb": $lines}
+        """.trimIndent()
+        val hendelserFraDBDump = DefaultJsonMapper.fromJson<Dump>(value).jobb.map {
+            when (it.type) {
+                "statistikk.lagreOppgaveHendelseJobb" -> {
+                    OppgaveHendelseData(DefaultJsonMapper.fromJson(it.payload), it.opprettetTid)
+                }
+
+                "statistikk.lagreHendelse" -> {
+                    if (it.payload.contains("2025-04-15T13:23:50.23941812")) {
+                        val data = BehandlingHendelseData(
+                            DefaultJsonMapper.fromJson(it.payload),
+                            it.opprettetTid
+                        )
+                        println(data.data.avklaringsbehov)
+                        println(DefaultJsonMapper.toJson(data.data.avklaringsbehov))
+                    }
+                    BehandlingHendelseData(DefaultJsonMapper.fromJson(it.payload), it.opprettetTid)
+                }
+
+                else -> {
+                    TODO()
+                }
+            }
+        }
+
+        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
+
+        val bigQueryClient = bigQueryClient(config)
+        testKlientNoInjection(
+            dbConfig,
+            pdlConfig = pdlConfig,
+            azureConfig = azureConfig,
+            bigQueryClient,
+        ) { url, client ->
+
+            var referanse: UUID? = null
+            var c = 1
+            hendelserFraDBDump.forEach {
+                when (it) {
+                    is BehandlingHendelseData -> {
+                        postBehandlingsflytHendelse(url, client, it.data)
+                        referanse = it.data.behandlingReferanse
+                        testUtil.ventPåSvar()
+                    }
+
+                    is OppgaveHendelseData -> {
+                        postOppgaveHendelse(dataSource, it.data)
+                        testUtil.ventPåSvar()
+                    }
+                }
+                logger.info("Hendelse nr ${c++}: ${it.data::class.simpleName} av ${hendelserFraDBDump.size}")
+            }
+            testUtil.ventPåSvar()
+
+            val behandling = ventPåSvar(
+                { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
+                { it != null }
+            )
+
+            assertThat(behandling!!.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+//            assertThat(behandling.hendelser).containsExactly()
+        }
+
+        // Sekvensnummer økes med 1 med ny info på sak
+        val bqSaker2 = ventPåSvar(
+            { bigQueryClient.read(SakTabell()) },
+            { t -> t !== null && t.isNotEmpty() && t.size > 2 })
+        assertThat(bqSaker2!!).hasSize(hendelserFraDBDump.size)
+        assertThat(bqSaker2.map { it.ansvarligEnhetKode }).containsAnyOf("4491", "5701", "5700")
+        assertThat(bqSaker2.map { it.behandlingStatus }).containsSubsequence(
+            "UNDER_BEHANDLING",
+            "IVERKSETTES",
+            "AVSLUTTET"
+        )
+        assertThat(bqSaker2.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
+            "UNDER_BEHANDLING",
+            "IVERKSETTES",
+            "AVSLUTTET",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
+        )
+        assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).isNotEmpty
+    }
+
+    private fun postOppgaveHendelse(
+        dataSource: DataSource,
+        hendelse: OppgaveHendelse
+    ) {
+        dataSource.transaction {
+            FlytJobbRepository(it).leggTil(
+                JobbInput(LagreOppgaveHendelseJobb(SimpleMeterRegistry(), object : JobbAppender {
+                    override fun leggTil(connection: DBConnection, jobb: JobbInput) {
+                        TODO()
+                    }
+
+                    override fun leggTilLagreSakTilBigQueryJobb(
+                        connection: DBConnection,
+                        behandlingId: BehandlingId
+                    ) {
+                        println("!!!!!!!!!!!!!!!!!!!!!!")
+                        TODO()
+                    }
+                })).medPayload(
+                    DefaultJsonMapper.toJson(hendelse)
+                ).forSak(stringToNumber(hendelse.saksnummer!!))
+            )
+        }
+
+    }
+
+    private fun postBehandlingsflytHendelse(
+        url: String,
+        client: RestClient<InputStream>,
+        hendelse: StoppetBehandling
+    ) {
+        client.post<StoppetBehandling, Any>(
+            URI.create("$url/stoppetBehandling"),
+            PostRequest(hendelse)
+        )
+    }
+
     @Test
     fun `test flyt`(
         @Postgres dbConfig: DbConfig,
@@ -65,9 +247,9 @@ class IntegrationTest {
                 PostRequest(hendelse)
             )
 
-            client.post<OppgaveHendelse, Any>(
+            client.post<no.nav.aap.oppgave.statistikk.OppgaveHendelse, Any>(
                 URI.create("$url/oppgave"), PostRequest(
-                    OppgaveHendelse(
+                    no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                         hendelse = HendelseType.OPPRETTET,
                         oppgaveDto = OppgaveDto(
                             id = 1,

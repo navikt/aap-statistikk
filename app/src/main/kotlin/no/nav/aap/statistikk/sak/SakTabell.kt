@@ -230,7 +230,7 @@ class SakTabell : BQTable<BQBehandling> {
         val aktorId = fieldValueList.get("aktorId").stringValue
         val ansvarligBeslutter = fieldValueList.hentEllerNull("ansvarligBeslutter")
         val opprettetAv = fieldValueList.get("opprettetAv").stringValue
-        val saksbehandler = fieldValueList.get("saksbehandler").stringValue
+        val saksbehandler = fieldValueList.hentEllerNull("saksbehandler")
         val søknadsFormat = fieldValueList.get("soknadsformat").stringValue
         val vedtakTid = fieldValueList.hentEllerNull("vedtakTid")
         val behandlingStatus = fieldValueList.get("behandlingStatus").stringValue
