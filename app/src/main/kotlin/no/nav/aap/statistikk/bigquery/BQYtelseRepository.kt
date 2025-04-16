@@ -53,7 +53,11 @@ class BQYtelseRepository(
                 fraDato = it.fraDato,
                 tilDato = it.tilDato,
                 dagsats = it.dagsats,
-                gradering = it.gradering
+                gradering = it.gradering,
+                antallBarn = it.antallBarn,
+                barnetillegg = it.barnetillegg,
+                barnetilleggSats = it.barnetilleggSats,
+                redusertDagsats = it.redusertDagsats
             )
         })
     }
