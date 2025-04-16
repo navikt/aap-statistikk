@@ -104,14 +104,6 @@ class IntegrationTest {
                 }
 
                 "statistikk.lagreHendelse" -> {
-                    if (it.payload.contains("2025-04-15T13:23:50.23941812")) {
-                        val data = BehandlingHendelseData(
-                            DefaultJsonMapper.fromJson(it.payload),
-                            it.opprettetTid
-                        )
-                        println(data.data.avklaringsbehov)
-                        println(DefaultJsonMapper.toJson(data.data.avklaringsbehov))
-                    }
                     BehandlingHendelseData(DefaultJsonMapper.fromJson(it.payload), it.opprettetTid)
                 }
 
