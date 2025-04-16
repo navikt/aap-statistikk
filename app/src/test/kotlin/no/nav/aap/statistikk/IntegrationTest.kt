@@ -147,6 +147,8 @@ class IntegrationTest {
                 { it != null }
             )
 
+//            assertThat(behandling!!.hendelser).hasSize()
+
             assertThat(behandling!!.status).isEqualTo(BehandlingStatus.AVSLUTTET)
 //            assertThat(behandling.hendelser).containsExactly()
         }
@@ -175,6 +177,26 @@ class IntegrationTest {
         assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).allSatisfy {
             assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
         }
+
+        assertThat(bqSaker2.map { it.behandlingMetode.name }).containsSubsequence(
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+        )
 
         // Sjekk ytelsesstatistikk
         val bqYtelse = ventPåSvar(

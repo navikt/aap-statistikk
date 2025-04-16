@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.Behandling
@@ -48,8 +49,6 @@ class SaksStatistikkService(
 
         val behandlingReferanse = behandling.referanse
 
-        val erManuell = hendelser.erManuell()
-
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
 
@@ -80,7 +79,11 @@ class SaksStatistikkService(
             vedtakTid = behandling.vedtakstidspunkt?.truncatedTo(ChronoUnit.SECONDS),
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
-            behandlingMetode = if (erManuell) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK,
+            behandlingMetode = behandlingMetode(behandling).also {
+                if (it == BehandlingMetode.AUTOMATISK) logger.info(
+                    "Behandling $behandlingReferanse er automatisk behandlet. Behandling $behandling"
+                )
+            },
             behandlingStatus = behandlingStatus(behandling),
             behandlingÅrsak = behandling.årsaker.joinToString(","),
             ansvarligEnhetKode = ansvarligEnhet,
@@ -95,6 +98,34 @@ class SaksStatistikkService(
 
         // TODO - kun lagre om endring siden sist
         bigQueryRepository.lagre(bqSak)
+    }
+
+    private fun behandlingMetode(behandling: Behandling): BehandlingMetode {
+        if (behandling.hendelser.isEmpty()) {
+            logger.info("Behandling-hendelser var tom.")
+            return BehandlingMetode.AUTOMATISK
+        }
+        val sisteHendelse = behandling.hendelser.last()
+        if (sisteHendelse.avklaringsBehov.isNullOrBlank()) {
+            logger.info("Ingen avkl.funnet for siste hendelse $sisteHendelse. Behandling: $behandling")
+            return behandlingMetode(behandling.copy(hendelser = behandling.hendelser.dropLast(1)))
+        }
+
+        val sisteDefinisjon = Definisjon.forKode(sisteHendelse.avklaringsBehov)
+
+        if (sisteDefinisjon == Definisjon.KVALITETSSIKRING) {
+            return BehandlingMetode.KVALITETSSIKRING
+        }
+
+        if (sisteDefinisjon == Definisjon.FATTE_VEDTAK) {
+            return BehandlingMetode.FATTE_VEDTAK
+        }
+
+        if (!behandling.hendelser.erManuell()) {
+            logger.info("Hendelser: $behandling")
+        }
+
+        return if (behandling.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
     }
 
     /**
