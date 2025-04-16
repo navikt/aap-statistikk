@@ -124,6 +124,7 @@ class IntegrationTest {
         val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
 
         val bigQueryClient = bigQueryClient(config)
+        var referanse: UUID? = null
         testKlientNoInjection(
             dbConfig,
             pdlConfig = pdlConfig,
@@ -131,7 +132,6 @@ class IntegrationTest {
             bigQueryClient,
         ) { url, client ->
 
-            var referanse: UUID? = null
             var c = 1
             hendelserFraDBDump.forEach {
                 when (it) {
@@ -178,6 +178,17 @@ class IntegrationTest {
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
         )
         assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).isNotEmpty
+
+        // Sjekk ytelsesstatistikk
+        val bqYtelse = ventPåSvar(
+            { bigQueryClient.read(TilkjentYtelseTabell()) },
+            { t -> t !== null && t.isNotEmpty() })
+
+        assertThat(bqYtelse!!).allSatisfy {
+            assertThat(it.behandlingsreferanse).isEqualTo(referanse.toString())
+            assertThat(it.dagsats).isEqualTo(974.0)
+            assertThat(it.antallBarn).isEqualTo(1)
+        }
     }
 
     private fun postOppgaveHendelse(

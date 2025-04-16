@@ -24,6 +24,7 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatReposit
 import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.lang.Double
 import java.math.BigDecimal
 import java.time.*
 import java.time.temporal.ChronoUnit
@@ -189,7 +190,11 @@ class AvsluttetBehandlingServiceTest {
                     it.fraDato,
                     it.tilDato,
                     it.dagsats,
-                    it.gradering
+                    it.gradering,
+                    antallBarn = it.antallBarn,
+                    barnetillegg = it.barnetillegg,
+                    barnetilleggSats = it.barnetilleggSats,
+                    redusertDagsats = it.redusertDagsats
                 )
             })
 
@@ -302,7 +307,7 @@ class AvsluttetBehandlingServiceTest {
         assertThat(uthentet.perioder).usingRecursiveComparison()
             .withEqualsForType(
                 { a, b -> abs(a.toDouble() - b.toDouble()) < 0.00001 },
-                java.lang.Double::class.java
+                Double::class.java
             )
             .ignoringCollectionOrder()
             .isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)

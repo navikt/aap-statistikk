@@ -15,7 +15,11 @@ data class BQTilkjentYtelse(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
     val dagsats: Double,
-    val gradering: Double
+    val gradering: Double,
+    val antallBarn: Int,
+    val barnetillegg: Double,
+    val barnetilleggSats: Double,
+    val redusertDagsats: Double,
 )
 
 class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
@@ -29,7 +33,10 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
         FRA_DATO(
             "fraDato"
         ),
-        TIL_DATO("tilDato"), DAGSATS("dagsats"), GRADERING("gradering")
+        TIL_DATO("tilDato"), DAGSATS("dagsats"), GRADERING("gradering"),
+        ANTALL_BARN("antallBarn"),
+        BARNETILLEGG("barnetillegg"), BARNETILLEGG_SATS("barnetilleggSats"),
+        REDUSERT_DAGSATS("redusertDagsats"),
     }
 
     override val tableName: String = TABLE_NAME
@@ -41,7 +48,11 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
         Field.of(FeltNavn.FRA_DATO.feltNavn, StandardSQLTypeName.DATE),
         Field.of(FeltNavn.TIL_DATO.feltNavn, StandardSQLTypeName.DATE),
         Field.of(FeltNavn.DAGSATS.feltNavn, StandardSQLTypeName.FLOAT64),
-        Field.of(FeltNavn.GRADERING.feltNavn, StandardSQLTypeName.FLOAT64)
+        Field.of(FeltNavn.GRADERING.feltNavn, StandardSQLTypeName.FLOAT64),
+        Field.of(FeltNavn.ANTALL_BARN.feltNavn, StandardSQLTypeName.INT64),
+        Field.of(FeltNavn.BARNETILLEGG.feltNavn, StandardSQLTypeName.FLOAT64),
+        Field.of(FeltNavn.BARNETILLEGG_SATS.feltNavn, StandardSQLTypeName.FLOAT64),
+        Field.of(FeltNavn.REDUSERT_DAGSATS.feltNavn, StandardSQLTypeName.FLOAT64),
     )
 
 
@@ -54,6 +65,10 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
         val tilDato = LocalDate.parse(fieldValueList.get(FeltNavn.TIL_DATO.feltNavn).stringValue)
         val dagsats = fieldValueList.get(FeltNavn.DAGSATS.feltNavn).doubleValue
         val gradering = fieldValueList.get(FeltNavn.GRADERING.feltNavn).doubleValue
+        val antallBarn = fieldValueList.get(FeltNavn.ANTALL_BARN.feltNavn).longValue
+        val barnetillegg = fieldValueList.get(FeltNavn.BARNETILLEGG.feltNavn).doubleValue
+        val barnetilleggSats = fieldValueList.get(FeltNavn.BARNETILLEGG_SATS.feltNavn).doubleValue
+        val redusertDagsats = fieldValueList.get(FeltNavn.REDUSERT_DAGSATS.feltNavn).doubleValue
 
         return BQTilkjentYtelse(
             saksnummer = saksnummer,
@@ -62,6 +77,10 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
             tilDato = tilDato,
             dagsats = dagsats,
             gradering = gradering,
+            antallBarn = antallBarn.toInt(),
+            barnetillegg = barnetillegg,
+            barnetilleggSats = barnetilleggSats,
+            redusertDagsats = redusertDagsats,
         )
     }
 
@@ -74,6 +93,10 @@ class TilkjentYtelseTabell : BQTable<BQTilkjentYtelse> {
                 FeltNavn.TIL_DATO.feltNavn to value.tilDato.toString(),
                 FeltNavn.DAGSATS.feltNavn to value.dagsats,
                 FeltNavn.GRADERING.feltNavn to value.gradering,
+                FeltNavn.ANTALL_BARN.feltNavn to value.antallBarn,
+                FeltNavn.BARNETILLEGG.feltNavn to value.barnetillegg,
+                FeltNavn.BARNETILLEGG_SATS.feltNavn to value.barnetilleggSats,
+                FeltNavn.REDUSERT_DAGSATS.feltNavn to value.redusertDagsats,
             )
         )
     }
