@@ -8,13 +8,14 @@ import java.util.*
 class OppgaveKtTest {
     @Test
     fun `bygge oppgave fra hendelser`() {
+        val behandlingRef = UUID.randomUUID()
         val hendelser = listOf(
             OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 mottattTidspunkt = LocalDateTime.now(),
                 personIdent = "12345678901",
                 saksnummer = "S12345",
-                behandlingRef = UUID.randomUUID(),
+                behandlingRef = behandlingRef,
                 journalpostId = 123,
                 enhet = "NAVKontor123",
                 avklaringsbehovKode = "Kode123",
@@ -31,5 +32,6 @@ class OppgaveKtTest {
         val oppgave = hendelser.tilOppgave()
 
         assertThat(oppgave.enhet.kode).isEqualTo("NAVKontor123")
+        assertThat(oppgave.behandlingReferanse!!.referanse).isEqualTo(behandlingRef)
     }
 }

@@ -72,8 +72,13 @@ class LagreOppgaveJobbUtfører(
             val behandling = behandlingRepository.hent(oppgave.behandlingReferanse.referanse)
 
             if (behandling != null) {
+                logger.info("Kaller lagreSakInfotilBigQueryCallback: $lagreSakInfotilBigQueryCallback")
                 lagreSakInfotilBigQueryCallback(behandling.id!!)
+            } else {
+                logger.info("Fant ikke behandling tilknyttet oppgaven, behandlingReferanse=${oppgave.behandlingReferanse.referanse}")
             }
+        } else {
+            logger.info("Mangler behandlingReferanse for oppgaven, oppgaveId=${oppgave.id}")
         }
     }
 }

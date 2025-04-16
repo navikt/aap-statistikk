@@ -3,7 +3,9 @@ package no.nav.aap.statistikk.jobber.appender
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
+import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.LagreSakinfoTilBigQueryJobb
 
 class MotorJobbAppender(
@@ -20,10 +22,12 @@ class MotorJobbAppender(
         connection: DBConnection,
         behandlingId: BehandlingId
     ) {
+        val saksnummer = BehandlingRepository(connection).hent(behandlingId).sak.saksnummer
         leggTil(
             connection,
             // For sak = behandlingId. Husk at "sak" er funksjonalt bare en concurrency-key
-            JobbInput(lagreSakinfoTilBigQueryJobb).medPayload(behandlingId).forSak(behandlingId)
+            JobbInput(lagreSakinfoTilBigQueryJobb).medPayload(behandlingId)
+                .forSak(stringToNumber(saksnummer.value))
         )
     }
 }

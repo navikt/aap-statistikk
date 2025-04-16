@@ -420,7 +420,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
         behandlinger[id] = behandling.copy(id = id).leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
-                status = behandling.status
+                status = behandling.status,
+                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus
             )
         )
         nextId++
@@ -434,7 +435,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
         behandlinger[behandling.id!!] = behandling.leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
-                status = behandling.status
+                status = behandling.status,
+                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus
             )
         )
     }

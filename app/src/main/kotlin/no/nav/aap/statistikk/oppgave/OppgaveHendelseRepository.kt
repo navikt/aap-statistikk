@@ -1,8 +1,11 @@
 package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import org.slf4j.LoggerFactory
 
 class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
+    private val log = LoggerFactory.getLogger(OppgaveHendelseRepository::class.java)
+
     fun lagreHendelse(hendelse: OppgaveHendelse): Long {
         val sql = """
             INSERT INTO oppgave_hendelser (type, identifikator, mottatt_tidspunkt, person_ident, saksnummer,
@@ -31,7 +34,7 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
                 setString(c++, hendelse.endretAv)
                 setLocalDateTime(c++, hendelse.endretTidspunkt)
             }
-        }
+        }.also { log.info("Lagret oppgavehendelse med id $it.") }
     }
 
     fun hentHendelserForId(id: Long): List<OppgaveHendelse> {

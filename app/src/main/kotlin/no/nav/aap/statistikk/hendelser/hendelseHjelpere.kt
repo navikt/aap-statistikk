@@ -4,7 +4,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilRetur
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
@@ -59,7 +58,7 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
     return this
         .filter { it.status.erÅpent() }
         .sortedByDescending {
-            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
+            it.tidspunktSisteEndring()
         }
         .map { it.avklaringsbehovDefinisjon.kode }
         .firstOrNull()?.toString()
@@ -68,11 +67,11 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
     return this
         .filter { it.status.erÅpent() }
-        .sortedByDescending {
-            it.endringer.maxBy { endring -> endring.tidsstempel }.tidsstempel
+        .sortedBy {
+            it.tidspunktSisteEndring()
         }
-        .map { it.status }
         .firstOrNull()
+        ?.status
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {
