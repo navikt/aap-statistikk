@@ -148,7 +148,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
                     conn,
                     JobbInput(lagrePostmottakHendelseJobb).medPayload(
                         DefaultJsonMapper.toJson(dto)
-                    ).medCallId()
+                    ).medCallId().forSak(dto.journalpostId.referanse)
                 )
             }
 
