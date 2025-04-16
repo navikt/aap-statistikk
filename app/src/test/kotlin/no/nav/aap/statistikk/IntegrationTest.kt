@@ -159,6 +159,8 @@ class IntegrationTest {
         assertThat(bqSaker2.map { it.ansvarligEnhetKode }).containsAnyOf("4491", "5701", "5700")
         assertThat(bqSaker2.map { it.behandlingStatus }).containsSubsequence(
             "UNDER_BEHANDLING",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
             "IVERKSETTES",
             "AVSLUTTET"
         )
@@ -170,6 +172,9 @@ class IntegrationTest {
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
         )
         assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).isNotEmpty
+        assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).allSatisfy {
+            assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
+        }
 
         // Sjekk ytelsesstatistikk
         val bqYtelse = ventPåSvar(
