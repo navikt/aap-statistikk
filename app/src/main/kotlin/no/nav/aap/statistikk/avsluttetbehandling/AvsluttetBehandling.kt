@@ -2,9 +2,12 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
+
+private val log = LoggerFactory.getLogger("no.nav.aap.statistikk.avsluttetbehandling")
 
 data class AvsluttetBehandling(
     val behandlingsReferanse: UUID,
@@ -13,8 +16,14 @@ data class AvsluttetBehandling(
     val beregningsgrunnlag: IBeregningsGrunnlag?,
     val diagnoser: Diagnoser?,
     val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList(),
-    val behandlingResultat: ResultatKode
-)
+    val behandlingResultat: ResultatKode?
+) {
+    init {
+        if (behandlingResultat == null) {
+            log.info("Behandlingresultat er null for referanse $behandlingsReferanse")
+        }
+    }
+}
 
 enum class ResultatKode {
     INNVILGET,
