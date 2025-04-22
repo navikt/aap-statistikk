@@ -22,6 +22,7 @@ import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
+import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.LagreSakinfoTilBigQueryJobb
@@ -66,8 +67,6 @@ class MottaStatistikkTest {
 
         val motor = motorMock()
 
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
-
         val meterRegistry = SimpleMeterRegistry()
 
         val mottattTid = LocalDateTime.now().minusDays(1)
@@ -77,7 +76,6 @@ class MottaStatistikkTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepositoryYtelse,
                 meterRegistry,
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
@@ -214,7 +212,6 @@ class MottaStatistikkTest {
 
         val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepositoryYtelse,
             meterRegistry,
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -237,6 +234,16 @@ class MottaStatistikkTest {
             skjermingService = skjermingService
         )
 
+        val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
+            behandlingRepositoryFactory = { FakeBehandlingRepository() },
+            rettighetstypeperiodeRepositoryFactory = { FakeRettighetsTypeRepository() },
+            diagnoseRepositoryFactory = { FakeDiagnoseRepository() },
+            vilkårsResulatRepositoryFactory = { FakeVilkårsResultatRepository() },
+            tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+            beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+            bqRepository = bqRepositoryYtelse,
+        )
+
         val motor = opprettMotor(
             dataSource,
             lagreStoppetHendelseJobb,
@@ -244,7 +251,8 @@ class MottaStatistikkTest {
             lagrePostmottakHendelseJobb
         )
 
-        val jobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
+        val jobbAppender =
+            MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
         val logger =
             LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger
@@ -386,7 +394,6 @@ class MottaStatistikkTest {
 
         val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepositoryYtelse,
             meterRegistry,
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -409,6 +416,16 @@ class MottaStatistikkTest {
             skjermingService = skjermingService
         )
 
+        val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
+            behandlingRepositoryFactory = { FakeBehandlingRepository() },
+            rettighetstypeperiodeRepositoryFactory = { FakeRettighetsTypeRepository() },
+            diagnoseRepositoryFactory = { FakeDiagnoseRepository() },
+            vilkårsResulatRepositoryFactory = { FakeVilkårsResultatRepository() },
+            tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+            beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+            bqRepository = bqRepositoryYtelse,
+        )
+
 
         val motor = opprettMotor(
             dataSource,
@@ -418,7 +435,8 @@ class MottaStatistikkTest {
         )
 
 
-        val jobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
+        val jobbAppender =
+            MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
         testKlient(
             transactionExecutor,
@@ -499,7 +517,6 @@ class MottaStatistikkTest {
 
         val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            bqRepositoryYtelse,
             meterRegistry,
             tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -522,6 +539,16 @@ class MottaStatistikkTest {
             skjermingService = skjermingService
         )
 
+        val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
+            behandlingRepositoryFactory = { FakeBehandlingRepository() },
+            rettighetstypeperiodeRepositoryFactory = { FakeRettighetsTypeRepository() },
+            diagnoseRepositoryFactory = { FakeDiagnoseRepository() },
+            vilkårsResulatRepositoryFactory = { FakeVilkårsResultatRepository() },
+            tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
+            beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+            bqRepository = bqRepositoryYtelse,
+        )
+
         val motor = opprettMotor(
             dataSource,
             lagreStoppetHendelseJobb,
@@ -529,7 +556,8 @@ class MottaStatistikkTest {
             lagrePostmottakHendelseJobb
         )
 
-        val jobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
+        val jobbAppender =
+            MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
         testKlient(
             transactionExecutor,

@@ -5,7 +5,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
-import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.behandling.TypeBehandling
@@ -103,8 +102,6 @@ class ProduksjonsstyringRepositoryTest {
         åpen: Boolean = true
     ) =
         dataSource.transaction { conn ->
-            val bqRepositoryYtelse = FakeBQYtelseRepository()
-
             val skjermingService = SkjermingService(FakePdlClient())
             val meterRegistry = SimpleMeterRegistry()
             val hendelsesService = HendelsesService(
@@ -118,20 +115,12 @@ class ProduksjonsstyringRepositoryTest {
                     skjermingService = skjermingService,
                     meterRegistry = meterRegistry,
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
-                    ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
-                        bqRepositoryYtelse,
-                        behandlingRepository = BehandlingRepository(conn),
-                        RettighetstypeperiodeRepository(conn),
-                        DiagnoseRepositoryImpl(conn),
-                        VilkårsresultatRepository(conn),
-                        TilkjentYtelseRepository(conn),
-                        beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn),
-                    ),
+                    opprettBigQueryLagringYtelseCallback = { TODO() }
                 ),
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
                 meterRegistry = meterRegistry,
-                opprettBigQueryLagringCallback = { MockJobbAppender() }
+                opprettBigQueryLagringSakStatistikkCallback = { MockJobbAppender() }
             )
 
             val hendelse = behandlingHendelse(

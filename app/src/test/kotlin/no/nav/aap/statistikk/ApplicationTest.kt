@@ -29,7 +29,6 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig
     ) {
         val jobbAppender = MockJobbAppender()
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         testKlient(
@@ -38,7 +37,6 @@ class ApplicationTest {
             jobbAppender = jobbAppender,
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-                bqRepositoryYtelse,
                 meterRegistry,
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
@@ -149,7 +147,6 @@ class ApplicationTest {
 }"""
 
         val jobbAppender = MockJobbAppender()
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
         val meterRegistry = SimpleMeterRegistry()
 
         testKlient(
@@ -158,7 +155,6 @@ class ApplicationTest {
             jobbAppender,
             azureConfig,
             LagreStoppetHendelseJobb(
-                bqRepositoryYtelse,
                 meterRegistry,
                 tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },

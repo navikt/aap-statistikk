@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
+import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -22,7 +23,7 @@ class AvsluttetBehandlingService(
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val skjermingService: SkjermingService,
     private val meterRegistry: MeterRegistry,
-    private val ytelsesStatistikkTilBigQuery: YtelsesStatistikkTilBigQuery,
+    private val opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
 
@@ -63,7 +64,7 @@ class AvsluttetBehandlingService(
         )
 
         if (!skjermingService.erSkjermet(uthentetBehandling)) {
-            ytelsesStatistikkTilBigQuery.lagre(uthentetBehandling.referanse)
+            opprettBigQueryLagringYtelseCallback(uthentetBehandling.id)
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }

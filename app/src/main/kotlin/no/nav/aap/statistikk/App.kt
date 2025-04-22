@@ -28,6 +28,7 @@ import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
 import no.nav.aap.statistikk.api.mottaStatistikk
+import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
@@ -112,10 +113,20 @@ fun Application.startUp(
         skjermingService = skjermingService
     )
 
-    val motorJobbAppender = MotorJobbAppender(lagreSakinfoTilBigQueryJobb)
+    val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
+        behandlingRepositoryFactory = { BehandlingRepository(it) },
+        rettighetstypeperiodeRepositoryFactory = { RettighetstypeperiodeRepository(it) },
+        diagnoseRepositoryFactory = { DiagnoseRepositoryImpl(it) },
+        vilkårsResulatRepositoryFactory = { VilkårsresultatRepository(it) },
+        tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
+        beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
+        bqRepository = bqYtelseRepository
+    )
+
+    val motorJobbAppender =
+        MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        bqYtelseRepository,
         prometheusMeterRegistry,
         tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
         beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
@@ -138,9 +149,10 @@ fun Application.startUp(
         lagreOppgaveHendelseJobb,
         lagrePostmottakHendelseJobb,
         lagreSakinfoTilBigQueryJobb,
+        lagreAvsluttetBehandlingTilBigQueryJobb,
         LagreOppgaveJobb(
             jobbAppender = motorJobbAppender
-        )
+        ),
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
@@ -176,6 +188,7 @@ private fun motor(
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
+    lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
     lagreOppgaveJobb: LagreOppgaveJobb
 ): Motor {
     return Motor(
@@ -193,6 +206,7 @@ private fun motor(
             lagreOppgaveJobb,
             lagrePostmottakHendelseJobb,
             lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
         ),
         prometheus = prometheusMeterRegistry,
     )
