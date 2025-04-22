@@ -173,7 +173,7 @@ class SaksStatistikkService(
 
                     ResultatKode.AVSLAG -> "AVSLAG"
                     ResultatKode.TRUKKET -> "TRUKKET"
-                    null -> TODO()
+                    null -> null
                 }
             }
         }

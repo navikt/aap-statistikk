@@ -119,7 +119,6 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 val encodedSaksNummer = dto.oppgaveDto.saksnummer?.let { stringToNumber(it) }
-                dto.oppgaveDto.behandlingRef?.let { stringToNumber(it.toString()) }
 
                 jobbAppender.leggTil(
                     conn,
@@ -157,7 +156,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
     }
 }
 
-fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
+private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
     val oppgaveDto = this.oppgaveDto
     return no.nav.aap.statistikk.oppgave.OppgaveHendelse(
         hendelse = when (this.hendelse) {
