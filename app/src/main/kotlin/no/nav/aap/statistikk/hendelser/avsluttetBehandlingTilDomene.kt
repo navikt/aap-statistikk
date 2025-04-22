@@ -24,6 +24,11 @@ fun AvsluttetBehandlingDTO.tilDomene(
         beregningsgrunnlag = if (beregningsGrunnlag == null) null else tilDomene(beregningsGrunnlag!!),
         diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
         behandlingsReferanse = behandlingsReferanse,
+        behandlingResultat = when (requireNotNull(resultat)) {
+            ResultatKode.INNVILGET -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.INNVILGET
+            ResultatKode.AVSLAG -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.AVSLAG
+            ResultatKode.TRUKKET -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.TRUKKET
+        },
         rettighetstypeperioder = this.rettighetstypePerioder.map {
             RettighetstypePeriode(
                 it.fraDato,
