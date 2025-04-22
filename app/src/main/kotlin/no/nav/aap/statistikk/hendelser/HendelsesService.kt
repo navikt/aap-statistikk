@@ -30,7 +30,7 @@ class HendelsesService(
     private val personService: PersonService,
     private val behandlingRepository: IBehandlingRepository,
     private val meterRegistry: MeterRegistry,
-    private val opprettBigQueryLagringCallback: (BehandlingId) -> Unit,
+    private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
     private val clock: Clock = Clock.systemDefaultZone()
 ) {
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
@@ -54,7 +54,7 @@ class HendelsesService(
             )
         }
 
-        opprettBigQueryLagringCallback(behandlingId)
+        opprettBigQueryLagringSakStatistikkCallback(behandlingId)
 
         meterRegistry.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")

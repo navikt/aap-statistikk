@@ -147,10 +147,7 @@ class IntegrationTest {
                 { it != null }
             )
 
-//            assertThat(behandling!!.hendelser).hasSize()
-
             assertThat(behandling!!.status).isEqualTo(BehandlingStatus.AVSLUTTET)
-//            assertThat(behandling.hendelser).containsExactly()
         }
 
         // Sekvensnummer økes med 1 med ny info på sak
@@ -227,6 +224,13 @@ class IntegrationTest {
                     ) {
                         println("!!!!!!!!!!!!!!!!!!!!!!")
                         TODO()
+                    }
+
+                    override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+                        connection: DBConnection,
+                        behandlingId: BehandlingId
+                    ) {
+                        TODO("Not yet implemented")
                     }
                 })).medPayload(
                     DefaultJsonMapper.toJson(hendelse)

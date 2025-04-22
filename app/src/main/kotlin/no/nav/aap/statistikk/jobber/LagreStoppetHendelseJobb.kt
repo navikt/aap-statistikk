@@ -6,13 +6,10 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
-import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
-import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -22,7 +19,6 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 
 class LagreStoppetHendelseJobb(
-    private val bqYtelseStatistikk: IBQYtelsesstatistikkRepository,
     private val meterRegistry: MeterRegistry,
     private val tilkjentYtelseRepositoryFactory: (DBConnection) -> ITilkjentYtelseRepository,
     private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
@@ -46,25 +42,22 @@ class LagreStoppetHendelseJobb(
                 skjermingService = skjermingService,
                 meterRegistry = meterRegistry,
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository(connection),
-                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
-                    bqRepository = bqYtelseStatistikk,
-                    rettighetstypeperiodeRepository = rettighetstypeperiodeRepository(connection),
-                    diagnoseRepository = DiagnoseRepositoryImpl(connection),
-                    vilkårsresultatRepository = vilkårsResultatRepositoryFactory(connection),
-                    tilkjentYtelseRepository = tilkjentYtelseRepositoryFactory(connection),
-                    beregningsgrunnlagRepository = beregningsgrunnlagRepositoryFactory(connection),
-                    behandlingRepository = behandlingRepositoryFactory(connection),
-                )
+                opprettBigQueryLagringYtelseCallback = { behandlingId ->
+                    jobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+                        connection,
+                        behandlingId
+                    )
+                }
             ),
             personService = personService(connection),
             behandlingRepository = BehandlingRepository(connection),
             meterRegistry = meterRegistry,
-            opprettBigQueryLagringCallback = { behandlingId ->
+            opprettBigQueryLagringSakStatistikkCallback = { behandlingId ->
                 jobbAppender.leggTilLagreSakTilBigQueryJobb(
                     connection,
                     behandlingId
                 )
-            }
+            },
         )
         return LagreStoppetHendelseJobbUtfører(
             hendelsesService,

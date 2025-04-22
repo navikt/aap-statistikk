@@ -267,8 +267,6 @@ fun opprettTestHendelse(
         clock
     )
 
-    println("Nå: ${LocalDateTime.now(clock)}. Behandlingopprettet: ${behandling.opprettetTid}}")
-
     val sakId = sak.id!!
     val behandlingId = behandling.id!!
 
@@ -359,6 +357,13 @@ class MockJobbAppender : JobbAppender {
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId.")
         bigQueryJobber.add(behandlingId)
+    }
+
+    override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+        connection: DBConnection,
+        behandlingId: BehandlingId
+    ) {
+        TODO("Not yet implemented")
     }
 }
 

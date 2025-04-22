@@ -12,7 +12,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.nyBehandlingOpprettet
@@ -149,20 +148,12 @@ class HendelsesServiceTest {
                 skjermingService = skjermingService,
                 meterRegistry = simpleMeterRegistry,
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
-                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
-                    bqRepositoryYtelse,
-                    behandlingRepository,
-                    rettighetstypeperiodeRepository,
-                    diagnoseRepository,
-                    vilkårsresultatRepository = vilkårsresultatRepository,
-                    tilkjentYtelseRepository = tilkjentYtelseRepository,
-                    beregningsgrunnlagRepository = beregningsgrunnlagRepository,
-                )
+                opprettBigQueryLagringYtelseCallback = { TODO() },
             ),
             personService = PersonService(FakePersonRepository()),
             behandlingRepository = behandlingRepository,
             meterRegistry = simpleMeterRegistry,
-            opprettBigQueryLagringCallback = opprettBigQueryLagringCallback,
+            opprettBigQueryLagringSakStatistikkCallback = opprettBigQueryLagringCallback,
             clock = clock
         )
     }

@@ -2,8 +2,10 @@ package no.nav.aap.statistikk.avsluttetbehandling.service
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
@@ -31,7 +33,9 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.function.BiPredicate
 import javax.sql.DataSource
+import kotlin.Pair
 import kotlin.math.abs
+import kotlin.to
 
 class AvsluttetBehandlingServiceTest {
     @Test
@@ -142,6 +146,21 @@ class AvsluttetBehandlingServiceTest {
             bigQueryClient
         }
 
+        val bqYtelseRepository = BQYtelseRepository(bigQueryClient)
+        dataSource.transaction {
+            LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
+                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
+                    bqRepository = bqYtelseRepository,
+                    behandlingRepository = BehandlingRepository(it),
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                    diagnoseRepository = DiagnoseRepositoryImpl(it),
+                    vilkårsresultatRepository = VilkårsresultatRepository(it),
+                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
+                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
+                    clock = clock
+                )
+            ).utfør(JobbInput(mockk()).medPayload(behandlingReferanse))
+        }
 
         val utlestFraBehandlingTabell = bigQueryClient.read(BehandlingTabell()).first()
         val utlestVilkårsVurderingFraBigQuery = bigQueryClient.read(VilkårsVurderingTabell())
@@ -324,7 +343,6 @@ class AvsluttetBehandlingServiceTest {
         clock: Clock = Clock.systemUTC()
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
-        val bqYtelseRepository = BQYtelseRepository(bigQueryClient)
 
         val behandlingRepository = BehandlingRepository(dbConnection, clock)
         val service =
@@ -337,16 +355,7 @@ class AvsluttetBehandlingServiceTest {
                 skjermingService = SkjermingService(FakePdlClient(emptyMap())),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                 meterRegistry = meterRegistry,
-                ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
-                    bqYtelseRepository,
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
-                    diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
-                    vilkårsresultatRepository = VilkårsresultatRepository(dbConnection),
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dbConnection),
-                    behandlingRepository = behandlingRepository,
-                    clock = clock
-                ),
+                opprettBigQueryLagringYtelseCallback = {}
             )
         return Pair(bigQueryClient, service)
     }

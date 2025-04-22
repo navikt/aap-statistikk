@@ -1,6 +1,8 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.behandling.BQYtelseBehandling
+import no.nav.aap.statistikk.behandling.DiagnoseRepository
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
