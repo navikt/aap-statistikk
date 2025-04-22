@@ -24,7 +24,7 @@ fun AvsluttetBehandlingDTO.tilDomene(
         beregningsgrunnlag = if (beregningsGrunnlag == null) null else tilDomene(beregningsGrunnlag!!),
         diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
         behandlingsReferanse = behandlingsReferanse,
-        behandlingResultat = requireNotNull(resultat.resultatTilDomene()),
+        behandlingResultat = resultat.resultatTilDomene(),
         rettighetstypeperioder = this.rettighetstypePerioder.map {
             RettighetstypePeriode(
                 it.fraDato,
