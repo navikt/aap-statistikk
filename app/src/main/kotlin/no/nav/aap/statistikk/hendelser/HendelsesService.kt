@@ -7,6 +7,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
@@ -85,6 +86,7 @@ class HendelsesService(
             søknadsformat = dto.soknadsFormat.tilDomene(),
             venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
             returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
+            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
             gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
             årsaker = dto.årsakTilBehandling.map { it.tilDomene() }
         )
@@ -181,28 +183,28 @@ fun Kanal.tilDomene(): SøknadsFormat {
 
 fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilBehandling {
     return when (this) {
-        ÅrsakTilBehandling.SØKNAD -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SØKNAD
-        ÅrsakTilBehandling.AKTIVITETSMELDING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.AKTIVITETSMELDING
-        ÅrsakTilBehandling.MELDEKORT -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.MELDEKORT
-        ÅrsakTilBehandling.LEGEERKLÆRING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.LEGEERKLÆRING
-        ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING
-        ÅrsakTilBehandling.DIALOGMELDING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.DIALOGMELDING
-        ÅrsakTilBehandling.G_REGULERING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.G_REGULERING
-        ÅrsakTilBehandling.REVURDER_MEDLEMSKAP -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_MEDLEMSSKAP
-        ÅrsakTilBehandling.REVURDER_YRKESSKADE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_YRKESSKADE
-        ÅrsakTilBehandling.REVURDER_BEREGNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_BEREGNING
-        ÅrsakTilBehandling.REVURDER_LOVVALG -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_LOVVALG
-        ÅrsakTilBehandling.KLAGE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.KLAGE
-        ÅrsakTilBehandling.REVURDER_SAMORDNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REVURDER_SAMORDNING
-        ÅrsakTilBehandling.LOVVALG_OG_MEDLEMSKAP -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.LOVVALG_OG_MEDLEMSKAP
-        ÅrsakTilBehandling.FORUTGAENDE_MEDLEMSKAP -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.FORUTGAENDE_MEDLEMSKAP
-        ÅrsakTilBehandling.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
-        ÅrsakTilBehandling.BARNETILLEGG -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.BARNETILLEGG
-        ÅrsakTilBehandling.INSTITUSJONSOPPHOLD -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.INSTITUSJONSOPPHOLD
-        ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING
-        ÅrsakTilBehandling.REFUSJONSKRAV -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.REFUSJONSKRAV
-        ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
-        ÅrsakTilBehandling.SØKNAD_TRUKKET -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.SØKNAD_TRUKKET
-        ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE -> no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE
+        ÅrsakTilBehandling.SØKNAD -> SØKNAD
+        ÅrsakTilBehandling.AKTIVITETSMELDING -> AKTIVITETSMELDING
+        ÅrsakTilBehandling.MELDEKORT -> MELDEKORT
+        ÅrsakTilBehandling.LEGEERKLÆRING -> LEGEERKLÆRING
+        ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING -> AVVIST_LEGEERKLÆRING
+        ÅrsakTilBehandling.DIALOGMELDING -> DIALOGMELDING
+        ÅrsakTilBehandling.G_REGULERING -> G_REGULERING
+        ÅrsakTilBehandling.REVURDER_MEDLEMSKAP -> REVURDER_MEDLEMSSKAP
+        ÅrsakTilBehandling.REVURDER_YRKESSKADE -> REVURDER_YRKESSKADE
+        ÅrsakTilBehandling.REVURDER_BEREGNING -> REVURDER_BEREGNING
+        ÅrsakTilBehandling.REVURDER_LOVVALG -> REVURDER_LOVVALG
+        ÅrsakTilBehandling.KLAGE -> KLAGE
+        ÅrsakTilBehandling.REVURDER_SAMORDNING -> REVURDER_SAMORDNING
+        ÅrsakTilBehandling.LOVVALG_OG_MEDLEMSKAP -> LOVVALG_OG_MEDLEMSKAP
+        ÅrsakTilBehandling.FORUTGAENDE_MEDLEMSKAP -> FORUTGAENDE_MEDLEMSKAP
+        ÅrsakTilBehandling.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND -> SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
+        ÅrsakTilBehandling.BARNETILLEGG -> BARNETILLEGG
+        ÅrsakTilBehandling.INSTITUSJONSOPPHOLD -> INSTITUSJONSOPPHOLD
+        ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING -> SAMORDNING_OG_AVREGNING
+        ÅrsakTilBehandling.REFUSJONSKRAV -> REFUSJONSKRAV
+        ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
+        ÅrsakTilBehandling.SØKNAD_TRUKKET -> SØKNAD_TRUKKET
+        ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE -> VURDER_RETTIGHETSPERIODE
     }
 }

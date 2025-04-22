@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.hendelser
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -153,17 +154,25 @@ class SaksStatistikkService(
             BehandlingStatus.AVSLUTTET -> {
                 val behandlingReferanse = behandling.referanse
                 val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
-                return if (rettighetstyper.isEmpty()) {
-                    // Hva med avslag?
-                    "AAP"
-                } else {
-                    if (rettighetstyper.size > 1) {
-                        logger.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
+                val resultat = behandling.resultat
+
+                when (resultat) {
+                    ResultatKode.INNVILGET -> if (rettighetstyper.isEmpty()) {
+                        // Hva med avslag?
+                        "AAP"
+                    } else {
+                        if (rettighetstyper.size > 1) {
+                            logger.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
+                        }
+                        // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
+                        val førsteRettighetstype =
+                            rettighetstyper.first().rettighetstype.name.lowercase()
+                        "AAP_$førsteRettighetstype"
                     }
-                    // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
-                    val førsteRettighetstype =
-                        rettighetstyper.first().rettighetstype.name.lowercase()
-                    "AAP_$førsteRettighetstype"
+
+                    ResultatKode.AVSLAG -> "AVSLAG"
+                    ResultatKode.TRUKKET -> "TRUKKET"
+                    null -> TODO()
                 }
             }
         }
