@@ -4,7 +4,6 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 data class AvsluttetBehandling(
@@ -13,8 +12,15 @@ data class AvsluttetBehandling(
     val vilkårsresultat: Vilkårsresultat,
     val beregningsgrunnlag: IBeregningsGrunnlag?,
     val diagnoser: Diagnoser?,
-    val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList()
+    val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList(),
+    val behandlingResultat: ResultatKode
 )
+
+enum class ResultatKode {
+    INNVILGET,
+    AVSLAG,
+    TRUKKET
+}
 
 data class RettighetstypePeriode(
     val fraDato: LocalDate,

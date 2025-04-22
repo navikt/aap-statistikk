@@ -116,6 +116,7 @@ class AvsluttetBehandlingServiceTest {
                 diagnosekode = "KOLERA",
                 bidiagnoser = listOf("PEST")
             ),
+            behandlingResultat = ResultatKode.INNVILGET,
             rettighetstypeperioder = listOf(
                 RettighetstypePeriode(
                     datoNå.minusYears(1),
@@ -283,6 +284,7 @@ class AvsluttetBehandlingServiceTest {
                 diagnosekode = "KOLERA",
                 bidiagnoser = listOf("PEST")
             ),
+            behandlingResultat = ResultatKode.INNVILGET,
             rettighetstypeperioder = listOf(
                 RettighetstypePeriode(
                     nå.minusYears(1),
