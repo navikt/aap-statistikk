@@ -323,7 +323,7 @@ class BehandlingRepositoryTest {
             dataSource.transaction {
                 it.execute("INSERT INTO behandling_historikk (behandling_id, versjon_id, gjeldende, oppdatert_tid, mottatt_tid, status, siste_saksbehandler, gjeldende_avklaringsbehov) VALUES (?,?,?,?,?,?,?,?)") {
                     setParams {
-                        setLong(1, id)
+                        setLong(1, id.id)
                         setLong(2, 1)
                         setBoolean(3, true)
                         setLocalDateTime(4, LocalDateTime.now())

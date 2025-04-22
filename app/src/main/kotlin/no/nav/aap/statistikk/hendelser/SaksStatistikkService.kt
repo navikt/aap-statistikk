@@ -5,6 +5,7 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
@@ -30,7 +31,7 @@ class SaksStatistikkService(
     private val skjermingService: SkjermingService,
     private val clock: Clock = systemDefaultZone()
 ) {
-    fun lagreSakInfoTilBigquery(behandlingId: Long) {
+    fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
 
         val behandling = behandlingRepository.hent(behandlingId)
         val erSkjermet = skjermingService.erSkjermet(behandling)

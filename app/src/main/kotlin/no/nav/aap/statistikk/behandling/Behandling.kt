@@ -20,7 +20,7 @@ data class Versjon(
  * @param behandlendeEnhet Hvilket NAV-kontor som eier behandlingen. Utledet som siste enhet på en oppgave tilhørende behandlingen.
  */
 data class Behandling(
-    val id: Long? = null,
+    val id: BehandlingId? = null,
     val referanse: UUID,
     val sak: Sak,
     val typeBehandling: TypeBehandling,
@@ -33,7 +33,7 @@ data class Behandling(
     val søknadsformat: SøknadsFormat,
     val sisteSaksbehandler: String? = null,
     val relaterteIdenter: List<String> = listOf(),
-    val relatertBehandlingId: Long? = null,
+    val relatertBehandlingId: BehandlingId? = null,
     val snapShotId: Long? = null,
     val gjeldendeAvklaringsBehov: String? = null,
     val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,

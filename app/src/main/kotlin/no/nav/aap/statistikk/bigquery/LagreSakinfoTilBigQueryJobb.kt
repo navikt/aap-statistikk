@@ -5,6 +5,7 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
+import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
 import no.nav.aap.statistikk.pdl.SkjermingService
@@ -14,7 +15,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(private val sakStatistikkService: Saks
     JobbUtfører {
 
     override fun utfør(input: JobbInput) {
-        val behandlingId = input.payload<Long>()
+        val behandlingId = input.payload<BehandlingId>()
         sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
     }
 }
