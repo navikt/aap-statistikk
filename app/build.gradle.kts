@@ -12,10 +12,10 @@ val mockkVersion = "1.14.0"
 val flywayVersion = "11.7.2"
 val testContainersVersion = "1.20.6"
 val komponenterVersjon = "1.0.226"
-val behandlingsflytversjon = "0.0.256"
+val behandlingsflytversjon = "0.0.264"
 val tilgangVersjon = "1.0.53"
 val oppgaveVersjon = "0.0.58"
-val postmottakVersjon = "0.0.75"
+val postmottakVersjon = "0.0.78"
 val utbetalVersjon = "0.0.34"
 
 application {
