@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.vilkårsresultat.repository
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -12,14 +13,14 @@ class VilkårsresultatRepository(
 ) : IVilkårsresultatRepository {
     override fun lagreVilkårsResultat(
         vilkårsresultat: VilkårsResultatEntity,
-        behandlingId: Long
+        behandlingId: BehandlingId
     ): Long {
         val sqlInsertResultat =
             """INSERT INTO VILKARSRESULTAT (behandling_id) VALUES (?)"""
 
         val uthentetId = dbConnection.executeReturnKey(sqlInsertResultat) {
             setParams {
-                setLong(1, behandlingId)
+                setLong(1, behandlingId.id)
             }
         }
 
@@ -151,7 +152,7 @@ WHERE br.referanse = ?;
 FROM VILKARSPERIODE
 WHERE vilkar_id = ?;
             """
-        return dbConnection.queryList<VilkårsPeriodeEntity>(sql) {
+        return dbConnection.queryList(sql) {
             setParams {
                 setLong(1, vilkårId)
             }

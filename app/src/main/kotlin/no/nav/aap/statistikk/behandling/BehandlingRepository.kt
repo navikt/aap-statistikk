@@ -11,14 +11,15 @@ import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 
-typealias BehandlingId = Long
+@JvmInline
+value class BehandlingId(val id: Long)
 
 class BehandlingRepository(
     private val dbConnection: DBConnection,
     private val clock: Clock = Clock.systemDefaultZone()
 ) : IBehandlingRepository {
 
-    override fun opprettBehandling(behandling: Behandling): Long {
+    override fun opprettBehandling(behandling: Behandling): BehandlingId {
         val sqlVersjon = """WITH ny_ref AS (
     INSERT INTO behandling_referanse (referanse)
         VALUES (?)
@@ -47,13 +48,13 @@ VALUES (?, ?, ?, ?, ?, ?)"""
                 setLong(2, id)
                 setString(3, behandling.typeBehandling.toString())
                 setLocalDateTime(4, behandling.opprettetTid)
-                setLong(5, behandling.relatertBehandlingId)
+                setLong(5, behandling.relatertBehandlingId?.id)
                 setArray(6, behandling.årsaker.map { it.name })
             }
         }
-        oppdaterBehandling(behandling.copy(id = behandlingId))
+        oppdaterBehandling(behandling.copy(id = behandlingId.let(::BehandlingId)))
 
-        return behandlingId
+        return BehandlingId(behandlingId)
     }
 
     override fun oppdaterBehandling(behandling: Behandling) {
@@ -80,7 +81,7 @@ SELECT COALESCE(
         }
 
         dbConnection.execute("UPDATE behandling_historikk SET gjeldende = FALSE where behandling_id = ?") {
-            setParams { setLong(1, behandlingId) }
+            setParams { setLong(1, behandlingId.id) }
         }
 
         dbConnection.executeBatch(
@@ -95,7 +96,7 @@ SELECT COALESCE(
         dbConnection.execute("UPDATE behandling SET aarsaker_til_behandling = ? WHERE id = ?") {
             setParams {
                 setArray(1, behandling.årsaker.map { it.name })
-                setLong(2, behandlingId)
+                setLong(2, behandlingId.id)
             }
         }
 
@@ -110,7 +111,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
-                setLong(c++, behandlingId)
+                setLong(c++, behandlingId.id)
                 setLong(c++, versjonId)
                 setBoolean(c++, true)
                 setLocalDateTime(c++, LocalDateTime.now(clock))
@@ -258,12 +259,12 @@ FROM behandling b
                                       limit 1)
 WHERE b.id = ?"""
 
-    override fun hent(id: Long): Behandling {
+    override fun hent(id: BehandlingId): Behandling {
         val behandling = dbConnection.queryFirst(
             hentMedId
         ) {
             setParams {
-                setLong(1, id)
+                setLong(1, id.id)
             }
             setRowMapper {
                 mapBehandling(it)
@@ -292,7 +293,7 @@ WHERE b.id = ?"""
                 """.trimIndent()
 
             dbConnection.queryList(historikkSpørring) {
-                setParams { setLong(1, behandling.id!!) }
+                setParams { setLong(1, behandling.id!!.id) }
                 setRowMapper {
                     BehandlingHendelse(
                         tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),
@@ -313,10 +314,10 @@ WHERE b.id = ?"""
             }
         }
 
-    override fun hentEllerNull(id: Long): Behandling? {
+    override fun hentEllerNull(id: BehandlingId): Behandling? {
         return dbConnection.queryFirstOrNull(hentMedId) {
             setParams {
-                setLong(1, id)
+                setLong(1, id.id)
             }
             setRowMapper {
                 mapBehandling(it)
@@ -333,7 +334,7 @@ WHERE b.id = ?"""
     }
 
     private fun mapBehandling(it: Row) = Behandling(
-        id = it.getLong("b_id"),
+        id = it.getLong("b_id").let(::BehandlingId),
         referanse = it.getUUID("br_referanse"),
         sak = Sak(
             id = it.getLong("s_id"),
@@ -356,7 +357,7 @@ WHERE b.id = ?"""
         søknadsformat = it.getEnum("bh_soknadsformat"),
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
         relaterteIdenter = it.getArray("rp_ident", String::class),
-        relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id"),
+        relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id")?.let(::BehandlingId),
         snapShotId = it.getLong("bh_id"),
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
             ?.ifBlank { null },

@@ -420,9 +420,9 @@ class FakePersonRepository : IPersonRepository {
 class FakeBehandlingRepository : IBehandlingRepository {
     private val behandlinger = mutableMapOf<Long, Behandling>()
     private var nextId = 0L
-    override fun opprettBehandling(behandling: Behandling): Long {
+    override fun opprettBehandling(behandling: Behandling): BehandlingId {
         val id = nextId
-        behandlinger[id] = behandling.copy(id = id).leggTilHendelse(
+        behandlinger[id] = behandling.copy(id = BehandlingId(id)).leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
                 status = behandling.status,
@@ -432,12 +432,12 @@ class FakeBehandlingRepository : IBehandlingRepository {
         nextId++
 
         logger.info("Opprettet behandling med ID $id")
-        return id
+        return BehandlingId(id)
     }
 
     override fun oppdaterBehandling(behandling: Behandling) {
         logger.info("Oppdaterte behandling med ID ${behandling.id}")
-        behandlinger[behandling.id!!] = behandling.leggTilHendelse(
+        behandlinger[behandling.id?.id!!] = behandling.leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
                 status = behandling.status,
@@ -454,12 +454,12 @@ class FakeBehandlingRepository : IBehandlingRepository {
         return behandlinger.asIterable().firstOrNull { it.value.referanse == referanse }?.value
     }
 
-    override fun hent(id: Long): Behandling {
-        return behandlinger[id]!!
+    override fun hent(id: BehandlingId): Behandling {
+        return behandlinger[id.id]!!
     }
 
-    override fun hentEllerNull(id: Long): Behandling? {
-        return behandlinger[id]
+    override fun hentEllerNull(id: BehandlingId): Behandling? {
+        return behandlinger[id.id]
     }
 
     override fun tellFullførteBehandlinger(): Long {
@@ -546,7 +546,7 @@ class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
 
     override fun lagreVilkårsResultat(
         vilkårsresultat: VilkårsResultatEntity,
-        behandlingId: Long
+        behandlingId: BehandlingId
     ): Long {
         vilkår.put(vilkår.size.toLong(), vilkårsresultat)
         return (vilkår.size - 1).toLong()

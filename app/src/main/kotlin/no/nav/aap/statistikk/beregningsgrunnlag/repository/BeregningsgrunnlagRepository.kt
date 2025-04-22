@@ -53,7 +53,10 @@ class BeregningsgrunnlagRepository(
 
     }
 
-    private fun hentBehandlingsReferanseId(dbConnection: DBConnection, referanse: UUID): Long {
+    private fun hentBehandlingsReferanseId(
+        dbConnection: DBConnection,
+        referanse: UUID
+    ): BehandlingId {
         val sql = """SELECT b.id
 FROM behandling b
          JOIN behandling_referanse br
@@ -65,7 +68,7 @@ WHERE br.referanse = ?"""
                 setUUID(1, referanse)
             }
             setRowMapper {
-                it.getLong("id")
+                it.getLong("id").let(::BehandlingId)
             }
         }
     }
@@ -80,7 +83,7 @@ WHERE br.referanse = ?"""
         return connection.executeReturnKey(sql) {
             setParams {
                 setString(1, type.toString())
-                setLong(2, behandlingId)
+                setLong(2, behandlingId.id)
             }
         }
     }

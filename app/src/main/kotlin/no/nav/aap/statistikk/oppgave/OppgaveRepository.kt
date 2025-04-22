@@ -33,7 +33,7 @@ SELECT COALESCE(
         val reservasjonId = if (oppgave.reservasjon != null) {
             val settInnReservasjonSql = """
     INSERT INTO reservasjon (reservert_av, opprettet_tid)
-    VALUES (?, ?)""";
+    VALUES (?, ?)"""
 
             dbConnection.executeReturnKey(settInnReservasjonSql) {
                 setParams {
@@ -293,7 +293,7 @@ where id = ?"""
 
         return dbConnection.queryList(sql) {
             setParams {
-                setLong(1, behandlingId)
+                setLong(1, behandlingId.id)
             }
             setRowMapper {
                 oppgaveMapper(it)

@@ -63,7 +63,7 @@ class HendelsesService(
     private fun hentEllerLagreBehandlingId(
         dto: StoppetBehandling,
         sak: Sak
-    ): Long {
+    ): BehandlingId {
 
         if (!Miljø.erProd()) {
             logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
