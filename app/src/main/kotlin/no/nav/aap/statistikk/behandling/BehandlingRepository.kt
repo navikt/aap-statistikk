@@ -105,8 +105,8 @@ SELECT COALESCE(
                                   vedtak_tidspunkt, ansvarlig_beslutter,
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
-                                  soknadsformat, venteaarsak, steggruppe, retur_aarsak)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -125,6 +125,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.venteÅrsak)
                 setEnumName(c++, behandling.gjeldendeStegGruppe)
                 setString(c++, behandling.returÅrsak)
+                setEnumName(c, behandling.resultat)
             }
         }
 
@@ -167,6 +168,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
        bh.retur_aarsak                     as bh_retur_aarsak,
        bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
        bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+       bh.resultat                         as bh_resultat,
        bh.soknadsformat                    as bh_soknadsformat,
        bh.steggruppe                       as bh_steggruppe,
        v.versjon                           as v_versjon,
@@ -228,6 +230,7 @@ WHERE br.referanse = ?"""
        bh.retur_aarsak                     as bh_retur_aarsak,
        bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
        bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+       bh.resultat                         as bh_resultat,
        bh.soknadsformat                    as bh_soknadsformat,
        bh.steggruppe                       as bh_steggruppe,
        bh.id                               as bh_id,
@@ -281,6 +284,7 @@ WHERE b.id = ?"""
               bh.retur_aarsak                     as bh_retur_aarsak,
               bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
               bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+              bh.resultat                         as bh_resultat,
               bh.status                           as bh_status
        from behandling_historikk bh
        where bh.behandling_id = ?
@@ -296,6 +300,7 @@ WHERE b.id = ?"""
                         avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
                         venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
                         returÅrsak = it.getStringOrNull("bh_retur_aarsak"),
+                        resultat = it.getEnumOrNull("bh_resultat"),
                         saksbehandler = it.getStringOrNull("bh_siste_saksbehandler")
                             ?.let { saksbehandler ->
                                 Saksbehandler(
@@ -361,6 +366,7 @@ WHERE b.id = ?"""
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
             .map { ÅrsakTilBehandling.valueOf(it) },
+        resultat = it.getEnumOrNull("bh_resultat"),
         behandlendeEnhet = it.getLongOrNull("e_id")
             ?.let { id -> Enhet(id = id, kode = it.getString("e_kode")) }
     )

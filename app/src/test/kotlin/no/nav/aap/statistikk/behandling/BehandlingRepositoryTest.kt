@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.oppgave.*
 import no.nav.aap.statistikk.sak.SakStatus
@@ -75,6 +76,7 @@ class BehandlingRepositoryTest {
                     venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
                     returÅrsak = "MANGELFULL_BEGRUNNELSE",
                     gjeldendeStegGruppe = StegGruppe.BREV,
+                    resultat = ResultatKode.INNVILGET,
                     årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
                 )
             )
@@ -98,6 +100,7 @@ class BehandlingRepositoryTest {
         )
         assertThat(uthentet.behandlendeEnhet).isEqualTo(enhet)
         assertThat(uthentet.gjeldendeAvklaringsbehovStatus).isEqualTo(Status.OPPRETTET)
+        assertThat(uthentet.resultat).isEqualTo(ResultatKode.INNVILGET)
         assertThat(uthentet.hendelser).satisfiesExactly(
             {
                 assertThat(it.tidspunkt).isCloseTo(
