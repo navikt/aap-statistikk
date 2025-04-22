@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.oppgave.Enhet
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.sak.Sak
@@ -41,6 +42,7 @@ data class Behandling(
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<ÅrsakTilBehandling> = listOf(),
     val behandlendeEnhet: Enhet? = null,
+    val resultat: ResultatKode? = null,
     val hendelser: List<BehandlingHendelse> = listOf(),
 ) {
     init {
@@ -74,6 +76,7 @@ data class BehandlingHendelse(
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
     val saksbehandler: Saksbehandler? = null,
+    val resultat: ResultatKode? = null,
     val status: BehandlingStatus,
 )
 
