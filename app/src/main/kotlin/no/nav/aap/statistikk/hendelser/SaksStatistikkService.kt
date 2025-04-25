@@ -95,7 +95,7 @@ class SaksStatistikkService(
         )
 
         if (behandling.årsaker.size > 1) {
-            logger.warn("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
+            logger.info("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
         }
 
         // TODO - kun lagre om endring siden sist
