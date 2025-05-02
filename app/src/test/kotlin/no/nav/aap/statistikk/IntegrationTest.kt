@@ -24,9 +24,11 @@ import no.nav.aap.oppgave.OppgaveDto
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.verdityper.Behandlingstype
 import no.nav.aap.statistikk.api.stringToNumber
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTabell
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
@@ -195,15 +197,28 @@ class IntegrationTest {
             "MANUELL",
         )
 
-        // Sjekk ytelsesstatistikk
-        val bqYtelse = ventPåSvar(
+        // Sjekk tilkjent ytelse
+        val tilkjentYtelse = ventPåSvar(
             { bigQueryClient.read(TilkjentYtelseTabell()) },
             { t -> t !== null && t.isNotEmpty() })
 
-        assertThat(bqYtelse!!).allSatisfy {
+        assertThat(tilkjentYtelse!!).allSatisfy {
             assertThat(it.behandlingsreferanse).isEqualTo(referanse.toString())
             assertThat(it.dagsats).isEqualTo(974.0)
             assertThat(it.antallBarn).isEqualTo(1)
+        }
+
+        // Sjekk ytelsesstatistikk
+        val bqYtelse = ventPåSvar(
+            { bigQueryClient.read(BehandlingTabell()) },
+            { t -> t !== null && t.isNotEmpty() })
+
+        assertThat(bqYtelse!!).allSatisfy {
+            assertThat(it.referanse).isEqualTo(referanse)
+            assertThat(it.datoAvsluttet).isEqualTo(
+                LocalDateTime.of(2025, 4, 15, 13, 28, 11, 316000000)
+            )
+            assertThat(it.resultat).isEqualTo(ResultatKode.valueOf(("INNVILGET")))
         }
     }
 

@@ -308,6 +308,7 @@ fun opprettTestBehandling(
         typeBehandling = TypeBehandling.Førstegangsbehandling,
         status = status,
         opprettetTid = opprettetTidspunkt,
+        oppdatertTidspunkt = opprettetTidspunkt,
         mottattTid = opprettetTidspunkt.truncatedTo(ChronoUnit.SECONDS),
         versjon = Versjon(UUID.randomUUID().toString()),
         søknadsformat = SøknadsFormat.PAPIR,
@@ -425,6 +426,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
         behandlinger[id] = behandling.copy(id = BehandlingId(id)).leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
+                hendelsesTidspunkt = LocalDateTime.now(),
                 status = behandling.status,
                 avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus
             )
@@ -440,6 +442,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
         behandlinger[behandling.id?.id!!] = behandling.leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
+                hendelsesTidspunkt = LocalDateTime.now(),
                 status = behandling.status,
                 avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus
             )
