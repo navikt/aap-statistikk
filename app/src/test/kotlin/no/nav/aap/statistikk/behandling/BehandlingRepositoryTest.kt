@@ -134,7 +134,11 @@ class BehandlingRepositoryTest {
 
         val uthentet2 = dataSource.transaction { BehandlingRepository(it).hent(uthentet.referanse) }
 
-        assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 -> c1.tidspunkt.compareTo(c2.tidspunkt) }
+        assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 ->
+            c1.hendelsesTidspunkt.compareTo(
+                c2.hendelsesTidspunkt
+            )
+        }
         assertThat(uthentet2.hendelser.size).isEqualTo(3)
     }
 
