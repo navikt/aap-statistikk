@@ -1,9 +1,11 @@
 package no.nav.aap.statistikk.behandling
 
 import com.google.cloud.bigquery.*
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BQTable
+import no.nav.aap.statistikk.bigquery.hentEllerNull
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.utbetaling.helved.toBase64
 import java.time.LocalDate
@@ -26,6 +28,7 @@ data class BQYtelseBehandling(
     val diagnosekode: String?,
     val bidiagnoser: List<String>?,
     val rettighetsPerioder: List<RettighetstypePeriode>,
+    val resultat: ResultatKode? = null,
     val radEndret: LocalDateTime
 )
 
@@ -90,6 +93,10 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 .setDescription("Base64-encodet verdi av 'behandlingsreferanse'. Det er denne som sendes til UR.")
                 .build()
 
+            val resultat = Field.newBuilder("resultat", StandardSQLTypeName.STRING)
+                .setDescription("Resultat av behandlingen. Ved innvilget førstegangsbehandling er denne INNVILGET. Kan være null.")
+                .setMode(Field.Mode.NULLABLE).build()
+
             return Schema.of(
                 saksnummer,
                 behandlingsreferanse,
@@ -101,7 +108,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 bidiagnoser,
                 rettighetstypePeriode,
                 radEndret,
-                utbetalingId
+                utbetalingId,
+                resultat
             )
         }
 
@@ -139,6 +147,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             rettighetsPerioder = rettighetstypePerioder,
             radEndret = radEndret,
             utbetalingId = utbetalingId,
+            resultat = fieldValueList.hentEllerNull("resultat")?.let { ResultatKode.valueOf(it) }
         )
     }
 
@@ -165,6 +174,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                         "rettighetstype" to periode.rettighetstype.toString()
                     )
                 },
+                "resultat" to value.resultat?.toString(),
                 "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "utbetalingId" to value.referanse.toBase64()

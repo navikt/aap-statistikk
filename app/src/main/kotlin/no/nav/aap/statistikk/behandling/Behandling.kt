@@ -43,6 +43,7 @@ data class Behandling(
     val årsaker: List<ÅrsakTilBehandling> = listOf(),
     val behandlendeEnhet: Enhet? = null,
     val resultat: ResultatKode? = null,
+    val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
     val hendelser: List<BehandlingHendelse> = listOf(),
 ) {
     init {
@@ -65,12 +66,17 @@ data class Behandling(
     fun avsluttetTid(): LocalDateTime {
         return hendelser
             .filter { it.status == BehandlingStatus.AVSLUTTET }
-            .maxOf { it.tidspunkt }
+            .maxOf { it.hendelsesTidspunkt }
     }
 }
 
+/**
+ * @param tidspunkt Tidspunkt for lagring i statistikk-databasen.
+ * @param hendelsesTidspunkt Tidspunkt for da hendelsen ble avgitt i behandlingsflyt.
+ */
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime,
+    val hendelsesTidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
     val avklaringsbehovStatus: AvklaringsbehovStatus?,
     val venteÅrsak: String? = null,

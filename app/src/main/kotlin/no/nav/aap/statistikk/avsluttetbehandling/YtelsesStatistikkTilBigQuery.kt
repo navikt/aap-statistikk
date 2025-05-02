@@ -49,6 +49,7 @@ class YtelsesStatistikkTilBigQuery(
                 referanse = behandling.referanse,
                 utbetalingId = behandling.referanse.toBase64(),
                 brukerFnr = behandling.sak.person.ident,
+                resultat = behandling.resultat,
                 behandlingsType = behandling.typeBehandling,
                 datoAvsluttet = behandling.avsluttetTid(),
                 kodeverk = diagnoser?.kodeverk,

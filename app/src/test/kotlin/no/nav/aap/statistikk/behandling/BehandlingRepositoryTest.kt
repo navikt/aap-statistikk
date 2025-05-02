@@ -77,7 +77,8 @@ class BehandlingRepositoryTest {
                     returÅrsak = "MANGELFULL_BEGRUNNELSE",
                     gjeldendeStegGruppe = StegGruppe.BREV,
                     resultat = ResultatKode.INNVILGET,
-                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING)
+                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING),
+                    oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1)
                 )
             )
         }
@@ -112,6 +113,10 @@ class BehandlingRepositoryTest {
             },
         )
         assertThat(uthentet.returÅrsak).isEqualTo("MANGELFULL_BEGRUNNELSE")
+        assertThat(uthentet.oppdatertTidspunkt).isCloseTo(
+            LocalDateTime.now(clock).minusMinutes(1),
+            within(500, ChronoUnit.MILLIS)
+        )
 
         dataSource.transaction {
             BehandlingRepository(it).oppdaterBehandling(

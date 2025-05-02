@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.sak
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.bigquery.BQTable
+import no.nav.aap.statistikk.bigquery.hentEllerNull
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -282,10 +283,6 @@ class SakTabell : BQTable<BQBehandling> {
             behandlingResultat = behandlingResultat,
             resultatBegrunnelse = resultatBegrunnelse,
         )
-    }
-
-    private fun FieldValueList.hentEllerNull(feltNavn: String): String? {
-        return if (!get(feltNavn).isNull) get(feltNavn).stringValue else null
     }
 
     override fun toRow(value: BQBehandling): InsertAllRequest.RowToInsert {
