@@ -107,4 +107,20 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
 
         return res.iterateAll().map { row -> table.parseRow(row) }
     }
+
+    override fun <E> read(
+        table: BQTable<E>,
+        whereClause: String
+    ): List<E> {
+        @Language("BigQuery")
+        val query = "select * from $dataset.${table.tableName} where $whereClause"
+
+        val config = QueryJobConfiguration.newBuilder(query)
+            .setUseLegacySql(false)
+            .setDefaultDataset(dataset).build()
+
+        val res = bigQuery.query(config)
+
+        return res.iterateAll().map { row -> table.parseRow(row) }
+    }
 }

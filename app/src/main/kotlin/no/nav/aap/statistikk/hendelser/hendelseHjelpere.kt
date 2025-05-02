@@ -89,7 +89,10 @@ fun List<BehandlingHendelse>.erManuell(): Boolean {
         }
 }
 
-fun erHosNayNy(hendelser: List<BehandlingHendelse>): Boolean {
+/**
+ * Bruk denne kun som fallback om det ikke finnes oppgave?
+ */
+fun erHosNay(hendelser: List<BehandlingHendelse>): Boolean {
     return hendelser
         .filterNot { it.avklaringsBehov == null || Definisjon.forKode(it.avklaringsBehov).løsesAv.size > 1 }
         .maxByOrNull { it.tidspunkt }
