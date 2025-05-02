@@ -46,7 +46,7 @@ class SaksStatistikkService(
             bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
 
         val hendelser = behandling.hendelser
-        val erHosNAY = erHosNayNy(hendelser)
+        val erHosNAY = erHosNay(hendelser)
         val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
 
         val behandlingReferanse = behandling.referanse

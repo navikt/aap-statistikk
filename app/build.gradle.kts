@@ -63,6 +63,7 @@ dependencies {
     implementation("no.nav:ktor-openapi-generator:1.0.106")
     implementation("no.nav.aap.behandlingsflyt:kontrakt:$behandlingsflytversjon")
     implementation("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
+    api("no.nav.aap.tilgang:plugin:${tilgangVersjon}")
 
     implementation("no.nav.aap.oppgave:api-kontrakt:$oppgaveVersjon")
     implementation("no.nav.aap.postmottak:kontrakt:$postmottakVersjon")
