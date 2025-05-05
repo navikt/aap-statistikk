@@ -60,7 +60,9 @@ class YtelsesStatistikkTilBigQuery(
             )
         )
         bqRepository.lagre(vilkårsResultat)
-        bqRepository.lagre(tilkjentYtelse)
+        if (tilkjentYtelse != null) {
+            bqRepository.lagre(tilkjentYtelse)
+        }
 
         val beregningsGrunnlag =
             beregningsgrunnlagRepository.hentBeregningsGrunnlag(behandling.referanse)

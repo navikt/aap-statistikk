@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
-import java.util.function.BiPredicate
 import javax.sql.DataSource
 import kotlin.math.abs
 
@@ -57,7 +56,7 @@ class TilkjentYtelseRepositoryTest {
                         dagsats = 1337.420,
                         gradering = 90.0,
                         redusertDagsats = 1337.420 * 0.9,
-                        ),
+                    ),
                     TilkjentYtelsePeriode(
                         fraDato = LocalDate.now().minusYears(3),
                         tilDato = LocalDate.now().minusYears(2),
