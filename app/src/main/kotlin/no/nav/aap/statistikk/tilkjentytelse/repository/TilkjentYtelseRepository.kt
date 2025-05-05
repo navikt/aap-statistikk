@@ -14,7 +14,7 @@ private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.jav
 interface ITilkjentYtelseRepository {
     fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long
     fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse
-    fun hentForBehandling(behandlingId: UUID): TilkjentYtelse
+    fun hentForBehandling(behandlingId: UUID): TilkjentYtelse?
 }
 
 class TilkjentYtelseRepository(
@@ -94,7 +94,7 @@ WHERE tilkjent_ytelse.id = ?"""
             perioderTriple.map { it.first })
     }
 
-    override fun hentForBehandling(behandlingId: UUID): TilkjentYtelse {
+    override fun hentForBehandling(behandlingId: UUID): TilkjentYtelse? {
         val perioderTriple = dbConnection.queryList(
             """SELECT *
 FROM tilkjent_ytelse_periode
@@ -107,6 +107,10 @@ WHERE br.referanse = ?"""
         ) {
             setParams { setUUID(1, behandlingId) }
             setRowMapper(mapTilkjentTriple())
+        }
+
+        if (perioderTriple.isEmpty()) {
+            return null
         }
 
         val saksnummer = perioderTriple.first().third
