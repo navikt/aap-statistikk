@@ -40,7 +40,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     constraints {
-        implementation("io.netty:netty-common:4.2.0.Final")
+        implementation("io.netty:netty-common:4.2.1.Final")
     }
 
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
