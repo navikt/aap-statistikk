@@ -51,7 +51,8 @@ class ProduksjonsstyringRepository(private val connection: DBConnection) {
 WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
                        FROM behandling_referanse br
                                 LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
-                       GROUP BY br.id, br.referanse WHERE o.status != 'AVSLUTTET'),
+                                WHERE o.status != 'AVSLUTTET'
+                       GROUP BY br.id, br.referanse),
      u as (select date_trunc('day', pbh.oppdatert_tid) dag,
                   pbh.oppdatert_tid  as                oppdatert_tid,
                   pb.mottatt_tid     as                mottatt_tid,
@@ -267,21 +268,38 @@ group by gjeldende_avklaringsbehov;
 
     fun opprettedeBehandlingerPerDag(
         antallDager: Int = 7,
-        behandlingsTyper: List<TypeBehandling>
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
     ): List<AntallPerDag> {
         val sql = """
-            select date(b.opprettet_tid) as dag,
-                   count(*)                 antall
-            from behandling b
-            where b.opprettet_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-            group by dag
-            order by dag
+WITH filtered_behandling AS (SELECT b.id, b.opprettet_tid, b.referanse_id, b.type
+                             FROM behandling b
+                             WHERE b.opprettet_tid >
+                                   current_date AT TIME ZONE 'Europe/Oslo' - interval '$antallDager days'),
+     oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'
+                       GROUP BY br.id, br.referanse)
+SELECT date(fb.opprettet_tid) AS dag, COUNT(*) AS antall
+FROM filtered_behandling fb
+         JOIN behandling_historikk bh ON fb.id = bh.behandling_id
+         LEFT JOIN oppgave_enhet oe ON fb.referanse_id = oe.id
+         LEFT JOIN enhet e ON e.id = oe.enhet_id
+WHERE bh.gjeldende = true
+  AND (fb.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+  AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL)
+GROUP BY dag
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper {
                 AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
@@ -292,26 +310,41 @@ group by gjeldende_avklaringsbehov;
 
     fun antallAvsluttedeBehandlingerPerDag(
         antallDager: Int = 7,
-        behandlingsTyper: List<TypeBehandling>
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
     ): List<AntallPerDag> {
         // todo
         val sql = """
-            select date(bh.oppdatert_tid) as dag,
-                   count(*)                  antall
-            from behandling b,
-                 behandling_historikk bh
-            where b.id = bh.behandling_id
-              and bh.gjeldende = true
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-              and bh.status = 'AVSLUTTET'
-              and bh.oppdatert_tid > current_date at time zone 'Europe/Oslo' - interval '$antallDager days'
-            group by dag
-            order by dag
+WITH filtered_behandling AS (SELECT b.id, bh.oppdatert_tid, b.referanse_id, b.type
+                             FROM behandling b
+                                      join behandling_historikk bh on b.id = bh.behandling_id
+                             WHERE bh.oppdatert_tid >
+                                   current_date AT TIME ZONE 'Europe/Oslo' - interval '$antallDager days'
+                               and gjeldende = true
+                               and bh.status = 'AVSLUTTET'),
+     oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                   JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'
+                       GROUP BY br.id, br.referanse)
+SELECT date(fb.oppdatert_tid) AS dag, COUNT(*) AS antall
+FROM filtered_behandling fb
+         LEFT JOIN oppgave_enhet oe ON fb.referanse_id = oe.id
+         LEFT JOIN enhet e ON e.id = oe.enhet_id
+    WHERE (fb.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+    AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL)
+GROUP BY dag
+ORDER BY dag;
         """.trimIndent()
 
         return connection.queryList(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper {
                 AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
@@ -372,24 +405,37 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
         }
     }
 
-    fun antallÅpneBehandlinger(behandlingsTyper: List<TypeBehandling>): Int {
+    fun antallÅpneBehandlinger(behandlingsTyper: List<TypeBehandling>, enheter: List<String>): Int {
         val sql = """            
-            select count(b.id) antall
-            from behandling b,
-                 behandling_historikk bh
-            where b.id = bh.behandling_id
-              and bh.gjeldende = true
-              and (b.type = ANY (?::text[]) or ${'$'}1 is null)
-              and bh.status != 'AVSLUTTET';
+WITH filtered_behandling AS (SELECT b.id, b.referanse_id, b.type
+                             FROM behandling b
+                                      join behandling_historikk bh on b.id = bh.behandling_id
+                                 and gjeldende = true
+                                 and bh.status != 'AVSLUTTET'),
+     oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                       FROM behandling_referanse br
+                                JOIN oppgave o ON br.id = o.behandling_referanse_id
+                       WHERE o.status != 'AVSLUTTET'
+                       GROUP BY br.id, br.referanse)
+SELECT count(fb.id) antall
+FROM filtered_behandling fb
+         LEFT JOIN oppgave_enhet oe ON fb.referanse_id = oe.id
+         LEFT JOIN enhet e ON e.id = oe.enhet_id
+    AND (fb.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+    AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL);
         """.trimIndent()
 
         return connection.queryFirst(sql) {
             setParams {
                 setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
             }
             setRowMapper { it.getInt("antall") }
         }
-
     }
 
     fun alderÅpneBehandlinger(
