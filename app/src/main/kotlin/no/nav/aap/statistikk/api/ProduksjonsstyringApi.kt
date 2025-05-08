@@ -13,6 +13,7 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.produksjonsstyring.*
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -51,6 +52,8 @@ data class FordelingInput(
         DAG, UKE, MÅNED, ÅR,
     }
 }
+
+private val log = LoggerFactory.getLogger("ProduksjonsstyringApi")
 
 val modules = TagModule(listOf(Tags.Produksjonsstyring))
 
@@ -238,15 +241,25 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     route("/behandlinger/utvikling").get<BehandlingUtviklingsUtviklingInput, List<BehandlinEndringerPerDag>>(
         TagModule(listOf(Tags.Produksjonsstyring))
     ) { req ->
+        log.info("Filter: behandlingstyper=${req.behandlingstyper}, enheter=${req.enheter}")
         // TODO!! for å støtte postmottak
         val antallDager = req.antallDager
         val antallBehandlinger = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
             val behandlingstyper = req.behandlingstyper.orEmpty()
-            val antallNye = repo.opprettedeBehandlingerPerDag(antallDager, behandlingstyper)
+            val antallNye = repo.opprettedeBehandlingerPerDag(
+                antallDager,
+                behandlingstyper,
+                req.enheter.orEmpty()
+            )
             val antallAvsluttede =
-                repo.antallAvsluttedeBehandlingerPerDag(antallDager, behandlingstyper)
-            val antallÅpneBehandlinger = repo.antallÅpneBehandlinger(behandlingstyper)
+                repo.antallAvsluttedeBehandlingerPerDag(
+                    antallDager,
+                    behandlingstyper,
+                    req.enheter.orEmpty()
+                )
+            val antallÅpneBehandlinger =
+                repo.antallÅpneBehandlinger(behandlingstyper, req.enheter.orEmpty())
             BeregnAntallBehandlinger.antallBehandlingerPerDag(
                 antallNye, antallAvsluttede, antallÅpneBehandlinger
             )

@@ -76,7 +76,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
     require(this.isNotEmpty())
 
     return this.sortedBy { it.mottattTidspunkt }
-        .fold<OppgaveHendelse, Oppgave?>(null) { acc, hendelse ->
+        .fold(null) { acc, hendelse ->
             if (acc == null) {
                 val enhet = hendelse.oppfolgingsenhet ?: hendelse.enhet
                 val reservasjon =
