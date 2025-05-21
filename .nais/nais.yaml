@@ -91,3 +91,9 @@ spec:
       value: https://{{pdl_url}}/graphql
     - name: INTEGRASJON_PDL_SCOPE
       value: {{pdl_scope}}
+    - name: INTEGRASJON_POSTMOTTAK_AZP
+      value: {{postmottak_azp}}
+    - name: INTEGRASJON_BEHANDLINGSFLYT_AZP
+      value: {{behandlingsflyt_azp}}
+    - name: INTEGRASJON_OPPGAVE_AZP
+      value: {{oppgave_azp}}

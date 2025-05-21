@@ -15,6 +15,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
+import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.oppgave.statistikk.HendelseType
@@ -26,6 +27,8 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
+import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
+import no.nav.aap.tilgang.authorizedPost
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -81,6 +84,12 @@ val exampleRequestStoppetBehandling = StoppetBehandling(
     årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
 )
 
+enum class Azp(val uuid: UUID) {
+    Postmottak(UUID.fromString(requiredConfigForKey("integrasjon.postmottak.azp"))),
+    Behandlingsflyt(UUID.fromString(requiredConfigForKey("integrasjon.behandlingsflyt.azp"))),
+    Oppgave(UUID.fromString(requiredConfigForKey("integrasjon.oppgave.azp")))
+}
+
 
 fun NormalOpenAPIRoute.mottaStatistikk(
     transactionExecutor: TransactionExecutor,
@@ -90,9 +99,11 @@ fun NormalOpenAPIRoute.mottaStatistikk(
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
 ) {
     route("/stoppetBehandling").status(HttpStatusCode.Accepted) {
-        post<Unit, String, StoppetBehandling>(
-            TagModule(listOf(Tags.MottaStatistikk)),
-            exampleRequest = exampleRequestStoppetBehandling
+        authorizedPost<Unit, String, StoppetBehandling>(
+            modules = arrayOf(TagModule(listOf(Tags.MottaStatistikk))),
+            routeConfig = AuthorizationMachineToMachineConfig(
+                authorizedAzps = listOf(Azp.Behandlingsflyt.uuid)
+            )
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 val stringified = DefaultJsonMapper.toJson(dto)
