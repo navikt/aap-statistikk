@@ -21,8 +21,7 @@ interface IBeregningsgrunnlagRepository {
 
 class BeregningsgrunnlagRepository(
     private val dbConnection: DBConnection
-) :
-    IBeregningsgrunnlagRepository {
+) : IBeregningsgrunnlagRepository {
     override fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
         val behandlingsReferanseId = hentBehandlingsReferanseId(
             dbConnection,

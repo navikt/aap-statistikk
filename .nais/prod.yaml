@@ -1,3 +1,6 @@
 isdev: 0
 pdl_url: pdl-api.prod-fss-pub.nais.io
 pdl_scope: api://prod-fss.pdl.pdl-api/.default
+postmottak_azp: 7f9044f1-fa3a-4356-9062-05035400fd6a
+behandlingsflyt_azp: ead3bfb6-d403-43b3-bb45-dc184ce314b7
+oppgave_azp: 2d076bcc-3b6a-4bc7-878e-791aed30433c
