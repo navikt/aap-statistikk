@@ -23,6 +23,7 @@ import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.oppgave.OppgaveDto
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.verdityper.Behandlingstype
+import no.nav.aap.statistikk.api.Azp
 import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.BehandlingId
@@ -44,6 +45,7 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.io.InputStream
@@ -55,6 +57,15 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelse as DomeneOppgaveHendelse
 
 @Fakes
 class IntegrationTest {
+    companion object {
+        @BeforeAll
+        @JvmStatic
+        fun beforeAll() {
+            System.setProperty("integrasjon.postmottak.azp", UUID.randomUUID().toString())
+            System.setProperty("integrasjon.behandlingsflyt.azp", UUID.randomUUID().toString())
+            System.setProperty("integrasjon.oppgave.azp", UUID.randomUUID().toString())
+        }
+    }
 
     data class Jobbdump(
         val payload: String,

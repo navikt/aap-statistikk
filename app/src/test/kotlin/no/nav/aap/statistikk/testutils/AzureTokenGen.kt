@@ -8,6 +8,7 @@ import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import no.nav.aap.statistikk.api.Azp
 import org.intellij.lang.annotations.Language
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -32,6 +33,7 @@ internal class AzureTokenGen(private val issuer: String, private val audience: S
             .expirationTime(LocalDateTime.now().plusHours(4).toDate())
             .claim("NAVident", "Lokalsaksbehandler")
             .claim("scope", "AAP_SCOPES")
+            .claim("azp", Azp.Behandlingsflyt.uuid)
             .build()
     }
 

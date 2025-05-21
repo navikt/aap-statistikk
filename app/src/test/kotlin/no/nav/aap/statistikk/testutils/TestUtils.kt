@@ -97,6 +97,9 @@ fun <E> testKlient(
     System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
     System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
+    System.setProperty("integrasjon.postmottak.azp", UUID.randomUUID().toString())
+    System.setProperty("integrasjon.oppgave.azp", UUID.randomUUID().toString())
+    System.setProperty("integrasjon.behandlingsflyt.azp", UUID.randomUUID().toString())
 
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
@@ -104,15 +107,14 @@ fun <E> testKlient(
         responseHandler = DefaultResponseHandler()
     )
 
+
     val server = embeddedServer(Netty, port = 0) {
         module(
             transactionExecutor,
             motor,
             jobbAppender,
             azureConfig,
-            {
-
-            },
+            {},
             lagreStoppetHendelseJobb,
             lagreOppgaveHendelseJobb,
             lagrePostmottakHendelseJobb,
