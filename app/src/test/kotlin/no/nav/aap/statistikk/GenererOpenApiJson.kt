@@ -17,6 +17,7 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.util.UUID
 
 fun main() {
     val azureFake = Fakes.AzureFake(port = 8081)
@@ -35,6 +36,10 @@ fun main() {
     System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
     System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
+    val randomUUID = UUID.randomUUID()
+    System.setProperty("integrasjon.postmottak.azp", randomUUID.toString())
+    System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
+    System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
 
     val server = embeddedServer(Netty, port = 8080) {
         module(
