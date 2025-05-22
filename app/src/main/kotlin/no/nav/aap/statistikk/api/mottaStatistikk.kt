@@ -3,18 +3,10 @@ package no.nav.aap.statistikk.api
 import com.papsign.ktor.openapigen.route.EndpointInfo
 import com.papsign.ktor.openapigen.route.TagModule
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
-import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.route
 import com.papsign.ktor.openapigen.route.status
 import io.ktor.http.*
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.AVKLAR_STUDENT
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.AVKLAR_SYKDOM
-import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
@@ -35,54 +27,9 @@ import java.util.*
 import java.util.stream.IntStream
 import kotlin.math.pow
 import kotlin.math.roundToLong
-import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 private val log = LoggerFactory.getLogger("MottaStatistikk")
 
-val avklaringsbehov = listOf(
-    AvklaringsbehovHendelseDto(
-        avklaringsbehovDefinisjon = AVKLAR_STUDENT,
-        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
-        endringer = listOf(
-            EndringDTO(
-                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                tidsstempel = LocalDateTime.now().minusMinutes(10),
-                endretAv = "Kelvin"
-            ), EndringDTO(
-                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
-                tidsstempel = LocalDateTime.now().minusMinutes(5),
-                endretAv = "Z994573"
-            )
-        )
-    ), AvklaringsbehovHendelseDto(
-        avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
-        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-        endringer = listOf(
-            EndringDTO(
-                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                tidsstempel = LocalDateTime.now().minusMinutes(3),
-                endretAv = "Kelvin"
-            )
-        )
-    )
-)
-
-private val eksempelUUID = UUID.randomUUID()
-
-val exampleRequestStoppetBehandling = StoppetBehandling(
-    saksnummer = "4LFL5CW",
-    behandlingReferanse = eksempelUUID,
-    behandlingType = TypeBehandling.Førstegangsbehandling,
-    ident = "1403199012345",
-    behandlingOpprettetTidspunkt = LocalDateTime.now(),
-    avklaringsbehov = avklaringsbehov,
-    versjon = "b21e88bca4533d3e0ee3a15f51a87cbaa11a7e9c",
-    mottattTid = LocalDateTime.now().minusDays(1),
-    sakStatus = SakStatus.LØPENDE,
-    hendelsesTidspunkt = LocalDateTime.now(),
-    behandlingStatus = Status.OPPRETTET,
-    årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
-)
 
 enum class Azp(val uuid: UUID) {
     Postmottak(UUID.fromString(requiredConfigForKey("integrasjon.postmottak.azp"))),
@@ -155,8 +102,12 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         }
     }
     route("/postmottak").status(HttpStatusCode.Accepted) {
-        post<Unit, String, DokumentflytStoppetHendelse>(
-            TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("DokumentflytStoppetHendelse"),
+        authorizedPost<Unit, String, DokumentflytStoppetHendelse>(
+            modules = arrayOf(
+                TagModule(listOf(Tags.MottaStatistikk)),
+                EndpointInfo("DokumentflytStoppetHendelse")
+            ),
+            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = listOf(Azp.Postmottak.uuid))
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 jobbAppender.leggTil(
