@@ -61,9 +61,10 @@ class IntegrationTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            System.setProperty("integrasjon.postmottak.azp", UUID.randomUUID().toString())
-            System.setProperty("integrasjon.behandlingsflyt.azp", UUID.randomUUID().toString())
-            System.setProperty("integrasjon.oppgave.azp", UUID.randomUUID().toString())
+            val azp = UUID.randomUUID().toString()
+            System.setProperty("integrasjon.postmottak.azp", azp)
+            System.setProperty("integrasjon.behandlingsflyt.azp", azp)
+            System.setProperty("integrasjon.oppgave.azp", azp)
         }
     }
 

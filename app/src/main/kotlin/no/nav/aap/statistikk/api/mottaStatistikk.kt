@@ -125,9 +125,14 @@ fun NormalOpenAPIRoute.mottaStatistikk(
         }
     }
     route("/oppgave").status(HttpStatusCode.Accepted) {
-        post<Unit, String, OppgaveHendelse>(
-            TagModule(listOf(Tags.MottaStatistikk)), EndpointInfo("OppgaveHendelse"),
-        ) { _, dto ->
+        authorizedPost<Unit, String, OppgaveHendelse>(
+            modules = arrayOf(
+                TagModule(listOf(Tags.MottaStatistikk)),
+                EndpointInfo("OppgaveHendelse")
+            ),
+            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = listOf(Azp.Oppgave.uuid)),
+
+            ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 val encodedSaksNummer = dto.oppgaveDto.saksnummer?.let { stringToNumber(it) }
 
