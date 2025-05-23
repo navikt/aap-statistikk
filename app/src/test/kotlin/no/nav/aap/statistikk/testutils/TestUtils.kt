@@ -521,6 +521,14 @@ class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
     override fun lagre(payload: BQYtelseBehandling) {
         behandlinger.add(payload)
     }
+
+    override fun commit() {
+        TODO()
+    }
+
+    override fun start() {
+        TODO("Not yet implemented")
+    }
 }
 
 class FakeBQSakRepository : IBQSakstatistikkRepository {
