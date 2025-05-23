@@ -43,12 +43,19 @@ class YtelsesStatistikkTilBigQuery(
 
         val tilkjentYtelse = tilkjentYtelseRepository.hentForBehandling(behandling.referanse)
 
+        val utbetalingId =
+            if (behandling.resultat in listOf(ResultatKode.TRUKKET, ResultatKode.AVSLAG)) {
+                null
+            } else {
+                behandling.referanse.toBase64()
+            }
+
         bqRepository.start()
         bqRepository.lagre(
             BQYtelseBehandling(
                 saksnummer = behandling.sak.saksnummer,
                 referanse = behandling.referanse,
-                utbetalingId = behandling.referanse.toBase64(),
+                utbetalingId = utbetalingId.toString(),
                 brukerFnr = behandling.sak.person.ident,
                 resultat = behandling.resultat,
                 behandlingsType = behandling.typeBehandling,
