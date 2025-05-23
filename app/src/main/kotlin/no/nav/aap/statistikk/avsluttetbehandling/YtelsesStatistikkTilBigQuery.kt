@@ -43,6 +43,7 @@ class YtelsesStatistikkTilBigQuery(
 
         val tilkjentYtelse = tilkjentYtelseRepository.hentForBehandling(behandling.referanse)
 
+        bqRepository.start()
         bqRepository.lagre(
             BQYtelseBehandling(
                 saksnummer = behandling.sak.saksnummer,
@@ -79,6 +80,7 @@ class YtelsesStatistikkTilBigQuery(
         if (tilGrunnlag != null) {
             bqRepository.lagre(tilGrunnlag)
         }
+        bqRepository.commit()
     }
 
     private fun tilBqGrunnlag(

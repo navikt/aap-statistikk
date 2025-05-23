@@ -17,4 +17,6 @@ interface IBQYtelsesstatistikkRepository {
     fun lagre(payload: TilkjentYtelse)
     fun lagre(payload: BeregningsGrunnlagBQ)
     fun lagre(payload: BQYtelseBehandling)
+    fun start()
+    fun commit()
 }
