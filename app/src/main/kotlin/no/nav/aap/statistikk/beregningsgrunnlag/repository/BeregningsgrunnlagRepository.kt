@@ -130,7 +130,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
             var c = 1
             setParams {
                 setDouble(c++, beregningsGrunnlag.grunnlaget())
-                setLong(c++, id)
+                setLong(c++, baseGrunnlagId)
                 setString(c++, grunnlagType)
                 setInt(c++, beregningsGrunnlag.terskelverdiForYrkesskade)
                 setBigDecimal(c++, beregningsGrunnlag.andelSomSkyldesYrkesskade)
