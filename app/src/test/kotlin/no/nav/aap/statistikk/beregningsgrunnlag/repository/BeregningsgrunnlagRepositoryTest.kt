@@ -279,11 +279,7 @@ class BeregningsgrunnlagRepositoryTest {
             )
 
         dataSource.transaction {
-
-
             val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
-
-
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse = behandlingsReferanse,
@@ -322,4 +318,99 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlagYrkesskade,
         )
     }
+
+    @Test
+    fun `sette inn mange beregningsgrunnlag`(@Postgres dataSource: DataSource) {
+        val referanser = List(50) { UUID.randomUUID() }
+
+        referanser.forEach { ref ->
+            opprettTestHendelse(dataSource, ref, Saksnummer("ABCDE-${ref.toString().takeLast(4)}"))
+
+            val grunnlag = genererTilfeldigGrunnlag()
+
+
+            dataSource.transaction { conn ->
+                val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn)
+
+                beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                    MedBehandlingsreferanse(
+                        value = grunnlag,
+                        behandlingsReferanse = ref
+                    )
+                )
+            }
+        }
+
+        referanser.forEach { ref ->
+            val hentet = dataSource.transaction {
+                BeregningsgrunnlagRepository(
+                    it
+                ).hentBeregningsGrunnlag(ref)
+            }
+
+            assertThat(hentet).hasSize(1)
+            assertThat(hentet.first().behandlingsReferanse).isEqualTo(ref)
+        }
+    }
+}
+
+fun genererTilfeldigGrunnlag(
+    options: List<String> = listOf(
+        "11_19",
+        "ufore",
+        "yrkesskade"
+    )
+): IBeregningsGrunnlag {
+    options.random().let {
+        return when (it) {
+            "11_19" -> genererTilfeldig1119Grunnlag()
+            "ufore" -> genererTilfeldigUforeGrunnlag()
+            "yrkesskade" -> genererTilfeldigYrkesskadeGrunnlag()
+            else -> throw IllegalArgumentException("Ukjent grunnlagstype: $it")
+        }
+    }
+}
+
+fun genererTilfeldig1119Grunnlag(): IBeregningsGrunnlag.Grunnlag_11_19 {
+    return IBeregningsGrunnlag.Grunnlag_11_19(
+        grunnlag = (10000..50000).random().toDouble(),
+        er6GBegrenset = (0..1).random() == 1,
+        erGjennomsnitt = (0..1).random() == 1,
+        inntekter = mapOf(
+            2019 to (20000..60000).random().toDouble(),
+            2020 to (20000..60000).random().toDouble()
+        )
+    )
+}
+
+fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre {
+    return IBeregningsGrunnlag.GrunnlagUføre(
+        grunnlag = (10000..50000).random().toDouble(),
+        grunnlag11_19 = genererTilfeldig1119Grunnlag(),
+        uføregrad = (0..100).random(),
+        type = UføreType.entries.toTypedArray().random(),
+        uføreInntekterFraForegåendeÅr = mapOf(
+            2018 to (20000..60000).random().toDouble(),
+            2019 to (20000..60000).random().toDouble(),
+            2020 to (20000..60000).random().toDouble()
+        ),
+        uføreYtterligereNedsattArbeidsevneÅr = (2018..2022).random()
+    )
+}
+
+fun genererTilfeldigYrkesskadeGrunnlag(): IBeregningsGrunnlag.GrunnlagYrkesskade {
+    return IBeregningsGrunnlag.GrunnlagYrkesskade(
+        grunnlaget = (10000..50000).random().toDouble(),
+        beregningsgrunnlag = genererTilfeldigGrunnlag(options = listOf("11_19", "ufore")),
+        terskelverdiForYrkesskade = (50..100).random(),
+        andelSomSkyldesYrkesskade = BigDecimal((10..90).random()),
+        andelYrkesskade = (10..50).random(),
+        benyttetAndelForYrkesskade = (10..50).random(),
+        andelSomIkkeSkyldesYrkesskade = BigDecimal((10..90).random()),
+        antattÅrligInntektYrkesskadeTidspunktet = BigDecimal((20000..60000).random()),
+        yrkesskadeTidspunkt = (2018..2022).random(),
+        grunnlagForBeregningAvYrkesskadeandel = BigDecimal((20000..60000).random()),
+        yrkesskadeinntektIG = BigDecimal((20000..60000).random()),
+        grunnlagEtterYrkesskadeFordel = BigDecimal((20000..60000).random())
+    )
 }
