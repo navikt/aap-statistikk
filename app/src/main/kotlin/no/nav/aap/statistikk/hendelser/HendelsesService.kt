@@ -207,5 +207,7 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
         ÅrsakTilBehandling.SØKNAD_TRUKKET -> SØKNAD_TRUKKET
         ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE -> VURDER_RETTIGHETSPERIODE
+        ÅrsakTilBehandling.REVURDER_MANUELL_INNTEKT -> REVURDER_MANUELL_INNTEKT
+        ÅrsakTilBehandling.KLAGE_TRUKKET -> KLAGE_TRUKKET
     }
 }
