@@ -8,6 +8,8 @@ import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.prioriterÅrsaker
+import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
@@ -87,7 +89,7 @@ class SaksStatistikkService(
                 )
             },
             behandlingStatus = behandlingStatus(behandling),
-            behandlingÅrsak = behandling.årsaker.joinToString(","),
+            behandlingÅrsak = behandling.årsaker.prioriterÅrsaker().name,
             ansvarligEnhetKode = ansvarligEnhet,
             behandlingResultat = regnUtBehandlingResultat(behandling),
             resultatBegrunnelse = resultatBegrunnelse(behandling),
@@ -206,4 +208,5 @@ class SaksStatistikkService(
             BehandlingStatus.AVSLUTTET -> "AVSLUTTET"
         }
     }
+
 }
