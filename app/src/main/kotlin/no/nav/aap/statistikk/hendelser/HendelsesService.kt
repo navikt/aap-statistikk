@@ -187,6 +187,7 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.SØKNAD -> SØKNAD
         ÅrsakTilBehandling.AKTIVITETSMELDING -> AKTIVITETSMELDING
         ÅrsakTilBehandling.MELDEKORT -> MELDEKORT
+        ÅrsakTilBehandling.FRITAK_MELDEPLIKT -> MELDEKORT
         ÅrsakTilBehandling.LEGEERKLÆRING -> LEGEERKLÆRING
         ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING -> AVVIST_LEGEERKLÆRING
         ÅrsakTilBehandling.DIALOGMELDING -> DIALOGMELDING
