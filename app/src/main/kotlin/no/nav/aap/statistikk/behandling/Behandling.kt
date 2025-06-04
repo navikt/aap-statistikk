@@ -112,6 +112,7 @@ enum class ÅrsakTilBehandling(val sortering: Int) {
     SØKNAD(0),
     AKTIVITETSMELDING(1),
     MELDEKORT(1),
+    FRITAK_MELDEPLIKT(2),
     LEGEERKLÆRING(1),
     AVVIST_LEGEERKLÆRING(1),
     DIALOGMELDING(1),
