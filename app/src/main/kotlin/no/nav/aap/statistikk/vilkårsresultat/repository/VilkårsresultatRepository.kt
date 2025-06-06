@@ -24,13 +24,14 @@ class VilkårsresultatRepository(
             }
         }
 
-        val sqlInsertVilkar = """
-                INSERT INTO VILKAR(vilkar_type, vilkarresult_id) VALUES(?, ?);
+        val sqlInsertVilkar = """INSERT INTO VILKAR(vilkar_type, vilkarresult_id)
+VALUES (?, ?);
             """
 
-        val sqlInsertPeriode = """
-                    INSERT INTO VILKARSPERIODE(fra_dato,til_dato,utfall,manuell_vurdering,innvilgelsesaarsak,avslagsaarsak,vilkar_id)
-                    VALUES(?,?,?,?,?,?,?);
+        val sqlInsertPeriode =
+            """INSERT INTO VILKARSPERIODE(fra_dato, til_dato, utfall, manuell_vurdering, innvilgelsesaarsak,
+                           avslagsaarsak, vilkar_id)
+VALUES (?, ?, ?, ?, ?, ?, ?);
                 """
 
         vilkårsresultat.vilkår.forEach { vilkårEntity ->
@@ -41,17 +42,15 @@ class VilkårsresultatRepository(
                 }
             }
 
-            vilkårEntity.perioder.forEach { periode ->
-                dbConnection.execute(sqlInsertPeriode) {
-                    setParams {
-                        setLocalDate(1, periode.fraDato)
-                        setLocalDate(2, periode.tilDato)
-                        setString(3, periode.utfall)
-                        setBoolean(4, periode.manuellVurdering)
-                        setString(5, periode.innvilgelsesårsak)
-                        setString(6, periode.avslagsårsak)
-                        setLong(7, vilkårKey)
-                    }
+            dbConnection.executeBatch(sqlInsertPeriode, vilkårEntity.perioder) {
+                setParams { periode ->
+                    setLocalDate(1, periode.fraDato)
+                    setLocalDate(2, periode.tilDato)
+                    setString(3, periode.utfall)
+                    setBoolean(4, periode.manuellVurdering)
+                    setString(5, periode.innvilgelsesårsak)
+                    setString(6, periode.avslagsårsak)
+                    setLong(7, vilkårKey)
                 }
             }
         }
@@ -90,7 +89,7 @@ WHERE vr.id = ?;
 
         return VilkårsResultatEntity(
             id = xx.first().first.id,
-            vilkår = xx.map { it.second },
+            vilkår = xx.mapNotNull { it.second },
         )
     }
 
@@ -117,22 +116,30 @@ WHERE br.referanse = ?;
 
         return VilkårsResultatEntity(
             id = xx.first().first.id,
-            vilkår = xx.map { it.second },
+            vilkår = xx.mapNotNull { it.second },
         )
     }
 
-    private fun mapVilkår(): (Row) -> Pair<EkstraInfo, VilkårEntity> = {
+    private fun mapVilkår(): (Row) -> Pair<EkstraInfo, VilkårEntity?> = {
         val id = it.getLong("vr_id")
         val saksNummer = it.getString("s_saksnummer")
         val typeBehandling = it.getString("b_type")
         val behandlingsReferanse = it.getString("br_referanse")
 
-        val vilkårId = it.getLong("v_id")
-        val vilkårType = it.getString("v_vilkar_type")
+        val vilkårId = it.getLongOrNull("v_id")
+        val vilkårType = it.getStringOrNull("v_vilkar_type")
 
-        val vilkårPerioder = getVilkårPerioder(dbConnection, vilkårId)
-        val vilkårEntity =
-            VilkårEntity(id = vilkårId, vilkårType = vilkårType, perioder = vilkårPerioder)
+        log.info("$vilkårId, $vilkårType")
+
+        val vilkårPerioder = vilkårId?.let { getVilkårPerioder(dbConnection, vilkårId) }
+            ?: emptyList()
+        val vilkårEntity = vilkårId?.let {
+            VilkårEntity(
+                id = vilkårId,
+                vilkårType = vilkårType!!,
+                perioder = vilkårPerioder
+            )
+        }
 
         Pair(
             EkstraInfo(

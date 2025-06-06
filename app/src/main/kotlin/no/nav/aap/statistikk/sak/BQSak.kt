@@ -7,6 +7,10 @@ import java.time.temporal.ChronoUnit.SECONDS
 
 private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
 
+/**
+ * @param endretTid Også kalt "funksjonellTid". Tidspunkt for siste endring på behandlingen. Ved første melding vil denne være lik registrertTid.
+ * @param tekniskTid Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.
+ */
 data class BQBehandling(
     val fagsystemNavn: String = "Kelvin",
     val sekvensNummer: Long,
