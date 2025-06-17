@@ -100,12 +100,13 @@ enum class KildeSystem {
 }
 
 enum class TypeBehandling(val kildeSystem: KildeSystem) {
-    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Revurdering(kildeSystem = KildeSystem.Behandlingsflyt), Tilbakekreving(
-        kildeSystem = KildeSystem.Behandlingsflyt
-    ),
-    Klage(kildeSystem = KildeSystem.Behandlingsflyt), Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak), Journalføring(
-        kildeSystem = KildeSystem.Postmottak
-    )
+    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), 
+    Revurdering(kildeSystem = KildeSystem.Behandlingsflyt), 
+    Tilbakekreving(kildeSystem = KildeSystem.Behandlingsflyt),
+    Klage(kildeSystem = KildeSystem.Behandlingsflyt),
+    SvarFraAndreinstans(kildeSystem = KildeSystem.Behandlingsflyt),
+    Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak), 
+    Journalføring(kildeSystem = KildeSystem.Postmottak)
 }
 
 enum class ÅrsakTilBehandling(val sortering: Int) {
@@ -135,10 +136,11 @@ enum class ÅrsakTilBehandling(val sortering: Int) {
     SØKNAD_TRUKKET(0),
     REVURDER_MANUELL_INNTEKT(1),
     KLAGE_TRUKKET(1),
+    MOTTATT_KABAL_HENDELSE(1),
 }
 
 
-fun List<ÅrsakTilBehandling>.prioriterÅrsaker() : ÅrsakTilBehandling {
+fun List<ÅrsakTilBehandling>.prioriterÅrsaker(): ÅrsakTilBehandling {
     return this.minByOrNull { it.sortering }!!
 }
 
