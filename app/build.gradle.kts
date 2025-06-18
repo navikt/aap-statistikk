@@ -16,7 +16,7 @@ val behandlingsflytversjon = "0.0.334"
 val tilgangVersjon = "1.0.79"
 val oppgaveVersjon = "0.0.86"
 val postmottakVersjon = "0.0.92"
-val utbetalVersjon = "0.0.47"
+val utbetalVersjon = "0.0.49"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
