@@ -55,7 +55,6 @@ data class OppgaveHendelse(
     val behandlingRef: UUID? = null,
     val journalpostId: Long? = null,
     val enhet: String,
-    val oppfolgingsenhet: String? = null,
     val avklaringsbehovKode: String,
     val status: Oppgavestatus,
     val reservertAv: String? = null,
@@ -78,7 +77,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
     return this.sortedBy { it.mottattTidspunkt }
         .fold(null) { acc, hendelse ->
             if (acc == null) {
-                val enhet = hendelse.oppfolgingsenhet ?: hendelse.enhet
+                val enhet = hendelse.enhet
                 val reservasjon =
                     reservasjon(hendelse)
                 Oppgave(
@@ -128,26 +127,4 @@ private fun reservasjon(hendelse: OppgaveHendelse) =
 
 data class Enhet(val id: Long? = null, val kode: String)
 
-class Saksbehandler(val id: Long? = null, val ident: String) {
-    override fun toString(): String {
-        return "Saksbehandler(id=$id, ident='$ident')"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Saksbehandler
-
-        if (id != other.id) return false
-        if (ident != other.ident) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + ident.hashCode()
-        return result
-    }
-}
+data class Saksbehandler(val id: Long? = null, val ident: String)

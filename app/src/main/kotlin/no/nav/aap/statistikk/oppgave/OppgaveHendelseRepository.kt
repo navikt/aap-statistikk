@@ -4,7 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import org.slf4j.LoggerFactory
 
 class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
-    private val log = LoggerFactory.getLogger(OppgaveHendelseRepository::class.java)
+    private val log = LoggerFactory.getLogger(javaClass)
 
     fun lagreHendelse(hendelse: OppgaveHendelse): Long {
         val sql = """
