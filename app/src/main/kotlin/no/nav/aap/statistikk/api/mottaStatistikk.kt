@@ -81,7 +81,9 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 
             ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
-                val encodedSaksNummer = dto.oppgaveDto.saksnummer?.let { stringToNumber(it) }
+                val saksnummer = dto.oppgaveTilStatistikkDto?.saksnummer
+                    ?: dto.oppgaveDto.saksnummer
+                val encodedSaksNummer = saksnummer?.let { stringToNumber(it) }
 
                 jobbAppender.leggTil(
                     conn,
@@ -125,6 +127,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
 
 private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
     val oppgaveDto = this.oppgaveDto
+    val nyOppgaveDto = this.oppgaveTilStatistikkDto
     return no.nav.aap.statistikk.oppgave.OppgaveHendelse(
         hendelse = when (this.hendelse) {
             HendelseType.OPPRETTET -> no.nav.aap.statistikk.oppgave.HendelseType.OPPRETTET
@@ -134,23 +137,25 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
             HendelseType.LUKKET -> no.nav.aap.statistikk.oppgave.HendelseType.LUKKET
             HendelseType.OPPDATERT -> no.nav.aap.statistikk.oppgave.HendelseType.OPPDATERT
         },
-        oppgaveId = requireNotNull(oppgaveDto.id) { "Trenger oppgave-ID for å skille mellom oppgavehendelser" },
+        oppgaveId = requireNotNull(
+            nyOppgaveDto?.id ?: oppgaveDto.id
+        ) { "Trenger oppgave-ID for å skille mellom oppgavehendelser" },
         mottattTidspunkt = LocalDateTime.now(),
-        personIdent = oppgaveDto.personIdent,
-        saksnummer = oppgaveDto.saksnummer,
-        behandlingRef = oppgaveDto.behandlingRef,
-        journalpostId = oppgaveDto.journalpostId,
-        enhet = oppgaveDto.enhet,
-        avklaringsbehovKode = oppgaveDto.avklaringsbehovKode,
-        status = when (oppgaveDto.status) {
+        personIdent = nyOppgaveDto?.personIdent ?: oppgaveDto.personIdent,
+        saksnummer = nyOppgaveDto?.saksnummer ?: oppgaveDto.saksnummer,
+        behandlingRef = nyOppgaveDto?.behandlingRef ?: oppgaveDto.behandlingRef,
+        journalpostId = nyOppgaveDto?.journalpostId ?: oppgaveDto.journalpostId,
+        enhet = nyOppgaveDto?.enhet ?: oppgaveDto.enhet,
+        avklaringsbehovKode = nyOppgaveDto?.enhet ?: oppgaveDto.avklaringsbehovKode,
+        status = when (nyOppgaveDto?.status ?: oppgaveDto.status) {
             no.nav.aap.oppgave.verdityper.Status.OPPRETTET -> Oppgavestatus.OPPRETTET
             no.nav.aap.oppgave.verdityper.Status.AVSLUTTET -> Oppgavestatus.AVSLUTTET
         },
-        reservertAv = oppgaveDto.reservertAv,
-        reservertTidspunkt = oppgaveDto.reservertTidspunkt,
-        opprettetTidspunkt = oppgaveDto.opprettetTidspunkt,
-        endretAv = oppgaveDto.endretAv,
-        endretTidspunkt = oppgaveDto.endretTidspunkt,
+        reservertAv = nyOppgaveDto?.reservertAv ?: oppgaveDto.reservertAv,
+        reservertTidspunkt = nyOppgaveDto?.reservertTidspunkt ?: oppgaveDto.reservertTidspunkt,
+        opprettetTidspunkt = nyOppgaveDto?.opprettetTidspunkt ?: oppgaveDto.opprettetTidspunkt,
+        endretAv = nyOppgaveDto?.endretAv ?: oppgaveDto.endretAv,
+        endretTidspunkt = nyOppgaveDto?.endretTidspunkt ?: oppgaveDto.endretTidspunkt,
     )
 }
 

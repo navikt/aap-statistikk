@@ -22,6 +22,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.oppgave.OppgaveDto
 import no.nav.aap.oppgave.statistikk.HendelseType
+import no.nav.aap.oppgave.statistikk.OppgaveTilStatistikkDto
 import no.nav.aap.oppgave.verdityper.Behandlingstype
 import no.nav.aap.statistikk.api.Azp
 import no.nav.aap.statistikk.api.stringToNumber
@@ -320,6 +321,20 @@ class IntegrationTest {
                             enhet = "0400",
                             oppfølgingsenhet = null,
                             behandlingOpprettet = hendelse.behandlingOpprettetTidspunkt,
+                            avklaringsbehovKode = hendelse.avklaringsbehov.utledGjeldendeAvklaringsBehov()!!,
+                            status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
+                            behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
+                            reservertAv = "Karl Korrodheid",
+                            reservertTidspunkt = LocalDateTime.now(),
+                            opprettetAv = "Kelvin",
+                            opprettetTidspunkt = LocalDateTime.now(),
+                        ),
+                        oppgaveTilStatistikkDto = OppgaveTilStatistikkDto(
+                            id = 1,
+                            personIdent = hendelse.ident,
+                            saksnummer = hendelse.saksnummer,
+                            behandlingRef = hendelse.behandlingReferanse,
+                            enhet = "0400",
                             avklaringsbehovKode = hendelse.avklaringsbehov.utledGjeldendeAvklaringsBehov()!!,
                             status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
                             behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
