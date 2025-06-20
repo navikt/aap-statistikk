@@ -313,22 +313,6 @@ class IntegrationTest {
                 URI.create("$url/oppgave"), PostRequest(
                     no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                         hendelse = HendelseType.OPPRETTET,
-                        oppgaveDto = OppgaveDto(
-                            id = 1,
-                            personIdent = hendelse.ident,
-                            saksnummer = hendelse.saksnummer,
-                            behandlingRef = hendelse.behandlingReferanse,
-                            enhet = "0400",
-                            oppfølgingsenhet = null,
-                            behandlingOpprettet = hendelse.behandlingOpprettetTidspunkt,
-                            avklaringsbehovKode = hendelse.avklaringsbehov.utledGjeldendeAvklaringsBehov()!!,
-                            status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
-                            behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
-                            reservertAv = "Karl Korrodheid",
-                            reservertTidspunkt = LocalDateTime.now(),
-                            opprettetAv = "Kelvin",
-                            opprettetTidspunkt = LocalDateTime.now(),
-                        ),
                         oppgaveTilStatistikkDto = OppgaveTilStatistikkDto(
                             id = 1,
                             personIdent = hendelse.ident,
