@@ -142,7 +142,7 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
         behandlingRef = nyOppgaveDto.behandlingRef,
         journalpostId = nyOppgaveDto.journalpostId,
         enhet = nyOppgaveDto.enhet,
-        avklaringsbehovKode = nyOppgaveDto.enhet,
+        avklaringsbehovKode = nyOppgaveDto.avklaringsbehovKode,
         status = when (nyOppgaveDto.status) {
             no.nav.aap.oppgave.verdityper.Status.OPPRETTET -> Oppgavestatus.OPPRETTET
             no.nav.aap.oppgave.verdityper.Status.AVSLUTTET -> Oppgavestatus.AVSLUTTET
