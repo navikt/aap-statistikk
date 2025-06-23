@@ -104,7 +104,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                 }
                 require(hendelse.oppgaveId == acc.identifikator) { "Skal kun aggregere oppgaver med samme id. Fikk ${hendelse.oppgaveId} og ${acc.id}." }
                 if (hendelse.avklaringsbehovKode != acc.avklaringsbehov) {
-                    logger.warn("Fant oppgave med ikke-unikt avklaringsbehov. Ignorerer.")
+                    logger.warn("Fant oppgave med ikke-unikt avklaringsbehov. Ignorerer ${hendelse.avklaringsbehovKode}, beholder ${acc.avklaringsbehov}.")
                 }
 
                 acc.copy(
