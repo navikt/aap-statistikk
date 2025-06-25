@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
-import com.papsign.ktor.openapigen.annotations.properties.description.Description
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
@@ -10,11 +9,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
-
-data class BehandlingPerAvklaringsbehov(
-    val antall: Int,
-    @property:Description("Avklaringsbehovkoden.") val behov: String
-)
 
 data class BehandlingPerSteggruppe(val steggruppe: String, val antall: Int)
 
@@ -163,56 +157,6 @@ group by type;
         }
     }
 
-    fun antallÅpneBehandlingerPerAvklaringsbehov(
-        behandlingsTyper: List<TypeBehandling>,
-        enheter: List<String>
-    ): List<BehandlingPerAvklaringsbehov> {
-        val sql = """
-WITH oppgave_enhet AS (SELECT br.id, o.enhet_id, br.referanse
-                       FROM behandling_referanse br
-                                JOIN oppgave o ON br.id = o.behandling_referanse_id
-                       WHERE o.status != 'AVSLUTTET'),
-     u as (select gjeldende_avklaringsbehov, b.type as type_behandling, e.kode as enhet
-           from behandling_historikk
-                    join behandling b on b.id = behandling_historikk.behandling_id
-                    left join oppgave_enhet oe on oe.id = b.referanse_id
-                    LEFT JOIN enhet e ON e.id = oe.enhet_id
-           where gjeldende = true
-             and status != 'AVSLUTTET'
-           union all
-           select gjeldende_avklaringsbehov, type_behandling as type, e.kode as enhet
-           from postmottak_behandling_historikk
-                    join postmottak_behandling pb
-                         on postmottak_behandling_historikk.postmottak_behandling_id = pb.id
-                    left join oppgave_enhet oe on pb.referanse = oe.referanse
-                    LEFT JOIN enhet e ON e.id = oe.enhet_id
-           where gjeldende = true
-             and status != 'AVSLUTTET')
-select gjeldende_avklaringsbehov, count(*)
-from u
-where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
-  and (enhet = ANY (?::text[]) or ${'$'}2 is null)
-group by gjeldende_avklaringsbehov;
-        """.trimIndent()
-
-        return connection.queryList(sql) {
-            setParams {
-                setBehandlingsTyperParam(behandlingsTyper)
-                if (enheter.isEmpty()) {
-                    setString(2, null)
-                } else {
-                    setArray(2, enheter)
-                }
-            }
-            setRowMapper { row ->
-                BehandlingPerAvklaringsbehov(
-                    antall = row.getInt("count"),
-                    behov = row.getStringOrNull("gjeldende_avklaringsbehov") ?: "UKJENT"
-                )
-            }
-        }
-    }
-
     fun antallBehandlingerPerSteggruppe(
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>
@@ -348,59 +292,6 @@ ORDER BY dag;
             }
             setRowMapper {
                 AntallPerDag(it.getLocalDate("dag"), it.getInt("antall"))
-            }
-        }
-    }
-
-    fun alderPåFerdigeBehandlingerSisteDager(
-        antallDager: Int,
-        behandlingsTyper: List<TypeBehandling>,
-        enheter: List<String>
-    ): Double {
-        val sql = """
-WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
-                       FROM behandling_referanse br
-                                LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
-                       WHERE o.status != 'AVSLUTTET'
-                       GROUP BY br.id, br.referanse),
-     u as (select bh.oppdatert_tid as oppdatert_tid,
-                  bh.mottatt_tid   as mottatt_tid,
-                  b.type           as type_behandling,
-                  e.kode           as enhet
-           FROM behandling_historikk bh
-                    JOIN behandling b ON b.id = bh.behandling_id
-                    LEFT JOIN oppgave_enhet oe ON oe.id = b.referanse_id
-                    LEFT JOIN enhet e ON e.id = oe.enhet_id
-           WHERE status = 'AVSLUTTET'
-             AND bh.oppdatert_tid > current_date - interval '7 days'
-           union all
-           select pbh.oppdatert_tid,
-                  pb.mottatt_tid,
-                  pb.type_behandling as type_behandling,
-                  e.kode             as enhet
-           from postmottak_behandling_historikk pbh
-                    join postmottak_behandling pb on pbh.postmottak_behandling_id = pb.id
-                    left join oppgave_enhet on pb.referanse = oppgave_enhet.referanse
-                    LEFT JOIN enhet e ON e.id = oppgave_enhet.enhet_id
-           where status = 'AVSLUTTET'
-             and pbh.oppdatert_tid > current_date - interval '$antallDager days')
-select avg(extract(epoch from oppdatert_tid - mottatt_tid))
-from u
-where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
-  and (enhet = ANY (?::text[]) or ${'$'}2 is null)
-
-        """.trimIndent()
-        return connection.queryFirst(sql) {
-            setParams {
-                setBehandlingsTyperParam(behandlingsTyper)
-                if (enheter.isEmpty()) {
-                    setString(2, null)
-                } else {
-                    setArray(2, enheter)
-                }
-            }
-            setRowMapper {
-                it.getDoubleOrNull("avg") ?: 0.0
             }
         }
     }

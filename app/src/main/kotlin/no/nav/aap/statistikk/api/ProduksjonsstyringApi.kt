@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.api
 
-import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.annotations.type.string.pattern.RegularExpression
 import com.papsign.ktor.openapigen.route.EndpointInfo
@@ -80,29 +79,6 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
     }
 
-    data class AlderSisteDager(
-        @PathParam("Antall dager å regne på") val antallDager: Int? = 7,
-        @QueryParam(description = "For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
-            TypeBehandling.Førstegangsbehandling
-        ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
-    )
-    route("/behandlingstid/lukkede-siste-dager/{antallDager}").get<AlderSisteDager, Double>(
-        modules,
-        info(description = "Henter alle behandlinger som er lukket i de siste n dager, og regner ut snittalderen på disse.")
-    ) { req ->
-        val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).alderPåFerdigeBehandlingerSisteDager(
-                req.antallDager
-                    ?: 7,
-                req.behandlingstyper.orEmpty(),
-                req.enheter.orEmpty()
-            )
-        }
-
-        respond(respons)
-    }
-
     data class ÅpneBehandlingerPerBehandlingstypeInput(
         @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
@@ -131,27 +107,6 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 gjennomsnittsalder = it.gjennomsnittsalder
             )
         })
-    }
-
-    data class BehandlingerPerAvklaringsbehovInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
-            TypeBehandling.Førstegangsbehandling
-        ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
-    )
-    route("/behandling-per-avklaringsbehov").get<BehandlingerPerAvklaringsbehovInput, List<BehandlingPerAvklaringsbehov>>(
-        modules, EndpointInfo(
-            summary = "Antall åpne behandlinger per avklaringsbehov.",
-        )
-    ) { req ->
-        val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).antallÅpneBehandlingerPerAvklaringsbehov(
-                req.behandlingstyper.orEmpty(),
-                req.enheter ?: listOf()
-            )
-        }
-
-        respond(respons)
     }
 
     data class BehandlingerPerSteggruppeInput(
