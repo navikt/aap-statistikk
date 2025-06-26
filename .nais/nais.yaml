@@ -76,7 +76,7 @@ spec:
       - type: POSTGRES_16
         flags:
           - name: cloudsql.logical_decoding
-            value: on
+            value: "on"
         tier: db-custom-1-3840
         diskAutoresize: true
         highAvailability: true
