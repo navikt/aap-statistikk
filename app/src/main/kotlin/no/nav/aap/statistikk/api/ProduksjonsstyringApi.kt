@@ -38,12 +38,12 @@ data class FordelingLukkedeBehandlinger(val bøtte: Int, val antall: Int) {
 }
 
 data class FordelingInput(
-    @QueryParam("Hvor mange bøtter skal åpne behandlinger plasseres i?") val antallBøtter: Int?,
-    @QueryParam("Week, month, day, etc.") val enhet: Tidsenhet = Tidsenhet.DAG,
-    @QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?,
-    @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+    @param:QueryParam("Hvor mange bøtter skal åpne behandlinger plasseres i?") val antallBøtter: Int?,
+    @param:QueryParam("Week, month, day, etc.") val enhet: Tidsenhet = Tidsenhet.DAG,
+    @param:QueryParam("Hver bøtte er enhet * bøtteStørrelse stor.") val bøtteStørrelse: Int?,
+    @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
     ),
-    @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<@RegularExpression(
+    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<@RegularExpression(
         pattern = "[0-9]{4}[0-9]{2}?"
     ) String>? = listOf()
 ) {
@@ -60,9 +60,9 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     transactionExecutor: TransactionExecutor
 ) {
     data class BehandlingstidPerDagInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
 
     data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
@@ -80,10 +80,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     }
 
     data class ÅpneBehandlingerPerBehandlingstypeInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
 
     data class AntallÅpneOgTypeOgGjennomsnittsalder(
@@ -110,10 +110,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     }
 
     data class BehandlingerPerSteggruppeInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
     route("/behandling-per-steggruppe").get<BehandlingerPerSteggruppeInput, List<BehandlingPerSteggruppe>>(
         modules
@@ -183,11 +183,11 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     }
 
     data class BehandlingUtviklingsUtviklingInput(
-        @QueryParam("Hvor mange dager å lage fordeling på.") val antallDager: Int = 7,
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        @param:QueryParam("Hvor mange dager å lage fordeling på.") val antallDager: Int = 7,
+        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
 
     data class BehandlinEndringerPerDag(
@@ -227,10 +227,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     }
 
     data class BehandlingerPåVentInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
     route("/behandlinger/på-vent").get<BehandlingerPåVentInput, List<VenteårsakOgGjennomsnitt>>(
         TagModule(listOf(Tags.Produksjonsstyring))
@@ -245,10 +245,10 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     }
 
     data class BehandlingAarsakAntallGjennomsnittInput(
-        @QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
     route("/behandlinger/årsak-til-behandling").get<BehandlingAarsakAntallGjennomsnittInput, List<BehandlingAarsakAntallGjennomsnitt>>(
         TagModule(listOf(Tags.Produksjonsstyring))
