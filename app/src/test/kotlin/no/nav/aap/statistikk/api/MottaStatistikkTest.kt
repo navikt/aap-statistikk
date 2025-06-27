@@ -26,6 +26,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.LagreSakinfoTilBigQueryJobb
+import no.nav.aap.statistikk.bigquery.RekjorSakstatistikkJobb
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.tilDomene
@@ -88,7 +89,8 @@ class MottaStatistikkTest {
                 jobbAppender = jobbAppender,
             ),
             LagreOppgaveHendelseJobb(meterRegistry, jobbAppender),
-            LagrePostmottakHendelseJobb(meterRegistry)
+            LagrePostmottakHendelseJobb(meterRegistry),
+            RekjorSakstatistikkJobb(jobbAppender)
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(
@@ -234,6 +236,8 @@ class MottaStatistikkTest {
             skjermingService = skjermingService
         )
 
+        val rekjørSakstatistikkJobb = RekjorSakstatistikkJobb(jobbAppender1)
+
         val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
             behandlingRepositoryFactory = { FakeBehandlingRepository() },
             rettighetstypeperiodeRepositoryFactory = { FakeRettighetsTypeRepository() },
@@ -268,7 +272,10 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb, lagrePostmottakHendelseJobb
+            lagreStoppetHendelseJobb,
+            lagreOppgaveHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            rekjørSakstatistikkJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -438,12 +445,17 @@ class MottaStatistikkTest {
         val jobbAppender =
             MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
+        val rekjørSakstatistikkJobb = RekjorSakstatistikkJobb(jobbAppender1)
+
         testKlient(
             transactionExecutor,
             motor,
             jobbAppender,
             azureConfig,
-            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb, lagrePostmottakHendelseJobb
+            lagreStoppetHendelseJobb,
+            lagreOppgaveHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            rekjørSakstatistikkJobb
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -559,12 +571,14 @@ class MottaStatistikkTest {
         val jobbAppender =
             MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
+        val rekjørSakstatistikkJobb = RekjorSakstatistikkJobb(jobbAppender1)
+
         testKlient(
             transactionExecutor,
             motor,
             jobbAppender,
             azureConfig,
-            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb, lagrePostmottakHendelseJobb
+            lagreStoppetHendelseJobb, lagreOppgaveHendelseJobb, lagrePostmottakHendelseJobb, rekjørSakstatistikkJobb
         ) { url, client ->
 
             client.post<DokumentflytStoppetHendelse, Any>(
