@@ -21,11 +21,13 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.JobbInput
+import no.nav.aap.motor.JobbSpesifikasjon
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
+import no.nav.aap.statistikk.api.driftApi
 import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
 import no.nav.aap.statistikk.api.mottaStatistikk
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
@@ -142,17 +144,23 @@ fun Application.startUp(
     val lagreOppgaveHendelseJobb =
         LagreOppgaveHendelseJobb(prometheusMeterRegistry, motorJobbAppender)
     val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(prometheusMeterRegistry)
+
+    val rekjorSakstatistikkJobb = RekjorSakstatistikkJobb(motorJobbAppender)
+
     val motor = motor(
         dataSource,
-        lagreStoppetHendelseJobb,
         prometheusMeterRegistry,
-        lagreOppgaveHendelseJobb,
-        lagrePostmottakHendelseJobb,
-        lagreSakinfoTilBigQueryJobb,
-        lagreAvsluttetBehandlingTilBigQueryJobb,
-        LagreOppgaveJobb(
-            jobbAppender = motorJobbAppender
-        ),
+        jobber = listOf(
+            LagreOppgaveJobb(
+                jobbAppender = motorJobbAppender
+            ),
+            lagreOppgaveHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            lagreStoppetHendelseJobb,
+            rekjorSakstatistikkJobb
+        )
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
@@ -169,27 +177,23 @@ fun Application.startUp(
     }
 
     module(
-        transactionExecutor,
-        motor,
-        motorJobbAppender,
-        azureConfig,
-        motorApiCallback,
-        lagreStoppetHendelseJobb,
-        lagreOppgaveHendelseJobb,
-        lagrePostmottakHendelseJobb,
-        prometheusMeterRegistry
+        transactionExecutor = transactionExecutor,
+        motor = motor,
+        jobbAppender = motorJobbAppender,
+        azureConfig = azureConfig,
+        motorApiCallback = motorApiCallback,
+        lagreStoppetHendelseJobb = lagreStoppetHendelseJobb,
+        lagreOppgaveHendelseJobb = lagreOppgaveHendelseJobb,
+        lagrePostmottakHendelseJobb = lagrePostmottakHendelseJobb,
+        rekjorSakstatistikkJobb = rekjorSakstatistikkJobb,
+        prometheusMeterRegistry = prometheusMeterRegistry,
     )
 }
 
 private fun motor(
     dataSource: DataSource,
-    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     prometheusMeterRegistry: PrometheusMeterRegistry,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
-    lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
-    lagreOppgaveJobb: LagreOppgaveJobb
+    jobber: List<JobbSpesifikasjon>
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -200,14 +204,7 @@ private fun motor(
                 return LogInformasjon(mapOf())
             }
         },
-        jobber = listOf(
-            lagreStoppetHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagreOppgaveJobb,
-            lagrePostmottakHendelseJobb,
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-        ),
+        jobber = jobber,
         prometheus = prometheusMeterRegistry,
     )
 }
@@ -221,6 +218,7 @@ fun Application.module(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    rekjorSakstatistikkJobb: RekjorSakstatistikkJobb,
     prometheusMeterRegistry: MeterRegistry,
 ) {
     motor.start()
@@ -255,6 +253,7 @@ fun Application.module(
                 )
                 hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()
+                driftApi(transactionExecutor, jobbAppender, rekjorSakstatistikkJobb)
             }
         }
     }

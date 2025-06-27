@@ -72,9 +72,9 @@ class IntegrationTest {
     data class Jobbdump(
         val payload: String,
         val type: String,
-        @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-        @JsonProperty("opprettet_tid") val opprettetTid: LocalDateTime
+        @param:JsonDeserialize(using = LocalDateTimeDeserializer::class)
+        @param:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+        @param:JsonProperty("opprettet_tid") val opprettetTid: LocalDateTime
     )
 
     data class Dump(val jobb: List<Jobbdump>)

@@ -63,6 +63,7 @@ import java.net.URI
 import java.nio.file.Path
 import java.time.Clock
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -88,6 +89,7 @@ fun <E> testKlient(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    rekjorSakstatistikkJobb: RekjorSakstatistikkJobb,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
     val res: E?
@@ -111,15 +113,16 @@ fun <E> testKlient(
 
     val server = embeddedServer(Netty, port = 0) {
         module(
-            transactionExecutor,
-            motor,
-            jobbAppender,
-            azureConfig,
-            {},
-            lagreStoppetHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+            transactionExecutor = transactionExecutor,
+            motor = motor,
+            jobbAppender = jobbAppender,
+            azureConfig = azureConfig,
+            motorApiCallback = {},
+            lagreStoppetHendelseJobb = lagreStoppetHendelseJobb,
+            lagreOppgaveHendelseJobb = lagreOppgaveHendelseJobb,
+            lagrePostmottakHendelseJobb = lagrePostmottakHendelseJobb,
+            rekjorSakstatistikkJobb = rekjorSakstatistikkJobb,
+            prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         )
     }.start()
 
@@ -406,6 +409,13 @@ class FakeBigQueryKvitteringRepository : IBigQueryKvitteringRepository {
     private var kvitteringer = 0L
     override fun lagreKvitteringForSak(sak: Sak, behandling: Behandling): Long {
         return kvitteringer++
+    }
+
+    override fun hentOpplastedeMeldingerFraOgTil(
+        fraOgMed: LocalDate,
+        tilOgMed: LocalDate
+    ): List<BehandlingId> {
+        TODO("Not yet implemented")
     }
 }
 
