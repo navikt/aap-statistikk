@@ -28,7 +28,13 @@ data class AvsluttetBehandling(
 enum class ResultatKode {
     INNVILGET,
     AVSLAG,
-    TRUKKET
+    TRUKKET,
+    KLAGE_OPPRETTHOLDES,
+    KLAGE_OMGJØRES,
+    KLAGE_DELVIS_OMGJØRES,
+    KLAGE_AVSLÅTT,
+    KLAGE_TRUKKET,
+    
 }
 
 data class RettighetstypePeriode(

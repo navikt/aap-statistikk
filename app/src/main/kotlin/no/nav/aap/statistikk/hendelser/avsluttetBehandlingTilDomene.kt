@@ -46,6 +46,11 @@ fun ResultatKode?.resultatTilDomene(): no.nav.aap.statistikk.avsluttetbehandling
         ResultatKode.INNVILGET -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.INNVILGET
         ResultatKode.AVSLAG -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.AVSLAG
         ResultatKode.TRUKKET -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.TRUKKET
+        ResultatKode.KLAGE_TRUKKET -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_TRUKKET
+        ResultatKode.KLAGE_OPPRETTHOLDES -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_OPPRETTHOLDES
+        ResultatKode.KLAGE_OMGJØRES -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_OMGJØRES
+        ResultatKode.KLAGE_DELVIS_OMGJØRES -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_DELVIS_OMGJØRES
+        ResultatKode.KLAGE_AVSLÅTT -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_AVSLÅTT
         null -> null
     }
 
