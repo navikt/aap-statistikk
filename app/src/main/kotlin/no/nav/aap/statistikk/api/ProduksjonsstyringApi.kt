@@ -52,6 +52,21 @@ data class FordelingInput(
     }
 }
 
+data class BehandlingerPerBehandlingstypeInputMedPeriode(
+    @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    ),
+    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf(),
+    @param:QueryParam("For hvilke periode som skal gjøres oppslag på") val oppslagsPeriode: OppslagsPeriode = OppslagsPeriode.IDAG
+) {
+    enum class OppslagsPeriode {
+        IDAG,
+        IGÅR,
+        DENNE_UKEN,
+        FORRIGE_UKE
+    }
+}
+
 private val log = LoggerFactory.getLogger("ProduksjonsstyringApi")
 
 val modules = TagModule(listOf(Tags.Produksjonsstyring))
@@ -98,6 +113,24 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val respons = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(
                 req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
+            )
+        }
+
+        respond(respons.map {
+            AntallÅpneOgTypeOgGjennomsnittsalder(
+                antallÅpne = it.antallÅpne, behandlingstype = it.behandlingstype,
+                gjennomsnittsalder = it.gjennomsnittsalder
+            )
+        })
+    }
+
+    route("/åpne-behandlinger-per-behandlingstype-med-periode").get<BehandlingerPerBehandlingstypeInputMedPeriode, List<AntallÅpneOgTypeOgGjennomsnittsalder>>(
+        modules,
+        EndpointInfo(summary = "Antall åpne behandlinger og gjennomsnittsalder på dem per behandlingstype.")
+    ) { req ->
+        val respons = transactionExecutor.withinTransaction {
+            ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnittGittPeriode(
+                req.behandlingstyper.orEmpty(), req.enheter ?: listOf(), req.oppslagsPeriode.toString()
             )
         }
 
@@ -239,6 +272,18 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
             val repo = ProduksjonsstyringRepository(connection)
             repo.venteÅrsakOgGjennomsnitt(
                 req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
+            )
+        }
+        respond(venteårsakOgGjennomsnitt)
+    }
+
+    route("/behandlinger/på-vent-med-periode").get<BehandlingerPerBehandlingstypeInputMedPeriode, List<VenteårsakOgGjennomsnitt>>(
+        TagModule(listOf(Tags.Produksjonsstyring))
+    ) { req ->
+        val venteårsakOgGjennomsnitt = transactionExecutor.withinTransaction { connection ->
+            val repo = ProduksjonsstyringRepository(connection)
+            repo.venteÅrsakOgGjennomsnittGittPeriode(
+                req.behandlingstyper.orEmpty(), req.enheter ?: listOf(), req.oppslagsPeriode.toString()
             )
         }
         respond(venteårsakOgGjennomsnitt)

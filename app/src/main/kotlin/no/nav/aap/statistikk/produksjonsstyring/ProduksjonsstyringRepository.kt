@@ -99,6 +99,152 @@ order by dag;
         }
     }
 
+    fun antallÅpneBehandlingerOgGjennomsnittGittPeriode(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>,
+        oppslagsPeriode: String
+
+    ): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
+        val sql = """WITH periode_grenser AS (
+            SELECT
+                CASE 
+                    WHEN ${'$'}3 = 'IDAG' THEN current_date
+                    WHEN ${'$'}3 = 'IGÅR' THEN current_date - INTERVAL '1 day'
+                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date - INTERVAL '7 days'
+                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '14 days'
+                END AS start_dato,
+                CASE 
+                    WHEN ${'$'}3 = 'IDAG' THEN current_date + INTERVAL '1 day'
+                    WHEN ${'$'}3 = 'IGÅR' THEN current_date
+                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date
+                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '7 days'
+                END AS slutt_dato
+        ),
+        
+        oppgave_enhet AS (
+            SELECT br.id, o.enhet_id, br.referanse
+            FROM behandling_referanse br
+                     JOIN oppgave o ON br.id = o.behandling_referanse_id
+            WHERE o.status != 'AVSLUTTET'
+        ),
+        
+        u AS (
+            SELECT b.type AS type,
+                   current_timestamp AT TIME ZONE 'Europe/Oslo' - b.opprettet_tid AS alder,
+                   e.kode AS enhet
+            FROM behandling_historikk bh
+                     JOIN behandling b ON b.id = bh.behandling_id
+                     LEFT JOIN oppgave_enhet oe ON oe.id = b.referanse_id
+                     LEFT JOIN enhet e ON e.id = oe.enhet_id
+                     JOIN periode_grenser pg ON b.opprettet_tid >= pg.start_dato AND b.opprettet_tid < pg.slutt_dato
+            WHERE gjeldende = true
+              AND status != 'AVSLUTTET'
+        
+            UNION ALL
+        
+            SELECT pb.type_behandling AS type,
+                   current_timestamp AT TIME ZONE 'Europe/Oslo' - pb.mottatt_tid AS alder,
+                   e.kode AS enhet
+            FROM postmottak_behandling_historikk pbh
+                     JOIN postmottak_behandling pb ON pb.id = pbh.postmottak_behandling_id
+                     LEFT JOIN oppgave_enhet oe ON pb.referanse = oe.referanse
+                     LEFT JOIN enhet e ON e.id = oe.enhet_id
+                     JOIN periode_grenser pg ON pb.mottatt_tid >= pg.start_dato AND pb.mottatt_tid < pg.slutt_dato
+            WHERE gjeldende = true
+              AND status != 'AVSLUTTET'
+        )
+        
+        SELECT type,
+               COUNT(*) AS count,
+               EXTRACT(EPOCH FROM AVG(alder)) AS gjennomsnitt_alder
+        FROM u
+        WHERE (type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+          AND (u.enhet = ANY (?::text[]) OR ${'$'}2 IS NULL)
+        GROUP BY type;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
+                setString(3, oppslagsPeriode)
+            }
+            setRowMapper { row ->
+                AntallÅpneOgTypeOgGjennomsnittsalderDTO(
+                    antallÅpne = row.getInt("count"),
+                    behandlingstype = row.getEnum("type"),
+                    gjennomsnittsalder = row.getDoubleOrNull("gjennomsnitt_alder") ?: 0.0
+                )
+            }
+        }
+    }
+
+    fun venteÅrsakOgGjennomsnittGittPeriode(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>,
+        oppslagsPeriode: String
+    ): List<VenteårsakOgGjennomsnitt> {
+        val sql = """WITH periode_grenser AS (
+            SELECT
+                CASE 
+                    WHEN ${'$'}3 = 'IDAG' THEN current_date
+                    WHEN ${'$'}3 = 'IGÅR' THEN current_date - INTERVAL '1 day'
+                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date - INTERVAL '7 days'
+                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '14 days'
+                END AS start_dato,
+                CASE 
+                    WHEN ${'$'}3 = 'IDAG' THEN current_date + INTERVAL '1 day'
+                    WHEN ${'$'}3 = 'IGÅR' THEN current_date
+                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date
+                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '7 days'
+                END AS slutt_dato
+        )
+        
+        SELECT
+            venteaarsak,
+            COUNT(*),
+            EXTRACT(EPOCH FROM AVG(now() AT TIME ZONE 'Europe/Oslo' - behandling_historikk.oppdatert_tid)) AS avg
+        FROM behandling_historikk
+                 JOIN behandling b ON b.id = behandling_historikk.behandling_id
+                 LEFT JOIN enhet e ON e.id = (
+                     SELECT DISTINCT o.enhet_id
+                     FROM oppgave o
+                     WHERE o.behandling_referanse_id = b.referanse_id
+                     LIMIT 1
+                 )
+                 JOIN periode_grenser pg ON behandling_historikk.oppdatert_tid >= pg.start_dato
+                                         AND behandling_historikk.oppdatert_tid < pg.slutt_dato
+        WHERE venteaarsak IS NOT NULL
+          AND gjeldende = true
+          AND (b.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+          AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL)
+        GROUP BY venteaarsak;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
+                setString(3, oppslagsPeriode)
+            }
+            setRowMapper {
+                VenteårsakOgGjennomsnitt(
+                    årsak = it.getString("venteaarsak"),
+                    antall = it.getInt("count"),
+                    gjennomsnittligAlder = it.getDouble("avg")
+                )
+            }
+        }
+    }
+
     fun antallÅpneBehandlingerOgGjennomsnitt(
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>
