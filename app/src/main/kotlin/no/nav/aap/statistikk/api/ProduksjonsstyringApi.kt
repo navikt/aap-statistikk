@@ -129,8 +129,19 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         EndpointInfo(summary = "Antall åpne behandlinger og gjennomsnittsalder på dem per behandlingstype.")
     ) { req ->
         val respons = transactionExecutor.withinTransaction {
+            val (startDato, sluttDato) = when (req.oppslagsPeriode) {
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now().plusDays(1)
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
+                else -> error("Ugyldig oppslagsPeriode: $req.oppslagsPeriode")
+            }
+
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnittGittPeriode(
-                req.behandlingstyper.orEmpty(), req.enheter ?: listOf(), req.oppslagsPeriode.toString()
+                behandlingsTyper = req.behandlingstyper.orEmpty(),
+                enheter =  req.enheter ?: listOf(),
+                startDato = startDato,
+                sluttDato = sluttDato
             )
         }
 
@@ -282,8 +293,20 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val venteårsakOgGjennomsnitt = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
+
+            val (startDato, sluttDato) = when (req.oppslagsPeriode) {
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now().plusDays(1)
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
+                else -> error("Ugyldig oppslagsPeriode: $req.oppslagsPeriode")
+            }
+
             repo.venteÅrsakOgGjennomsnittGittPeriode(
-                req.behandlingstyper.orEmpty(), req.enheter ?: listOf(), req.oppslagsPeriode.toString()
+                behandlingsTyper = req.behandlingstyper.orEmpty(),
+                enheter = req.enheter ?: listOf(),
+                startDato = startDato,
+                sluttDato = sluttDato
             )
         }
         respond(venteårsakOgGjennomsnitt)
