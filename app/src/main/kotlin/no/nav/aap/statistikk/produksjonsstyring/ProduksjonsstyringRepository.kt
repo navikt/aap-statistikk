@@ -147,8 +147,8 @@ order by dag;
                COUNT(*) AS count,
                EXTRACT(EPOCH FROM AVG(alder)) AS gjennomsnitt_alder
         FROM u
-        WHERE (type = ANY (?::text[]) OR ${'$'}1 IS NULL)
-          AND (u.enhet = ANY (?::text[]) OR ${'$'}2 IS NULL)
+        WHERE (type = ANY (?::text[]) OR ${'$'}3 IS NULL)
+          AND (u.enhet = ANY (?::text[]) OR ${'$'}4 IS NULL)
         GROUP BY type;
         """.trimIndent()
 
@@ -198,8 +198,8 @@ order by dag;
                                          AND behandling_historikk.oppdatert_tid < pg.slutt_dato
         WHERE venteaarsak IS NOT NULL
           AND gjeldende = true
-          AND (b.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
-          AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL)
+          AND (b.type = ANY (?::text[]) OR ${'$'}3 IS NULL)
+          AND (e.kode = ANY (?::text[]) OR ${'$'}4 IS NULL)
         GROUP BY venteaarsak;
         """.trimIndent()
 
