@@ -134,7 +134,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
-                else -> error("Ugyldig oppslagsPeriode: $req.oppslagsPeriode")
+                else -> LocalDate.now() to LocalDate.now().plusDays(1)
             }
 
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnittGittPeriode(
@@ -299,7 +299,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
-                else -> error("Ugyldig oppslagsPeriode: $req.oppslagsPeriode")
+                else -> LocalDate.now() to LocalDate.now().plusDays(1)
             }
 
             repo.venteÅrsakOgGjennomsnittGittPeriode(
