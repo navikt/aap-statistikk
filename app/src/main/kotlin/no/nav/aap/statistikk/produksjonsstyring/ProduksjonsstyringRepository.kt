@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.produksjonsstyring
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
+import no.nav.aap.statistikk.api.BehandlingerPerBehandlingstypeInputMedPeriode
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -102,23 +103,11 @@ order by dag;
     fun antallÅpneBehandlingerOgGjennomsnittGittPeriode(
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>,
-        oppslagsPeriode: String
-
+        startDato: LocalDate,
+        sluttDato: LocalDate
     ): List<AntallÅpneOgTypeOgGjennomsnittsalderDTO> {
         val sql = """WITH periode_grenser AS (
-            SELECT
-                CASE 
-                    WHEN ${'$'}3 = 'IDAG' THEN current_date
-                    WHEN ${'$'}3 = 'IGÅR' THEN current_date - INTERVAL '1 day'
-                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date - INTERVAL '7 days'
-                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '14 days'
-                END AS start_dato,
-                CASE 
-                    WHEN ${'$'}3 = 'IDAG' THEN current_date + INTERVAL '1 day'
-                    WHEN ${'$'}3 = 'IGÅR' THEN current_date
-                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date
-                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '7 days'
-                END AS slutt_dato
+            SELECT ?::date AS start_dato, ?::date AS slutt_dato
         ),
         
         oppgave_enhet AS (
@@ -165,13 +154,14 @@ order by dag;
 
         return connection.queryList(sql) {
             setParams {
-                setBehandlingsTyperParam(behandlingsTyper)
+                setLocalDate(1, startDato)
+                setLocalDate(2, sluttDato)
                 if (enheter.isEmpty()) {
-                    setString(2, null)
+                    setString(3, null)
                 } else {
-                    setArray(2, enheter)
+                    setArray(3, enheter)
                 }
-                setString(3, oppslagsPeriode)
+                setBehandlingsTyperParam(behandlingsTyper, 4)
             }
             setRowMapper { row ->
                 AntallÅpneOgTypeOgGjennomsnittsalderDTO(
@@ -186,24 +176,12 @@ order by dag;
     fun venteÅrsakOgGjennomsnittGittPeriode(
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>,
-        oppslagsPeriode: String
+        startDato: LocalDate,
+        sluttDato: LocalDate
     ): List<VenteårsakOgGjennomsnitt> {
         val sql = """WITH periode_grenser AS (
-            SELECT
-                CASE 
-                    WHEN ${'$'}3 = 'IDAG' THEN current_date
-                    WHEN ${'$'}3 = 'IGÅR' THEN current_date - INTERVAL '1 day'
-                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date - INTERVAL '7 days'
-                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '14 days'
-                END AS start_dato,
-                CASE 
-                    WHEN ${'$'}3 = 'IDAG' THEN current_date + INTERVAL '1 day'
-                    WHEN ${'$'}3 = 'IGÅR' THEN current_date
-                    WHEN ${'$'}3 = 'DENNE_UKEN' THEN current_date
-                    WHEN ${'$'}3 = 'FORRIGE_UKE' THEN current_date - INTERVAL '7 days'
-                END AS slutt_dato
+            SELECT ?::date AS start_dato, ?::date AS slutt_dato
         )
-        
         SELECT
             venteaarsak,
             COUNT(*),
@@ -227,13 +205,14 @@ order by dag;
 
         return connection.queryList(sql) {
             setParams {
-                setBehandlingsTyperParam(behandlingsTyper)
+                setLocalDate(1, startDato)
+                setLocalDate(2, sluttDato)
                 if (enheter.isEmpty()) {
-                    setString(2, null)
+                    setString(3, null)
                 } else {
-                    setArray(2, enheter)
+                    setArray(3, enheter)
                 }
-                setString(3, oppslagsPeriode)
+                setBehandlingsTyperParam(behandlingsTyper, 4)
             }
             setRowMapper {
                 VenteårsakOgGjennomsnitt(
