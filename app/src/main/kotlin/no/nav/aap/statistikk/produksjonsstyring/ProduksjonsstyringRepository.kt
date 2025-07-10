@@ -285,7 +285,8 @@ group by type;
 
     fun antallBehandlingerPerSteggruppe(
         behandlingsTyper: List<TypeBehandling>,
-        enheter: List<String>
+        enheter: List<String>,
+        oppgaveTyper: List<String>
     ): List<BehandlingPerSteggruppe> {
         // TODO! Trenger steggruppe fra postmottak først
         val sql = """
@@ -313,6 +314,7 @@ select gjeldende_avklaringsbehov, count(*)
 from u
 where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
   and (enhet = ANY (?::text[]) or ${'$'}2 is null)
+  and (gjeldende_avklaringsbehov = ANY (?::text[]) or ${'$'}3 is null)
 group by gjeldende_avklaringsbehov;
 
         """.trimIndent()
@@ -324,6 +326,11 @@ group by gjeldende_avklaringsbehov;
                     setString(2, null)
                 } else {
                     setArray(2, enheter)
+                }
+                if (oppgaveTyper.isEmpty()) {
+                    setString(3, null)
+                } else {
+                    setArray(3, oppgaveTyper)
                 }
             }
             setRowMapper { row ->
