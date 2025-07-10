@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingPerSteggruppe(val steggruppe: String, val antall: Int)
-data class OppgaverPerSteggruppe(val nye: Int, val gamle: Int)
+data class OppgaverPerSteggruppe(val nye: Int, val lukkede: Int)
 
 data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
