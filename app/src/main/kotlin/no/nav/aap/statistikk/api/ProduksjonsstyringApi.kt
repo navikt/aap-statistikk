@@ -67,6 +67,21 @@ data class BehandlingerPerBehandlingstypeInputMedPeriode(
     }
 }
 
+data class OppgaverPerBehandlingstypeInputMedPeriode(
+    @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+        TypeBehandling.Førstegangsbehandling
+    ),
+    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf(),
+    @param:QueryParam("For hvilke periode som skal gjøres oppslag på") val oppslagsPeriode: OppslagsPeriode = OppslagsPeriode.IDAG
+) {
+    enum class OppslagsPeriode {
+        IDAG,
+        IGÅR,
+        DENNE_UKEN,
+        FORRIGE_UKE
+    }
+}
+
 private val log = LoggerFactory.getLogger("ProduksjonsstyringApi")
 
 val modules = TagModule(listOf(Tags.Produksjonsstyring))
@@ -224,6 +239,38 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 enheter = req.enheter.orEmpty()
             ).map { FordelingLukkedeBehandlinger.fraBøtteFordeling(it) }
         })
+    }
+
+    route("/oppgaver-per-steggruppe-med-periode").get<OppgaverPerBehandlingstypeInputMedPeriode, OppgaverPerSteggruppe>(
+        modules
+    ) { req ->
+        val respons = transactionExecutor.withinTransaction { connection ->
+            val (startDato, sluttDato) = when (req.oppslagsPeriode) {
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now().plusDays(1)
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
+                else -> LocalDate.now() to LocalDate.now().plusDays(1)
+            }
+            val repo = ProduksjonsstyringRepository(connection)
+            val behandlingstyper = req.behandlingstyper.orEmpty()
+            val antallNye = repo.antallÅpneOppgaver(
+                behandlingsTyper = behandlingstyper,
+                enheter = req.enheter.orEmpty(),
+                startDato = startDato,
+                sluttDato = sluttDato
+            )
+            val antallAvsluttede =
+                repo.antallLukkedeOppgaver(
+                    behandlingsTyper = behandlingstyper,
+                    enheter = req.enheter.orEmpty(),
+                    startDato = startDato,
+                    sluttDato = sluttDato
+                )
+            OppgaverPerSteggruppe(antallNye, antallAvsluttede)
+        }
+
+        respond(respons)
     }
 
     data class BehandlingUtviklingsUtviklingInput(
