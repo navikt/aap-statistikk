@@ -12,6 +12,7 @@ import java.time.temporal.ChronoUnit
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingPerSteggruppe(val steggruppe: String, val antall: Int)
+data class OppgaverPerSteggruppe(val nye: Int, val gamle: Int)
 
 data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
@@ -333,6 +334,110 @@ group by gjeldende_avklaringsbehov;
             }
         }.groupBy { it.steggruppe }
             .map { BehandlingPerSteggruppe(it.key, it.value.sumOf { it.antall }) }
+    }
+
+    fun antallÅpneOppgaver(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>,
+        startDato: LocalDate,
+        sluttDato: LocalDate
+    ): Int {
+        val sql = """
+            WITH filtered_oppgave AS (
+                SELECT o.id, o.opprettet_tidspunkt, o.behandling_referanse_id
+                FROM oppgave o
+                WHERE o.opprettet_tidspunkt >= ?::date
+                  AND o.opprettet_tidspunkt <= ?::date
+                  AND o.status != 'AVSLUTTET'
+            ),
+            oppgave_data AS (
+                SELECT
+                    fo.id,
+                    b.type AS behandling_type,
+                    e.kode AS enhet_kode
+                FROM filtered_oppgave fo
+                    JOIN behandling_referanse br ON fo.behandling_referanse_id = br.id
+                    JOIN behandling b ON br.id = b.id
+                    LEFT JOIN (
+                        SELECT br.id AS behandling_referanse_id, MIN(o.enhet_id) AS enhet_id
+                        FROM behandling_referanse br
+                        JOIN oppgave o ON br.id = o.behandling_referanse_id
+                        WHERE o.status != 'AVSLUTTET'
+                        GROUP BY br.id
+                    ) oe ON br.id = oe.behandling_referanse_id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
+            )
+            SELECT COUNT(*) AS antall
+            FROM oppgave_data op
+            WHERE (op.behandling_type = ANY (?::text[]) OR ${'$'}4 IS NULL)
+              AND (op.enhet_kode = ANY (?::text[]) OR ${'$'}3 IS NULL);
+        """.trimIndent()
+
+        return connection.queryFirst(sql) {
+            setParams {
+                setLocalDate(1, startDato)
+                setLocalDate(2, sluttDato)
+                if (enheter.isEmpty()) {
+                    setString(3, null)
+                } else {
+                    setArray(3, enheter)
+                }
+                setBehandlingsTyperParam(behandlingsTyper, 4)
+            }
+            setRowMapper { row -> row.getInt("antall") }
+        }
+    }
+
+    fun antallLukkedeOppgaver(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>,
+        startDato: LocalDate,
+        sluttDato: LocalDate
+    ): Int {
+        val sql = """
+            WITH filtered_oppgave AS (
+                SELECT o.id, o.opprettet_tidspunkt, o.behandling_referanse_id
+                FROM oppgave o
+                WHERE o.opprettet_tidspunkt >= ?::date
+                  AND o.opprettet_tidspunkt <= ?::date
+                  AND o.status = 'AVSLUTTET'
+            ),
+            oppgave_data AS (
+                SELECT
+                    fo.id,
+                    b.type AS behandling_type,
+                    e.kode AS enhet_kode
+                FROM filtered_oppgave fo
+                    JOIN behandling_referanse br ON fo.behandling_referanse_id = br.id
+                    JOIN behandling b ON br.id = b.id
+                    LEFT JOIN (
+                        SELECT br.id AS behandling_referanse_id, MIN(o.enhet_id) AS enhet_id
+                        FROM behandling_referanse br
+                        JOIN oppgave o ON br.id = o.behandling_referanse_id
+                        WHERE o.status = 'AVSLUTTET'
+                        GROUP BY br.id
+                    ) oe ON br.id = oe.behandling_referanse_id
+                    LEFT JOIN enhet e ON e.id = oe.enhet_id
+            )
+            SELECT COUNT(*) AS antall
+            FROM oppgave_data op
+            WHERE (op.behandling_type = ANY (?::text[]) OR ${'$'}4 IS NULL)
+              AND (op.enhet_kode = ANY (?::text[]) OR ${'$'}3 IS NULL);
+        """.trimIndent()
+
+        return connection.queryFirst(sql) {
+            setParams {
+                setLocalDate(1, startDato)
+                setLocalDate(2, sluttDato)
+                if (enheter.isEmpty()) {
+                    setString(3, null)
+                } else {
+                    setArray(3, enheter)
+                }
+                setBehandlingsTyperParam(behandlingsTyper, 4)
+            }
+            setRowMapper { row -> row.getInt("antall") }
+        }
     }
 
     fun opprettedeBehandlingerPerDag(
