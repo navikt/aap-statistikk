@@ -12,6 +12,7 @@ import no.nav.aap.statistikk.testutils.postgresTestConfig
 import no.nav.aap.statistikk.testutils.schemaRegistry
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("TestApp")
 
@@ -32,6 +33,10 @@ fun main() {
     System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
     System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
+    val randomUUID = UUID.randomUUID()
+    System.setProperty("integrasjon.postmottak.azp", randomUUID.toString())
+    System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
+    System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
 
 
     val pgConfig = postgresTestConfig()
