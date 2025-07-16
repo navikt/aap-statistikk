@@ -14,7 +14,7 @@ val testContainersVersion = "1.21.3"
 val komponenterVersjon = "1.0.286"
 val behandlingsflytversjon = "0.0.371"
 val tilgangVersjon = "1.0.96"
-val oppgaveVersjon = "0.0.97"
+val oppgaveVersjon = "0.0.98"
 val postmottakVersjon = "0.0.92"
 val utbetalVersjon = "0.0.51"
 
