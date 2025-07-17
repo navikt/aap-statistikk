@@ -373,12 +373,11 @@ group by gjeldende_avklaringsbehov;
                                 LEFT JOIN enhet e ON e.id = oe.enhet_id
                        where gjeldende_avklaringsbehov is not null
                          and gjeldende = true)
-            select gjeldende_avklaringsbehov, count(*)
+            select count(*) as antall
             from u
             where (type_behandling = ANY (?::text[]) or ${'$'}3 is null)
               and (enhet = ANY (?::text[]) or ${'$'}4 is null)
               and (gjeldende_avklaringsbehov = ANY (?::text[]) or ${'$'}5 is null)
-            group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
         return connection.queryFirst(sql) {
@@ -431,12 +430,11 @@ group by gjeldende_avklaringsbehov;
                                 LEFT JOIN enhet e ON e.id = oe.enhet_id
                        where gjeldende_avklaringsbehov is not null
                          and gjeldende = true)
-            select gjeldende_avklaringsbehov, count(*)
+            select count(*) as antall
             from u
             where (type_behandling = ANY (?::text[]) or ${'$'}3 is null)
               and (enhet = ANY (?::text[]) or ${'$'}4 is null)
               and (gjeldende_avklaringsbehov = ANY (?::text[]) or ${'$'}5 is null)
-            group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
         return connection.queryFirst(sql) {
