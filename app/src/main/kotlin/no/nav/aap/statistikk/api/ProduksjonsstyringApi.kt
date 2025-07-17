@@ -272,7 +272,13 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                     sluttDato = sluttDato,
                     oppgaveTyper = req.oppgaveTyper.orEmpty()
                 )
-            OppgaverPerSteggruppe(antallNye, antallAvsluttede)
+            val antallTotalt =
+                repo.antallÅpneOppgaverTotalt(
+                    behandlingsTyper = behandlingstyper,
+                    enheter = req.enheter.orEmpty(),
+                    oppgaveTyper = req.oppgaveTyper.orEmpty()
+                )
+            OppgaverPerSteggruppe(antallNye, antallAvsluttede, antallTotalt)
         }
 
         respond(respons)

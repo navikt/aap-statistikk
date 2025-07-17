@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit
 data class BehandlingstidPerDag(val dag: LocalDate, val snitt: Double)
 
 data class BehandlingPerSteggruppe(val steggruppe: String, val antall: Int)
-data class OppgaverPerSteggruppe(val nye: Int, val lukkede: Int)
+data class OppgaverPerSteggruppe(val nye: Int, val lukkede: Int, val totalt: Int)
 
 data class AntallPerDag(val dag: LocalDate, val antall: Int)
 
@@ -394,6 +394,57 @@ group by gjeldende_avklaringsbehov;
                     setString(5, null)
                 } else {
                     setArray(5, oppgaveTyper)
+                }
+            }
+            setRowMapper { row -> row.getInt("antall") }
+        }
+    }
+
+    fun antallÅpneOppgaverTotalt(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>,
+        oppgaveTyper: List<String>
+    ): Int {
+        val sql = """
+            WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                                   FROM behandling_referanse br
+                                            LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                                   WHERE o.status != 'AVSLUTTET'
+                                   GROUP BY br.id, br.referanse),
+                 u as (select gjeldende_avklaringsbehov, e.kode as enhet, b.type as type_behandling
+                       from behandling_historikk
+                                join behandling b on b.id = behandling_historikk.behandling_id
+                                join oppgave_enhet oe on b.referanse_id = oe.id
+                                LEFT JOIN enhet e ON e.id = oe.enhet_id
+                       where gjeldende_avklaringsbehov is not null
+                         and gjeldende = true
+                       union all
+                       select gjeldende_avklaringsbehov, e.kode as enhet, pb.type_behandling as type_behandling
+                       from postmottak_behandling_historikk pbh
+                                left join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
+                                join oppgave_enhet oe on pb.referanse = oe.referanse
+                                LEFT JOIN enhet e ON e.id = oe.enhet_id
+                       where gjeldende_avklaringsbehov is not null
+                         and gjeldende = true)
+            select count(*) as antall
+            from u
+            where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
+              and (enhet = ANY (?::text[]) or ${'$'}2 is null)
+              and (gjeldende_avklaringsbehov = ANY (?::text[]) or ${'$'}3 is null)
+        """.trimIndent()
+
+        return connection.queryFirst(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper, 1)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
+                if (oppgaveTyper.isEmpty()) {
+                    setString(3, null)
+                } else {
+                    setArray(3, oppgaveTyper)
                 }
             }
             setRowMapper { row -> row.getInt("antall") }
