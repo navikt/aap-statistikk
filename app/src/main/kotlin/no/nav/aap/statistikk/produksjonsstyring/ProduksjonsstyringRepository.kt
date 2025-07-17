@@ -347,49 +347,55 @@ group by gjeldende_avklaringsbehov;
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>,
         startDato: LocalDate,
-        sluttDato: LocalDate
+        sluttDato: LocalDate,
+        oppgaveTyper: List<String>
     ): Int {
         val sql = """
-            WITH filtered_oppgave AS (
-                SELECT o.id, o.opprettet_tidspunkt, o.behandling_referanse_id
-                FROM oppgave o
-                WHERE o.opprettet_tidspunkt >= ?::date
-                  AND o.opprettet_tidspunkt <= ?::date
-                  AND o.status != 'AVSLUTTET'
-            ),
-            oppgave_data AS (
-                SELECT
-                    fo.id,
-                    b.type AS behandling_type,
-                    e.kode AS enhet_kode
-                FROM filtered_oppgave fo
-                    JOIN behandling_referanse br ON fo.behandling_referanse_id = br.id
-                    JOIN behandling b ON br.id = b.id
-                    LEFT JOIN (
-                        SELECT br.id AS behandling_referanse_id, MIN(o.enhet_id) AS enhet_id
-                        FROM behandling_referanse br
-                        JOIN oppgave o ON br.id = o.behandling_referanse_id
-                        WHERE o.status != 'AVSLUTTET'
-                        GROUP BY br.id
-                    ) oe ON br.id = oe.behandling_referanse_id
-                    LEFT JOIN enhet e ON e.id = oe.enhet_id
-            )
-            SELECT COUNT(*) AS antall
-            FROM oppgave_data op
-            WHERE (op.behandling_type = ANY (?::text[]) OR ${'$'}4 IS NULL)
-              AND (op.enhet_kode = ANY (?::text[]) OR ${'$'}3 IS NULL);
+            WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                                   FROM behandling_referanse br
+                                            LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                                   WHERE o.status != 'AVSLUTTET'
+                                   AND o.opprettet_tidspunkt >= ?::date
+                                   AND o.opprettet_tidspunkt <= ?::date
+                                   GROUP BY br.id, br.referanse),
+                 u as (select gjeldende_avklaringsbehov, e.kode as enhet, b.type as type_behandling
+                       from behandling_historikk
+                                join behandling b on b.id = behandling_historikk.behandling_id
+                                join oppgave_enhet oe on b.referanse_id = oe.id
+                                LEFT JOIN enhet e ON e.id = oe.enhet_id
+                       where gjeldende_avklaringsbehov is not null
+                         and gjeldende = true
+                       union all
+                       select gjeldende_avklaringsbehov, e.kode as enhet, pb.type_behandling as type_behandling
+                       from postmottak_behandling_historikk pbh
+                                left join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
+                                join oppgave_enhet oe on pb.referanse = oe.referanse
+                                LEFT JOIN enhet e ON e.id = oe.enhet_id
+                       where gjeldende_avklaringsbehov is not null
+                         and gjeldende = true)
+            select gjeldende_avklaringsbehov, count(*)
+            from u
+            where (type_behandling = ANY (?::text[]) or ${'$'}3 is null)
+              and (enhet = ANY (?::text[]) or ${'$'}4 is null)
+              and (gjeldende_avklaringsbehov = ANY (?::text[]) or ${'$'}5 is null)
+            group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
         return connection.queryFirst(sql) {
             setParams {
                 setLocalDate(1, startDato)
                 setLocalDate(2, sluttDato)
+                setBehandlingsTyperParam(behandlingsTyper, 3)
                 if (enheter.isEmpty()) {
-                    setString(3, null)
+                    setString(4, null)
                 } else {
-                    setArray(3, enheter)
+                    setArray(4, enheter)
                 }
-                setBehandlingsTyperParam(behandlingsTyper, 4)
+                if (oppgaveTyper.isEmpty()) {
+                    setString(5, null)
+                } else {
+                    setArray(5, oppgaveTyper)
+                }
             }
             setRowMapper { row -> row.getInt("antall") }
         }
@@ -399,49 +405,55 @@ group by gjeldende_avklaringsbehov;
         behandlingsTyper: List<TypeBehandling>,
         enheter: List<String>,
         startDato: LocalDate,
-        sluttDato: LocalDate
+        sluttDato: LocalDate,
+        oppgaveTyper: List<String>
     ): Int {
         val sql = """
-            WITH filtered_oppgave AS (
-                SELECT o.id, o.opprettet_tidspunkt, o.behandling_referanse_id
-                FROM oppgave o
-                WHERE o.opprettet_tidspunkt >= ?::date
-                  AND o.opprettet_tidspunkt <= ?::date
-                  AND o.status = 'AVSLUTTET'
-            ),
-            oppgave_data AS (
-                SELECT
-                    fo.id,
-                    b.type AS behandling_type,
-                    e.kode AS enhet_kode
-                FROM filtered_oppgave fo
-                    JOIN behandling_referanse br ON fo.behandling_referanse_id = br.id
-                    JOIN behandling b ON br.id = b.id
-                    LEFT JOIN (
-                        SELECT br.id AS behandling_referanse_id, MIN(o.enhet_id) AS enhet_id
-                        FROM behandling_referanse br
-                        JOIN oppgave o ON br.id = o.behandling_referanse_id
-                        WHERE o.status = 'AVSLUTTET'
-                        GROUP BY br.id
-                    ) oe ON br.id = oe.behandling_referanse_id
-                    LEFT JOIN enhet e ON e.id = oe.enhet_id
-            )
-            SELECT COUNT(*) AS antall
-            FROM oppgave_data op
-            WHERE (op.behandling_type = ANY (?::text[]) OR ${'$'}4 IS NULL)
-              AND (op.enhet_kode = ANY (?::text[]) OR ${'$'}3 IS NULL);
+            WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                                   FROM behandling_referanse br
+                                            LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                                   WHERE o.status = 'AVSLUTTET'
+                                   AND o.opprettet_tidspunkt >= ?::date
+                                   AND o.opprettet_tidspunkt <= ?::date
+                                   GROUP BY br.id, br.referanse),
+                 u as (select gjeldende_avklaringsbehov, e.kode as enhet, b.type as type_behandling
+                       from behandling_historikk
+                                join behandling b on b.id = behandling_historikk.behandling_id
+                                join oppgave_enhet oe on b.referanse_id = oe.id
+                                LEFT JOIN enhet e ON e.id = oe.enhet_id
+                       where gjeldende_avklaringsbehov is not null
+                         and gjeldende = true
+                       union all
+                       select gjeldende_avklaringsbehov, e.kode as enhet, pb.type_behandling as type_behandling
+                       from postmottak_behandling_historikk pbh
+                                left join postmottak_behandling pb on pb.id = pbh.postmottak_behandling_id
+                                join oppgave_enhet oe on pb.referanse = oe.referanse
+                                LEFT JOIN enhet e ON e.id = oe.enhet_id
+                       where gjeldende_avklaringsbehov is not null
+                         and gjeldende = true)
+            select gjeldende_avklaringsbehov, count(*)
+            from u
+            where (type_behandling = ANY (?::text[]) or ${'$'}3 is null)
+              and (enhet = ANY (?::text[]) or ${'$'}4 is null)
+              and (gjeldende_avklaringsbehov = ANY (?::text[]) or ${'$'}5 is null)
+            group by gjeldende_avklaringsbehov;
         """.trimIndent()
 
         return connection.queryFirst(sql) {
             setParams {
                 setLocalDate(1, startDato)
                 setLocalDate(2, sluttDato)
+                setBehandlingsTyperParam(behandlingsTyper, 3)
                 if (enheter.isEmpty()) {
-                    setString(3, null)
+                    setString(4, null)
                 } else {
-                    setArray(3, enheter)
+                    setArray(4, enheter)
                 }
-                setBehandlingsTyperParam(behandlingsTyper, 4)
+                if (oppgaveTyper.isEmpty()) {
+                    setString(5, null)
+                } else {
+                    setArray(5, oppgaveTyper)
+                }
             }
             setRowMapper { row -> row.getInt("antall") }
         }

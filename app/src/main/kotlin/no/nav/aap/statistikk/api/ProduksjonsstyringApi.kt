@@ -72,7 +72,8 @@ data class OppgaverPerBehandlingstypeInputMedPeriode(
         TypeBehandling.Førstegangsbehandling
     ),
     @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf(),
-    @param:QueryParam("For hvilke periode som skal gjøres oppslag på") val oppslagsPeriode: OppslagsPeriode = OppslagsPeriode.IDAG
+    @param:QueryParam("For hvilke periode som skal gjøres oppslag på") val oppslagsPeriode: OppslagsPeriode = OppslagsPeriode.IDAG,
+    @param:QueryParam("For hvilke oppgavetyper. Tom liste betyr alle.") val oppgaveTyper: List<String>? = listOf()
 ) {
     enum class OppslagsPeriode {
         IDAG,
@@ -260,14 +261,16 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 behandlingsTyper = behandlingstyper,
                 enheter = req.enheter.orEmpty(),
                 startDato = startDato,
-                sluttDato = sluttDato
+                sluttDato = sluttDato,
+                oppgaveTyper = req.oppgaveTyper.orEmpty()
             )
             val antallAvsluttede =
                 repo.antallLukkedeOppgaver(
                     behandlingsTyper = behandlingstyper,
                     enheter = req.enheter.orEmpty(),
                     startDato = startDato,
-                    sluttDato = sluttDato
+                    sluttDato = sluttDato,
+                    oppgaveTyper = req.oppgaveTyper.orEmpty()
                 )
             OppgaverPerSteggruppe(antallNye, antallAvsluttede)
         }
