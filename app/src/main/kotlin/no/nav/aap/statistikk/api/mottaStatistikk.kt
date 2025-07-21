@@ -129,7 +129,6 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
     return no.nav.aap.statistikk.oppgave.OppgaveHendelse(
         hendelse = when (this.hendelse) {
             HendelseType.OPPRETTET -> no.nav.aap.statistikk.oppgave.HendelseType.OPPRETTET
-            HendelseType.GJENÅPNET -> no.nav.aap.statistikk.oppgave.HendelseType.OPPDATERT
             HendelseType.RESERVERT -> no.nav.aap.statistikk.oppgave.HendelseType.RESERVERT
             HendelseType.AVRESERVERT -> no.nav.aap.statistikk.oppgave.HendelseType.AVRESERVERT
             HendelseType.LUKKET -> no.nav.aap.statistikk.oppgave.HendelseType.LUKKET

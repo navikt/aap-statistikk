@@ -150,7 +150,6 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
-                else -> LocalDate.now() to LocalDate.now().plusDays(1)
             }
 
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnittGittPeriode(
@@ -253,7 +252,6 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
                 OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
                 OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
-                else -> LocalDate.now() to LocalDate.now().plusDays(1)
             }
             val repo = ProduksjonsstyringRepository(connection)
             val behandlingstyper = req.behandlingstyper.orEmpty()
@@ -357,7 +355,6 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
                 BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
-                else -> LocalDate.now() to LocalDate.now().plusDays(1)
             }
 
             repo.venteÅrsakOgGjennomsnittGittPeriode(

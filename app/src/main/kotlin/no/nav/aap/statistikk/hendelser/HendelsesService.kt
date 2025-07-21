@@ -166,6 +166,7 @@ fun no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.tilDomene(): T
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Tilbakekreving -> TypeBehandling.Tilbakekreving
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Klage -> TypeBehandling.Klage
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.SvarFraAndreinstans -> TypeBehandling.SvarFraAndreinstans
+        no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling -> TypeBehandling.Oppfølgingsbehandling
     }
 
 fun Status.tilDomene(): BehandlingStatus =
@@ -211,6 +212,7 @@ fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilB
         ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE -> VURDER_RETTIGHETSPERIODE
         ÅrsakTilBehandling.REVURDER_MANUELL_INNTEKT -> REVURDER_MANUELL_INNTEKT
         ÅrsakTilBehandling.KLAGE_TRUKKET -> KLAGE_TRUKKET
-        ÅrsakTilBehandling.MOTTATT_KABAL_HENDELSE ->  MOTTATT_KABAL_HENDELSE
+        ÅrsakTilBehandling.MOTTATT_KABAL_HENDELSE -> MOTTATT_KABAL_HENDELSE
+        ÅrsakTilBehandling.OPPFØLGINGSOPPGAVE -> OPPFØLGINGSOPPGAVE
     }
 }

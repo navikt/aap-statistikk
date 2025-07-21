@@ -100,13 +100,14 @@ enum class KildeSystem {
 }
 
 enum class TypeBehandling(val kildeSystem: KildeSystem) {
-    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), 
-    Revurdering(kildeSystem = KildeSystem.Behandlingsflyt), 
+    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt),
+    Revurdering(kildeSystem = KildeSystem.Behandlingsflyt),
     Tilbakekreving(kildeSystem = KildeSystem.Behandlingsflyt),
     Klage(kildeSystem = KildeSystem.Behandlingsflyt),
     SvarFraAndreinstans(kildeSystem = KildeSystem.Behandlingsflyt),
-    Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak), 
-    Journalføring(kildeSystem = KildeSystem.Postmottak)
+    Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak),
+    Journalføring(kildeSystem = KildeSystem.Postmottak),
+    Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt)
 }
 
 enum class ÅrsakTilBehandling(val sortering: Int) {
@@ -137,6 +138,7 @@ enum class ÅrsakTilBehandling(val sortering: Int) {
     REVURDER_MANUELL_INNTEKT(1),
     KLAGE_TRUKKET(1),
     MOTTATT_KABAL_HENDELSE(1),
+    OPPFØLGINGSOPPGAVE(0)
 }
 
 
