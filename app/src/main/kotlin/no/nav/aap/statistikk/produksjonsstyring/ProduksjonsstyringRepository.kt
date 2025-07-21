@@ -288,7 +288,6 @@ group by type;
         enheter: List<String>,
         oppgaveTyper: List<String>
     ): List<BehandlingPerSteggruppe> {
-        // TODO! Trenger steggruppe fra postmottak først
         val sql = """
 WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
                        FROM behandling_referanse br
@@ -316,7 +315,6 @@ where (type_behandling = ANY (?::text[]) or ${'$'}1 is null)
   and (enhet = ANY (?::text[]) or ${'$'}2 is null)
   and (gjeldende_avklaringsbehov = ANY (?::text[]) or ${'$'}3 is null)
 group by gjeldende_avklaringsbehov;
-
         """.trimIndent()
 
         return connection.queryList(sql) {
