@@ -12,9 +12,9 @@ val mockkVersion = "1.14.5"
 val flywayVersion = "11.10.3"
 val testContainersVersion = "1.21.3"
 val komponenterVersjon = "1.0.295"
-val behandlingsflytversjon = "0.0.381"
-val tilgangVersjon = "1.0.97"
-val oppgaveVersjon = "0.0.103"
+val behandlingsflytversjon = "0.0.384"
+val tilgangVersjon = "1.0.98"
+val oppgaveVersjon = "0.0.105"
 val postmottakVersjon = "0.0.111"
 val utbetalVersjon = "0.0.53"
 
@@ -82,6 +82,9 @@ dependencies {
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
+        }
+        implementation("org.apache.commons:commons-lang3:3.18.0") {
+            because("https://www.mend.io/vulnerability-database/CVE-2025-48924?utm_source=JetBrains")
         }
     }
     testImplementation("org.testcontainers:gcloud:$testContainersVersion")
