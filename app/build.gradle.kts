@@ -11,12 +11,12 @@ val ktorVersion = "3.2.2"
 val mockkVersion = "1.14.5"
 val flywayVersion = "11.10.3"
 val testContainersVersion = "1.21.3"
-val komponenterVersjon = "1.0.295"
+val komponenterVersjon = "1.0.302"
 val behandlingsflytversjon = "0.0.388"
-val tilgangVersjon = "1.0.98"
+val tilgangVersjon = "1.0.99"
 val oppgaveVersjon = "0.0.105"
 val postmottakVersjon = "0.0.112"
-val utbetalVersjon = "0.0.53"
+val utbetalVersjon = "0.0.54"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
