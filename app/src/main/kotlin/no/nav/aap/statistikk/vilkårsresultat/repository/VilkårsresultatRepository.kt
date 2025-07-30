@@ -129,8 +129,6 @@ WHERE br.referanse = ?;
         val vilkårId = it.getLongOrNull("v_id")
         val vilkårType = it.getStringOrNull("v_vilkar_type")
 
-        log.info("$vilkårId, $vilkårType")
-
         val vilkårPerioder = vilkårId?.let { getVilkårPerioder(dbConnection, vilkårId) }
             ?: emptyList()
         val vilkårEntity = vilkårId?.let {
