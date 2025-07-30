@@ -63,7 +63,7 @@ class App
 
 fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { _, e ->
-        log.error("Uhåndtert feil", e)
+        log.error("Uhåndtert feil av type ${e.javaClass}", e)
     }
     val dbConfig = DbConfig.fraMiljøVariabler()
     val bgConfigSak = BigQueryConfigFromEnv("saksstatistikk")
