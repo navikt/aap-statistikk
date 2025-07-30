@@ -15,6 +15,9 @@ on:
     paths-ignore:
       - '.github/**'
 
+permissions:
+  id-token: write
+
 jobs:
   gradle:
     ## push til main eller etter branch (e.g. dependabot) er merget
@@ -23,7 +26,6 @@ jobs:
       contents: write
       actions: read
       checks: write
-      id-token: write
     uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
     with:
       publish-typescript:  true
@@ -37,7 +39,6 @@ jobs:
     if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'dev-gcp'
     permissions:
       contents: read
-      id-token: write
     needs: gradle
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
@@ -51,7 +52,6 @@ jobs:
     if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'prod-gcp'
     permissions:
       contents: read
-      id-token: write
     needs: dev
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
