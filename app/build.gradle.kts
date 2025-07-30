@@ -80,7 +80,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.27.3")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     constraints {
-        implementation("org.apache.commons:commons-compress:1.27.1") {
+        implementation("org.apache.commons:commons-compress:1.28.0") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
         implementation("org.apache.commons:commons-lang3:3.18.0") {
