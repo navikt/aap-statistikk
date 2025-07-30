@@ -26,9 +26,10 @@ jobs:
       contents: write
       actions: read
       checks: write
+      id-token: write
     uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main
     with:
-      publish-typescript:  true
+      publish-typescript: true
       typescript-enums: true
       generate-openapi-command: gradle genererOpenApi
       app-navn: statistikk
@@ -39,6 +40,7 @@ jobs:
     if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'dev-gcp'
     permissions:
       contents: read
+      id-token: write
     needs: gradle
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
@@ -52,6 +54,7 @@ jobs:
     if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'prod-gcp'
     permissions:
       contents: read
+      id-token: write
     needs: dev
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
@@ -63,6 +66,8 @@ jobs:
   deploy-bigquery-resources-dev:
     uses: ./.github/workflows/deploy_bigquery.yml
     secrets: inherit
+    permissions:
+      id-token: write
     with:
       cluster: dev-gcp
       project: aap-dev-e48b
