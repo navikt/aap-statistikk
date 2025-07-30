@@ -25,6 +25,9 @@ data class AvsluttetBehandling(
     }
 }
 
+/**
+ * Husk å oppdatere tabellen `kodeverk_resultat` også!
+ */
 enum class ResultatKode {
     INNVILGET,
     AVSLAG,
@@ -34,7 +37,6 @@ enum class ResultatKode {
     KLAGE_DELVIS_OMGJØRES,
     KLAGE_AVSLÅTT,
     KLAGE_TRUKKET,
-    
 }
 
 data class RettighetstypePeriode(
@@ -43,11 +45,22 @@ data class RettighetstypePeriode(
     val rettighetstype: RettighetsType
 )
 
+/**
+ * Ved oppdateringer her må tabellen `kodeverk_rettighetstype` oppdateres. Lag migrering!
+ */
 enum class RettighetsType(val hjemmel: String) {
     BISTANDSBEHOV(hjemmel = "§ 11-6"),
     SYKEPENGEERSTATNING(hjemmel = "§ 11-13"),
     STUDENT(hjemmel = "§ 11-14"),
+
+    /**
+     * TODO: Legg til i kodeverkstabell når denne tas i bruk.
+     */
     ARBEIDSSØKER(hjemmel = "§ 11-17"),
+
+    /**
+     * TODO: Legg til i kodeverkstabell når denne tas i bruk.
+     */
     VURDERES_FOR_UFØRETRYGD(hjemmel = "§ 11-18"),
 }
 

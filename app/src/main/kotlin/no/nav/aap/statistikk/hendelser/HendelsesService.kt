@@ -46,12 +46,16 @@ class HendelsesService(
             // TODO: legg denne i en jobb
             val avsluttetBehandling =
                 requireNotNull(hendelse.avsluttetBehandling) { "Om behandlingen er avsluttet, så må avsluttetBehandling være ikke-null." }
-            avsluttetBehandlingService.lagre(
-                avsluttetBehandling.tilDomene(
-                    saksnummer,
-                    hendelse.behandlingReferanse,
+
+            // Oppfølgingsbehandling er ikke relatert til en ytelse, så dette kan ignoreres.
+            if (hendelse.behandlingType !in listOf(no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling)) {
+                avsluttetBehandlingService.lagre(
+                    avsluttetBehandling.tilDomene(
+                        saksnummer,
+                        hendelse.behandlingReferanse,
+                    )
                 )
-            )
+            }
         }
 
         opprettBigQueryLagringSakStatistikkCallback(behandlingId)
