@@ -1,0 +1,24 @@
+name: Deploy BigQuery Resources
+
+on:
+  workflow_call:
+    inputs:
+      cluster:
+        required: true
+        type: string
+      project:
+        required: true
+        type: string
+
+jobs:
+  deploy-views:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          RESOURCE: "\
+            .nais/bigquery/view_vilkarsresultat.yml"
+          VAR: project=${{ inputs.project }}
+          PRINT_PAYLOAD: true
