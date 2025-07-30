@@ -59,3 +59,10 @@ jobs:
       cluster: prod-gcp
       manifest: .nais/nais.yaml
       vars: .nais/prod.yaml
+
+  deploy-bigquery-resources-dev:
+    uses: ./.github/workflows/deploy_bigquery.yml
+    secrets: inherit
+    with:
+      cluster: dev-gcp
+      project: aap-dev-e48b
