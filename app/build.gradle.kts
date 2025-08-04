@@ -15,7 +15,7 @@ val komponenterVersjon = "1.0.302"
 val behandlingsflytversjon = "0.0.390"
 val tilgangVersjon = "1.0.99"
 val oppgaveVersjon = "0.0.105"
-val postmottakVersjon = "0.0.112"
+val postmottakVersjon = "0.0.113"
 val utbetalVersjon = "0.0.54"
 
 application {
