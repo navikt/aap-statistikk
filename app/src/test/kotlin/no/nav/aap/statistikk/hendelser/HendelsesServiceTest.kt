@@ -10,7 +10,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegang
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
@@ -105,7 +105,8 @@ class HendelsesServiceTest {
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID,
-                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
+                vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
+                årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD)
             )
         )
 
@@ -202,7 +203,8 @@ class HendelsesServiceTest {
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
-                årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
+                vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
+                årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD)
             )
         )
 

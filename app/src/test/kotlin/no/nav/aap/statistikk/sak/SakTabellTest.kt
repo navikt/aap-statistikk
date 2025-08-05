@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.sak
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
+import no.nav.aap.statistikk.behandling.Vurderingsbehov
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.testutils.BigQuery
@@ -56,7 +56,7 @@ class SakTabellTest {
                 saksbehandler = "1234",
                 behandlingMetode = BehandlingMetode.MANUELL,
                 behandlingStatus = "UNDER_BEHANDLING",
-                behandlingÅrsak = ÅrsakTilBehandling.SØKNAD.toString(),
+                behandlingÅrsak = Vurderingsbehov.SØKNAD.toString(),
                 ansvarligEnhetKode = "1337",
                 sakYtelse = sakYtelse,
                 behandlingResultat = "AX",

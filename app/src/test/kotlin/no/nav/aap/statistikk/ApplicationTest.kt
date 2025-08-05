@@ -68,6 +68,7 @@ class ApplicationTest {
   "behandlingType": "Førstegangsbehandling",
   "ident": "1403199012345",
   "avklaringsbehov": [],
+  "vurderingsbehov":  [],
   "årsakTilBehandling":  [],
   "versjon": "UKJENT",
   "mottattTid": [
@@ -123,6 +124,7 @@ class ApplicationTest {
   "behandlingType": "Førstegangsbehandling",
   "ident": "1403199012345",
   "avklaringsbehov": [],
+  "vurderingsbehov":  [],
   "årsakTilBehandling":  [],
   "versjon": "UKJENT",
   "mottattTid": [

@@ -77,7 +77,7 @@ class BehandlingRepositoryTest {
                     returÅrsak = "MANGELFULL_BEGRUNNELSE",
                     gjeldendeStegGruppe = StegGruppe.BREV,
                     resultat = ResultatKode.INNVILGET,
-                    årsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.G_REGULERING),
+                    årsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.G_REGULERING),
                     oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1)
                 )
             )
@@ -96,8 +96,8 @@ class BehandlingRepositoryTest {
         assertThat(uthentet.vedtakstidspunkt).isEqualTo(vedtakstidspunkt)
         assertThat(uthentet.ansvarligBeslutter).isEqualTo("Josgeir Dalføre")
         assertThat(uthentet.årsaker).containsExactlyInAnyOrder(
-            ÅrsakTilBehandling.SØKNAD,
-            ÅrsakTilBehandling.G_REGULERING
+            Vurderingsbehov.SØKNAD,
+            Vurderingsbehov.G_REGULERING
         )
         assertThat(uthentet.behandlendeEnhet).isEqualTo(enhet)
         assertThat(uthentet.gjeldendeAvklaringsbehovStatus).isEqualTo(Status.OPPRETTET)

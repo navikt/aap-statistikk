@@ -9,7 +9,6 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.prioriterÅrsaker
-import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling

@@ -40,7 +40,7 @@ data class Behandling(
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
-    val årsaker: List<ÅrsakTilBehandling> = listOf(),
+    val årsaker: List<Vurderingsbehov> = listOf(),
     val behandlendeEnhet: Enhet? = null,
     val resultat: ResultatKode? = null,
     val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
@@ -110,7 +110,7 @@ enum class TypeBehandling(val kildeSystem: KildeSystem) {
     Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt)
 }
 
-enum class ÅrsakTilBehandling(val sortering: Int) {
+enum class Vurderingsbehov(val sortering: Int) {
     SØKNAD(0),
     AKTIVITETSMELDING(1),
     MELDEKORT(1),
@@ -142,7 +142,7 @@ enum class ÅrsakTilBehandling(val sortering: Int) {
 }
 
 
-fun List<ÅrsakTilBehandling>.prioriterÅrsaker(): ÅrsakTilBehandling {
+fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov {
     return this.minByOrNull { it.sortering }!!
 }
 
