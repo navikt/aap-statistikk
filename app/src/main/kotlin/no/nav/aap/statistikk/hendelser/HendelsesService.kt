@@ -3,11 +3,11 @@ package no.nav.aap.statistikk.hendelser
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.behandling.ÅrsakTilBehandling.*
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
@@ -184,35 +184,35 @@ fun Kanal.tilDomene(): SøknadsFormat {
     }
 }
 
-fun ÅrsakTilBehandling.tilDomene(): no.nav.aap.statistikk.behandling.ÅrsakTilBehandling {
+fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbehov {
     return when (this) {
-        ÅrsakTilBehandling.SØKNAD -> SØKNAD
-        ÅrsakTilBehandling.AKTIVITETSMELDING -> AKTIVITETSMELDING
-        ÅrsakTilBehandling.MELDEKORT -> MELDEKORT
-        ÅrsakTilBehandling.FRITAK_MELDEPLIKT -> MELDEKORT
-        ÅrsakTilBehandling.LEGEERKLÆRING -> LEGEERKLÆRING
-        ÅrsakTilBehandling.AVVIST_LEGEERKLÆRING -> AVVIST_LEGEERKLÆRING
-        ÅrsakTilBehandling.DIALOGMELDING -> DIALOGMELDING
-        ÅrsakTilBehandling.G_REGULERING -> G_REGULERING
-        ÅrsakTilBehandling.REVURDER_MEDLEMSKAP -> REVURDER_MEDLEMSSKAP
-        ÅrsakTilBehandling.REVURDER_YRKESSKADE -> REVURDER_YRKESSKADE
-        ÅrsakTilBehandling.REVURDER_BEREGNING -> REVURDER_BEREGNING
-        ÅrsakTilBehandling.REVURDER_LOVVALG -> REVURDER_LOVVALG
-        ÅrsakTilBehandling.KLAGE -> KLAGE
-        ÅrsakTilBehandling.REVURDER_SAMORDNING -> REVURDER_SAMORDNING
-        ÅrsakTilBehandling.LOVVALG_OG_MEDLEMSKAP -> LOVVALG_OG_MEDLEMSKAP
-        ÅrsakTilBehandling.FORUTGAENDE_MEDLEMSKAP -> FORUTGAENDE_MEDLEMSKAP
-        ÅrsakTilBehandling.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND -> SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
-        ÅrsakTilBehandling.BARNETILLEGG -> BARNETILLEGG
-        ÅrsakTilBehandling.INSTITUSJONSOPPHOLD -> INSTITUSJONSOPPHOLD
-        ÅrsakTilBehandling.SAMORDNING_OG_AVREGNING -> SAMORDNING_OG_AVREGNING
-        ÅrsakTilBehandling.REFUSJONSKRAV -> REFUSJONSKRAV
-        ÅrsakTilBehandling.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
-        ÅrsakTilBehandling.SØKNAD_TRUKKET -> SØKNAD_TRUKKET
-        ÅrsakTilBehandling.VURDER_RETTIGHETSPERIODE -> VURDER_RETTIGHETSPERIODE
-        ÅrsakTilBehandling.REVURDER_MANUELL_INNTEKT -> REVURDER_MANUELL_INNTEKT
-        ÅrsakTilBehandling.KLAGE_TRUKKET -> KLAGE_TRUKKET
-        ÅrsakTilBehandling.MOTTATT_KABAL_HENDELSE -> MOTTATT_KABAL_HENDELSE
-        ÅrsakTilBehandling.OPPFØLGINGSOPPGAVE -> OPPFØLGINGSOPPGAVE
+        Vurderingsbehov.SØKNAD -> SØKNAD
+        Vurderingsbehov.AKTIVITETSMELDING -> AKTIVITETSMELDING
+        Vurderingsbehov.MELDEKORT -> MELDEKORT
+        Vurderingsbehov.FRITAK_MELDEPLIKT -> MELDEKORT
+        Vurderingsbehov.LEGEERKLÆRING -> LEGEERKLÆRING
+        Vurderingsbehov.AVVIST_LEGEERKLÆRING -> AVVIST_LEGEERKLÆRING
+        Vurderingsbehov.DIALOGMELDING -> DIALOGMELDING
+        Vurderingsbehov.G_REGULERING -> G_REGULERING
+        Vurderingsbehov.REVURDER_MEDLEMSKAP -> REVURDER_MEDLEMSSKAP
+        Vurderingsbehov.REVURDER_YRKESSKADE -> REVURDER_YRKESSKADE
+        Vurderingsbehov.REVURDER_BEREGNING -> REVURDER_BEREGNING
+        Vurderingsbehov.REVURDER_LOVVALG -> REVURDER_LOVVALG
+        Vurderingsbehov.KLAGE -> KLAGE
+        Vurderingsbehov.REVURDER_SAMORDNING -> REVURDER_SAMORDNING
+        Vurderingsbehov.LOVVALG_OG_MEDLEMSKAP -> LOVVALG_OG_MEDLEMSKAP
+        Vurderingsbehov.FORUTGAENDE_MEDLEMSKAP -> FORUTGAENDE_MEDLEMSKAP
+        Vurderingsbehov.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND -> SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
+        Vurderingsbehov.BARNETILLEGG -> BARNETILLEGG
+        Vurderingsbehov.INSTITUSJONSOPPHOLD -> INSTITUSJONSOPPHOLD
+        Vurderingsbehov.SAMORDNING_OG_AVREGNING -> SAMORDNING_OG_AVREGNING
+        Vurderingsbehov.REFUSJONSKRAV -> REFUSJONSKRAV
+        Vurderingsbehov.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT -> UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
+        Vurderingsbehov.SØKNAD_TRUKKET -> SØKNAD_TRUKKET
+        Vurderingsbehov.VURDER_RETTIGHETSPERIODE -> VURDER_RETTIGHETSPERIODE
+        Vurderingsbehov.REVURDER_MANUELL_INNTEKT -> REVURDER_MANUELL_INNTEKT
+        Vurderingsbehov.KLAGE_TRUKKET -> KLAGE_TRUKKET
+        Vurderingsbehov.MOTTATT_KABAL_HENDELSE -> MOTTATT_KABAL_HENDELSE
+        Vurderingsbehov.OPPFØLGINGSOPPGAVE -> OPPFØLGINGSOPPGAVE
     }
 }

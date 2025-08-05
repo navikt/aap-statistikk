@@ -372,7 +372,7 @@ WHERE b.id = ?"""
         returÅrsak = it.getStringOrNull("bh_retur_aarsak")?.ifBlank { null },
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
-            .map { ÅrsakTilBehandling.valueOf(it) },
+            .map { Vurderingsbehov.valueOf(it) },
         resultat = it.getEnumOrNull("bh_resultat"),
         behandlendeEnhet = it.getLongOrNull("e_id")
             ?.let { id -> Enhet(id = id, kode = it.getString("e_kode")) },
