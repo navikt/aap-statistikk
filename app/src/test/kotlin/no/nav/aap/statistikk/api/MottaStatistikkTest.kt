@@ -10,7 +10,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ÅrsakTilBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
@@ -104,7 +104,8 @@ class MottaStatistikkTest {
                         mottattTid = mottattTid,
                         sakStatus = SakStatus.UTREDES,
                         hendelsesTidspunkt = hendelsesTidspunkt,
-                        årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
+                        vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
+                        årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD)
                     )
                 )
             )
@@ -124,7 +125,8 @@ class MottaStatistikkTest {
                     mottattTid = mottattTid,
                     sakStatus = SakStatus.UTREDES,
                     hendelsesTidspunkt = hendelsesTidspunkt,
-                    årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
+                    årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD),
+                    vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
                 )
             )
         )
@@ -197,7 +199,8 @@ class MottaStatistikkTest {
             mottattTid = LocalDateTime.now().minusDays(1),
             sakStatus = SakStatus.UTREDES,
             hendelsesTidspunkt = LocalDateTime.now(),
-            årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
+            årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD),
+            vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
         )
 
         val hendelse2 = hendelse.copy(hendelsesTidspunkt = LocalDateTime.now().plusSeconds(0))
@@ -378,7 +381,8 @@ class MottaStatistikkTest {
             mottattTid = LocalDateTime.now().minusDays(1),
             sakStatus = SakStatus.UTREDES,
             hendelsesTidspunkt = LocalDateTime.now(),
-            årsakTilBehandling = listOf(ÅrsakTilBehandling.SØKNAD)
+            årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD),
+            vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
         )
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)

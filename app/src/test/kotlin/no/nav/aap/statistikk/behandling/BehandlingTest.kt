@@ -7,8 +7,8 @@ class BehandlingTest {
 
     @Test
     fun `prioriter årsaker til behandling`() {
-        val flereÅrsaker = listOf(ÅrsakTilBehandling.SØKNAD, ÅrsakTilBehandling.MELDEKORT)
+        val flereÅrsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.MELDEKORT)
 
-        assertThat(flereÅrsaker.prioriterÅrsaker()).isEqualTo(ÅrsakTilBehandling.SØKNAD)
+        assertThat(flereÅrsaker.prioriterÅrsaker()).isEqualTo(Vurderingsbehov.SØKNAD)
     }
 }
