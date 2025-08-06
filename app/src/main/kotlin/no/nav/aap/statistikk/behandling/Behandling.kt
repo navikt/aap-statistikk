@@ -112,6 +112,7 @@ enum class TypeBehandling(val kildeSystem: KildeSystem) {
 
 enum class Vurderingsbehov(val sortering: Int) {
     SØKNAD(0),
+    HELHETLIG_VURDERING(1),
     AKTIVITETSMELDING(1),
     MELDEKORT(1),
     FRITAK_MELDEPLIKT(2),
@@ -123,6 +124,7 @@ enum class Vurderingsbehov(val sortering: Int) {
     REVURDER_YRKESSKADE(1),
     REVURDER_BEREGNING(1),
     REVURDER_LOVVALG(1),
+    REVURDER_MELDEPLIKT_RIMELIG_GRUNN(1),
     KLAGE(0),
     REVURDER_SAMORDNING(1),
     LOVVALG_OG_MEDLEMSKAP(1),
