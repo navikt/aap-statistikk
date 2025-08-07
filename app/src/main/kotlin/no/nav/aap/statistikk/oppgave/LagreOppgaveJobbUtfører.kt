@@ -26,8 +26,7 @@ class LagreOppgaveJobbUtfører(
     private val saksbehandlerRepository: SaksbehandlerRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val lagreSakInfotilBigQueryCallback: (BehandlingId) -> Unit
-) :
-    JobbUtfører {
+) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val hendelse = DefaultJsonMapper.fromJson<Long>(input.payload())
 

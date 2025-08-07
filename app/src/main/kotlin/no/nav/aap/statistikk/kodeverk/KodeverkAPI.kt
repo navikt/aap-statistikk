@@ -34,6 +34,18 @@ fun Application.kodeverk(
                     title {
                         +name
                     }
+
+                    unsafe {
+                        raw(
+                            """
+                                <style>
+                                th {
+                                border-bottom: 1px solid black;
+                                }
+                               </style>
+                            """.trimIndent()
+                        )
+                    }
                 }
                 body {
                     h1 {

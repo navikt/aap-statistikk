@@ -67,8 +67,7 @@ data class PdlRespons(val hentPersonBolk: List<HentPersonBolkResult>)
 
 data class HentPersonBolkResult(val ident: String, val person: Person?)
 
-private const val identer = "\$identer"
-val PERSON_BOLK_QUERY = """
+val PERSON_BOLK_QUERY = $$"""
     query($identer: [ID!]!) {
         hentPersonBolk(identer: $identer) {
             ident,
