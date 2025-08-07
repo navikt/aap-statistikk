@@ -41,6 +41,7 @@ import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.kodeverk.kodeverk
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.pdl.PdlConfig
@@ -230,6 +231,7 @@ fun Application.module(
 
     monitoring(prometheusMeterRegistry)
     statusPages()
+    kodeverk(transactionExecutor)
 
     commonKtorModule(
         prometheusMeterRegistry, azureConfig, InfoModel(
