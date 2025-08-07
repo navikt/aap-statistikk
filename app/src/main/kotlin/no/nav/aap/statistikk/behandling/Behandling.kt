@@ -99,6 +99,9 @@ enum class KildeSystem {
     Behandlingsflyt, Postmottak
 }
 
+/**
+ * Ved oppdateringer her må `kodeverk_behandlingstype`-tabellen oppdateres! Legg til migrering.
+ */
 enum class TypeBehandling(val kildeSystem: KildeSystem) {
     Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt),
     Revurdering(kildeSystem = KildeSystem.Behandlingsflyt),

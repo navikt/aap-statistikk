@@ -29,10 +29,14 @@ data class VilkårsPeriode(
     val avslagsårsak: String? = null
 )
 
+/**
+ * Ved oppdateringer her må tabellen `kodeverk_vilkar` oppdateres. Lag migrering!
+ */
 enum class Vilkårtype {
     ALDERSVILKÅRET,
     SYKDOMSVILKÅRET,
-    BISTANDSVILKÅRET, MEDLEMSKAP,
+    BISTANDSVILKÅRET,
+    MEDLEMSKAP,
     GRUNNLAGET,
     SYKEPENGEERSTATNING,
     LOVVALG,
