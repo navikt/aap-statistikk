@@ -4,11 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.behandling.Behandling
-import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.behandling.prioriterÅrsaker
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
@@ -35,6 +31,12 @@ class SaksStatistikkService(
     fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
 
         val behandling = behandlingRepository.hent(behandlingId)
+
+        if (behandling.typeBehandling in listOf(TypeBehandling.Oppfølgingsbehandling)) {
+            logger.info("Behandling $behandlingId er oppfølgingsbehandling, og skal ikke til BigQuery.")
+            return
+        }
+
         val erSkjermet = skjermingService.erSkjermet(behandling)
         val saksbehandler =
             if (erSkjermet) "-5" else behandling.sisteSaksbehandler
