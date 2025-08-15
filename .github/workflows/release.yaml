@@ -41,6 +41,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: deploy-dev
     needs: gradle
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
@@ -55,6 +57,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    concurrency:
+      group: deploy-prod
     needs: dev
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
