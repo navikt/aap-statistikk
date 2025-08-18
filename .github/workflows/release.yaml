@@ -75,3 +75,13 @@ jobs:
     with:
       cluster: dev-gcp
       project: aap-dev-e48b
+
+  deploy-bigquery-resources-prod:
+    uses: ./.github/workflows/deploy_bigquery.yml
+    secrets: inherit
+    needs: dev
+    permissions:
+      id-token: write
+    with:
+      cluster: prod-gcp
+      project: aap-prod-9adc
