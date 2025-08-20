@@ -128,7 +128,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setEnumName(c++, behandling.gjeldendeStegGruppe)
                 setString(c++, behandling.returÅrsak)
                 setEnumName(c++, behandling.resultat)
-                setLocalDateTime(c++, behandling.oppdatertTidspunkt)
+                setLocalDateTime(c, behandling.oppdatertTidspunkt)
             }
         }
 

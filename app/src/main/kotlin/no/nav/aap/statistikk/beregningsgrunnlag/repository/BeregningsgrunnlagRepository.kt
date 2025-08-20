@@ -147,7 +147,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     beregningsGrunnlag.grunnlagForBeregningAvYrkesskadeandel
                 )
                 setBigDecimal(c++, beregningsGrunnlag.yrkesskadeinntektIG)
-                setBigDecimal(c++, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
+                setBigDecimal(c, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
             }
         }
     }
@@ -176,7 +176,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     c++,
                     ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr)
                 )
-                setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
+                setInt(c, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
             }
         }
     }

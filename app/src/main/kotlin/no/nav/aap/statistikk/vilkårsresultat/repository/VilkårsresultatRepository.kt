@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.*
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
@@ -16,11 +17,12 @@ class VilkårsresultatRepository(
         behandlingId: BehandlingId
     ): Long {
         val sqlInsertResultat =
-            """INSERT INTO VILKARSRESULTAT (behandling_id) VALUES (?)"""
+            """INSERT INTO VILKARSRESULTAT (behandling_id, opprettet_tidspunkt) VALUES (?, ?)"""
 
         val uthentetId = dbConnection.executeReturnKey(sqlInsertResultat) {
             setParams {
                 setLong(1, behandlingId.id)
+                setLocalDateTime(2, LocalDateTime.now())
             }
         }
 

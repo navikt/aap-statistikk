@@ -32,7 +32,7 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
                 setLocalDateTime(c++, hendelse.reservertTidspunkt)
                 setLocalDateTime(c++, hendelse.opprettetTidspunkt)
                 setString(c++, hendelse.endretAv)
-                setLocalDateTime(c++, hendelse.endretTidspunkt)
+                setLocalDateTime(c, hendelse.endretTidspunkt)
             }
         }.also { log.info("Lagret oppgavehendelse med id $it.") }
     }

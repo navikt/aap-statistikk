@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.util.*
 
 private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.java)
@@ -23,9 +24,10 @@ class TilkjentYtelseRepository(
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
 
         val nøkkel =
-            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id) VALUES (?)") {
+            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt) VALUES (?, ?)") {
                 setParams {
                     setInt(1, hentBehandlingId(tilkjentYtelse.behandlingsReferanse, dbConnection))
+                    setLocalDateTime(2, LocalDateTime.now())
                 }
             }
 
