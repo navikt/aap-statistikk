@@ -122,7 +122,7 @@ WHERE sak.saksnummer = ?
                 setBoolean(c++, true)
                 setLocalDateTime(c++, sak.sistOppdatert)
                 setLong(c++, sak.id)
-                setString(c++, sak.sakStatus.toString())
+                setString(c, sak.sakStatus.toString())
             }
         }
 
