@@ -24,6 +24,7 @@ spec:
              date(vp.fra_dato) as fraDato,
              date(vp.til_dato) as tilDato,
              vp.utfall         as utfall,
+             vr.opprettet_tidspunkt as regDato,
              timestamp_millis(greatest(b.datastream_metadata.source_timestamp, v.datastream_metadata.source_timestamp, vr.datastream_metadata.source_timestamp, vp.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)) AS endretTid,
              concat(b.id, '-', v.id, '-', vr.id, '-', vp.id, '-', br.id, '-', s.id) as unik_id
       FROM datastream_hendelser.public_vilkarsresultat vr
