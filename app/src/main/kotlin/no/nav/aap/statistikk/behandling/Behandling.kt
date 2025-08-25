@@ -110,7 +110,8 @@ enum class TypeBehandling(val kildeSystem: KildeSystem) {
     SvarFraAndreinstans(kildeSystem = KildeSystem.Behandlingsflyt),
     Dokumenthåndtering(kildeSystem = KildeSystem.Postmottak),
     Journalføring(kildeSystem = KildeSystem.Postmottak),
-    Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt)
+    Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt),
+    Aktivitetsplikt(kildeSystem = KildeSystem.Behandlingsflyt),
 }
 
 enum class Vurderingsbehov(val sortering: Int) {
@@ -143,7 +144,8 @@ enum class Vurderingsbehov(val sortering: Int) {
     REVURDER_MANUELL_INNTEKT(1),
     KLAGE_TRUKKET(1),
     MOTTATT_KABAL_HENDELSE(1),
-    OPPFØLGINGSOPPGAVE(0)
+    OPPFØLGINGSOPPGAVE(0), 
+    AKTIVITETSPLIKT_11_7(1);
 }
 
 
