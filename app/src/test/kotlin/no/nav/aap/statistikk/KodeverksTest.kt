@@ -67,7 +67,8 @@ class KodeverksTest {
             "Førstegangsbehandling",
             "Revurdering",
             "Klage",
-            "SvarFraAndreinstans"
+            "SvarFraAndreinstans",
+            "Aktivitetsplikt"
         )
     }
 
