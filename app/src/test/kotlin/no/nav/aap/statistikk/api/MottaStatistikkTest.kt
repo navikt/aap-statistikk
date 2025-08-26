@@ -293,12 +293,11 @@ class MottaStatistikkTest {
                     },
                     { it?.let { it > 0 } ?: false })
             }
+
+            val exceptions = listAppender.list.filter { it.throwableProxy != null }
+            assertThat(exceptions).isEmpty()
+            motor.stop()
         }
-
-        val exceptions = listAppender.list.filter { it.throwableProxy != null }
-        assertThat(exceptions).isEmpty()
-
-        motor.stop()
     }
 
     private fun opprettMotor(
