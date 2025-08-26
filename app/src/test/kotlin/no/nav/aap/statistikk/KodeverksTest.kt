@@ -2,8 +2,6 @@ package no.nav.aap.statistikk
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
-import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.kodeverk.Kodeverk
 import no.nav.aap.statistikk.kodeverk.KodeverkRepository
 import no.nav.aap.statistikk.testutils.Postgres
