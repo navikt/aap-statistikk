@@ -27,7 +27,10 @@ spec:
         tp.antall_barn as antallBarn,
         tp.barnetillegg,
         tp.barnetillegg_sats as barnetilleggSats,
-        tp.redusert_dagsats as redusertDagsats
+        tp.redusert_dagsats as redusertDagsats,
+        DATETIME(ty.opprettet_tidspunkt) AS regDato,
+        DATETIME(TIMESTAMP_MILLIS(GREATEST(b.datastream_metadata.source_timestamp, tp.datastream_metadata.source_timestamp, ty.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endretTid,
+        concat(b.id, '-', tp.id, '-', ty.id, '-', br.id, '-', s.id) as unik_id
       FROM
         `aap-dev-e48b.datastream_hendelser.public_tilkjent_ytelse_periode` tp
       JOIN
