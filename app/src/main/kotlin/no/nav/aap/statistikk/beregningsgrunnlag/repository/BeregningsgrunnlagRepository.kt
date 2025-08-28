@@ -302,7 +302,7 @@ where br.referanse = ?
             object : TypeReference<Map<Int, Double>>() {}
         val parsedMap = ObjectMapper().readValue(grunnlagUføreRs.getString("g_inntekter"), typeRef)
 
-        val grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
+        @Suppress("LocalVariableName") val grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
             grunnlag = grunnlagUføreRs.getDouble("g_grunnlag"),
             er6GBegrenset = grunnlagUføreRs.getBoolean("g_er6g_begrenset"),
             erGjennomsnitt = grunnlagUføreRs.getBoolean("g_er_gjennomsnitt"),
