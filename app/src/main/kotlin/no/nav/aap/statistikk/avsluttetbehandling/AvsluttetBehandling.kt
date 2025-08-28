@@ -99,6 +99,7 @@ sealed interface IBeregningsGrunnlag {
 
     fun type(): GrunnlagType
 
+    @Suppress("ClassName")
     data class Grunnlag_11_19(
         val grunnlag: Double,
         val er6GBegrenset: Boolean,
