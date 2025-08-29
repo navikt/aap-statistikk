@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
+import no.nav.aap.statistikk.hendelser.onlyOrNull
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
@@ -74,7 +75,7 @@ class YtelsesStatistikkTilBigQuery(
 
         val beregningsGrunnlag =
             beregningsgrunnlagRepository.hentBeregningsGrunnlag(behandling.referanse)
-                .firstOrNull()
+                .onlyOrNull()
 
         val tilGrunnlag = beregningsGrunnlag?.let {
             tilBqGrunnlag(
