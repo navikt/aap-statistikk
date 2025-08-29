@@ -20,16 +20,16 @@ spec:
       SELECT
         s.saksnummer,
         br.referanse,
-        tp.fra_dato as fraDato,
-        tp.til_dato,
+        date(tp.fra_dato) as fra_dato,
+        date(tp.til_dato) as til_dato,
         tp.dagsats,
         tp.gradering,
-        tp.antall_barn as antallBarn,
+        tp.antall_barn as antall_barn,
         tp.barnetillegg,
-        tp.barnetillegg_sats as barnetilleggSats,
-        tp.redusert_dagsats as redusertDagsats,
-        DATETIME(ty.opprettet_tidspunkt) AS regDato,
-        DATETIME(TIMESTAMP_MILLIS(GREATEST(b.datastream_metadata.source_timestamp, tp.datastream_metadata.source_timestamp, ty.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endretTid,
+        tp.barnetillegg_sats as barnetillegg_sats,
+        tp.redusert_dagsats as redusert_dagsats,
+        DATETIME(ty.opprettet_tidspunkt) AS reg_dato,
+        DATETIME(TIMESTAMP_MILLIS(GREATEST(b.datastream_metadata.source_timestamp, tp.datastream_metadata.source_timestamp, ty.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endret_tid,
         concat(b.id, '-', tp.id, '-', ty.id, '-', br.id, '-', s.id) as unik_id
       FROM
         `datastream_hendelser.public_tilkjent_ytelse_periode` tp
