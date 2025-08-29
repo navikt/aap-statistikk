@@ -1,0 +1,80 @@
+apiVersion: bigquery.cnrm.cloud.google.com/v1beta1
+kind: BigQueryTable
+metadata:
+  name: view-beregningsgrunnlag
+  namespace: aap
+  labels:
+    team: aap
+  annotations:
+    cnrm.cloud.google.com/management-conflict-prevention-policy: none
+    cnrm.cloud.google.com/state-into-spec: absent
+    cnrm.cloud.google.com/project-id: {{project}}
+spec:
+  resourceID: view_beregningsgrunnlag
+  description: "View som viser beregningsgrunnlag."
+  datasetRef:
+    external: ytelsestatistikk
+  view:
+    useLegacySql: false
+    query: >-
+      SELECT
+      br.referanse AS behandlingsreferanse,
+      s.saksnummer AS saksnummer,
+      pg.type AS type,
+      (
+      SELECT
+      CASE pg.type
+      WHEN '11_19' THEN g.grunnlag
+      WHEN 'yrkesskade' THEN gy.grunnlag
+      WHEN 'uføre' THEN gu.grunnlag
+      ELSE NULL
+      END
+      ) AS grunnlaget,
+      g.grunnlag AS grunnlaget_std,
+      g.er6g_begrenset AS g_er6g_begrenset,
+      g.er_gjennomsnitt AS g_er_gjennomsnitt,
+      g.inntekter AS g_inntekter,
+      gy.grunnlag AS gy_grunnlag,
+      gy.beregningsgrunnlag_type AS gy_beregningsgrunnlag_type,
+      gy.terskelverdi_for_yrkesskade AS gy_terskelverdi_for_yrkesskade,
+      gy.andel_som_skyldes_yrkesskade AS gy_andel_som_skyldes_yrkesskade,
+      gy.andel_yrkesskade AS gy_andel_yrkesskade,
+      gy.benyttet_andel_for_yrkesskade AS gy_benyttet_andel_for_yrkesskade,
+      gy.andel_som_ikke_skyldes_yrkesskade AS gy_andel_som_ikke_skyldes_yrkesskade,
+      gy.antatt_arlig_inntekt_yrkesskade_tidspunktet AS gy_antatt_arlig_inntekt_yrkesskade_tidspunktet,
+      gy.yrkesskade_tidspunkt AS gy_yrkesskade_tidspunkt,
+      gy.grunnlag_for_beregning_av_yrkesskadeandel AS gy_grunnlag_for_beregning_av_yrkesskadeandel,
+      gy.yrkesskadeinntekt_ig AS gy_yrkesskadeinntekt_ig,
+      gy.grunnlag_etter_yrkesskade_fordel AS gy_grunnlag_etter_yrkesskade_fordel,
+      gu.grunnlag AS gu_grunnlag,
+      gu.type AS gu_type,
+      gu.uforegrad AS gu_uforegrad,
+      gu.ufore_inntekter_fra_foregaende_ar AS gu_ufore_inntekter_fra_foregaende_ar,
+      gu.ufore_ytterligere_nedsatt_arbeidsevne_ar AS gu_ufore_ytterligere_nedsatt_arbeidsevne_ar,
+      br.referanse AS b_referanse
+      FROM
+      datastream_hendelser.public_grunnlag pg
+      LEFT OUTER JOIN
+      datastream_hendelser.public_grunnlag_11_19 AS g
+      ON
+      pg.id = g.grunnlag_id
+      LEFT OUTER JOIN
+      datastream_hendelser.public_grunnlag_yrkesskade AS gy
+      ON
+      g.id = gy.beregningsgrunnlag_id
+      LEFT OUTER JOIN
+      datastream_hendelser.public_grunnlag_ufore AS gu
+      ON
+      g.id = gu.grunnlag_11_19_id
+      LEFT OUTER JOIN
+      datastream_hendelser.public_behandling AS b
+      ON
+      b.id = pg.behandling_id
+      LEFT OUTER JOIN
+      datastream_hendelser.public_behandling_referanse br
+      ON
+      b.referanse_id = br.id
+      JOIN
+      aap-dev-e48b.datastream_hendelser.public_sak s
+      ON
+      s.id = b.sak_id
