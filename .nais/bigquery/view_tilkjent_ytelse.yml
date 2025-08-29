@@ -19,7 +19,7 @@ spec:
     query: >-
       SELECT
         s.saksnummer,
-        br.referanse,
+        br.referanse as behandlingsreferanse,
         date(tp.fra_dato) as fra_dato,
         date(tp.til_dato) as til_dato,
         tp.dagsats,
