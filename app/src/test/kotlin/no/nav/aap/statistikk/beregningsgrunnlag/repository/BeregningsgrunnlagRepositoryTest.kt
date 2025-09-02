@@ -96,8 +96,7 @@ class BeregningsgrunnlagRepositoryTest {
                 ).hentBeregningsGrunnlag(behandlingsReferanse)
             }
 
-        assertThat(hentBeregningsGrunnlag).hasSize(1)
-        assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
+        assertThat(hentBeregningsGrunnlag).hasSize(1).first().isEqualTo(
             MedBehandlingsreferanse(
                 value = grunnlagYrkesskade,
                 behandlingsReferanse = behandlingsReferanse
