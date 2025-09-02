@@ -145,7 +145,8 @@ enum class Vurderingsbehov(val sortering: Int) {
     KLAGE_TRUKKET(1),
     MOTTATT_KABAL_HENDELSE(1),
     OPPFØLGINGSOPPGAVE(0), 
-    AKTIVITETSPLIKT_11_7(1);
+    AKTIVITETSPLIKT_11_7(1),
+    EFFEKTUER_AKTIVITETSPLIKT(1);
 }
 
 
