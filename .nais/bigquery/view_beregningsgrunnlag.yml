@@ -27,13 +27,13 @@ spec:
                          END)                               AS grunnlaget,
              g.inntekter                                    AS inntekter,
              -- YRKESSKADE
-             gy.yrkesskade_tidspunkt                        AS gy_yrkesskade_tidspunkt,
-             gy.antatt_arlig_inntekt_yrkesskade_tidspunktet AS gy_antatt_arlig_inntekt_yrkesskade_tidspunktet,
-             gy.andel_yrkesskade                            AS gy_andel_yrkesskade,
+             gy.yrkesskade_tidspunkt                        AS yrkesskade_tidspunkt,
+             gy.antatt_arlig_inntekt_yrkesskade_tidspunktet AS antatt_arlig_inntekt_yrkesskade_tidspunktet,
+             gy.andel_yrkesskade                            AS andel_yrkesskade,
              -- UFØRE
-             gu.uforegrad                                   AS gu_uforegrad,
-             gu.ufore_inntekter_fra_foregaende_ar           AS gu_ufore_inntekter_fra_foregaende_ar,
-             gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    AS gu_ufore_ytterligere_nedsatt_arbeidsevne_ar,
+             gu.uforegrad                                   AS uforegrad,
+             gu.ufore_inntekter_fra_foregaende_ar           AS ufore_inntekter_fra_foregaende_ar,
+             gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    AS ufore_ytterligere_nedsatt_arbeidsevne_ar,
       FROM datastream_hendelser.public_grunnlag pg
                LEFT OUTER JOIN
            datastream_hendelser.public_grunnlag_11_19 AS g
