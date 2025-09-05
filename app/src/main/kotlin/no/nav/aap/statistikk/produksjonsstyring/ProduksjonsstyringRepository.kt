@@ -36,6 +36,15 @@ data class BehandlingAarsakAntallGjennomsnitt(
     val gjennomsnittligAlder: Double
 )
 
+data class BehandlingAvklaringsbehovRetur(
+    val avklaringsbehov: String,
+    val antallPerAvklaringsbehov: Int,
+    val returFra: String?,
+    val returÅrsak: String?,
+    val antallÅpneBehandlinger: Int,
+    val gjennomsnittTidFraRetur: Double?
+)
+
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
 
     fun hentBehandlingstidPerDag(
@@ -278,6 +287,58 @@ group by type;
                     antallÅpne = row.getInt("count"),
                     behandlingstype = row.getEnum("type"),
                     gjennomsnittsalder = row.getDoubleOrNull("gjennomsnitt_alder") ?: 0.0
+                )
+            }
+        }
+    }
+
+    fun antallBehandlingerPerAvklaringsbehovRetur(
+        behandlingsTyper: List<TypeBehandling>,
+        enheter: List<String>
+    ): List<BehandlingAvklaringsbehovRetur> {
+        val sql = """
+            WITH oppgave_enhet AS (SELECT br.id, MIN(o.enhet_id) AS enhet_id, br.referanse
+                                   FROM behandling_referanse br
+                                            LEFT JOIN oppgave o ON br.id = o.behandling_referanse_id
+                                   WHERE o.status != 'AVSLUTTET'
+                                   GROUP BY br.id, br.referanse)
+            SELECT bh.gjeldende_avklaringsbehov                              as avklaringsbehov,
+                   count(*) OVER (PARTITION BY bh.gjeldende_avklaringsbehov) AS antall_per_avklaringsbehov,
+                   bh.gjeldende_avklaringsbehov_status                       AS retur_fra,
+                   bh.retur_aarsak,
+                   count(*)                                                  AS antall_aapne_behandlinger,
+                   extract(epoch from avg(current_timestamp at time zone 'Europe/Oslo' - bh.hendelsestidspunkt))
+                                                                             AS gj_snitt_tid_fra_retur
+            FROM behandling b
+                     JOIN behandling_historikk bh ON b.id = bh.behandling_id
+                     LEFT JOIN oppgave_enhet oe ON b.referanse_id = oe.id
+                     LEFT JOIN enhet e ON e.id = oe.enhet_id
+            WHERE bh.gjeldende = true
+              AND bh.gjeldende_avklaringsbehov IS NOT NULL
+              AND bh.gjeldende_avklaringsbehov_status IN ('SENDT_TILBAKE_FRA_BESLUTTER', 'SENDT_TILBAKE_FRA_KVALITETSSIKRER')
+              AND (b.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+              AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL)
+            GROUP BY bh.gjeldende_avklaringsbehov, retur_fra, bh.retur_aarsak
+            ORDER BY bh.gjeldende_avklaringsbehov, retur_fra, bh.retur_aarsak;
+        """.trimIndent()
+
+        return connection.queryList(sql) {
+            setParams {
+                setBehandlingsTyperParam(behandlingsTyper)
+                if (enheter.isEmpty()) {
+                    setString(2, null)
+                } else {
+                    setArray(2, enheter)
+                }
+            }
+            setRowMapper { row ->
+                BehandlingAvklaringsbehovRetur(
+                    avklaringsbehov = row.getString("avklaringsbehov"),
+                    antallPerAvklaringsbehov = row.getInt("antall_per_avklaringsbehov"),
+                    returFra = row.getString("retur_fra"),
+                    returÅrsak = row.getString("retur_aarsak"),
+                    antallÅpneBehandlinger = row.getInt("antall_aapne_behandlinger"),
+                    gjennomsnittTidFraRetur = row.getDouble("gj_snitt_tid_fra_retur")
                 )
             }
         }
