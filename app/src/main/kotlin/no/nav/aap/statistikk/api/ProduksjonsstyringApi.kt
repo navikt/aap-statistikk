@@ -389,4 +389,21 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         })
     }
 
+    data class BehandlingerReturGjennomsnitt(
+        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+            TypeBehandling.Førstegangsbehandling
+        ),
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+    )
+    route("/behandlinger/retur").get<BehandlingerReturGjennomsnitt, List<BehandlingAvklaringsbehovRetur>>(
+        modules,
+        EndpointInfo(summary = "Hvor mange saker som blir returnert fra kvalitetssikrer og beslutter og hvor lenge disse sakene har ligget etter retur.")
+    ) { req ->
+        val respons = transactionExecutor.withinTransaction { conn ->
+            ProduksjonsstyringRepository(conn).antallBehandlingerPerAvklaringsbehovRetur(
+                req.behandlingstyper ?: listOf(), req.enheter.orEmpty()
+            )
+        }
+        respond(respons)
+    }
 }
