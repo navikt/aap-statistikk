@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -77,12 +78,13 @@ WHERE br.referanse = ?"""
         type: GrunnlagType,
         behandlingId: BehandlingId
     ): Long {
-        val sql = "INSERT INTO GRUNNLAG(type, behandling_id) VALUES (?, ?) "
+        val sql = "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt) VALUES (?, ?, ?) "
 
         return connection.executeReturnKey(sql) {
             setParams {
                 setString(1, type.toString())
                 setLong(2, behandlingId.id)
+                setLocalDateTime(3, LocalDateTime.now())
             }
         }
     }
