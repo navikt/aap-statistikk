@@ -38,11 +38,15 @@ data class BehandlingAarsakAntallGjennomsnitt(
 
 data class BehandlingAvklaringsbehovRetur(
     val avklaringsbehov: String,
-    val antallPerAvklaringsbehov: Int,
     val returFra: String,
     val returÅrsak: String,
     val antallÅpneBehandlinger: Int,
     val gjennomsnittTidFraRetur: Double
+)
+
+data class BehandlingAvklaringsbehovReturDTO(
+    val returerPerAvklaringsbehov: List<BehandlingAvklaringsbehovRetur>,
+    val totalt: Int
 )
 
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
@@ -303,7 +307,6 @@ group by type;
                                    WHERE o.status != 'AVSLUTTET'
                                    GROUP BY br.id, br.referanse)
             SELECT bh.gjeldende_avklaringsbehov                              as avklaringsbehov,
-                   count(*) OVER (PARTITION BY bh.gjeldende_avklaringsbehov) AS antall_per_avklaringsbehov,
                    bh.gjeldende_avklaringsbehov_status                       AS retur_fra,
                    bh.retur_aarsak,
                    count(*)                                                  AS antall_aapne_behandlinger,
@@ -334,7 +337,6 @@ group by type;
             setRowMapper { row ->
                 BehandlingAvklaringsbehovRetur(
                     avklaringsbehov = row.getString("avklaringsbehov"),
-                    antallPerAvklaringsbehov = row.getInt("antall_per_avklaringsbehov"),
                     returFra = row.getString("retur_fra"),
                     returÅrsak = row.getString("retur_aarsak"),
                     antallÅpneBehandlinger = row.getInt("antall_aapne_behandlinger"),
