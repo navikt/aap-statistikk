@@ -39,10 +39,10 @@ data class BehandlingAarsakAntallGjennomsnitt(
 data class BehandlingAvklaringsbehovRetur(
     val avklaringsbehov: String,
     val antallPerAvklaringsbehov: Int,
-    val returFra: String?,
-    val returÅrsak: String?,
+    val returFra: String,
+    val returÅrsak: String,
     val antallÅpneBehandlinger: Int,
-    val gjennomsnittTidFraRetur: Double?
+    val gjennomsnittTidFraRetur: Double
 )
 
 class ProduksjonsstyringRepository(private val connection: DBConnection) {
