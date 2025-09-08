@@ -395,14 +395,22 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         ),
         @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
     )
-    route("/behandlinger/retur").get<BehandlingerReturGjennomsnitt, List<BehandlingAvklaringsbehovRetur>>(
+    route("/behandlinger/retur").get<BehandlingerReturGjennomsnitt, List<BehandlingAvklaringsbehovReturDTO>>(
         modules,
         EndpointInfo(summary = "Hvor mange saker som blir returnert fra kvalitetssikrer og beslutter og hvor lenge disse sakene har ligget etter retur.")
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).antallBehandlingerPerAvklaringsbehovRetur(
+            val data = ProduksjonsstyringRepository(conn).antallBehandlingerPerAvklaringsbehovRetur(
                 req.behandlingstyper ?: listOf(), req.enheter.orEmpty()
             )
+
+            val groupedByBehov = data.groupBy { it.avklaringsbehov }.values.toList()
+            groupedByBehov.map { aggregerteBehov ->
+                BehandlingAvklaringsbehovReturDTO(
+                    aggregerteBehov,
+                    aggregerteBehov.sumOf { it.antallÅpneBehandlinger }
+                )
+            }
         }
         respond(respons)
     }
