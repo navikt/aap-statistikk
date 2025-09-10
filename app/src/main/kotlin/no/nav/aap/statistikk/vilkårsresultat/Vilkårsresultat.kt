@@ -40,7 +40,9 @@ enum class Vilkårtype {
     GRUNNLAGET,
     SYKEPENGEERSTATNING,
     LOVVALG,
-    SAMORDNING
+    SAMORDNING,
+    OVERGANGARBEIDVILKÅRET,
+    OVERGANGUFØREVILKÅRET
 }
 
 enum class Utfall {

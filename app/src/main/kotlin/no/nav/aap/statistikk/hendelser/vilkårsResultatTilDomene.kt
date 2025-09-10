@@ -54,5 +54,7 @@ private fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.tilDomene
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.SYKEPENGEERSTATNING -> Vilkårtype.SYKEPENGEERSTATNING
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.LOVVALG -> Vilkårtype.LOVVALG
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.SAMORDNING -> Vilkårtype.SAMORDNING
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.OVERGANGARBEIDVILKÅRET -> Vilkårtype.OVERGANGARBEIDVILKÅRET
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.OVERGANGUFØREVILKÅRET -> Vilkårtype.OVERGANGUFØREVILKÅRET
     }
 }
