@@ -224,5 +224,7 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.REVURDER_MELDEPLIKT_RIMELIG_GRUNN -> REVURDER_MELDEPLIKT_RIMELIG_GRUNN
         Vurderingsbehov.AKTIVITETSPLIKT_11_7 -> AKTIVITETSPLIKT_11_7
         Vurderingsbehov.EFFEKTUER_AKTIVITETSPLIKT -> EFFEKTUER_AKTIVITETSPLIKT
+        Vurderingsbehov.OVERGANG_UFORE -> OVERGANG_UFORE
+        Vurderingsbehov.OVERGANG_ARBEID -> OVERGANG_ARBEID
     }
 }
