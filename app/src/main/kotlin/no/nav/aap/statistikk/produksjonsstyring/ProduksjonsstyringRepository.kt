@@ -895,6 +895,7 @@ WHERE (b.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
   AND bh.gjeldende = TRUE
   AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL)
   AND bh.status != 'AVSLUTTET'
+  AND b.aarsaker_til_behandling IS NOT NULL
 GROUP BY arr.aarsak;
         """.trimIndent()
 
