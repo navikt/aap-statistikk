@@ -73,7 +73,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("no.nav.aap.kelvin:motor-test-utils:$komponenterVersjon")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("com.nimbusds:nimbus-jose-jwt:10.4.2")
+    testImplementation("com.nimbusds:nimbus-jose-jwt:10.5")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("org.assertj:assertj-core:3.27.4")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
