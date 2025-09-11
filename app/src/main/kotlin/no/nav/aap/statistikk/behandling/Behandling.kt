@@ -148,7 +148,8 @@ enum class Vurderingsbehov(val sortering: Int) {
     AKTIVITETSPLIKT_11_7(1),
     EFFEKTUER_AKTIVITETSPLIKT(1),
     OVERGANG_UFORE(1),
-    OVERGANG_ARBEID(1);
+    OVERGANG_ARBEID(1),
+    REVURDERING_KANSELLERT(0);
 }
 
 

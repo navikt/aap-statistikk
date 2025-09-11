@@ -181,6 +181,7 @@ class SaksStatistikkService(
                     ResultatKode.KLAGE_DELVIS_OMGJØRES -> "KLAGE_DELVIS_OMGJØRES"
                     ResultatKode.KLAGE_AVSLÅTT -> "KLAGE_AVSLÅTT"
                     ResultatKode.KLAGE_TRUKKET -> "KLAGE_TRUKKET"
+                    ResultatKode.KANSELLERT -> "KANSELLERT"
                     null -> null
                 }
             }
