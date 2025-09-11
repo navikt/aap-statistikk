@@ -872,22 +872,30 @@ order by bucket;
         enheter: List<String>
     ): List<BehandlingAarsakAntallGjennomsnitt> {
         val sql = """
-select unnest(b.aarsaker_til_behandling)                                       as aarsak,
-       count(*),
-       extract(epoch from avg(current_timestamp at time zone 'Europe/Oslo' -
-                                                             b.opprettet_tid)) as avg_alder
-from behandling b
-         join behandling_historikk bh on b.id = bh.behandling_id
-         LEFT JOIN enhet e ON e.id = (SELECT distinct o.enhet_id
-                                      FROM oppgave o
-                                      WHERE o.behandling_referanse_id = b.referanse_id
-                                        AND o.status != 'AVSLUTTET'
-                                      LIMIT 1)
-where (b.type = ANY (?::text[]) or ${'$'}1 is null)
-  and bh.gjeldende = true
-  and (e.kode = ANY (?::text[]) or ${'$'}2 is null)
-  and bh.status != 'AVSLUTTET'
-group by aarsak;
+SELECT arr.aarsak,
+       COUNT(*) AS antall,
+       EXTRACT(
+               EPOCH FROM AVG(current_timestamp AT TIME ZONE 'Europe/Oslo' - b.opprettet_tid)
+       ) AS avg_alder
+FROM behandling b
+         JOIN behandling_historikk bh
+              ON b.id = bh.behandling_id
+         LEFT JOIN LATERAL unnest(b.aarsaker_til_behandling) arr(aarsak) ON TRUE
+         LEFT JOIN (
+    SELECT DISTINCT ON (o.behandling_referanse_id)
+        o.behandling_referanse_id,
+        o.enhet_id
+    FROM oppgave o
+    WHERE o.status != 'AVSLUTTET'
+    ORDER BY o.behandling_referanse_id
+) o ON o.behandling_referanse_id = b.referanse_id
+         LEFT JOIN enhet e
+                   ON e.id = o.enhet_id
+WHERE (b.type = ANY (?::text[]) OR ${'$'}1 IS NULL)
+  AND bh.gjeldende = TRUE
+  AND (e.kode = ANY (?::text[]) OR ${'$'}2 IS NULL)
+  AND bh.status != 'AVSLUTTET'
+GROUP BY arr.aarsak;
         """.trimIndent()
 
         return connection.queryList(sql) {
