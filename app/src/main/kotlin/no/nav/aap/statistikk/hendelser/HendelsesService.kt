@@ -58,7 +58,9 @@ class HendelsesService(
             }
         }
 
-        opprettBigQueryLagringSakStatistikkCallback(behandlingId)
+        if (hendelse.behandlingType !in listOf(no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling)) {
+            opprettBigQueryLagringSakStatistikkCallback(behandlingId)
+        }
 
         meterRegistry.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
@@ -172,7 +174,7 @@ fun no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.tilDomene(): T
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.SvarFraAndreinstans -> TypeBehandling.SvarFraAndreinstans
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling -> TypeBehandling.Oppfølgingsbehandling
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Aktivitetsplikt -> TypeBehandling.Aktivitetsplikt
-        
+
     }
 
 fun Status.tilDomene(): BehandlingStatus =
