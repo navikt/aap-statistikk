@@ -7,7 +7,7 @@ plugins {
     application
 }
 
-val ktorVersion = "3.2.3"
+val ktorVersion = "3.3.0"
 val mockkVersion = "1.14.5"
 val flywayVersion = "11.12.0"
 val testContainersVersion = "1.21.3"
