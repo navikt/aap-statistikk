@@ -10,6 +10,8 @@ private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
 /**
  * @param endretTid Også kalt "funksjonellTid". Tidspunkt for siste endring på behandlingen. Ved første melding vil denne være lik registrertTid.
  * @param tekniskTid Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.
+ * @param mottattTid Tidspunktet da behandlingen oppstår (eks. søknad mottas). Dette er starten på beregning av saksbehandlingstid. Denne verdien må være mindre eller lik registrertTid.
+ * @param registrertTid Tidspunkt da behandlingen første gang ble registrert i fagsystemet. Ved digitale søknader bør denne være tilnærmet lik mottattTid.
  */
 data class BQBehandling(
     val fagsystemNavn: String = "Kelvin",
@@ -43,9 +45,11 @@ data class BQBehandling(
     init {
         require(behandlingType.uppercase() == behandlingType)
         require(mottattTid.truncatedTo(SECONDS).isEqual(mottattTid))
+
         require(
             registrertTid.truncatedTo(SECONDS).isEqual(registrertTid)
         )
+        require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid)) { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid." }
         require(
             ferdigbehandletTid == null || ferdigbehandletTid.truncatedTo(SECONDS)
                 .isEqual(ferdigbehandletTid)
@@ -63,8 +67,3 @@ data class BQBehandling(
 enum class BehandlingMetode {
     MANUELL, AUTOMATISK, KVALITETSSIKRING, FATTE_VEDTAK
 }
-
-/**
- * @param id Skal referere til sekvensnummer.
- */
-data class BQVilkårsPrøving(val id: String, val beskrivelse: String, val resultat: String)
