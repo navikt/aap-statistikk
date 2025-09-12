@@ -9,7 +9,6 @@ import no.nav.aap.postmottak.kontrakt.avklaringsbehov.Status
 import no.nav.aap.postmottak.kontrakt.behandling.TypeBehandling
 import no.nav.aap.postmottak.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
-import no.nav.aap.postmottak.kontrakt.steg.StegType
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -111,17 +110,6 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
         }
         .map { it.avklaringsbehovDefinisjon.kode }
         .firstOrNull()?.toString()
-}
-
-// TODO!!
-fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {
-    return this
-        .filter(function())
-        .sortedByDescending {
-            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
-        }
-        .map { it.avklaringsbehovDefinisjon.løsesISteg }
-        .firstOrNull()
 }
 
 private fun function(): (AvklaringsbehovHendelseDto) -> Boolean =

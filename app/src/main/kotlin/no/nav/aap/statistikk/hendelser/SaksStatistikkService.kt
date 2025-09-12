@@ -6,10 +6,10 @@ import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepositor
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
-import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
+import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Clock.systemDefaultZone
@@ -56,7 +56,6 @@ class SaksStatistikkService(
 
         val relatertBehandlingUUID =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
-
 
         val behandlingHendelse = hendelser.last()
         val hendelsesTidspunkt = behandlingHendelse.tidspunkt

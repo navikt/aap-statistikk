@@ -4,10 +4,12 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakePdlClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -83,7 +85,7 @@ class SkjermingServiceTest {
         logger.addAppender(listAppender)
 
         val service = SkjermingService(object : PdlClient {
-            override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.pdl.Person> {
+            override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {
                 throw Exception("oopsie")
             }
         })

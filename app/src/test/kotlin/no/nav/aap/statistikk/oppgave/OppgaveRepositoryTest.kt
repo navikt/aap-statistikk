@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat

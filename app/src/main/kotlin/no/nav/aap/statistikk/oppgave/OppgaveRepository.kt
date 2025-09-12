@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.oppgave
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.person.Person
 
 class OppgaveRepository(private val dbConnection: DBConnection) {

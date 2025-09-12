@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.enhet
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.statistikk.oppgave.Enhet
 
 class EnhetRepository(private val dbConnection: DBConnection) {
     fun lagreEnhet(enhet: Enhet): Long {

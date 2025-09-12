@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.produksjonsstyring
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
-import no.nav.aap.statistikk.api.BehandlingerPerBehandlingstypeInputMedPeriode
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -928,9 +927,9 @@ GROUP BY arr.aarsak;
 fun tilSteggruppe(kode: String): String {
     return try {
         Definisjon.forKode(kode).løsesISteg.gruppe.toString()
-    } catch (e: IllegalArgumentException) {
+    } catch (_: IllegalArgumentException) {
         no.nav.aap.postmottak.kontrakt.avklaringsbehov.Definisjon.forKode(kode).løsesISteg.gruppe.toString()
-    } catch (e: NoSuchElementException) {
+    } catch (_: NoSuchElementException) {
         throw IllegalStateException("Finner ikke for kode $kode")
     }
 }
