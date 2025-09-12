@@ -37,6 +37,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.*
@@ -335,7 +336,13 @@ class IntegrationTest {
                 { it != null }
             )
             assertThat(behandling).isNotNull
-            assertThat(behandling!!.behandlendeEnhet!!.kode).isEqualTo("0400")
+            val enhet = dataSource.transaction {
+                OppgaveHendelseRepository(it).hentEnhetForAvklaringsbehov(
+                    behandling!!.referanse,
+                    behandling.gjeldendeAvklaringsBehov!!
+                ).last()
+            }
+            assertThat(enhet.enhet).isEqualTo("0400")
 
             testUtil.ventPåSvar()
             val bqSaker = ventPåSvar(

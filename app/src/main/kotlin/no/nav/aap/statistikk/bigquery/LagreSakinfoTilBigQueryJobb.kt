@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 
@@ -33,10 +34,11 @@ class LagreSakinfoTilBigQueryJobb(
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val sakStatistikkService = SaksStatistikkService(
             behandlingRepository = behandlingRepositoryFactory(connection),
+            rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
             bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
             bigQueryRepository = bqSakstatikk,
             skjermingService = skjermingService,
-            rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+            oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
         )
         return LagreSakinfoTilBigQueryJobbUtfører(sakStatistikkService)
     }

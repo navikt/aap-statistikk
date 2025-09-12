@@ -210,7 +210,7 @@ where id = ?"""
         },
         reservasjon = it.getLongOrNull("o_reservasjon_id")?.let { reservasjon ->
             Reservasjon(
-                id = it.getLong("o_reservasjon_id"),
+                id = reservasjon,
                 reservertAv = Saksbehandler(
                     id = it.getLong("r_reservert_av"),
                     ident = it.getString("s_nav_ident")

@@ -176,9 +176,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
        bh.soknadsformat                    as bh_soknadsformat,
        bh.steggruppe                       as bh_steggruppe,
        v.versjon                           as v_versjon,
-       rp.rp_ident                         as rp_ident,
-       e.id                                as e_id,
-       e.kode                              as e_kode
+       rp.rp_ident                         as rp_ident
 FROM behandling b
          JOIN sak s on b.sak_id = s.id
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
@@ -192,11 +190,6 @@ FROM behandling b
                              JOIN person pr ON rp.person_id = pr.id
                     GROUP BY rp.behandling_id) rp
                    on rp.behandling_id = bh.id
-         left join enhet e on e.id = (select o.enhet_id
-                                      from oppgave o
-                                      where o.behandling_referanse_id = b.referanse_id
-                                      order by o.opprettet_tidspunkt desc
-                                      limit 1)
 WHERE br.referanse = ?"""
         ) {
             setParams {
@@ -374,8 +367,6 @@ WHERE b.id = ?"""
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
             .map { Vurderingsbehov.valueOf(it) },
         resultat = it.getEnumOrNull("bh_resultat"),
-        behandlendeEnhet = it.getLongOrNull("e_id")
-            ?.let { id -> Enhet(id = id, kode = it.getString("e_kode")) },
         oppdatertTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt")
     )
 }

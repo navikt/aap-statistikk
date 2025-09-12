@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepositor
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.BQBehandling
 import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
@@ -26,7 +27,8 @@ class SaksStatistikkService(
     private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
     private val bigQueryRepository: IBQSakstatistikkRepository,
     private val skjermingService: SkjermingService,
-    private val clock: Clock = systemDefaultZone()
+    private val clock: Clock = systemDefaultZone(),
+    val oppgaveHendelseRepository: OppgaveHendelseRepository
 ) {
     fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
 
@@ -50,7 +52,18 @@ class SaksStatistikkService(
 
         val hendelser = behandling.hendelser
         val erHosNAY = erHosNay(hendelser)
-        val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling)
+        val enhet = if (behandling.gjeldendeAvklaringsBehov != null) {
+            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
+                behandling.referanse,
+                behandling.gjeldendeAvklaringsBehov
+            ).lastOrNull()?.enhet
+        } else null
+
+        if (enhet == null) {
+            logger.warn("Fant ikke enhet for behandling $behandlingId.")
+        }
+
+        val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling, enhet)
 
         val behandlingReferanse = behandling.referanse
 
@@ -189,13 +202,13 @@ class SaksStatistikkService(
 
     private fun ansvarligEnhet(
         erHosNAY: Boolean,
-        behandling: Behandling
+        behandling: Behandling,
+        enhet: String?
     ): String? {
         if (skjermingService.erSkjermet(behandling)) {
             return "-5"
         }
-        // TODO! Hvordan fange opp 4438 her?
-        return if (erHosNAY) NAY_NASJONAL_KØ_KODE else behandling.behandlendeEnhet?.kode
+        return enhet ?: if (erHosNAY) NAY_NASJONAL_KØ_KODE else null
     }
 
     fun behandlingStatus(behandling: Behandling): String {
