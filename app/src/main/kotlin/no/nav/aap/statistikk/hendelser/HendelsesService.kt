@@ -92,7 +92,7 @@ class HendelsesService(
             returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
             resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
             gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
-            årsaker = dto.årsakTilBehandling.map { it.tilDomene() },
+            årsaker = dto.vurderingsbehov.map { it.tilDomene() },
             oppdatertTidspunkt = dto.hendelsesTidspunkt
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
