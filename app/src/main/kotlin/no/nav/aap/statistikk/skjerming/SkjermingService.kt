@@ -10,7 +10,7 @@ class SkjermingService(
     private val pdlClient: PdlClient
 ) {
     fun erSkjermet(behandling: Behandling): Boolean {
-        val identer = listOf(behandling.sak.person.ident) + behandling.relaterteIdenter
+        val identer = behandling.identerPåBehandling()
         try {
             val hentPersoner = pdlClient.hentPersoner(identer)
             return hentPersoner

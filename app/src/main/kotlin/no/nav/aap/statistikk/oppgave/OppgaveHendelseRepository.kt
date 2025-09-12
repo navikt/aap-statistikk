@@ -2,6 +2,8 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.util.*
 
 class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -82,4 +84,32 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
         }
 
     }
+
+    fun hentEnhetForAvklaringsbehov(
+        behandlingReferanse: UUID,
+        avklaringsbehovKode: String
+    ): List<EnhetOgTidspunkt> {
+        val sql = """
+            select enhet, mottatt_tidspunkt
+            from oppgave_hendelser
+            where behandling_referanse = ?
+              and avklaringsbehov_kode = ?
+            order by opprettet_tidspunkt desc
+        """.trimIndent()
+
+        return dbConnection.queryList(sql) {
+            setParams {
+                setUUID(1, behandlingReferanse)
+                setString(2, avklaringsbehovKode)
+            }
+            setRowMapper {
+                EnhetOgTidspunkt(
+                    enhet = it.getString("enhet"),
+                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt")
+                )
+            }
+        }
+    }
 }
+
+data class EnhetOgTidspunkt(val enhet: String, val tidspunkt: LocalDateTime)

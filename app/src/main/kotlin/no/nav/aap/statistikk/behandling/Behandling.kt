@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.sak.Sak
 import java.time.LocalDateTime
@@ -17,7 +16,6 @@ data class Versjon(
 
 /**
  * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
- * @param behandlendeEnhet Hvilket NAV-kontor som eier behandlingen. Utledet som siste enhet på en oppgave tilhørende behandlingen.
  */
 data class Behandling(
     val id: BehandlingId? = null,
@@ -41,7 +39,6 @@ data class Behandling(
     val returÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<Vurderingsbehov> = listOf(),
-    val behandlendeEnhet: Enhet? = null,
     val resultat: ResultatKode? = null,
     val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
     val hendelser: List<BehandlingHendelse> = listOf(),
@@ -67,6 +64,10 @@ data class Behandling(
         return hendelser
             .filter { it.status == BehandlingStatus.AVSLUTTET }
             .maxOf { it.hendelsesTidspunkt }
+    }
+
+    fun identerPåBehandling(): List<String> {
+        return listOf(this.sak.person.ident) + this.relaterteIdenter
     }
 }
 
@@ -144,7 +145,7 @@ enum class Vurderingsbehov(val sortering: Int) {
     REVURDER_MANUELL_INNTEKT(1),
     KLAGE_TRUKKET(1),
     MOTTATT_KABAL_HENDELSE(1),
-    OPPFØLGINGSOPPGAVE(0), 
+    OPPFØLGINGSOPPGAVE(0),
     AKTIVITETSPLIKT_11_7(1),
     EFFEKTUER_AKTIVITETSPLIKT(1),
     OVERGANG_UFORE(1),

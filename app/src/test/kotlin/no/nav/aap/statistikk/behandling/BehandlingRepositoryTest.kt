@@ -6,7 +6,10 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.enhet.EnhetRepository
-import no.nav.aap.statistikk.oppgave.*
+import no.nav.aap.statistikk.oppgave.BehandlingReferanse
+import no.nav.aap.statistikk.oppgave.Oppgave
+import no.nav.aap.statistikk.oppgave.OppgaveRepository
+import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
@@ -100,7 +103,6 @@ class BehandlingRepositoryTest {
             Vurderingsbehov.SØKNAD,
             Vurderingsbehov.G_REGULERING
         )
-        assertThat(uthentet.behandlendeEnhet).isEqualTo(enhet)
         assertThat(uthentet.gjeldendeAvklaringsbehovStatus).isEqualTo(Status.OPPRETTET)
         assertThat(uthentet.resultat).isEqualTo(ResultatKode.INNVILGET)
         assertThat(uthentet.hendelser).satisfiesExactly(
