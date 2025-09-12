@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.pdl
+package no.nav.aap.statistikk.integrasjoner.pdl
 
 data class GraphQLRespons<E>(
     val errors: List<GraphQLError>? = null,

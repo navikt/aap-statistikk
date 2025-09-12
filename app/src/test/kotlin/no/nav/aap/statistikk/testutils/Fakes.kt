@@ -11,7 +11,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.statistikk.pdl.*
+import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
+import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
+import no.nav.aap.statistikk.integrasjoner.pdl.GraphQLRespons
+import no.nav.aap.statistikk.integrasjoner.pdl.HentPersonBolkResult
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlRespons
+import no.nav.aap.statistikk.integrasjoner.pdl.Person
 import org.junit.jupiter.api.extension.*
 import java.net.URI
 

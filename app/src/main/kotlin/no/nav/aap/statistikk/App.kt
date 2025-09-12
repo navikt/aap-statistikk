@@ -44,14 +44,14 @@ import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.kodeverk.kodeverk
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
-import no.nav.aap.statistikk.pdl.PdlConfig
-import no.nav.aap.statistikk.pdl.PdlGraphQLClient
-import no.nav.aap.statistikk.pdl.SkjermingService
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLClient
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
+import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory

@@ -20,11 +20,9 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.testutil.TestUtil
-import no.nav.aap.oppgave.OppgaveDto
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveTilStatistikkDto
 import no.nav.aap.oppgave.verdityper.Behandlingstype
-import no.nav.aap.statistikk.api.Azp
 import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.BehandlingId
@@ -38,7 +36,7 @@ import no.nav.aap.statistikk.hendelser.utledGjeldendeAvklaringsBehov
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
-import no.nav.aap.statistikk.pdl.PdlConfig
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.sak.SakTabell
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.*

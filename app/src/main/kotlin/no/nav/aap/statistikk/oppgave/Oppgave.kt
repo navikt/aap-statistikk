@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.oppgave
 
+import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.person.Person
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -121,7 +122,5 @@ private fun reservasjon(hendelse: OppgaveHendelse) =
             reservasjonOpprettet = hendelse.reservertTidspunkt
         )
     } else null
-
-data class Enhet(val id: Long? = null, val kode: String)
 
 data class Saksbehandler(val id: Long? = null, val ident: String)

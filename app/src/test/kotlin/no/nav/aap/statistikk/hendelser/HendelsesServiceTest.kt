@@ -15,12 +15,12 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.nyBehandlingOpprettet
-import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

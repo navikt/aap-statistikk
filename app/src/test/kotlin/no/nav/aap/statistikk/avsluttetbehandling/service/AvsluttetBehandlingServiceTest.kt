@@ -13,8 +13,8 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRep
 import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse

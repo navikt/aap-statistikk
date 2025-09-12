@@ -1,6 +1,8 @@
-package no.nav.aap.statistikk.pdl
+package no.nav.aap.statistikk.skjerming
 
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
 
 private val logger = org.slf4j.LoggerFactory.getLogger("SkjermingService")
 

@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.pdl
+package no.nav.aap.statistikk.integrasjoner.pdl
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig

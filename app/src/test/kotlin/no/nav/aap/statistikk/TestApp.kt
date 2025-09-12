@@ -5,7 +5,7 @@ import io.ktor.server.netty.*
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.pdl.PdlConfig
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.bigQueryContainer
 import no.nav.aap.statistikk.testutils.postgresTestConfig

@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.oppgave.*
 import no.nav.aap.statistikk.sak.SakStatus

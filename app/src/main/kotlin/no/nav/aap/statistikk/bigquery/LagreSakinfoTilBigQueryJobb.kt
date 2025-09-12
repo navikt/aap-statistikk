@@ -8,8 +8,8 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.hendelser.SaksStatistikkService
-import no.nav.aap.statistikk.pdl.SkjermingService
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
+import no.nav.aap.statistikk.skjerming.SkjermingService
 
 class LagreSakinfoTilBigQueryJobbUtfører(private val sakStatistikkService: SaksStatistikkService) :
     JobbUtfører {
