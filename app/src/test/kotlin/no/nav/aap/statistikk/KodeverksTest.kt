@@ -66,7 +66,8 @@ class KodeverksTest {
             "Revurdering",
             "Klage",
             "SvarFraAndreinstans",
-            "Aktivitetsplikt"
+            "Aktivitetsplikt",
+            "Aktivitetsplikt11_9",
         )
     }
 

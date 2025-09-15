@@ -174,7 +174,7 @@ fun no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.tilDomene(): T
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.SvarFraAndreinstans -> TypeBehandling.SvarFraAndreinstans
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling -> TypeBehandling.Oppfølgingsbehandling
         no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Aktivitetsplikt -> TypeBehandling.Aktivitetsplikt
-
+        no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Aktivitetsplikt11_9 -> TypeBehandling.Aktivitetsplikt11_9
     }
 
 fun Status.tilDomene(): BehandlingStatus =
@@ -225,6 +225,7 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.HELHETLIG_VURDERING -> HELHETLIG_VURDERING
         Vurderingsbehov.REVURDER_MELDEPLIKT_RIMELIG_GRUNN -> REVURDER_MELDEPLIKT_RIMELIG_GRUNN
         Vurderingsbehov.AKTIVITETSPLIKT_11_7 -> AKTIVITETSPLIKT_11_7
+        Vurderingsbehov.AKTIVITETSPLIKT_11_9 -> AKTIVITETSPLIKT_11_9
         Vurderingsbehov.EFFEKTUER_AKTIVITETSPLIKT -> EFFEKTUER_AKTIVITETSPLIKT
         Vurderingsbehov.OVERGANG_UFORE -> OVERGANG_UFORE
         Vurderingsbehov.OVERGANG_ARBEID -> OVERGANG_ARBEID
