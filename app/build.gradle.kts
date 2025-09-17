@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id("aap-statistikk.conventions")
     kotlin("jvm")
-    id("io.ktor.plugin") version "3.2.3"
+    id("io.ktor.plugin") version "3.3.0"
     application
 }
 
@@ -12,7 +12,7 @@ val mockkVersion = "1.14.5"
 val flywayVersion = "11.12.0"
 val testContainersVersion = "1.21.3"
 val komponenterVersjon = "1.0.361"
-val behandlingsflytversjon = "0.0.431"
+val behandlingsflytversjon = "0.0.434"
 val tilgangVersjon = "1.0.122"
 val oppgaveVersjon = "0.0.119"
 val postmottakVersjon = "0.0.116"
@@ -94,6 +94,7 @@ repositories {
 
 tasks {
     withType<ShadowJar> {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         mergeServiceFiles()
     }
 }
