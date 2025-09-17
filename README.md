@@ -8,13 +8,15 @@ Formålet er å levere statistikk og produkssjonstyringsdata relatert til AAP.
 
 Bruker Gradle wrapper, så bare klon og kjør `./gradlew build`.
 
+Dokumentasjon på [sysdok](https://aap-sysdoc.ansatt.nav.no/funksjonalitet/Statistikk/teknisk)..
+
 ## Henvendelser
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
 # For NAV-ansatte
 
-Interne henvendelser kan sendes via Slack i kanalen `#po-aap-team-aap`.
+Interne henvendelser kan sendes via Slack i kanalen `#ytelse-aap-værsågod`.
 
 
 ## Oppdatere Gradle wrapper

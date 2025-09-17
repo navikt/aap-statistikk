@@ -32,7 +32,7 @@ data class BQBehandling(
     val mottattTid: LocalDateTime,
     val opprettetAv: String,
     val ansvarligBeslutter: String?,
-    val vedtakTid: LocalDateTime? = null,
+    private val vedtakTid: LocalDateTime? = null,
     val søknadsFormat: SøknadsFormat,
     val saksbehandler: String?,
     val behandlingMetode: BehandlingMetode,
@@ -51,7 +51,6 @@ data class BQBehandling(
             registrertTid.truncatedTo(SECONDS).isEqual(registrertTid)
         )
         require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid)) { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid." }
-        require(vedtakTid == null || vedtakTid.truncatedTo(SECONDS).isEqual(vedtakTid))
         if (ansvarligEnhetKode == null) {
             logger.info("Fant ikke ansvarlig enhet for behandling $behandlingUUID med saksnummer $saksnummer.")
         }
@@ -61,6 +60,7 @@ data class BQBehandling(
     }
 
     val ferdigBehandletTidTrunkert = ferdigbehandletTid?.truncatedTo(SECONDS)
+    val vedtakTidTrunkert = vedtakTid?.truncatedTo(SECONDS)
 }
 
 enum class BehandlingMetode {
