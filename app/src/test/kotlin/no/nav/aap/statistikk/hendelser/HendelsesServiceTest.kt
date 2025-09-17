@@ -34,8 +34,6 @@ import java.util.*
 class HendelsesServiceTest {
     @Test
     fun `sette inn med relatert behanding`() {
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
-
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
@@ -55,7 +53,6 @@ class HendelsesServiceTest {
             skjermingService,
             simpleMeterRegistry,
             rettighetstypeperiodeRepository,
-            bqRepositoryYtelse,
             opprettBigQueryLagringCallback,
             clock
         )
@@ -106,7 +103,6 @@ class HendelsesServiceTest {
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID,
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD)
             )
         )
 
@@ -131,7 +127,6 @@ class HendelsesServiceTest {
         skjermingService: SkjermingService,
         simpleMeterRegistry: SimpleMeterRegistry,
         rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
-        bqRepositoryYtelse: FakeBQYtelseRepository,
         opprettBigQueryLagringCallback: (BehandlingId) -> Unit,
         clock: Clock
     ): HendelsesService {
@@ -161,8 +156,6 @@ class HendelsesServiceTest {
 
     @Test
     fun `teller opprettet behandling`() {
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
-
         val currentInstant = Instant.now()
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
@@ -179,7 +172,6 @@ class HendelsesServiceTest {
             skjermingService,
             simpleMeterRegistry,
             rettighetstypeperiodeRepository,
-            bqRepositoryYtelse,
             { MockJobbAppender() },
             clock
         )
@@ -204,7 +196,6 @@ class HendelsesServiceTest {
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD)
             )
         )
 

@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     return this
-        .filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
+        .filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
         .onlyOrNull()
         ?.endringer?.sortedBy { it.tidsstempel }
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.tidsstempel
@@ -23,7 +23,7 @@ fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
  * er "Fatte vedtak"
  */
 fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
-    return this.filter { it.avklaringsbehovDefinisjon.løsesISteg == StegType.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
+    return this.filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
         .onlyOrNull()
         ?.endringer?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
 }

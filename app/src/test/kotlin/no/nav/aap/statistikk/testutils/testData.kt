@@ -162,7 +162,6 @@ fun behandlingHendelse(
         mottattTid = LocalDateTime.parse("2024-08-14T10:35:33.595"),
         sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
         hendelsesTidspunkt = LocalDateTime.now(clock),
-        årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD),
         vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
     )
 }
