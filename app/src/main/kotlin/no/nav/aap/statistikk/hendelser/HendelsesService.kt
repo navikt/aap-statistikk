@@ -229,6 +229,6 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.EFFEKTUER_AKTIVITETSPLIKT -> EFFEKTUER_AKTIVITETSPLIKT
         Vurderingsbehov.OVERGANG_UFORE -> OVERGANG_UFORE
         Vurderingsbehov.OVERGANG_ARBEID -> OVERGANG_ARBEID
-        Vurderingsbehov.REVURDERING_KANSELLERT -> REVURDERING_KANSELLERT
+        Vurderingsbehov.REVURDERING_AVBRUTT -> REVURDERING_AVBRUTT
     }
 }
