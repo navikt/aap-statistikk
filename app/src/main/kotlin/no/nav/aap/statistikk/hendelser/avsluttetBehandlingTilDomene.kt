@@ -51,7 +51,7 @@ fun ResultatKode?.resultatTilDomene(): no.nav.aap.statistikk.avsluttetbehandling
         ResultatKode.KLAGE_OMGJØRES -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_OMGJØRES
         ResultatKode.KLAGE_DELVIS_OMGJØRES -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_DELVIS_OMGJØRES
         ResultatKode.KLAGE_AVSLÅTT -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KLAGE_AVSLÅTT
-        ResultatKode.KANSELLERT -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.KANSELLERT
+        ResultatKode.AVBRUTT -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.AVBRUTT
         null -> null
     }
 
