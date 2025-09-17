@@ -232,9 +232,7 @@ WHERE br.referanse = ?"""
        bh.steggruppe                       as bh_steggruppe,
        bh.id                               as bh_id,
        v.versjon                           as v_versjon,
-       rp.rp_ident                         as rp_ident,
-       e.id                                as e_id,
-       e.kode                              as e_kode
+       rp.rp_ident                         as rp_ident
 FROM behandling b
          JOIN behandling_referanse br on b.referanse_id = br.id
          JOIN sak s on b.sak_id = s.id
@@ -248,11 +246,6 @@ FROM behandling b
                              JOIN person pr ON rp.person_id = pr.id
                     GROUP BY rp.behandling_id) rp
                    on rp.behandling_id = bh.id
-         left join enhet e on e.id = (select o.enhet_id
-                                      from oppgave o
-                                      where o.behandling_referanse_id = b.referanse_id
-                                      order by o.opprettet_tidspunkt desc
-                                      limit 1)
 WHERE b.id = ?"""
 
     override fun hent(id: BehandlingId): Behandling {

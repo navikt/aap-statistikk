@@ -308,7 +308,7 @@ class SakTabell : BQTable<BQBehandling> {
                     ?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "opprettetAv" to value.opprettetAv,
                 "saksbehandler" to value.saksbehandler,
-                "vedtakTid" to value.vedtakTid?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                "vedtakTid" to value.vedtakTidTrunkert?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "soknadsformat" to value.søknadsFormat.toString(),
                 "behandlingMetode" to value.behandlingMetode.toString(),
                 "ansvarligBeslutter" to value.ansvarligBeslutter,

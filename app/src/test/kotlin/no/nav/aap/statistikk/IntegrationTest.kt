@@ -400,7 +400,7 @@ class IntegrationTest {
 
             assertThat(sakRespons).hasSize(3)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("Z994573")
-            assertThat(sakRespons.first().vedtakTid).isEqualTo(
+            assertThat(sakRespons.first().vedtakTidTrunkert).isEqualTo(
                 LocalDateTime.of(
                     2024,
                     10,
