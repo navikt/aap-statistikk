@@ -26,7 +26,8 @@ fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
 fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
     return this.filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
         .onlyOrNull()
-        ?.endringer?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
+        ?.endringer?.sortedBy { it.tidsstempel }
+        ?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
 }
 
 fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
