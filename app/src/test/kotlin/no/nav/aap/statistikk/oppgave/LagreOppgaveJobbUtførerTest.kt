@@ -56,12 +56,14 @@ class LagreOppgaveJobbUtførerTest {
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                personService = PersonService(PersonRepository(it)),
-                oppgaveRepository = OppgaveRepository(it),
-                enhetRepository = EnhetRepository(it),
-                saksbehandlerRepository = SaksbehandlerRepository(it),
-                BehandlingRepository(it),
-                lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
+                oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
+                    personService = PersonService(PersonRepository(it)),
+                    oppgaveRepository = OppgaveRepository(it),
+                    enhetRepository = EnhetRepository(it),
+                    saksbehandlerRepository = SaksbehandlerRepository(it),
+                    BehandlingRepository(it),
+                    lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
+                ),
             ).utfør(
                 JobbInput(
                     LagreOppgaveJobb(
@@ -259,12 +261,14 @@ class LagreOppgaveJobbUtførerTest {
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                personService = PersonService(PersonRepository(it)),
-                oppgaveRepository = OppgaveRepository(it),
-                enhetRepository = EnhetRepository(it),
-                saksbehandlerRepository = SaksbehandlerRepository(it),
-                behandlingRepository = BehandlingRepository(it),
-                lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
+                oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
+                    personService = PersonService(PersonRepository(it)),
+                    oppgaveRepository = OppgaveRepository(it),
+                    enhetRepository = EnhetRepository(it),
+                    saksbehandlerRepository = SaksbehandlerRepository(it),
+                    behandlingRepository = BehandlingRepository(it),
+                    lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
+                )
             ).utfør(JobbInput(LagreOppgaveJobb(MockJobbAppender())).medPayload(oppgaveHendelse.oppgaveId.toString()))
         }
     }

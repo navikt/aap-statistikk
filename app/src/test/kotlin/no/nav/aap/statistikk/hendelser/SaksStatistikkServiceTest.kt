@@ -1,0 +1,205 @@
+package no.nav.aap.statistikk.hendelser
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.mockk.mockk
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.oppgave.HendelseType
+import no.nav.aap.statistikk.oppgave.OppgaveHendelse
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
+import no.nav.aap.statistikk.oppgave.Oppgavestatus
+import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.FakeBQSakRepository
+import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.verdityper.dokument.Kanal
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.time.LocalDateTime
+import java.util.*
+import java.util.function.BiPredicate
+import javax.sql.DataSource
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as BehandlingStatus
+import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
+
+class SaksStatistikkServiceTest {
+    @Test
+    fun `hente ut historikk`(@Postgres dataSource: DataSource) {
+
+        val referanse = lagreHendelser(dataSource)
+        val behandlingId =
+            dataSource.transaction { BehandlingRepository(it).hent(referanse)!!.id!! }
+
+        val alleHendelser = dataSource.transaction {
+            val sakStatikkService = konstruerSakstatistikkService(it, FakeBQSakRepository())
+
+            sakStatikkService.alleHendelserPåBehandling(behandlingId)
+        }
+
+        val bQSakRepository = FakeBQSakRepository()
+        dataSource.transaction {
+            konstruerSakstatistikkService(
+                it,
+                bQSakRepository
+            ).lagreSakInfoTilBigquery(behandlingId)
+        }
+        assertThat(bQSakRepository.saker).hasSize(1)
+        assertThat(alleHendelser.last())
+            .usingRecursiveComparison()
+            .ignoringFields("sekvensNummer")
+            .withEqualsForFieldsMatchingRegexes(
+                BiPredicate { a: LocalDateTime, b: LocalDateTime ->
+                    Duration.between(a, b).abs() < Duration.ofSeconds(1)
+                },
+                "(endret|teknisk)Tid"
+            )
+            .isEqualTo(bQSakRepository.saker.first())
+
+        assertThat(alleHendelser.last().ansvarligEnhetKode).isEqualTo("0220")
+
+        assertThat(alleHendelser.size).isEqualTo(2)
+    }
+
+    private fun konstruerSakstatistikkService(
+        connection: DBConnection, bQSakRepository: FakeBQSakRepository
+    ): SaksStatistikkService =
+        SaksStatistikkService(
+            behandlingRepository = BehandlingRepository(connection),
+            rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+            bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
+            bigQueryRepository = bQSakRepository,
+            skjermingService = SkjermingService(mockk()),
+            oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
+        )
+
+    fun lagreHendelser(dataSource: DataSource): UUID {
+        val behandlingReferanse = UUID.randomUUID()
+        val mottattTid = LocalDateTime.now()
+        dataSource.transaction {
+            val hendelsesService = HendelsesService(
+                sakRepository = SakRepositoryImpl(it),
+                // mockk fordi irrelevant for denne testen
+                avsluttetBehandlingService = mockk(relaxed = true),
+                personService = PersonService(PersonRepository(it)),
+                behandlingRepository = BehandlingRepository(it),
+                meterRegistry = SimpleMeterRegistry(),
+                opprettBigQueryLagringSakStatistikkCallback = {},
+            )
+
+            OppgaveHendelseRepository(it).lagreHendelse(OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                oppgaveId = 1L,
+                mottattTidspunkt = LocalDateTime.now(),
+                personIdent = "12345678910",
+                saksnummer = "123456789",
+                behandlingRef = behandlingReferanse,
+                enhet = "0220",
+                avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
+                status = Oppgavestatus.OPPRETTET,
+                reservertAv = "123456789",
+                reservertTidspunkt = LocalDateTime.now(),
+                opprettetTidspunkt = LocalDateTime.now(),
+                endretAv = "123456789",
+                endretTidspunkt = LocalDateTime.now()
+            ))
+
+            hendelsesService.prosesserNyHendelse(
+                StoppetBehandling(
+                    saksnummer = "AAAA",
+                    sakStatus = SakStatus.UTREDES,
+                    behandlingReferanse = behandlingReferanse,
+                    relatertBehandling = null,
+                    behandlingOpprettetTidspunkt = LocalDateTime.now(),
+                    mottattTid = mottattTid,
+                    behandlingStatus = BehandlingStatus.OPPRETTET,
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    soknadsFormat = Kanal.DIGITAL,
+                    ident = "1233456",
+                    versjon = "1",
+                    vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                    avklaringsbehov = listOf(
+                        AvklaringsbehovHendelseDto(
+                            avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                            status = AvklaringsbehovStatus.OPPRETTET,
+                            endringer = listOf(
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.OPPRETTET,
+                                    tidsstempel = LocalDateTime.now(),
+                                    endretAv = "Bork",
+                                )
+                            ),
+                            typeBrev = null,
+                        )
+                    ),
+                    hendelsesTidspunkt = LocalDateTime.now(),
+                    avsluttetBehandling = null,
+                    identerForSak = listOf("1233455", "11212")
+                )
+            )
+
+            hendelsesService.prosesserNyHendelse(
+                StoppetBehandling(
+                    saksnummer = "AAAA",
+                    sakStatus = SakStatus.UTREDES,
+                    behandlingReferanse = behandlingReferanse,
+                    relatertBehandling = null,
+                    behandlingOpprettetTidspunkt = LocalDateTime.now(),
+                    mottattTid = mottattTid,
+                    behandlingStatus = BehandlingStatus.OPPRETTET,
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    soknadsFormat = Kanal.DIGITAL,
+                    ident = "1233456",
+                    versjon = "1",
+                    vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                    avklaringsbehov = listOf(
+                        AvklaringsbehovHendelseDto(
+                            avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                            status = AvklaringsbehovStatus.AVSLUTTET,
+                            endringer = listOf(
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.OPPRETTET,
+                                    tidsstempel = LocalDateTime.now().minusSeconds(1),
+                                    endretAv = "Bork",
+                                ),
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.AVSLUTTET,
+                                    tidsstempel = LocalDateTime.now(),
+                                    endretAv = "Bork",
+                                )
+                            ),
+                        ),
+                        AvklaringsbehovHendelseDto(
+                            avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
+                            status = AvklaringsbehovStatus.OPPRETTET,
+                            endringer = listOf(
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.OPPRETTET,
+                                    tidsstempel = LocalDateTime.now(),
+                                    endretAv = "Bjork",
+                                )
+                            ),
+                        ),
+                    ),
+                    hendelsesTidspunkt = LocalDateTime.now(),
+                    avsluttetBehandling = null,
+                    identerForSak = listOf("1233455", "11212")
+                )
+            )
+        }
+
+        return behandlingReferanse
+    }
+}

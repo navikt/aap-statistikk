@@ -431,7 +431,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 tidspunkt = LocalDateTime.now(),
                 hendelsesTidspunkt = LocalDateTime.now(),
                 status = behandling.status,
-                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus
+                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
+                versjon = behandling.versjon,
             )
         )
         nextId++
@@ -447,7 +448,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 tidspunkt = LocalDateTime.now(),
                 hendelsesTidspunkt = LocalDateTime.now(),
                 status = behandling.status,
-                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus
+                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
+                versjon = behandling.versjon,
             )
         )
     }
