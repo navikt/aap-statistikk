@@ -1,9 +1,13 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.hendelser.erManuell
 import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.Sak
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -13,6 +17,8 @@ data class Versjon(
     val verdi: String,
     val id: Long? = null,
 )
+
+private val log = LoggerFactory.getLogger(Behandling::class.java)
 
 /**
  * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
@@ -69,6 +75,34 @@ data class Behandling(
     fun identerPåBehandling(): List<String> {
         return listOf(this.sak.person.ident) + this.relaterteIdenter
     }
+
+    fun behandlingMetode(): BehandlingMetode {
+        if (this.hendelser.isEmpty()) {
+            log.info("Behandling-hendelser var tom.")
+            return BehandlingMetode.AUTOMATISK
+        }
+        val sisteHendelse = this.hendelser.last()
+        if (sisteHendelse.avklaringsBehov.isNullOrBlank()) {
+            log.info("Ingen avkl.funnet for siste hendelse $sisteHendelse. Behandling: $this")
+            return this.copy(hendelser = this.hendelser.dropLast(1)).behandlingMetode()
+        }
+
+        val sisteDefinisjon = Definisjon.forKode(sisteHendelse.avklaringsBehov)
+
+        if (sisteDefinisjon == Definisjon.KVALITETSSIKRING) {
+            return BehandlingMetode.KVALITETSSIKRING
+        }
+
+        if (sisteDefinisjon == Definisjon.FATTE_VEDTAK) {
+            return BehandlingMetode.FATTE_VEDTAK
+        }
+
+        if (!this.hendelser.erManuell()) {
+            log.info("Hendelser: $this")
+        }
+
+        return if (this.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
+    }
 }
 
 /**
@@ -84,7 +118,10 @@ data class BehandlingHendelse(
     val returÅrsak: String? = null,
     val saksbehandler: Saksbehandler? = null,
     val resultat: ResultatKode? = null,
+    val versjon: Versjon,
     val status: BehandlingStatus,
+    val ansvarligBeslutter: String? = null,
+    val vedtakstidspunkt: LocalDateTime? = null,
 )
 
 enum class SøknadsFormat {

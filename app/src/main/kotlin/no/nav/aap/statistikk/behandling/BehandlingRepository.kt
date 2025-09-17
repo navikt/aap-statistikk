@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
-import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -284,8 +283,13 @@ WHERE b.id = ?"""
               bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
               bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
               bh.resultat                         as bh_resultat,
-              bh.status                           as bh_status
+              bh.status                           as bh_status,
+              bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
+              bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
+              bh.versjon_id                       as bh_versjon_id,
+              v.versjon                           as bh_versjon
        from behandling_historikk bh
+                join versjon v on bh.versjon_id = v.id
        where bh.behandling_id = ?
        order by bh.hendelsestidspunkt
                 """.trimIndent()
@@ -307,7 +311,13 @@ WHERE b.id = ?"""
                                     ident = saksbehandler
                                 )
                             },
-                        status = it.getEnum("bh_status")
+                        ansvarligBeslutter = it.getStringOrNull("bh_ansvarlig_beslutter"),
+                        vedtakstidspunkt = it.getLocalDateTimeOrNull("bh_vedtak_tidspunkt"),
+                        status = it.getEnum("bh_status"),
+                        versjon = Versjon(
+                            id = it.getLong("bh_versjon_id"),
+                            verdi = it.getString("bh_versjon")
+                        )
                     )
                 }
             }

@@ -304,7 +304,7 @@ class SakTabell : BQTable<BQBehandling> {
                 "registrertTid" to value.registrertTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
                 "versjon" to value.verson,
-                "ferdigbehandletTid" to value.ferdigbehandletTid?.truncatedTo(ChronoUnit.SECONDS)
+                "ferdigbehandletTid" to value.ferdigBehandletTidTrunkert?.truncatedTo(ChronoUnit.SECONDS)
                     ?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "opprettetAv" to value.opprettetAv,
                 "saksbehandler" to value.saksbehandler,
