@@ -105,7 +105,6 @@ class MottaStatistikkTest {
                         sakStatus = SakStatus.UTREDES,
                         hendelsesTidspunkt = hendelsesTidspunkt,
                         vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                        årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD)
                     )
                 )
             )
@@ -125,7 +124,6 @@ class MottaStatistikkTest {
                     mottattTid = mottattTid,
                     sakStatus = SakStatus.UTREDES,
                     hendelsesTidspunkt = hendelsesTidspunkt,
-                    årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD),
                     vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
                 )
             )
@@ -199,7 +197,6 @@ class MottaStatistikkTest {
             mottattTid = LocalDateTime.now().minusDays(1),
             sakStatus = SakStatus.UTREDES,
             hendelsesTidspunkt = LocalDateTime.now(),
-            årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD),
             vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
         )
 
@@ -380,7 +377,6 @@ class MottaStatistikkTest {
             mottattTid = LocalDateTime.now().minusDays(1),
             sakStatus = SakStatus.UTREDES,
             hendelsesTidspunkt = LocalDateTime.now(),
-            årsakTilBehandling = listOf(Vurderingsbehov.SØKNAD),
             vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
         )
 

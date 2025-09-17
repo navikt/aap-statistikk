@@ -32,14 +32,14 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRe
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
-import no.nav.aap.statistikk.module
-import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
+import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -293,7 +293,7 @@ fun opprettTestSak(dataSource: DataSource, saksnummer: Saksnummer, person: Perso
             sakStatus = SakStatus.UTREDES,
         )
         val id = SakRepositoryImpl(it).settInnSak(sak)
-        sak.copy(id)
+        sak.copy(id = id)
     }
 }
 
@@ -327,7 +327,7 @@ fun opprettTestBehandling(
                 behandling
             )
         }
-        behandling.copy(id)
+        behandling.copy(id = id)
     }
 }
 
@@ -566,7 +566,7 @@ class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
         vilkårsresultat: VilkårsResultatEntity,
         behandlingId: BehandlingId
     ): Long {
-        vilkår.put(vilkår.size.toLong(), vilkårsresultat)
+        vilkår[vilkår.size.toLong()] = vilkårsresultat
         return (vilkår.size - 1).toLong()
     }
 
