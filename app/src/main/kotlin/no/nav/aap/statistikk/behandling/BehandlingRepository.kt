@@ -203,7 +203,8 @@ WHERE br.referanse = ?"""
         return behandling
     }
 
-    private val hentMedId = """SELECT b.id                                as b_id,
+    private val hentMedId = """
+SELECT b.id                                as b_id,
        br.referanse                        as br_referanse,
        b.type                              as b_type,
        b.opprettet_tid                     as b_opprettet_tid,
