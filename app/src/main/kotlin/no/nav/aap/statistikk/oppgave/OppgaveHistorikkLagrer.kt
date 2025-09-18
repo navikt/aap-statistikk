@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -55,8 +56,10 @@ class OppgaveHistorikkLagrer(
             val behandling = behandlingRepository.hent(oppgave.behandlingReferanse.referanse)
 
             if (behandling != null) {
-                log.info("Kaller lagreSakInfotilBigQueryCallback: $lagreSakInfotilBigQueryCallback")
-                lagreSakInfotilBigQueryCallback(behandling.id!!)
+                if (behandling.typeBehandling != TypeBehandling.Oppfølgingsbehandling) {
+                    log.info("Kaller lagreSakInfotilBigQueryCallback: $lagreSakInfotilBigQueryCallback")
+                    lagreSakInfotilBigQueryCallback(behandling.id!!)
+                }
             } else {
                 log.info("Fant ikke behandling tilknyttet oppgaven, behandlingReferanse=${oppgave.behandlingReferanse.referanse}")
             }
