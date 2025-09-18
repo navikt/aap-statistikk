@@ -50,7 +50,8 @@ data class BQBehandling(
         require(
             registrertTid.truncatedTo(SECONDS).isEqual(registrertTid)
         )
-        require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid)) { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid." }
+        require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid))
+        { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID" }
         if (ansvarligEnhetKode == null) {
             logger.info("Fant ikke ansvarlig enhet for behandling $behandlingUUID med saksnummer $saksnummer.")
         }
