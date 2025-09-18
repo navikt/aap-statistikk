@@ -98,4 +98,12 @@ tasks {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
         mergeServiceFiles()
     }
+
+    test {
+        useJUnitPlatform()
+        maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
 }
