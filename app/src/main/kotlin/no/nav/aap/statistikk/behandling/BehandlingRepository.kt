@@ -145,13 +145,13 @@ WHERE ident = ?""", behandling.relaterteIdenter
 
     override fun hent(referanse: UUID): Behandling? {
         val behandling = dbConnection.queryFirstOrNull(
-            """SELECT b.id                                as b_id,
-       b.referanse_id                      as b_referanse,
+            """
+SELECT b.id                                as b_id,
+       br.referanse                        as br_referanse,
        b.type                              as b_type,
        b.opprettet_tid                     as b_opprettet_tid,
        b.forrige_behandling_id             as b_forrige_behandling_id,
        b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
-       br.referanse                        as br_referanse,
        s.id                                as s_id,
        s.saksnummer                        as s_saksnummer,
        sh.oppdatert_tid                    as sh_oppdatert_tid,
@@ -165,7 +165,6 @@ WHERE ident = ?""", behandling.relaterteIdenter
        bh.hendelsestidspunkt               as bh_hendelsestidspunkt,
        bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
        bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
-       bh.id                               as bh_id,
        bh.siste_saksbehandler              as bh_siste_saksbehandler,
        bh.venteaarsak                      as bh_venteaarsak,
        bh.retur_aarsak                     as bh_retur_aarsak,
@@ -174,20 +173,28 @@ WHERE ident = ?""", behandling.relaterteIdenter
        bh.resultat                         as bh_resultat,
        bh.soknadsformat                    as bh_soknadsformat,
        bh.steggruppe                       as bh_steggruppe,
+       bh.id                               as bh_id,
        v.versjon                           as v_versjon,
        rp.rp_ident                         as rp_ident
 FROM behandling b
-         JOIN sak s on b.sak_id = s.id
-         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
-         JOIN person p on p.id = s.person_id
          JOIN behandling_referanse br on b.referanse_id = br.id
-         JOIN (SELECT * FROM behandling_historikk bh WHERE bh.gjeldende = TRUE) bh
-              on b.id = bh.behandling_id
+         JOIN sak s on b.sak_id = s.id
+         JOIN LATERAL (SELECT *
+                       FROM sak_historikk sh
+                       WHERE gjeldende = TRUE
+                         and sh.sak_id = s.id) sh on s.id = sh.sak_id
+         JOIN person p on p.id = s.person_id
+         JOIN LATERAL (SELECT *
+                       FROM behandling_historikk
+                       WHERE gjeldende = TRUE
+                         AND behandling_historikk.behandling_id = b.id) bh
+              on bh.behandling_id = b.id
          JOIN versjon v on v.id = bh.versjon_id
-         LEFT JOIN (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
-                    FROM relaterte_personer rp
-                             JOIN person pr ON rp.person_id = pr.id
-                    GROUP BY rp.behandling_id) rp
+         LEFT JOIN LATERAL (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
+                            FROM relaterte_personer rp
+                                     JOIN person pr ON rp.person_id = pr.id
+                            WHERE rp.behandling_id = bh.behandling_id
+                            GROUP BY rp.behandling_id) rp
                    on rp.behandling_id = bh.id
 WHERE br.referanse = ?"""
         ) {
@@ -237,15 +244,22 @@ SELECT b.id                                as b_id,
 FROM behandling b
          JOIN behandling_referanse br on b.referanse_id = br.id
          JOIN sak s on b.sak_id = s.id
-         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh on s.id = sh.sak_id
+         JOIN LATERAL (SELECT *
+                       FROM sak_historikk sh
+                       WHERE gjeldende = TRUE
+                         and sh.sak_id = s.id) sh on s.id = sh.sak_id
          JOIN person p on p.id = s.person_id
-         JOIN (SELECT * FROM behandling_historikk WHERE gjeldende = TRUE) bh
+         JOIN LATERAL (SELECT *
+                       FROM behandling_historikk
+                       WHERE gjeldende = TRUE
+                         AND behandling_historikk.behandling_id = b.id) bh
               on bh.behandling_id = b.id
          JOIN versjon v on v.id = bh.versjon_id
-         LEFT JOIN (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
-                    FROM relaterte_personer rp
-                             JOIN person pr ON rp.person_id = pr.id
-                    GROUP BY rp.behandling_id) rp
+         LEFT JOIN LATERAL (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
+                            FROM relaterte_personer rp
+                                     JOIN person pr ON rp.person_id = pr.id
+                            WHERE rp.behandling_id = bh.behandling_id
+                            GROUP BY rp.behandling_id) rp
                    on rp.behandling_id = bh.id
 WHERE b.id = ?"""
 
