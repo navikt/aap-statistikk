@@ -57,7 +57,7 @@ class SaksStatistikkService(
     fun bqBehandlingForBehandling(
         behandling: Behandling,
         erSkjermet: Boolean,
-        sekvensNummer: Long
+        sekvensNummer: Long?
     ): BQBehandling {
         val sak = behandling.sak
         val relatertBehandlingUUID = hentRelatertBehandlingUUID(behandling)
@@ -119,20 +119,19 @@ class SaksStatistikkService(
         )
     }
 
-    fun alleHendelserPåBehandling(behandlingId: BehandlingId): List<BQBehandling> {
+    fun alleHendelserPåBehandling(
+        behandlingId: BehandlingId
+    ): List<BQBehandling> {
         val behandling = behandlingRepository.hent(behandlingId)
 
         val erSkjermet = skjermingService.erSkjermet(behandling)
 
         return (1..<behandling.hendelser.size + 1).map { behandling.hendelser.subList(0, it) }
             .map { hendelser ->
-                val sekvensNummer =
-                    bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
-
                 bqBehandlingForBehandling(
                     behandling.copy(hendelser = hendelser),
                     erSkjermet,
-                    sekvensNummer
+                    null,
                 )
             }
     }

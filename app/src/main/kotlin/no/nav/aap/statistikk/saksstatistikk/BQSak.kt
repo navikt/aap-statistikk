@@ -17,7 +17,7 @@ private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
  */
 data class BQBehandling(
     val fagsystemNavn: String = "Kelvin",
-    val sekvensNummer: Long,
+    val sekvensNummer: Long?,
     val behandlingUUID: UUID,
     val relatertBehandlingUUID: UUID? = null,
     val relatertFagsystem: String? = null,
