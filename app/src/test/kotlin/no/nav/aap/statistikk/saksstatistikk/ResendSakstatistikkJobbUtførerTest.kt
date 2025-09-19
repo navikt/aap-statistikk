@@ -32,7 +32,7 @@ class ResendSakstatistikkJobbUtførerTest {
                 konstruerSakstatistikkService(
                     it,
                     FakeBQSakRepository()
-                )
+                ), SakstatistikkRepositoryImpl(it)
             ).utfør(input)
         }
     }
