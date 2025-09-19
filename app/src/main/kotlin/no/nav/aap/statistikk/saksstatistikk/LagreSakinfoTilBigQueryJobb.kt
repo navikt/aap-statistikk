@@ -38,6 +38,7 @@ class LagreSakinfoTilBigQueryJobb(
             bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
             bigQueryRepository = bqSakstatikk,
             skjermingService = skjermingService,
+            sakstatikkService = SakstatistikkRepositoryImpl(connection),
             oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
         )
         return LagreSakinfoTilBigQueryJobbUtfører(sakStatistikkService)
