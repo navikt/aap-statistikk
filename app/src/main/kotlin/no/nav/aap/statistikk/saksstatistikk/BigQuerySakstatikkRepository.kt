@@ -1,10 +1,11 @@
-package no.nav.aap.statistikk.bigquery
+package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.statistikk.saksstatistikk.BQBehandling
-import no.nav.aap.statistikk.saksstatistikk.SakTabell
+import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
+import org.slf4j.LoggerFactory
 import java.util.*
 
-private val logger = org.slf4j.LoggerFactory.getLogger(BigQuerySakstatikkRepository::class.java)
+private val logger = LoggerFactory.getLogger(BigQuerySakstatikkRepository::class.java)
 
 class BigQuerySakstatikkRepository
     (

@@ -8,7 +8,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.bigquery.LagreSakinfoTilBigQueryJobb
+import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import org.slf4j.LoggerFactory
 
 class MotorJobbAppender(
