@@ -12,16 +12,21 @@ import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import org.slf4j.LoggerFactory
 
 class ResendSakstatistikkJobbUtfører(
     val sakStatikkService: SaksStatistikkService,
     val sakstatistikkRepository: SakstatistikkRepository
 ) : JobbUtfører {
+
+    private val log = LoggerFactory.getLogger(javaClass)
+
     override fun utfør(input: JobbInput) {
         val behandlingId = input.payload<Long>().let(::BehandlingId)
 
         val alleHendelser = sakStatikkService.alleHendelserPåBehandling(behandlingId)
-        sakstatistikkRepository.lagreFlere(alleHendelser)
+        val ids = sakstatistikkRepository.lagreFlere(alleHendelser)
+        log.info("Lagret ${alleHendelser.size} hendelser i sakssakstatistikk-tabell.")
     }
 }
 
