@@ -31,7 +31,7 @@ jobs:
     with:
       publish-typescript: true
       typescript-enums: true
-      generate-openapi-command: gradle genererOpenApi
+      generate-openapi-command: ./gradlew genererOpenApi
       app-navn: statistikk
     secrets: inherit
 
