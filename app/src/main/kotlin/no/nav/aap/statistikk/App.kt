@@ -52,6 +52,7 @@ import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.saksstatistikk.BigQuerySakstatikkRepository
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
+import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -145,6 +146,12 @@ fun Application.startUp(
     val lagreOppgaveHendelseJobb =
         LagreOppgaveHendelseJobb(prometheusMeterRegistry, motorJobbAppender)
     val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(prometheusMeterRegistry)
+
+    val resendSakstatistikkJobb = ResendSakstatistikkJobb(
+        pdlClient = pdlClient,
+        bigQuerySakstatikkRepository = bqSakRepository,
+    )
+
     val motor = motor(
         dataSource,
         lagreStoppetHendelseJobb,
@@ -156,6 +163,7 @@ fun Application.startUp(
         LagreOppgaveJobb(
             jobbAppender = motorJobbAppender
         ),
+        resendSakstatistikkJobb
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
@@ -192,7 +200,8 @@ private fun motor(
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
     lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
-    lagreOppgaveJobb: LagreOppgaveJobb
+    lagreOppgaveJobb: LagreOppgaveJobb,
+    resendSakstatistikkJobb: ResendSakstatistikkJobb,
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -210,6 +219,7 @@ private fun motor(
             lagrePostmottakHendelseJobb,
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb
         ),
         prometheus = prometheusMeterRegistry,
     )
