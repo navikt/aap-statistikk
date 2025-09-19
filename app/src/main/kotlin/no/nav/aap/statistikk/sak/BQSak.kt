@@ -27,7 +27,7 @@ data class BQBehandling(
     val tekniskTid: LocalDateTime,
     val registrertTid: LocalDateTime,
     val endretTid: LocalDateTime,
-    val verson: String,
+    val versjon: String,
     val avsender: String = KELVIN,
     val mottattTid: LocalDateTime,
     val opprettetAv: String,

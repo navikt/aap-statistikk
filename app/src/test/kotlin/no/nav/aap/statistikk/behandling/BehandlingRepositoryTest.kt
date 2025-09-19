@@ -105,6 +105,8 @@ class BehandlingRepositoryTest {
         )
         assertThat(uthentet.gjeldendeAvklaringsbehovStatus).isEqualTo(Status.OPPRETTET)
         assertThat(uthentet.resultat).isEqualTo(ResultatKode.INNVILGET)
+        assertThat(uthentet.hendelser).hasSize(1)
+        assertThat(uthentet.resultat()).isEqualTo(ResultatKode.INNVILGET)
         assertThat(uthentet.hendelser).satisfiesExactly(
             {
                 assertThat(it.tidspunkt).isCloseTo(

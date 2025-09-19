@@ -72,6 +72,10 @@ data class Behandling(
             .maxOf { it.hendelsesTidspunkt }
     }
 
+    fun resultat(): ResultatKode? {
+        return hendelser.lastOrNull()?.resultat
+    }
+
     fun identerPåBehandling(): List<String> {
         return listOf(this.sak.person.ident) + this.relaterteIdenter
     }
