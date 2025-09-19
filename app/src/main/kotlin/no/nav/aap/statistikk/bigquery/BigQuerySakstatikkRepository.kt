@@ -1,8 +1,8 @@
 package no.nav.aap.statistikk.bigquery
 
-import no.nav.aap.statistikk.sak.BQBehandling
-import no.nav.aap.statistikk.sak.SakTabell
-import java.util.UUID
+import no.nav.aap.statistikk.saksstatistikk.BQBehandling
+import no.nav.aap.statistikk.saksstatistikk.SakTabell
+import java.util.*
 
 private val logger = org.slf4j.LoggerFactory.getLogger(BigQuerySakstatikkRepository::class.java)
 

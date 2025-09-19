@@ -6,6 +6,9 @@ import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Vurderingsbehov
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.saksstatistikk.BQBehandling
+import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
+import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.schemaRegistry
 import org.assertj.core.api.Assertions.assertThat
@@ -33,12 +36,13 @@ class SakTabellTest {
         val sakYtelse = "AAP"
 
         val tekniskTid = LocalDateTime.now()
+        val relatertBehandlingUUID = UUID.randomUUID()
         client.insert(
             sakTabell, BQBehandling(
                 fagsystemNavn = KELVIN,
                 sekvensNummer = 1L,
-                behandlingUUID = referanse.toString(),
-                relatertBehandlingUUID = "123",
+                behandlingUUID = referanse,
+                relatertBehandlingUUID = relatertBehandlingUUID,
                 relatertFagsystem = "Kelvin",
                 behandlingType = TypeBehandling.Revurdering.toString().uppercase(),
                 aktorId = "123456",
@@ -77,8 +81,8 @@ class SakTabellTest {
                 BQBehandling(
                     fagsystemNavn = "KELVIN",
                     sekvensNummer = 1,
-                    behandlingUUID = referanse.toString(),
-                    relatertBehandlingUUID = "123",
+                    behandlingUUID = referanse,
+                    relatertBehandlingUUID = relatertBehandlingUUID,
                     relatertFagsystem = "Kelvin",
                     ferdigbehandletTid = null, //
                     behandlingType = "REVURDERING",

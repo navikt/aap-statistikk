@@ -1,0 +1,32 @@
+create table saksstatistikk
+(
+    ID                       BIGSERIAL NOT NULL PRIMARY KEY,
+    fagsystem_navn           text      not null,
+    behandling_uuid          uuid      not null,
+    saksnummer               text      not null,
+    relatert_behandling_uuid uuid,
+    relatert_fagsystem       text,
+    behandling_type          text      not null,
+    aktor_id                 text      not null,
+    -- PS: ved overføring til BQ vil tidssoner bli feil,
+    -- så må eksponere korrigert timestamp i view
+    teknisk_tid              timestamp,
+    registrert_tid           timestamp,
+    endret_tid               timestamp,
+    mottatt_tid              timestamp,
+    vedtak_tid               timestamp,
+    ferdigbehandlet_tid      timestamp,
+    versjon                  text      not null,
+    avsender                 text      not null,
+    opprettet_av             text      not null,
+    ansvarlig_beslutter      text,
+    soknadsformat            text      not null,
+    saksbehandler            text,
+    behandlingmetode         text      not null,
+    behandling_status        text      not null,
+    behandling_aarsak        text      not null,
+    behandling_resultat      text,
+    resultat_begrunnelse     text,
+    ansvarlig_enhet_kode     text,
+    sak_ytelse               text      not null
+);

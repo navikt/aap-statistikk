@@ -1,13 +1,13 @@
-package no.nav.aap.statistikk.hendelser
+package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
+import no.nav.aap.statistikk.hendelser.ferdigBehandletTid
+import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
-import no.nav.aap.statistikk.sak.BQBehandling
-import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
@@ -81,8 +81,8 @@ class SaksStatistikkService(
 
         return BQBehandling(
             sekvensNummer = sekvensNummer,
-            behandlingUUID = behandlingReferanse.toString(),
-            relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
+            behandlingUUID = behandlingReferanse,
+            relatertBehandlingUUID = relatertBehandlingUUID,
             relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
             ferdigbehandletTid = hendelser.ferdigBehandletTid(),
             behandlingType = behandling.typeBehandling.toString().uppercase(),

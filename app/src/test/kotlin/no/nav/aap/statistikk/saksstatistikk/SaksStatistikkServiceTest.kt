@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.hendelser
+package no.nav.aap.statistikk.saksstatistikk
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
@@ -12,6 +12,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository

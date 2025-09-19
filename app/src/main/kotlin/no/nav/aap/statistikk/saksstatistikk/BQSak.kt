@@ -1,10 +1,11 @@
-package no.nav.aap.statistikk.sak
+package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
 
@@ -17,10 +18,10 @@ private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
 data class BQBehandling(
     val fagsystemNavn: String = "Kelvin",
     val sekvensNummer: Long,
-    val behandlingUUID: String,
-    val relatertBehandlingUUID: String? = null,
+    val behandlingUUID: UUID,
+    val relatertBehandlingUUID: UUID? = null,
     val relatertFagsystem: String? = null,
-    private val ferdigbehandletTid: LocalDateTime? = null,
+    val ferdigbehandletTid: LocalDateTime? = null,
     val behandlingType: String,
     val aktorId: String,
     val saksnummer: String,
@@ -32,7 +33,7 @@ data class BQBehandling(
     val mottattTid: LocalDateTime,
     val opprettetAv: String,
     val ansvarligBeslutter: String?,
-    private val vedtakTid: LocalDateTime? = null,
+    val vedtakTid: LocalDateTime? = null,
     val søknadsFormat: SøknadsFormat,
     val saksbehandler: String?,
     val behandlingMetode: BehandlingMetode,
@@ -45,11 +46,7 @@ data class BQBehandling(
 ) {
     init {
         require(behandlingType.uppercase() == behandlingType)
-        require(mottattTid.truncatedTo(SECONDS).isEqual(mottattTid))
 
-        require(
-            registrertTid.truncatedTo(SECONDS).isEqual(registrertTid)
-        )
         require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid))
         { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID" }
         if (ansvarligEnhetKode == null) {
