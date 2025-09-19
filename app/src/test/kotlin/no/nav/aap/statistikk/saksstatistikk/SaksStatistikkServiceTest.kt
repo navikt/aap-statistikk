@@ -8,9 +8,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.oppgave.HendelseType
@@ -19,12 +17,10 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeBQSakRepository
-import no.nav.aap.statistikk.testutils.FakePdlClient
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import no.nav.aap.verdityper.dokument.Kanal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -73,20 +69,6 @@ class SaksStatistikkServiceTest {
         assertThat(alleHendelser.last().ansvarligEnhetKode).isEqualTo("0220")
 
         assertThat(alleHendelser.size).isEqualTo(2)
-    }
-
-    private fun konstruerSakstatistikkService(
-        connection: DBConnection, bQSakRepository: FakeBQSakRepository
-    ): SaksStatistikkService {
-        return SaksStatistikkService(
-            behandlingRepository = BehandlingRepository(connection),
-            rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
-            bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
-            bigQueryRepository = bQSakRepository,
-            skjermingService = SkjermingService(FakePdlClient()),
-            oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
-            sakstatikkService = SakstatistikkRepositoryImpl(connection),
-        )
     }
 
     fun lagreHendelser(dataSource: DataSource): UUID {

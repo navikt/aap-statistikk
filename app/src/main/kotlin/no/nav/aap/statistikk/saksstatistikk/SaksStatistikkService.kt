@@ -27,9 +27,10 @@ class SaksStatistikkService(
     private val bigQueryRepository: IBQSakstatistikkRepository,
     private val skjermingService: SkjermingService,
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
-    private val sakstatikkService: SakstatistikkRepository,
+    private val sakstatistikkRepository: SakstatistikkRepository,
     private val clock: Clock = systemDefaultZone()
 ) {
+
     fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
         val behandling = behandlingRepository.hent(behandlingId)
         require(behandling.typeBehandling !in listOf(TypeBehandling.Oppfølgingsbehandling)) {
@@ -38,8 +39,7 @@ class SaksStatistikkService(
 
         val erSkjermet = skjermingService.erSkjermet(behandling)
 
-        val sekvensNummer =
-            bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
+        val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
 
         val bqSak = bqBehandlingForBehandling(behandling, erSkjermet, sekvensNummer)
 
@@ -47,7 +47,7 @@ class SaksStatistikkService(
         bigQueryRepository.lagre(bqSak)
 
         if (!Miljø.erProd()) {
-            sakstatikkService.lagre(bqSak)
+            sakstatistikkRepository.lagre(bqSak)
         }
     }
 

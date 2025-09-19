@@ -22,10 +22,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
-import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
+import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -40,6 +37,7 @@ import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -47,6 +45,9 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
 import no.nav.aap.statistikk.saksstatistikk.BQBehandling
+import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
+import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
+import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
@@ -655,5 +656,21 @@ fun forberedDatabase(
         )
     )
 }
+
+
+fun konstruerSakstatistikkService(
+    connection: DBConnection, bQSakRepository: FakeBQSakRepository
+): SaksStatistikkService {
+    return SaksStatistikkService(
+        behandlingRepository = BehandlingRepository(connection),
+        rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+        bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
+        bigQueryRepository = bQSakRepository,
+        skjermingService = SkjermingService(FakePdlClient()),
+        oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
+        sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
+    )
+}
+
 
 val schemaRegistry: SchemaRegistry = schemaRegistryYtelseStatistikk + schemaRegistrySakStatistikk
