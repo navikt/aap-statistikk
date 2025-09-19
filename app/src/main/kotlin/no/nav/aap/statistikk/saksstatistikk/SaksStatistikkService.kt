@@ -1,6 +1,9 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.miljo.Miljø
+import no.nav.aap.komponenter.tidslinje.Segment
+import no.nav.aap.komponenter.tidslinje.Tidslinje
+import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
@@ -73,6 +76,10 @@ class SaksStatistikkService(
             )
         }?.enhet
         val ansvarligEnhet = ansvarligEnhet(enhet, erSkjermet)
+
+        if (ansvarligEnhet == null) {
+            logger.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
+        }
 
         if (ansvarligEnhet == null) {
             logger.warn("Fant ikke enhet for behandling $behandlingReferanse.")

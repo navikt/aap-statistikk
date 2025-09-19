@@ -39,11 +39,13 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
 
     override fun lagre(bqBehandling: BQBehandling): Long {
         return dbConnection.executeReturnKey(insertSql) {
-            setParams(setParamsInsert(bqBehandling))
+            setParams {
+                setParams(bqBehandling)
+            }
         }
     }
 
-    private fun setParamsInsert(bqBehandling: BQBehandling): Params.() -> Unit = {
+    private fun Params.setParams(bqBehandling: BQBehandling) {
         setString(1, bqBehandling.fagsystemNavn)
         setUUID(2, bqBehandling.behandlingUUID)
         setString(3, bqBehandling.saksnummer)
@@ -72,10 +74,12 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         setString(26, bqBehandling.sakYtelse)
     }
 
-    override fun lagreFlere(bqBehandlinger: List<BQBehandling>): List<Long> {
-        return dbConnection.executeReturnKeys(insertSql) {
-            bqBehandlinger.forEach { bqBehandling ->
-                setParams(setParamsInsert(bqBehandling))
+    override fun lagreFlere(bqBehandlinger: List<BQBehandling>) {
+        return dbConnection.executeBatch(insertSql, bqBehandlinger) {
+            setParams { bqBehandling ->
+                setParams {
+                    setParams(bqBehandling)
+                }
             }
         }
     }

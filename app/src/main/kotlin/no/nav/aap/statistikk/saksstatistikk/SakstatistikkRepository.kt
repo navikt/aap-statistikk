@@ -4,7 +4,7 @@ import org.jetbrains.annotations.TestOnly
 
 interface SakstatistikkRepository {
     fun lagre(bqBehandling: BQBehandling): Long
-    fun lagreFlere(bqBehandlinger: List<BQBehandling>): List<Long>
+    fun lagreFlere(bqBehandlinger: List<BQBehandling>)
 
     @TestOnly
     fun hentSisteForBehandling(id: Long): BQBehandling
