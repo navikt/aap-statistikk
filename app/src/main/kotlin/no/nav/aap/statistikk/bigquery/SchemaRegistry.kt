@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.bigquery
 
 import no.nav.aap.statistikk.behandling.BehandlingTabell
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagTabell
-import no.nav.aap.statistikk.sak.SakTabell
+import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
 

@@ -38,7 +38,7 @@ import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
-import no.nav.aap.statistikk.sak.SakTabell
+import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell

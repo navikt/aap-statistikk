@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.sak
+package no.nav.aap.statistikk.saksstatistikk
 
 import com.google.cloud.bigquery.*
 import no.nav.aap.statistikk.behandling.SøknadsFormat
@@ -10,6 +10,7 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 class SakTabell : BQTable<BQBehandling> {
     companion object {
@@ -122,6 +123,11 @@ class SakTabell : BQTable<BQBehandling> {
               """.trimIndent()
                 ).build()
 
+            val sakYtelse =
+                Field.newBuilder("sakYtelse", StandardSQLTypeName.STRING)
+                    .setDescription("Kode som angir hvilken ytelse/stønad behandlingen gjelder.")
+                    .build()
+
             // Tomme felter som skal med i spec, men som vi ikke leverer på/ikke har implementert
             val utbetaltTid =
                 Field.newBuilder("utbetaltTid", StandardSQLTypeName.DATE)
@@ -131,11 +137,6 @@ class SakTabell : BQTable<BQBehandling> {
             val forventOppstartTid =
                 Field.newBuilder("forventetOppstartTid", StandardSQLTypeName.DATE)
                     .setDescription("Hvis systemet eller bruker har et forhold til når ytelsen normalt skal utbetales (planlagt uttak, ønsket oppstart etc).")
-                    .build()
-
-            val sakYtelse =
-                Field.newBuilder("sakYtelse", StandardSQLTypeName.STRING)
-                    .setDescription("Kode som angir hvilken ytelse/stønad behandlingen gjelder.")
                     .build()
 
             val sakUtland =
@@ -167,8 +168,6 @@ class SakTabell : BQTable<BQBehandling> {
             val sakId = Field.newBuilder("sakId", StandardSQLTypeName.STRING)
                 .setDescription("Alltid null. Vi leverer saksnummer i stedet.")
                 .setMode(Field.Mode.NULLABLE).build()
-
-
 
             return Schema.of(
                 fagsystemNavn,
@@ -217,7 +216,8 @@ class SakTabell : BQTable<BQBehandling> {
         val fagsystemNavn = fieldValueList.get("fagsystemNavn").stringValue
         val saksnummer = fieldValueList.get("saksnummer").stringValue
         val behandlingUuid = fieldValueList.get("behandlingUuid").stringValue
-        val relatertBehandlingUUid = fieldValueList.hentEllerNull("relatertBehandlingUUid")
+        val relatertBehandlingUUid =
+            fieldValueList.hentEllerNull("relatertBehandlingUUid")?.let(UUID::fromString)
         val relatertFagsystem = fieldValueList.hentEllerNull("relatertFagsystem")
         val ferdigbehandletTid = fieldValueList.hentEllerNull("ferdigbehandletTid")
         val tekniskTid = fieldValueList.get("tekniskTid").timestampValue
@@ -245,7 +245,7 @@ class SakTabell : BQTable<BQBehandling> {
         return BQBehandling(
             fagsystemNavn = fagsystemNavn,
             saksnummer = saksnummer,
-            behandlingUUID = behandlingUuid,
+            behandlingUUID = UUID.fromString(behandlingUuid),
             relatertBehandlingUUID = relatertBehandlingUUid,
             relatertFagsystem = relatertFagsystem,
             tekniskTid = LocalDateTime.ofInstant(
@@ -291,8 +291,8 @@ class SakTabell : BQTable<BQBehandling> {
                 "fagsystemNavn" to value.fagsystemNavn,
                 "sekvensnummer" to value.sekvensNummer,
                 "saksnummer" to value.saksnummer,
-                "behandlingUuid" to value.behandlingUUID,
-                "relatertBehandlingUUid" to value.relatertBehandlingUUID,
+                "behandlingUuid" to value.behandlingUUID.toString(),
+                "relatertBehandlingUUid" to value.relatertBehandlingUUID?.toString(),
                 "relatertFagsystem" to value.relatertFagsystem,
                 "behandlingType" to value.behandlingType,
                 "aktorId" to value.aktorId,

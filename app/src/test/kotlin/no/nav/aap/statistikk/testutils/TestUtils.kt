@@ -46,6 +46,7 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
+import no.nav.aap.statistikk.saksstatistikk.BQBehandling
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository

@@ -5,8 +5,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.hendelser.erManuell
 import no.nav.aap.statistikk.oppgave.Saksbehandler
-import no.nav.aap.statistikk.sak.BehandlingMetode
 import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
