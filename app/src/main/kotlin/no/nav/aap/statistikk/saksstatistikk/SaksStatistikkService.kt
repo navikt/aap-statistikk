@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
@@ -26,6 +27,7 @@ class SaksStatistikkService(
     private val bigQueryRepository: IBQSakstatistikkRepository,
     private val skjermingService: SkjermingService,
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
+    private val sakstatikkService: SakstatistikkRepository,
     private val clock: Clock = systemDefaultZone()
 ) {
     fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
@@ -43,6 +45,10 @@ class SaksStatistikkService(
 
         // TODO - kun lagre om endring siden sist
         bigQueryRepository.lagre(bqSak)
+
+        if (!Miljø.erProd()) {
+            sakstatikkService.lagre(bqSak)
+        }
     }
 
     private fun hentRelatertBehandlingUUID(behandling: Behandling): UUID? =
