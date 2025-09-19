@@ -27,7 +27,7 @@ class ResendSakstatistikkJobbUtfører(
 
 class ResendSakstatistikkJobb(
     private val pdlClient: PdlClient,
-    private val bigQuerySakstatikkRepository: IBQSakstatistikkRepository
+    private val bigQuerySakstatikkRepository: IBQSakstatistikkRepository,
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         return ResendSakstatistikkJobbUtfører(

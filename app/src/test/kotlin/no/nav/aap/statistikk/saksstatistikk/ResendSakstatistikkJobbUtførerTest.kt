@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
-import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.testutils.FakeBQSakRepository
 import no.nav.aap.statistikk.testutils.FakePdlClient
