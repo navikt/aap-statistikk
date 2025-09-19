@@ -45,7 +45,11 @@ class YtelsesStatistikkTilBigQuery(
         val tilkjentYtelse = tilkjentYtelseRepository.hentForBehandling(behandling.referanse)
 
         val utbetalingId =
-            if (behandling.resultat in listOf(ResultatKode.TRUKKET, ResultatKode.AVSLAG)) {
+            if (behandling.resultat() in listOf(
+                    ResultatKode.TRUKKET, ResultatKode.AVSLAG,
+                    ResultatKode.AVBRUTT
+                )
+            ) {
                 null
             } else {
                 behandling.referanse.toBase64()
@@ -58,7 +62,7 @@ class YtelsesStatistikkTilBigQuery(
                 referanse = behandling.referanse,
                 utbetalingId = utbetalingId.toString(),
                 brukerFnr = behandling.sak.person.ident,
-                resultat = behandling.resultat,
+                resultat = behandling.resultat(),
                 behandlingsType = behandling.typeBehandling,
                 datoAvsluttet = behandling.avsluttetTid(),
                 kodeverk = diagnoser?.kodeverk,

@@ -19,8 +19,6 @@ import java.util.*
 
 private val logger = LoggerFactory.getLogger(SaksStatistikkService::class.java)
 
-private const val NAY_NASJONAL_KØ_KODE = "4491"
-
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
@@ -37,72 +35,11 @@ class SaksStatistikkService(
         }
 
         val erSkjermet = skjermingService.erSkjermet(behandling)
-        val saksbehandler =
-            if (erSkjermet) "-5" else behandling.sisteSaksbehandler
-
-        val sak = behandling.sak
 
         val sekvensNummer =
-            bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
+            bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
 
-        val hendelser = behandling.hendelser
-        val erHosNAY = erHosNay(hendelser)
-        val enhet = if (behandling.gjeldendeAvklaringsBehov != null) {
-            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
-                behandling.referanse,
-                behandling.gjeldendeAvklaringsBehov
-            ).lastOrNull()?.enhet
-        } else null
-
-        if (enhet == null) {
-            logger.warn("Fant ikke enhet for behandling $behandlingId.")
-        }
-
-        val ansvarligEnhet = ansvarligEnhet(erHosNAY, behandling, enhet)
-
-        val behandlingReferanse = behandling.referanse
-
-        val relatertBehandlingUUID = hentRelatertBehandlingUUID(behandling)
-
-        val behandlingHendelse = hendelser.last()
-        val hendelsesTidspunkt = behandlingHendelse.tidspunkt
-
-        val bqSak = BQBehandling(
-            sekvensNummer = sekvensNummer,
-            behandlingUUID = behandlingReferanse.toString(),
-            relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
-            relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
-            ferdigbehandletTid = behandling.hendelser.ferdigBehandletTid(),
-            behandlingType = behandling.typeBehandling.toString().uppercase(),
-            aktorId = sak.person.ident,
-            saksnummer = sak.saksnummer.value,
-            tekniskTid = LocalDateTime.now(clock),
-            registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
-            endretTid = hendelsesTidspunkt,
-            verson = behandling.versjon.verdi,
-            mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-            // TODO: ved manuell revurdering må opprettetAv settes til saksbehandler som opprettet manuell revurdering
-            opprettetAv = KELVIN,
-            ansvarligBeslutter = if (erSkjermet && behandling.ansvarligBeslutter !== null) "-5" else behandling.ansvarligBeslutter,
-            vedtakTid = behandling.vedtakstidspunkt?.truncatedTo(ChronoUnit.SECONDS),
-            søknadsFormat = behandling.søknadsformat,
-            saksbehandler = saksbehandler,
-            behandlingMetode = behandling.behandlingMetode().also {
-                if (it == BehandlingMetode.AUTOMATISK) logger.info(
-                    "Behandling $behandlingReferanse er automatisk behandlet. Behandling $behandling"
-                )
-            },
-            behandlingStatus = behandlingStatus(behandlingHendelse),
-            behandlingÅrsak = behandling.årsaker.prioriterÅrsaker().name,
-            ansvarligEnhetKode = ansvarligEnhet,
-            behandlingResultat = regnUtBehandlingResultat(behandling),
-            resultatBegrunnelse = resultatBegrunnelse(behandling.hendelser),
-            sakYtelse = "AAP"
-        )
-
-        if (behandling.årsaker.size > 1) {
-            logger.info("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
-        }
+        val bqSak = bqBehandlingForBehandling(behandling, erSkjermet, sekvensNummer)
 
         // TODO - kun lagre om endring siden sist
         bigQueryRepository.lagre(bqSak)
@@ -111,55 +48,85 @@ class SaksStatistikkService(
     private fun hentRelatertBehandlingUUID(behandling: Behandling): UUID? =
         behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
 
+    fun bqBehandlingForBehandling(
+        behandling: Behandling,
+        erSkjermet: Boolean,
+        sekvensNummer: Long
+    ): BQBehandling {
+        val sak = behandling.sak
+        val relatertBehandlingUUID = hentRelatertBehandlingUUID(behandling)
+        val hendelser = behandling.hendelser
+        val sisteHendelse = hendelser.last()
+        val behandlingReferanse = behandling.referanse
+
+        val enhet = sisteHendelse.avklaringsBehov?.let {
+            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(behandlingReferanse, it)
+        }?.lastOrNull {
+            it.tidspunkt.isBefore(
+                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
+            )
+        }?.enhet
+        val ansvarligEnhet = ansvarligEnhet(enhet, erSkjermet)
+
+        if (ansvarligEnhet == null) {
+            logger.warn("Fant ikke enhet for behandling $behandlingReferanse.")
+        }
+
+        val saksbehandler =
+            if (erSkjermet) "-5" else sisteHendelse.saksbehandler?.ident
+
+        if (behandling.årsaker.size > 1) {
+            logger.info("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
+        }
+
+        return BQBehandling(
+            sekvensNummer = sekvensNummer,
+            behandlingUUID = behandlingReferanse.toString(),
+            relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
+            relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
+            ferdigbehandletTid = hendelser.ferdigBehandletTid(),
+            behandlingType = behandling.typeBehandling.toString().uppercase(),
+            aktorId = sak.person.ident,
+            saksnummer = sak.saksnummer.value,
+            tekniskTid = LocalDateTime.now(clock),
+            registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
+            endretTid = sisteHendelse.hendelsesTidspunkt,
+            versjon = sisteHendelse.versjon.verdi,
+            mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
+            // TODO: ved manuell revurdering må opprettetAv settes til saksbehandler som opprettet manuell revurdering
+            opprettetAv = KELVIN,
+            ansvarligBeslutter = if (erSkjermet && sisteHendelse.ansvarligBeslutter !== null) "-5" else sisteHendelse.ansvarligBeslutter,
+            vedtakTid = sisteHendelse.vedtakstidspunkt,
+            søknadsFormat = behandling.søknadsformat,
+            saksbehandler = saksbehandler,
+            behandlingMetode = behandling.behandlingMetode().also {
+                if (it == BehandlingMetode.AUTOMATISK) logger.info(
+                    "Behandling $behandlingReferanse er automatisk behandlet. Behandling $behandling"
+                )
+            },
+            behandlingStatus = behandlingStatus(sisteHendelse),
+            behandlingÅrsak = behandling.årsaker.prioriterÅrsaker().name,
+            behandlingResultat = regnUtBehandlingResultat(behandling),
+            resultatBegrunnelse = resultatBegrunnelse(hendelser),
+            ansvarligEnhetKode = ansvarligEnhet,
+            sakYtelse = "AAP"
+        )
+    }
+
     fun alleHendelserPåBehandling(behandlingId: BehandlingId): List<BQBehandling> {
         val behandling = behandlingRepository.hent(behandlingId)
-        val sak = behandling.sak
 
         val erSkjermet = skjermingService.erSkjermet(behandling)
 
         return (1..<behandling.hendelser.size + 1).map { behandling.hendelser.subList(0, it) }
             .map { hendelser ->
                 val sekvensNummer =
-                    bigQueryKvitteringRepository.lagreKvitteringForSak(sak, behandling)
-                val relatertBehandlingUUID = hentRelatertBehandlingUUID(behandling)
+                    bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
 
-                val sisteHendelse = hendelser.last()
-                val enhet = if (sisteHendelse.avklaringsBehov != null) {
-                    oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
-                        behandling.referanse,
-                        sisteHendelse.avklaringsBehov
-                    ).lastOrNull { it.tidspunkt.isBefore(sisteHendelse.hendelsesTidspunkt) }?.enhet
-                } else null
-
-                val saksbehandler =
-                    if (erSkjermet) "-5" else sisteHendelse.saksbehandler?.ident
-
-                BQBehandling(
-                    sekvensNummer = sekvensNummer,
-                    behandlingUUID = behandling.referanse.toString(),
-                    relatertBehandlingUUID = relatertBehandlingUUID?.toString(),
-                    relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
-                    ferdigbehandletTid = hendelser.ferdigBehandletTid(),
-                    behandlingType = behandling.typeBehandling.toString().uppercase(),
-                    aktorId = sak.person.ident,
-                    saksnummer = sak.saksnummer.value,
-                    tekniskTid = LocalDateTime.now(clock),
-                    registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
-                    endretTid = sisteHendelse.hendelsesTidspunkt,
-                    verson = sisteHendelse.versjon.verdi,
-                    mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-                    opprettetAv = KELVIN,
-                    ansvarligBeslutter = if (erSkjermet && behandling.ansvarligBeslutter !== null) "-5" else behandling.ansvarligBeslutter,
-                    vedtakTid = sisteHendelse.vedtakstidspunkt,
-                    søknadsFormat = behandling.søknadsformat,
-                    saksbehandler = saksbehandler,
-                    behandlingMetode = behandling.copy(hendelser = hendelser).behandlingMetode(),
-                    behandlingStatus = behandlingStatus(sisteHendelse),
-                    behandlingÅrsak = behandling.årsaker.prioriterÅrsaker().name,
-                    behandlingResultat = regnUtBehandlingResultat(behandling),
-                    resultatBegrunnelse = resultatBegrunnelse(hendelser),
-                    ansvarligEnhetKode = enhet,
-                    sakYtelse = "AAP"
+                bqBehandlingForBehandling(
+                    behandling.copy(hendelser = hendelser),
+                    erSkjermet,
+                    sekvensNummer
                 )
             }
     }
@@ -191,7 +158,7 @@ class SaksStatistikkService(
             BehandlingStatus.AVSLUTTET -> {
                 val behandlingReferanse = behandling.referanse
                 val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
-                val resultat = behandling.resultat
+                val resultat = behandling.resultat()
 
                 when (resultat) {
                     ResultatKode.INNVILGET -> if (rettighetstyper.isEmpty()) {
@@ -222,14 +189,13 @@ class SaksStatistikkService(
     }
 
     private fun ansvarligEnhet(
-        erHosNAY: Boolean,
-        behandling: Behandling,
-        enhet: String?
+        enhet: String?,
+        erSkjermet: Boolean,
     ): String? {
-        if (skjermingService.erSkjermet(behandling)) {
+        if (erSkjermet) {
             return "-5"
         }
-        return enhet ?: if (erHosNAY) NAY_NASJONAL_KØ_KODE else null
+        return enhet
     }
 
     fun behandlingStatus(hendelse: BehandlingHendelse): String {

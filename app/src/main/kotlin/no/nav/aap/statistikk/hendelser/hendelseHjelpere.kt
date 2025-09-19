@@ -7,7 +7,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.tilgang.Rolle
 import java.time.LocalDateTime
 
 
@@ -93,24 +92,6 @@ fun List<BehandlingHendelse>.erManuell(): Boolean {
 
 fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
     return this.lastOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
-}
-
-/**
- * Bruk denne kun som fallback om det ikke finnes oppgave?
- */
-fun erHosNay(hendelser: List<BehandlingHendelse>): Boolean {
-    return hendelser
-        .filterNot { it.avklaringsBehov == null || Definisjon.forKode(it.avklaringsBehov).løsesAv.size > 1 }
-        .maxByOrNull { it.tidspunkt }
-        ?.let {
-            Definisjon.forKode(requireNotNull(it.avklaringsBehov)).løsesAv.all { rolle ->
-                rolle in listOf(
-                    Rolle.SAKSBEHANDLER_NASJONAL,
-                    Rolle.BESLUTTER
-                )
-            }
-        } ?: true
-
 }
 
 fun <T> List<T>.only(): T {

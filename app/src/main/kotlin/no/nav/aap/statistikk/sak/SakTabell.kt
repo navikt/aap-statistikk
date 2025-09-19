@@ -257,7 +257,7 @@ class SakTabell : BQTable<BQBehandling> {
             ),
             behandlingType = behandlingType,
             avsender = avsender,
-            verson = versjon,
+            versjon = versjon,
             sekvensNummer = sekvensNummer,
             aktorId = aktorId,
             mottattTid = LocalDateTime.parse(mottattTid),
@@ -303,7 +303,7 @@ class SakTabell : BQTable<BQBehandling> {
                     .toInstant(ZoneOffset.UTC).toEpochMilli() / 1000.0,
                 "registrertTid" to value.registrertTid.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "avsender" to value.avsender,
-                "versjon" to value.verson,
+                "versjon" to value.versjon,
                 "ferdigbehandletTid" to value.ferdigBehandletTidTrunkert?.truncatedTo(ChronoUnit.SECONDS)
                     ?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "opprettetAv" to value.opprettetAv,

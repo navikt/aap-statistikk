@@ -9,7 +9,6 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.testutils.BigQuery
 import no.nav.aap.statistikk.testutils.schemaRegistry
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.LocalDateTime
@@ -47,7 +46,7 @@ class SakTabellTest {
                 tekniskTid = tekniskTid,
                 registrertTid = registrertTid,
                 endretTid = endretTid,
-                verson = "versjon",
+                versjon = "versjon",
                 avsender = KELVIN,
                 mottattTid = mottattTid,
                 opprettetAv = KELVIN,
@@ -88,7 +87,7 @@ class SakTabellTest {
                     tekniskTid = tekniskTid,
                     registrertTid = registrertTid,
                     endretTid = endretTid,
-                    verson = "versjon",
+                    versjon = "versjon",
                     avsender = KELVIN,
                     mottattTid = mottattTid,
                     opprettetAv = KELVIN,

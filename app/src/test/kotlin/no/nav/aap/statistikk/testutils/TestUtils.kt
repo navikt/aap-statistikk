@@ -404,7 +404,7 @@ class FakeSakRepository : SakRepository {
 
 class FakeBigQueryKvitteringRepository : IBigQueryKvitteringRepository {
     private var kvitteringer = 0L
-    override fun lagreKvitteringForSak(sak: Sak, behandling: Behandling): Long {
+    override fun lagreKvitteringForSak(behandling: Behandling): Long {
         return kvitteringer++
     }
 }
@@ -548,7 +548,7 @@ class FakeBQSakRepository : IBQSakstatistikkRepository {
 class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
     private val tilkjentYtelser = mutableMapOf<Int, TilkjentYtelseEntity>()
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
-        tilkjentYtelser.put(tilkjentYtelser.size, tilkjentYtelse)
+        tilkjentYtelser[tilkjentYtelser.size] = tilkjentYtelse
         return (tilkjentYtelser.size - 1).toLong()
     }
 
