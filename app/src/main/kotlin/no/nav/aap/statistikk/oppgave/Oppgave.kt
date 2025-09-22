@@ -123,4 +123,6 @@ private fun reservasjon(hendelse: OppgaveHendelse) =
         )
     } else null
 
-data class Saksbehandler(val id: Long? = null, val ident: String)
+data class Saksbehandler(val id: Long? = null, val ident: String) {
+    constructor(ident: String) : this(ident = ident, id = null)
+}

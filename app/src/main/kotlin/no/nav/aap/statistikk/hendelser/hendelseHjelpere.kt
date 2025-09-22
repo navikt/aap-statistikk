@@ -8,7 +8,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import java.time.LocalDateTime
-
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandlingStatus
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     return this
@@ -38,6 +38,34 @@ fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
         .minByOrNull { it.tidspunktSisteEndring() }
         ?.endringer
         ?.maxByOrNull { it.tidsstempel }?.årsakTilRetur?.firstOrNull()?.årsak
+}
+
+fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
+    val brevSendt =
+        this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES }
+            .all { it.status.erAvsluttet() }
+
+    if (brevSendt) {
+        return BehandlingStatus.AVSLUTTET
+    }
+
+    val brevBehovOpprettet =
+        this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES }
+            .all { it.status.erÅpent() }
+
+    if (brevBehovOpprettet) {
+        return BehandlingStatus.IVERKSETTES
+    }
+
+    val erOpprettet =
+        this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.OPPRETTET }
+            .any { it.status.erÅpent() }
+
+    if (erOpprettet) {
+        return BehandlingStatus.OPPRETTET
+    }
+
+    return BehandlingStatus.UTREDES
 }
 
 fun Status.returnert(): Boolean = when (this) {

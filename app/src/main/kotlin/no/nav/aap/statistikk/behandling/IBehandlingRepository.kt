@@ -7,6 +7,8 @@ interface IBehandlingRepository {
 
     fun oppdaterBehandling(behandling: Behandling)
 
+    fun invaliderOgLagreNyHistorikk(behandling: Behandling)
+
     fun hent(referanse: UUID): Behandling?
 
     fun hentEllerNull(id: BehandlingId): Behandling?

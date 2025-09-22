@@ -21,6 +21,7 @@ import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Clock
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -187,8 +188,11 @@ class BehandlingRepositoryTest {
         }
 
         dataSource.transaction {
-            assertThat(BehandlingRepository(it).hent(referanse)).isNotNull()
-            assertThat(BehandlingRepository(it).hent(referanse2)).isNotNull()
+            val førsteUthentet = BehandlingRepository(it).hent(referanse)
+            assertThat(førsteUthentet).isNotNull()
+            val andreUthentet = BehandlingRepository(it).hent(referanse2)
+            assertThat(andreUthentet).isNotNull()
+            assertThat(førsteUthentet?.versjon).isEqualTo(andreUthentet?.versjon)
         }
     }
 
@@ -310,44 +314,60 @@ class BehandlingRepositoryTest {
     }
 
     @Test
-    fun `prøve å sette inn flere med gjeldende = true skal feile`(@Postgres dataSource: DataSource) {
+    fun `invalider historikk, og hent ut igjen`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
 
-        val id = dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
+        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
+
+        val behandlingId = dataSource.transaction {
+            BehandlingRepository(it, clock).opprettBehandling(
                 Behandling(
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.OPPRETTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
+                )
+            )
+        }
+
+        val littSenereClock = Clock.offset(clock, Duration.ofDays(1))
+
+        dataSource.transaction {
+            BehandlingRepository(it, littSenereClock).oppdaterBehandling(
+                Behandling(
+                    id = behandlingId,
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
                     status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
-                    relaterteIdenter = listOf("123", "456", "123456789"),
-                    gjeldendeAvklaringsBehov = "0559",
+                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon("xxx2"),
+                    søknadsformat = SøknadsFormat.DIGITAL,
                 )
             )
         }
 
-        assertThrows<Exception> {
-            dataSource.transaction {
-                it.execute("INSERT INTO behandling_historikk (behandling_id, versjon_id, gjeldende, oppdatert_tid, mottatt_tid, status, siste_saksbehandler, gjeldende_avklaringsbehov) VALUES (?,?,?,?,?,?,?,?)") {
-                    setParams {
-                        setLong(1, id.id)
-                        setLong(2, 1)
-                        setBoolean(3, true)
-                        setLocalDateTime(4, LocalDateTime.now())
-                        setLocalDateTime(5, LocalDateTime.now())
-                        setString(6, BehandlingStatus.UTREDES.name)
-                        setString(7, BehandlingStatus.UTREDES.name)
-                        setString(8, BehandlingStatus.UTREDES.name)
-                    }
-                }
-            }
+        val uthentet =
+            dataSource.transaction { BehandlingRepository(it, littSenereClock).hent(behandlingId) }
+
+        dataSource.transaction {
+            BehandlingRepository(it, littSenereClock).invaliderOgLagreNyHistorikk(uthentet)
         }
+
+        val uthentet2 =
+            dataSource.transaction { BehandlingRepository(it, littSenereClock).hent(behandlingId) }
+
+        assertThat(uthentet2)
+            .usingRecursiveComparison()
+            .ignoringFields("hendelser.versjon", "snapShotId", "hendelser.tidspunkt")
+            .isEqualTo(uthentet)
     }
 }

@@ -50,6 +50,7 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.saksstatistikk.BigQuerySakstatikkRepository
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
@@ -137,6 +138,7 @@ fun Application.startUp(
         vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
         diagnoseRepository = { DiagnoseRepositoryImpl(it) },
         behandlingRepositoryFactory = { BehandlingRepository(it) },
+        sakService = { SakService(no.nav.aap.statistikk.sak.SakRepositoryImpl(it)) },
         rettighetstypeperiodeRepository = { RettighetstypeperiodeRepository(it) },
         personService = { PersonService(PersonRepository(it)) },
         skjermingService = skjermingService,

@@ -13,7 +13,7 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRe
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
@@ -24,6 +24,7 @@ class LagreStoppetHendelseJobb(
     private val beregningsgrunnlagRepositoryFactory: (DBConnection) -> IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepositoryFactory: (DBConnection) -> IVilkårsresultatRepository,
     private val diagnoseRepository: (DBConnection) -> DiagnoseRepository,
+    private val sakService: (DBConnection) -> SakService,
     private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
     private val rettighetstypeperiodeRepository: (DBConnection) -> IRettighetstypeperiodeRepository,
     private val personService: (DBConnection) -> PersonService,
@@ -32,7 +33,7 @@ class LagreStoppetHendelseJobb(
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val hendelsesService = HendelsesService(
-            sakRepository = SakRepositoryImpl(connection),
+            sakService = sakService(connection),
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepository = tilkjentYtelseRepositoryFactory(connection),
                 beregningsgrunnlagRepository = beregningsgrunnlagRepositoryFactory(connection),
@@ -59,9 +60,7 @@ class LagreStoppetHendelseJobb(
                 )
             },
         )
-        return LagreStoppetHendelseJobbUtfører(
-            hendelsesService,
-        )
+        return LagreStoppetHendelseJobbUtfører(hendelsesService)
     }
 
     override fun type(): String {

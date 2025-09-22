@@ -435,6 +435,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 status = behandling.status,
                 avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
                 versjon = behandling.versjon,
+                mottattTid = behandling.mottattTid,
+                søknadsformat = behandling.søknadsformat,
             )
         )
         nextId++
@@ -452,8 +454,14 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 status = behandling.status,
                 avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
                 versjon = behandling.versjon,
+                mottattTid = behandling.mottattTid,
+                søknadsformat = behandling.søknadsformat
             )
         )
+    }
+
+    override fun invaliderOgLagreNyHistorikk(behandlingOppdateringer: Behandling) {
+        TODO("Not yet implemented")
     }
 
     private fun Behandling.leggTilHendelse(hendelse: BehandlingHendelse): Behandling {

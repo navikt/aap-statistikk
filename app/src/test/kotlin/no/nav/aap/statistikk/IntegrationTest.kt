@@ -33,13 +33,13 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.utledGjeldendeAvklaringsBehov
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
-import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.sak.tilSaksnummer
+import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell

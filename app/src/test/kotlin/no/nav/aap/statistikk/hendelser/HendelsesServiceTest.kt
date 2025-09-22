@@ -18,6 +18,7 @@ import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -134,7 +135,7 @@ class HendelsesServiceTest {
         val tilkjentYtelseRepository = FakeTilkjentYtelseRepository()
         val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
         return HendelsesService(
-            sakRepository = sakRepository,
+            sakService = SakService(sakRepository),
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 beregningsgrunnlagRepository = beregningsgrunnlagRepository,
@@ -172,7 +173,7 @@ class HendelsesServiceTest {
             skjermingService,
             simpleMeterRegistry,
             rettighetstypeperiodeRepository,
-            { MockJobbAppender() },
+            {},
             clock
         )
 

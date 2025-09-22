@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
@@ -105,7 +106,7 @@ class ProduksjonsstyringRepositoryTest {
             val skjermingService = SkjermingService(FakePdlClient())
             val meterRegistry = SimpleMeterRegistry()
             val hendelsesService = HendelsesService(
-                sakRepository = SakRepositoryImpl(conn),
+                sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = AvsluttetBehandlingService(
                     tilkjentYtelseRepository = TilkjentYtelseRepository(conn),
                     beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn),
@@ -120,7 +121,7 @@ class ProduksjonsstyringRepositoryTest {
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
                 meterRegistry = meterRegistry,
-                opprettBigQueryLagringSakStatistikkCallback = { MockJobbAppender() }
+                opprettBigQueryLagringSakStatistikkCallback = { }
             )
 
             val hendelse = behandlingHendelse(

@@ -38,6 +38,7 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
@@ -81,6 +82,7 @@ class MottaStatistikkTest {
                 beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 diagnoseRepository = { FakeDiagnoseRepository() },
+                sakService = { SakService(FakeSakRepository()) },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 personService = { PersonService(FakePersonRepository()) },
@@ -217,6 +219,7 @@ class MottaStatistikkTest {
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
+            sakService = { SakService(SakRepositoryImpl(it)) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             personService = { PersonService(PersonRepository(it)) },
@@ -398,6 +401,7 @@ class MottaStatistikkTest {
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
+            sakService = { SakService(SakRepositoryImpl(it)) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             personService = { PersonService(PersonRepository(it)) },
@@ -521,6 +525,7 @@ class MottaStatistikkTest {
             beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
             diagnoseRepository = { FakeDiagnoseRepository() },
+            sakService = { SakService(SakRepositoryImpl(it)) },
             behandlingRepositoryFactory = { BehandlingRepository(it) },
             rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
             personService = { PersonService(PersonRepository(it)) },

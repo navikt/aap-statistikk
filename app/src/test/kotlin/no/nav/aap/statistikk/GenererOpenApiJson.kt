@@ -17,7 +17,7 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import java.net.URI
 import java.nio.charset.StandardCharsets
-import java.util.UUID
+import java.util.*
 
 fun main() {
     val azureFake = Fakes.AzureFake(port = 8081)
