@@ -50,20 +50,43 @@ data class Behandling(
     val hendelser: List<BehandlingHendelse> = listOf(),
 ) {
     init {
-        // Skal oppgis med sekund-presisjon
-        require(
-            mottattTid.truncatedTo(ChronoUnit.SECONDS).isEqual(mottattTid)
-        ) { "Vil ha mottattTid på sekund-oppløsning" }
-
         if (typeBehandling == TypeBehandling.Førstegangsbehandling) {
             require((ansvarligBeslutter != null && vedtakstidspunkt != null) || (ansvarligBeslutter == null && vedtakstidspunkt == null)) {
                 "Om saken er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null. Har ansvarlig beslutter: $ansvarligBeslutter, har vedtakstidspunkt: $vedtakstidspunkt"
             }
         }
 
-        require(hendelser.sortedBy { it.tidspunkt }
-            .zipWithNext { a, b -> a.tidspunkt <= b.tidspunkt }
+        require(hendelser.sortedBy { it.hendelsesTidspunkt }
+            .zipWithNext { a, b -> a.hendelsesTidspunkt <= b.hendelsesTidspunkt }
             .all { it }) { "Hendelser må være sortert." }
+    }
+
+    fun leggTilHendelse(hendelse: BehandlingHendelse): Behandling {
+        return this.copy(
+            hendelser = this.hendelser + hendelse,
+            oppdatertTidspunkt = hendelse.hendelsesTidspunkt,
+            versjon = hendelse.versjon,
+            gjeldendeAvklaringsBehov = hendelse.avklaringsBehov,
+            gjeldendeAvklaringsbehovStatus = hendelse.avklaringsbehovStatus,
+            mottattTid = hendelse.mottattTid,
+            vedtakstidspunkt = hendelse.vedtakstidspunkt,
+            ansvarligBeslutter = hendelse.ansvarligBeslutter,
+            status = hendelse.status,
+            venteÅrsak = hendelse.venteÅrsak,
+            returÅrsak = hendelse.returÅrsak,
+            sisteSaksbehandler = hendelse.saksbehandler?.ident,
+            søknadsformat = hendelse.søknadsformat,
+            resultat = hendelse.resultat,
+        )
+    }
+
+    fun hendelsesHistorikk(): List<Behandling> {
+        return (1..<this.hendelser.size + 1)
+            .map { this.hendelser.subList(0, it) }
+            .scan(this.copy(hendelser = emptyList())) { acc, hendelser ->
+                acc.leggTilHendelse(hendelser.last())
+            }
+            .drop(1)
     }
 
     fun avsluttetTid(): LocalDateTime {
@@ -114,9 +137,10 @@ data class Behandling(
  * @param hendelsesTidspunkt Tidspunkt for da hendelsen ble avgitt i behandlingsflyt.
  */
 data class BehandlingHendelse(
-    val tidspunkt: LocalDateTime,
+    val tidspunkt: LocalDateTime?,
     val hendelsesTidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
+    val steggruppe: String? = null,
     val avklaringsbehovStatus: AvklaringsbehovStatus?,
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
@@ -126,6 +150,8 @@ data class BehandlingHendelse(
     val status: BehandlingStatus,
     val ansvarligBeslutter: String? = null,
     val vedtakstidspunkt: LocalDateTime? = null,
+    val mottattTid: LocalDateTime,
+    val søknadsformat: SøknadsFormat,
 )
 
 enum class SøknadsFormat {

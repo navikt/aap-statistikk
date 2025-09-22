@@ -18,7 +18,9 @@ import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.testutils.FakeBQSakRepository
+import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import no.nav.aap.verdityper.dokument.Kanal
@@ -78,7 +80,7 @@ class SaksStatistikkServiceTest {
             val mottattTid = LocalDateTime.now()
             dataSource.transaction {
                 val hendelsesService = HendelsesService(
-                    sakRepository = SakRepositoryImpl(it),
+                    sakService = SakService(SakRepositoryImpl(it)),
                     // mockk fordi irrelevant for denne testen
                     avsluttetBehandlingService = mockk(relaxed = true),
                     personService = PersonService(PersonRepository(it)),

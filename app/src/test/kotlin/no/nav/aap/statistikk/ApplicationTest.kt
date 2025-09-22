@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
@@ -43,6 +44,7 @@ class ApplicationTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                sakService = { SakService(FakeSakRepository()) },
                 rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),
@@ -163,6 +165,7 @@ class ApplicationTest {
                 vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
                 diagnoseRepository = { DiagnoseRepositoryImpl(it) },
                 behandlingRepositoryFactory = { FakeBehandlingRepository() },
+                sakService = { SakService(FakeSakRepository()) },
                 rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 personService = { PersonService(FakePersonRepository()) },
                 skjermingService = SkjermingService(FakePdlClient()),

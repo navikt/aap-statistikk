@@ -133,9 +133,9 @@ class SaksStatistikkService(
         return (1..<behandling.hendelser.size + 1).map { behandling.hendelser.subList(0, it) }
             .map { hendelser ->
                 bqBehandlingForBehandling(
-                    behandling.copy(hendelser = hendelser),
-                    erSkjermet,
-                    null,
+                    behandling = behandling.copy(hendelser = hendelser),
+                    erSkjermet = erSkjermet,
+                    sekvensNummer = null,
                 )
             }
     }

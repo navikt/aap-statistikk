@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.miljo.Miljø
@@ -9,23 +10,24 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.nyBehandlingOpprettet
-import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakRepository
+import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.verdityper.dokument.Kanal
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
+import java.util.UUID
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 private val logger = LoggerFactory.getLogger("HendelsesService")
 
 class HendelsesService(
-    private val sakRepository: SakRepository,
+    private val sakService: SakService,
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personService: PersonService,
     private val behandlingRepository: IBehandlingRepository,
@@ -38,9 +40,9 @@ class HendelsesService(
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
 
         val sak =
-            hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus)
+            sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
 
-        val behandlingId = hentEllerLagreBehandlingId(hendelse, sak)
+        val behandlingId = hentEllerLagreBehandling(hendelse, sak).id!!
 
         if (hendelse.behandlingStatus == Status.AVSLUTTET) {
             // TODO: legg denne i en jobb
@@ -60,21 +62,60 @@ class HendelsesService(
 
         if (hendelse.behandlingType !in listOf(no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling)) {
             opprettBigQueryLagringSakStatistikkCallback(behandlingId)
+//            jobbAppender.leggTilLagreSakTilBigQueryJobb()
         }
 
         meterRegistry.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
     }
 
-    private fun hentEllerLagreBehandlingId(
+    fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {
+        val person = personService.hentEllerLagrePerson(hendelse.ident)
+        val saksnummer = hendelse.saksnummer.let(::Saksnummer)
+
+        val sak =
+            sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
+        val behandling = konstruerBehandling(hendelse, sak)
+
+        val behandlingMedHistorikk = avklaringsbehovTilHistorikk(hendelse, behandling)
+
+        behandlingRepository.invaliderOgLagreNyHistorikk(behandlingMedHistorikk)
+
+
+    }
+
+
+    private fun hentEllerLagreBehandling(
         dto: StoppetBehandling,
         sak: Sak
-    ): BehandlingId {
+    ): Behandling {
 
         if (!Miljø.erProd()) {
             logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
         }
 
+        val behandling = konstruerBehandling(dto, sak)
+
+        val eksisterendeBehandlingId = behandling.id
+        val behandlingId = if (eksisterendeBehandlingId != null) {
+            behandlingRepository.oppdaterBehandling(
+                behandling.copy(id = eksisterendeBehandlingId)
+            )
+            logger.info("Oppdaterte behandling med referanse ${behandling.referanse} og id $eksisterendeBehandlingId.")
+            eksisterendeBehandlingId
+        } else {
+            val id = behandlingRepository.opprettBehandling(behandling)
+            logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
+            meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()).increment()
+            id
+        }
+        return behandling.copy(id = behandlingId)
+    }
+
+    private fun konstruerBehandling(
+        dto: StoppetBehandling,
+        sak: Sak
+    ): Behandling {
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
@@ -82,7 +123,7 @@ class HendelsesService(
             opprettetTid = dto.behandlingOpprettetTidspunkt,
             vedtakstidspunkt = dto.avklaringsbehov.utledVedtakTid(),
             ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter(),
-            mottattTid = dto.mottattTid.truncatedTo(ChronoUnit.SECONDS),
+            mottattTid = dto.mottattTid,
             status = dto.behandlingStatus.tilDomene(),
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
@@ -99,64 +140,67 @@ class HendelsesService(
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 
-        val relatertBehadling = hentRelatertBehandling(dto)
-
-        val behandlingId = if (eksisterendeBehandlingId != null) {
-            behandlingRepository.oppdaterBehandling(
-                behandling.copy(
-                    id = eksisterendeBehandlingId,
-                    relatertBehandlingId = relatertBehadling?.id
-                )
-            )
-            logger.info("Oppdaterte behandling med referanse ${behandling.referanse} og id $eksisterendeBehandlingId.")
-            eksisterendeBehandlingId
-        } else {
-            val id =
-                behandlingRepository.opprettBehandling(behandling.copy(relatertBehandlingId = relatertBehadling?.id))
-            logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
-            meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()).increment()
-            id
-        }
-        return behandlingId
+        val relatertBehadling = hentRelatertBehandling(dto.relatertBehandling)
+        val behandlingMedRelatertBehandling =
+            behandling.copy(relatertBehandlingId = relatertBehadling?.id)
+        return behandlingMedRelatertBehandling.copy(eksisterendeBehandlingId)
     }
 
-    private fun hentRelatertBehandling(dto: StoppetBehandling): Behandling? {
-        val relatertBehandlingUUID = dto.relatertBehandling
+    private fun hentRelatertBehandling(relatertBehandlingUUID: UUID?): Behandling? {
         val relatertBehadling =
             relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
         return relatertBehadling
     }
 
-    private fun hentEllerSettInnSak(
-        person: Person,
-        saksnummer: Saksnummer,
-        sakStatus: SakStatus
-    ): Sak {
-        var sak = sakRepository.hentSakEllernull(saksnummer)
-        if (sak == null) {
-            val sakId = sakRepository.settInnSak(
-                Sak(
-                    id = null,
-                    saksnummer = saksnummer,
-                    person = person,
-                    sistOppdatert = LocalDateTime.now(clock),
-                    sakStatus = sakStatus.tilDomene()
-                )
-            )
-            sak = sakRepository.hentSak(sakId)
-        } else {
-            sakRepository.oppdaterSak(
-                sak.copy(
-                    sakStatus = sakStatus.tilDomene(),
-                    sistOppdatert = LocalDateTime.now(clock)
+    fun avklaringsbehovTilHistorikk(
+        dto: StoppetBehandling, behandling: Behandling
+    ): Behandling {
+        val avklaringsbehov = dto.avklaringsbehov
+
+        val avklaringsbehovEndringer = avklaringsbehov
+            .flatMap { behov -> behov.endringer.map { Pair(behov, it) } }
+            .sortedBy { it.second.tidsstempel }
+
+        val endringsTidspunkter = avklaringsbehov.flatMap { it.endringer.map { it.tidsstempel } }
+
+        val avklaringsbehovHistorikk = endringsTidspunkter.map { tidspunkt ->
+            avklaringsbehov.påTidspunkt(tidspunkt)
+        }
+        return avklaringsbehovHistorikk.fold(behandling) { acc, curr ->
+            acc.leggTilHendelse(
+                BehandlingHendelse(
+                    tidspunkt = null, // Vil etterfylles
+                    hendelsesTidspunkt = dto.hendelsesTidspunkt,
+                    avklaringsBehov = curr.utledGjeldendeAvklaringsBehov(),
+                    avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
+                    venteÅrsak = curr.utledÅrsakTilSattPåVent(),
+                    returÅrsak = curr.årsakTilRetur()?.name,
+                    saksbehandler = curr.sistePersonPåBehandling()?.let(::Saksbehandler),
+                    resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+                    versjon = dto.versjon.let(::Versjon),
+                    status = curr.utledBehandlingStatus(),
+                    ansvarligBeslutter = curr.utledAnsvarligBeslutter(),
+                    vedtakstidspunkt = curr.utledVedtakTid(),
+                    mottattTid = dto.mottattTid,
+                    søknadsformat = dto.soknadsFormat.tilDomene(),
                 )
             )
         }
-        return sak
+    }
+
+
+    fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): List<AvklaringsbehovHendelseDto> {
+        return this
+            .map {
+                it.copy(endringer = it.endringer.filter {
+                    it.tidsstempel.isBefore(tidspunkt) || it.tidsstempel == tidspunkt
+                })
+            }
+            .filter { it.endringer.isNotEmpty() }
     }
 }
 
-private fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus {
+internal fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus {
     return when (this) {
         SakStatus.OPPRETTET -> no.nav.aap.statistikk.sak.SakStatus.OPPRETTET
         SakStatus.UTREDES -> no.nav.aap.statistikk.sak.SakStatus.UTREDES
