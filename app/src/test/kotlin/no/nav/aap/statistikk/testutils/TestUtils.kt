@@ -143,9 +143,9 @@ fun <E> testKlientNoInjection(
         issuer = "tilgang"
     ),
     bigQueryClient: BigQueryClient,
-    test: (url: String, client: RestClient<InputStream>) -> E?,
-): E? {
-    val res: E?
+    test: (url: String, client: RestClient<InputStream>) -> E,
+): E {
+    var res: E
 
     System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
     System.setProperty("azure.app.client.id", azureConfig.clientId)
@@ -460,12 +460,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
         )
     }
 
-    override fun invaliderOgLagreNyHistorikk(behandlingOppdateringer: Behandling) {
+    override fun invaliderOgLagreNyHistorikk(behandling: Behandling) {
         TODO("Not yet implemented")
-    }
-
-    private fun Behandling.leggTilHendelse(hendelse: BehandlingHendelse): Behandling {
-        return copy(hendelser = this.hendelser + hendelse)
     }
 
     override fun hent(referanse: UUID): Behandling? {

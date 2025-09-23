@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.miljo.Miljø
@@ -10,9 +9,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.nyBehandlingOpprettet
-import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakService
@@ -20,11 +17,8 @@ import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.verdityper.dokument.Kanal
 import org.slf4j.LoggerFactory
 import java.time.Clock
-import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
-
-private val logger = LoggerFactory.getLogger("HendelsesService")
 
 class HendelsesService(
     private val sakService: SakService,
@@ -33,8 +27,11 @@ class HendelsesService(
     private val behandlingRepository: IBehandlingRepository,
     private val meterRegistry: MeterRegistry,
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
+    private val opprettRekjørSakstatistikkCallback: (BehandlingId) -> Unit,
     private val clock: Clock = Clock.systemDefaultZone()
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
         val person = personService.hentEllerLagrePerson(hendelse.ident)
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
@@ -62,7 +59,6 @@ class HendelsesService(
 
         if (hendelse.behandlingType !in listOf(no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling)) {
             opprettBigQueryLagringSakStatistikkCallback(behandlingId)
-//            jobbAppender.leggTilLagreSakTilBigQueryJobb()
         }
 
         meterRegistry.hendelseLagret().increment()
@@ -77,11 +73,13 @@ class HendelsesService(
             sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
         val behandling = konstruerBehandling(hendelse, sak)
 
-        val behandlingMedHistorikk = avklaringsbehovTilHistorikk(hendelse, behandling)
+        val behandlingMedHistorikk =
+            ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
         behandlingRepository.invaliderOgLagreNyHistorikk(behandlingMedHistorikk)
 
-
+        logger.info("Starter jobb for rekjøring av saksstatistikk.")
+        opprettRekjørSakstatistikkCallback(behandling.id!!)
     }
 
 
@@ -150,53 +148,6 @@ class HendelsesService(
         val relatertBehadling =
             relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
         return relatertBehadling
-    }
-
-    fun avklaringsbehovTilHistorikk(
-        dto: StoppetBehandling, behandling: Behandling
-    ): Behandling {
-        val avklaringsbehov = dto.avklaringsbehov
-
-        val avklaringsbehovEndringer = avklaringsbehov
-            .flatMap { behov -> behov.endringer.map { Pair(behov, it) } }
-            .sortedBy { it.second.tidsstempel }
-
-        val endringsTidspunkter = avklaringsbehov.flatMap { it.endringer.map { it.tidsstempel } }
-
-        val avklaringsbehovHistorikk = endringsTidspunkter.map { tidspunkt ->
-            avklaringsbehov.påTidspunkt(tidspunkt)
-        }
-        return avklaringsbehovHistorikk.fold(behandling) { acc, curr ->
-            acc.leggTilHendelse(
-                BehandlingHendelse(
-                    tidspunkt = null, // Vil etterfylles
-                    hendelsesTidspunkt = dto.hendelsesTidspunkt,
-                    avklaringsBehov = curr.utledGjeldendeAvklaringsBehov(),
-                    avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
-                    venteÅrsak = curr.utledÅrsakTilSattPåVent(),
-                    returÅrsak = curr.årsakTilRetur()?.name,
-                    saksbehandler = curr.sistePersonPåBehandling()?.let(::Saksbehandler),
-                    resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-                    versjon = dto.versjon.let(::Versjon),
-                    status = curr.utledBehandlingStatus(),
-                    ansvarligBeslutter = curr.utledAnsvarligBeslutter(),
-                    vedtakstidspunkt = curr.utledVedtakTid(),
-                    mottattTid = dto.mottattTid,
-                    søknadsformat = dto.soknadsFormat.tilDomene(),
-                )
-            )
-        }
-    }
-
-
-    fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): List<AvklaringsbehovHendelseDto> {
-        return this
-            .map {
-                it.copy(endringer = it.endringer.filter {
-                    it.tidsstempel.isBefore(tidspunkt) || it.tidsstempel == tidspunkt
-                })
-            }
-            .filter { it.endringer.isNotEmpty() }
     }
 }
 

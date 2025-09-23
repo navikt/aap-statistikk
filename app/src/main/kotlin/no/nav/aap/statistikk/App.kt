@@ -39,8 +39,10 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Flyway
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLClient
+import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
@@ -133,43 +135,62 @@ fun Application.startUp(
     val motorJobbAppender =
         MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
-    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        prometheusMeterRegistry,
-        sakService = { SakService(SakRepositoryImpl(it)) },
-        personService = { PersonService(PersonRepository(it)) },
-        avsluttetBehandlingService = {
-            AvsluttetBehandlingService(
-                tilkjentYtelseRepository = TilkjentYtelseRepository(it),
-                beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
-                vilkårsResultatRepository = VilkårsresultatRepository(it),
-                diagnoseRepository = DiagnoseRepositoryImpl(it),
-                behandlingRepository = BehandlingRepository(it),
-                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
-                skjermingService = skjermingService,
-                meterRegistry = prometheusMeterRegistry,
-                opprettBigQueryLagringYtelseCallback = { behandlingId ->
-                    motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                        it,
-                        behandlingId
-                    )
-                }
-            )
-        },
-        jobbAppender = motorJobbAppender,
-    )
-
-    val lagreOppgaveHendelseJobb =
-        LagreOppgaveHendelseJobb(prometheusMeterRegistry, motorJobbAppender)
-    val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(prometheusMeterRegistry)
-
     val resendSakstatistikkJobb = ResendSakstatistikkJobb(
         pdlClient = pdlClient,
         bigQuerySakstatikkRepository = bqSakRepository,
     )
 
+    val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
+        HendelsesService(
+            sakService = SakService(SakRepositoryImpl(connection)),
+            personService = PersonService(PersonRepository(connection)),
+            avsluttetBehandlingService = AvsluttetBehandlingService(
+                tilkjentYtelseRepository = TilkjentYtelseRepository(connection),
+                beregningsgrunnlagRepository = BeregningsgrunnlagRepository(connection),
+                vilkårsResultatRepository = VilkårsresultatRepository(connection),
+                diagnoseRepository = DiagnoseRepositoryImpl(connection),
+                behandlingRepository = BehandlingRepository(connection),
+                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+                skjermingService = skjermingService,
+                meterRegistry = prometheusMeterRegistry,
+                opprettBigQueryLagringYtelseCallback = { behandlingId ->
+                    motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+                        connection,
+                        behandlingId
+                    )
+                }
+            ),
+            behandlingRepository = BehandlingRepository(connection),
+            meterRegistry = prometheusMeterRegistry,
+            opprettBigQueryLagringSakStatistikkCallback = {
+                motorJobbAppender.leggTilLagreSakTilBigQueryJobb(
+                    connection,
+                    it
+                )
+            },
+            opprettRekjørSakstatistikkCallback = {
+                log.info("Starter resending-jobb. BehandlingId: $it")
+                motorJobbAppender.leggTil(
+                    connection, JobbInput(resendSakstatistikkJobb).medPayload(it)
+                )
+            },
+        )
+    }
+    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+        hendelsesService = hendelsesService,
+    )
+
+    val lagreAvklaringsbehovHendelseJobb =
+        LagreAvklaringsbehovHendelseJobb(hendelsesService = hendelsesService)
+
+    val lagreOppgaveHendelseJobb =
+        LagreOppgaveHendelseJobb(prometheusMeterRegistry, motorJobbAppender)
+    val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(prometheusMeterRegistry)
+
     val motor = motor(
         dataSource,
         lagreStoppetHendelseJobb,
+        lagreAvklaringsbehovHendelseJobb,
         prometheusMeterRegistry,
         lagreOppgaveHendelseJobb,
         lagrePostmottakHendelseJobb,
@@ -210,6 +231,7 @@ fun Application.startUp(
 private fun motor(
     dataSource: DataSource,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
     prometheusMeterRegistry: PrometheusMeterRegistry,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
@@ -229,6 +251,7 @@ private fun motor(
         },
         jobber = listOf(
             lagreStoppetHendelseJobb,
+            lagreAvklaringsbehovHendelseJobb,
             lagreOppgaveHendelseJobb,
             lagreOppgaveJobb,
             lagrePostmottakHendelseJobb,
