@@ -20,7 +20,6 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.testutils.FakeBQSakRepository
-import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import no.nav.aap.verdityper.dokument.Kanal
@@ -87,6 +86,7 @@ class SaksStatistikkServiceTest {
                     behandlingRepository = BehandlingRepository(it),
                     meterRegistry = SimpleMeterRegistry(),
                     opprettBigQueryLagringSakStatistikkCallback = {},
+                    opprettRekjørSakstatistikkCallback = { },
                 )
 
                 OppgaveHendelseRepository(it).lagreHendelse(

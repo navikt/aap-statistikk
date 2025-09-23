@@ -16,7 +16,10 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
-import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.testutils.FakePdlClient
+import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
+import no.nav.aap.statistikk.testutils.behandlingHendelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -121,7 +124,8 @@ class ProduksjonsstyringRepositoryTest {
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
                 meterRegistry = meterRegistry,
-                opprettBigQueryLagringSakStatistikkCallback = { }
+                opprettBigQueryLagringSakStatistikkCallback = { },
+                opprettRekjørSakstatistikkCallback = { TODO() },
             )
 
             val hendelse = behandlingHendelse(

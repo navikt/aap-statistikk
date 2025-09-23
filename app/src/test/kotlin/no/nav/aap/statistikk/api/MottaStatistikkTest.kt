@@ -30,6 +30,7 @@ import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
@@ -39,6 +40,7 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
+import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -79,25 +81,7 @@ class MottaStatistikkTest {
             motor,
             jobbAppender,
             azureConfig,
-            LagreStoppetHendelseJobb(
-                meterRegistry,
-                sakService = { SakService(FakeSakRepository()) },
-                personService = { PersonService(FakePersonRepository()) },
-                avsluttetBehandlingService = {
-                    AvsluttetBehandlingService(
-                        tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                        beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                        vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                        diagnoseRepository = FakeDiagnoseRepository(),
-                        behandlingRepository = FakeBehandlingRepository(),
-                        rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                        skjermingService = SkjermingService(FakePdlClient()),
-                        meterRegistry = meterRegistry,
-                        opprettBigQueryLagringYtelseCallback = {}
-                    )
-                },
-                jobbAppender = jobbAppender,
-            ),
+            fakeLagreStoppetHendelseJobb(meterRegistry),
             LagreOppgaveHendelseJobb(meterRegistry, jobbAppender),
             LagrePostmottakHendelseJobb(meterRegistry)
         ) { url, client ->
@@ -140,6 +124,32 @@ class MottaStatistikkTest {
             )
         )
     }
+
+    private fun fakeLagreStoppetHendelseJobb(meterRegistry: SimpleMeterRegistry): LagreStoppetHendelseJobb =
+        LagreStoppetHendelseJobb(
+            hendelsesService = {
+                val behandlingRepository = FakeBehandlingRepository()
+                HendelsesService(
+                    sakService = SakService(FakeSakRepository()),
+                    personService = PersonService(FakePersonRepository()),
+                    avsluttetBehandlingService = AvsluttetBehandlingService(
+                        tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+                        beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+                        vilkårsResultatRepository = FakeVilkårsResultatRepository(),
+                        diagnoseRepository = FakeDiagnoseRepository(),
+                        behandlingRepository = behandlingRepository,
+                        rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+                        skjermingService = SkjermingService(FakePdlClient()),
+                        meterRegistry = meterRegistry,
+                        opprettBigQueryLagringYtelseCallback = {}
+                    ),
+                    behandlingRepository = behandlingRepository,
+                    meterRegistry = meterRegistry,
+                    opprettBigQueryLagringSakStatistikkCallback = { TODO() },
+                    opprettRekjørSakstatistikkCallback = { TODO() },
+                )
+            },
+        )
 
     @RepeatedTest(value = 2)
     fun `motta to events rett etter hverandre`(
@@ -222,25 +232,7 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            meterRegistry = meterRegistry,
-            avsluttetBehandlingService = {
-                AvsluttetBehandlingService(
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
-                    vilkårsResultatRepository = VilkårsresultatRepository(it),
-                    diagnoseRepository = DiagnoseRepositoryImpl(it),
-                    behandlingRepository = BehandlingRepository(it),
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
-                    skjermingService = skjermingService,
-                    meterRegistry = meterRegistry,
-                    opprettBigQueryLagringYtelseCallback = { }
-                )
-            },
-            sakService = { SakService(SakRepositoryImpl(it)) },
-            personService = { PersonService(PersonRepository(it)) },
-            jobbAppender = jobbAppender1
-        )
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(skjermingService, meterRegistry)
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
@@ -314,6 +306,33 @@ class MottaStatistikkTest {
             motor.stop()
         }
     }
+
+    private fun ekteLagreStoppetHendelseJobb(
+        skjermingService: SkjermingService,
+        meterRegistry: SimpleMeterRegistry
+    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+        hendelsesService = {
+            HendelsesService(
+                sakService = SakService(SakRepositoryImpl(it)),
+                personService = PersonService(PersonRepository(it)),
+                avsluttetBehandlingService = AvsluttetBehandlingService(
+                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
+                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
+                    vilkårsResultatRepository = VilkårsresultatRepository(it),
+                    diagnoseRepository = DiagnoseRepositoryImpl(it),
+                    behandlingRepository = BehandlingRepository(it),
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                    skjermingService = skjermingService,
+                    meterRegistry = meterRegistry,
+                    opprettBigQueryLagringYtelseCallback = { }
+                ),
+                behandlingRepository = BehandlingRepository(it),
+                meterRegistry = meterRegistry,
+                opprettBigQueryLagringSakStatistikkCallback = { },
+                opprettRekjørSakstatistikkCallback = { },
+            )
+        },
+    )
 
     private fun opprettMotor(
         dataSource: DataSource,
@@ -410,43 +429,25 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            meterRegistry,
-            sakService = { SakService(SakRepositoryImpl(it)) },
-            personService = { PersonService(PersonRepository(it)) },
-            avsluttetBehandlingService = {
-                AvsluttetBehandlingService(
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
-                    vilkårsResultatRepository = VilkårsresultatRepository(it),
-                    diagnoseRepository = DiagnoseRepositoryImpl(it),
-                    rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                    skjermingService = skjermingService,
-                    meterRegistry = meterRegistry,
-                    opprettBigQueryLagringYtelseCallback = { TODO() },
-                    behandlingRepository = BehandlingRepository(it)
-                )
-            },
-            jobbAppender = jobbAppender1
-        )
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(skjermingService, meterRegistry)
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
-            bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
-            behandlingRepositoryFactory = { FakeBehandlingRepository() },
+            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
             bqSakstatikk = bqStatistikkRepository,
             skjermingService = skjermingService
         )
 
         val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
-            behandlingRepositoryFactory = { FakeBehandlingRepository() },
-            rettighetstypeperiodeRepositoryFactory = { FakeRettighetsTypeRepository() },
-            diagnoseRepositoryFactory = { FakeDiagnoseRepository() },
-            vilkårsResulatRepositoryFactory = { FakeVilkårsResultatRepository() },
-            tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-            beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
+            behandlingRepositoryFactory = { BehandlingRepository(it) },
+            rettighetstypeperiodeRepositoryFactory = { RettighetstypeperiodeRepository(it) },
+            diagnoseRepositoryFactory = { DiagnoseRepositoryImpl(it) },
+            vilkårsResulatRepositoryFactory = { VilkårsresultatRepository(it) },
+            tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
+            beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
             bqRepository = bqRepositoryYtelse,
         )
 
@@ -457,7 +458,6 @@ class MottaStatistikkTest {
             lagreSakinfoTilBigQueryJobb,
             lagrePostmottakHendelseJobb
         )
-
 
         val jobbAppender =
             MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
@@ -540,25 +540,7 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-            meterRegistry,
-            sakService = { SakService(SakRepositoryImpl(it)) },
-            personService = { PersonService(PersonRepository(it)) },
-            avsluttetBehandlingService = {
-                AvsluttetBehandlingService(
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
-                    vilkårsResultatRepository = VilkårsresultatRepository(it),
-                    diagnoseRepository = DiagnoseRepositoryImpl(it),
-                    behandlingRepository = BehandlingRepository(it),
-                    rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                    skjermingService = skjermingService,
-                    meterRegistry = meterRegistry,
-                    opprettBigQueryLagringYtelseCallback = { }
-                )
-            },
-            jobbAppender = jobbAppender1
-        )
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(skjermingService, meterRegistry)
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
