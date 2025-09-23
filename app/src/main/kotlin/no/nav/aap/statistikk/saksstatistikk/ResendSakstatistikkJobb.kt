@@ -16,6 +16,7 @@ class ResendSakstatistikkJobbUtfører(
 
     override fun utfør(input: JobbInput) {
         val behandlingId = input.payload<Long>().let(::BehandlingId)
+        log.info("Resender sakstatistikk for behandling med id $behandlingId.")
 
         val alleHendelser = sakStatikkService.alleHendelserPåBehandling(behandlingId)
         val ids = sakstatistikkRepository.lagreFlere(alleHendelser)

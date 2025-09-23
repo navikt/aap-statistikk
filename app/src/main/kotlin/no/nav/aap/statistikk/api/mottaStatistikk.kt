@@ -14,6 +14,7 @@ import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
@@ -44,6 +45,7 @@ fun NormalOpenAPIRoute.mottaStatistikk(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
 ) {
     route("/stoppetBehandling").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, StoppetBehandling>(
@@ -71,6 +73,30 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             )
         }
     }
+
+    route("/oppdatertBehandling").status(HttpStatusCode.Accepted) {
+        authorizedPost<Unit, String, StoppetBehandling>(
+            modules = arrayOf(TagModule(listOf(Tags.MottaStatistikk))),
+            routeConfig = AuthorizationMachineToMachineConfig(
+                authorizedAzps = listOf(Azp.Behandlingsflyt.uuid)
+            )
+        ) { _, dto ->
+            transactionExecutor.withinTransaction { conn ->
+                val stringified = DefaultJsonMapper.toJson(dto)
+                val encodedSaksNummer = stringToNumber(dto.saksnummer)
+
+                jobbAppender.leggTil(
+                    conn,
+                    JobbInput(lagreAvklaringsbehovHendelseJobb)
+                        .medPayload(stringified)
+                        .medCallId()
+                        .forSak(encodedSaksNummer)
+                )
+            }
+            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
+        }
+    }
+
     route("/oppgave").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, OppgaveHendelse>(
             modules = arrayOf(

@@ -33,6 +33,7 @@ import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
+import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
@@ -79,7 +80,6 @@ private val logger = LoggerFactory.getLogger("TestUtils")
 fun <E> testKlient(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
-    jobbAppender: JobbAppender,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwksUri = "http://localhost:8081/jwks",
@@ -90,6 +90,8 @@ fun <E> testKlient(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+    jobbAppender: JobbAppender,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
     val res: E?
@@ -121,6 +123,7 @@ fun <E> testKlient(
             lagreStoppetHendelseJobb,
             lagreOppgaveHendelseJobb,
             lagrePostmottakHendelseJobb,
+            lagreAvklaringsbehovHendelseJobb,
             PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         )
     }.start()
@@ -129,6 +132,7 @@ fun <E> testKlient(
 
     res = test("http://localhost:$port", restClient)
 
+    motor.stop()
     server.stop(500L, 10_000L)
 
     return res
@@ -342,6 +346,7 @@ val noOpTransactionExecutor = object : TransactionExecutor {
 fun motorMock(): Motor {
     val motor = mockk<Motor>()
     every { motor.start() } just Runs
+    every { motor.stop() } just Runs
     return motor
 }
 
@@ -366,6 +371,13 @@ class MockJobbAppender : JobbAppender {
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+        connection: DBConnection,
+        behandlingId: BehandlingId
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun leggTilResendSakstatistikkJobb(
         connection: DBConnection,
         behandlingId: BehandlingId
     ) {

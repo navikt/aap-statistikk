@@ -51,7 +51,8 @@ fun main() {
             lagreStoppetHendelseJobb = mockk(),
             lagreOppgaveHendelseJobb = mockk(),
             lagrePostmottakHendelseJobb = mockk(),
-            prometheusMeterRegistry = SimpleMeterRegistry()
+            prometheusMeterRegistry = SimpleMeterRegistry(),
+            lagreAvklaringsbehovHendelseJobb = mockk(),
         )
     }.start()
 

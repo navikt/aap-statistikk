@@ -7,13 +7,10 @@ import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 import java.util.*
 import java.util.function.BiPredicate
 import javax.sql.DataSource
-import kotlin.math.abs
 
 class SakstatistikkRepositoryImplTest {
     @Test
@@ -54,13 +51,13 @@ class SakstatistikkRepositoryImplTest {
             behandlingResultat = "AX",
             resultatBegrunnelse = "BEGRUNNELSE"
         )
-        val id = dataSource.transaction {
+        dataSource.transaction {
             val repository = SakstatistikkRepositoryImpl(it)
             repository.lagre(hendelse)
         }
 
         val uthentet = dataSource.transaction {
-            SakstatistikkRepositoryImpl(it).hentSisteForBehandling(id)
+            SakstatistikkRepositoryImpl(it).hentSisteForBehandling(referanse)
         }
         val datoSammenligner: BiPredicate<LocalDateTime, LocalDateTime> = BiPredicate { t, u ->
             t.truncatedTo(ChronoUnit.MILLIS).equals(u.truncatedTo(ChronoUnit.MILLIS))

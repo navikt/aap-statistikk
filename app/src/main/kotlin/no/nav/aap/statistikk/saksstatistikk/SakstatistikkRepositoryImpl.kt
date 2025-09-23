@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
 import no.nav.aap.statistikk.behandling.SøknadsFormat
+import java.util.*
 
 class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
     SakstatistikkRepository {
@@ -85,13 +86,13 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
     }
 
     override fun hentSisteForBehandling(
-        id: Long
+        referanse: UUID
     ): BQBehandling {
         val sql = """
-            select * from saksstatistikk where id = ?
+            select * from saksstatistikk where behandling_uuid = ?
         """.trimIndent()
 
-        return dbConnection.queryFirst(sql) {
+        return checkNotNull(dbConnection.queryFirstOrNull(sql) {
             setRowMapper { row ->
                 BQBehandling(
                     fagsystemNavn = row.getString("fagsystem_navn"),
@@ -99,7 +100,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
                     saksnummer = row.getString("saksnummer"),
                     behandlingUUID = row.getUUID("behandling_uuid"),
                     relatertBehandlingUUID = row.getUUIDOrNull("relatert_behandling_uuid"),
-                    relatertFagsystem = row.getString("relatert_fagsystem"),
+                    relatertFagsystem = row.getStringOrNull("relatert_fagsystem"),
                     ferdigbehandletTid = row.getLocalDateTimeOrNull("ferdigbehandlet_tid"),
                     behandlingType = row.getString("behandling_type"),
                     aktorId = row.getString("aktor_id"),
@@ -110,25 +111,25 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
                     versjon = row.getString("versjon"),
                     avsender = row.getString("avsender"),
                     opprettetAv = row.getString("opprettet_av"),
-                    saksbehandler = row.getString("saksbehandler"),
+                    saksbehandler = row.getStringOrNull("saksbehandler"),
                     vedtakTid = row.getLocalDateTimeOrNull("vedtak_tid"),
                     søknadsFormat = SøknadsFormat.valueOf(row.getString("soknadsformat")),
                     behandlingMetode = BehandlingMetode.valueOf(
                         row.getString("behandlingmetode")
                     ),
-                    ansvarligBeslutter = row.getString("ansvarlig_beslutter"),
+                    ansvarligBeslutter = row.getStringOrNull("ansvarlig_beslutter"),
                     behandlingStatus = row.getString("behandling_status"),
                     behandlingÅrsak = row.getString("behandling_aarsak"),
-                    ansvarligEnhetKode = row.getString("ansvarlig_enhet_kode"),
+                    ansvarligEnhetKode = row.getStringOrNull("ansvarlig_enhet_kode"),
                     sakYtelse = row.getString("sak_ytelse"),
-                    behandlingResultat = row.getString("behandling_resultat"),
-                    resultatBegrunnelse = row.getString("resultat_begrunnelse")
+                    behandlingResultat = row.getStringOrNull("behandling_resultat"),
+                    resultatBegrunnelse = row.getStringOrNull("resultat_begrunnelse")
                 )
             }
             setParams {
-                setLong(1, id)
+                setUUID(1, referanse)
             }
-        }
+        }) { "Fant ikke behandling for referanse $referanse" }
     }
 
 }

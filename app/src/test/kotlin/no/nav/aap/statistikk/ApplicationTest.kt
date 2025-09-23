@@ -3,6 +3,7 @@ package no.nav.aap.statistikk
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
@@ -11,6 +12,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
+import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.person.PersonService
@@ -33,35 +35,37 @@ class ApplicationTest {
         val jobbAppender = MockJobbAppender()
         val meterRegistry = SimpleMeterRegistry()
 
+        val hendelsesService: (DBConnection) -> HendelsesService = {
+            HendelsesService(
+                sakService = SakService(FakeSakRepository()),
+                avsluttetBehandlingService = AvsluttetBehandlingService(
+                    tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+                    beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+                    vilkårsResultatRepository = FakeVilkårsResultatRepository(),
+                    diagnoseRepository = FakeDiagnoseRepository(),
+                    behandlingRepository = FakeBehandlingRepository(),
+                    rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+                    skjermingService = SkjermingService(FakePdlClient()),
+                    meterRegistry = meterRegistry,
+                    opprettBigQueryLagringYtelseCallback = {}
+                ),
+                personService = PersonService(FakePersonRepository()),
+                behandlingRepository = FakeBehandlingRepository(),
+                meterRegistry = meterRegistry,
+                opprettBigQueryLagringSakStatistikkCallback = { },
+                opprettRekjørSakstatistikkCallback = { },
+            )
+        }
         testKlient(
             transactionExecutor = noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender = jobbAppender,
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-                hendelsesService = {
-                    HendelsesService(
-                        sakService = SakService(FakeSakRepository()),
-                        avsluttetBehandlingService = AvsluttetBehandlingService(
-                            tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                            beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                            vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                            diagnoseRepository = FakeDiagnoseRepository(),
-                            behandlingRepository = FakeBehandlingRepository(),
-                            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                            skjermingService = SkjermingService(FakePdlClient()),
-                            meterRegistry = meterRegistry,
-                            opprettBigQueryLagringYtelseCallback = {}
-                        ),
-                        personService = PersonService(FakePersonRepository()),
-                        behandlingRepository = FakeBehandlingRepository(),
-                        meterRegistry = meterRegistry,
-                        opprettBigQueryLagringSakStatistikkCallback = { },
-                        opprettRekjørSakstatistikkCallback = { },
-                    )
-                },
+                hendelsesService = hendelsesService,
             ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, mockk()),
-            lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
+            lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry),
+            lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
         ) { url, client ->
             @Language("JSON") val body = """{
   "saksnummer": "123456789",
@@ -164,37 +168,37 @@ class ApplicationTest {
         val jobbAppender = MockJobbAppender()
         val meterRegistry = SimpleMeterRegistry()
 
+        val hendelsesService: (DBConnection) -> HendelsesService = {
+            val behandlingRepository = FakeBehandlingRepository()
+            HendelsesService(
+                sakService = SakService(FakeSakRepository()),
+                personService = PersonService(FakePersonRepository()),
+                avsluttetBehandlingService = AvsluttetBehandlingService(
+                    tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+                    beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+                    vilkårsResultatRepository = FakeVilkårsResultatRepository(),
+                    diagnoseRepository = FakeDiagnoseRepository(),
+                    behandlingRepository = behandlingRepository,
+                    rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+                    skjermingService = SkjermingService(FakePdlClient()),
+                    meterRegistry = meterRegistry,
+                    opprettBigQueryLagringYtelseCallback = {}
+                ),
+                behandlingRepository = behandlingRepository,
+                meterRegistry = meterRegistry,
+                opprettBigQueryLagringSakStatistikkCallback = { TODO() },
+                opprettRekjørSakstatistikkCallback = { TODO() },
+            )
+        }
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
-            jobbAppender,
             azureConfig,
-            LagreStoppetHendelseJobb(
-                hendelsesService = {
-                    val behandlingRepository = FakeBehandlingRepository()
-                    HendelsesService(
-                        sakService = SakService(FakeSakRepository()),
-                        personService = PersonService(FakePersonRepository()),
-                        avsluttetBehandlingService = AvsluttetBehandlingService(
-                            tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                            beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                            vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                            diagnoseRepository = FakeDiagnoseRepository(),
-                            behandlingRepository = behandlingRepository,
-                            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                            skjermingService = SkjermingService(FakePdlClient()),
-                            meterRegistry = meterRegistry,
-                            opprettBigQueryLagringYtelseCallback = {}
-                        ),
-                        behandlingRepository = behandlingRepository,
-                        meterRegistry = meterRegistry,
-                        opprettBigQueryLagringSakStatistikkCallback = { TODO() },
-                        opprettRekjørSakstatistikkCallback = { TODO() },
-                    )
-                }
-            ),
+            LagreStoppetHendelseJobb(hendelsesService),
             LagreOppgaveHendelseJobb(meterRegistry, mockk()),
-            LagrePostmottakHendelseJobb(meterRegistry)
+            LagrePostmottakHendelseJobb(meterRegistry),
+            LagreAvklaringsbehovHendelseJobb(hendelsesService),
+            jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"), PostRequest(

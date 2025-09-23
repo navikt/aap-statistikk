@@ -259,6 +259,13 @@ class IntegrationTest {
                     ) {
                         TODO("Not yet implemented")
                     }
+
+                    override fun leggTilResendSakstatistikkJobb(
+                        connection: DBConnection,
+                        behandlingId: BehandlingId
+                    ) {
+                        TODO("Not yet implemented")
+                    }
                 })).medPayload(
                     DefaultJsonMapper.toJson(hendelse)
                 ).forSak(stringToNumber(hendelse.saksnummer!!))

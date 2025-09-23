@@ -6,7 +6,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.miljo.Miljø
-import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
@@ -19,7 +18,6 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
-import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.verdityper.dokument.Kanal
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -44,7 +42,6 @@ class HendelsesService(
             avsluttetBehandlingService: AvsluttetBehandlingService,
             jobbAppender: JobbAppender,
             meterRegistry: MeterRegistry,
-            resendSakstatistikkJobb: ResendSakstatistikkJobb,
         ): HendelsesService {
             return HendelsesService(
                 sakService = SakService(SakRepositoryImpl(connection)),
@@ -53,6 +50,8 @@ class HendelsesService(
                 behandlingRepository = BehandlingRepository(connection),
                 meterRegistry = meterRegistry,
                 opprettBigQueryLagringSakStatistikkCallback = {
+                    LoggerFactory.getLogger(HendelsesService::class.java)
+                        .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")
                     jobbAppender.leggTilLagreSakTilBigQueryJobb(
                         connection,
                         it
@@ -61,9 +60,7 @@ class HendelsesService(
                 opprettRekjørSakstatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)
                         .info("Starter resending-jobb. BehandlingId: $it")
-                    jobbAppender.leggTil(
-                        connection, JobbInput(resendSakstatistikkJobb).medPayload(it)
-                    )
+                    jobbAppender.leggTilResendSakstatistikkJobb(connection, it)
                 })
         }
     }
@@ -112,10 +109,16 @@ class HendelsesService(
         val behandlingMedHistorikk =
             ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
-        behandlingRepository.invaliderOgLagreNyHistorikk(behandlingMedHistorikk)
+        val behandlingId = hentEllerLagreBehandling(hendelse, sak).id
+        checkNotNull(behandlingId)
 
-        logger.info("Starter jobb for rekjøring av saksstatistikk.")
-        opprettRekjørSakstatistikkCallback(behandling.id!!)
+        val behandlingMedId = behandlingMedHistorikk.copy(id = behandlingId)
+
+        behandlingRepository.invaliderOgLagreNyHistorikk(behandlingMedId)
+
+        logger.info("Starter jobb for rekjøring av saksstatistikk for behandling med id ${behandlingMedId.id}.")
+
+        opprettRekjørSakstatistikkCallback(behandlingId)
     }
 
 
