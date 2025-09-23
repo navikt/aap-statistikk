@@ -9,7 +9,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
+import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.person.PersonService
@@ -39,15 +39,21 @@ class ApplicationTest {
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
                 meterRegistry,
-                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                diagnoseRepository = { DiagnoseRepositoryImpl(it) },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 sakService = { SakService(FakeSakRepository()) },
-                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 personService = { PersonService(FakePersonRepository()) },
-                skjermingService = SkjermingService(FakePdlClient()),
+                avsluttetBehandlingService = {
+                    AvsluttetBehandlingService(
+                        tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+                        beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+                        vilkårsResultatRepository = FakeVilkårsResultatRepository(),
+                        diagnoseRepository = FakeDiagnoseRepository(),
+                        behandlingRepository = FakeBehandlingRepository(),
+                        rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+                        skjermingService = SkjermingService(FakePdlClient()),
+                        meterRegistry = meterRegistry,
+                        opprettBigQueryLagringYtelseCallback = {}
+                    )
+                },
                 jobbAppender = mockk()
             ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, mockk()),
             lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
@@ -160,15 +166,21 @@ class ApplicationTest {
             azureConfig,
             LagreStoppetHendelseJobb(
                 meterRegistry,
-                tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-                beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-                vilkårsResultatRepositoryFactory = { FakeVilkårsResultatRepository() },
-                diagnoseRepository = { DiagnoseRepositoryImpl(it) },
-                behandlingRepositoryFactory = { FakeBehandlingRepository() },
                 sakService = { SakService(FakeSakRepository()) },
-                rettighetstypeperiodeRepository = { FakeRettighetsTypeRepository() },
                 personService = { PersonService(FakePersonRepository()) },
-                skjermingService = SkjermingService(FakePdlClient()),
+                avsluttetBehandlingService = {
+                    AvsluttetBehandlingService(
+                        tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
+                        beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
+                        vilkårsResultatRepository = FakeVilkårsResultatRepository(),
+                        diagnoseRepository = FakeDiagnoseRepository(),
+                        behandlingRepository = FakeBehandlingRepository(),
+                        rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+                        skjermingService = SkjermingService(FakePdlClient()),
+                        meterRegistry = meterRegistry,
+                        opprettBigQueryLagringYtelseCallback = {}
+                    )
+                },
                 jobbAppender = mockk()
             ),
             LagreOppgaveHendelseJobb(meterRegistry, mockk()),
