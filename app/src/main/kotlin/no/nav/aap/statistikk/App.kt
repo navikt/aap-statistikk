@@ -101,15 +101,13 @@ fun Application.startUp(
     val bqSakRepository = BigQuerySakstatikkRepository(bigQueryClientSak)
     val bqYtelseRepository = BQYtelseRepository(bigQueryClientYtelse)
 
-    val pdlClient = PdlGraphQLClient(
-        pdlConfig = pdlConfig, prometheusMeterRegistry
-    )
+    val pdlClient = PdlGraphQLClient(pdlConfig, prometheusMeterRegistry)
+
     val skjermingService = SkjermingService(pdlClient)
     val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
         SaksStatistikkService.konstruer(it, bqSakRepository, skjermingService)
     }
-    val lagreSakinfoTilBigQueryJobb =
-        LagreSakinfoTilBigQueryJobb(sakStatistikkService = sakStatistikkService)
+    val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
 
     val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
         ytelsesStatistikkTilBigQuery = { connection ->
@@ -117,14 +115,19 @@ fun Application.startUp(
         }
     )
 
-    val motorJobbAppender =
-        MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
-
     val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
+
+    val motorJobbAppender =
+        MotorJobbAppender(
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb
+        )
 
     val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
         HendelsesService.konstruer(
-            connection, AvsluttetBehandlingService.konstruer(
+            connection,
+            AvsluttetBehandlingService.konstruer(
                 connection,
                 meterRegistry = prometheusMeterRegistry,
                 skjermingService = skjermingService,
@@ -137,15 +140,10 @@ fun Application.startUp(
             ),
             jobbAppender = motorJobbAppender,
             meterRegistry = prometheusMeterRegistry,
-            resendSakstatistikkJobb = resendSakstatistikkJobb
         )
     }
-    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        hendelsesService = hendelsesService,
-    )
-
-    val lagreAvklaringsbehovHendelseJobb =
-        LagreAvklaringsbehovHendelseJobb(hendelsesService = hendelsesService)
+    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
+    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
 
     val lagreOppgaveHendelseJobb =
         LagreOppgaveHendelseJobb(prometheusMeterRegistry, motorJobbAppender)
@@ -188,15 +186,16 @@ fun Application.startUp(
         lagreStoppetHendelseJobb,
         lagreOppgaveHendelseJobb,
         lagrePostmottakHendelseJobb,
+        lagreAvklaringsbehovHendelseJobb,
         prometheusMeterRegistry
     )
 }
 
-private fun motor(
+fun motor(
     dataSource: DataSource,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
-    prometheusMeterRegistry: PrometheusMeterRegistry,
+    prometheusMeterRegistry: MeterRegistry,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
@@ -236,6 +235,7 @@ fun Application.module(
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
     prometheusMeterRegistry: MeterRegistry,
 ) {
     motor.start()
@@ -267,7 +267,8 @@ fun Application.module(
                     jobbAppender,
                     lagreStoppetHendelseJobb,
                     lagreOppgaveHendelseJobb,
-                    lagrePostmottakHendelseJobb
+                    lagrePostmottakHendelseJobb,
+                    lagreAvklaringsbehovHendelseJobb
                 )
                 hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()

@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.Saksnummer
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
@@ -16,6 +17,8 @@ value class BehandlingId(val id: Long)
 class BehandlingRepository(
     private val dbConnection: DBConnection, private val clock: Clock = Clock.systemDefaultZone()
 ) : IBehandlingRepository {
+
+    private val log = LoggerFactory.getLogger(javaClass)
 
     override fun opprettBehandling(behandling: Behandling): BehandlingId {
         val behandlingReferanseQuery = """WITH ny_ref AS (
@@ -87,8 +90,8 @@ VALUES (?, ?, ?, ?, ?, ?)"""
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  hendelsestidspunkt, slettet)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -108,7 +111,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setEnumName(c++, behandling.gjeldendeStegGruppe)
                 setString(c++, behandling.returÅrsak)
                 setEnumName(c++, behandling.resultat)
-                setLocalDateTime(c, behandling.oppdatertTidspunkt)
+                setLocalDateTime(c++, behandling.oppdatertTidspunkt)
+                setBoolean(c++, false)
             }
         }
 
@@ -171,8 +175,8 @@ WHERE ident = ?""", behandling.relaterteIdenter
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  hendelsestidspunkt, slettet)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, oppdateringer.mapIndexed { index, it -> Pair(it, index) }
         ) {
             setParams { (behandling, idx) ->
@@ -193,9 +197,11 @@ WHERE ident = ?""", behandling.relaterteIdenter
                 setEnumName(c++, behandling.gjeldendeStegGruppe)
                 setString(c++, behandling.returÅrsak)
                 setEnumName(c++, behandling.resultat)
-                setLocalDateTime(c, behandling.oppdatertTidspunkt)
+                setLocalDateTime(c++, behandling.oppdatertTidspunkt)
+                setBoolean(c++, false)
             }
         }
+        log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id} med versjon $versjonId.")
     }
 
     override fun hent(referanse: UUID): Behandling? {
@@ -265,7 +271,8 @@ WHERE br.referanse = ?"""
         return behandling
     }
 
-    private val hentMedId = """SELECT b.id                                as b_id,
+    private val hentMedId = """
+SELECT b.id                                as b_id,
        br.referanse                        as br_referanse,
        b.type                              as b_type,
        b.opprettet_tid                     as b_opprettet_tid,
@@ -319,18 +326,18 @@ FROM behandling b
 WHERE b.id = ?"""
 
     override fun hent(id: BehandlingId): Behandling {
-        val behandling = dbConnection.queryFirst(hentMedId) {
+        val behandling = dbConnection.queryFirstOrNull(hentMedId) {
             setParams {
                 setLong(1, id.id)
             }
             setRowMapper {
                 mapBehandling(it)
             }
-        }.let {
+        }?.let {
             it.copy(hendelser = hentBehandlingHistorikk(it))
         }
 
-        return behandling
+        return checkNotNull(behandling) { "Fant ikke behandling med id $id" }
     }
 
     private fun hentBehandlingHistorikk(behandling: Behandling): List<BehandlingHendelse> = run {

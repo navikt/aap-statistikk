@@ -16,5 +16,6 @@ class LagreAvklaringsbehovHendelseJobbUtfører(private val hendelsesService: Hen
         logger.info("StoppetBehandling mottatt Regenerer statistikk. Behandlingsreferanse: ${dto.behandlingReferanse}.")
 
         hendelsesService.prosesserNyHistorikkHendelse(dto)
+        logger.info("Ferdig å regenerere statistikk for behandling ${dto.behandlingReferanse}.")
     }
 }

@@ -9,7 +9,12 @@ interface JobbAppender {
     fun leggTilLagreSakTilBigQueryJobb(
         connection: DBConnection, behandlingId: BehandlingId
     )
+
     fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+        connection: DBConnection, behandlingId: BehandlingId
+    )
+
+    fun leggTilResendSakstatistikkJobb(
         connection: DBConnection, behandlingId: BehandlingId
     )
 }

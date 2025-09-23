@@ -9,11 +9,13 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
+import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import org.slf4j.LoggerFactory
 
 class MotorJobbAppender(
     private val lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
     private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
+    private val resendSakstatistikkJobb: ResendSakstatistikkJobb,
 ) : JobbAppender {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -55,6 +57,20 @@ class MotorJobbAppender(
             ).forSak(
                 stringToNumber(saksnummer.value)
             )
+        )
+    }
+
+    override fun leggTilResendSakstatistikkJobb(
+        connection: DBConnection,
+        behandlingId: BehandlingId
+    ) {
+        log.info("Starter resending-jobb. BehandlingId: $behandlingId")
+        val behandling = BehandlingRepository(connection).hent(behandlingId)
+        val saksnummer = behandling.sak.saksnummer
+        leggTil(
+            connection,
+            JobbInput(resendSakstatistikkJobb).medPayload(behandlingId)
+                .forSak(stringToNumber(saksnummer.value))
         )
     }
 }
