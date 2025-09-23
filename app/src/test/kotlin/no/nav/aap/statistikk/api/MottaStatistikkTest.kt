@@ -25,18 +25,21 @@ import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
+import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
+import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
-import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
@@ -45,6 +48,9 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
+import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
+import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
+import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -232,27 +238,32 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(skjermingService, meterRegistry)
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
+            skjermingService,
+            meterRegistry,
+            bqStatistikkRepository,
+            jobbAppender1
+        )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
-            bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
-            behandlingRepositoryFactory = { FakeBehandlingRepository() },
-            bqSakstatikk = bqStatistikkRepository,
-            skjermingService = skjermingService
+            sakStatistikkService = {
+                SaksStatistikkService(
+                    behandlingRepository = BehandlingRepository(it),
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                    bigQueryKvitteringRepository = BigQueryKvitteringRepository(it),
+                    bigQueryRepository = bqStatistikkRepository,
+                    skjermingService = skjermingService,
+                    oppgaveHendelseRepository = OppgaveHendelseRepository(it),
+                    sakstatistikkRepository = SakstatistikkRepositoryImpl(it),
+                )
+            },
         )
 
-        val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
-            behandlingRepositoryFactory = { FakeBehandlingRepository() },
-            rettighetstypeperiodeRepositoryFactory = { FakeRettighetsTypeRepository() },
-            diagnoseRepositoryFactory = { FakeDiagnoseRepository() },
-            vilkårsResulatRepositoryFactory = { FakeVilkårsResultatRepository() },
-            tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-            beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-            bqRepository = bqRepositoryYtelse,
-        )
+        val lagreAvsluttetBehandlingTilBigQueryJobb =
+            konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
 
         val motor = opprettMotor(
             dataSource,
@@ -309,29 +320,31 @@ class MottaStatistikkTest {
 
     private fun ekteLagreStoppetHendelseJobb(
         skjermingService: SkjermingService,
-        meterRegistry: SimpleMeterRegistry
+        meterRegistry: SimpleMeterRegistry,
+        bqSakStatikkService: IBQSakstatistikkRepository,
+        jobbAppender: JobbAppender,
     ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         hendelsesService = {
-            HendelsesService(
-                sakService = SakService(SakRepositoryImpl(it)),
-                personService = PersonService(PersonRepository(it)),
-                avsluttetBehandlingService = AvsluttetBehandlingService(
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
-                    vilkårsResultatRepository = VilkårsresultatRepository(it),
-                    diagnoseRepository = DiagnoseRepositoryImpl(it),
-                    behandlingRepository = BehandlingRepository(it),
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+            HendelsesService.konstruer(
+                it,
+                avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
+                    it, meterRegistry,
                     skjermingService = skjermingService,
-                    meterRegistry = meterRegistry,
-                    opprettBigQueryLagringYtelseCallback = { }
+                    opprettBigQueryLagringYtelseCallback = { TODO() },
                 ),
-                behandlingRepository = BehandlingRepository(it),
+                jobbAppender = jobbAppender,
                 meterRegistry = meterRegistry,
-                opprettBigQueryLagringSakStatistikkCallback = { },
-                opprettRekjørSakstatistikkCallback = { },
+                resendSakstatistikkJobb = ResendSakstatistikkJobb(
+                    sakStatistikkService = {
+                        SaksStatistikkService.konstruer(
+                            it,
+                            bqSakStatikkService,
+                            skjermingService
+                        )
+                    }
+                ),
             )
-        },
+        }
     )
 
     private fun opprettMotor(
@@ -429,28 +442,32 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(skjermingService, meterRegistry)
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
+            skjermingService,
+            meterRegistry,
+            bqStatistikkRepository,
+            jobbAppender1
+        )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
-            bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
-            behandlingRepositoryFactory = { BehandlingRepository(it) },
-            bqSakstatikk = bqStatistikkRepository,
-            skjermingService = skjermingService
+            sakStatistikkService = {
+                SaksStatistikkService(
+                    behandlingRepository = BehandlingRepository(it),
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                    bigQueryKvitteringRepository = BigQueryKvitteringRepository(it),
+                    bigQueryRepository = bqStatistikkRepository,
+                    skjermingService = skjermingService,
+                    oppgaveHendelseRepository = OppgaveHendelseRepository(it),
+                    sakstatistikkRepository = SakstatistikkRepositoryImpl(it),
+                )
+            },
         )
 
-        val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
-            behandlingRepositoryFactory = { BehandlingRepository(it) },
-            rettighetstypeperiodeRepositoryFactory = { RettighetstypeperiodeRepository(it) },
-            diagnoseRepositoryFactory = { DiagnoseRepositoryImpl(it) },
-            vilkårsResulatRepositoryFactory = { VilkårsresultatRepository(it) },
-            tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
-            beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
-            bqRepository = bqRepositoryYtelse,
-        )
-
+        val lagreAvsluttetBehandlingTilBigQueryJobb =
+            konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
 
         val motor = opprettMotor(
             dataSource,
@@ -510,6 +527,21 @@ class MottaStatistikkTest {
         motor.stop()
     }
 
+    private fun konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse: FakeBQYtelseRepository): LagreAvsluttetBehandlingTilBigQueryJobb =
+        LagreAvsluttetBehandlingTilBigQueryJobb(
+            ytelsesStatistikkTilBigQuery = {
+                YtelsesStatistikkTilBigQuery(
+                    bqRepository = bqRepositoryYtelse,
+                    behandlingRepository = BehandlingRepository(it),
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                    diagnoseRepository = DiagnoseRepositoryImpl(it),
+                    vilkårsresultatRepository = VilkårsresultatRepository(it),
+                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
+                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
+                )
+            },
+        )
+
     @Test
     fun `kan motta postmottak-hendelse, og jobb blir utført`(
         @Postgres dataSource: DataSource,
@@ -540,27 +572,32 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
 
         val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(skjermingService, meterRegistry)
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
+            skjermingService,
+            meterRegistry,
+            bqRepositorySak,
+            jobbAppender1
+        )
 
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
-            bigQueryKvitteringRepository = { FakeBigQueryKvitteringRepository() },
-            behandlingRepositoryFactory = { FakeBehandlingRepository() },
-            bqSakstatikk = bqRepositorySak,
-            skjermingService = skjermingService
+            sakStatistikkService = {
+                SaksStatistikkService(
+                    behandlingRepository = BehandlingRepository(it),
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                    bigQueryKvitteringRepository = BigQueryKvitteringRepository(it),
+                    bigQueryRepository = bqRepositorySak,
+                    skjermingService = skjermingService,
+                    oppgaveHendelseRepository = OppgaveHendelseRepository(it),
+                    sakstatistikkRepository = SakstatistikkRepositoryImpl(it),
+                )
+            },
         )
 
-        val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
-            behandlingRepositoryFactory = { FakeBehandlingRepository() },
-            rettighetstypeperiodeRepositoryFactory = { FakeRettighetsTypeRepository() },
-            diagnoseRepositoryFactory = { FakeDiagnoseRepository() },
-            vilkårsResulatRepositoryFactory = { FakeVilkårsResultatRepository() },
-            tilkjentYtelseRepositoryFactory = { FakeTilkjentYtelseRepository() },
-            beregningsgrunnlagRepositoryFactory = { FakeBeregningsgrunnlagRepository() },
-            bqRepository = bqRepositoryYtelse,
-        )
+        val lagreAvsluttetBehandlingTilBigQueryJobb =
+            konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
 
         val motor = opprettMotor(
             dataSource,

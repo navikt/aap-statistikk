@@ -30,10 +30,7 @@ import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
 import no.nav.aap.statistikk.api.mottaStatistikk
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
-import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
+import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
@@ -49,19 +46,13 @@ import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.kodeverk.kodeverk
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
-import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
-import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.saksstatistikk.BigQuerySakstatikkRepository
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
+import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.skjerming.SkjermingService
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
@@ -79,7 +70,6 @@ fun main() {
     val bgConfigYtelse = BigQueryConfigFromEnv("ytelsestatistikk")
     val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistryYtelseStatistikk)
     val bigQueryClientSak = BigQueryClient(bgConfigSak, schemaRegistrySakStatistikk)
-
 
     val azureConfig = azureconfigFraMiljøVariabler()
     val pdlConfig = PdlConfig(
@@ -115,65 +105,39 @@ fun Application.startUp(
         pdlConfig = pdlConfig, prometheusMeterRegistry
     )
     val skjermingService = SkjermingService(pdlClient)
-    val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
-        bigQueryKvitteringRepository = { BigQueryKvitteringRepository(it) },
-        behandlingRepositoryFactory = { BehandlingRepository(it) },
-        bqSakstatikk = bqSakRepository,
-        skjermingService = skjermingService
-    )
+    val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
+        SaksStatistikkService.konstruer(it, bqSakRepository, skjermingService)
+    }
+    val lagreSakinfoTilBigQueryJobb =
+        LagreSakinfoTilBigQueryJobb(sakStatistikkService = sakStatistikkService)
 
     val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
-        behandlingRepositoryFactory = { BehandlingRepository(it) },
-        rettighetstypeperiodeRepositoryFactory = { RettighetstypeperiodeRepository(it) },
-        diagnoseRepositoryFactory = { DiagnoseRepositoryImpl(it) },
-        vilkårsResulatRepositoryFactory = { VilkårsresultatRepository(it) },
-        tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
-        beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
-        bqRepository = bqYtelseRepository
+        ytelsesStatistikkTilBigQuery = { connection ->
+            YtelsesStatistikkTilBigQuery.konstruer(connection, bqRepository = bqYtelseRepository)
+        }
     )
 
     val motorJobbAppender =
         MotorJobbAppender(lagreSakinfoTilBigQueryJobb, lagreAvsluttetBehandlingTilBigQueryJobb)
 
-    val resendSakstatistikkJobb = ResendSakstatistikkJobb(
-        pdlClient = pdlClient,
-        bigQuerySakstatikkRepository = bqSakRepository,
-    )
+    val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
 
     val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
-        HendelsesService(
-            sakService = SakService(SakRepositoryImpl(connection)),
-            personService = PersonService(PersonRepository(connection)),
-            avsluttetBehandlingService = AvsluttetBehandlingService(
-                tilkjentYtelseRepository = TilkjentYtelseRepository(connection),
-                beregningsgrunnlagRepository = BeregningsgrunnlagRepository(connection),
-                vilkårsResultatRepository = VilkårsresultatRepository(connection),
-                diagnoseRepository = DiagnoseRepositoryImpl(connection),
-                behandlingRepository = BehandlingRepository(connection),
-                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
-                skjermingService = skjermingService,
+        HendelsesService.konstruer(
+            connection, AvsluttetBehandlingService.konstruer(
+                connection,
                 meterRegistry = prometheusMeterRegistry,
+                skjermingService = skjermingService,
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->
                     motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
                         connection,
                         behandlingId
                     )
-                }
+                },
             ),
-            behandlingRepository = BehandlingRepository(connection),
+            jobbAppender = motorJobbAppender,
             meterRegistry = prometheusMeterRegistry,
-            opprettBigQueryLagringSakStatistikkCallback = {
-                motorJobbAppender.leggTilLagreSakTilBigQueryJobb(
-                    connection,
-                    it
-                )
-            },
-            opprettRekjørSakstatistikkCallback = {
-                log.info("Starter resending-jobb. BehandlingId: $it")
-                motorJobbAppender.leggTil(
-                    connection, JobbInput(resendSakstatistikkJobb).medPayload(it)
-                )
-            },
+            resendSakstatistikkJobb = resendSakstatistikkJobb
         )
     }
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(

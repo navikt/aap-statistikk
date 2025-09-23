@@ -1,14 +1,17 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.hendelser.ferdigBehandletTid
 import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
+import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
@@ -30,6 +33,24 @@ class SaksStatistikkService(
     private val sakstatistikkRepository: SakstatistikkRepository,
     private val clock: Clock = systemDefaultZone()
 ) {
+
+    companion object {
+        fun konstruer(
+            connection: DBConnection,
+            bigQueryRepository: IBQSakstatistikkRepository,
+            skjermingService: SkjermingService,
+        ): SaksStatistikkService {
+            return SaksStatistikkService(
+                behandlingRepository = BehandlingRepository(connection),
+                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+                bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
+                bigQueryRepository = bigQueryRepository,
+                skjermingService = skjermingService,
+                sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
+                oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
+            )
+        }
+    }
 
     fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
         val behandling = behandlingRepository.hent(behandlingId)
