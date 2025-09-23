@@ -3,20 +3,13 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id("aap-statistikk.conventions")
     kotlin("jvm")
-    id("io.ktor.plugin") version "3.3.0"
+    alias(libs.plugins.ktor)
     application
 }
 
-val ktorVersion = "3.3.0"
 val mockkVersion = "1.14.5"
 val flywayVersion = "11.13.1"
 val testContainersVersion = "1.21.3"
-val komponenterVersjon = "1.0.366"
-val behandlingsflytversjon = "0.0.436"
-val tilgangVersjon = "1.0.125"
-val oppgaveVersjon = "0.0.119"
-val postmottakVersjon = "0.0.116"
-val utbetalVersjon = "0.0.60"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -36,10 +29,8 @@ tasks.register<JavaExec>("genererOpenApi") {
 
 
 dependencies {
-    implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
-
-    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-    implementation("io.ktor:ktor-server-html-builder:${ktorVersion}")
+    implementation(libs.ktorServerStatusPages)
+    implementation(libs.ktorServerHtmlBuilder)
 
     implementation("ch.qos.logback:logback-classic:1.5.18")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
@@ -49,28 +40,28 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql:42.7.8")
     implementation("com.zaxxer:HikariCP:7.0.2")
 
-    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
+    implementation(libs.motor)
+    implementation(libs.motorApi)
+    implementation(libs.httpklient)
+    implementation(libs.dbconnect)
+    implementation(libs.infrastructure)
+    implementation(libs.server)
 
     implementation("no.nav:ktor-openapi-generator:1.0.125")
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:$behandlingsflytversjon")
-    implementation("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
-    api("no.nav.aap.tilgang:plugin:${tilgangVersjon}")
+    implementation(libs.behandlingsflytKontrakt)
+    implementation(libs.tilgangKontrakt)
+    api(libs.tilgangPlugin)
 
-    implementation("no.nav.aap.oppgave:api-kontrakt:$oppgaveVersjon")
-    implementation("no.nav.aap.postmottak:kontrakt:$postmottakVersjon")
-    implementation("no.nav.aap.utbetal:api-kontrakt:$utbetalVersjon")
+    implementation(libs.oppgaveKontrakt)
+    implementation(libs.postmottakKontrakt)
+    implementation(libs.utbetalKontrakt)
 
     implementation("com.google.cloud:google-cloud-bigquery:2.55.0")
 
 
     testImplementation(kotlin("test"))
-    testImplementation("no.nav.aap.kelvin:motor-test-utils:$komponenterVersjon")
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation(libs.motorTestUtils)
+    testImplementation(libs.ktorServerTestHost)
     testImplementation("com.nimbusds:nimbus-jose-jwt:10.5")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("org.assertj:assertj-core:3.27.5")
