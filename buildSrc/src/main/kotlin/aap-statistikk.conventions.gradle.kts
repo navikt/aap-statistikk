@@ -48,6 +48,13 @@ kotlin {
     }
 }
 
+// Pass på at når vi kaller JavaExec eller Test tasks så bruker vi samme JVM som vi kompilerer med
+val toolchainLauncher = javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(21))
+}
+tasks.withType<Test>().configureEach { javaLauncher.set(toolchainLauncher) }
+tasks.withType<JavaExec>().configureEach { javaLauncher.set(toolchainLauncher) }
+
 
 kotlin.sourceSets["main"].kotlin.srcDirs("main")
 kotlin.sourceSets["test"].kotlin.srcDirs("test")
