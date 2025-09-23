@@ -28,6 +28,7 @@ import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
 import no.nav.aap.statistikk.api.mottaStatistikk
+import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
@@ -50,6 +51,7 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.saksstatistikk.BigQuerySakstatikkRepository
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
@@ -133,15 +135,26 @@ fun Application.startUp(
 
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         prometheusMeterRegistry,
-        tilkjentYtelseRepositoryFactory = { TilkjentYtelseRepository(it) },
-        beregningsgrunnlagRepositoryFactory = { BeregningsgrunnlagRepository(it) },
-        vilkårsResultatRepositoryFactory = { VilkårsresultatRepository(it) },
-        diagnoseRepository = { DiagnoseRepositoryImpl(it) },
-        behandlingRepositoryFactory = { BehandlingRepository(it) },
-        sakService = { SakService(no.nav.aap.statistikk.sak.SakRepositoryImpl(it)) },
-        rettighetstypeperiodeRepository = { RettighetstypeperiodeRepository(it) },
+        sakService = { SakService(SakRepositoryImpl(it)) },
         personService = { PersonService(PersonRepository(it)) },
-        skjermingService = skjermingService,
+        avsluttetBehandlingService = {
+            AvsluttetBehandlingService(
+                tilkjentYtelseRepository = TilkjentYtelseRepository(it),
+                beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
+                vilkårsResultatRepository = VilkårsresultatRepository(it),
+                diagnoseRepository = DiagnoseRepositoryImpl(it),
+                behandlingRepository = BehandlingRepository(it),
+                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                skjermingService = skjermingService,
+                meterRegistry = prometheusMeterRegistry,
+                opprettBigQueryLagringYtelseCallback = { behandlingId ->
+                    motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+                        it,
+                        behandlingId
+                    )
+                }
+            )
+        },
         jobbAppender = motorJobbAppender,
     )
 
