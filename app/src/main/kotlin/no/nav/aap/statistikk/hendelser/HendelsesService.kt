@@ -4,16 +4,22 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.miljo.Miljø
+import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.nyBehandlingOpprettet
+import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.verdityper.dokument.Kanal
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -31,6 +37,36 @@ class HendelsesService(
     private val clock: Clock = Clock.systemDefaultZone()
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    companion object {
+        fun konstruer(
+            connection: DBConnection,
+            avsluttetBehandlingService: AvsluttetBehandlingService,
+            jobbAppender: JobbAppender,
+            meterRegistry: MeterRegistry,
+            resendSakstatistikkJobb: ResendSakstatistikkJobb,
+        ): HendelsesService {
+            return HendelsesService(
+                sakService = SakService(SakRepositoryImpl(connection)),
+                personService = PersonService(PersonRepository(connection)),
+                avsluttetBehandlingService = avsluttetBehandlingService,
+                behandlingRepository = BehandlingRepository(connection),
+                meterRegistry = meterRegistry,
+                opprettBigQueryLagringSakStatistikkCallback = {
+                    jobbAppender.leggTilLagreSakTilBigQueryJobb(
+                        connection,
+                        it
+                    )
+                },
+                opprettRekjørSakstatistikkCallback = {
+                    LoggerFactory.getLogger(HendelsesService::class.java)
+                        .info("Starter resending-jobb. BehandlingId: $it")
+                    jobbAppender.leggTil(
+                        connection, JobbInput(resendSakstatistikkJobb).medPayload(it)
+                    )
+                })
+        }
+    }
 
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
         val person = personService.hentEllerLagrePerson(hendelse.ident)

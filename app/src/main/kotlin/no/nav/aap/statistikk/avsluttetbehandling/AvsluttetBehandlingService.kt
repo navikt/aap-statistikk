@@ -1,17 +1,18 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
-import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.DiagnoseEntity
-import no.nav.aap.statistikk.behandling.DiagnoseRepository
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
 
 class AvsluttetBehandlingService(
@@ -26,6 +27,25 @@ class AvsluttetBehandlingService(
     private val opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
+
+    companion object {
+        fun konstruer(
+            dbConnection: DBConnection,
+            meterRegistry: MeterRegistry,
+            skjermingService: SkjermingService,
+            opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
+        ) = AvsluttetBehandlingService(
+            tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
+            beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dbConnection),
+            vilkårsResultatRepository = VilkårsresultatRepository(dbConnection),
+            diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
+            behandlingRepository = BehandlingRepository(dbConnection),
+            rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
+            skjermingService = skjermingService,
+            meterRegistry = meterRegistry,
+            opprettBigQueryLagringYtelseCallback = opprettBigQueryLagringYtelseCallback
+        )
+    }
 
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
         lagreDiagnose(avsluttetBehandling)

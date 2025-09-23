@@ -4,14 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
-import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
 
 class ResendSakstatistikkJobbUtfører(
@@ -31,23 +24,12 @@ class ResendSakstatistikkJobbUtfører(
 }
 
 class ResendSakstatistikkJobb(
-    private val pdlClient: PdlClient,
-    private val bigQuerySakstatikkRepository: IBQSakstatistikkRepository,
+    private val sakStatistikkService: (DBConnection) -> SaksStatistikkService,
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         return ResendSakstatistikkJobbUtfører(
-            SaksStatistikkService(
-                behandlingRepository = BehandlingRepository(connection),
-                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
-                bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
-                bigQueryRepository = bigQuerySakstatikkRepository,
-                skjermingService = SkjermingService(
-                    pdlClient = pdlClient
-                ),
-                oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
-                sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
-            ),
-            sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
+            sakStatikkService = sakStatistikkService(connection),
+            sakstatistikkRepository = SakstatistikkRepositoryImpl(connection)
         )
     }
 

@@ -4,13 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
-import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
-import no.nav.aap.statistikk.skjerming.SkjermingService
 
 class LagreSakinfoTilBigQueryJobbUtfører(private val sakStatistikkService: SaksStatistikkService) :
     JobbUtfører {
@@ -22,26 +16,14 @@ class LagreSakinfoTilBigQueryJobbUtfører(private val sakStatistikkService: Saks
 }
 
 class LagreSakinfoTilBigQueryJobb(
-    private val bigQueryKvitteringRepository: (DBConnection) -> IBigQueryKvitteringRepository,
-    private val behandlingRepositoryFactory: (DBConnection) -> IBehandlingRepository,
-    private val bqSakstatikk: IBQSakstatistikkRepository,
-    private val skjermingService: SkjermingService,
+    private val sakStatistikkService: (DBConnection) -> SaksStatistikkService,
 ) : Jobb {
     override fun beskrivelse(): String {
         return "Lagrer sakinfo til BigQuery"
     }
 
     override fun konstruer(connection: DBConnection): JobbUtfører {
-        val sakStatistikkService = SaksStatistikkService(
-            behandlingRepository = behandlingRepositoryFactory(connection),
-            rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
-            bigQueryKvitteringRepository = bigQueryKvitteringRepository(connection),
-            bigQueryRepository = bqSakstatikk,
-            skjermingService = skjermingService,
-            sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
-            oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
-        )
-        return LagreSakinfoTilBigQueryJobbUtfører(sakStatistikkService)
+        return LagreSakinfoTilBigQueryJobbUtfører(sakStatistikkService(connection))
     }
 
     override fun navn(): String {

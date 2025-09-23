@@ -4,11 +4,8 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -20,8 +17,6 @@ import no.nav.aap.statistikk.testutils.FakePdlClient
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.behandlingHendelse
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -110,17 +105,8 @@ class ProduksjonsstyringRepositoryTest {
             val meterRegistry = SimpleMeterRegistry()
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
-                avsluttetBehandlingService = AvsluttetBehandlingService(
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(conn),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn),
-                    vilkårsResultatRepository = VilkårsresultatRepository(conn),
-                    diagnoseRepository = DiagnoseRepositoryImpl(conn),
-                    behandlingRepository = BehandlingRepository(conn),
-                    skjermingService = skjermingService,
-                    meterRegistry = meterRegistry,
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(conn),
-                    opprettBigQueryLagringYtelseCallback = { TODO() }
-                ),
+                avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
+                    conn, meterRegistry, skjermingService, {}),
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
                 meterRegistry = meterRegistry,

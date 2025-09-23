@@ -1,15 +1,17 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.statistikk.behandling.BQYtelseBehandling
-import no.nav.aap.statistikk.behandling.DiagnoseRepository
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.hendelser.onlyOrNull
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import no.nav.aap.utbetaling.helved.toBase64
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -26,6 +28,23 @@ class YtelsesStatistikkTilBigQuery(
     private val beregningsgrunnlagRepository: IBeregningsgrunnlagRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) {
+
+    companion object {
+        fun konstruer(
+            connection: DBConnection,
+            bqRepository: IBQYtelsesstatistikkRepository,
+        ): YtelsesStatistikkTilBigQuery {
+            return YtelsesStatistikkTilBigQuery(
+                bqRepository = bqRepository,
+                behandlingRepository = BehandlingRepository(connection),
+                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+                diagnoseRepository = DiagnoseRepositoryImpl(connection),
+                vilkårsresultatRepository = VilkårsresultatRepository(connection),
+                tilkjentYtelseRepository = TilkjentYtelseRepository(connection),
+                beregningsgrunnlagRepository = BeregningsgrunnlagRepository(connection),
+            )
+        }
+    }
 
     private val log = LoggerFactory.getLogger(javaClass)
 
