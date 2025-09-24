@@ -109,9 +109,8 @@ fun <E> testKlient(
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
         tokenProvider = ClientCredentialsTokenProvider,
-        responseHandler = DefaultResponseHandler()
+        responseHandler = DefaultResponseHandler(),
     )
-
 
     val server = embeddedServer(Netty, port = 0) {
         module(

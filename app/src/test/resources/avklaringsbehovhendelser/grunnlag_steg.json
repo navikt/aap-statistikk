@@ -1,0 +1,202 @@
+{
+  "saksnummer" : "4LDRRYo",
+  "sakStatus" : "UTREDES",
+  "behandlingReferanse" : "ca0a378d-9249-47b3-808a-afe6a6357ac5",
+  "relatertBehandling" : null,
+  "behandlingOpprettetTidspunkt" : "2025-09-24T12:36:56.235",
+  "mottattTid" : "2025-09-24T00:00:00",
+  "behandlingStatus" : "UTREDES",
+  "behandlingType" : "Førstegangsbehandling",
+  "soknadsFormat" : "DIGITAL",
+  "ident" : "01410022806",
+  "versjon" : "LATEST-TEST",
+  "vurderingsbehov" : [ "SØKNAD" ],
+  "avklaringsbehov" : [ {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5003",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "AVKLAR_SYKDOM",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : true,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    },
+    "status" : "KVALITETSSIKRET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:36:56.584",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-09-24T12:37:50.029",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdering av § 11-5"
+    }, {
+      "status" : "KVALITETSSIKRET",
+      "tidsstempel" : "2025-09-24T12:39:00.206",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5006",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "VURDER_BISTANDSBEHOV",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : true,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    },
+    "status" : "KVALITETSSIKRET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:37:50.129",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-09-24T12:38:30.831",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "asdasdasd"
+    }, {
+      "status" : "KVALITETSSIKRET",
+      "tidsstempel" : "2025-09-24T12:39:00.208",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5026",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "REFUSJON_KRAV",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:38:31.216",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-09-24T12:38:46.704",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdert refusjonskrav"
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5053",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "SYKDOMSVURDERING_BREV",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : true,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    },
+    "status" : "KVALITETSSIKRET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:38:46.818",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-09-24T12:38:51.755",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Skrevet sykdomsvurdering for brev"
+    }, {
+      "status" : "KVALITETSSIKRET",
+      "tidsstempel" : "2025-09-24T12:39:00.209",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5097",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "KVALITETSSIKRING",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "KVALITETSSIKRER" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:38:51.88",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-09-24T12:39:00.211",
+      "frist" : null,
+      "endretAv" : "VEILEDER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "\\n\\n"
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5008",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "FASTSETT_BEREGNINGSTIDSPUNKT",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_NASJONAL" ]
+    },
+    "status" : "OPPRETTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:39:00.392",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  } ],
+  "hendelsesTidspunkt" : "2025-09-24T12:39:00.413099",
+  "avsluttetBehandling" : null,
+  "identerForSak" : [ "01410022806" ]
+}

@@ -7,6 +7,7 @@ import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgaveHendelseMottatt
 
@@ -24,7 +25,7 @@ class LagreOppgaveHendelseJobbUtfører(
 
         flytJobbRepository.leggTil(
             JobbInput(LagreOppgaveJobb(jobbAppender)).medPayload(hendelse.oppgaveId.toString())
-                .forSak(hendelse.oppgaveId)
+                .forSak(hendelse.saksnummer?.let(::stringToNumber) ?: hendelse.oppgaveId)
         )
         meterRegistry.oppgaveHendelseMottatt().increment()
     }

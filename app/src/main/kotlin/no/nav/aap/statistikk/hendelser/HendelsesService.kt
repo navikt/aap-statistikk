@@ -109,8 +109,7 @@ class HendelsesService(
         val behandlingMedHistorikk =
             ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
-        val behandlingId = hentEllerLagreBehandling(hendelse, sak).id
-        checkNotNull(behandlingId)
+        val behandlingId = checkNotNull(hentEllerLagreBehandling(hendelse, sak).id)
 
         val behandlingMedId = behandlingMedHistorikk.copy(id = behandlingId)
 
@@ -165,7 +164,7 @@ class HendelsesService(
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
-            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov(),
+            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov()?.kode?.name,
             gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
             søknadsformat = dto.soknadsFormat.tilDomene(),
             venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),

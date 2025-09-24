@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.FATTE_VEDTAK
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -32,7 +30,7 @@ import no.nav.aap.statistikk.behandling.BehandlingTabell
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.hendelser.utledGjeldendeAvklaringsBehov
+import no.nav.aap.statistikk.hendelser.påTidspunkt
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
@@ -294,12 +292,23 @@ class IntegrationTest {
         @Fakes pdlConfig: PdlConfig,
     ) {
 
-        val behandlingReferanse = UUID.randomUUID()
-        val saksnummer = "4LFK2S0".tilSaksnummer()
+        val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
+        val saksnummer = "4LDRRYo".tilSaksnummer()
         val hendelseFørCopy = behandlingHendelse(saksnummer, behandlingReferanse)
-        val avsluttetBehandling = avsluttetBehandlingDTO()
+//        val avsluttetBehandling = avsluttetBehandlingDTO()
 
-        val hendelse = gjørHendelseAvsluttet(hendelseFørCopy)
+        val hendelse =
+            object {}.javaClass.getResource("/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")!!
+                .readText().let { DefaultJsonMapper.fromJson<StoppetBehandling>(it) }
+
+        val tidspunkter = hendelse.avklaringsbehov.flatMap { it.endringer.map { it.tidsstempel } }
+        val midtI = tidspunkter[tidspunkter.size / 2 + 1]
+        val hendelsx = hendelse.copy(
+            behandlingStatus = Status.UTREDES,
+            avsluttetBehandling = null,
+            avklaringsbehov = hendelse.avklaringsbehov.påTidspunkt(midtI),
+            hendelsesTidspunkt = hendelse.hendelsesTidspunkt.minusMinutes(5)
+        )
 
         val bigQueryClient = bigQueryClient(config)
 
@@ -312,8 +321,14 @@ class IntegrationTest {
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"),
-                PostRequest(hendelse)
+                PostRequest(hendelsx)
             )
+
+            testUtil.ventPåSvar()
+
+            val gjeldendeAVklaringsbehov =
+                dataSource.transaction { BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!.gjeldendeAvklaringsBehov }!!
+                    .let { Definisjon.forKode(it) }
 
             client.post<no.nav.aap.oppgave.statistikk.OppgaveHendelse, Any>(
                 URI.create("$url/oppgave"), PostRequest(
@@ -325,16 +340,23 @@ class IntegrationTest {
                             saksnummer = hendelse.saksnummer,
                             behandlingRef = hendelse.behandlingReferanse,
                             enhet = "0400",
-                            avklaringsbehovKode = hendelse.avklaringsbehov.utledGjeldendeAvklaringsBehov()!!,
+                            avklaringsbehovKode = gjeldendeAVklaringsbehov.kode.name,
                             status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
                             behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
                             reservertAv = "Karl Korrodheid",
-                            reservertTidspunkt = LocalDateTime.now(),
+                            reservertTidspunkt = hendelse.hendelsesTidspunkt,
                             opprettetAv = "Kelvin",
-                            opprettetTidspunkt = LocalDateTime.now(),
+                            opprettetTidspunkt = hendelse.hendelsesTidspunkt,
                         )
                     )
                 )
+            )
+            testUtil.ventPåSvar()
+
+
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"),
+                PostRequest(hendelse)
             )
 
             testUtil.ventPåSvar()
@@ -346,7 +368,7 @@ class IntegrationTest {
             val enhet = dataSource.transaction {
                 OppgaveHendelseRepository(it).hentEnhetForAvklaringsbehov(
                     behandling!!.referanse,
-                    behandling.gjeldendeAvklaringsBehov!!
+                    gjeldendeAVklaringsbehov.kode.name,
                 ).last()
             }
             assertThat(enhet.enhet).isEqualTo("0400")
@@ -354,11 +376,12 @@ class IntegrationTest {
             testUtil.ventPåSvar()
             val bqSaker = ventPåSvar(
                 { bigQueryClient.read(SakTabell()).sortedBy { it.sekvensNummer } },
-                { t -> t !== null && t.isNotEmpty() && t.size == 2 })
+                { t -> t !== null && t.isNotEmpty() && t.size == 3 })
             assertThat(bqSaker).isNotNull
-            assertThat(bqSaker).hasSize(2)
+            assertThat(bqSaker).hasSize(3)
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
+            println(bqSaker)
             assertThat(bqSaker[1].ansvarligEnhetKode).isEqualTo("0400")
 
             client.post<StoppetBehandling, Any>(
@@ -366,7 +389,7 @@ class IntegrationTest {
                 PostRequest(
                     hendelse.copy(
                         behandlingStatus = Status.AVSLUTTET,
-                        avsluttetBehandling = avsluttetBehandling
+                        avsluttetBehandling = hendelse.avsluttetBehandling
                     )
                 )
             )
@@ -383,7 +406,7 @@ class IntegrationTest {
                     { bigQueryClient.read(VilkårsVurderingTabell()) },
                     { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(bigQueryRespons).hasSize(1)
+            assertThat(bigQueryRespons).hasSize(8)
             val vilkårsVurderingRad = bigQueryRespons!!.first()
 
             assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
@@ -394,11 +417,11 @@ class IntegrationTest {
                 { bigQueryClient.read(TilkjentYtelseTabell()) },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(tilkjentBigQuery!!).hasSize(2)
+            assertThat(tilkjentBigQuery!!).hasSize(27)
             val tilkjentYtelse = tilkjentBigQuery.first()
             assertThat(tilkjentYtelse.behandlingsreferanse).isEqualTo(behandlingReferanse.toString())
-            assertThat(tilkjentYtelse.dagsats).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder[0].dagsats)
-            assertThat(tilkjentBigQuery[1].dagsats).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder[1].dagsats)
+            assertThat(tilkjentYtelse.dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[0].dagsats)
+            assertThat(tilkjentBigQuery[1].dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[1].dagsats)
 
 
             val sakRespons = ventPåSvar(
@@ -406,16 +429,9 @@ class IntegrationTest {
                 { t -> t !== null && t.isNotEmpty() })
 
             assertThat(sakRespons).hasSize(3)
-            assertThat(sakRespons!!.first().saksbehandler).isEqualTo("Z994573")
-            assertThat(sakRespons.first().vedtakTidTrunkert).isEqualTo(
-                LocalDateTime.of(
-                    2024,
-                    10,
-                    18,
-                    11,
-                    7,
-                    27
-                )
+            assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
+            assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
+                LocalDateTime.parse("2025-09-24T13:53:01")
             )
         }
     }
@@ -432,25 +448,4 @@ class IntegrationTest {
     }
 
 
-    private fun gjørHendelseAvsluttet(hendelseFørCopy: StoppetBehandling) =
-        hendelseFørCopy.copy(
-            avklaringsbehov = hendelseFørCopy.avklaringsbehov + listOf(
-                AvklaringsbehovHendelseDto(
-                    avklaringsbehovDefinisjon = FATTE_VEDTAK,
-                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
-                    endringer = listOf(
-                        EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                            tidsstempel = LocalDateTime.parse("2024-10-18T11:07:17.882"),
-                            endretAv = "Kelvin"
-                        ),
-                        EndringDTO(
-                            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
-                            tidsstempel = LocalDateTime.parse("2024-10-18T11:07:27.634"),
-                            endretAv = "Z994573"
-                        )
-                    )
-                ),
-            )
-        )
 }

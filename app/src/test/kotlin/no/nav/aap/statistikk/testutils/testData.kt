@@ -104,10 +104,10 @@ fun behandlingHendelse(
         avklaringsbehov = listOf(
             AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
-                status = EndringStatus.valueOf("SENDT_TILBAKE_FRA_KVALITETSSIKRER"),
+                status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
                 endringer = listOf(
                     EndringDTO(
-                        status = EndringStatus.valueOf("OPPRETTET"),
+                        status = EndringStatus.OPPRETTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                         frist = null,
                         endretAv = "Kelvin"
@@ -140,16 +140,16 @@ fun behandlingHendelse(
             ),
             AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = KVALITETSSIKRING,
-                status = EndringStatus.valueOf("AVSLUTTET"),
+                status = EndringStatus.AVSLUTTET,
                 endringer = listOf(
                     EndringDTO(
-                        status = EndringStatus.valueOf("OPPRETTET"),
+                        status = EndringStatus.OPPRETTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                         frist = null,
                         endretAv = "Kelvin"
                     ),
                     EndringDTO(
-                        status = EndringStatus.valueOf("AVSLUTTET"),
+                        status = EndringStatus.AVSLUTTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                         frist = null,
                         endretAv = "Z994573"

@@ -11,10 +11,9 @@ import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandlingStatus
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
-    return this
-        .filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
-        .onlyOrNull()
-        ?.endringer?.sortedBy { it.tidsstempel }
+    if (this.any { it.status.returnert() }) return null
+    return this.filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
+        .onlyOrNull()?.endringer?.sortedBy { it.tidsstempel }
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.tidsstempel
 }
 
@@ -23,9 +22,9 @@ fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
  * er "Fatte vedtak"
  */
 fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
+    if (this.any { it.status.returnert() }) return null
     return this.filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
-        .onlyOrNull()
-        ?.endringer?.sortedBy { it.tidsstempel }
+        .onlyOrNull()?.endringer?.sortedBy { it.tidsstempel }
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
 }
 
@@ -33,17 +32,14 @@ fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
     endringer.maxBy { it.tidsstempel }.tidsstempel
 
 fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
-    return this
-        .filter { it.status.returnert() }
-        .minByOrNull { it.tidspunktSisteEndring() }
-        ?.endringer
-        ?.maxByOrNull { it.tidsstempel }?.årsakTilRetur?.firstOrNull()?.årsak
+    return this.filter { it.status.returnert() }
+        .minByOrNull { it.tidspunktSisteEndring() }?.endringer?.maxByOrNull { it.tidsstempel }?.årsakTilRetur?.firstOrNull()?.årsak
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
     val brevSendt =
         this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES }
-            .all { it.status.erAvsluttet() }
+            .any { it.status.erAvsluttet() }
 
     if (brevSendt) {
         return BehandlingStatus.AVSLUTTET
@@ -51,7 +47,7 @@ fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
 
     val brevBehovOpprettet =
         this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES }
-            .all { it.status.erÅpent() }
+            .any { it.status.erÅpent() }
 
     if (brevBehovOpprettet) {
         return BehandlingStatus.IVERKSETTES
@@ -69,8 +65,7 @@ fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
 }
 
 fun Status.returnert(): Boolean = when (this) {
-    Status.SENDT_TILBAKE_FRA_BESLUTTER,
-    Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER -> true
+    Status.SENDT_TILBAKE_FRA_BESLUTTER, Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER -> true
 
     else -> false
 }
@@ -81,41 +76,53 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
         .maxByOrNull { it.tidsstempel }?.endretAv
 }
 
-fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
-    return this.førsteÅpneAvklaringsbehov()
-        ?.avklaringsbehovDefinisjon?.kode?.toString()
+fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): Definisjon? {
+    return this.filter {
+        !it.avklaringsbehovDefinisjon.erVentebehov()
+                && it.status.erÅpent()
+    }
+        .firstOrNull()?.avklaringsbehovDefinisjon
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
-    return this.førsteÅpneAvklaringsbehov()?.status
-}
-
-fun List<AvklaringsbehovHendelseDto>.førsteÅpneAvklaringsbehov(): AvklaringsbehovHendelseDto? {
     return this
         .filter { it.status.erÅpent() && !it.avklaringsbehovDefinisjon.erVentebehov() }
-        .minByOrNull { it.tidspunktSisteEndring() }
+        .minByOrNull { it.tidspunktSisteEndring() }?.status
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {
-    return this.førsteÅpneAvklaringsbehov()?.avklaringsbehovDefinisjon?.løsesISteg
+    return this.filter {
+        !it.avklaringsbehovDefinisjon.erVentebehov()
+                && it.status.erÅpent()
+    }.firstOrNull()?.avklaringsbehovDefinisjon?.løsesISteg
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
-    return this
-        .filter { it.status.erÅpent() }
+    return this.filter { it.status.erÅpent() }
         .filter { it.avklaringsbehovDefinisjon.erVentebehov() && !it.avklaringsbehovDefinisjon.erBrevVentebehov() }
-        .flatMap { it.endringer }
-        .maxByOrNull { it.tidsstempel }
-        ?.årsakTilSattPåVent?.toString()
+        .flatMap { it.endringer }.maxByOrNull { it.tidsstempel }?.årsakTilSattPåVent?.toString()
 }
 
 
 @JvmName("erAutomatisk")
 fun List<BehandlingHendelse>.erManuell(): Boolean {
+    return this.filterNot { it.avklaringsBehov == null }.any {
+        !Definisjon.forKode(it.avklaringsBehov!!).erAutomatisk()
+    }
+}
+
+fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): List<AvklaringsbehovHendelseDto> {
     return this
-        .filterNot { it.avklaringsBehov == null }.any {
-            !Definisjon.forKode(it.avklaringsBehov!!).erAutomatisk()
+        .map {
+            val endringer = it.endringer.filter {
+                it.tidsstempel.isBefore(tidspunkt) || it.tidsstempel == tidspunkt
+            }
+            it.copy(
+                endringer = endringer,
+                status = endringer.lastOrNull()?.status ?: it.status
+            )
         }
+        .filter { it.endringer.isNotEmpty() }
 }
 
 fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {

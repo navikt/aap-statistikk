@@ -7,8 +7,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 
-private val logger = LoggerFactory.getLogger("no.nav.aap.statistikk.sak")
-
 /**
  * @param endretTid Også kalt "funksjonellTid". Tidspunkt for siste endring på behandlingen. Ved første melding vil denne være lik registrertTid.
  * @param tekniskTid Tidspunktet da fagsystemet legger hendelsen på grensesnittet/topicen.
@@ -44,6 +42,8 @@ data class BQBehandling(
     val ansvarligEnhetKode: String?,
     val sakYtelse: String,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     init {
         require(behandlingType.uppercase() == behandlingType)
 
