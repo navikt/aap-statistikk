@@ -21,8 +21,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-private val logger = LoggerFactory.getLogger(SaksStatistikkService::class.java)
-
 class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
@@ -33,6 +31,7 @@ class SaksStatistikkService(
     private val sakstatistikkRepository: SakstatistikkRepository,
     private val clock: Clock = systemDefaultZone()
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     companion object {
         fun konstruer(

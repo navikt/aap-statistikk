@@ -1,19 +1,131 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.*
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.statistikk.behandling.BehandlingStatus
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.SoftAssertions
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStatus
 
+
+@ExtendWith(SoftAssertionsExtension::class)
 class HendelseHjelpereKtTest {
+    companion object {
+        private fun fromResources(filnavn: String): String {
+            return object {}.javaClass.getResource("/$filnavn")?.readText()!!
+        }
+    }
+
+
+    @Test
+    fun `midt i behandling`(softly: SoftAssertions) {
+        val hendelserString = fromResources("avklaringsbehovhendelser/grunnlag_steg.json")
+        val stoppetBehandling =
+            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+        val hendelser = stoppetBehandling.avklaringsbehov
+
+        softly.apply {
+            assertThat(hendelser).isNotEmpty()
+            assertThat(hendelser.utledAnsvarligBeslutter()).isNull()
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
+            assertThat(hendelser.utledVedtakTid()).isNull()
+            assertThat(hendelser.årsakTilRetur()).isNull()
+            assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+                FASTSETT_BEREGNINGSTIDSPUNKT
+            )
+            assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
+            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.FASTSETT_BEREGNINGSTIDSPUNKT)
+            assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
+        }
+    }
+
+    @Test
+    fun `sendt tilbake fra beslutter 11-5`(softly: SoftAssertions) {
+        val hendelserString =
+            fromResources("avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json")
+        val stoppetBehandling =
+            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+        val hendelser = stoppetBehandling.avklaringsbehov
+
+        softly.apply {
+            assertThat(hendelser).isNotEmpty()
+            assertThat(hendelser.utledAnsvarligBeslutter()).isNull()
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
+            assertThat(hendelser.utledVedtakTid()).isNull()
+            assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isEqualTo(
+                ÅrsakTilReturKode.MANGLENDE_UTREDNING
+            )
+            assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+                AVKLAR_SYKDOM
+            )
+            assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER)
+            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.AVKLAR_SYKDOM)
+            assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
+        }
+    }
+
+    @Test
+    fun `er på brevsteget`(softly: SoftAssertions) {
+        val hendelserString =
+            fromResources("avklaringsbehovhendelser/er_pa_brev_steget.json")
+        val stoppetBehandling =
+            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+        val hendelser = stoppetBehandling.avklaringsbehov
+
+        softly.apply {
+            assertThat(hendelser).isNotEmpty()
+            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("VEILEDER")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
+            assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
+            assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
+            assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.IVERKSETTES)
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+                SKRIV_VEDTAKSBREV
+            )
+            assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
+            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
+            assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
+        }
+    }
+
+    @Test
+    fun `fullført førstegangsbehandling`(softly: SoftAssertions) {
+        val hendelserString =
+            fromResources("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
+        val stoppetBehandling =
+            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+        val hendelser = stoppetBehandling.avklaringsbehov
+
+        softly.apply {
+            assertThat(hendelser).isNotEmpty()
+            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("VEILEDER")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
+            assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
+            assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
+            assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+                null
+            )
+            assertThat(hendelser.sisteAvklaringsbehovStatus()).isNull()
+            assertThat(hendelser.utledGjeldendeStegType()).isNull()
+            assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
+        }
+    }
+
     @Test
     fun `kan utlede vedtaktid fra liste av avklaringsbehovhendelser`() {
         val utledetVedtakTid = avklaringsbehovHendelser.utledVedtakTid()
@@ -33,7 +145,7 @@ class HendelseHjelpereKtTest {
     }
 
     @Test
-    fun `tester på en ufullført behandling, er ikke Kelvin`() {
+    fun `siste person på behandling - tester på en ufullført behandling, er ikke Kelvin`() {
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isNotNull()
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isNotEqualTo("Kelvin")
         assertThat(ufullførtBehandlingEndringer.sistePersonPåBehandling()).isEqualTo("Z99400")
@@ -48,9 +160,18 @@ class HendelseHjelpereKtTest {
     fun `ekte data, verifiser`() {
         assertThat(ekte2.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.ANNET)
         assertThat(ekte2.sisteAvklaringsbehovStatus()).isEqualTo(Status.SENDT_TILBAKE_FRA_BESLUTTER)
+    }
 
+    @Test
+    fun `utled gjeldendde stegtype fra ekte data`() {
         assertThat(ekte2.utledGjeldendeStegType()).isEqualTo(StegType.AVKLAR_SYKDOM)
-        assertThat(ekte2.utledGjeldendeAvklaringsBehov()).isEqualTo(AVKLAR_SYKDOM.kode.toString())
+    }
+
+    @Test
+    fun `utled gjeldende avklaringsbehov ekte data`() {
+        assertThat(ekte2.utledGjeldendeAvklaringsBehov()).isEqualTo(
+            AVKLAR_SYKDOM
+        )
     }
 
     @Test
@@ -90,9 +211,8 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `utled gjeldende avklaringsbehov`() {
-        assertThat(ufullførtBehandlingEndringer.utledGjeldendeAvklaringsBehov()).isEqualTo(
-            AvklaringsbehovKode.`5099`.toString()
-        )
+        assertThat(ufullførtBehandlingEndringer.utledGjeldendeAvklaringsBehov())
+            .isEqualTo(FATTE_VEDTAK)
     }
 
     @Test
@@ -225,19 +345,16 @@ val avklaringsbehovHendelser = listOf(
             EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:42:07.925"),
-                frist = null,
                 endretAv = "Kelvin"
             ),
             EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:53:18.400"),
-                frist = null,
                 endretAv = "Z994573"
             ),
             EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:53:45.371"),
-                frist = null,
                 endretAv = "Z994573"
             )
         )
@@ -249,13 +366,11 @@ val avklaringsbehovHendelser = listOf(
             EndringDTO(
                 status = EndringStatus.OPPRETTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:58:51.113"),
-                frist = null,
                 endretAv = "Z994573"
             ),
             EndringDTO(
                 status = EndringStatus.AVSLUTTET,
                 tidsstempel = LocalDateTime.parse("2024-10-18T10:58:51.172"),
-                frist = null,
                 endretAv = "Z994573"
             )
         )
@@ -568,7 +683,6 @@ val sattPåVentPåKvalitetssikringNAYSteg = listOf(
         )
     ),
     AvklaringsbehovHendelseDto(
-
         avklaringsbehovDefinisjon = BESTILL_LEGEERKLÆRING,
         status = EndringStatus.OPPRETTET,
         endringer = listOf(

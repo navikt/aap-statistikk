@@ -3,10 +3,14 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
 import no.nav.aap.statistikk.behandling.SøknadsFormat
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
     SakstatistikkRepository {
+
+    private val log = LoggerFactory.getLogger(javaClass)
+
     private val insertSql = """
         insert into saksstatistikk
         (fagsystem_navn,
@@ -43,6 +47,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
             setParams {
                 setParams(bqBehandling)
             }
+            setResultValidator { it == 1 }
         }
     }
 
@@ -78,21 +83,19 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
     override fun lagreFlere(bqBehandlinger: List<BQBehandling>) {
         return dbConnection.executeBatch(insertSql, bqBehandlinger) {
             setParams { bqBehandling ->
-                setParams {
-                    setParams(bqBehandling)
-                }
+                setParams(bqBehandling)
             }
         }
     }
 
     override fun hentSisteForBehandling(
         referanse: UUID
-    ): BQBehandling {
+    ): List<BQBehandling> {
         val sql = """
             select * from saksstatistikk where behandling_uuid = ?
         """.trimIndent()
 
-        return checkNotNull(dbConnection.queryFirstOrNull(sql) {
+        return dbConnection.queryList(sql) {
             setRowMapper { row ->
                 BQBehandling(
                     fagsystemNavn = row.getString("fagsystem_navn"),
@@ -129,7 +132,9 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
             setParams {
                 setUUID(1, referanse)
             }
-        }) { "Fant ikke behandling for referanse $referanse" }
+        }.also {
+            log.info("Returnerte ${it.size} rader fra saksstatistikk for behandling $referanse")
+        }
     }
 
 }

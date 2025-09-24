@@ -70,6 +70,7 @@ data class Behandling(
             gjeldendeAvklaringsbehovStatus = hendelse.avklaringsbehovStatus,
             mottattTid = hendelse.mottattTid,
             vedtakstidspunkt = hendelse.vedtakstidspunkt,
+            gjeldendeStegGruppe = hendelse.steggruppe,
             ansvarligBeslutter = hendelse.ansvarligBeslutter,
             status = hendelse.status,
             venteÅrsak = hendelse.venteÅrsak,
@@ -105,12 +106,12 @@ data class Behandling(
 
     fun behandlingMetode(): BehandlingMetode {
         if (this.hendelser.isEmpty()) {
-            log.info("Behandling-hendelser var tom.")
+            log.info("Behandling-hendelser var tom. Behandling: ${this.referanse}")
             return BehandlingMetode.AUTOMATISK
         }
         val sisteHendelse = this.hendelser.last()
         if (sisteHendelse.avklaringsBehov.isNullOrBlank()) {
-            log.info("Ingen avkl.funnet for siste hendelse $sisteHendelse. Behandling: $this")
+            log.info("Ingen avkl.funnet for siste hendelse. Behandling: ${this.referanse}. Antall hendelser: ${this.hendelser.size}")
             return this.copy(hendelser = this.hendelser.dropLast(1)).behandlingMetode()
         }
 
@@ -140,7 +141,7 @@ data class BehandlingHendelse(
     val tidspunkt: LocalDateTime?,
     val hendelsesTidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
-    val steggruppe: String? = null,
+    val steggruppe: StegGruppe? = null,
     val avklaringsbehovStatus: AvklaringsbehovStatus?,
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,

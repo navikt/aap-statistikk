@@ -63,7 +63,9 @@ class SakstatistikkRepositoryImplTest {
             t.truncatedTo(ChronoUnit.MILLIS).equals(u.truncatedTo(ChronoUnit.MILLIS))
         }
 
-        assertThat(uthentet)
+        assertThat(uthentet).hasSize(1)
+
+        assertThat(uthentet.first())
             .usingRecursiveComparison()
             .withEqualsForType(datoSammenligner, LocalDateTime::class.java)
             .isEqualTo(hendelse)

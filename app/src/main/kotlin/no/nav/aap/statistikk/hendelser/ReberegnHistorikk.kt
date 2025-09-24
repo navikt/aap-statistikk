@@ -18,18 +18,24 @@ class ReberegnHistorikk {
             .flatMap { behov -> behov.endringer.map { Pair(behov, it) } }
             .sortedBy { it.second.tidsstempel }
 
-        val endringsTidspunkter = avklaringsbehov.flatMap { it.endringer.map { it.tidsstempel } }
+        val endringsTidspunkter = avklaringsbehov.flatMap {
+            it.endringer.map { it.tidsstempel }
+        }
 
         val avklaringsbehovHistorikk = endringsTidspunkter.map { tidspunkt ->
             avklaringsbehov.påTidspunkt(tidspunkt)
+        }.filterNot {
+            // Fjerne "ugyldig" tilstand
+            it.utledAnsvarligBeslutter() == null && it.sisteAvklaringsbehovStatus() == null
         }
         return avklaringsbehovHistorikk.fold(behandling) { acc, curr ->
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
-                    hendelsesTidspunkt = dto.hendelsesTidspunkt,
-                    avklaringsBehov = curr.utledGjeldendeAvklaringsBehov(),
+                    hendelsesTidspunkt = curr.map { it.tidspunktSisteEndring() }.max(),
+                    avklaringsBehov = curr.utledGjeldendeAvklaringsBehov()?.kode?.name,
                     avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
+                    steggruppe = curr.utledGjeldendeStegType()?.gruppe,
                     venteÅrsak = curr.utledÅrsakTilSattPåVent(),
                     returÅrsak = curr.årsakTilRetur()?.name,
                     saksbehandler = curr.sistePersonPåBehandling()?.let(::Saksbehandler),
@@ -43,16 +49,5 @@ class ReberegnHistorikk {
                 )
             )
         }
-    }
-
-
-    fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): List<AvklaringsbehovHendelseDto> {
-        return this
-            .map {
-                it.copy(endringer = it.endringer.filter {
-                    it.tidsstempel.isBefore(tidspunkt) || it.tidsstempel == tidspunkt
-                })
-            }
-            .filter { it.endringer.isNotEmpty() }
     }
 }

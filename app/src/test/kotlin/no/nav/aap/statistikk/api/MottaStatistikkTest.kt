@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.api
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -175,7 +176,7 @@ class MottaStatistikkTest {
     private val hendelse = StoppetBehandling(
         saksnummer = "4LFK2S0",
         behandlingReferanse = UUID.fromString("96175156-0950-475a-8de0-41a25f4c0cec"),
-        behandlingStatus = Status.OPPRETTET,
+        behandlingStatus = Status.IVERKSETTES,
         behandlingType = TypeBehandling.Førstegangsbehandling,
         ident = "14890097570",
         avklaringsbehov = listOf(
@@ -192,12 +193,12 @@ class MottaStatistikkTest {
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                         frist = null,
-                        endretAv = "Z994573"
+                        endretAv = "Z9945111"
                     )
                 )
             ), AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
-                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                 endringer = listOf(
                     EndringDTO(
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
@@ -224,7 +225,19 @@ class MottaStatistikkTest {
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                         frist = null,
-                        endretAv = "Z994573"
+                        endretAv = "Z994500"
+                    )
+                )
+            ),
+            AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = SKRIV_VEDTAKSBREV,
+                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                endringer = listOf(
+                    EndringDTO(
+                        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                        tidsstempel = LocalDateTime.parse("2024-08-15T11:51:17.231"),
+                        frist = null,
+                        endretAv = "Kelvin"
                     )
                 )
             )
@@ -304,11 +317,18 @@ class MottaStatistikkTest {
                 URI.create("$url/oppdatertBehandling"), PostRequest(hendelse)
             )
 
-            TestUtil(dataSource, listOf()).ventPåSvar()
-            val bqBehandling = dataSource.transaction {
-                val behandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
-                SakstatistikkRepositoryImpl(it).hentSisteForBehandling(behandling!!.referanse)
+
+            TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
+
+            val (behandling, bqBehandlinger) = dataSource.transaction {
+                val behandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!
+                Pair(
+                    behandling,
+                    SakstatistikkRepositoryImpl(it).hentSisteForBehandling(behandling.referanse)
+                )
             }
+            assertThat(behandling.hendelser).hasSize(4)
+            assertThat(bqBehandlinger).hasSize(4)
         }
     }
 
@@ -396,7 +416,7 @@ class MottaStatistikkTest {
             val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
 
             assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
-            assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5006")
+            assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5051")
             assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
             assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
             assertThat(uthentetBehandling.opprettetTid).isEqualTo(
