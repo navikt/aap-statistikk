@@ -64,7 +64,7 @@ dependencies {
     testImplementation(libs.ktorServerTestHost)
     testImplementation("com.nimbusds:nimbus-jose-jwt:10.5")
     testImplementation("io.mockk:mockk:${mockkVersion}")
-    testImplementation("org.assertj:assertj-core:3.27.5")
+    testImplementation("org.assertj:assertj-core:3.27.6")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
     constraints {
         implementation("org.apache.commons:commons-compress:1.28.0") {
