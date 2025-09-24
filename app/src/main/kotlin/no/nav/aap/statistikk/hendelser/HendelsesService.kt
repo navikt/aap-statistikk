@@ -264,5 +264,7 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.OVERGANG_UFORE -> OVERGANG_UFORE
         Vurderingsbehov.OVERGANG_ARBEID -> OVERGANG_ARBEID
         Vurderingsbehov.REVURDERING_AVBRUTT -> REVURDERING_AVBRUTT
+        Vurderingsbehov.DØDSFALL_BRUKER -> DØDSFALL_BRUKER
+        Vurderingsbehov.DØDSFALL_BARN -> DØDSFALL_BARN
     }
 }
