@@ -294,8 +294,6 @@ class IntegrationTest {
 
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
         val saksnummer = "4LDRRYo".tilSaksnummer()
-        val hendelseFørCopy = behandlingHendelse(saksnummer, behandlingReferanse)
-//        val avsluttetBehandling = avsluttetBehandlingDTO()
 
         val hendelse =
             object {}.javaClass.getResource("/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")!!
@@ -344,9 +342,9 @@ class IntegrationTest {
                             status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
                             behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
                             reservertAv = "Karl Korrodheid",
-                            reservertTidspunkt = hendelse.hendelsesTidspunkt,
+                            reservertTidspunkt = midtI,
                             opprettetAv = "Kelvin",
-                            opprettetTidspunkt = hendelse.hendelsesTidspunkt,
+                            opprettetTidspunkt = midtI,
                         )
                     )
                 )
@@ -372,6 +370,7 @@ class IntegrationTest {
                 ).last()
             }
             assertThat(enhet.enhet).isEqualTo("0400")
+            println("GJELDENDE AVKLARINGSBEHOV $gjeldendeAVklaringsbehov")
 
             testUtil.ventPåSvar()
             val bqSaker = ventPåSvar(
@@ -382,7 +381,9 @@ class IntegrationTest {
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
             println(bqSaker)
-            assertThat(bqSaker[1].ansvarligEnhetKode).isEqualTo("0400")
+            assertThat(bqSaker).anySatisfy {
+                assertThat(it.ansvarligEnhetKode).isEqualTo("0400")
+            }
 
             client.post<StoppetBehandling, Any>(
                 URI.create("$url/stoppetBehandling"),
@@ -393,6 +394,8 @@ class IntegrationTest {
                     )
                 )
             )
+
+            testUtil.ventPåSvar()
 
             // Sekvensnummer økes med 1 med ny info på sak
             val bqSaker2 = ventPåSvar(

@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.Math.random
@@ -108,7 +109,7 @@ class VilkårsresultatRepositoryTest {
         assertThat(hentUtMedReferanse).isEqualTo(hentetUt)
     }
 
-    @Test
+    @RepeatedTest(5)
     fun `lagre og hente på flere behandlinger`(@Postgres dataSource: DataSource) {
 
         val referanser = (0..10).associate { UUID.randomUUID() to tilfeldigVilkårsResultatEntity() }

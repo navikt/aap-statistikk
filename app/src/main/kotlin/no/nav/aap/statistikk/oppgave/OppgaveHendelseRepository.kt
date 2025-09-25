@@ -90,7 +90,7 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
         avklaringsbehovKode: String
     ): List<EnhetOgTidspunkt> {
         val sql = """
-            select enhet, mottatt_tidspunkt
+            select enhet, opprettet_tidspunkt
             from oppgave_hendelser
             where behandling_referanse = ?
               and avklaringsbehov_kode = ?
@@ -105,7 +105,7 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
             setRowMapper {
                 EnhetOgTidspunkt(
                     enhet = it.getString("enhet"),
-                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt")
+                    tidspunkt = it.getLocalDateTime("opprettet_tidspunkt")
                 )
             }
         }
