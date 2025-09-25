@@ -70,7 +70,7 @@ dependencies {
         implementation("org.apache.commons:commons-compress:1.28.0") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
-        implementation("org.apache.commons:commons-lang3:3.18.0") {
+        implementation("org.apache.commons:commons-lang3:3.19.0") {
             because("https://www.mend.io/vulnerability-database/CVE-2025-48924?utm_source=JetBrains")
         }
     }
