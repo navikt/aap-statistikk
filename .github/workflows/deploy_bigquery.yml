@@ -21,6 +21,7 @@ jobs:
           RESOURCE: "\
             .nais/bigquery/view_vilkarsresultat.yml,\
             .nais/bigquery/view_tilkjent_ytelse.yml,\
-            .nais/bigquery/view_beregningsgrunnlag.yml"
+            .nais/bigquery/view_beregningsgrunnlag.yml,\
+            .nais/bigquery/view_saksstatistikk.yml"
           VAR: project=${{ inputs.project }}
           PRINT_PAYLOAD: true
