@@ -79,7 +79,7 @@ class OppgaveHendelseRepositoryTest {
             listOf(
                 EnhetOgTidspunkt(
                     enhet = "0417",
-                    tidspunkt = LocalDateTime.parse("2025-08-20T12:35:06.260915")
+                    tidspunkt = LocalDateTime.parse("2025-08-20T12:34:58.428")
                 )
             )
         )

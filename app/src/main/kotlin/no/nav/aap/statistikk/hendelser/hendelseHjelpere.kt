@@ -87,7 +87,7 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): Definisjon
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
     return this
         .filter { it.status.erÅpent() && !it.avklaringsbehovDefinisjon.erVentebehov() }
-        .minByOrNull { it.tidspunktSisteEndring() }?.status
+        .firstOrNull()?.status
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {

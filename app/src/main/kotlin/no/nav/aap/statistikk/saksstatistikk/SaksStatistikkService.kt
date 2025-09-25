@@ -98,10 +98,6 @@ class SaksStatistikkService(
             logger.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
         }
 
-        if (ansvarligEnhet == null) {
-            logger.warn("Fant ikke enhet for behandling $behandlingReferanse.")
-        }
-
         val saksbehandler =
             if (erSkjermet) "-5" else sisteHendelse.saksbehandler?.ident
 
