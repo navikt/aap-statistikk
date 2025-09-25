@@ -19,4 +19,4 @@ spec:
     query: >-
       SELECT *
       FROM
-         `aap-dev-e48b.datastream_hendelser.public_saksstatistikk`
+         `datastream_hendelser.public_saksstatistikk`
