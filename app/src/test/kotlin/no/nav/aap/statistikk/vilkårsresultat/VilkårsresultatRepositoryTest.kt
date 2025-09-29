@@ -129,12 +129,12 @@ class VilkårsresultatRepositoryTest {
             RecursiveComparisonConfiguration.builder()
                 .withIgnoredFields("vilkår.id", "id", "vilkår.perioder.id").build()
 
-        dataSource.transaction { conn ->
-            referanser.mapValues { (ref, vilkårsResultat) ->
-                val res = VilkårsresultatRepository(conn).hentForBehandling(ref)
-
-                assertThat(res).usingRecursiveComparison(config).isEqualTo(vilkårsResultat)
+        referanser.mapValues { (ref, vilkårsResultat) ->
+            val res = dataSource.transaction { conn ->
+                VilkårsresultatRepository(conn).hentForBehandling(ref)
             }
+
+            assertThat(res).usingRecursiveComparison(config).isEqualTo(vilkårsResultat)
         }
     }
 
