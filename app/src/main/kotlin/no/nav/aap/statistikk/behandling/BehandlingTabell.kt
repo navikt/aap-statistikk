@@ -20,7 +20,7 @@ import java.util.*
 data class BQYtelseBehandling(
     val saksnummer: Saksnummer,
     val referanse: UUID,
-    val utbetalingId: String,
+    val utbetalingId: String?,
     val brukerFnr: String,
     val behandlingsType: TypeBehandling,
     val datoAvsluttet: LocalDateTime,

@@ -12,7 +12,6 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
-import no.nav.aap.utbetaling.helved.toBase64
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
@@ -63,23 +62,14 @@ class YtelsesStatistikkTilBigQuery(
 
         val tilkjentYtelse = tilkjentYtelseRepository.hentForBehandling(behandling.referanse)
 
-        val utbetalingId =
-            if (behandling.resultat() in listOf(
-                    ResultatKode.TRUKKET, ResultatKode.AVSLAG,
-                    ResultatKode.AVBRUTT
-                )
-            ) {
-                null
-            } else {
-                behandling.referanse.toBase64()
-            }
+        val utbetalingId = behandling.utbetalingId()
 
         bqRepository.start()
         bqRepository.lagre(
             BQYtelseBehandling(
                 saksnummer = behandling.sak.saksnummer,
                 referanse = behandling.referanse,
-                utbetalingId = utbetalingId.toString(),
+                utbetalingId = behandling.utbetalingId(),
                 brukerFnr = behandling.sak.person.ident,
                 resultat = behandling.resultat(),
                 behandlingsType = behandling.typeBehandling,
