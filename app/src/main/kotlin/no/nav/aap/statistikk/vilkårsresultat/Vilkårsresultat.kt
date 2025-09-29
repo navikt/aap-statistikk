@@ -24,7 +24,6 @@ data class VilkårsPeriode(
     val tilDato: LocalDate,
     val utfall: Utfall,
     val manuellVurdering: Boolean,
-    // Er disse interessante? Er de strenger?
     val innvilgelsesårsak: String? = null,
     val avslagsårsak: String? = null
 )
