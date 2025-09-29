@@ -24,6 +24,7 @@ spec:
              date(vp.fra_dato) as fra_dato,
              date(vp.til_dato) as til_dato,
              vp.utfall         as utfall,
+             vp.innvilgelsesaarsak as innvilgelsesaarsak,
              datetime(vr.opprettet_tidspunkt) as reg_dato,
              DATETIME(timestamp_millis(greatest(b.datastream_metadata.source_timestamp, v.datastream_metadata.source_timestamp, vr.datastream_metadata.source_timestamp, vp.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endret_tid,
              concat(b.id, '-', v.id, '-', vr.id, '-', vp.id, '-', br.id, '-', s.id) as unik_id
