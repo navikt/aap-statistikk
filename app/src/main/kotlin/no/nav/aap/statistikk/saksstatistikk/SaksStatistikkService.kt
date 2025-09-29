@@ -135,12 +135,13 @@ class SaksStatistikkService(
             behandlingResultat = regnUtBehandlingResultat(behandling),
             resultatBegrunnelse = resultatBegrunnelse(hendelser),
             ansvarligEnhetKode = ansvarligEnhet,
-            sakYtelse = "AAP"
+            sakYtelse = "AAP",
+            erResending = false
         )
     }
 
     fun alleHendelserPåBehandling(
-        behandlingId: BehandlingId
+        behandlingId: BehandlingId,
     ): List<BQBehandling> {
         val behandling = behandlingRepository.hent(behandlingId)
 

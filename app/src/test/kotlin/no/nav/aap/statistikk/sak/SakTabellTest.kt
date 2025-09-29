@@ -63,7 +63,8 @@ class SakTabellTest {
                 ansvarligEnhetKode = "1337",
                 sakYtelse = sakYtelse,
                 behandlingResultat = "AX",
-                resultatBegrunnelse = "BEGRUNNELSE"
+                resultatBegrunnelse = "BEGRUNNELSE",
+                erResending = false
             )
         )
 
@@ -105,7 +106,8 @@ class SakTabellTest {
                     ansvarligEnhetKode = "1337",
                     sakYtelse = "AAP",
                     behandlingResultat = "AX",
-                    resultatBegrunnelse = "BEGRUNNELSE"
+                    resultatBegrunnelse = "BEGRUNNELSE",
+                    erResending = false
                 )
             )
     }

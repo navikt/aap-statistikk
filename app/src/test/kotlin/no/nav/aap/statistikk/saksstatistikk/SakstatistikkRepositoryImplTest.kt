@@ -49,7 +49,8 @@ class SakstatistikkRepositoryImplTest {
             ansvarligEnhetKode = "1337",
             sakYtelse = "AAP",
             behandlingResultat = "AX",
-            resultatBegrunnelse = "BEGRUNNELSE"
+            resultatBegrunnelse = "BEGRUNNELSE",
+            erResending = true,
         )
         dataSource.transaction {
             val repository = SakstatistikkRepositoryImpl(it)

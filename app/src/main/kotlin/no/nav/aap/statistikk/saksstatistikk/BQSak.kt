@@ -41,6 +41,7 @@ data class BQBehandling(
     val resultatBegrunnelse: String?,
     val ansvarligEnhetKode: String?,
     val sakYtelse: String,
+    val erResending: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 

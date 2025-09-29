@@ -282,6 +282,7 @@ class SakTabell : BQTable<BQBehandling> {
             sakYtelse = sakYtelse,
             behandlingResultat = behandlingResultat,
             resultatBegrunnelse = resultatBegrunnelse,
+            erResending = false,
         )
     }
 
