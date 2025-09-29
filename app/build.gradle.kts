@@ -8,7 +8,7 @@ plugins {
 }
 
 val mockkVersion = "1.14.5"
-val flywayVersion = "11.13.1"
+val flywayVersion = "11.13.2"
 val testContainersVersion = "1.21.3"
 
 application {
