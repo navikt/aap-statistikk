@@ -60,6 +60,14 @@ data class BQBehandling(
 
     val ferdigBehandletTidTrunkert = ferdigbehandletTid?.truncatedTo(SECONDS)
     val vedtakTidTrunkert = vedtakTid?.truncatedTo(SECONDS)
+
+    fun ansesSomDuplikat(other: BQBehandling): Boolean {
+        return this == other.copy(
+            sekvensNummer = sekvensNummer,
+            erResending = erResending,
+            tekniskTid = tekniskTid
+        )
+    }
 }
 
 enum class BehandlingMetode {
