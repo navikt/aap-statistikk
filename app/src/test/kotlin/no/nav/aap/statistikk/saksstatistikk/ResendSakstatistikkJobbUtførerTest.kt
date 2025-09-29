@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.testutils.FakeBQSakRepository
 import no.nav.aap.statistikk.testutils.FakePdlClient
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import javax.sql.DataSource
 
@@ -38,6 +39,11 @@ class ResendSakstatistikkJobbUtførerTest {
                 ), SakstatistikkRepositoryImpl(it)
             ).utfør(input)
         }
+
+        val uthentet =
+            dataSource.transaction { SakstatistikkRepositoryImpl(it).hentSisteForBehandling(ref) }
+
+        assertThat(uthentet).isNotEmpty
     }
 
 }

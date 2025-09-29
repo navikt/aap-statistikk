@@ -38,8 +38,9 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
          behandling_resultat,
          resultat_begrunnelse,
          ansvarlig_enhet_kode,
-         sak_ytelse)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         sak_ytelse,
+         er_relast)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
 
     override fun lagre(bqBehandling: BQBehandling): Long {
@@ -78,6 +79,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         setString(24, bqBehandling.resultatBegrunnelse)
         setString(25, bqBehandling.ansvarligEnhetKode)
         setString(26, bqBehandling.sakYtelse)
+        setBoolean(27, bqBehandling.erResending)
     }
 
     override fun lagreFlere(bqBehandlinger: List<BQBehandling>) {
@@ -126,7 +128,8 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
                     ansvarligEnhetKode = row.getStringOrNull("ansvarlig_enhet_kode"),
                     sakYtelse = row.getString("sak_ytelse"),
                     behandlingResultat = row.getStringOrNull("behandling_resultat"),
-                    resultatBegrunnelse = row.getStringOrNull("resultat_begrunnelse")
+                    resultatBegrunnelse = row.getStringOrNull("resultat_begrunnelse"),
+                    erResending = row.getBoolean("er_relast"),
                 )
             }
             setParams {
