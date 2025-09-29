@@ -31,7 +31,7 @@ class SaksStatistikkService(
     private val sakstatistikkRepository: SakstatistikkRepository,
     private val clock: Clock = systemDefaultZone()
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
     companion object {
         fun konstruer(
@@ -67,7 +67,12 @@ class SaksStatistikkService(
         bigQueryRepository.lagre(bqSak)
 
         if (!Miljø.erProd()) {
-            sakstatistikkRepository.lagre(bqSak)
+            val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
+            if (siste?.ansesSomDuplikat(bqSak) != true) {
+                sakstatistikkRepository.lagre(bqSak)
+            } else {
+                log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
+            }
         }
     }
 
@@ -95,14 +100,14 @@ class SaksStatistikkService(
         val ansvarligEnhet = ansvarligEnhet(enhet, erSkjermet)
 
         if (ansvarligEnhet == null) {
-            logger.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
+            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
         }
 
         val saksbehandler =
             if (erSkjermet) "-5" else sisteHendelse.saksbehandler?.ident
 
         if (behandling.årsaker.size > 1) {
-            logger.info("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
+            log.info("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
         }
 
         return BQBehandling(
@@ -126,7 +131,7 @@ class SaksStatistikkService(
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
             behandlingMetode = behandling.behandlingMetode().also {
-                if (it == BehandlingMetode.AUTOMATISK) logger.info(
+                if (it == BehandlingMetode.AUTOMATISK) log.info(
                     "Behandling $behandlingReferanse er automatisk behandlet. Behandling $behandling"
                 )
             },
@@ -192,7 +197,7 @@ class SaksStatistikkService(
                         "AAP"
                     } else {
                         if (rettighetstyper.size > 1) {
-                            logger.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
+                            log.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
                         }
                         // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
                         val førsteRettighetstype =
