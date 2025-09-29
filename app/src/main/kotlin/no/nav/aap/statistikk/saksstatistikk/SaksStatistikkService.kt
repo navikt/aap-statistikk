@@ -68,7 +68,7 @@ class SaksStatistikkService(
 
         if (!Miljø.erProd()) {
             val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
-            if (siste?.ansesSomDuplikat(bqSak) != true) {
+            if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
                 sakstatistikkRepository.lagre(bqSak)
             } else {
                 log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
