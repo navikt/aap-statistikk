@@ -1,7 +1,7 @@
 [versions]
 ktor = "3.3.0"
 komponenter = "1.0.375"
-tilgang = "1.0.127"
+tilgang = "1.0.128"
 behandlingsflyt = "0.0.444"
 oppgave = "0.0.120"
 utbetaling = "0.0.60"
