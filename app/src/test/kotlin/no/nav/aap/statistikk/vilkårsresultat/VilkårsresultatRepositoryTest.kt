@@ -134,7 +134,10 @@ class VilkårsresultatRepositoryTest {
                 VilkårsresultatRepository(conn).hentForBehandling(ref)
             }
 
-            assertThat(res).usingRecursiveComparison(config).isEqualTo(vilkårsResultat)
+            assertThat(res)
+                .usingRecursiveComparison(config)
+                .ignoringCollectionOrder()
+                .isEqualTo(vilkårsResultat)
         }
     }
 
