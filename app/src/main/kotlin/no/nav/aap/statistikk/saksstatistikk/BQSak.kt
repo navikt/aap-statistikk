@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
@@ -48,8 +49,11 @@ data class BQBehandling(
     init {
         require(behandlingType.uppercase() == behandlingType)
 
-        require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid))
-        { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID" }
+        // Bug i SAF i mars.
+        if (mottattTid.isAfter(LocalDate.of(2025, 4, 1).atStartOfDay())) {
+            require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid))
+            { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID" }
+        }
         if (ansvarligEnhetKode == null) {
             logger.info("Fant ikke ansvarlig enhet for behandling $behandlingUUID med saksnummer $saksnummer.")
         }
