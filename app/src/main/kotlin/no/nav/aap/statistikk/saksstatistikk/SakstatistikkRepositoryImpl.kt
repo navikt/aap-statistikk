@@ -96,7 +96,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
             select * from saksstatistikk where behandling_uuid = ? order by teknisk_tid desc limit 1
         """.trimIndent()
 
-        return dbConnection.queryFirst(sql) {
+        return dbConnection.queryFirstOrNull(sql) {
             setParams {
                 setUUID(1, uuid)
             }
