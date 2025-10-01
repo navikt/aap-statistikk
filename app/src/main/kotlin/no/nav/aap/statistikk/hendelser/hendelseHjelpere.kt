@@ -13,6 +13,15 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandli
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     if (this.any { it.status.returnert() }) return null
+
+    // Hvis FATTE_VEDTAK er løst, men det fortsatt finnes åpne behov, så betyr at det
+    // det har vært retur fra beslutter.
+    val finnesÅpneBehov =
+        this.filter { it.status.erÅpent() && it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.UTREDES && !it.avklaringsbehovDefinisjon.erVentebehov() }
+            .isNotEmpty()
+
+    if (finnesÅpneBehov) return null
+
     return this.filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
         .onlyOrNull()?.endringer?.sortedBy { it.tidsstempel }
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.tidsstempel
@@ -24,6 +33,16 @@ fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
  */
 fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
     if (this.any { it.status.returnert() }) return null
+
+    // Hvis FATTE_VEDTAK er løst, men det fortsatt finnes åpne behov, så betyr at det
+    // det har vært retur fra beslutter.
+    val finnesÅpneBehov =
+        this.filter { it.status.erÅpent() && it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.UTREDES && !it.avklaringsbehovDefinisjon.erVentebehov() }
+            .isNotEmpty()
+
+    if (finnesÅpneBehov) return null
+
+
     return this.filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
         .onlyOrNull()?.endringer?.sortedBy { it.tidsstempel }
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
@@ -39,7 +58,7 @@ fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
 
 fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
     val brevSendt =
-        this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES }
+        this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES || it.avklaringsbehovDefinisjon == Definisjon.SKRIV_BREV }
             .any { it.status.erAvsluttet() }
 
     if (brevSendt) {
