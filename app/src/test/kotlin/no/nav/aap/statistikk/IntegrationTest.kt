@@ -268,7 +268,7 @@ class IntegrationTest {
 
         // Gjør samme sjekker som for vanlige sending
         // TODO: lage testdataen på nytt, slik at dette kan testes
-//        assertThat(resendinger.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
+        assertThat(resendinger.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
 //        assertThat(resendinger).extracting("behandlingStatus").containsSubsequence(
 //            "UNDER_BEHANDLING",
 //            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
