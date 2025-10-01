@@ -38,6 +38,7 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.saksstatistikk.SakTabell
+import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
@@ -120,10 +121,17 @@ class IntegrationTest {
                 }
 
                 else -> {
-                    TODO()
+                    error("Uhåndtert $it")
                 }
             }
         }
+
+        val avsluttetBehandlingHendelser =
+            hendelserFraDBDump.filterIsInstance<BehandlingHendelseData>()
+                .filter { it.data.avsluttetBehandling != null }
+        assertThat(
+            avsluttetBehandlingHendelser
+        ).hasSize(1)
 
         val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
 
@@ -167,7 +175,7 @@ class IntegrationTest {
             { bigQueryClient.read(SakTabell()) },
             { t -> t !== null && t.isNotEmpty() && t.size > 2 })
         assertThat(bqSaker2!!).hasSize(hendelserFraDBDump.size)
-        assertThat(bqSaker2.map { it.ansvarligEnhetKode }).containsAnyOf("4491", "5701", "5700")
+        assertThat(bqSaker2.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
         assertThat(bqSaker2.map { it.behandlingStatus }).containsSubsequence(
             "UNDER_BEHANDLING",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
@@ -230,6 +238,75 @@ class IntegrationTest {
             )
             assertThat(it.resultat).isEqualTo(ResultatKode.valueOf(("INNVILGET")))
         }
+
+        // DEL 2: test resending
+        testKlientNoInjection(
+            dbConfig,
+            pdlConfig = pdlConfig,
+            azureConfig = azureConfig,
+            bigQueryClient,
+        ) { url, client ->
+
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/oppdatertBehandling"),
+                PostRequest(avsluttetBehandlingHendelser.last().data)
+            )
+
+            testUtil.ventPåSvar()
+        }
+
+        val alleSakstatistikkHendelser = dataSource.transaction {
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                avsluttetBehandlingHendelser.last().data.behandlingReferanse
+            ).sortedBy { it.endretTid }
+        }
+
+        val resendinger =
+            alleSakstatistikkHendelser.filter { it.erResending }.sortedBy { it.endretTid }
+        val originale =
+            alleSakstatistikkHendelser.filter { !it.erResending }.sortedBy { it.endretTid }
+
+        // Gjør samme sjekker som for vanlige sending
+        // TODO: lage testdataen på nytt, slik at dette kan testes
+//        assertThat(resendinger.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
+//        assertThat(resendinger).extracting("behandlingStatus").containsSubsequence(
+//            "UNDER_BEHANDLING",
+//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
+//            "IVERKSETTES",
+//            "AVSLUTTET"
+//        )
+//        assertThat(resendinger.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
+//            "UNDER_BEHANDLING",
+//            "IVERKSETTES",
+//            "AVSLUTTET",
+//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
+//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
+//        )
+//        assertThat(resendinger.filter { it.resultatBegrunnelse != null }).isNotEmpty
+//        assertThat(resendinger.filter { it.resultatBegrunnelse != null }).allSatisfy {
+//            assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
+//        }
+//
+//        assertThat(resendinger.map { it.behandlingMetode.name }).containsSubsequence(
+//            "MANUELL",
+//            "KVALITETSSIKRING",
+//            "MANUELL",
+//            "KVALITETSSIKRING",
+//            "MANUELL",
+//            "KVALITETSSIKRING",
+//            "MANUELL",
+//            "KVALITETSSIKRING",
+//            "MANUELL",
+//            "FATTE_VEDTAK",
+//            "MANUELL",
+//            "FATTE_VEDTAK",
+//            "MANUELL",
+//            "FATTE_VEDTAK",
+//            "MANUELL",
+//            "FATTE_VEDTAK",
+//            "MANUELL",
+//        )
     }
 
     private fun postOppgaveHendelse(

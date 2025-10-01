@@ -472,7 +472,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
     }
 
     override fun invaliderOgLagreNyHistorikk(behandling: Behandling) {
-        TODO("Not yet implemented")
+        behandlinger[behandling.id?.id!!] = behandling
     }
 
     override fun hent(referanse: UUID): Behandling? {
@@ -514,7 +514,6 @@ class FakeDiagnoseRepository : DiagnoseRepository {
     override fun hentForBehandling(behandlingReferanse: UUID): DiagnoseEntity {
         TODO("Not yet implemented")
     }
-
 }
 
 class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {

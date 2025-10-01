@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import org.jetbrains.annotations.TestOnly
 import java.util.*
 
 interface SakstatistikkRepository {
@@ -9,7 +8,6 @@ interface SakstatistikkRepository {
 
     fun hentSisteHendelseForBehandling(uuid: UUID): BQBehandling?
 
-    @TestOnly
-    fun hentSisteForBehandling(referanse: UUID): List<BQBehandling>
+    fun hentAlleHendelserPåBehandling(referanse: UUID): List<BQBehandling>
 }
 

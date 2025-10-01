@@ -58,7 +58,7 @@ class SakstatistikkRepositoryImplTest {
         }
 
         val uthentet = dataSource.transaction {
-            SakstatistikkRepositoryImpl(it).hentSisteForBehandling(referanse)
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
         }
         val datoSammenligner: BiPredicate<LocalDateTime, LocalDateTime> = BiPredicate { t, u ->
             t.truncatedTo(ChronoUnit.MILLIS).equals(u.truncatedTo(ChronoUnit.MILLIS))

@@ -1,11 +1,8 @@
 package no.nav.aap.statistikk.hendelser
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.AvklaringsbehovKode
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.*
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.behandling.BehandlingStatus
@@ -22,18 +19,9 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStat
 
 @ExtendWith(SoftAssertionsExtension::class)
 class HendelseHjelpereKtTest {
-    companion object {
-        private fun fromResources(filnavn: String): String {
-            return object {}.javaClass.getResource("/$filnavn")?.readText()!!
-        }
-    }
-
-
     @Test
     fun `midt i behandling`(softly: SoftAssertions) {
-        val hendelserString = fromResources("avklaringsbehovhendelser/grunnlag_steg.json")
-        val stoppetBehandling =
-            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+        val stoppetBehandling = hendelseFraFil("avklaringsbehovhendelser/grunnlag_steg.json")
         val hendelser = stoppetBehandling.avklaringsbehov
 
         softly.apply {
@@ -54,10 +42,8 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `sendt tilbake fra beslutter 11-5`(softly: SoftAssertions) {
-        val hendelserString =
-            fromResources("avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json")
         val stoppetBehandling =
-            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+            hendelseFraFil("avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json")
         val hendelser = stoppetBehandling.avklaringsbehov
 
         softly.apply {
@@ -80,10 +66,8 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `er på brevsteget`(softly: SoftAssertions) {
-        val hendelserString =
-            fromResources("avklaringsbehovhendelser/er_pa_brev_steget.json")
         val stoppetBehandling =
-            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+            hendelseFraFil("avklaringsbehovhendelser/er_pa_brev_steget.json")
         val hendelser = stoppetBehandling.avklaringsbehov
 
         softly.apply {
@@ -104,16 +88,14 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `fullført førstegangsbehandling`(softly: SoftAssertions) {
-        val hendelserString =
-            fromResources("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
         val stoppetBehandling =
-            DefaultJsonMapper.fromJson<StoppetBehandling>(hendelserString)
+            hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
         val hendelser = stoppetBehandling.avklaringsbehov
 
         softly.apply {
             assertThat(hendelser).isNotEmpty()
-            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("VEILEDER")
-            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
+            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("BESLUTTER")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("BESLUTTER")
             assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
             assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)

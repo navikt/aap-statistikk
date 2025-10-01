@@ -1,12 +1,10 @@
 package no.nav.aap.statistikk.hendelser
 
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.oppgave.Saksbehandler
-import java.time.LocalDateTime
 
 class ReberegnHistorikk {
     fun avklaringsbehovTilHistorikk(
@@ -14,13 +12,9 @@ class ReberegnHistorikk {
     ): Behandling {
         val avklaringsbehov = dto.avklaringsbehov
 
-        val avklaringsbehovEndringer = avklaringsbehov
-            .flatMap { behov -> behov.endringer.map { Pair(behov, it) } }
-            .sortedBy { it.second.tidsstempel }
-
         val endringsTidspunkter = avklaringsbehov.flatMap {
             it.endringer.map { it.tidsstempel }
-        }
+        }.sortedBy { it }
 
         val avklaringsbehovHistorikk = endringsTidspunkter.map { tidspunkt ->
             avklaringsbehov.påTidspunkt(tidspunkt)
@@ -28,6 +22,7 @@ class ReberegnHistorikk {
             // Fjerne "ugyldig" tilstand
             it.utledAnsvarligBeslutter() == null && it.sisteAvklaringsbehovStatus() == null
         }
+
         return avklaringsbehovHistorikk.fold(behandling) { acc, curr ->
             acc.leggTilHendelse(
                 BehandlingHendelse(

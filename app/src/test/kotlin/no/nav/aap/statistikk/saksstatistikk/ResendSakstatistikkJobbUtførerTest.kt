@@ -41,7 +41,7 @@ class ResendSakstatistikkJobbUtførerTest {
         }
 
         val uthentet =
-            dataSource.transaction { SakstatistikkRepositoryImpl(it).hentSisteForBehandling(ref) }
+            dataSource.transaction { SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(ref) }
 
         assertThat(uthentet).isNotEmpty
     }

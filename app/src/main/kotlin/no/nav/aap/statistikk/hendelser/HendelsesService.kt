@@ -109,6 +109,9 @@ class HendelsesService(
         val behandlingMedHistorikk =
             ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
+        check(behandling.status == behandlingMedHistorikk.status)
+        { "Behandlingstatus er ikke lik behandling med historikk-status. Behandlingstatus: ${behandling.status}, behandling med historikk-status: ${behandlingMedHistorikk.status}" }
+
         val behandlingId = checkNotNull(hentEllerLagreBehandling(hendelse, sak).id)
 
         val behandlingMedId = behandlingMedHistorikk.copy(id = behandlingId)

@@ -60,8 +60,8 @@ annotation class Postgres {
         }
 
         override fun afterEach(context: ExtensionContext?) {
-            flyway.clean()
-            flyway.createAndMigrateDataSource()
+//            flyway.clean()
+//            flyway.createAndMigrateDataSource()
         }
 
         override fun supportsParameter(

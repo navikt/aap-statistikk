@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.isBeforeOrEqual
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -51,7 +52,7 @@ data class BQBehandling(
 
         // Bug i SAF i mars.
         if (mottattTid.isAfter(LocalDate.of(2025, 4, 1).atStartOfDay())) {
-            require(mottattTid.isBefore(registrertTid) || mottattTid.isEqual(registrertTid))
+            require(mottattTid.isBeforeOrEqual(registrertTid))
             { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID" }
         }
         if (ansvarligEnhetKode == null) {
