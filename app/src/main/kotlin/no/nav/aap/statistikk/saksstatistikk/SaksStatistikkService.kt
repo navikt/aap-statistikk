@@ -66,14 +66,14 @@ class SaksStatistikkService(
         // TODO - kun lagre om endring siden sist
         bigQueryRepository.lagre(bqSak)
 
-        if (true) {
-            val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
-            if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
-                sakstatistikkRepository.lagre(bqSak)
-            } else {
-                log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
-            }
+
+        val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
+        if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
+            sakstatistikkRepository.lagre(bqSak)
+        } else {
+            log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
         }
+
     }
 
     private fun hentRelatertBehandlingUUID(behandling: Behandling): UUID? =
