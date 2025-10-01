@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
@@ -17,6 +16,7 @@ import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Clock.systemDefaultZone
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -66,7 +66,7 @@ class SaksStatistikkService(
         // TODO - kun lagre om endring siden sist
         bigQueryRepository.lagre(bqSak)
 
-        if (!Miljø.erProd()) {
+        if (true) {
             val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
             if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
                 sakstatistikkRepository.lagre(bqSak)
@@ -146,20 +146,128 @@ class SaksStatistikkService(
     }
 
     fun alleHendelserPåBehandling(
-        behandlingId: BehandlingId,
+        behandlingId: BehandlingId
     ): List<BQBehandling> {
         val behandling = behandlingRepository.hent(behandlingId)
 
         val erSkjermet = skjermingService.erSkjermet(behandling)
 
-        return (1..<behandling.hendelser.size + 1).map { behandling.hendelser.subList(0, it) }
-            .map { hendelser ->
-                bqBehandlingForBehandling(
-                    behandling = behandling.copy(hendelser = hendelser),
-                    erSkjermet = erSkjermet,
-                    sekvensNummer = null,
-                )
+        val originaleHendelser =
+            sakstatistikkRepository.hentAlleHendelserPåBehandling(behandling.referanse)
+
+        val alleHendelser =
+            (1..<behandling.hendelser.size + 1).map { behandling.hendelser.subList(0, it) }
+                .map { hendelser ->
+                    bqBehandlingForBehandling(
+                        behandling = behandling.copy(hendelser = hendelser),
+                        erSkjermet = erSkjermet,
+                        sekvensNummer = null,
+                    )
+                }
+
+        return flettBehandlingHendelser(originaleHendelser, alleHendelser)
+    }
+
+    /**
+     * Må bevare mengden av endringTid-verdier pga krav fra saksstatistikk.
+     */
+    fun flettBehandlingHendelser(
+        originaleHendelser: List<BQBehandling>,
+        nyeHendelser: List<BQBehandling>
+    ): List<BQBehandling> {
+        val sorterteNye = nyeHendelser.sortedBy { it.endretTid }
+        val nyeQueue = LinkedList(sorterteNye)
+
+        var forrigeNye: BQBehandling? = null
+        val originaleMedNyData = originaleHendelser
+            .sortedBy { it.endretTid }
+            .map {
+                if (nyeQueue.isEmpty()) {
+                    val last = sorterteNye.last()
+                    forrigeNye = last
+                    last.copy(endretTid = it.endretTid) // ???
+                } else if (nærNokITid(it.endretTid, nyeQueue.peek().endretTid)) {
+                    val ny = nyeQueue.poll()
+                    forrigeNye = ny
+                    ny.copy(endretTid = it.endretTid)
+                } else if (it.endretTid.isBefore(nyeQueue.peek().endretTid) && forrigeNye != null) {
+                    /*
+                    GAMMEL: -------   X ---------
+                    NY    : -- Z ------- Y ------ (Z = forrigeNye)
+                     */
+                    forrigeNye.copy(endretTid = it.endretTid)
+                } else if (it.endretTid.isBefore(nyeQueue.peek().endretTid) && forrigeNye == null) {
+                    /*
+                    GAMMEL: ---- X ---------
+                    NY    : ---------- Y ---
+                     */
+                    val ny = nyeQueue.poll()
+                    forrigeNye = ny
+                    ny.copy(endretTid = it.endretTid)
+                } else if (it.endretTid.isAfter(nyeQueue.peek().endretTid) && forrigeNye != null) {
+                    /*
+                    GAMMEL: ------------ X --
+                    NY    : -- Z --- Y ------
+                     */
+                    val ny = nyeQueue.poll()
+                    forrigeNye = ny
+                    ny.copy(endretTid = it.endretTid)
+                } else if (it.endretTid.isAfter(nyeQueue.peek().endretTid) && forrigeNye == null) {
+                    /*
+                    GAMMEL: ------------ X --
+                    NY    : ------ Y ------
+                     */
+                    val ny = nyeQueue.poll()
+                    forrigeNye = ny
+                    ny.copy(endretTid = it.endretTid)
+                } else {
+                    error("Ukjent situasjon")
+                }
             }
+
+        check(originaleMedNyData.map { it.endretTid }
+            .toSet() == originaleHendelser.map { it.endretTid }.toSet())
+
+        return (nyeQueue.toList() + originaleMedNyData).sortedBy { it.endretTid }
+            .fold(listOf()) { acc, curr ->
+                val forrige = acc.lastOrNull()
+                if (forrige == null) {
+                    acc + curr
+                } else {
+                    if (forrige.ansesSomDuplikat(curr)) {
+                        acc
+                    } else {
+                        acc + curr
+                    }
+                }
+            }
+    }
+
+    private fun nærNokITid(
+        originalTid: LocalDateTime,
+        nyTid: LocalDateTime
+    ): Boolean {
+        val duration = Duration.between(originalTid, nyTid)
+        return if (duration.abs().toMillis() <= 10) {
+            log.info("LIK NOK $duration")
+            true
+        } else {
+            log.info("IKKE NOK ${duration}")
+            false
+        }
+//        return original.endretTid == ny.endretTid
+    }
+
+    fun leggTilHvisIkkeDuplikat(
+        forrige: BQBehandling?,
+        kandidat: BQBehandling,
+        nyListe: MutableList<BQBehandling>
+    ): Boolean {
+        if ((forrige != null && !forrige.ansesSomDuplikat(kandidat)) || forrige == null) {
+            nyListe.add(kandidat)
+            return true
+        }
+        return false
     }
 
     /**

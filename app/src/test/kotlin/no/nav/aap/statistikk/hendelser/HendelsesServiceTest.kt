@@ -121,6 +121,39 @@ class HendelsesServiceTest {
         checkUnnecessaryStub(opprettBigQueryLagringCallback)
     }
 
+    @Test
+    fun `beregn historikk, enkelt test`() {
+        val hendelse =
+            hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
+        val currentInstant = Instant.now()
+        val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
+        val behandlingRepository = FakeBehandlingRepository()
+        val simpleMeterRegistry = SimpleMeterRegistry()
+        val sakRepository = FakeSakRepository()
+        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+
+        val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
+
+        val rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
+        val diagnoseRepository = FakeDiagnoseRepository()
+        val hendelsesService = konstruerHendelsesService(
+            sakRepository,
+            diagnoseRepository,
+            behandlingRepository,
+            skjermingService,
+            simpleMeterRegistry,
+            rettighetstypeperiodeRepository,
+            opprettBigQueryLagringCallback,
+            clock
+        )
+
+        hendelsesService.prosesserNyHistorikkHendelse(hendelse)
+
+        val behandling = behandlingRepository.hent(hendelse.behandlingReferanse)!!
+
+        assertThat(behandling.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+    }
+
     private fun konstruerHendelsesService(
         sakRepository: FakeSakRepository,
         diagnoseRepository: FakeDiagnoseRepository,

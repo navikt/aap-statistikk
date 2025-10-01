@@ -20,7 +20,7 @@ class ResendSakstatistikkJobbUtfører(
 
         val alleHendelser = sakStatikkService.alleHendelserPåBehandling(behandlingId)
             .map { it.copy(erResending = true) }
-        val ids = sakstatistikkRepository.lagreFlere(alleHendelser)
+        sakstatistikkRepository.lagreFlere(alleHendelser)
         log.info("Lagret ${alleHendelser.size} hendelser i sakssakstatistikk-tabell.")
     }
 }

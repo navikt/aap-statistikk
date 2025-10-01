@@ -7,6 +7,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.isBeforeOrEqual
 import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandlingStatus
 
@@ -115,7 +116,7 @@ fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): Lis
     return this
         .map {
             val endringer = it.endringer.filter {
-                it.tidsstempel.isBefore(tidspunkt) || it.tidsstempel == tidspunkt
+                it.tidsstempel.isBeforeOrEqual(tidspunkt)
             }
             it.copy(
                 endringer = endringer,

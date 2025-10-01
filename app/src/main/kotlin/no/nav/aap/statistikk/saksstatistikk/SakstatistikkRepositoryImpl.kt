@@ -106,11 +106,11 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         }
     }
 
-    override fun hentSisteForBehandling(
+    override fun hentAlleHendelserPåBehandling(
         referanse: UUID
     ): List<BQBehandling> {
         val sql = """
-            select * from saksstatistikk where behandling_uuid = ?
+            select * from saksstatistikk where behandling_uuid = ? order by teknisk_tid
         """.trimIndent()
 
         return dbConnection.queryList(sql) {

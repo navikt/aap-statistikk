@@ -383,7 +383,7 @@
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T13:41:14.278",
       "frist" : null,
-      "endretAv" : "VEILEDER",
+      "endretAv" : "SAKSBEHANDLER_NASJONAL",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
@@ -407,7 +407,7 @@
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T13:52:56.082",
       "frist" : null,
-      "endretAv" : "VEILEDER",
+      "endretAv" : "SAKSBEHANDLER_NASJONAL",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
@@ -435,7 +435,7 @@
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T13:41:38.441",
       "frist" : null,
-      "endretAv" : "VEILEDER",
+      "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "sdsasdasd\\n\\n\\n"
@@ -451,7 +451,7 @@
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T13:53:01.368",
       "frist" : null,
-      "endretAv" : "VEILEDER",
+      "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "\\n\\n\\n"
@@ -479,7 +479,7 @@
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T13:56:38.567",
       "frist" : null,
-      "endretAv" : "VEILEDER",
+      "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "Brev ferdig"
