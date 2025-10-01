@@ -11,7 +11,7 @@ metadata:
     cnrm.cloud.google.com/project-id: {{project}}
 spec:
   resourceID: view_saksstatistikk
-  description: "View som viser beregningsgrunnlag."
+  description: "View som viser saksstatistikk."
   datasetRef:
     external: saksstatistikk
   view:
