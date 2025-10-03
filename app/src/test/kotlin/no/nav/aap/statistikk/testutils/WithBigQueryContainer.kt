@@ -65,7 +65,7 @@ annotation class BigQuery {
             val alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             val sb = StringBuilder()
             val random = Random()
-            for (i in 0 until 5) {
+            (0 until 5).forEach { i ->
                 val index: Int = random.nextInt(alphabet.length)
                 sb.append(alphabet[index])
             }

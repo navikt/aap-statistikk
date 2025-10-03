@@ -184,7 +184,6 @@ class HendelsesServiceTest {
             behandlingRepository = behandlingRepository,
             meterRegistry = simpleMeterRegistry,
             opprettBigQueryLagringSakStatistikkCallback = opprettBigQueryLagringCallback,
-            clock = clock,
             opprettRekjørSakstatistikkCallback = {}
         )
     }
