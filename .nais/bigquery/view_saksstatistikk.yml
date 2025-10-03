@@ -17,6 +17,34 @@ spec:
   view:
     useLegacySql: false
     query: >-
-      SELECT *
+      SELECT
+        fagsystem_navn,
+        id AS sekvensnummer,
+        saksnummer,
+        behandling_uuid,
+        relatert_behandling_uuid,
+        relatert_fagsystem,
+        behandling_type,
+        TIMESTAMP(DATETIME(ferdigbehandlet_tid, "Europe/Oslo")) AS ferdigbehandlet_tid,
+        TIMESTAMP(DATETIME(endret_tid), "Europe/Oslo") AS endretTid,
+        aktor_id,
+        aktor_id AS fodselsnummer,
+        TIMESTAMP(DATETIME(teknisk_tid), "Europe/Oslo") AS teknisk_tid,
+        TIMESTAMP(DATETIME(mottatt_tid), "Europe/Oslo") AS mottatt_tid,
+        TIMESTAMP(DATETIME(registrert_tid), "Europe/Oslo") AS registrert_tid,
+        versjon,
+        avsender,
+        opprettet_av,
+        saksbehandler,
+        TIMESTAMP(DATETIME(vedtak_tid), "Europe/Oslo") AS vedtak_tid,
+        soknadsformat,
+        behandlingmetode,
+        behandling_status,
+        behandling_aarsak,
+        ansvarlig_beslutter,
+        ansvarlig_enhet_kode AS ansvarlig_enhet,
+        sak_ytelse,
+        behandling_resultat,
+        resultat_begrunnelse
       FROM
-         `datastream_hendelser.public_saksstatistikk`
+        `datastream_hendelser.public_saksstatistikk`

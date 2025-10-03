@@ -32,7 +32,6 @@ class HendelsesService(
     private val meterRegistry: MeterRegistry,
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
     private val opprettRekjørSakstatistikkCallback: (BehandlingId) -> Unit,
-    private val clock: Clock = Clock.systemDefaultZone()
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -42,12 +41,13 @@ class HendelsesService(
             avsluttetBehandlingService: AvsluttetBehandlingService,
             jobbAppender: JobbAppender,
             meterRegistry: MeterRegistry,
+            clock: Clock = Clock.systemDefaultZone()
         ): HendelsesService {
             return HendelsesService(
                 sakService = SakService(SakRepositoryImpl(connection)),
                 personService = PersonService(PersonRepository(connection)),
                 avsluttetBehandlingService = avsluttetBehandlingService,
-                behandlingRepository = BehandlingRepository(connection),
+                behandlingRepository = BehandlingRepository(connection, clock),
                 meterRegistry = meterRegistry,
                 opprettBigQueryLagringSakStatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)
