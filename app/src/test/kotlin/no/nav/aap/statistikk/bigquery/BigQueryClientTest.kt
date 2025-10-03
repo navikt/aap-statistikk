@@ -74,9 +74,7 @@ class BigQueryClientTest {
             }
         }
 
-        val nyClient =
-            BigQueryClient(bigQueryConfig, mapOf("mytable" to oppdatertTabell))
-
+        BigQueryClient(bigQueryConfig, mapOf("mytable" to oppdatertTabell))
     }
 
     @Test

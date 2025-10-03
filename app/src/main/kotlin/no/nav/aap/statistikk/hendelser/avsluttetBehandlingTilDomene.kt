@@ -167,7 +167,7 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             type = grunnlagUføre.type.tilDomene()
         )
     }
-    throw IllegalStateException()
+    error("Ugyldig state.")
 }
 
 private fun UføreType.tilDomene(): no.nav.aap.statistikk.avsluttetbehandling.UføreType =

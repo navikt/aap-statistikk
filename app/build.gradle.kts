@@ -58,8 +58,6 @@ dependencies {
 
     implementation("com.google.cloud:google-cloud-bigquery:2.55.1")
 
-
-    testImplementation(kotlin("test"))
     testImplementation(libs.motorTestUtils)
     testImplementation(libs.ktorServerTestHost)
     testImplementation("com.nimbusds:nimbus-jose-jwt:10.5")
@@ -76,6 +74,8 @@ dependencies {
     }
     testImplementation("org.testcontainers:gcloud:$testContainersVersion")
     testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 repositories {

@@ -22,15 +22,11 @@ import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.IntStream
 import kotlin.math.pow
 import kotlin.math.roundToLong
-
-private val log = LoggerFactory.getLogger("MottaStatistikk")
-
 
 enum class Azp(val uuid: UUID) {
     Postmottak(UUID.fromString(requiredConfigForKey("integrasjon.postmottak.azp"))),

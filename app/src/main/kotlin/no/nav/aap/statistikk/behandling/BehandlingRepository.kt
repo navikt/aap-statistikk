@@ -177,7 +177,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
                                   hendelsestidspunkt, slettet)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, oppdateringer.mapIndexed { index, it -> Pair(it, index) }
+            """, oppdateringer.mapIndexed { index, behandling -> Pair(behandling, index) }
         ) {
             setParams { (behandling, idx) ->
                 var c = 1

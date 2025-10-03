@@ -49,7 +49,7 @@ class YtelsesStatistikkTilBigQuery(
 
     fun lagre(behandlingReferanse: UUID) {
         val behandling =
-            requireNotNull(behandlingRepository.hent(behandlingReferanse)) { "Prøver å lagre en ikke-eksistereden behandling med referanse $behandlingReferanse" }
+            requireNotNull(behandlingRepository.hent(behandlingReferanse)) { "Prøver å lagre en ikke-eksisterende behandling med referanse $behandlingReferanse" }
         val rettighetstypeperioder = rettighetstypeperiodeRepository.hent(behandling.referanse)
         val diagnoser = diagnoseRepository.hentForBehandling(behandling.referanse)
 

@@ -14,7 +14,7 @@ class BigQuerySakstatikkRepository
     private val sakTabell = SakTabell()
 
     override fun lagre(payload: BQBehandling) {
-        logger.info("Lagrer saksinfo.")
+        logger.info("Lagrer saksinfo til BigQuery for saksnr ${payload.saksnummer}")
         client.insert(sakTabell, payload)
     }
 
