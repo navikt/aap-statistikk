@@ -54,8 +54,7 @@ class HendelsesServiceTest {
             skjermingService,
             simpleMeterRegistry,
             rettighetstypeperiodeRepository,
-            opprettBigQueryLagringCallback,
-            clock
+            opprettBigQueryLagringCallback
         )
 
         val sak = Sak(
@@ -125,8 +124,6 @@ class HendelsesServiceTest {
     fun `beregn historikk, enkelt test`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
-        val currentInstant = Instant.now()
-        val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
         val simpleMeterRegistry = SimpleMeterRegistry()
         val sakRepository = FakeSakRepository()
@@ -143,8 +140,7 @@ class HendelsesServiceTest {
             skjermingService,
             simpleMeterRegistry,
             rettighetstypeperiodeRepository,
-            opprettBigQueryLagringCallback,
-            clock
+            opprettBigQueryLagringCallback
         )
 
         hendelsesService.prosesserNyHistorikkHendelse(hendelse)
@@ -161,8 +157,7 @@ class HendelsesServiceTest {
         skjermingService: SkjermingService,
         simpleMeterRegistry: SimpleMeterRegistry,
         rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
-        opprettBigQueryLagringCallback: (BehandlingId) -> Unit,
-        clock: Clock
+        opprettBigQueryLagringCallback: (BehandlingId) -> Unit
     ): HendelsesService {
         val vilkårsresultatRepository = FakeVilkårsResultatRepository()
         val tilkjentYtelseRepository = FakeTilkjentYtelseRepository()
@@ -206,8 +201,7 @@ class HendelsesServiceTest {
             skjermingService,
             simpleMeterRegistry,
             rettighetstypeperiodeRepository,
-            {},
-            clock
+            {}
         )
 
         hendelsesService.prosesserNyHendelse(

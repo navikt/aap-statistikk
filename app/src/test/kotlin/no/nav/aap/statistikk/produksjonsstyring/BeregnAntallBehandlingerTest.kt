@@ -1,8 +1,8 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import kotlin.test.Test
 
 class BeregnAntallBehandlingerTest {
 

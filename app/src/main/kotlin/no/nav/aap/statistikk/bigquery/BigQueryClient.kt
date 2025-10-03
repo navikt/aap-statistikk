@@ -58,9 +58,7 @@ class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: Schema
     }
 
     override fun <E> create(table: BQTable<E>): Boolean {
-        if (!sjekkAtDatasetEksisterer()) {
-            throw Exception("Dataset $dataset eksisterer ikke, så kan ikke lage tabell.")
-        }
+        check(sjekkAtDatasetEksisterer()) { "Dataset $dataset eksisterer ikke, så kan ikke lage tabell." }
 
         val name = table.tableName
 

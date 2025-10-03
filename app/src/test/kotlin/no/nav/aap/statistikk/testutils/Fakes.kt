@@ -125,37 +125,32 @@ annotation class Fakes {
         private val azure = AzureFake()
         private val pdl = PdlFake()
 
-        override fun beforeAll(context: ExtensionContext?) {
+        override fun beforeAll(context: ExtensionContext) {
             azure.start()
             pdl.start()
         }
 
-        override fun afterAll(context: ExtensionContext?) {
+        override fun afterAll(context: ExtensionContext) {
             azure.close()
             pdl.close()
         }
 
         override fun supportsParameter(
-            parameterContext: ParameterContext?,
-            extensionContext: ExtensionContext?
+            parameterContext: ParameterContext,
+            extensionContext: ExtensionContext
         ): Boolean {
-            return (parameterContext?.isAnnotated(Fakes::class.java) == true
-                    && (parameterContext.parameter.type == TestToken::class.java))
-                    || parameterContext?.isAnnotated(
+            return (parameterContext.isAnnotated(Fakes::class.java) && (parameterContext.parameter.type == TestToken::class.java)) || parameterContext.isAnnotated(
                 Fakes::class.java
-            ) == true
-                    && (parameterContext.parameter.type == AzureConfig::class.java) || (parameterContext?.isAnnotated(
+            ) && (parameterContext.parameter.type == AzureConfig::class.java) || (parameterContext.isAnnotated(
                 Fakes::class.java
-            ) == true
-                    && (parameterContext.parameter.type == PdlConfig::class.java))
+            ) && (parameterContext.parameter.type == PdlConfig::class.java))
         }
 
         override fun resolveParameter(
-            parameterContext: ParameterContext?,
-            extensionContext: ExtensionContext?
+            parameterContext: ParameterContext,
+            extensionContext: ExtensionContext
         ): Any {
-            if (parameterContext?.isAnnotated(Fakes::class.java) == true
-                && parameterContext.parameter.type == AzureConfig::class.java
+            if (parameterContext.isAnnotated(Fakes::class.java) && parameterContext.parameter.type == AzureConfig::class.java
             ) {
                 return AzureConfig(
                     clientId = "tilgang",
@@ -164,27 +159,25 @@ annotation class Fakes {
                     tokenEndpoint = URI.create("http://localhost:${azure.port()}/token"),
                     clientSecret = "verysecret",
                 )
-            } else if (parameterContext?.isAnnotated(Fakes::class.java) == true
-                && parameterContext.parameter.type == TestToken::class.java
+            } else if (parameterContext.isAnnotated(Fakes::class.java) && parameterContext.parameter.type == TestToken::class.java
             ) {
                 val token = AzureTokenGen("tilgang", "tilgang").generate()
                 return TestToken(access_token = token, scope = "AAP_SCOPES")
-            } else if (parameterContext?.isAnnotated(Fakes::class.java) == true
-                && parameterContext.parameter.type == PdlConfig::class.java
+            } else if (parameterContext.isAnnotated(Fakes::class.java) && parameterContext.parameter.type == PdlConfig::class.java
             ) {
                 return PdlConfig(
                     url = "http://localhost:${pdl.port()}",
                     scope = "..."
                 )
             } else {
-                throw IllegalArgumentException("Ukjent parametertype")
+                error("Ukjent parametertype: ${parameterContext.parameter.type}")
             }
         }
     }
 
     data class ErrorRespons(val message: String?)
 
-    @Suppress("PropertyName")
+    @Suppress("PropertyName", "ConstructorParameterNaming")
     data class TestToken(
         val access_token: String,
         val refresh_token: String = "very.secure.token",

@@ -54,31 +54,29 @@ annotation class Postgres {
             }
         }
 
-        override fun beforeEach(context: ExtensionContext?) {
+        override fun beforeEach(context: ExtensionContext) {
             flyway.clean()
             flyway.createAndMigrateDataSource()
         }
 
-        override fun afterEach(context: ExtensionContext?) {
+        override fun afterEach(context: ExtensionContext) {
 //            flyway.clean()
 //            flyway.createAndMigrateDataSource()
         }
 
         override fun supportsParameter(
-            parameterContext: ParameterContext?,
-            extensionContext: ExtensionContext?
+            parameterContext: ParameterContext,
+            extensionContext: ExtensionContext
         ): Boolean {
-            return (parameterContext?.isAnnotated(Postgres::class.java) == true && (parameterContext.parameter.type == DataSource::class.java))
-                    || ((parameterContext?.isAnnotated(Postgres::class.java) == true && (parameterContext.parameter.type == DbConfig::class.java)))
+            return (parameterContext.isAnnotated(Postgres::class.java) && (parameterContext.parameter.type == DataSource::class.java)) || (parameterContext.isAnnotated(
+                Postgres::class.java
+            ) && (parameterContext.parameter.type == DbConfig::class.java))
         }
 
         override fun resolveParameter(
-            parameterContext: ParameterContext?,
-            extensionContext: ExtensionContext?
+            parameterContext: ParameterContext,
+            extensionContext: ExtensionContext
         ): Any {
-            if (parameterContext == null) {
-                throw IllegalArgumentException("ParameterContext cannot be null")
-            }
             if (parameterContext.parameter.type == DataSource::class.java) {
                 return dataSource
             }

@@ -73,20 +73,20 @@ annotation class BigQuery {
         }
 
         override fun supportsParameter(
-            parameterContext: ParameterContext?,
-            extensionContext: ExtensionContext?
+            parameterContext: ParameterContext,
+            extensionContext: ExtensionContext
         ): Boolean {
-            return parameterContext?.isAnnotated(BigQuery::class.java) == true && (parameterContext.parameter.type == BigQueryConfig::class.java)
+            return parameterContext.isAnnotated(BigQuery::class.java) && (parameterContext.parameter.type == BigQueryConfig::class.java)
         }
 
         override fun resolveParameter(
-            parameterContext: ParameterContext?,
-            extensionContext: ExtensionContext?
+            parameterContext: ParameterContext,
+            extensionContext: ExtensionContext
         ): Any {
             return testBigQueryConfig()
         }
 
-        override fun afterAll(context: ExtensionContext?) {
+        override fun afterAll(context: ExtensionContext) {
             bigQueryContainer.stop()
         }
     }
