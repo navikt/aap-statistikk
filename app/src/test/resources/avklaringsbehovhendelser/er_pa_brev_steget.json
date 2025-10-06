@@ -71,8 +71,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5006",
@@ -131,8 +130,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5026",
@@ -175,8 +173,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "Vurdert refusjonskrav"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5053",
@@ -227,8 +224,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "Skrevet sykdomsvurdering for brev"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5097",
@@ -255,8 +251,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "\\n\\n"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5008",
@@ -307,8 +302,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5020",
@@ -359,8 +353,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5098",
@@ -411,8 +404,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5099",
@@ -455,8 +447,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "\\n\\n\\n"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5051",
@@ -475,8 +466,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   } ],
   "hendelsesTidspunkt" : "2025-09-24T13:53:01.673128",
   "avsluttetBehandling" : null,

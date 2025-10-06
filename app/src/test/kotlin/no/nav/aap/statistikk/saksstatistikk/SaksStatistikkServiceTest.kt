@@ -133,7 +133,6 @@ class SaksStatistikkServiceTest {
                                         endretAv = "Bork",
                                     )
                                 ),
-                                typeBrev = null,
                             )
                         ),
                         hendelsesTidspunkt = LocalDateTime.now(),
