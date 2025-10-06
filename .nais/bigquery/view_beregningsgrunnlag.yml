@@ -26,6 +26,8 @@ spec:
                          WHEN 'uføre' THEN null -- gu.grunnlag
                          END)                 AS grunnlaget,
              g.inntekter                      AS inntekter,
+             g.er6g_begrenset as grunnlag_er_6g_begrenset,
+             g.er_gjennomsnitt as grunnlag_er_gjennomsnitt,
              -- YRKESSKADE
              --gy.yrkesskade_tidspunkt                        AS yrkesskade_tidspunkt,
       --        gy.antatt_arlig_inntekt_yrkesskade_tidspunktet AS antatt_arlig_inntekt_yrkesskade_tidspunktet,
