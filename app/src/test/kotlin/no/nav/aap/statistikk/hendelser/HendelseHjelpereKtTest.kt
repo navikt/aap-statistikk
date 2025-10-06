@@ -1189,7 +1189,6 @@ val ekteEksempel = listOf(
                 årsakTilRetur = listOf(ÅrsakTilRetur(årsak = ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE))
             )
         ),
-        typeBrev = null
     )
 )
 
@@ -1305,8 +1304,7 @@ val ekte2 = """
               }
             ]
           }
-        ],
-        "typeBrev": null
+        ]
       },
       {
         "avklaringsbehovDefinisjon": {
@@ -1407,8 +1405,7 @@ val ekte2 = """
         "endretAv" : "Kelvin",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     }, {
       "avklaringsbehovDefinisjon" : {
         "kode" : "5008",
@@ -1440,8 +1437,7 @@ val ekte2 = """
         "endretAv" : "Kelvin",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     }, {
       "avklaringsbehovDefinisjon" : {
         "kode" : "5017",
@@ -1473,8 +1469,7 @@ val ekte2 = """
         "endretAv" : "Z994573",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     }, {
       "avklaringsbehovDefinisjon" : {
         "kode" : "5020",
@@ -1506,8 +1501,7 @@ val ekte2 = """
         "endretAv" : "Kelvin",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     }, {
       "avklaringsbehovDefinisjon" : {
         "kode" : "5026",
@@ -1539,8 +1533,7 @@ val ekte2 = """
         "endretAv" : "Kelvin",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     }, {
       "avklaringsbehovDefinisjon" : {
         "kode" : "5097",
@@ -1607,8 +1600,7 @@ val ekte2 = """
         "endretAv" : "Z994573",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     }, {
       "avklaringsbehovDefinisjon" : {
         "kode" : "5098",
@@ -1640,8 +1632,7 @@ val ekte2 = """
         "endretAv" : "Kelvin",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     }, {
       "avklaringsbehovDefinisjon" : {
         "kode" : "5099",
@@ -1666,7 +1657,6 @@ val ekte2 = """
         "endretAv" : "Z994573",
         "årsakTilSattPåVent" : null,
         "årsakTilRetur" : [ ]
-      } ],
-      "typeBrev" : null
+      } ]
     } ]
 """.trimIndent().let { DefaultJsonMapper.fromJson<List<AvklaringsbehovHendelseDto>>(it) }
