@@ -55,8 +55,7 @@
         "årsak" : "MANGLENDE_UTREDNING"
       } ],
       "begrunnelse" : "sdsasdasd"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5006",
@@ -99,8 +98,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5026",
@@ -135,8 +133,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5053",
@@ -179,8 +176,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5097",
@@ -207,8 +203,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "\\n\\n"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5008",
@@ -243,8 +238,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5020",
@@ -279,8 +273,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5098",
@@ -315,8 +308,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5099",
@@ -343,8 +335,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "sdsasdasd\\n\\n\\n"
-    } ],
-    "typeBrev" : null
+    } ]
   } ],
   "hendelsesTidspunkt" : "2025-09-24T13:41:39.258439",
   "avsluttetBehandling" : null,

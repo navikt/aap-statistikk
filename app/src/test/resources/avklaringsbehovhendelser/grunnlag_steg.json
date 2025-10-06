@@ -45,8 +45,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5006",
@@ -81,8 +80,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5026",
@@ -109,8 +107,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "Vurdert refusjonskrav"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5053",
@@ -145,8 +142,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5097",
@@ -173,8 +169,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "\\n\\n"
-    } ],
-    "typeBrev" : null
+    } ]
   }, {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5008",
@@ -193,8 +188,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : ""
-    } ],
-    "typeBrev" : null
+    } ]
   } ],
   "hendelsesTidspunkt" : "2025-09-24T12:39:00.413099",
   "avsluttetBehandling" : null,
