@@ -4,7 +4,7 @@ komponenter = "1.0.386"
 tilgang = "1.0.132"
 behandlingsflyt = "0.0.454"
 oppgave = "0.0.125"
-utbetaling = "0.0.60"
+utbetaling = "0.0.62"
 postmottak = "0.0.116"
 
 [libraries]
