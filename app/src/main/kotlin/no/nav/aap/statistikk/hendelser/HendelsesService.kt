@@ -271,6 +271,5 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.DØDSFALL_BARN -> DØDSFALL_BARN
         Vurderingsbehov.OPPHOLDSKRAV -> OPPHOLDSKRAV
         Vurderingsbehov.REVURDER_STUDENT -> REVURDER_STUDENT
-        Vurderingsbehov.MOTTATT_PDL_HENDELSE -> MOTTATT_PDL_HENDELSE
     }
 }
