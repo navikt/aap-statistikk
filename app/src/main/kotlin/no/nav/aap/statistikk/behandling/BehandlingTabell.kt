@@ -197,7 +197,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "utbetalingId" to value.referanse.toBase64(),
-                "vurderingsbehov" to value.vurderingsbehov
+                "vurderingsbehov" to value.vurderingsbehov.joinToString(",").let(::listOf)
             )
         )
     }
