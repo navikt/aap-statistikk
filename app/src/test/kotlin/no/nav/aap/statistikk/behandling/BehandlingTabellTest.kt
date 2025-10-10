@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.function.Consumer
 
 class BehandlingTabellTest {
     @Test
@@ -38,12 +39,14 @@ class BehandlingTabellTest {
                 rettighetstype = RettighetsType.BISTANDSBEHOV
             )
         )
+        val datoOpprettet = LocalDateTime.now().minusDays(1)
         client.insert(
             tabell, BQYtelseBehandling(
                 saksnummer = Saksnummer("123XXX"),
                 referanse = referanse,
                 brukerFnr = "2902198512345",
                 behandlingsType = TypeBehandling.Førstegangsbehandling,
+                datoOpprettet = datoOpprettet,
                 datoAvsluttet = datoAvsluttet,
                 kodeverk = "IC23",
                 diagnosekode = "PEST",
@@ -56,19 +59,21 @@ class BehandlingTabellTest {
 
         val read = client.read(tabell)
 
-        assertThat(read.size).isEqualTo(1)
-        assertThat(read.first().saksnummer.value).isEqualTo("123XXX")
-        assertThat(read.first().referanse).isEqualTo(referanse)
-        assertThat(read.first().brukerFnr).isEqualTo("2902198512345")
-        assertThat(read.first().behandlingsType).isEqualTo(TypeBehandling.Førstegangsbehandling)
-        assertThat(read.first().datoAvsluttet).isCloseTo(
-            datoAvsluttet,
-            within(500, ChronoUnit.MILLIS)
-        )
-        assertThat(read.first().kodeverk).isEqualTo("IC23")
-        assertThat(read.first().diagnosekode).isEqualTo("PEST")
-        assertThat(read.first().bidiagnoser).isEqualTo(listOf("KOLERA", "BOLIGSKADE"))
-        assertThat(read.first().rettighetsPerioder).isEqualTo(rettighetsPerioder)
-        assertThat(read.first().utbetalingId).isEqualTo(referanse.toBase64())
+        assertThat(read).hasSize(1).first().satisfies(Consumer {
+            assertThat(it.saksnummer.value).isEqualTo("123XXX")
+            assertThat(it.referanse).isEqualTo(referanse)
+            assertThat(it.brukerFnr).isEqualTo("2902198512345")
+            assertThat(it.behandlingsType).isEqualTo(TypeBehandling.Førstegangsbehandling)
+            assertThat(it.datoAvsluttet).isCloseTo(
+                datoAvsluttet,
+                within(500, ChronoUnit.MILLIS)
+            )
+            assertThat(it.datoOpprettet).isCloseTo(datoOpprettet, within(500, ChronoUnit.MILLIS))
+            assertThat(it.kodeverk).isEqualTo("IC23")
+            assertThat(it.diagnosekode).isEqualTo("PEST")
+            assertThat(it.bidiagnoser).isEqualTo(listOf("KOLERA", "BOLIGSKADE"))
+            assertThat(it.rettighetsPerioder).isEqualTo(rettighetsPerioder)
+            assertThat(it.utbetalingId).isEqualTo(referanse.toBase64())
+        })
     }
 }

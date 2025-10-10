@@ -180,6 +180,7 @@ class AvsluttetBehandlingServiceTest {
                     brukerFnr = "29021946",
                     behandlingsType = TypeBehandling.Førstegangsbehandling,
                     datoAvsluttet = opprettetTidspunkt,
+                    datoOpprettet = opprettetTidspunkt,
                     kodeverk = "KODEVERK",
                     diagnosekode = "KOLERA",
                     bidiagnoser = listOf("PEST"),
