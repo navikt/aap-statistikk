@@ -172,7 +172,7 @@ class AvsluttetBehandlingServiceTest {
             ) < 1
         }
         assertThat(utlestFraBehandlingTabell).usingRecursiveComparison()
-            .withEqualsForFields(datoSammenligner, "datoAvsluttet")
+            .withEqualsForFields(datoSammenligner, "datoAvsluttet", "datoOpprettet")
             .isEqualTo(
                 BQYtelseBehandling(
                     saksnummer = saksnummer,
