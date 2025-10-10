@@ -55,6 +55,7 @@ class AvsluttetBehandlingServiceTest {
             saksnummer,
             status = BehandlingStatus.AVSLUTTET,
             opprettetTidspunkt = opprettetTidspunkt,
+            vurderingsbehov = listOf(Vurderingsbehov.OVERGANG_UFORE),
             clock
         )
 
@@ -193,7 +194,8 @@ class AvsluttetBehandlingServiceTest {
                     ),
                     radEndret = LocalDateTime.now(clock)
                         .truncatedTo(ChronoUnit.MILLIS),
-                    utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64()
+                    utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64(),
+                    vurderingsbehov = listOf(Vurderingsbehov.OVERGANG_UFORE.name),
                 )
             )
 

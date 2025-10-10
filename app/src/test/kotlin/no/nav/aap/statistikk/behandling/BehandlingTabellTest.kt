@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.VURDER_FORMKRAV_KODE
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.bigquery.BigQueryClient
@@ -53,7 +54,11 @@ class BehandlingTabellTest {
                 bidiagnoser = listOf("KOLERA", "BOLIGSKADE"),
                 radEndret = LocalDateTime.now(),
                 rettighetsPerioder = rettighetsPerioder,
-                utbetalingId = referanse.toBase64()
+                utbetalingId = referanse.toBase64(),
+                vurderingsbehov = listOf(
+                    Vurderingsbehov.OVERGANG_UFORE.name,
+                    Vurderingsbehov.SØKNAD.name
+                )
             )
         )
 
@@ -74,6 +79,12 @@ class BehandlingTabellTest {
             assertThat(it.bidiagnoser).isEqualTo(listOf("KOLERA", "BOLIGSKADE"))
             assertThat(it.rettighetsPerioder).isEqualTo(rettighetsPerioder)
             assertThat(it.utbetalingId).isEqualTo(referanse.toBase64())
+            assertThat(it.vurderingsbehov).isEqualTo(
+                listOf(
+                    Vurderingsbehov.OVERGANG_UFORE.name,
+                    Vurderingsbehov.SØKNAD.name
+                )
+            )
         })
     }
 }

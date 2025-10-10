@@ -79,7 +79,8 @@ class YtelsesStatistikkTilBigQuery(
                 diagnosekode = diagnoser?.diagnosekode,
                 bidiagnoser = diagnoser?.bidiagnoser,
                 rettighetsPerioder = rettighetstypeperioder,
-                radEndret = LocalDateTime.now(clock)
+                radEndret = LocalDateTime.now(clock),
+                vurderingsbehov = behandling.årsaker.map { it.name }
             )
         )
         bqRepository.lagre(vilkårsResultat)
