@@ -23,6 +23,7 @@ data class BQYtelseBehandling(
     val utbetalingId: String?,
     val brukerFnr: String,
     val behandlingsType: TypeBehandling,
+    val datoOpprettet: LocalDateTime,
     val datoAvsluttet: LocalDateTime,
     val kodeverk: String?,
     val diagnosekode: String?,
@@ -58,6 +59,9 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 ).build()
             val datoAvsluttet = Field.newBuilder("datoAvsluttet", StandardSQLTypeName.DATETIME)
                 .setDescription("På hvilken dato ble saksbehandlingen avsluttet i Kelvin. Ikke-null.")
+                .build()
+            val datoOpprettet = Field.newBuilder("datoOpprettet", StandardSQLTypeName.DATETIME)
+                .setDescription("På hvilken dato ble behandling opprettet i Kelvin. Ikke-null.")
                 .build()
             val kodeverk = Field.newBuilder("kodeverk", StandardSQLTypeName.STRING)
                 .setDescription("Kodeverk brukt for diagnose i 11-5-vurderingen. Kan være null om søknaden ble avslått før sykdomsbildet ble vurdert.")
@@ -102,6 +106,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 behandlingsreferanse,
                 behandlingsType,
                 brukerFnr,
+                datoOpprettet,
                 datoAvsluttet,
                 kodeverk,
                 diagnosekode,
@@ -118,6 +123,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         val referanse = fieldValueList.get("behandlingsreferanse").stringValue
         val brukerFnr = fieldValueList.get("brukerFnr").stringValue
         val behandlingsType = fieldValueList.get("behandlingsType").stringValue
+        val datoOpprettet = LocalDateTime.parse(fieldValueList.get("datoOpprettet").stringValue)
         val datoAvsluttet = LocalDateTime.parse(fieldValueList.get("datoAvsluttet").stringValue)
         val kodeverk = fieldValueList.get("kodeverk").stringValue
         val diagnosekode = fieldValueList.get("diagnosekode").stringValue
@@ -140,6 +146,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             referanse = UUID.fromString(referanse),
             brukerFnr = brukerFnr,
             behandlingsType = behandlingsType.let { TypeBehandling.valueOf(it) },
+            datoOpprettet = datoOpprettet,
             datoAvsluttet = datoAvsluttet,
             kodeverk = kodeverk,
             diagnosekode = diagnosekode,
@@ -158,6 +165,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 "behandlingsreferanse" to value.referanse.toString(),
                 "brukerFnr" to value.brukerFnr,
                 "behandlingsType" to value.behandlingsType.toString(),
+                "datoOpprettet" to value.datoOpprettet.truncatedTo(ChronoUnit.MILLIS)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "datoAvsluttet" to value.datoAvsluttet.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 "kodeverk" to value.kodeverk,

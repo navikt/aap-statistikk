@@ -73,6 +73,7 @@ class YtelsesStatistikkTilBigQuery(
                 brukerFnr = behandling.sak.person.ident,
                 resultat = behandling.resultat(),
                 behandlingsType = behandling.typeBehandling,
+                datoOpprettet = behandling.opprettetTid,
                 datoAvsluttet = behandling.avsluttetTid(),
                 kodeverk = diagnoser?.kodeverk,
                 diagnosekode = diagnoser?.diagnosekode,
