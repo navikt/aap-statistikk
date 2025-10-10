@@ -81,8 +81,8 @@ class BehandlingTabellTest {
             assertThat(it.utbetalingId).isEqualTo(referanse.toBase64())
             assertThat(it.vurderingsbehov).isEqualTo(
                 listOf(
-                    Vurderingsbehov.OVERGANG_UFORE.name,
-                    Vurderingsbehov.SØKNAD.name
+                    Vurderingsbehov.OVERGANG_UFORE.name + "," +
+                            Vurderingsbehov.SØKNAD.name
                 )
             )
         })
