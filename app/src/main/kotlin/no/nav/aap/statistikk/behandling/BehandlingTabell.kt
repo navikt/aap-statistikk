@@ -29,6 +29,7 @@ data class BQYtelseBehandling(
     val diagnosekode: String?,
     val bidiagnoser: List<String>?,
     val rettighetsPerioder: List<RettighetstypePeriode>,
+    val vurderingsbehov: List<String>,
     val resultat: ResultatKode? = null,
     val radEndret: LocalDateTime
 )
@@ -101,6 +102,11 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 .setDescription("Resultat av behandlingen. Ved innvilget førstegangsbehandling er denne INNVILGET. Kan være null.")
                 .setMode(Field.Mode.NULLABLE).build()
 
+            val vurderingsbehov = Field.newBuilder("vurderingsbehov", StandardSQLTypeName.STRING)
+                .setDescription("Behandlingsbehov som er vurdert i denne behandlingen.")
+                .setMode(Field.Mode.REPEATED)
+                .build()
+
             return Schema.of(
                 saksnummer,
                 behandlingsreferanse,
@@ -114,7 +120,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 rettighetstypePeriode,
                 radEndret,
                 utbetalingId,
-                resultat
+                resultat,
+                vurderingsbehov
             )
         }
 
@@ -129,6 +136,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
         val diagnosekode = fieldValueList.get("diagnosekode").stringValue
         val bidiagnoser =
             fieldValueList.get("bidiagnoser").repeatedValue.map { it.recordValue[0].stringValue }
+        val vurderingsbehov =
+            fieldValueList.get("vurderingsbehov").repeatedValue.map { it.value.toString() }
         val radEndret = LocalDateTime.parse(fieldValueList.get("radEndret").stringValue)
         val utbetalingId = fieldValueList.get("utbetalingId").stringValue
 
@@ -154,7 +163,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             rettighetsPerioder = rettighetstypePerioder,
             radEndret = radEndret,
             utbetalingId = utbetalingId,
-            resultat = fieldValueList.hentEllerNull("resultat")?.let { ResultatKode.valueOf(it) }
+            resultat = fieldValueList.hentEllerNull("resultat")?.let { ResultatKode.valueOf(it) },
+            vurderingsbehov = vurderingsbehov
         )
     }
 
@@ -186,7 +196,8 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 "resultat" to value.resultat?.toString(),
                 "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "utbetalingId" to value.referanse.toBase64()
+                "utbetalingId" to value.referanse.toBase64(),
+                "vurderingsbehov" to value.vurderingsbehov
             )
         )
     }

@@ -258,6 +258,7 @@ fun opprettTestHendelse(
     saksnummer: Saksnummer,
     status: BehandlingStatus = BehandlingStatus.UTREDES,
     opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    vurderingsbehov: List<Vurderingsbehov> = emptyList(),
     clock: Clock = Clock.systemDefaultZone()
 ): Pair<BehandlingId, SakId> {
     val ident = "29021946"
@@ -272,6 +273,7 @@ fun opprettTestHendelse(
         sak,
         status,
         opprettetTidspunkt,
+        vurderingsbehov,
         clock
     )
 
@@ -308,6 +310,7 @@ fun opprettTestBehandling(
     sak: Sak,
     status: BehandlingStatus = BehandlingStatus.UTREDES,
     opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    vurderingsbehov: List<Vurderingsbehov> = emptyList(),
     clock: Clock = Clock.systemDefaultZone()
 ): Behandling {
     val behandling = Behandling(
@@ -319,6 +322,7 @@ fun opprettTestBehandling(
         oppdatertTidspunkt = opprettetTidspunkt,
         mottattTid = opprettetTidspunkt.truncatedTo(ChronoUnit.SECONDS),
         versjon = Versjon(UUID.randomUUID().toString()),
+        årsaker = vurderingsbehov,
         søknadsformat = SøknadsFormat.PAPIR,
     )
     return dataSource.transaction {
