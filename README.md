@@ -8,7 +8,7 @@ Formålet er å levere statistikk og produkssjonstyringsdata relatert til AAP.
 
 Bruker Gradle wrapper, så bare klon og kjør `./gradlew build`.
 
-Dokumentasjon på [sysdok](https://aap-sysdoc.ansatt.nav.no/funksjonalitet/Statistikk/teknisk)..
+Dokumentasjon på [sysdok](https://aap-sysdoc.ansatt.nav.no/funksjonalitet/Statistikk/teknisk).
 
 ## Henvendelser
 
