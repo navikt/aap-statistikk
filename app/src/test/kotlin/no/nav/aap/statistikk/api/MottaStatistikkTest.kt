@@ -525,7 +525,17 @@ class MottaStatistikkTest {
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb({ TODO() })
         val motor = motor(
-            dataSource = dataSource, prometheusMeterRegistry = meterRegistry, jobber = listOf()
+            dataSource = dataSource, prometheusMeterRegistry = meterRegistry,
+            jobber = listOf(
+                resendSakstatistikkJobb,
+                lagreAvsluttetBehandlingTilBigQueryJobb,
+                lagreSakinfoTilBigQueryJobb,
+                LagreAvklaringsbehovHendelseJobb({ TODO() }),
+                lagrePostmottakHendelseJobb,
+                lagreOppgaveHendelseJobb,
+                LagreOppgaveJobb(jobbAppender1),
+                lagreStoppetHendelseJobb
+            )
         )
         val jobbAppender = MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,

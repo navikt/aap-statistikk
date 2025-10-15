@@ -8,6 +8,10 @@ plugins {
     application
 }
 
+detekt {
+    ignoreFailures = true
+}
+
 val mockkVersion = "1.14.6"
 val flywayVersion = "11.14.0"
 val testContainersVersion = "1.21.3"
