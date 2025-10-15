@@ -3,6 +3,7 @@ name: "CodeQL"
 on:
   push:
     branches: ["main"]
+  pull_request:
 
 jobs:
   analyze:
@@ -17,6 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         language: ["kotlin"]
+    env:
+      GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -39,11 +42,15 @@ jobs:
           gradle-version: wrapper
 
       - name: Build
-        run: ./gradlew clean build -x test
-        env:
-          GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
+        run: ./gradlew build -x test -x detekt
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{matrix.language}}"
+
+      - run: ./gradlew detekt
+
+      - uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: app/build/reports/detekt/detekt.sarif

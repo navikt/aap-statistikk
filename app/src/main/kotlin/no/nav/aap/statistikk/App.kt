@@ -20,6 +20,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
+import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
@@ -151,17 +152,19 @@ fun Application.startUp(
 
     val motor = motor(
         dataSource,
-        lagreStoppetHendelseJobb,
-        lagreAvklaringsbehovHendelseJobb,
         prometheusMeterRegistry,
-        lagreOppgaveHendelseJobb,
-        lagrePostmottakHendelseJobb,
-        lagreSakinfoTilBigQueryJobb,
-        lagreAvsluttetBehandlingTilBigQueryJobb,
-        LagreOppgaveJobb(
-            jobbAppender = motorJobbAppender
-        ),
-        resendSakstatistikkJobb
+        listOf(
+            lagreStoppetHendelseJobb,
+            lagreAvklaringsbehovHendelseJobb,
+            lagreOppgaveHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            LagreOppgaveJobb(
+                jobbAppender = motorJobbAppender
+            ),
+            resendSakstatistikkJobb
+        )
     )
 
     monitor.subscribe(ApplicationStopPreparing) {
@@ -193,15 +196,8 @@ fun Application.startUp(
 
 fun motor(
     dataSource: DataSource,
-    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
     prometheusMeterRegistry: MeterRegistry,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
-    lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
-    lagreOppgaveJobb: LagreOppgaveJobb,
-    resendSakstatistikkJobb: ResendSakstatistikkJobb,
+    jobber: List<Jobb>,
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -212,16 +208,7 @@ fun motor(
                 return LogInformasjon(mapOf())
             }
         },
-        jobber = listOf(
-            lagreStoppetHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagreOppgaveJobb,
-            lagrePostmottakHendelseJobb,
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb
-        ),
+        jobber = jobber,
         prometheus = prometheusMeterRegistry,
     )
 }
