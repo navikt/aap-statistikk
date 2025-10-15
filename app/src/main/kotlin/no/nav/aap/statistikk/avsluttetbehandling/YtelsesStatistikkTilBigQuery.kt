@@ -12,7 +12,6 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
-import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
@@ -44,8 +43,6 @@ class YtelsesStatistikkTilBigQuery(
             )
         }
     }
-
-    private val log = LoggerFactory.getLogger(javaClass)
 
     fun lagre(behandlingReferanse: UUID) {
         val behandling =
