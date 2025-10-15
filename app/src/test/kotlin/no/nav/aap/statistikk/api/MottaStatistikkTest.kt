@@ -227,8 +227,7 @@ class MottaStatistikkTest {
                         endretAv = "Z994500"
                     )
                 )
-            ),
-            AvklaringsbehovHendelseDto(
+            ), AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = SKRIV_VEDTAKSBREV,
                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                 endringer = listOf(
@@ -262,21 +261,18 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
-                it,
-                bqStatistikkRepository,
-                skjermingService
+                it, bqStatistikkRepository, skjermingService
             )
         }
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
         val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
-        val jobbAppender =
-            MotorJobbAppender(
-                lagreSakinfoTilBigQueryJobb,
-                lagreAvsluttetBehandlingTilBigQueryJobb,
-                resendSakstatistikkJobb
-            )
+        val jobbAppender = MotorJobbAppender(
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb
+        )
 
         val hendelsesService: (DBConnection) -> HendelsesService = {
             HendelsesService.konstruer(
@@ -348,21 +344,18 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlClient())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
-                it,
-                bqStatistikkRepository,
-                skjermingService
+                it, bqStatistikkRepository, skjermingService
             )
         }
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
         val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
-        val jobbAppender =
-            MotorJobbAppender(
-                lagreSakinfoTilBigQueryJobb,
-                lagreAvsluttetBehandlingTilBigQueryJobb,
-                resendSakstatistikkJobb
-            )
+        val jobbAppender = MotorJobbAppender(
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb
+        )
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
             skjermingService, meterRegistry, jobbAppender
         )
@@ -442,22 +435,24 @@ class MottaStatistikkTest {
         lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
     ): Motor = motor(
         dataSource = dataSource,
-        lagreStoppetHendelseJobb = LagreStoppetHendelseJobb({ conn ->
-            HendelsesService.konstruer(
-                conn,
-                AvsluttetBehandlingService.konstruer(conn, meterRegistry, skjermingService) {},
-                jobbAppender,
-                meterRegistry,
-            )
-        }),
-        lagreAvklaringsbehovHendelseJobb = lagreAvklaringsbehovHendelseJobb,
         prometheusMeterRegistry = meterRegistry,
-        lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender),
-        lagrePostmottakHendelseJobb = lagrePostmottakHendelseJobb,
-        lagreSakinfoTilBigQueryJobb = lagreSakinfoTilBigQueryJobb,
-        lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb { TODO() },
-        lagreOppgaveJobb = LagreOppgaveJobb(jobbAppender),
-        resendSakstatistikkJobb = resendSakstatistikkJobb
+        jobber = listOf(
+            LagreAvsluttetBehandlingTilBigQueryJobb { TODO() },
+            LagreOppgaveJobb(jobbAppender),
+            resendSakstatistikkJobb,
+            lagreAvklaringsbehovHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            LagreOppgaveHendelseJobb(meterRegistry, jobbAppender),
+            lagreSakinfoTilBigQueryJobb,
+            LagreStoppetHendelseJobb({ conn ->
+                HendelsesService.konstruer(
+                    conn,
+                    AvsluttetBehandlingService.konstruer(conn, meterRegistry, skjermingService) {},
+                    jobbAppender,
+                    meterRegistry,
+                )
+            })
+        )
     )
 
     private fun konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse: FakeBQYtelseRepository): LagreAvsluttetBehandlingTilBigQueryJobb =
@@ -530,23 +525,23 @@ class MottaStatistikkTest {
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb({ TODO() })
         val motor = motor(
-            dataSource = dataSource,
-            lagreStoppetHendelseJobb = lagreStoppetHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb({ TODO() }),
-            prometheusMeterRegistry = meterRegistry,
-            lagreOppgaveHendelseJobb = lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb = lagrePostmottakHendelseJobb,
-            lagreSakinfoTilBigQueryJobb = lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb({ TODO() }),
-            lagreOppgaveJobb = LagreOppgaveJobb(jobbAppender1),
-            resendSakstatistikkJobb = resendSakstatistikkJobb
-        )
-        val jobbAppender =
-            MotorJobbAppender(
-                lagreSakinfoTilBigQueryJobb,
+            dataSource = dataSource, prometheusMeterRegistry = meterRegistry,
+            jobber = listOf(
+                resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,
-                resendSakstatistikkJobb
+                lagreSakinfoTilBigQueryJobb,
+                LagreAvklaringsbehovHendelseJobb({ TODO() }),
+                lagrePostmottakHendelseJobb,
+                lagreOppgaveHendelseJobb,
+                LagreOppgaveJobb(jobbAppender1),
+                lagreStoppetHendelseJobb
             )
+        )
+        val jobbAppender = MotorJobbAppender(
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb
+        )
 
         testKlient(
             transactionExecutor,

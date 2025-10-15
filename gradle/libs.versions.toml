@@ -7,6 +7,8 @@ oppgave = "0.0.128"
 utbetaling = "0.0.65"
 postmottak = "0.0.116"
 
+flyway = "11.14.0"
+
 [libraries]
 ktorServerTestHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 ktorServerStatusPages = { module = "io.ktor:ktor-server-call-logging-jvm", version.ref = "ktor" }
@@ -24,6 +26,10 @@ behandlingsflytKontrakt = { module = "no.nav.aap.behandlingsflyt:kontrakt", vers
 utbetalKontrakt = { module = "no.nav.aap.utbetal:api-kontrakt", version.ref = "utbetaling" }
 oppgaveKontrakt = { module = "no.nav.aap.oppgave:api-kontrakt", version.ref = "oppgave" }
 postmottakKontrakt = { module = "no.nav.aap.postmottak:kontrakt", version.ref = "postmottak" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.5.19" }
+logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "8.1" }
+flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway"}
+flywayPostgres = {module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway"}
 
 [plugins]
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

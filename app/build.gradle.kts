@@ -4,7 +4,12 @@ plugins {
     id("aap-statistikk.conventions")
     kotlin("jvm")
     alias(libs.plugins.ktor)
+    id("io.gitlab.arturbosch.detekt")
     application
+}
+
+detekt {
+    ignoreFailures = true
 }
 
 val mockkVersion = "1.14.6"
@@ -32,11 +37,11 @@ dependencies {
     implementation(libs.ktorServerStatusPages)
     implementation(libs.ktorServerHtmlBuilder)
 
-    implementation("ch.qos.logback:logback-classic:1.5.19")
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+    implementation(libs.logback)
+    implementation(libs.logbackLogstashEncoder)
 
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
-    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
+    implementation(libs.flyway)
+    implementation(libs.flywayPostgres)
     runtimeOnly("org.postgresql:postgresql:42.7.8")
     implementation("com.zaxxer:HikariCP:7.0.2")
 
