@@ -11,9 +11,6 @@ import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
-import org.slf4j.LoggerFactory
-
-private val logger = LoggerFactory.getLogger(LagreOppgaveJobbUtfører::class.java)
 
 
 class LagreOppgaveJobbUtfører(

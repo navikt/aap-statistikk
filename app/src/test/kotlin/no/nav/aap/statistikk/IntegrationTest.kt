@@ -263,8 +263,6 @@ class IntegrationTest {
 
         val resendinger =
             alleSakstatistikkHendelser.filter { it.erResending }.sortedBy { it.endretTid }
-        val originale =
-            alleSakstatistikkHendelser.filter { !it.erResending }.sortedBy { it.endretTid }
 
         // Gjør samme sjekker som for vanlige sending
         // TODO: lage testdataen på nytt, slik at dette kan testes
