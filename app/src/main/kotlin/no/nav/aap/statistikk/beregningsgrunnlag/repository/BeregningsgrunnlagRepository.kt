@@ -244,7 +244,7 @@ where br.referanse = ?
                     }
 
                     else -> {
-                        throw IllegalStateException("Dette er alle mulige grunnlagstyper.")
+                        error("Dette er alle mulige grunnlagstyper.")
                     }
                 }
 
@@ -263,7 +263,7 @@ where br.referanse = ?
             beregningsgrunnlag = when (type) {
                 "normal" -> hentGrunnlag11_19(resultSet)
                 "ufore" -> hentUtGrunnlagUføre(resultSet)
-                else -> throw IllegalStateException("Umulig å komme hit.")
+                else -> error("Umulig å komme hit.")
             },
             terskelverdiForYrkesskade = resultSet.getInt("gy_terskelverdi_for_yrkesskade"),
             andelSomSkyldesYrkesskade = resultSet.getBigDecimal("gy_andel_som_skyldes_yrkesskade"),

@@ -930,6 +930,6 @@ fun tilSteggruppe(kode: String): String {
     } catch (_: IllegalArgumentException) {
         no.nav.aap.postmottak.kontrakt.avklaringsbehov.Definisjon.forKode(kode).løsesISteg.gruppe.toString()
     } catch (_: NoSuchElementException) {
-        throw IllegalStateException("Finner ikke for kode $kode")
+        error("Finner ikke for kode $kode")
     }
 }
