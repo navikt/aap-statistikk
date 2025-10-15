@@ -25,7 +25,7 @@ import java.net.URI
 @ExtendWith(Fakes.FakesExtension::class)
 annotation class Fakes {
     class AzureFake(port: Int = 0) {
-        private val azure = embeddedServer(Netty, port = port, module = { azureFake() })
+        private val azure = embeddedServer(Netty, port = port, module = { azure() })
 
         fun start() {
             azure.start()
@@ -37,13 +37,13 @@ annotation class Fakes {
 
         fun port(): Int = azure.port()
 
-        private fun Application.azureFake() {
+        private fun Application.azure() {
             install(ContentNegotiation) {
                 jackson()
             }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
-                    this@azureFake.log.info(
+                    this@azure.log.info(
                         "AZURE :: Ukjent feil ved kall til '{}'",
                         call.request.local.uri,
                         cause
@@ -67,7 +67,7 @@ annotation class Fakes {
     }
 
     class PdlFake(port: Int = 0) {
-        private val pdl = embeddedServer(Netty, port = port, module = { pdlFake() })
+        private val pdl = embeddedServer(Netty, port = port, module = { pdl() })
 
         fun start() {
             pdl.start()
@@ -79,13 +79,13 @@ annotation class Fakes {
 
         fun port(): Int = pdl.port()
 
-        private fun Application.pdlFake() {
+        private fun Application.pdl() {
             install(ContentNegotiation) {
                 jackson()
             }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
-                    this@pdlFake.log.info(
+                    this@pdl.log.info(
                         "AZURE :: Ukjent feil ved kall til '{}'",
                         call.request.local.uri,
                         cause
