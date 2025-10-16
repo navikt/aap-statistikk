@@ -61,27 +61,20 @@ fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
         this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES || it.avklaringsbehovDefinisjon == Definisjon.SKRIV_BREV }
             .any { it.status.erAvsluttet() }
 
-    if (brevSendt) {
-        return BehandlingStatus.AVSLUTTET
-    }
-
     val brevBehovOpprettet =
         this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES }
             .any { it.status.erÅpent() }
-
-    if (brevBehovOpprettet) {
-        return BehandlingStatus.IVERKSETTES
-    }
 
     val erOpprettet =
         this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.OPPRETTET }
             .any { it.status.erÅpent() }
 
-    if (erOpprettet) {
-        return BehandlingStatus.OPPRETTET
+    return when {
+        brevSendt -> BehandlingStatus.AVSLUTTET
+        brevBehovOpprettet -> BehandlingStatus.IVERKSETTES
+        erOpprettet -> BehandlingStatus.OPPRETTET
+        else -> BehandlingStatus.UTREDES
     }
-
-    return BehandlingStatus.UTREDES
 }
 
 fun Status.returnert(): Boolean = when (this) {
