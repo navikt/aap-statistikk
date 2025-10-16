@@ -10,9 +10,7 @@ import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import no.nav.aap.utbetaling.helved.toBase64
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
-import kotlin.collections.contains
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 
 data class Versjon(
@@ -91,15 +89,17 @@ data class Behandling(
     }
 
     fun utbetalingId(): String? {
-        if (this.resultat() in listOf(
+        return when {
+            this.resultat() in listOf(
                 ResultatKode.TRUKKET, ResultatKode.AVSLAG, ResultatKode.AVBRUTT
-            )
-        ) return null
+            ) -> null
 
-        if (this.status in listOf(BehandlingStatus.IVERKSETTES, BehandlingStatus.AVSLUTTET)) {
-            return this.referanse.toBase64()
+            this.status in listOf(
+                BehandlingStatus.IVERKSETTES, BehandlingStatus.AVSLUTTET
+            ) -> this.referanse.toBase64()
+
+            else -> null
         }
-        return null
     }
 
     fun behandlingStatus(): BehandlingStatus {
@@ -218,9 +218,13 @@ enum class Vurderingsbehov(val sortering: Int) {
     VURDER_RETTIGHETSPERIODE(1), SØKNAD_TRUKKET(0), REVURDER_MANUELL_INNTEKT(1), KLAGE_TRUKKET(1), MOTTATT_KABAL_HENDELSE(
         1
     ),
-    OPPFØLGINGSOPPGAVE(0), AKTIVITETSPLIKT_11_7(1), AKTIVITETSPLIKT_11_9(1), EFFEKTUER_AKTIVITETSPLIKT(1),
-    EFFEKTUER_AKTIVITETSPLIKT_11_9(1),
-    OVERGANG_UFORE(1), OVERGANG_ARBEID(1), DØDSFALL_BRUKER(1), DØDSFALL_BARN(1), REVURDERING_AVBRUTT(
+    OPPFØLGINGSOPPGAVE(0), AKTIVITETSPLIKT_11_7(1), AKTIVITETSPLIKT_11_9(1), EFFEKTUER_AKTIVITETSPLIKT(
+        1
+    ),
+    EFFEKTUER_AKTIVITETSPLIKT_11_9(1), OVERGANG_UFORE(1), OVERGANG_ARBEID(1), DØDSFALL_BRUKER(1), DØDSFALL_BARN(
+        1
+    ),
+    REVURDERING_AVBRUTT(
         0
     ),
     OPPHOLDSKRAV(1), REVURDER_STUDENT(1);
