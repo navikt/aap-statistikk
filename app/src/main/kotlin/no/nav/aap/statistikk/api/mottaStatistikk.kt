@@ -27,13 +27,10 @@ import kotlin.math.pow
 import kotlin.math.roundToLong
 
 
-fun NormalOpenAPIRoute.mottaStatistikk(
+fun NormalOpenAPIRoute.mottaStoppetBehandling(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
-    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb
 ) {
     route("/stoppetBehandling").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, StoppetBehandling>(
@@ -61,7 +58,13 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             )
         }
     }
+}
 
+fun NormalOpenAPIRoute.mottaOppdatertBehandling(
+    transactionExecutor: TransactionExecutor,
+    jobbAppender: JobbAppender,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+) {
     route("/oppdatertBehandling").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, StoppetBehandling>(
             modules = arrayOf(TagModule(listOf(Tags.MottaStatistikk))),
@@ -84,7 +87,13 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
         }
     }
+}
 
+fun NormalOpenAPIRoute.mottaOppgaveOppdatering(
+    transactionExecutor: TransactionExecutor,
+    jobbAppender: JobbAppender,
+    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
+) {
     route("/oppgave").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, OppgaveHendelse>(
             modules = arrayOf(
@@ -116,6 +125,13 @@ fun NormalOpenAPIRoute.mottaStatistikk(
             )
         }
     }
+}
+
+fun NormalOpenAPIRoute.mottaPostmottakOppdatering(
+    transactionExecutor: TransactionExecutor,
+    jobbAppender: JobbAppender,
+    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+) {
     route("/postmottak").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, DokumentflytStoppetHendelse>(
             modules = arrayOf(

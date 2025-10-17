@@ -27,8 +27,7 @@ import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
-import no.nav.aap.statistikk.api.hentBehandlingstidPerDag
-import no.nav.aap.statistikk.api.mottaStatistikk
+import no.nav.aap.statistikk.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
@@ -249,13 +248,17 @@ fun Application.module(
     routing {
         authenticate(AZURE) {
             apiRouting {
-                mottaStatistikk(
+                mottaStoppetBehandling(transactionExecutor, jobbAppender, lagreStoppetHendelseJobb)
+                mottaOppdatertBehandling(
                     transactionExecutor,
                     jobbAppender,
-                    lagreStoppetHendelseJobb,
-                    lagreOppgaveHendelseJobb,
-                    lagrePostmottakHendelseJobb,
                     lagreAvklaringsbehovHendelseJobb
+                )
+                mottaOppgaveOppdatering(transactionExecutor, jobbAppender, lagreOppgaveHendelseJobb)
+                mottaPostmottakOppdatering(
+                    transactionExecutor,
+                    jobbAppender,
+                    lagrePostmottakHendelseJobb
                 )
                 hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()
