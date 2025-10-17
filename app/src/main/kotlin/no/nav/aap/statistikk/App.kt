@@ -35,7 +35,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
-import no.nav.aap.statistikk.db.Flyway
+import no.nav.aap.statistikk.db.Migrering
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
@@ -96,7 +96,7 @@ fun Application.startUp(
         PrometheusConfig.DEFAULT
     )
 
-    val flyway = Flyway(dbConfig, prometheusMeterRegistry)
+    val flyway = Migrering(dbConfig, prometheusMeterRegistry)
     val dataSource = flyway.createAndMigrateDataSource()
 
     val bqSakRepository = BigQuerySakstatikkRepository(bigQueryClientSak)

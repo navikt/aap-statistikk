@@ -7,7 +7,6 @@ import com.papsign.ktor.openapigen.route.route
 import com.papsign.ktor.openapigen.route.status
 import io.ktor.http.*
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.oppgave.statistikk.HendelseType
@@ -23,16 +22,9 @@ import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
 import java.time.LocalDateTime
-import java.util.*
 import java.util.stream.IntStream
 import kotlin.math.pow
 import kotlin.math.roundToLong
-
-enum class Azp(val uuid: UUID) {
-    Postmottak(UUID.fromString(requiredConfigForKey("integrasjon.postmottak.azp"))),
-    Behandlingsflyt(UUID.fromString(requiredConfigForKey("integrasjon.behandlingsflyt.azp"))),
-    Oppgave(UUID.fromString(requiredConfigForKey("integrasjon.oppgave.azp")))
-}
 
 
 fun NormalOpenAPIRoute.mottaStatistikk(
