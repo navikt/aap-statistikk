@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariDataSource
 import io.micrometer.core.instrument.MeterRegistry
 import org.flywaydb.core.Flyway
 
-class Flyway(config: DbConfig, meterRegistry: MeterRegistry) {
+class Migrering(config: DbConfig, meterRegistry: MeterRegistry) {
     private val dataSource = HikariDataSource().apply {
         jdbcUrl = config.jdbcUrl
         username = config.userName
