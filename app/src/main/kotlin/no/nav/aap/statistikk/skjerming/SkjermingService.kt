@@ -17,7 +17,7 @@ class SkjermingService(
                 .flatMap { it.adressebeskyttelse }
                 .any { it.gradering.erHemmelig() }
         } catch (e: Exception) {
-            logger.warn("Feilet kall til PDL. Returnerer false for skjerming. Se stackTrace.", e)
+            logger.error("Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.", e)
             return false;
         }
     }
