@@ -2,7 +2,6 @@ package no.nav.aap.statistikk
 
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
@@ -51,7 +50,6 @@ fun main() {
             lagreStoppetHendelseJobb = mockk(),
             lagreOppgaveHendelseJobb = mockk(),
             lagrePostmottakHendelseJobb = mockk(),
-            prometheusMeterRegistry = SimpleMeterRegistry(),
             lagreAvklaringsbehovHendelseJobb = mockk(),
         )
     }.start()

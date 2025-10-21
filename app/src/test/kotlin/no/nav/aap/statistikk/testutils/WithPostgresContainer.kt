@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.testutils
 
 import com.zaxxer.hikari.HikariDataSource
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Migrering
 import org.junit.jupiter.api.extension.*
@@ -50,7 +49,7 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
                 userName = postgresContainer.username,
                 password = postgresContainer.password
             )
-            flyway = Migrering(dbConfig, SimpleMeterRegistry())
+            flyway = Migrering(dbConfig)
             dataSource = flyway.createAndMigrateDataSource()
         }
     }

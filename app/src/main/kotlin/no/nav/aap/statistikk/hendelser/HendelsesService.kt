@@ -1,11 +1,11 @@
 package no.nav.aap.statistikk.hendelser
 
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.miljo.Miljø
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
@@ -29,7 +29,6 @@ class HendelsesService(
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personService: PersonService,
     private val behandlingRepository: IBehandlingRepository,
-    private val meterRegistry: MeterRegistry,
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
     private val opprettRekjørSakstatistikkCallback: (BehandlingId) -> Unit,
 ) {
@@ -40,7 +39,6 @@ class HendelsesService(
             connection: DBConnection,
             avsluttetBehandlingService: AvsluttetBehandlingService,
             jobbAppender: JobbAppender,
-            meterRegistry: MeterRegistry,
             clock: Clock = Clock.systemDefaultZone()
         ): HendelsesService {
             return HendelsesService(
@@ -48,7 +46,6 @@ class HendelsesService(
                 personService = PersonService(PersonRepository(connection)),
                 avsluttetBehandlingService = avsluttetBehandlingService,
                 behandlingRepository = BehandlingRepository(connection, clock),
-                meterRegistry = meterRegistry,
                 opprettBigQueryLagringSakStatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)
                         .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")
@@ -94,7 +91,7 @@ class HendelsesService(
             opprettBigQueryLagringSakStatistikkCallback(behandlingId)
         }
 
-        meterRegistry.hendelseLagret().increment()
+        PrometheusProvider.prometheus.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
     }
 
@@ -145,7 +142,8 @@ class HendelsesService(
         } else {
             val id = behandlingRepository.opprettBehandling(behandling)
             logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
-            meterRegistry.nyBehandlingOpprettet(dto.behandlingType.tilDomene()).increment()
+            PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
+                .increment()
             id
         }
         return behandling.copy(id = behandlingId)

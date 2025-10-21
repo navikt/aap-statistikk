@@ -6,8 +6,7 @@ import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -22,6 +21,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
@@ -31,8 +31,8 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -123,7 +123,6 @@ fun <E> testKlient(
             lagreOppgaveHendelseJobb,
             lagrePostmottakHendelseJobb,
             lagreAvklaringsbehovHendelseJobb,
-            PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         )
     }.start()
 
@@ -613,7 +612,7 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
     }
 }
 
-class FakePdlClient(val identerHemmelig: Map<String, Boolean> = emptyMap()) : PdlClient {
+class FakePdlGateway(val identerHemmelig: Map<String, Boolean> = emptyMap()) : PdlGateway {
     override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {
         return identer.map {
             no.nav.aap.statistikk.integrasjoner.pdl.Person(
@@ -684,7 +683,7 @@ fun konstruerSakstatistikkService(
         rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
         bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
         bigQueryRepository = bQSakRepository,
-        skjermingService = SkjermingService(FakePdlClient()),
+        skjermingService = SkjermingService(FakePdlGateway()),
         oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
     )

@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
@@ -33,7 +32,6 @@ class ApplicationTest {
         @Fakes azureConfig: AzureConfig
     ) {
         val jobbAppender = MockJobbAppender()
-        val meterRegistry = SimpleMeterRegistry()
 
         val hendelsesService: (DBConnection) -> HendelsesService = {
             HendelsesService(
@@ -45,13 +43,11 @@ class ApplicationTest {
                     diagnoseRepository = FakeDiagnoseRepository(),
                     behandlingRepository = FakeBehandlingRepository(),
                     rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                    skjermingService = SkjermingService(FakePdlClient()),
-                    meterRegistry = meterRegistry,
+                    skjermingService = SkjermingService(FakePdlGateway()),
                     opprettBigQueryLagringYtelseCallback = {}
                 ),
                 personService = PersonService(FakePersonRepository()),
                 behandlingRepository = FakeBehandlingRepository(),
-                meterRegistry = meterRegistry,
                 opprettBigQueryLagringSakStatistikkCallback = { },
                 opprettRekjørSakstatistikkCallback = { },
             )
@@ -63,8 +59,8 @@ class ApplicationTest {
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
                 hendelsesService = hendelsesService,
-            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, mockk()),
-            lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry),
+            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(mockk()),
+            lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(),
             lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
         ) { url, client ->
             @Language("JSON") val body = """{
@@ -166,7 +162,6 @@ class ApplicationTest {
 }"""
 
         val jobbAppender = MockJobbAppender()
-        val meterRegistry = SimpleMeterRegistry()
 
         val hendelsesService: (DBConnection) -> HendelsesService = {
             val behandlingRepository = FakeBehandlingRepository()
@@ -180,12 +175,10 @@ class ApplicationTest {
                     diagnoseRepository = FakeDiagnoseRepository(),
                     behandlingRepository = behandlingRepository,
                     rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                    skjermingService = SkjermingService(FakePdlClient()),
-                    meterRegistry = meterRegistry,
+                    skjermingService = SkjermingService(FakePdlGateway()),
                     opprettBigQueryLagringYtelseCallback = {}
                 ),
                 behandlingRepository = behandlingRepository,
-                meterRegistry = meterRegistry,
                 opprettBigQueryLagringSakStatistikkCallback = { TODO() },
                 opprettRekjørSakstatistikkCallback = { TODO() },
             )
@@ -195,8 +188,8 @@ class ApplicationTest {
             motorMock(),
             azureConfig,
             LagreStoppetHendelseJobb(hendelsesService),
-            LagreOppgaveHendelseJobb(meterRegistry, mockk()),
-            LagrePostmottakHendelseJobb(meterRegistry),
+            LagreOppgaveHendelseJobb(mockk()),
+            LagrePostmottakHendelseJobb(),
             LagreAvklaringsbehovHendelseJobb(hendelsesService),
             jobbAppender,
         ) { url, client ->

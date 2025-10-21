@@ -2,17 +2,17 @@ package no.nav.aap.statistikk.skjerming
 
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 
 private val logger = org.slf4j.LoggerFactory.getLogger("SkjermingService")
 
 class SkjermingService(
-    private val pdlClient: PdlClient
+    private val pdlGateway: PdlGateway
 ) {
     fun erSkjermet(behandling: Behandling): Boolean {
         val identer = behandling.identerPåBehandling()
         try {
-            val hentPersoner = pdlClient.hentPersoner(identer)
+            val hentPersoner = pdlGateway.hentPersoner(identer)
             return hentPersoner
                 .flatMap { it.adressebeskyttelse }
                 .any { it.gradering.erHemmelig() }

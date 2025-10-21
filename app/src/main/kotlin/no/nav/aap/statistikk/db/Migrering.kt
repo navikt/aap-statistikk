@@ -1,16 +1,16 @@
 package no.nav.aap.statistikk.db
 
 import com.zaxxer.hikari.HikariDataSource
-import io.micrometer.core.instrument.MeterRegistry
+import no.nav.aap.statistikk.PrometheusProvider
 import org.flywaydb.core.Flyway
 
-class Migrering(config: DbConfig, meterRegistry: MeterRegistry) {
+class Migrering(config: DbConfig) {
     private val dataSource = HikariDataSource().apply {
         jdbcUrl = config.jdbcUrl
         username = config.userName
         password = config.password
         connectionTestQuery = "SELECT 1"
-        metricRegistry = meterRegistry
+        metricRegistry = PrometheusProvider.prometheus
     }
 
     private val flyway = Flyway

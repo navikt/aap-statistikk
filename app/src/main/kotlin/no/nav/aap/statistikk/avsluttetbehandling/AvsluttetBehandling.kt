@@ -119,7 +119,7 @@ sealed interface IBeregningsGrunnlag {
     data class GrunnlagUføre(
         val grunnlag: Double,
         val type: UføreType,
-        @Suppress("PropertyName") val grunnlag11_19: Grunnlag_11_19,
+        @Suppress("PropertyName", "ConstructorParameterNaming") val grunnlag11_19: Grunnlag_11_19,
         val uføregrad: Int,
         val uføreInntekterFraForegåendeÅr: Map<Int, Double>,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,

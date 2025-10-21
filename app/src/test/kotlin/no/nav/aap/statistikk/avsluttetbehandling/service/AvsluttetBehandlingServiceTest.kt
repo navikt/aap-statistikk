@@ -1,11 +1,11 @@
 package no.nav.aap.statistikk.avsluttetbehandling.service
 
-import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
@@ -132,13 +132,13 @@ class AvsluttetBehandlingServiceTest {
         )
 
         val meterRegistry = SimpleMeterRegistry()
+        PrometheusProvider.prometheus = meterRegistry
         val counter = meterRegistry.avsluttetBehandlingLagret()
 
         val bigQueryClient = dataSource.transaction {
             val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 it,
                 bigQuery,
-                meterRegistry,
                 clock = clock
             )
 
@@ -238,6 +238,7 @@ class AvsluttetBehandlingServiceTest {
         val saksnummer = Saksnummer("xxxx")
 
         val meterRegistry = SimpleMeterRegistry()
+        PrometheusProvider.prometheus = meterRegistry
         val counter = meterRegistry.avsluttetBehandlingLagret()
 
         opprettTestHendelse(dataSource, behandlingReferanse, saksnummer)
@@ -319,8 +320,7 @@ class AvsluttetBehandlingServiceTest {
         dataSource.transaction {
             val (_, service) = konstruerAvsluttetBehandlingService(
                 it,
-                bigQuery,
-                meterRegistry
+                bigQuery
             )
             service.lagre(avsluttetBehandling)
         }
@@ -342,7 +342,6 @@ class AvsluttetBehandlingServiceTest {
     private fun konstruerAvsluttetBehandlingService(
         dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig,
-        meterRegistry: MeterRegistry,
         clock: Clock = Clock.systemUTC()
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
@@ -355,9 +354,8 @@ class AvsluttetBehandlingServiceTest {
                 VilkårsresultatRepository(dbConnection),
                 diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
                 behandlingRepository = behandlingRepository,
-                skjermingService = SkjermingService(FakePdlClient(emptyMap())),
+                skjermingService = SkjermingService(FakePdlGateway(emptyMap())),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
-                meterRegistry = meterRegistry,
                 opprettBigQueryLagringYtelseCallback = {}
             )
         return Pair(bigQueryClient, service)

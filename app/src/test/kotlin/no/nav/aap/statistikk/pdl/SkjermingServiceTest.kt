@@ -4,13 +4,13 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlClient
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
-import no.nav.aap.statistikk.testutils.FakePdlClient
+import no.nav.aap.statistikk.testutils.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -43,7 +43,7 @@ class SkjermingServiceTest {
     @Test
     fun `returnerer skjermet-true om noen av relaterte identer er skjermet`() {
         val service =
-            SkjermingService(FakePdlClient(identerHemmelig = mapOf("123" to true, "456" to false)))
+            SkjermingService(FakePdlGateway(identerHemmelig = mapOf("123" to true, "456" to false)))
 
         assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf("123")))).isTrue()
         assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf("456")))).isFalse()
@@ -54,7 +54,7 @@ class SkjermingServiceTest {
     fun `returnerer skjermet om personen på saken er skjermet`() {
         val service =
             SkjermingService(
-                FakePdlClient(
+                FakePdlGateway(
                     identerHemmelig = mapOf(
                         "123" to true,
                         behandling.sak.person.ident to true
@@ -68,7 +68,7 @@ class SkjermingServiceTest {
 
     @Test
     fun `returnerer false om ingen relaterte er skjermede om personen på saken er skjermet`() {
-        val service = SkjermingService(FakePdlClient(identerHemmelig = mapOf()))
+        val service = SkjermingService(FakePdlGateway(identerHemmelig = mapOf()))
 
 
         assertThat(service.erSkjermet(behandling)).isFalse()
@@ -84,7 +84,7 @@ class SkjermingServiceTest {
 
         logger.addAppender(listAppender)
 
-        val service = SkjermingService(object : PdlClient {
+        val service = SkjermingService(object : PdlGateway {
             override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {
                 throw Exception("oopsie")
             }

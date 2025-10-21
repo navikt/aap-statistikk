@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
@@ -313,7 +312,7 @@ class IntegrationTest {
     ) {
         dataSource.transaction {
             FlytJobbRepository(it).leggTil(
-                JobbInput(LagreOppgaveHendelseJobb(SimpleMeterRegistry(), object : JobbAppender {
+                JobbInput(LagreOppgaveHendelseJobb(object : JobbAppender {
                     override fun leggTil(connection: DBConnection, jobb: JobbInput) {
                         TODO()
                     }

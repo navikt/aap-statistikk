@@ -13,8 +13,6 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
@@ -38,7 +36,7 @@ import no.nav.aap.statistikk.db.Migrering
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLClient
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -91,17 +89,13 @@ fun Application.startUp(
 ) {
     log.info("Starter.")
 
-    val prometheusMeterRegistry = PrometheusMeterRegistry(
-        PrometheusConfig.DEFAULT
-    )
-
-    val flyway = Migrering(dbConfig, prometheusMeterRegistry)
+    val flyway = Migrering(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
     val bqSakRepository = BigQuerySakstatikkRepository(bigQueryClientSak)
     val bqYtelseRepository = BQYtelseRepository(bigQueryClientYtelse)
 
-    val pdlClient = PdlGraphQLClient(pdlConfig, prometheusMeterRegistry)
+    val pdlClient = PdlGraphQLGateway(pdlConfig)
 
     val skjermingService = SkjermingService(pdlClient)
     val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
@@ -129,7 +123,6 @@ fun Application.startUp(
             connection,
             AvsluttetBehandlingService.konstruer(
                 connection,
-                meterRegistry = prometheusMeterRegistry,
                 skjermingService = skjermingService,
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->
                     motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
@@ -138,20 +131,18 @@ fun Application.startUp(
                     )
                 },
             ),
-            jobbAppender = motorJobbAppender,
-            meterRegistry = prometheusMeterRegistry,
+            jobbAppender = motorJobbAppender
         )
     }
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
 
     val lagreOppgaveHendelseJobb =
-        LagreOppgaveHendelseJobb(prometheusMeterRegistry, motorJobbAppender)
-    val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(prometheusMeterRegistry)
+        LagreOppgaveHendelseJobb(motorJobbAppender)
+    val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
     val motor = motor(
         dataSource,
-        prometheusMeterRegistry,
         listOf(
             lagreStoppetHendelseJobb,
             lagreAvklaringsbehovHendelseJobb,
@@ -189,13 +180,11 @@ fun Application.startUp(
         lagreOppgaveHendelseJobb,
         lagrePostmottakHendelseJobb,
         lagreAvklaringsbehovHendelseJobb,
-        prometheusMeterRegistry
     )
 }
 
 fun motor(
     dataSource: DataSource,
-    prometheusMeterRegistry: MeterRegistry,
     jobber: List<Jobb>,
 ): Motor {
     return Motor(
@@ -208,7 +197,7 @@ fun motor(
             }
         },
         jobber = jobber,
-        prometheus = prometheusMeterRegistry,
+        prometheus = PrometheusProvider.prometheus,
     )
 }
 
@@ -222,19 +211,18 @@ fun Application.module(
     lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
-    prometheusMeterRegistry: MeterRegistry,
 ) {
     motor.start()
     transactionExecutor.withinTransaction {
         RetryService(it).enable()
     }
 
-    monitoring(prometheusMeterRegistry)
+    monitoring()
     statusPages()
     kodeverk(transactionExecutor)
 
     commonKtorModule(
-        prometheusMeterRegistry, azureConfig, InfoModel(
+        PrometheusProvider.prometheus, azureConfig, InfoModel(
             title = "AAP - Statistikk",
             version = "0.0.1",
             description = """
@@ -268,10 +256,11 @@ fun Application.module(
 }
 
 
-private fun Application.monitoring(prometheus: MeterRegistry) {
+private fun Application.monitoring() {
     routing {
         route("/actuator") {
             get("/metrics") {
+                val prometheus = PrometheusProvider.prometheus
                 if (prometheus is PrometheusMeterRegistry) {
                     call.respond(prometheus.scrape())
                 }

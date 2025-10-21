@@ -11,6 +11,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
@@ -39,9 +40,10 @@ class HendelsesServiceTest {
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
         val simpleMeterRegistry = SimpleMeterRegistry()
+        PrometheusProvider.prometheus = simpleMeterRegistry
         val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
         val sakRepository = FakeSakRepository()
-        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+        val skjermingService = SkjermingService(FakePdlGateway(emptyMap()))
 
         val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
 
@@ -52,7 +54,6 @@ class HendelsesServiceTest {
             diagnoseRepository,
             behandlingRepository,
             skjermingService,
-            simpleMeterRegistry,
             rettighetstypeperiodeRepository,
             opprettBigQueryLagringCallback
         )
@@ -125,9 +126,8 @@ class HendelsesServiceTest {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
         val behandlingRepository = FakeBehandlingRepository()
-        val simpleMeterRegistry = SimpleMeterRegistry()
         val sakRepository = FakeSakRepository()
-        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+        val skjermingService = SkjermingService(FakePdlGateway(emptyMap()))
 
         val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
 
@@ -138,7 +138,6 @@ class HendelsesServiceTest {
             diagnoseRepository,
             behandlingRepository,
             skjermingService,
-            simpleMeterRegistry,
             rettighetstypeperiodeRepository,
             opprettBigQueryLagringCallback
         )
@@ -155,7 +154,6 @@ class HendelsesServiceTest {
         diagnoseRepository: FakeDiagnoseRepository,
         behandlingRepository: FakeBehandlingRepository,
         skjermingService: SkjermingService,
-        simpleMeterRegistry: SimpleMeterRegistry,
         rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
         opprettBigQueryLagringCallback: (BehandlingId) -> Unit
     ): HendelsesService {
@@ -171,13 +169,11 @@ class HendelsesServiceTest {
                 diagnoseRepository = diagnoseRepository,
                 behandlingRepository = behandlingRepository,
                 skjermingService = skjermingService,
-                meterRegistry = simpleMeterRegistry,
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
                 opprettBigQueryLagringYtelseCallback = { TODO() },
             ),
             personService = PersonService(FakePersonRepository()),
             behandlingRepository = behandlingRepository,
-            meterRegistry = simpleMeterRegistry,
             opprettBigQueryLagringSakStatistikkCallback = opprettBigQueryLagringCallback,
             opprettRekjørSakstatistikkCallback = {}
         )
@@ -189,9 +185,10 @@ class HendelsesServiceTest {
         val clock = Clock.fixed(currentInstant, ZoneId.of("Europe/Oslo"))
         val behandlingRepository = FakeBehandlingRepository()
         val simpleMeterRegistry = SimpleMeterRegistry()
+        PrometheusProvider.prometheus = simpleMeterRegistry
         val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
         val sakRepository = FakeSakRepository()
-        val skjermingService = SkjermingService(FakePdlClient(emptyMap()))
+        val skjermingService = SkjermingService(FakePdlGateway(emptyMap()))
 
         val rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
         val hendelsesService = konstruerHendelsesService(
@@ -199,10 +196,8 @@ class HendelsesServiceTest {
             FakeDiagnoseRepository(),
             behandlingRepository,
             skjermingService,
-            simpleMeterRegistry,
-            rettighetstypeperiodeRepository,
-            {}
-        )
+            rettighetstypeperiodeRepository
+        ) {}
 
         hendelsesService.prosesserNyHendelse(
             StoppetBehandling(

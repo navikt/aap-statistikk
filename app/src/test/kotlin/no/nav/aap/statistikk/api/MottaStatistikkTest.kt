@@ -18,7 +18,7 @@ import no.nav.aap.motor.Motor
 import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
-import no.nav.aap.statistikk.avsluttetBehandlingLagret
+import no.nav.aap.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
@@ -27,15 +27,12 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
-import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
-import no.nav.aap.statistikk.lagretPostmottakHendelse
-import no.nav.aap.statistikk.motor
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
@@ -76,17 +73,15 @@ class MottaStatistikkTest {
 
         val motor = motorMock()
 
-        val meterRegistry = SimpleMeterRegistry()
-
         val mottattTid = LocalDateTime.now().minusDays(1)
         testKlient(
             noOpTransactionExecutor,
             motor,
             azureConfig,
-            fakeLagreStoppetHendelseJobb(meterRegistry),
-            LagreOppgaveHendelseJobb(meterRegistry, jobbAppender),
-            LagrePostmottakHendelseJobb(meterRegistry),
-            LagreAvklaringsbehovHendelseJobb({ TODO() }),
+            fakeLagreStoppetHendelseJobb(),
+            LagreOppgaveHendelseJobb(jobbAppender),
+            LagrePostmottakHendelseJobb(),
+            LagreAvklaringsbehovHendelseJobb { TODO() },
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -129,7 +124,7 @@ class MottaStatistikkTest {
         )
     }
 
-    private fun fakeLagreStoppetHendelseJobb(meterRegistry: SimpleMeterRegistry): LagreStoppetHendelseJobb =
+    private fun fakeLagreStoppetHendelseJobb(): LagreStoppetHendelseJobb =
         LagreStoppetHendelseJobb(
             hendelsesService = {
                 val behandlingRepository = FakeBehandlingRepository()
@@ -143,11 +138,9 @@ class MottaStatistikkTest {
                         diagnoseRepository = FakeDiagnoseRepository(),
                         behandlingRepository = behandlingRepository,
                         rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                        skjermingService = SkjermingService(FakePdlClient()),
-                        meterRegistry = meterRegistry,
+                        skjermingService = SkjermingService(FakePdlGateway()),
                         opprettBigQueryLagringYtelseCallback = {}),
                     behandlingRepository = behandlingRepository,
-                    meterRegistry = meterRegistry,
                     opprettBigQueryLagringSakStatistikkCallback = { TODO() },
                     opprettRekjørSakstatistikkCallback = { TODO() },
                 )
@@ -156,19 +149,17 @@ class MottaStatistikkTest {
 
     private fun ekteLagreStoppetHendelseJobb(
         skjermingService: SkjermingService,
-        meterRegistry: SimpleMeterRegistry,
         jobbAppender: JobbAppender,
     ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         hendelsesService = {
             HendelsesService.konstruer(
                 it,
                 avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
-                    it, meterRegistry,
+                    it,
                     skjermingService = skjermingService,
                     opprettBigQueryLagringYtelseCallback = { TODO() },
                 ),
                 jobbAppender = jobbAppender,
-                meterRegistry = meterRegistry,
             )
         })
 
@@ -252,13 +243,12 @@ class MottaStatistikkTest {
     fun `regenerere historikk for behandling`(
         @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
     ) {
-        val meterRegistry = SimpleMeterRegistry()
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
         val bqRepositoryYtelse = FakeBQYtelseRepository()
         val bqStatistikkRepository = FakeBQSakRepository()
 
-        val skjermingService = SkjermingService(FakePdlClient())
+        val skjermingService = SkjermingService(FakePdlGateway())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
                 it, bqStatistikkRepository, skjermingService
@@ -277,19 +267,17 @@ class MottaStatistikkTest {
         val hendelsesService: (DBConnection) -> HendelsesService = {
             HendelsesService.konstruer(
                 it,
-                AvsluttetBehandlingService.konstruer(it, meterRegistry, skjermingService) {},
+                AvsluttetBehandlingService.konstruer(it, skjermingService) {},
                 jobbAppender,
-                meterRegistry,
             )
         }
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender)
-        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(jobbAppender)
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
 
         val motor = konstruerMotor(
             dataSource,
-            meterRegistry,
             skjermingService,
             jobbAppender,
             resendSakstatistikkJobb,
@@ -332,7 +320,7 @@ class MottaStatistikkTest {
         @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
     ) {
         val meterRegistry = SimpleMeterRegistry()
-
+        PrometheusProvider.prometheus = meterRegistry
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
@@ -341,7 +329,7 @@ class MottaStatistikkTest {
         val bqRepositoryYtelse = FakeBQYtelseRepository()
         val bqStatistikkRepository = FakeBQSakRepository()
 
-        val skjermingService = SkjermingService(FakePdlClient())
+        val skjermingService = SkjermingService(FakePdlGateway())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
                 it, bqStatistikkRepository, skjermingService
@@ -357,17 +345,16 @@ class MottaStatistikkTest {
             resendSakstatistikkJobb
         )
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
-            skjermingService, meterRegistry, jobbAppender
+            skjermingService, jobbAppender
         )
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender)
-        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(jobbAppender)
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
-        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb({ TODO() })
+        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb { TODO() }
 
         val motor = konstruerMotor(
             dataSource,
-            meterRegistry,
             skjermingService,
             jobbAppender,
             resendSakstatistikkJobb,
@@ -400,33 +387,33 @@ class MottaStatistikkTest {
             }
         }
 
-        dataSource.transaction {
+        val (uthentetSak, uthentetBehandling) = dataSource.transaction {
             val hendelsesRepository = SakRepositoryImpl(
                 it
             )
             val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer.let(::Saksnummer))
             val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
-
-            assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
-            assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5051")
-            assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
-            assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
-            assertThat(uthentetBehandling.opprettetTid).isEqualTo(
-                hendelse.behandlingOpprettetTidspunkt
-            )
-            assertThat(uthentetBehandling.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
-            assertThat(uthentetBehandling.status).isEqualTo(hendelse.behandlingStatus.tilDomene())
-
-            assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
-            assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
+            Pair(uthentetSak, uthentetBehandling)
         }
+
+        assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
+        assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5051")
+        assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
+        assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
+        assertThat(uthentetBehandling.opprettetTid).isEqualTo(
+            hendelse.behandlingOpprettetTidspunkt
+        )
+        assertThat(uthentetBehandling.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
+        assertThat(uthentetBehandling.status).isEqualTo(hendelse.behandlingStatus.tilDomene())
+
+        assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
+        assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
 
         motor.stop()
     }
 
     private fun konstruerMotor(
         dataSource: DataSource,
-        meterRegistry: SimpleMeterRegistry,
         skjermingService: SkjermingService,
         jobbAppender: MotorJobbAppender,
         resendSakstatistikkJobb: ResendSakstatistikkJobb,
@@ -435,23 +422,21 @@ class MottaStatistikkTest {
         lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
     ): Motor = motor(
         dataSource = dataSource,
-        prometheusMeterRegistry = meterRegistry,
         jobber = listOf(
             LagreAvsluttetBehandlingTilBigQueryJobb { TODO() },
             LagreOppgaveJobb(jobbAppender),
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            LagreOppgaveHendelseJobb(meterRegistry, jobbAppender),
+            LagreOppgaveHendelseJobb(jobbAppender),
             lagreSakinfoTilBigQueryJobb,
-            LagreStoppetHendelseJobb({ conn ->
+            LagreStoppetHendelseJobb { conn ->
                 HendelsesService.konstruer(
                     conn,
-                    AvsluttetBehandlingService.konstruer(conn, meterRegistry, skjermingService) {},
+                    AvsluttetBehandlingService.konstruer(conn, skjermingService) {},
                     jobbAppender,
-                    meterRegistry,
                 )
-            })
+            }
         )
     )
 
@@ -492,19 +477,19 @@ class MottaStatistikkTest {
         val bqRepositorySak = FakeBQSakRepository()
 
         val meterRegistry = SimpleMeterRegistry()
-
+        PrometheusProvider.prometheus = meterRegistry
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
-        val skjermingService = SkjermingService(FakePdlClient())
+        val skjermingService = SkjermingService(FakePdlGateway())
 
         val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
-            skjermingService, meterRegistry, jobbAppender1
+            skjermingService, jobbAppender1
         )
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(meterRegistry, jobbAppender1)
-        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(meterRegistry)
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(jobbAppender1)
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
             sakStatistikkService = {
@@ -523,14 +508,14 @@ class MottaStatistikkTest {
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
 
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb({ TODO() })
+        val resendSakstatistikkJobb = ResendSakstatistikkJobb { TODO() }
         val motor = motor(
-            dataSource = dataSource, prometheusMeterRegistry = meterRegistry,
+            dataSource = dataSource,
             jobber = listOf(
                 resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,
                 lagreSakinfoTilBigQueryJobb,
-                LagreAvklaringsbehovHendelseJobb({ TODO() }),
+                LagreAvklaringsbehovHendelseJobb { TODO() },
                 lagrePostmottakHendelseJobb,
                 lagreOppgaveHendelseJobb,
                 LagreOppgaveJobb(jobbAppender1),
@@ -550,7 +535,7 @@ class MottaStatistikkTest {
             lagreStoppetHendelseJobb,
             lagreOppgaveHendelseJobb,
             lagrePostmottakHendelseJobb,
-            LagreAvklaringsbehovHendelseJobb({ TODO() }),
+            LagreAvklaringsbehovHendelseJobb { TODO() },
             jobbAppender,
         ) { url, client ->
 
