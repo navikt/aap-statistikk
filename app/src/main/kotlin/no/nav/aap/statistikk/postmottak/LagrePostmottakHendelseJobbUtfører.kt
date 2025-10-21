@@ -37,7 +37,7 @@ class LagrePostmottakHendelseJobbUtfører(
     }
 }
 
-class LagrePostmottakHendelseJobb() : Jobb {
+class LagrePostmottakHendelseJobb : Jobb {
     override fun konstruer(connection: DBConnection): LagrePostmottakHendelseJobbUtfører {
         return LagrePostmottakHendelseJobbUtfører(
             postmottakBehandlingService = PostmottakBehandlingService(
