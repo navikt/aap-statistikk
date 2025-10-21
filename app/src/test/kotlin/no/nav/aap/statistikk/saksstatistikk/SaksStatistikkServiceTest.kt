@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -84,7 +83,6 @@ class SaksStatistikkServiceTest {
                     avsluttetBehandlingService = mockk(relaxed = true),
                     personService = PersonService(PersonRepository(it)),
                     behandlingRepository = BehandlingRepository(it),
-                    meterRegistry = SimpleMeterRegistry(),
                     opprettBigQueryLagringSakStatistikkCallback = {},
                     opprettRekjørSakstatistikkCallback = { },
                 )

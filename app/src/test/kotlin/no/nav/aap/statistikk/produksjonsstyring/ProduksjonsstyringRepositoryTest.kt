@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.produksjonsstyring
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -13,7 +12,7 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
-import no.nav.aap.statistikk.testutils.FakePdlClient
+import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.behandlingHendelse
@@ -101,15 +100,14 @@ class ProduksjonsstyringRepositoryTest {
         åpen: Boolean = true
     ) =
         dataSource.transaction { conn ->
-            val skjermingService = SkjermingService(FakePdlClient())
-            val meterRegistry = SimpleMeterRegistry()
+            val skjermingService = SkjermingService(FakePdlGateway())
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
-                    conn, meterRegistry, skjermingService, {}),
+                    conn, skjermingService
+                ) {},
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
-                meterRegistry = meterRegistry,
                 opprettBigQueryLagringSakStatistikkCallback = { },
                 opprettRekjørSakstatistikkCallback = { TODO() },
             )

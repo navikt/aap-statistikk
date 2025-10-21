@@ -30,7 +30,8 @@ WHERE sak.id = ?
         }
     }
 
-    private val HENT_SAK_QUERY = """
+    companion object {
+        private const val HENT_SAK_QUERY = """
 SELECT sak.id           as s_id,
        sak.saksnummer   as s_saksnummer,
        sak.person_id    as s_person_id,
@@ -43,6 +44,8 @@ FROM sak
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh ON sh.sak_id = sak.id
 WHERE sak.saksnummer = ?
         """
+    }
+
 
     override fun hentSak(saksnummer: Saksnummer): Sak {
         return dbConnection.queryFirst(HENT_SAK_QUERY) {

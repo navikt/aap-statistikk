@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.integrasjoner.pdl
 
-import io.micrometer.core.instrument.MeterRegistry
+import com.github.benmanes.caffeine.cache.Caffeine
+import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
@@ -8,18 +9,33 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.statistikk.PrometheusProvider
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.time.Duration
 
-private val logger = LoggerFactory.getLogger(PdlClient::class.java)
+private val logger = LoggerFactory.getLogger(PdlGateway::class.java)
 
-interface PdlClient {
+interface PdlGateway {
     fun hentPersoner(identer: List<String>): List<Person>
 }
 
 private const val BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING = "B287"
 
-class PdlGraphQLClient(private val pdlConfig: PdlConfig, meterRegistry: MeterRegistry) : PdlClient {
+class PdlGraphQLGateway(private val pdlConfig: PdlConfig) :
+    PdlGateway {
+    companion object {
+        private val pdlCache = Caffeine.newBuilder()
+            .maximumSize(1000)
+            .expireAfterWrite(Duration.ofHours(4))
+            .recordStats()
+            .build<String, List<Person>>()
+
+        init {
+            CaffeineCacheMetrics.monitor(PrometheusProvider.prometheus, pdlCache, "pdl")
+        }
+    }
+
     private val client = RestClient(
         config = ClientConfig(
             scope = pdlConfig.scope,
@@ -32,22 +48,23 @@ class PdlGraphQLClient(private val pdlConfig: PdlConfig, meterRegistry: MeterReg
         ),
         tokenProvider = ClientCredentialsTokenProvider,
         responseHandler = DefaultResponseHandler(),
-        prometheus = meterRegistry
+        prometheus = PrometheusProvider.prometheus
     )
 
     override fun hentPersoner(identer: List<String>): List<Person> {
         logger.info("Henter ${identer.size} personer fra PDL.")
 
-        val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
-            URI.create(pdlConfig.url), PostRequest(body = PdlRequest.hentPersonBolk(identer))
-        )
+        return pdlCache.get(identer.joinToString(",")) {
+            val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
+                URI.create(pdlConfig.url), PostRequest(body = PdlRequest.hentPersonBolk(identer))
+            )
 
-        val graphQLdata =
-            requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
+            val graphQLdata =
+                requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
 
-        return graphQLdata.hentPersonBolk.map { requireNotNull(it.person) { "Fant ikke info om person ${it.ident}" } }
+            graphQLdata.hentPersonBolk.map { requireNotNull(it.person) { "Fant ikke info om person ${it.ident}" } }
+        }
     }
-
 }
 
 data class PdlConfig(val url: String, val scope: String)

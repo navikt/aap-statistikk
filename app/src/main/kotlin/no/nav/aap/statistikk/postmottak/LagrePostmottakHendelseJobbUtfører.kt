@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.postmottak
 
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
@@ -9,6 +8,7 @@ import no.nav.aap.postmottak.kontrakt.avklaringsbehov.Status
 import no.nav.aap.postmottak.kontrakt.behandling.TypeBehandling
 import no.nav.aap.postmottak.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory
 class LagrePostmottakHendelseJobbUtfører(
     private val postmottakBehandlingService: PostmottakBehandlingService,
     private val personService: PersonService,
-    private val meterRegistry: MeterRegistry
 ) :
     JobbUtfører {
     private val logger = LoggerFactory.getLogger(LagrePostmottakHendelseJobbUtfører::class.java)
@@ -33,12 +32,12 @@ class LagrePostmottakHendelseJobbUtfører(
         val oppdatertBehandling =
             postmottakBehandlingService.oppdaterEllerOpprettBehandling(domeneHendelse)
 
-        meterRegistry.lagretPostmottakHendelse().increment()
+        PrometheusProvider.prometheus.lagretPostmottakHendelse().increment()
         logger.info("Fullført prosessering av postmottak-behandling med ID ${oppdatertBehandling.id()}.")
     }
 }
 
-class LagrePostmottakHendelseJobb(private val meterRegistry: MeterRegistry) : Jobb {
+class LagrePostmottakHendelseJobb() : Jobb {
     override fun konstruer(connection: DBConnection): LagrePostmottakHendelseJobbUtfører {
         return LagrePostmottakHendelseJobbUtfører(
             postmottakBehandlingService = PostmottakBehandlingService(
@@ -49,7 +48,6 @@ class LagrePostmottakHendelseJobb(private val meterRegistry: MeterRegistry) : Jo
             personService = PersonService(
                 PersonRepository(connection)
             ),
-            meterRegistry = meterRegistry
         )
     }
 

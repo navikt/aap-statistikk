@@ -1,12 +1,12 @@
 package no.nav.aap.statistikk.oppgave
 
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgaveHendelseMottatt
@@ -15,7 +15,6 @@ import no.nav.aap.statistikk.oppgaveHendelseMottatt
 class LagreOppgaveHendelseJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val flytJobbRepository: FlytJobbRepository,
-    private val meterRegistry: MeterRegistry,
     private val jobbAppender: JobbAppender
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
@@ -27,12 +26,11 @@ class LagreOppgaveHendelseJobbUtfører(
             JobbInput(LagreOppgaveJobb(jobbAppender)).medPayload(hendelse.oppgaveId.toString())
                 .forSak(hendelse.saksnummer?.let(::stringToNumber) ?: hendelse.oppgaveId)
         )
-        meterRegistry.oppgaveHendelseMottatt().increment()
+        PrometheusProvider.prometheus.oppgaveHendelseMottatt().increment()
     }
 }
 
 class LagreOppgaveHendelseJobb(
-    private val meterRegistry: MeterRegistry,
     private val jobbAppender: JobbAppender
 ) : Jobb {
     override fun beskrivelse(): String {
@@ -43,7 +41,6 @@ class LagreOppgaveHendelseJobb(
         return LagreOppgaveHendelseJobbUtfører(
             OppgaveHendelseRepository(connection),
             FlytJobbRepository(connection),
-            meterRegistry,
             jobbAppender,
         )
     }

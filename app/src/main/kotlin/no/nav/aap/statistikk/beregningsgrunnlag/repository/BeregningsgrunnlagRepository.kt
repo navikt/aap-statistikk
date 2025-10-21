@@ -113,7 +113,7 @@ WHERE br.referanse = ?"""
                 )
             }
 
-            is IBeregningsGrunnlag.GrunnlagYrkesskade -> throw RuntimeException("Yrkesskadegrunnlag kan ikke inneholde seg selv.")
+            is IBeregningsGrunnlag.GrunnlagYrkesskade -> error("Yrkesskadegrunnlag kan ikke inneholde seg selv.")
         }
 
         val insertQuery =

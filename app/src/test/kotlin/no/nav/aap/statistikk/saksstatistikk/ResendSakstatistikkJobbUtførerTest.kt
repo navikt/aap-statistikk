@@ -5,7 +5,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeBQSakRepository
-import no.nav.aap.statistikk.testutils.FakePdlClient
+import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import org.assertj.core.api.Assertions.assertThat
@@ -25,7 +25,7 @@ class ResendSakstatistikkJobbUtførerTest {
                     SaksStatistikkService.konstruer(
                         it,
                         FakeBQSakRepository(),
-                        SkjermingService(FakePdlClient()),
+                        SkjermingService(FakePdlGateway()),
                     )
                 }
             )

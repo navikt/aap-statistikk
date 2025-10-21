@@ -1,7 +1,7 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -23,7 +23,6 @@ class AvsluttetBehandlingService(
     private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val skjermingService: SkjermingService,
-    private val meterRegistry: MeterRegistry,
     private val opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
@@ -31,7 +30,6 @@ class AvsluttetBehandlingService(
     companion object {
         fun konstruer(
             dbConnection: DBConnection,
-            meterRegistry: MeterRegistry,
             skjermingService: SkjermingService,
             opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
         ) = AvsluttetBehandlingService(
@@ -42,7 +40,6 @@ class AvsluttetBehandlingService(
             behandlingRepository = BehandlingRepository(dbConnection),
             rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
             skjermingService = skjermingService,
-            meterRegistry = meterRegistry,
             opprettBigQueryLagringYtelseCallback = opprettBigQueryLagringYtelseCallback
         )
     }
@@ -88,7 +85,7 @@ class AvsluttetBehandlingService(
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }
-        meterRegistry.avsluttetBehandlingLagret().increment()
+        PrometheusProvider.prometheus.avsluttetBehandlingLagret().increment()
     }
 
     private fun lagreDiagnose(avsluttetBehandling: AvsluttetBehandling) {

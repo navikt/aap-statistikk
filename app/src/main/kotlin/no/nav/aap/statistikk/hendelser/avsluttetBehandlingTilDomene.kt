@@ -121,44 +121,45 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
     val grunnlagYrkesskade = beregningsgrunnlagDTO.grunnlagYrkesskade
     @Suppress("LocalVariableName") val grunnlag11_19dto = beregningsgrunnlagDTO.grunnlag11_19dto
     val grunnlagUføre = beregningsgrunnlagDTO.grunnlagUføre
-    if (grunnlag11_19dto != null) {
-        return IBeregningsGrunnlag.Grunnlag_11_19(
+    return when {
+        grunnlag11_19dto != null -> IBeregningsGrunnlag.Grunnlag_11_19(
             grunnlag11_19dto.grunnlaget,
             grunnlag11_19dto.er6GBegrenset,
             grunnlag11_19dto.erGjennomsnitt,
             grunnlag11_19dto.inntekter.mapKeys { (k, _) -> k.toInt() }
         )
-    }
-    if (grunnlagYrkesskade != null) {
-        var beregningsGrunnlag: IBeregningsGrunnlag? = null
-        if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre != null) {
-            beregningsGrunnlag = tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre!!)
-        } else if (beregningsgrunnlagDTO.grunnlagYrkesskade!!.beregningsgrunnlag.grunnlagYrkesskade != null) {
-            beregningsGrunnlag =
-                tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade!!)
-        } else if (grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto != null) {
-            beregningsGrunnlag =
-                grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene()
-        }
-        beregningsGrunnlag = requireNotNull(beregningsGrunnlag)
 
-        return IBeregningsGrunnlag.GrunnlagYrkesskade(
-            grunnlaget = grunnlagYrkesskade.grunnlaget.toDouble(),
-            beregningsgrunnlag = beregningsGrunnlag,
-            andelYrkesskade = grunnlagYrkesskade.andelYrkesskade,
-            andelSomSkyldesYrkesskade = grunnlagYrkesskade.andelSomSkyldesYrkesskade,
-            andelSomIkkeSkyldesYrkesskade = grunnlagYrkesskade.andelSomIkkeSkyldesYrkesskade,
-            antattÅrligInntektYrkesskadeTidspunktet = grunnlagYrkesskade.antattÅrligInntektYrkesskadeTidspunktet,
-            benyttetAndelForYrkesskade = grunnlagYrkesskade.benyttetAndelForYrkesskade,
-            grunnlagEtterYrkesskadeFordel = grunnlagYrkesskade.grunnlagEtterYrkesskadeFordel,
-            grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskade.grunnlagForBeregningAvYrkesskadeandel,
-            terskelverdiForYrkesskade = grunnlagYrkesskade.terskelverdiForYrkesskade,
-            yrkesskadeinntektIG = grunnlagYrkesskade.yrkesskadeinntektIG,
-            yrkesskadeTidspunkt = grunnlagYrkesskade.yrkesskadeTidspunkt,
-        )
-    }
-    if (grunnlagUføre != null) {
-        return IBeregningsGrunnlag.GrunnlagUføre(
+        grunnlagYrkesskade != null -> {
+            var beregningsGrunnlag: IBeregningsGrunnlag? = null
+            if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre != null) {
+                beregningsGrunnlag =
+                    tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre!!)
+            } else if (beregningsgrunnlagDTO.grunnlagYrkesskade!!.beregningsgrunnlag.grunnlagYrkesskade != null) {
+                beregningsGrunnlag =
+                    tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade!!)
+            } else if (grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto != null) {
+                beregningsGrunnlag =
+                    grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene()
+            }
+            beregningsGrunnlag = requireNotNull(beregningsGrunnlag)
+
+            IBeregningsGrunnlag.GrunnlagYrkesskade(
+                grunnlaget = grunnlagYrkesskade.grunnlaget.toDouble(),
+                beregningsgrunnlag = beregningsGrunnlag,
+                andelYrkesskade = grunnlagYrkesskade.andelYrkesskade,
+                andelSomSkyldesYrkesskade = grunnlagYrkesskade.andelSomSkyldesYrkesskade,
+                andelSomIkkeSkyldesYrkesskade = grunnlagYrkesskade.andelSomIkkeSkyldesYrkesskade,
+                antattÅrligInntektYrkesskadeTidspunktet = grunnlagYrkesskade.antattÅrligInntektYrkesskadeTidspunktet,
+                benyttetAndelForYrkesskade = grunnlagYrkesskade.benyttetAndelForYrkesskade,
+                grunnlagEtterYrkesskadeFordel = grunnlagYrkesskade.grunnlagEtterYrkesskadeFordel,
+                grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskade.grunnlagForBeregningAvYrkesskadeandel,
+                terskelverdiForYrkesskade = grunnlagYrkesskade.terskelverdiForYrkesskade,
+                yrkesskadeinntektIG = grunnlagYrkesskade.yrkesskadeinntektIG,
+                yrkesskadeTidspunkt = grunnlagYrkesskade.yrkesskadeTidspunkt,
+            )
+        }
+
+        grunnlagUføre != null -> IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag11_19 = grunnlagUføre.grunnlag.tilDomene(),
             uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() },
             uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
@@ -166,8 +167,9 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             grunnlag = grunnlagUføre.grunnlaget.toDouble(),
             type = grunnlagUføre.type.tilDomene()
         )
+
+        else -> error("Ugyldig tilstand.")
     }
-    error("Ugyldig state.")
 }
 
 private fun UføreType.tilDomene(): no.nav.aap.statistikk.avsluttetbehandling.UføreType =
