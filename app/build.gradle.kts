@@ -62,7 +62,7 @@ dependencies {
     implementation(libs.postmottakKontrakt)
     implementation(libs.utbetalKontrakt)
 
-    implementation("com.google.cloud:google-cloud-bigquery:2.55.2")
+    implementation("com.google.cloud:google-cloud-bigquery:2.55.3")
 
     testImplementation(libs.motorTestUtils)
     testImplementation(libs.ktorServerTestHost)
