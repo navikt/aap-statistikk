@@ -90,8 +90,8 @@ VALUES (?, ?, ?, ?, ?, ?)"""
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  hendelsestidspunkt, slettet, utbetaling_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -113,6 +113,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setEnumName(c++, behandling.resultat)
                 setLocalDateTime(c++, behandling.oppdatertTidspunkt)
                 setBoolean(c++, false)
+                setString(c++, behandling.utbetalingId())
             }
         }
 
@@ -175,8 +176,8 @@ WHERE ident = ?""", behandling.relaterteIdenter
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  hendelsestidspunkt, slettet, utbetaling_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, oppdateringer.mapIndexed { index, behandling -> Pair(behandling, index) }
         ) {
             setParams { (behandling, idx) ->
@@ -199,6 +200,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
                 setEnumName(c++, behandling.resultat)
                 setLocalDateTime(c++, behandling.oppdatertTidspunkt)
                 setBoolean(c++, false)
+                setString(c++, behandling.utbetalingId())
             }
         }
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id} med versjon $versjonId.")
