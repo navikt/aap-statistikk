@@ -23,6 +23,7 @@ jobs:
             .nais/bigquery/view_tilkjent_ytelse.yml,\
             .nais/bigquery/view_beregningsgrunnlag.yml,\
             .nais/bigquery/view_saksstatistikk.yml,\
+            .nais/bigquery/view_utbetaling.yml,\
             .nais/bigquery/view_behandlinger.yml"
           VAR: project=${{ inputs.project }}
           PRINT_PAYLOAD: true
