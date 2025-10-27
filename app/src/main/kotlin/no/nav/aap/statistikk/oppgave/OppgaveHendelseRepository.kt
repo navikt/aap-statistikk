@@ -14,8 +14,8 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
                                            behandling_referanse,
                                            journalpost_id, enhet, avklaringsbehov_kode, status, reservert_av,
                                            reservert_tidspunkt, opprettet_tidspunkt, endret_av,
-                                           endret_tidspunkt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                           endret_tidspunkt, har_hastemarkering)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
         return dbConnection.executeReturnKey(sql) {
             var c = 1
@@ -34,7 +34,8 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
                 setLocalDateTime(c++, hendelse.reservertTidspunkt)
                 setLocalDateTime(c++, hendelse.opprettetTidspunkt)
                 setString(c++, hendelse.endretAv)
-                setLocalDateTime(c, hendelse.endretTidspunkt)
+                setLocalDateTime(c++, hendelse.endretTidspunkt)
+                setBoolean(c, hendelse.harHasteMarkering)
             }
         }.also { log.info("Lagret oppgavehendelse med id $it.") }
     }
@@ -55,7 +56,8 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
                    reservert_tidspunkt,
                    opprettet_tidspunkt,
                    endret_av,
-                   endret_tidspunkt
+                   endret_tidspunkt,
+                   har_hastemarkering
             FROM oppgave_hendelser
             WHERE identifikator = ?
         """.trimIndent()
@@ -78,7 +80,8 @@ class OppgaveHendelseRepository(private val dbConnection: DBConnection) {
                     opprettetTidspunkt = it.getLocalDateTime("opprettet_tidspunkt"),
                     endretAv = it.getStringOrNull("endret_av"),
                     endretTidspunkt = it.getLocalDateTimeOrNull("endret_tidspunkt"),
-                    oppgaveId = it.getLong("identifikator")
+                    oppgaveId = it.getLong("identifikator"),
+                    harHasteMarkering = it.getBooleanOrNull("har_hastemarkering")
                 )
             }
         }

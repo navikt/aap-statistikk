@@ -22,6 +22,7 @@ data class Oppgave(
     val opprettetTidspunkt: LocalDateTime,
     val reservasjon: Reservasjon? = null,
     val behandlingReferanse: BehandlingReferanse? = null,
+    val harHasteMarkering: Boolean? = false,
     val hendelser: List<OppgaveHendelse>
 )
 
@@ -60,6 +61,7 @@ data class OppgaveHendelse(
     val opprettetTidspunkt: LocalDateTime,
     val endretAv: String? = null,
     val endretTidspunkt: LocalDateTime? = null,
+    val harHasteMarkering: Boolean? = false,
 ) {
     init {
         require(if (reservertAv != null) reservertTidspunkt != null else true)
@@ -91,7 +93,8 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     },
                     reservasjon = reservasjon,
                     identifikator = hendelse.oppgaveId,
-                    avklaringsbehov = hendelse.avklaringsbehovKode
+                    avklaringsbehov = hendelse.avklaringsbehovKode,
+                    harHasteMarkering = hendelse.harHasteMarkering
                 )
             } else {
                 if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident) {
@@ -109,7 +112,8 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     hendelser = acc.hendelser + hendelse,
                     enhet = Enhet(kode = hendelse.enhet),
                     status = hendelse.status,
-                    reservasjon = reservasjon(hendelse)
+                    reservasjon = reservasjon(hendelse),
+                    harHasteMarkering = hendelse.harHasteMarkering
                 )
             }
         }!!

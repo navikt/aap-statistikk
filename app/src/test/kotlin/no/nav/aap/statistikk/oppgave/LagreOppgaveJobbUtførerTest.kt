@@ -160,6 +160,84 @@ class LagreOppgaveJobbUtførerTest {
     }
 
     @Test
+    fun `kan legge på og fjerne hastemarkering på oppgave`(@Postgres dataSource: DataSource) {
+        val behandling = settOppEksisterendeBehandling(dataSource)
+        val oppgaveId = 12345L
+
+        settInnOppgaveHendelseOgUtførerJobb(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                personIdent = "12345678901",
+                saksnummer = "S12345",
+                behandlingRef = behandling.referanse,
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "Kode123",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now(),
+                endretAv = "SaksbehandlerEndret123",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId
+            )
+        )
+
+        val oppgaverPåBehandling = dataSource.transaction {
+            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+        }
+
+        assertThat(oppgaverPåBehandling.size).isEqualTo(1)
+        assertThat(oppgaverPåBehandling.first().harHasteMarkering).isEqualTo(false)
+
+        // Legg på hastemarkering
+        settInnOppgaveHendelseOgUtførerJobb(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "POST_MOTTAK_NOE",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
+                endretAv = "SaksbehandlerEndret4232",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
+                harHasteMarkering = true
+            )
+        )
+
+        val oppgaveMedMarkering = dataSource.transaction {
+            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+        }
+        assertThat(oppgaveMedMarkering.first().harHasteMarkering).isTrue()
+
+        // Fjerner hastemarkering
+        settInnOppgaveHendelseOgUtførerJobb(
+            dataSource, oppgaveHendelse = OppgaveHendelse(
+                hendelse = HendelseType.OPPRETTET,
+                mottattTidspunkt = LocalDateTime.now(),
+                journalpostId = 123,
+                enhet = "NAVKontor123",
+                avklaringsbehovKode = "POST_MOTTAK_NOE",
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
+                endretAv = "SaksbehandlerEndret4232",
+                endretTidspunkt = LocalDateTime.now(),
+                oppgaveId = oppgaveId,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
+            )
+        )
+
+        val oppgaveUtenMarkering = dataSource.transaction {
+            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+        }
+        assertThat(oppgaveUtenMarkering.first().harHasteMarkering).isFalse()
+    }
+
+    @Test
     fun `reservere oppgave på annen person`(@Postgres dataSource: DataSource) {
         val behandling = settOppEksisterendeBehandling(dataSource)
         val oppgaveId = 123L
