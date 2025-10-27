@@ -46,8 +46,8 @@ SELECT COALESCE(
 
         val sql = """
             insert into oppgave (person_id, behandling_referanse_id, enhet_id, status, opprettet_tidspunkt,
-                                 reservasjon_id, identifikator, avklaringsbehov)
-            values (?, ?, ?, ?, ?, ?, ?, ?)
+                                 reservasjon_id, identifikator, avklaringsbehov, har_hastemarkering)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
         return dbConnection.executeReturnKey(sql) {
@@ -60,6 +60,7 @@ SELECT COALESCE(
                 setLong(6, reservasjonId)
                 setLong(7, oppgave.identifikator)
                 setString(8, oppgave.avklaringsbehov)
+                setBoolean(9, oppgave.harHasteMarkering)
             }
         }
     }
@@ -153,6 +154,20 @@ where id = ?"""
                 setLong(2, oppgave.id)
             }
         }
+
+        // Oppdater hastemarkering
+        val sqlOppdaterHastemarkering = """
+            update oppgave
+            set har_hastemarkering = ?
+            where id = ?
+        """.trimIndent()
+
+        dbConnection.execute(sqlOppdaterHastemarkering) {
+            setParams {
+                setBoolean(1, oppgave.harHasteMarkering)
+                setLong(2, oppgave.id)
+            }
+        }
     }
 
     fun hentOppgaverForEnhet(enhet: Enhet): List<Oppgave> {
@@ -166,6 +181,7 @@ where id = ?"""
                    o.status                  as o_status,
                    o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                    o.reservasjon_id          as o_reservasjon_id,
+                   o.har_hastemarkering      as o_har_hastemarkering,
                    br.referanse              as o_behandling_referanse,
                    e.id                      as e_id,
                    e.kode                    as e_kode,
@@ -220,7 +236,8 @@ where id = ?"""
         },
         identifikator = it.getLong("o_identifikator"),
         avklaringsbehov = it.getString("o_avklaringsbehov"),
-        hendelser = listOf() // TODO
+        hendelser = listOf(), // TODO
+        harHasteMarkering = it.getBooleanOrNull("o_har_hastemarkering"),
     )
 
     fun hentOppgave(identifikator: Long): Oppgave? {
@@ -234,6 +251,7 @@ where id = ?"""
                    o.status                  as o_status,
                    o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                    o.reservasjon_id          as o_reservasjon_id,
+                   o.har_hastemarkering      as o_har_hastemarkering,
                    br.referanse              as o_behandling_referanse,
                    e.id                      as e_id,
                    e.kode                    as e_kode,
@@ -273,6 +291,7 @@ where id = ?"""
                    o.status                  as o_status,
                    o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                    o.reservasjon_id          as o_reservasjon_id,
+                   o.har_hastemarkering      as o_har_hastemarkering,
                    br.referanse              as o_behandling_referanse,
                    e.id                      as e_id,
                    e.kode                    as e_kode,
