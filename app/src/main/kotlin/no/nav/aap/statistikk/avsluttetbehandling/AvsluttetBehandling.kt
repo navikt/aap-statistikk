@@ -53,15 +53,7 @@ enum class RettighetsType(val hjemmel: String) {
     BISTANDSBEHOV(hjemmel = "§ 11-6"),
     SYKEPENGEERSTATNING(hjemmel = "§ 11-13"),
     STUDENT(hjemmel = "§ 11-14"),
-
-    /**
-     * TODO: Legg til i kodeverkstabell når denne tas i bruk.
-     */
     ARBEIDSSØKER(hjemmel = "§ 11-17"),
-
-    /**
-     * TODO: Legg til i kodeverkstabell når denne tas i bruk.
-     */
     VURDERES_FOR_UFØRETRYGD(hjemmel = "§ 11-18"),
 }
 
