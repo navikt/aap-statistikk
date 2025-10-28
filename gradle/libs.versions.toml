@@ -5,7 +5,7 @@ tilgang = "1.0.141"
 behandlingsflyt = "0.0.474"
 oppgave = "0.0.130"
 utbetaling = "0.0.65"
-postmottak = "0.0.116"
+postmottak = "0.0.131"
 
 flyway = "11.15.0"
 
