@@ -114,7 +114,6 @@ private fun function(): (AvklaringsbehovHendelseDto) -> Boolean =
     {
         setOf(
             Status.OPPRETTET,
-            Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
             Status.SENDT_TILBAKE_FRA_BESLUTTER
         ).contains(it.status)
     }
