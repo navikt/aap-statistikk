@@ -2,6 +2,7 @@ package no.nav.aap.statistikk
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.kodeverk.Kodeverk
 import no.nav.aap.statistikk.kodeverk.KodeverkRepository
 import no.nav.aap.statistikk.testutils.Postgres
@@ -39,16 +40,14 @@ class KodeverksTest {
     fun `alle rettighetstyper eksisterer i kodeverkstabell`(
         @Postgres dataSource: DataSource,
     ) {
-        val rettighetstyper = hentVilkårTyper(dataSource) {
+        val rettighetstyperFraDB = hentVilkårTyper(dataSource) {
             this.hentRettighetstype()
         }
 
+        val rettighetstyper = RettighetsType.entries.map { it.name }
+
         // Oppdater når det kommer flere
-        assertThat(rettighetstyper).containsExactlyInAnyOrder(
-            "BISTANDSBEHOV",
-            "SYKEPENGEERSTATNING",
-            "STUDENT"
-        )
+        assertThat(rettighetstyperFraDB).containsExactlyInAnyOrder(*rettighetstyper.toTypedArray())
 
     }
 
