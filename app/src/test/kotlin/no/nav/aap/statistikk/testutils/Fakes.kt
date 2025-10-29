@@ -11,13 +11,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
-import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
-import no.nav.aap.statistikk.integrasjoner.pdl.GraphQLRespons
-import no.nav.aap.statistikk.integrasjoner.pdl.HentPersonBolkResult
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlRespons
-import no.nav.aap.statistikk.integrasjoner.pdl.Person
+import no.nav.aap.statistikk.integrasjoner.pdl.*
 import org.junit.jupiter.api.extension.*
 import java.net.URI
 
@@ -67,6 +61,10 @@ annotation class Fakes {
     }
 
     class PdlFake(port: Int = 0) {
+        init {
+            System.setProperty("integrasjon.pdl.url", "http://localhost:$port")
+            System.setProperty("integrasjon.pdl.scope", "xxx")
+        }
         private val pdl = embeddedServer(Netty, port = port, module = { pdl() })
 
         fun start() {
@@ -76,8 +74,6 @@ annotation class Fakes {
         fun close() {
             pdl.stop(500L, 10_000L)
         }
-
-        fun port(): Int = pdl.port()
 
         private fun Application.pdl() {
             install(ContentNegotiation) {
@@ -141,9 +137,7 @@ annotation class Fakes {
         ): Boolean {
             return (parameterContext.isAnnotated(Fakes::class.java) && (parameterContext.parameter.type == TestToken::class.java)) || parameterContext.isAnnotated(
                 Fakes::class.java
-            ) && (parameterContext.parameter.type == AzureConfig::class.java) || (parameterContext.isAnnotated(
-                Fakes::class.java
-            ) && (parameterContext.parameter.type == PdlConfig::class.java))
+            ) && (parameterContext.parameter.type == AzureConfig::class.java)
         }
 
         override fun resolveParameter(
@@ -163,12 +157,6 @@ annotation class Fakes {
             ) {
                 val token = AzureTokenGen("tilgang", "tilgang").generate()
                 return TestToken(access_token = token, scope = "AAP_SCOPES")
-            } else if (parameterContext.isAnnotated(Fakes::class.java) && parameterContext.parameter.type == PdlConfig::class.java
-            ) {
-                return PdlConfig(
-                    url = "http://localhost:${pdl.port()}",
-                    scope = "..."
-                )
             } else {
                 error("Ukjent parametertype: ${parameterContext.parameter.type}")
             }

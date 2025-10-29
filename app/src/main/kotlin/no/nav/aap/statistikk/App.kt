@@ -15,6 +15,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
@@ -35,8 +36,6 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Migrering
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.hendelser.HendelsesService
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -70,13 +69,11 @@ fun main() {
     val bigQueryClientSak = BigQueryClient(bgConfigSak, schemaRegistrySakStatistikk)
 
     val azureConfig = azureconfigFraMiljøVariabler()
-    val pdlConfig = PdlConfig(
-        url = System.getenv("INTEGRASJON_PDL_URL"),
-        scope = System.getenv("INTEGRASJON_PDL_SCOPE")
-    )
+
+    val gatewayProvider = defaultGatewayProvider()
 
     embeddedServer(Netty, port = 8080) {
-        startUp(dbConfig, azureConfig, bigQueryClientSak, bigQueryClientYtelse, pdlConfig)
+        startUp(dbConfig, azureConfig, bigQueryClientSak, bigQueryClientYtelse, gatewayProvider)
     }.start(wait = true)
 }
 
@@ -85,7 +82,7 @@ fun Application.startUp(
     azureConfig: AzureConfig,
     bigQueryClientSak: BigQueryClient,
     bigQueryClientYtelse: BigQueryClient,
-    pdlConfig: PdlConfig
+    gatewayProvider: GatewayProvider
 ) {
     log.info("Starter.")
 
@@ -95,9 +92,7 @@ fun Application.startUp(
     val bqSakRepository = BigQuerySakstatikkRepository(bigQueryClientSak)
     val bqYtelseRepository = BQYtelseRepository(bigQueryClientYtelse)
 
-    val pdlClient = PdlGraphQLGateway(pdlConfig)
-
-    val skjermingService = SkjermingService(pdlClient)
+    val skjermingService = SkjermingService.konstruer(gatewayProvider)
     val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
         SaksStatistikkService.konstruer(
             it,

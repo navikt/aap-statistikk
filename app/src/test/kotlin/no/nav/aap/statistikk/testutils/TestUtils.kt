@@ -6,7 +6,6 @@ import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -21,7 +20,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
-import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
@@ -29,9 +27,9 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRe
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
@@ -138,7 +136,6 @@ fun <E> testKlient(
 
 fun <E> testKlientNoInjection(
     dbConfig: DbConfig,
-    pdlConfig: PdlConfig,
     azureConfig: AzureConfig = AzureConfig(
         clientId = "tilgang",
         jwksUri = "http://localhost:8081/jwks",
@@ -167,7 +164,7 @@ fun <E> testKlientNoInjection(
             azureConfig,
             bigQueryClient,
             bigQueryClient,
-            pdlConfig,
+            defaultGatewayProvider()
         )
     }.start()
 

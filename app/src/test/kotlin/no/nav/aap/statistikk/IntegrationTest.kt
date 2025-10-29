@@ -30,7 +30,6 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.påTidspunkt
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
@@ -99,7 +98,6 @@ class IntegrationTest {
         @Postgres dataSource: DataSource,
         @BigQuery config: BigQueryConfig,
         @Fakes azureConfig: AzureConfig,
-        @Fakes pdlConfig: PdlConfig,
     ) {
         // hent på nytt slik: select payload, opprettet_tid, type from jobb where sak_id = 783332 order by opprettet_tid
         // og lagre output som json
@@ -138,7 +136,6 @@ class IntegrationTest {
         var referanse: UUID? = null
         testKlientNoInjection(
             dbConfig,
-            pdlConfig = pdlConfig,
             azureConfig = azureConfig,
             bigQueryClient,
         ) { url, client ->
@@ -240,7 +237,6 @@ class IntegrationTest {
         // DEL 2: test resending
         testKlientNoInjection(
             dbConfig,
-            pdlConfig = pdlConfig,
             azureConfig = azureConfig,
             bigQueryClient,
         ) { url, client ->
@@ -365,7 +361,6 @@ class IntegrationTest {
         @Postgres dataSource: DataSource,
         @BigQuery config: BigQueryConfig,
         @Fakes azureConfig: AzureConfig,
-        @Fakes pdlConfig: PdlConfig,
     ) {
 
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
@@ -390,7 +385,6 @@ class IntegrationTest {
         val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
         testKlientNoInjection(
             dbConfig,
-            pdlConfig = pdlConfig,
             azureConfig = azureConfig,
             bigQueryClient,
         ) { url, client ->
