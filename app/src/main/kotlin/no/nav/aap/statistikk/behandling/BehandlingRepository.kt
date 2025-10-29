@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -17,6 +18,12 @@ value class BehandlingId(val id: Long)
 class BehandlingRepository(
     private val dbConnection: DBConnection, private val clock: Clock = Clock.systemDefaultZone()
 ) : IBehandlingRepository {
+
+    companion object : RepositoryFactory<IBehandlingRepository> {
+        override fun konstruer(connection: DBConnection): IBehandlingRepository {
+            return BehandlingRepository(connection)
+        }
+    }
 
     private val log = LoggerFactory.getLogger(javaClass)
 

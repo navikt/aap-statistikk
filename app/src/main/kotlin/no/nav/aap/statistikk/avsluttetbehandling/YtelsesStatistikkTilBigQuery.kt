@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -31,10 +32,11 @@ class YtelsesStatistikkTilBigQuery(
         fun konstruer(
             connection: DBConnection,
             bqRepository: IBQYtelsesstatistikkRepository,
+            repositoryProvider: RepositoryProvider
         ): YtelsesStatistikkTilBigQuery {
             return YtelsesStatistikkTilBigQuery(
                 bqRepository = bqRepository,
-                behandlingRepository = BehandlingRepository(connection),
+                behandlingRepository = repositoryProvider.provide(),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
                 diagnoseRepository = DiagnoseRepositoryImpl(connection),
                 vilkårsresultatRepository = VilkårsresultatRepository(connection),

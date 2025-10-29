@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.*
@@ -31,13 +32,14 @@ class AvsluttetBehandlingService(
         fun konstruer(
             dbConnection: DBConnection,
             skjermingService: SkjermingService,
+            repositoryProvider: RepositoryProvider,
             opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
         ) = AvsluttetBehandlingService(
             tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
             beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dbConnection),
             vilkårsResultatRepository = VilkårsresultatRepository(dbConnection),
             diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
-            behandlingRepository = BehandlingRepository(dbConnection),
+            behandlingRepository = repositoryProvider.provide(),
             rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
             skjermingService = skjermingService,
             opprettBigQueryLagringYtelseCallback = opprettBigQueryLagringYtelseCallback
