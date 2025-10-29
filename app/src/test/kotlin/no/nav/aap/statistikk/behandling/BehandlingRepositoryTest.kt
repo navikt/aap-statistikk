@@ -19,7 +19,6 @@ import no.nav.aap.statistikk.testutils.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -83,7 +82,8 @@ class BehandlingRepositoryTest {
                     gjeldendeStegGruppe = StegGruppe.BREV,
                     resultat = ResultatKode.INNVILGET,
                     årsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.G_REGULERING),
-                    oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1)
+                    oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
+                    opprettetAv = "Saksbehandler"
                 )
             )
         }
@@ -123,6 +123,7 @@ class BehandlingRepositoryTest {
             LocalDateTime.now(clock).minusMinutes(1),
             within(500, ChronoUnit.MILLIS)
         )
+        assertThat(uthentet.opprettetAv).isEqualTo("Saksbehandler")
 
         dataSource.transaction {
             BehandlingRepository(it).oppdaterBehandling(
