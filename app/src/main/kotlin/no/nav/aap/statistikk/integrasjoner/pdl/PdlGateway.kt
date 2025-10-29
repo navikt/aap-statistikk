@@ -2,6 +2,9 @@ package no.nav.aap.statistikk.integrasjoner.pdl
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics
+import no.nav.aap.komponenter.config.requiredConfigForKey
+import no.nav.aap.komponenter.gateway.Factory
+import no.nav.aap.komponenter.gateway.Gateway
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
@@ -16,20 +19,24 @@ import java.time.Duration
 
 private val logger = LoggerFactory.getLogger(PdlGateway::class.java)
 
-interface PdlGateway {
+interface PdlGateway : Gateway {
     fun hentPersoner(identer: List<String>): List<Person>
 }
 
 private const val BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING = "B287"
 
-class PdlGraphQLGateway(private val pdlConfig: PdlConfig) :
+class PdlGraphQLGateway :
     PdlGateway {
-    companion object {
+    companion object : Factory<PdlGateway> {
         private val pdlCache = Caffeine.newBuilder()
             .maximumSize(1000)
             .expireAfterWrite(Duration.ofHours(4))
             .recordStats()
             .build<String, List<Person>>()
+
+        override fun konstruer(): PdlGateway {
+            return PdlGraphQLGateway()
+        }
 
         init {
             CaffeineCacheMetrics.monitor(PrometheusProvider.prometheus, pdlCache, "pdl")
@@ -38,7 +45,7 @@ class PdlGraphQLGateway(private val pdlConfig: PdlConfig) :
 
     private val client = RestClient(
         config = ClientConfig(
-            scope = pdlConfig.scope,
+            scope = requiredConfigForKey("integrasjon.pdl.scope"),
             additionalHeaders = listOf(
                 Header(
                     "behandlingsnummer",
@@ -56,7 +63,8 @@ class PdlGraphQLGateway(private val pdlConfig: PdlConfig) :
 
         return pdlCache.get(identer.joinToString(",")) {
             val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
-                URI.create(pdlConfig.url), PostRequest(body = PdlRequest.hentPersonBolk(identer))
+                URI.create(requiredConfigForKey("integrasjon.pdl.url")),
+                PostRequest(body = PdlRequest.hentPersonBolk(identer))
             )
 
             val graphQLdata =
@@ -66,8 +74,6 @@ class PdlGraphQLGateway(private val pdlConfig: PdlConfig) :
         }
     }
 }
-
-data class PdlConfig(val url: String, val scope: String)
 
 internal data class PdlRequest(val query: String, val variables: Variables) {
     data class Variables(val ident: String? = null, val identer: List<String>? = null)
