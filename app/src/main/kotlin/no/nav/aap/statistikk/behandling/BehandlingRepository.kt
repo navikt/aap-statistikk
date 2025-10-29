@@ -48,8 +48,8 @@ SELECT COALESCE(
 
         val behandlingId = dbConnection.executeReturnKey(
             """INSERT INTO behandling (sak_id, referanse_id, type, opprettet_tid, forrige_behandling_id,
-                        aarsaker_til_behandling)
-VALUES (?, ?, ?, ?, ?, ?)"""
+                        aarsaker_til_behandling, opprettet_av)
+VALUES (?, ?, ?, ?, ?, ?, ?)"""
         ) {
             setParams {
                 setLong(1, behandling.sak.id!!)
@@ -58,6 +58,7 @@ VALUES (?, ?, ?, ?, ?, ?)"""
                 setLocalDateTime(4, behandling.opprettetTid)
                 setLong(5, behandling.relatertBehandlingId?.id)
                 setArray(6, behandling.årsaker.map { it.name })
+                setString(7, behandling.opprettetAv)
             }
         }
         oppdaterBehandling(behandling.copy(id = behandlingId.let(::BehandlingId)))
@@ -222,6 +223,7 @@ SELECT b.id                                as b_id,
        b.opprettet_tid                     as b_opprettet_tid,
        b.forrige_behandling_id             as b_forrige_behandling_id,
        b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
+       b.opprettet_av                      as b_opprettet_av,
        s.id                                as s_id,
        s.saksnummer                        as s_saksnummer,
        sh.oppdatert_tid                    as sh_oppdatert_tid,
@@ -287,6 +289,7 @@ SELECT b.id                                as b_id,
        b.opprettet_tid                     as b_opprettet_tid,
        b.forrige_behandling_id             as b_forrige_behandling_id,
        b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
+       b.opprettet_av                      as b_opprettet_av,
        s.id                                as s_id,
        s.saksnummer                        as s_saksnummer,
        sh.oppdatert_tid                    as sh_oppdatert_tid,
@@ -440,6 +443,7 @@ WHERE b.id = ?"""
         typeBehandling = it.getString("b_type").let { TypeBehandling.valueOf(it) },
         status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
         opprettetTid = it.getLocalDateTime("b_opprettet_tid"),
+        opprettetAv = it.getStringOrNull("b_opprettet_av"),
         mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
         vedtakstidspunkt = it.getLocalDateTimeOrNull("bh_vedtak_tidspunkt"),
         ansvarligBeslutter = it.getStringOrNull("bh_ansvarlig_beslutter")?.ifBlank { null },

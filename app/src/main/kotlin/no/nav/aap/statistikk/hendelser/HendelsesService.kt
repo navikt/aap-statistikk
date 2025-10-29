@@ -172,6 +172,7 @@ class HendelsesService(
             resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
             gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
             årsaker = dto.vurderingsbehov.map { it.tilDomene() },
+            opprettetAv = dto.opprettetAv,
             oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
