@@ -9,6 +9,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.statistikk.PrometheusProvider
@@ -96,7 +97,13 @@ class HendelsesServiceTest {
                     AvklaringsbehovHendelseDto(
                         avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                        endringer = listOf()
+                        endringer = listOf(
+                            EndringDTO(
+                                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                                tidsstempel = LocalDateTime.now(),
+                                endretAv = "Fredrik",
+                            )
+                        )
                     )
                 ),
                 mottattTid = LocalDateTime.now().minusDays(1),
@@ -212,7 +219,13 @@ class HendelsesServiceTest {
                     AvklaringsbehovHendelseDto(
                         avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                        endringer = listOf()
+                        endringer = listOf(
+                            EndringDTO(
+                                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                                tidsstempel = LocalDateTime.now(),
+                                endretAv = "Fredrik",
+                            )
+                        )
                     )
                 ),
                 mottattTid = LocalDateTime.now().minusDays(1),

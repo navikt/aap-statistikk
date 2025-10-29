@@ -51,6 +51,9 @@ fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
 fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
     endringer.maxBy { it.tidsstempel }.tidsstempel
 
+fun List<AvklaringsbehovHendelseDto>.tidspunktSisteEndring() =
+    this.maxBy { it.tidspunktSisteEndring() }.tidspunktSisteEndring()
+
 fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
     return this.filter { it.status.returnert() }
         .minByOrNull { it.tidspunktSisteEndring() }?.endringer?.maxByOrNull { it.tidsstempel }?.årsakTilRetur?.firstOrNull()?.årsak

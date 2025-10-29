@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
@@ -38,9 +39,10 @@ class SaksStatistikkService(
             connection: DBConnection,
             bigQueryRepository: IBQSakstatistikkRepository,
             skjermingService: SkjermingService,
+            repositoryProvider: RepositoryProvider,
         ): SaksStatistikkService {
             return SaksStatistikkService(
-                behandlingRepository = BehandlingRepository(connection),
+                behandlingRepository = repositoryProvider.provide(),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
                 bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
                 bigQueryRepository = bigQueryRepository,
@@ -121,7 +123,7 @@ class SaksStatistikkService(
             saksnummer = sak.saksnummer.value,
             tekniskTid = LocalDateTime.now(clock),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
-            endretTid = sisteHendelse.hendelsesTidspunkt,
+            endretTid = sisteHendelse.hendelsesTidspunkt, /// !! Endre denne
             versjon = sisteHendelse.versjon.verdi,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             // TODO: ved manuell revurdering må opprettetAv settes til saksbehandler som opprettet manuell revurdering

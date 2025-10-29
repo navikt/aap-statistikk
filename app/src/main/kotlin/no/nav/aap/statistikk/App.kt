@@ -99,13 +99,16 @@ fun Application.startUp(
 
     val skjermingService = SkjermingService(pdlClient)
     val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
-        SaksStatistikkService.konstruer(it, bqSakRepository, skjermingService)
+        SaksStatistikkService.konstruer(it, bqSakRepository, skjermingService, postgresRepositoryRegistry.provider(it))
     }
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
 
     val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
         ytelsesStatistikkTilBigQuery = { connection ->
-            YtelsesStatistikkTilBigQuery.konstruer(connection, bqRepository = bqYtelseRepository)
+            YtelsesStatistikkTilBigQuery.konstruer(
+                connection, bqRepository = bqYtelseRepository,
+                repositoryProvider = postgresRepositoryRegistry.provider(connection)
+            )
         }
     )
 
@@ -115,7 +118,8 @@ fun Application.startUp(
         MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb
+            resendSakstatistikkJobb,
+            postgresRepositoryRegistry
         )
 
     val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
@@ -124,6 +128,7 @@ fun Application.startUp(
             AvsluttetBehandlingService.konstruer(
                 connection,
                 skjermingService = skjermingService,
+                repositoryProvider = postgresRepositoryRegistry.provider(connection),
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->
                     motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
                         connection,

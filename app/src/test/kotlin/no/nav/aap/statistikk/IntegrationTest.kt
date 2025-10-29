@@ -233,7 +233,7 @@ class IntegrationTest {
         assertThat(bqYtelse!!).allSatisfy {
             assertThat(it.referanse).isEqualTo(referanse)
             assertThat(it.datoAvsluttet).isEqualTo(
-                LocalDateTime.of(2025, 4, 15, 13, 28, 11, 316000000)
+                LocalDateTime.of(2025, 4, 15, 13, 28, 11, 127000000)
             )
             assertThat(it.resultat).isEqualTo(ResultatKode.valueOf(("INNVILGET")))
         }

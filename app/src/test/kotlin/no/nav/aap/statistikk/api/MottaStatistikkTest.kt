@@ -157,8 +157,8 @@ class MottaStatistikkTest {
                 avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
                     it,
                     skjermingService = skjermingService,
-                    opprettBigQueryLagringYtelseCallback = { TODO() },
-                ),
+                    repositoryProvider = postgresRepositoryRegistry.provider(it)
+                ) { TODO() },
                 jobbAppender = jobbAppender,
             )
         })
@@ -251,7 +251,10 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlGateway())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
-                it, bqStatistikkRepository, skjermingService
+                it,
+                bqStatistikkRepository,
+                skjermingService,
+                postgresRepositoryRegistry.provider(it)
             )
         }
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
@@ -261,13 +264,18 @@ class MottaStatistikkTest {
         val jobbAppender = MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb
+            resendSakstatistikkJobb,
+            postgresRepositoryRegistry
         )
 
         val hendelsesService: (DBConnection) -> HendelsesService = {
             HendelsesService.konstruer(
                 it,
-                AvsluttetBehandlingService.konstruer(it, skjermingService) {},
+                AvsluttetBehandlingService.konstruer(
+                    it,
+                    skjermingService,
+                    postgresRepositoryRegistry.provider(it)
+                ) {},
                 jobbAppender,
             )
         }
@@ -332,7 +340,10 @@ class MottaStatistikkTest {
         val skjermingService = SkjermingService(FakePdlGateway())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
-                it, bqStatistikkRepository, skjermingService
+                it,
+                bqStatistikkRepository,
+                skjermingService,
+                postgresRepositoryRegistry.provider(it)
             )
         }
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
@@ -342,7 +353,8 @@ class MottaStatistikkTest {
         val jobbAppender = MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb
+            resendSakstatistikkJobb,
+            postgresRepositoryRegistry
         )
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
             skjermingService, jobbAppender
@@ -433,7 +445,11 @@ class MottaStatistikkTest {
             LagreStoppetHendelseJobb { conn ->
                 HendelsesService.konstruer(
                     conn,
-                    AvsluttetBehandlingService.konstruer(conn, skjermingService) {},
+                    AvsluttetBehandlingService.konstruer(
+                        conn,
+                        skjermingService,
+                        postgresRepositoryRegistry.provider(conn)
+                    ) {},
                     jobbAppender,
                 )
             }
@@ -525,7 +541,8 @@ class MottaStatistikkTest {
         val jobbAppender = MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb
+            resendSakstatistikkJobb,
+            postgresRepositoryRegistry
         )
 
         testKlient(

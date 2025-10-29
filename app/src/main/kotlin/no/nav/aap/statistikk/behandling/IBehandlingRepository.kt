@@ -1,8 +1,9 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.komponenter.repository.Repository
 import java.util.*
 
-interface IBehandlingRepository {
+interface IBehandlingRepository : Repository {
     fun opprettBehandling(behandling: Behandling): BehandlingId
 
     fun oppdaterBehandling(behandling: Behandling)
