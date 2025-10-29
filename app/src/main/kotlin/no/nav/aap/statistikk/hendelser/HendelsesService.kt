@@ -125,7 +125,6 @@ class HendelsesService(
         dto: StoppetBehandling,
         sak: Sak
     ): Behandling {
-
         if (!Miljø.erProd()) {
             logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
         }
@@ -173,7 +172,7 @@ class HendelsesService(
             resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
             gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
             årsaker = dto.vurderingsbehov.map { it.tilDomene() },
-            oppdatertTidspunkt = dto.hendelsesTidspunkt
+            oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 

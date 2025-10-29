@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -25,6 +26,12 @@ data class DiagnoseEntity(
 
 class DiagnoseRepositoryImpl(private val dbConnection: DBConnection) : DiagnoseRepository {
     private val logger = LoggerFactory.getLogger(DiagnoseRepositoryImpl::class.java)
+
+    companion object : RepositoryFactory<DiagnoseRepository> {
+        override fun konstruer(connection: DBConnection): DiagnoseRepository {
+            return DiagnoseRepositoryImpl(connection)
+        }
+    }
 
     override fun lagre(diagnoseEntity: DiagnoseEntity): Long {
         val sql = """

@@ -123,7 +123,7 @@ class SaksStatistikkService(
             saksnummer = sak.saksnummer.value,
             tekniskTid = LocalDateTime.now(clock),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
-            endretTid = sisteHendelse.hendelsesTidspunkt, /// !! Endre denne
+            endretTid = behandling.oppdatertTidspunkt ?: sisteHendelse.hendelsesTidspunkt,
             versjon = sisteHendelse.versjon.verdi,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             // TODO: ved manuell revurdering må opprettetAv settes til saksbehandler som opprettet manuell revurdering

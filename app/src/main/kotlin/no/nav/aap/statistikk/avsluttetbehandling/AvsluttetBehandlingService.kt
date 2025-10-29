@@ -4,7 +4,10 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
-import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.DiagnoseEntity
+import no.nav.aap.statistikk.behandling.DiagnoseRepository
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -38,7 +41,7 @@ class AvsluttetBehandlingService(
             tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
             beregningsgrunnlagRepository = BeregningsgrunnlagRepository(dbConnection),
             vilkårsResultatRepository = VilkårsresultatRepository(dbConnection),
-            diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
+            diagnoseRepository = repositoryProvider.provide(),
             behandlingRepository = repositoryProvider.provide(),
             rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
             skjermingService = skjermingService,
