@@ -181,6 +181,7 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
         opprettetTidspunkt = nyOppgaveDto.opprettetTidspunkt,
         endretAv = nyOppgaveDto.endretAv,
         endretTidspunkt = nyOppgaveDto.endretTidspunkt,
+        harHasteMarkering = nyOppgaveDto.harHasteMarkering,
     )
 }
 
