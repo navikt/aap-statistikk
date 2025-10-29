@@ -33,6 +33,7 @@ import no.nav.aap.statistikk.hendelser.påTidspunkt
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlConfig
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
+import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.tilSaksnummer
@@ -312,30 +313,37 @@ class IntegrationTest {
     ) {
         dataSource.transaction {
             FlytJobbRepository(it).leggTil(
-                JobbInput(LagreOppgaveHendelseJobb(object : JobbAppender {
-                    override fun leggTil(connection: DBConnection, jobb: JobbInput) {
-                        TODO()
-                    }
+                JobbInput(
+                    LagreOppgaveHendelseJobb(
+                        LagreOppgaveJobb(
+                            object : JobbAppender {
+                                override fun leggTil(connection: DBConnection, jobb: JobbInput) {
+                                    TODO()
+                                }
 
-                    override fun leggTilLagreSakTilBigQueryJobb(
-                        connection: DBConnection, behandlingId: BehandlingId
-                    ) {
-                        println("!!!!!!!!!!!!!!!!!!!!!!")
-                        TODO()
-                    }
+                                override fun leggTilLagreSakTilBigQueryJobb(
+                                    connection: DBConnection, behandlingId: BehandlingId
+                                ) {
+                                    println("!!!!!!!!!!!!!!!!!!!!!!")
+                                    TODO()
+                                }
 
-                    override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                        connection: DBConnection, behandlingId: BehandlingId
-                    ) {
-                        TODO("Not yet implemented")
-                    }
+                                override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
+                                    connection: DBConnection, behandlingId: BehandlingId
+                                ) {
+                                    TODO("Not yet implemented")
+                                }
 
-                    override fun leggTilResendSakstatistikkJobb(
-                        connection: DBConnection, behandlingId: BehandlingId
-                    ) {
-                        TODO("Not yet implemented")
-                    }
-                })).medPayload(
+                                override fun leggTilResendSakstatistikkJobb(
+                                    connection: DBConnection, behandlingId: BehandlingId
+                                ) {
+                                    TODO("Not yet implemented")
+                                }
+                            },
+                            postgresRepositoryRegistry
+                        )
+                    )
+                ).medPayload(
                     DefaultJsonMapper.toJson(hendelse)
                 ).forSak(stringToNumber(hendelse.saksnummer!!))
             )
@@ -427,10 +435,10 @@ class IntegrationTest {
             testUtil.ventPåSvar()
             val behandling = ventPåSvar(
                 {
-                dataSource.transaction {
-                    BehandlingRepository(it).hent(behandlingReferanse)
-                }
-            },
+                    dataSource.transaction {
+                        BehandlingRepository(it).hent(behandlingReferanse)
+                    }
+                },
                 { it != null })
             assertThat(behandling).isNotNull
             val enhet = dataSource.transaction {

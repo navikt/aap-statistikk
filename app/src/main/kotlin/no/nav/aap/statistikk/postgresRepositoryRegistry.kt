@@ -5,6 +5,7 @@ import no.nav.aap.motor.FlytJobbRepositoryImpl
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
+import no.nav.aap.statistikk.person.PersonRepository
 
 
 val postgresRepositoryRegistry = RepositoryRegistry()
@@ -12,3 +13,4 @@ val postgresRepositoryRegistry = RepositoryRegistry()
     .register<BehandlingRepository>()
     .register<DiagnoseRepositoryImpl>()
     .register<BeregningsgrunnlagRepository>()
+    .register<PersonRepository>()

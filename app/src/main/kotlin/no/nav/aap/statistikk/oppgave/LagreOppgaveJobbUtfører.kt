@@ -2,15 +2,11 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.enhet.EnhetRepository
-import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
-import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
 
 
 class LagreOppgaveJobbUtfører(
@@ -27,7 +23,10 @@ class LagreOppgaveJobbUtfører(
     }
 }
 
-class LagreOppgaveJobb(private val jobbAppender: JobbAppender) : Jobb {
+class LagreOppgaveJobb(
+    private val jobbAppender: JobbAppender,
+    private val repositoryRegistry: RepositoryRegistry
+) : Jobb {
     override fun beskrivelse(): String {
         return "Henter rene oppgavehendelser fra databasen og konverterer til modell."
     }
@@ -35,20 +34,12 @@ class LagreOppgaveJobb(private val jobbAppender: JobbAppender) : Jobb {
     override fun konstruer(connection: DBConnection): LagreOppgaveJobbUtfører {
         return LagreOppgaveJobbUtfører(
             OppgaveHendelseRepository(connection),
-            OppgaveHistorikkLagrer(
-                personService = PersonService(PersonRepository(connection)),
-                oppgaveRepository = OppgaveRepository(connection),
-                enhetRepository = EnhetRepository(connection),
-                saksbehandlerRepository = SaksbehandlerRepository(connection),
-                behandlingRepository = BehandlingRepository(connection),
-                lagreSakInfotilBigQueryCallback = {
-                    jobbAppender.leggTilLagreSakTilBigQueryJobb(
-                        connection,
-                        it
-                    )
-                }
-            )
-
+            OppgaveHistorikkLagrer.konstruer(connection, repositoryRegistry.provider(connection), {
+                jobbAppender.leggTilLagreSakTilBigQueryJobb(
+                    connection,
+                    it
+                )
+            })
         )
     }
 

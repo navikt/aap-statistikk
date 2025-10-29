@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
+import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.SakService
@@ -59,7 +60,12 @@ class ApplicationTest {
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
                 hendelsesService = hendelsesService,
-            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(mockk()),
+            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
+                LagreOppgaveJobb(
+                    mockk(),
+                    mockk()
+                )
+            ),
             lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(),
             lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
         ) { url, client ->
@@ -188,7 +194,12 @@ class ApplicationTest {
             motorMock(),
             azureConfig,
             LagreStoppetHendelseJobb(hendelsesService),
-            LagreOppgaveHendelseJobb(mockk()),
+            LagreOppgaveHendelseJobb(
+                LagreOppgaveJobb(
+                    mockk(),
+                    mockk()
+                )
+            ),
             LagrePostmottakHendelseJobb(),
             LagreAvklaringsbehovHendelseJobb(hendelsesService),
             jobbAppender,

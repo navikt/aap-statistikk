@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
@@ -67,7 +68,8 @@ class LagreOppgaveJobbUtførerTest {
             ).utfør(
                 JobbInput(
                     LagreOppgaveJobb(
-                        jobbAppender = MockJobbAppender()
+                        jobbAppender = MockJobbAppender(),
+                        repositoryRegistry = mockk()
                     )
                 ).medPayload(oppgaveId.toString())
             )
@@ -347,7 +349,14 @@ class LagreOppgaveJobbUtførerTest {
                     behandlingRepository = BehandlingRepository(it),
                     lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
                 )
-            ).utfør(JobbInput(LagreOppgaveJobb(MockJobbAppender())).medPayload(oppgaveHendelse.oppgaveId.toString()))
+            ).utfør(
+                JobbInput(
+                    LagreOppgaveJobb(
+                        MockJobbAppender(),
+                        postgresRepositoryRegistry
+                    )
+                ).medPayload(oppgaveHendelse.oppgaveId.toString())
+            )
         }
     }
 
