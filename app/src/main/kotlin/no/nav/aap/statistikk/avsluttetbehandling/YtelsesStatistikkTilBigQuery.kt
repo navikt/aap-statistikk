@@ -2,7 +2,9 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
-import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.behandling.BQYtelseBehandling
+import no.nav.aap.statistikk.behandling.DiagnoseRepository
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -38,7 +40,7 @@ class YtelsesStatistikkTilBigQuery(
                 bqRepository = bqRepository,
                 behandlingRepository = repositoryProvider.provide(),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
-                diagnoseRepository = DiagnoseRepositoryImpl(connection),
+                diagnoseRepository = repositoryProvider.provide(),
                 vilkårsresultatRepository = VilkårsresultatRepository(connection),
                 tilkjentYtelseRepository = TilkjentYtelseRepository(connection),
                 beregningsgrunnlagRepository = BeregningsgrunnlagRepository(connection),
