@@ -49,7 +49,6 @@ import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
-import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
@@ -92,7 +91,6 @@ fun Application.startUp(
     val bqSakRepository = BigQuerySakstatikkRepository(bigQueryClientSak)
     val bqYtelseRepository = BQYtelseRepository(bigQueryClientYtelse)
 
-    val skjermingService = SkjermingService.konstruer(gatewayProvider)
     val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
         SaksStatistikkService.konstruer(
             it,
