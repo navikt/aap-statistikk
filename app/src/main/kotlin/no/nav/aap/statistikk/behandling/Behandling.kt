@@ -48,6 +48,7 @@ data class Behandling(
     val resultat: ResultatKode? = null,
     val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
     val hendelser: List<BehandlingHendelse> = listOf(),
+    val opprettetAv: String? = null,
 ) {
     init {
         if (typeBehandling == TypeBehandling.Førstegangsbehandling) {
