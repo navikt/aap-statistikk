@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.repository.Repository
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
@@ -14,7 +16,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 
-interface IBeregningsgrunnlagRepository {
+interface IBeregningsgrunnlagRepository : Repository {
     fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long
     fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>>
 }
@@ -23,6 +25,12 @@ interface IBeregningsgrunnlagRepository {
 class BeregningsgrunnlagRepository(
     private val dbConnection: DBConnection
 ) : IBeregningsgrunnlagRepository {
+    companion object : RepositoryFactory<IBeregningsgrunnlagRepository> {
+        override fun konstruer(connection: DBConnection): IBeregningsgrunnlagRepository {
+            return BeregningsgrunnlagRepository(connection)
+        }
+    }
+
     override fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
         val behandlingsReferanseId = hentBehandlingsReferanseId(
             dbConnection,

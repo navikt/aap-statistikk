@@ -109,6 +109,28 @@ class HendelseHjelpereKtTest {
     }
 
     @Test
+    fun `skal være iverksettes`(softly: SoftAssertions) {
+        val stoppetBehandling =
+            hendelseFraFil("avklaringsbehovhendelser/skal_være_iverksettes.json")
+        val hendelser = stoppetBehandling.avklaringsbehov
+
+        softly.apply {
+            assertThat(hendelser).isNotEmpty()
+            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("Z994573")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("Z994573")
+            assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-04-15T13:27:58.401"))
+            assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
+            assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.IVERKSETTES)
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+                SKRIV_VEDTAKSBREV
+            )
+            assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.OPPRETTET)
+            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
+            assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
+        }
+    }
+
+    @Test
     fun `kan utlede vedtaktid fra liste av avklaringsbehovhendelser`() {
         val utledetVedtakTid = avklaringsbehovHendelser.utledVedtakTid()
 

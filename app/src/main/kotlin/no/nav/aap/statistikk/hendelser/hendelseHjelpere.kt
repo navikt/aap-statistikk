@@ -65,7 +65,7 @@ fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
             .any { it.status.erAvsluttet() }
 
     val brevBehovOpprettet =
-        this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES }
+        this.filter { it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.IVERKSETTES || it.avklaringsbehovDefinisjon == Definisjon.SKRIV_BREV }
             .any { it.status.erÅpent() }
 
     val erOpprettet =
@@ -73,8 +73,8 @@ fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
             .any { it.status.erÅpent() }
 
     return when {
-        brevSendt -> BehandlingStatus.AVSLUTTET
         brevBehovOpprettet -> BehandlingStatus.IVERKSETTES
+        brevSendt -> BehandlingStatus.AVSLUTTET
         erOpprettet -> BehandlingStatus.OPPRETTET
         else -> BehandlingStatus.UTREDES
     }
