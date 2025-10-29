@@ -15,7 +15,6 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.verdityper.dokument.Kanal
@@ -43,7 +42,7 @@ class HendelsesService(
             clock: Clock = Clock.systemDefaultZone()
         ): HendelsesService {
             return HendelsesService(
-                sakService = SakService(SakRepositoryImpl(connection)),
+                sakService = SakService(repositoryProvider),
                 personService = PersonService(repositoryProvider),
                 avsluttetBehandlingService = avsluttetBehandlingService,
                 behandlingRepository = BehandlingRepository(connection, clock),

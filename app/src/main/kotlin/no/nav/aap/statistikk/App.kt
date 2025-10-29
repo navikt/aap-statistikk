@@ -128,12 +128,13 @@ fun Application.startUp(
         )
 
     val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
+        val repositoryProvider = postgresRepositoryRegistry.provider(connection)
         HendelsesService.konstruer(
             connection,
             AvsluttetBehandlingService.konstruer(
                 connection,
                 skjermingService = skjermingService,
-                repositoryProvider = postgresRepositoryRegistry.provider(connection),
+                repositoryProvider = repositoryProvider,
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->
                     motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
                         connection,
@@ -142,7 +143,7 @@ fun Application.startUp(
                 },
             ),
             jobbAppender = motorJobbAppender,
-            repositoryProvider = postgresRepositoryRegistry.provider(connection),
+            repositoryProvider = repositoryProvider,
         )
     }
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)

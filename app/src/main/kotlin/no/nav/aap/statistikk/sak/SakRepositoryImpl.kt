@@ -2,9 +2,30 @@ package no.nav.aap.statistikk.sak
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.person.Person
 
 class SakRepositoryImpl(private val dbConnection: DBConnection) : SakRepository {
+    companion object : RepositoryFactory<SakRepository> {
+        override fun konstruer(connection: DBConnection): SakRepository {
+            return SakRepositoryImpl(connection)
+        }
+
+        private const val HENT_SAK_QUERY = """
+SELECT sak.id           as s_id,
+       sak.saksnummer   as s_saksnummer,
+       sak.person_id    as s_person_id,
+       p.ident          as p_ident,
+       sh.oppdatert_tid as sh_oppdatert_tid,
+       sh.sak_status    as sh_sak_status,
+       sh.id            as sh_id
+FROM sak
+         JOIN person p ON sak.person_id = p.id
+         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh ON sh.sak_id = sak.id
+WHERE sak.saksnummer = ?
+        """
+    }
+
     override fun hentSak(sakID: Long): Sak {
         val query = """
 SELECT sak.id           as s_id,
@@ -29,23 +50,6 @@ WHERE sak.id = ?
             }
         }
     }
-
-    companion object {
-        private const val HENT_SAK_QUERY = """
-SELECT sak.id           as s_id,
-       sak.saksnummer   as s_saksnummer,
-       sak.person_id    as s_person_id,
-       p.ident          as p_ident,
-       sh.oppdatert_tid as sh_oppdatert_tid,
-       sh.sak_status    as sh_sak_status,
-       sh.id            as sh_id
-FROM sak
-         JOIN person p ON sak.person_id = p.id
-         JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh ON sh.sak_id = sak.id
-WHERE sak.saksnummer = ?
-        """
-    }
-
 
     override fun hentSak(saksnummer: Saksnummer): Sak {
         return dbConnection.queryFirst(HENT_SAK_QUERY) {

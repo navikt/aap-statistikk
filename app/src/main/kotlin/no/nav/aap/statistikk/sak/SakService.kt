@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.sak
 
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.person.Person
 import java.time.Clock
 import java.time.LocalDateTime
@@ -8,7 +9,9 @@ class SakService(
     private val sakRepository: SakRepository,
     private val clock: Clock = Clock.systemDefaultZone()
 ) {
-     fun hentEllerSettInnSak(
+    constructor(repositoryProvider: RepositoryProvider) : this(repositoryProvider.provide())
+
+    fun hentEllerSettInnSak(
         person: Person,
         saksnummer: Saksnummer,
         sakStatus: SakStatus
