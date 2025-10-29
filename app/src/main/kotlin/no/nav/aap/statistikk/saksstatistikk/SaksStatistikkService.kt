@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
@@ -38,7 +39,7 @@ class SaksStatistikkService(
         fun konstruer(
             connection: DBConnection,
             bigQueryRepository: IBQSakstatistikkRepository,
-            skjermingService: SkjermingService,
+            gatewayProvider: GatewayProvider,
             repositoryProvider: RepositoryProvider,
         ): SaksStatistikkService {
             return SaksStatistikkService(
@@ -46,7 +47,7 @@ class SaksStatistikkService(
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
                 bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
                 bigQueryRepository = bigQueryRepository,
-                skjermingService = skjermingService,
+                skjermingService = SkjermingService.konstruer(gatewayProvider),
                 sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
                 oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
             )

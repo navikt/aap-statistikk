@@ -160,7 +160,7 @@ class MottaStatistikkTest {
                 it,
                 avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
                     it,
-                    skjermingService = skjermingService,
+                    gatewayProvider = defaultGatewayProvider(),
                     repositoryProvider = postgresRepositoryRegistry.provider(it)
                 ) { TODO() },
                 jobbAppender = jobbAppender,
@@ -258,7 +258,7 @@ class MottaStatistikkTest {
             SaksStatistikkService.konstruer(
                 it,
                 bqStatistikkRepository,
-                skjermingService,
+                defaultGatewayProvider {  },
                 postgresRepositoryRegistry.provider(it)
             )
         }
@@ -278,7 +278,7 @@ class MottaStatistikkTest {
                 it,
                 AvsluttetBehandlingService.konstruer(
                     it,
-                    skjermingService,
+                    gatewayProvider = defaultGatewayProvider(),
                     postgresRepositoryRegistry.provider(it)
                 ) {},
                 jobbAppender,
@@ -354,7 +354,7 @@ class MottaStatistikkTest {
             SaksStatistikkService.konstruer(
                 it,
                 bqStatistikkRepository,
-                skjermingService,
+                defaultGatewayProvider {  },
                 postgresRepositoryRegistry.provider(it)
             )
         }
@@ -470,7 +470,7 @@ class MottaStatistikkTest {
                         conn,
                         AvsluttetBehandlingService.konstruer(
                             conn,
-                            skjermingService,
+                            defaultGatewayProvider(),
                             postgresRepositoryRegistry.provider(conn)
                         ) {},
                         jobbAppender,
@@ -538,7 +538,7 @@ class MottaStatistikkTest {
                 SaksStatistikkService.konstruer(
                     it,
                     bigQueryRepository = bqRepositorySak,
-                    skjermingService = skjermingService,
+                    gatewayProvider = defaultGatewayProvider(),
                     repositoryProvider = postgresRepositoryRegistry.provider(it),
                 )
             },

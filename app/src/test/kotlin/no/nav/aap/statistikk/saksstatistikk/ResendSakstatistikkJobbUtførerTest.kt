@@ -3,8 +3,8 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.postgresRepositoryRegistry
-import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeBQSakRepository
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
@@ -20,13 +20,17 @@ class ResendSakstatistikkJobbUtførerTest {
         val ref = SaksStatistikkServiceTest.lagreHendelser(dataSource)
         val behandlingId = dataSource.transaction { BehandlingRepository(it).hent(ref) }?.id!!
 
+        val gatewayProvider = defaultGatewayProvider {
+            register<FakePdlGateway>()
+        }
+
         val input = JobbInput(
             jobb = ResendSakstatistikkJobb(
                 {
                     SaksStatistikkService.konstruer(
                         it,
                         FakeBQSakRepository(),
-                        SkjermingService(FakePdlGateway()),
+                        gatewayProvider,
                         postgresRepositoryRegistry.provider(it)
                     )
                 }
@@ -43,7 +47,11 @@ class ResendSakstatistikkJobbUtførerTest {
         }
 
         val uthentet =
-            dataSource.transaction { SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(ref) }
+            dataSource.transaction {
+                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                    ref
+                )
+            }
 
         assertThat(uthentet).isNotEmpty
     }
