@@ -70,7 +70,8 @@ data class BQBehandling(
         return this == other.copy(
             sekvensNummer = sekvensNummer,
             erResending = erResending,
-            tekniskTid = tekniskTid
+            tekniskTid = tekniskTid,
+            endretTid = endretTid
         )
     }
 }
