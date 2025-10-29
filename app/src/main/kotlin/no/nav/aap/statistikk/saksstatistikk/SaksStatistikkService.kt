@@ -126,8 +126,7 @@ class SaksStatistikkService(
             endretTid = behandling.oppdatertTidspunkt ?: sisteHendelse.hendelsesTidspunkt,
             versjon = sisteHendelse.versjon.verdi,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
-            // TODO: ved manuell revurdering må opprettetAv settes til saksbehandler som opprettet manuell revurdering
-            opprettetAv = KELVIN,
+            opprettetAv = behandling.opprettetAv ?: KELVIN,
             ansvarligBeslutter = if (erSkjermet && sisteHendelse.ansvarligBeslutter !== null) "-5" else sisteHendelse.ansvarligBeslutter,
             vedtakTid = sisteHendelse.vedtakstidspunkt,
             søknadsFormat = behandling.søknadsformat,
