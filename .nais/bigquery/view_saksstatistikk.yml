@@ -27,7 +27,6 @@ spec:
         behandling_type,
         TIMESTAMP(DATETIME(ferdigbehandlet_tid, "Europe/Oslo")) AS ferdigbehandlet_tid,
         TIMESTAMP(DATETIME(endret_tid), "Europe/Oslo") AS endretTid,
-        aktor_id,
         aktor_id AS fodselsnummer,
         TIMESTAMP(DATETIME(teknisk_tid), "Europe/Oslo") AS teknisk_tid,
         TIMESTAMP(DATETIME(mottatt_tid), "Europe/Oslo") AS mottatt_tid,

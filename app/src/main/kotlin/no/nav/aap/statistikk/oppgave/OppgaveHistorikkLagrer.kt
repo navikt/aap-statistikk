@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.oppgave
 
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.TypeBehandling
@@ -17,6 +19,23 @@ class OppgaveHistorikkLagrer(
     private val lagreSakInfotilBigQueryCallback: (BehandlingId) -> Unit
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
+
+    companion object {
+        fun konstruer(
+            dbConnection: DBConnection,
+            repositoryProvider: RepositoryProvider,
+            lagreSakInfotilBigQueryCallback: (BehandlingId) -> Unit
+        ): OppgaveHistorikkLagrer {
+            return OppgaveHistorikkLagrer(
+                personService = PersonService(repositoryProvider),
+                oppgaveRepository = OppgaveRepository(dbConnection),
+                enhetRepository = EnhetRepository(dbConnection),
+                saksbehandlerRepository = SaksbehandlerRepository(dbConnection),
+                behandlingRepository = repositoryProvider.provide(),
+                lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
+            )
+        }
+    }
 
     fun lagre(oppgave: Oppgave) {
         val saksbehandlerMedId = oppgave.reservasjon?.let {

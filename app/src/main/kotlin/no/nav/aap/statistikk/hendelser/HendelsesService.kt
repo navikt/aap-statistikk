@@ -5,6 +5,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.miljo.Miljø
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
@@ -12,7 +13,6 @@ import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.nyBehandlingOpprettet
-import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
@@ -39,11 +39,12 @@ class HendelsesService(
             connection: DBConnection,
             avsluttetBehandlingService: AvsluttetBehandlingService,
             jobbAppender: JobbAppender,
+            repositoryProvider: RepositoryProvider,
             clock: Clock = Clock.systemDefaultZone()
         ): HendelsesService {
             return HendelsesService(
                 sakService = SakService(SakRepositoryImpl(connection)),
-                personService = PersonService(PersonRepository(connection)),
+                personService = PersonService(repositoryProvider),
                 avsluttetBehandlingService = avsluttetBehandlingService,
                 behandlingRepository = BehandlingRepository(connection, clock),
                 opprettBigQueryLagringSakStatistikkCallback = {

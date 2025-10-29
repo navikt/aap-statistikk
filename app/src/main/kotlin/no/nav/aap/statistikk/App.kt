@@ -99,7 +99,12 @@ fun Application.startUp(
 
     val skjermingService = SkjermingService(pdlClient)
     val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
-        SaksStatistikkService.konstruer(it, bqSakRepository, skjermingService, postgresRepositoryRegistry.provider(it))
+        SaksStatistikkService.konstruer(
+            it,
+            bqSakRepository,
+            skjermingService,
+            postgresRepositoryRegistry.provider(it)
+        )
     }
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
 
@@ -136,14 +141,20 @@ fun Application.startUp(
                     )
                 },
             ),
-            jobbAppender = motorJobbAppender
+            jobbAppender = motorJobbAppender,
+            repositoryProvider = postgresRepositoryRegistry.provider(connection),
         )
     }
     val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
 
+    val lagreOppgaveJobb = LagreOppgaveJobb(
+        motorJobbAppender,
+        postgresRepositoryRegistry
+    )
+
     val lagreOppgaveHendelseJobb =
-        LagreOppgaveHendelseJobb(motorJobbAppender)
+        LagreOppgaveHendelseJobb(lagreOppgaveJobb)
     val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
     val motor = motor(
@@ -155,9 +166,7 @@ fun Application.startUp(
             lagrePostmottakHendelseJobb,
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
-            LagreOppgaveJobb(
-                jobbAppender = motorJobbAppender
-            ),
+            lagreOppgaveJobb,
             resendSakstatistikkJobb
         )
     )

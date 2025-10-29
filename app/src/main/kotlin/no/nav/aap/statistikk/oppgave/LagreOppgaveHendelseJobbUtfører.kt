@@ -8,14 +8,13 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.api.stringToNumber
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgaveHendelseMottatt
 
 
 class LagreOppgaveHendelseJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val flytJobbRepository: FlytJobbRepository,
-    private val jobbAppender: JobbAppender
+    private val lagreOppgaveJobb: LagreOppgaveJobb
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val hendelse = DefaultJsonMapper.fromJson<OppgaveHendelse>(input.payload())
@@ -23,7 +22,7 @@ class LagreOppgaveHendelseJobbUtfører(
         oppgaveHendelseRepository.lagreHendelse(hendelse)
 
         flytJobbRepository.leggTil(
-            JobbInput(LagreOppgaveJobb(jobbAppender)).medPayload(hendelse.oppgaveId.toString())
+            JobbInput(lagreOppgaveJobb).medPayload(hendelse.oppgaveId.toString())
                 .forSak(hendelse.saksnummer?.let(::stringToNumber) ?: hendelse.oppgaveId)
         )
         PrometheusProvider.prometheus.oppgaveHendelseMottatt().increment()
@@ -31,7 +30,7 @@ class LagreOppgaveHendelseJobbUtfører(
 }
 
 class LagreOppgaveHendelseJobb(
-    private val jobbAppender: JobbAppender
+    val lagreOppgaveJobb: LagreOppgaveJobb,
 ) : Jobb {
     override fun beskrivelse(): String {
         return "Lagrer rene oppgavehendelser fra oppgave-appen."
@@ -41,7 +40,7 @@ class LagreOppgaveHendelseJobb(
         return LagreOppgaveHendelseJobbUtfører(
             OppgaveHendelseRepository(connection),
             FlytJobbRepository(connection),
-            jobbAppender,
+            lagreOppgaveJobb
         )
     }
 
