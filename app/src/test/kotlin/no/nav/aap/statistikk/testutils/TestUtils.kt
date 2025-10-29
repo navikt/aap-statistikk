@@ -13,6 +13,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.gateway.Factory
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
@@ -610,6 +611,12 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
 }
 
 class FakePdlGateway(val identerHemmelig: Map<String, Boolean> = emptyMap()) : PdlGateway {
+    companion object : Factory<PdlGateway> {
+        override fun konstruer(): PdlGateway {
+            return FakePdlGateway()
+        }
+    }
+
     override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {
         return identer.map {
             no.nav.aap.statistikk.integrasjoner.pdl.Person(

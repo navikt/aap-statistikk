@@ -97,7 +97,7 @@ fun Application.startUp(
         SaksStatistikkService.konstruer(
             it,
             bqSakRepository,
-            skjermingService,
+            gatewayProvider,
             postgresRepositoryRegistry.provider(it)
         )
     }
@@ -128,7 +128,7 @@ fun Application.startUp(
             connection,
             AvsluttetBehandlingService.konstruer(
                 connection,
-                skjermingService = skjermingService,
+                gatewayProvider = gatewayProvider,
                 repositoryProvider = repositoryProvider,
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->
                     motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
