@@ -152,7 +152,6 @@ class MottaStatistikkTest {
         )
 
     private fun ekteLagreStoppetHendelseJobb(
-        skjermingService: SkjermingService,
         jobbAppender: JobbAppender,
     ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
         hendelsesService = {
@@ -253,12 +252,11 @@ class MottaStatistikkTest {
         val bqRepositoryYtelse = FakeBQYtelseRepository()
         val bqStatistikkRepository = FakeBQSakRepository()
 
-        val skjermingService = SkjermingService(FakePdlGateway())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
                 it,
                 bqStatistikkRepository,
-                defaultGatewayProvider {  },
+                defaultGatewayProvider { },
                 postgresRepositoryRegistry.provider(it)
             )
         }
@@ -298,7 +296,6 @@ class MottaStatistikkTest {
 
         val motor = konstruerMotor(
             dataSource,
-            skjermingService,
             jobbAppender,
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
@@ -349,12 +346,11 @@ class MottaStatistikkTest {
         val bqRepositoryYtelse = FakeBQYtelseRepository()
         val bqStatistikkRepository = FakeBQSakRepository()
 
-        val skjermingService = SkjermingService(FakePdlGateway())
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
                 it,
                 bqStatistikkRepository,
-                defaultGatewayProvider {  },
+                defaultGatewayProvider { },
                 postgresRepositoryRegistry.provider(it)
             )
         }
@@ -369,7 +365,7 @@ class MottaStatistikkTest {
             postgresRepositoryRegistry
         )
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
-            skjermingService, jobbAppender
+            jobbAppender
         )
 
         val lagreOppgaveHendelseJobb =
@@ -385,7 +381,6 @@ class MottaStatistikkTest {
 
         val motor = konstruerMotor(
             dataSource,
-            skjermingService,
             jobbAppender,
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
@@ -444,7 +439,6 @@ class MottaStatistikkTest {
 
     private fun konstruerMotor(
         dataSource: DataSource,
-        skjermingService: SkjermingService,
         jobbAppender: MotorJobbAppender,
         resendSakstatistikkJobb: ResendSakstatistikkJobb,
         lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
@@ -522,11 +516,9 @@ class MottaStatistikkTest {
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
-        val skjermingService = SkjermingService(FakePdlGateway())
-
         val jobbAppender1 = MockJobbAppender()
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
-            skjermingService, jobbAppender1
+            jobbAppender1
         )
 
         val lagreOppgaveJobb = LagreOppgaveJobb(jobbAppender1, postgresRepositoryRegistry)
