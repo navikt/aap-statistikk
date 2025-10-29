@@ -35,11 +35,9 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -509,14 +507,11 @@ class MottaStatistikkTest {
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
             sakStatistikkService = {
-                SaksStatistikkService(
-                    behandlingRepository = BehandlingRepository(it),
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
-                    bigQueryKvitteringRepository = BigQueryKvitteringRepository(it),
+                SaksStatistikkService.konstruer(
+                    it,
                     bigQueryRepository = bqRepositorySak,
                     skjermingService = skjermingService,
-                    oppgaveHendelseRepository = OppgaveHendelseRepository(it),
-                    sakstatistikkRepository = SakstatistikkRepositoryImpl(it),
+                    repositoryProvider = postgresRepositoryRegistry.provider(it),
                 )
             },
         )

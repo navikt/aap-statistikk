@@ -6,7 +6,6 @@ import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.hendelser.onlyOrNull
@@ -43,7 +42,7 @@ class YtelsesStatistikkTilBigQuery(
                 diagnoseRepository = repositoryProvider.provide(),
                 vilkårsresultatRepository = VilkårsresultatRepository(connection),
                 tilkjentYtelseRepository = TilkjentYtelseRepository(connection),
-                beregningsgrunnlagRepository = BeregningsgrunnlagRepository(connection),
+                beregningsgrunnlagRepository = repositoryProvider.provide(),
             )
         }
     }

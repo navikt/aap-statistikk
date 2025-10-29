@@ -69,9 +69,10 @@ class IntegrationTest {
     data class Jobbdump(
         val payload: String,
         val type: String,
-        @param:JsonDeserialize(using = LocalDateTimeDeserializer::class)
-        @param:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-        @param:JsonProperty("opprettet_tid") val opprettetTid: LocalDateTime
+        @param:JsonDeserialize(using = LocalDateTimeDeserializer::class) @param:JsonFormat(
+            shape = JsonFormat.Shape.STRING,
+            pattern = "yyyy-MM-dd HH:mm:ss.SSS"
+        ) @param:JsonProperty("opprettet_tid") val opprettetTid: LocalDateTime
     )
 
     data class Dump(val jobb: List<Jobbdump>)
@@ -82,13 +83,11 @@ class IntegrationTest {
     }
 
     data class BehandlingHendelseData(
-        override val data: StoppetBehandling,
-        override val opprettetTidspunkt: LocalDateTime
+        override val data: StoppetBehandling, override val opprettetTidspunkt: LocalDateTime
     ) : HendelseData
 
     data class OppgaveHendelseData(
-        override val data: DomeneOppgaveHendelse,
-        override val opprettetTidspunkt: LocalDateTime
+        override val data: DomeneOppgaveHendelse, override val opprettetTidspunkt: LocalDateTime
     ) : HendelseData
 
     private val logger = LoggerFactory.getLogger(IntegrationTest::class.java)
@@ -163,8 +162,7 @@ class IntegrationTest {
 
             val behandling = ventPåSvar(
                 { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
-                { it != null }
-            )
+                { it != null })
 
             assertThat(behandling!!.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         }
@@ -254,7 +252,7 @@ class IntegrationTest {
             testUtil.ventPåSvar()
         }
 
-        val alleSakstatistikkHendelser = dataSource.transaction {
+        val alleSakstatistikkHendelser = dataSource.transaction { it ->
             SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
                 avsluttetBehandlingHendelser.last().data.behandlingReferanse
             ).sortedBy { it.endretTid }
@@ -266,49 +264,51 @@ class IntegrationTest {
         // Gjør samme sjekker som for vanlige sending
         // TODO: lage testdataen på nytt, slik at dette kan testes
         assertThat(resendinger.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
-//        assertThat(resendinger).extracting("behandlingStatus").containsSubsequence(
-//            "UNDER_BEHANDLING",
-//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
-//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
-//            "IVERKSETTES",
-//            "AVSLUTTET"
-//        )
-//        assertThat(resendinger.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
-//            "UNDER_BEHANDLING",
-//            "IVERKSETTES",
-//            "AVSLUTTET",
-//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
-//            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
-//        )
-//        assertThat(resendinger.filter { it.resultatBegrunnelse != null }).isNotEmpty
-//        assertThat(resendinger.filter { it.resultatBegrunnelse != null }).allSatisfy {
-//            assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
-//        }
-//
-//        assertThat(resendinger.map { it.behandlingMetode.name }).containsSubsequence(
-//            "MANUELL",
-//            "KVALITETSSIKRING",
-//            "MANUELL",
-//            "KVALITETSSIKRING",
-//            "MANUELL",
-//            "KVALITETSSIKRING",
-//            "MANUELL",
-//            "KVALITETSSIKRING",
-//            "MANUELL",
-//            "FATTE_VEDTAK",
-//            "MANUELL",
-//            "FATTE_VEDTAK",
-//            "MANUELL",
-//            "FATTE_VEDTAK",
-//            "MANUELL",
-//            "FATTE_VEDTAK",
-//            "MANUELL",
-//        )
+        assertThat(resendinger).extracting("behandlingStatus").containsSubsequence(
+            "UNDER_BEHANDLING",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
+            "IVERKSETTES",
+            "AVSLUTTET"
+        )
+        assertThat(resendinger.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
+            "UNDER_BEHANDLING",
+            "IVERKSETTES",
+            "AVSLUTTET",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
+        )
+        assertThat(resendinger.filter { it.resultatBegrunnelse != null }).isNotEmpty
+        assertThat(resendinger.filter { it.resultatBegrunnelse != null }).allSatisfy {
+            assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
+        }
+
+        assertThat(resendinger.map { it.behandlingMetode.name }).containsSubsequence(
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "KVALITETSSIKRING",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+            "FATTE_VEDTAK",
+            "MANUELL",
+        )
+
+        println("Alle sakstatistikk hendelser: ${alleSakstatistikkHendelser.size}")
+        println("Resendinger: ${resendinger.size}")
     }
 
     private fun postOppgaveHendelse(
-        dataSource: DataSource,
-        hendelse: OppgaveHendelse
+        dataSource: DataSource, hendelse: OppgaveHendelse
     ) {
         dataSource.transaction {
             FlytJobbRepository(it).leggTil(
@@ -318,23 +318,20 @@ class IntegrationTest {
                     }
 
                     override fun leggTilLagreSakTilBigQueryJobb(
-                        connection: DBConnection,
-                        behandlingId: BehandlingId
+                        connection: DBConnection, behandlingId: BehandlingId
                     ) {
                         println("!!!!!!!!!!!!!!!!!!!!!!")
                         TODO()
                     }
 
                     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                        connection: DBConnection,
-                        behandlingId: BehandlingId
+                        connection: DBConnection, behandlingId: BehandlingId
                     ) {
                         TODO("Not yet implemented")
                     }
 
                     override fun leggTilResendSakstatistikkJobb(
-                        connection: DBConnection,
-                        behandlingId: BehandlingId
+                        connection: DBConnection, behandlingId: BehandlingId
                     ) {
                         TODO("Not yet implemented")
                     }
@@ -347,13 +344,10 @@ class IntegrationTest {
     }
 
     private fun postBehandlingsflytHendelse(
-        url: String,
-        client: RestClient<InputStream>,
-        hendelse: StoppetBehandling
+        url: String, client: RestClient<InputStream>, hendelse: StoppetBehandling
     ) {
         client.post<StoppetBehandling, Any>(
-            URI.create("$url/stoppetBehandling"),
-            PostRequest(hendelse)
+            URI.create("$url/stoppetBehandling"), PostRequest(hendelse)
         )
     }
 
@@ -373,7 +367,8 @@ class IntegrationTest {
             object {}.javaClass.getResource("/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")!!
                 .readText().let { DefaultJsonMapper.fromJson<StoppetBehandling>(it) }
 
-        val tidspunkter = hendelse.avklaringsbehov.flatMap { it.endringer.map { it.tidsstempel } }
+        val tidspunkter =
+            hendelse.avklaringsbehov.flatMap { it.endringer.map { endringDTO -> endringDTO.tidsstempel } }
         val midtI = tidspunkter[tidspunkter.size / 2 + 1]
         val hendelsx = hendelse.copy(
             behandlingStatus = Status.UTREDES,
@@ -392,8 +387,7 @@ class IntegrationTest {
             bigQueryClient,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"),
-                PostRequest(hendelsx)
+                URI.create("$url/stoppetBehandling"), PostRequest(hendelsx)
             )
 
             testUtil.ventPåSvar()
@@ -427,15 +421,17 @@ class IntegrationTest {
 
 
             client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"),
-                PostRequest(hendelse)
+                URI.create("$url/stoppetBehandling"), PostRequest(hendelse)
             )
 
             testUtil.ventPåSvar()
             val behandling = ventPåSvar(
-                { dataSource.transaction { BehandlingRepository(it).hent(behandlingReferanse) } },
-                { it != null }
-            )
+                {
+                dataSource.transaction {
+                    BehandlingRepository(it).hent(behandlingReferanse)
+                }
+            },
+                { it != null })
             assertThat(behandling).isNotNull
             val enhet = dataSource.transaction {
                 OppgaveHendelseRepository(it).hentEnhetForAvklaringsbehov(
@@ -444,7 +440,6 @@ class IntegrationTest {
                 ).last()
             }
             assertThat(enhet.enhet).isEqualTo("0400")
-            println("GJELDENDE AVKLARINGSBEHOV $gjeldendeAVklaringsbehov")
 
             testUtil.ventPåSvar()
             val bqSaker = ventPåSvar(
@@ -454,14 +449,12 @@ class IntegrationTest {
             assertThat(bqSaker).hasSize(3)
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
-            println(bqSaker)
             assertThat(bqSaker).anySatisfy {
                 assertThat(it.ansvarligEnhetKode).isEqualTo("0400")
             }
 
             client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"),
-                PostRequest(
+                URI.create("$url/stoppetBehandling"), PostRequest(
                     hendelse.copy(
                         behandlingStatus = Status.AVSLUTTET,
                         avsluttetBehandling = hendelse.avsluttetBehandling
@@ -478,10 +471,9 @@ class IntegrationTest {
             assertThat(bqSaker2!!).hasSize(3)
             assertThat(bqSaker2[2].sekvensNummer).isEqualTo(3)
 
-            val bigQueryRespons =
-                ventPåSvar(
-                    { bigQueryClient.read(VilkårsVurderingTabell()) },
-                    { t -> t !== null && t.isNotEmpty() })
+            val bigQueryRespons = ventPåSvar(
+                { bigQueryClient.read(VilkårsVurderingTabell()) },
+                { t -> t !== null && t.isNotEmpty() })
 
             assertThat(bigQueryRespons).hasSize(8)
             val vilkårsVurderingRad = bigQueryRespons!!.first()
