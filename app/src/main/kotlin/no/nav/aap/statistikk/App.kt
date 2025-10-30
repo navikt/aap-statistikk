@@ -17,6 +17,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.Jobb
@@ -72,7 +73,14 @@ fun main() {
     val gatewayProvider = defaultGatewayProvider()
 
     embeddedServer(Netty, port = 8080) {
-        startUp(dbConfig, azureConfig, bigQueryClientSak, bigQueryClientYtelse, gatewayProvider)
+        startUp(
+            dbConfig,
+            azureConfig,
+            bigQueryClientSak,
+            bigQueryClientYtelse,
+            gatewayProvider,
+            postgresRepositoryRegistry
+        )
     }.start(wait = true)
 }
 
@@ -81,7 +89,8 @@ fun Application.startUp(
     azureConfig: AzureConfig,
     bigQueryClientSak: BigQueryClient,
     bigQueryClientYtelse: BigQueryClient,
-    gatewayProvider: GatewayProvider
+    gatewayProvider: GatewayProvider,
+    repositoryRegistry: RepositoryRegistry
 ) {
     log.info("Starter.")
 
@@ -96,7 +105,7 @@ fun Application.startUp(
             it,
             bqSakRepository,
             gatewayProvider,
-            postgresRepositoryRegistry.provider(it)
+            repositoryRegistry.provider(it)
         )
     }
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
@@ -105,7 +114,7 @@ fun Application.startUp(
         ytelsesStatistikkTilBigQuery = { connection ->
             YtelsesStatistikkTilBigQuery.konstruer(
                 connection, bqRepository = bqYtelseRepository,
-                repositoryProvider = postgresRepositoryRegistry.provider(connection)
+                repositoryProvider = repositoryRegistry.provider(connection)
             )
         }
     )
@@ -116,12 +125,11 @@ fun Application.startUp(
         MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb,
-            postgresRepositoryRegistry
+            resendSakstatistikkJobb
         )
 
     val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
-        val repositoryProvider = postgresRepositoryRegistry.provider(connection)
+        val repositoryProvider = repositoryRegistry.provider(connection)
         HendelsesService.konstruer(
             connection,
             AvsluttetBehandlingService.konstruer(
@@ -143,8 +151,7 @@ fun Application.startUp(
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
 
     val lagreOppgaveJobb = LagreOppgaveJobb(
-        motorJobbAppender,
-        postgresRepositoryRegistry
+        motorJobbAppender
     )
 
     val lagreOppgaveHendelseJobb =

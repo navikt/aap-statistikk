@@ -1,7 +1,5 @@
 package no.nav.aap.statistikk.postmottak
 
-import java.util.*
-
 class PostmottakBehandlingService(private val postmottakBehandlingRepository: PostmottakBehandlingRepository) {
     fun oppdaterEllerOpprettBehandling(innkommendeBehandling: PostmottakBehandling): PostmottakBehandling {
         val eksisterendeBehandling =

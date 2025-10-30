@@ -335,8 +335,7 @@ class IntegrationTest {
                                 ) {
                                     TODO("Not yet implemented")
                                 }
-                            },
-                            postgresRepositoryRegistry
+                            }
                         )
                     )
                 ).medPayload(

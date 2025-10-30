@@ -7,8 +7,7 @@ import java.util.*
 
 private val logger = LoggerFactory.getLogger(BigQuerySakstatikkRepository::class.java)
 
-class BigQuerySakstatikkRepository
-    (
+class BigQuerySakstatikkRepository(
     private val client: BigQueryClient
 ) : IBQSakstatistikkRepository {
     private val sakTabell = SakTabell()

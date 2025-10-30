@@ -11,15 +11,14 @@ import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.person.Person
-import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.provider
 import org.slf4j.LoggerFactory
 
 class LagrePostmottakHendelseJobbUtfører(
     private val postmottakBehandlingService: PostmottakBehandlingService,
     private val personService: PersonService,
-) :
-    JobbUtfører {
+) : JobbUtfører {
     private val logger = LoggerFactory.getLogger(LagrePostmottakHendelseJobbUtfører::class.java)
 
     override fun utfør(input: JobbInput) {
@@ -41,11 +40,9 @@ class LagrePostmottakHendelseJobb : Jobb {
     override fun konstruer(connection: DBConnection): LagrePostmottakHendelseJobbUtfører {
         return LagrePostmottakHendelseJobbUtfører(
             postmottakBehandlingService = PostmottakBehandlingService(
-                PostmottakBehandlingRepository(connection)
+                connection.provider().provide()
             ),
-            personService = PersonService(
-                PersonRepository(connection)
-            ),
+            personService = PersonService(connection.provider()),
         )
     }
 
@@ -93,25 +90,18 @@ fun TypeBehandling.tilDomene(): no.nav.aap.statistikk.behandling.TypeBehandling 
  * Nøyaktig samme logikk som [no.nav.aap.statistikk.hendelser.sistePersonPåBehandling]. Finnes måte å unngå å duplisere kode?
  */
 fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
-    return this.flatMap { it.endringer }
-        .filter { it.endretAv.lowercase() != "Kelvin".lowercase() }
+    return this.flatMap { it.endringer }.filter { it.endretAv.lowercase() != "Kelvin".lowercase() }
         .maxByOrNull { it.tidsstempel }?.endretAv
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
-    return this
-        .filter(function())
-        .sortedByDescending {
+    return this.filter(function()).sortedByDescending {
             it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
-        }
-        .map { it.avklaringsbehovDefinisjon.kode }
-        .firstOrNull()?.toString()
+        }.map { it.avklaringsbehovDefinisjon.kode }.firstOrNull()?.toString()
 }
 
-private fun function(): (AvklaringsbehovHendelseDto) -> Boolean =
-    {
-        setOf(
-            Status.OPPRETTET,
-            Status.SENDT_TILBAKE_FRA_BESLUTTER
-        ).contains(it.status)
-    }
+private fun function(): (AvklaringsbehovHendelseDto) -> Boolean = {
+    setOf(
+        Status.OPPRETTET, Status.SENDT_TILBAKE_FRA_BESLUTTER
+    ).contains(it.status)
+}

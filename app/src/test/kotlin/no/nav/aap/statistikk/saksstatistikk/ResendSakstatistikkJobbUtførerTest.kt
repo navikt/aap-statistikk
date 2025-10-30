@@ -26,15 +26,14 @@ class ResendSakstatistikkJobbUtførerTest {
 
         val input = JobbInput(
             jobb = ResendSakstatistikkJobb(
-                {
-                    SaksStatistikkService.konstruer(
-                        it,
-                        FakeBQSakRepository(),
-                        gatewayProvider,
-                        postgresRepositoryRegistry.provider(it)
-                    )
-                }
-            )
+            ) {
+                SaksStatistikkService.konstruer(
+                    it,
+                    FakeBQSakRepository(),
+                    gatewayProvider,
+                    postgresRepositoryRegistry.provider(it)
+                )
+            }
         ).medPayload(behandlingId)
 
         dataSource.transaction {

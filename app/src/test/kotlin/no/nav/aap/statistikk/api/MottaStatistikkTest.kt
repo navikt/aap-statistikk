@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.api
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -38,14 +37,14 @@ import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
-import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepository
+import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepositoryImpl
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
-import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
+import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -80,8 +79,7 @@ class MottaStatistikkTest {
             fakeLagreStoppetHendelseJobb(),
             LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb(
-                    jobbAppender,
-                    mockk()
+                    jobbAppender
                 )
             ),
             LagrePostmottakHendelseJobb(),
@@ -263,12 +261,12 @@ class MottaStatistikkTest {
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
+        val resendSakstatistikkJobb =
+            ResendSakstatistikkJobb(sakStatistikkService)
         val jobbAppender = MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
             resendSakstatistikkJobb,
-            postgresRepositoryRegistry
         )
 
         val hendelsesService: (DBConnection) -> HendelsesService = {
@@ -287,8 +285,7 @@ class MottaStatistikkTest {
         val lagreOppgaveHendelseJobb =
             LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb(
-                    jobbAppender,
-                    postgresRepositoryRegistry
+                    jobbAppender
                 )
             )
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
@@ -324,7 +321,8 @@ class MottaStatistikkTest {
                 val behandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!
                 Pair(
                     behandling,
-                    SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandling.referanse)
+                    it.provider().provide<SakstatistikkRepository>()
+                        .hentAlleHendelserPåBehandling(behandling.referanse)
                 )
             }
             assertThat(behandling.hendelser).hasSize(4)
@@ -357,12 +355,12 @@ class MottaStatistikkTest {
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
+        val resendSakstatistikkJobb =
+            ResendSakstatistikkJobb(sakStatistikkService)
         val jobbAppender = MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
             resendSakstatistikkJobb,
-            postgresRepositoryRegistry
         )
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
             jobbAppender
@@ -371,8 +369,7 @@ class MottaStatistikkTest {
         val lagreOppgaveHendelseJobb =
             LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb(
-                    jobbAppender,
-                    postgresRepositoryRegistry
+                    jobbAppender
                 )
             )
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
@@ -446,8 +443,7 @@ class MottaStatistikkTest {
         lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
     ): Motor {
         val lagreOppgaveJobb = LagreOppgaveJobb(
-            jobbAppender,
-            postgresRepositoryRegistry
+            jobbAppender
         )
         return motor(
             dataSource = dataSource,
@@ -521,7 +517,7 @@ class MottaStatistikkTest {
             jobbAppender1
         )
 
-        val lagreOppgaveJobb = LagreOppgaveJobb(jobbAppender1, postgresRepositoryRegistry)
+        val lagreOppgaveJobb = LagreOppgaveJobb(jobbAppender1)
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(lagreOppgaveJobb)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
@@ -539,7 +535,7 @@ class MottaStatistikkTest {
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
 
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb { TODO() }
+        val resendSakstatistikkJobb = ResendSakstatistikkJobb() { TODO() }
         val motor = motor(
             dataSource = dataSource,
             jobber = listOf(
@@ -557,7 +553,6 @@ class MottaStatistikkTest {
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
             resendSakstatistikkJobb,
-            postgresRepositoryRegistry
         )
 
         testKlient(
@@ -577,7 +572,7 @@ class MottaStatistikkTest {
 
             dataSource.transaction(readOnly = true) {
                 ventPåSvar({
-                    PostmottakBehandlingRepository(
+                    PostmottakBehandlingRepositoryImpl(
                         it
                     ).hentEksisterendeBehandling(referanse)
                 }, { it != null })

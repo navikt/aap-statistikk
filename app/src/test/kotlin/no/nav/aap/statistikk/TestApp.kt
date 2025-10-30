@@ -56,7 +56,7 @@ fun main() {
                 issuer = "tilgang",
                 tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
                 clientSecret = "xxx",
-            ), bigQueryClient, bigQueryClient, defaultGatewayProvider()
+            ), bigQueryClient, bigQueryClient, defaultGatewayProvider(), postgresRepositoryRegistry
         )
     }.start(wait = true)
 }
