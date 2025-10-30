@@ -366,7 +366,8 @@ class MockJobbAppender : JobbAppender {
 
     override fun leggTilLagreSakTilBigQueryJobb(
         connection: DBConnection,
-        behandlingId: BehandlingId
+        behandlingId: BehandlingId,
+        delayInMillis: Long
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId.")
         bigQueryJobber.add(behandlingId)

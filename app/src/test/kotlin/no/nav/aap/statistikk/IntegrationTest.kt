@@ -311,32 +311,7 @@ class IntegrationTest {
             FlytJobbRepository(it).leggTil(
                 JobbInput(
                     LagreOppgaveHendelseJobb(
-                        LagreOppgaveJobb(
-                            object : JobbAppender {
-                                override fun leggTil(connection: DBConnection, jobb: JobbInput) {
-                                    TODO()
-                                }
-
-                                override fun leggTilLagreSakTilBigQueryJobb(
-                                    connection: DBConnection, behandlingId: BehandlingId
-                                ) {
-                                    println("!!!!!!!!!!!!!!!!!!!!!!")
-                                    TODO()
-                                }
-
-                                override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                                    connection: DBConnection, behandlingId: BehandlingId
-                                ) {
-                                    TODO("Not yet implemented")
-                                }
-
-                                override fun leggTilResendSakstatistikkJobb(
-                                    connection: DBConnection, behandlingId: BehandlingId
-                                ) {
-                                    TODO("Not yet implemented")
-                                }
-                            }
-                        )
+                        LagreOppgaveJobb(MockJobbAppender())
                     )
                 ).medPayload(
                     DefaultJsonMapper.toJson(hendelse)

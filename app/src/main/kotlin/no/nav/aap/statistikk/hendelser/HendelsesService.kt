@@ -51,7 +51,10 @@ class HendelsesService(
                         .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")
                     jobbAppender.leggTilLagreSakTilBigQueryJobb(
                         connection,
-                        it
+                        it,
+                        // Veldig hacky! Dette er for at jobben som kjører fra oppgave-appen
+                        // skal få tid til å oppdater enhet-tabellen før denne kjører.
+                        delayInMillis = 500L
                     )
                 },
                 opprettRekjørSakstatistikkCallback = {
