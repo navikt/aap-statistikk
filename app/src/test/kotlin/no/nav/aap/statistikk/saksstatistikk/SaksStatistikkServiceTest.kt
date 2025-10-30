@@ -67,7 +67,7 @@ class SaksStatistikkServiceTest {
             .isEqualTo(bQSakRepository.saker.first())
 
         assertThat(alleHendelser.last().ansvarligEnhetKode).isEqualTo("0220")
-
+        assertThat(alleHendelser.map { it.endretTid }).doesNotHaveDuplicates()
         assertThat(alleHendelser.size).isEqualTo(2)
     }
 

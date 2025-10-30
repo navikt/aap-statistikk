@@ -119,7 +119,7 @@ class BehandlingRepositoryTest {
             },
         )
         assertThat(uthentet.returÅrsak).isEqualTo("MANGELFULL_BEGRUNNELSE")
-        assertThat(uthentet.oppdatertTidspunkt).isCloseTo(
+        assertThat(uthentet.oppdatertTidspunkt()).isCloseTo(
             LocalDateTime.now(clock).minusMinutes(1),
             within(500, ChronoUnit.MILLIS)
         )

@@ -46,7 +46,7 @@ data class Behandling(
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<Vurderingsbehov> = listOf(),
     val resultat: ResultatKode? = null,
-    val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
+    private val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
     val hendelser: List<BehandlingHendelse> = listOf(),
     val opprettetAv: String? = null,
 ) {
@@ -110,6 +110,10 @@ data class Behandling(
     fun avsluttetTid(): LocalDateTime {
         return hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }
             .maxOf { it.hendelsesTidspunkt }
+    }
+
+    fun oppdatertTidspunkt(): LocalDateTime {
+        return hendelser.maxOfOrNull { it.hendelsesTidspunkt } ?: this.oppdatertTidspunkt!!
     }
 
     fun resultat(): ResultatKode? {

@@ -119,7 +119,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setEnumName(c++, behandling.gjeldendeStegGruppe)
                 setString(c++, behandling.returÅrsak)
                 setEnumName(c++, behandling.resultat)
-                setLocalDateTime(c++, behandling.oppdatertTidspunkt)
+                setLocalDateTime(c++, behandling.oppdatertTidspunkt())
                 setBoolean(c++, false)
                 setString(c++, behandling.utbetalingId())
             }
@@ -206,7 +206,7 @@ WHERE ident = ?""", behandling.relaterteIdenter
                 setEnumName(c++, behandling.gjeldendeStegGruppe)
                 setString(c++, behandling.returÅrsak)
                 setEnumName(c++, behandling.resultat)
-                setLocalDateTime(c++, behandling.oppdatertTidspunkt)
+                setLocalDateTime(c++, behandling.oppdatertTidspunkt())
                 setBoolean(c++, false)
                 setString(c++, behandling.utbetalingId())
             }
