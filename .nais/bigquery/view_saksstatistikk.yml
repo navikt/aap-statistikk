@@ -44,6 +44,9 @@ spec:
         ansvarlig_enhet_kode AS ansvarlig_enhet,
         sak_ytelse,
         behandling_resultat,
-        resultat_begrunnelse
+        resultat_begrunnelse,
+        NULL AS utbetalt_tid,
+        NULL AS forventet_oppstart_tid,
+        NULL AS sak_utland
       FROM
         `datastream_hendelser.public_saksstatistikk`
