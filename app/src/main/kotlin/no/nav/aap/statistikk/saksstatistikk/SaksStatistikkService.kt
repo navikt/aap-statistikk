@@ -230,6 +230,10 @@ class SaksStatistikkService(
         check(originaleMedNyData.map { it.endretTid }
             .toSet() == originaleHendelser.map { it.endretTid }.toSet())
 
+        val nyeTidspunkter = nyeHendelser.map { it.endretTid }.toSet().minus(originaleMedNyData.map { it.endretTid }.toSet())
+        val gamleTidspunkter = originaleHendelser.map { it.endretTid }.toSet().minus(nyeHendelser.map { it.endretTid }.toSet())
+        log.info("Nye tidspunkter: $nyeTidspunkter. Gamle tidspunkter: $gamleTidspunkter.")
+
         return (nyeQueue.toList() + originaleMedNyData).sortedBy { it.endretTid }
             .fold(listOf()) { acc, curr ->
                 val forrige = acc.lastOrNull()
