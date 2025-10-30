@@ -54,7 +54,7 @@ class HendelsesService(
                         it,
                         // Veldig hacky! Dette er for at jobben som kjører fra oppgave-appen
                         // skal få tid til å oppdater enhet-tabellen før denne kjører.
-                        delayInMillis = 500L
+                        delayInMillis = 1000L
                     )
                 },
                 opprettRekjørSakstatistikkCallback = {
