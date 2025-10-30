@@ -119,7 +119,7 @@ fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.Grunnla
 
 fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag {
     val grunnlagYrkesskade = beregningsgrunnlagDTO.grunnlagYrkesskade
-    @Suppress("LocalVariableName") val grunnlag11_19dto = beregningsgrunnlagDTO.grunnlag11_19dto
+    @Suppress("LocalVariableName", "VariableNaming") val grunnlag11_19dto = beregningsgrunnlagDTO.grunnlag11_19dto
     val grunnlagUføre = beregningsgrunnlagDTO.grunnlagUføre
     return when {
         grunnlag11_19dto != null -> IBeregningsGrunnlag.Grunnlag_11_19(

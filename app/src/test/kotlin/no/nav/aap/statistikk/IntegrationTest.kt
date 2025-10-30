@@ -249,7 +249,7 @@ class IntegrationTest {
             testUtil.ventPåSvar()
         }
 
-        val alleSakstatistikkHendelser = dataSource.transaction { it ->
+        val alleSakstatistikkHendelser = dataSource.transaction {
             SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
                 avsluttetBehandlingHendelser.last().data.behandlingReferanse
             ).sortedBy { it.endretTid }
