@@ -47,6 +47,7 @@ spec:
         resultat_begrunnelse,
         NULL AS utbetalt_tid,
         NULL AS forventet_oppstart_tid,
-        NULL AS sak_utland
+        NULL AS sak_utland,
+        er_relast
       FROM
         `datastream_hendelser.public_saksstatistikk`
