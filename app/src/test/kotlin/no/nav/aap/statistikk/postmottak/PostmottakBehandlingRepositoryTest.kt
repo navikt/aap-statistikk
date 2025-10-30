@@ -44,7 +44,7 @@ class PostmottakBehandlingRepositoryTest {
     @Test
     fun `ikke-eksisterende behandling returnerer null`(@Postgres dataSource: DataSource) {
         val uthentet = dataSource.transaction {
-            PostmottakBehandlingRepository(it).hentEksisterendeBehandling(UUID.randomUUID())
+            PostmottakBehandlingRepositoryImpl(it).hentEksisterendeBehandling(UUID.randomUUID())
         }
 
         assertNull(uthentet)
@@ -76,7 +76,7 @@ class PostmottakBehandlingRepositoryTest {
         assertThat(uthentet!!.endringer()).hasSize(1)
 
         dataSource.transaction {
-            PostmottakBehandlingRepository(it).oppdaterBehandling(
+            PostmottakBehandlingRepositoryImpl(it).oppdaterBehandling(
                 uthentet.referanse, PostmottakOppdatering(
                     gjeldende = true,
                     status = "enstatus",
@@ -100,7 +100,7 @@ class PostmottakBehandlingRepositoryTest {
         dataSource: DataSource,
         behandling: PostmottakBehandling
     ) = dataSource.transaction {
-        PostmottakBehandlingRepository(it).hentEksisterendeBehandling(behandling.referanse)
+        PostmottakBehandlingRepositoryImpl(it).hentEksisterendeBehandling(behandling.referanse)
     }
 
     private fun opprettBehandling(
@@ -109,7 +109,7 @@ class PostmottakBehandlingRepositoryTest {
         val personMedId =
             PersonService(PersonRepository(it)).hentEllerLagrePerson(postmottakBehandling.person.ident)
         postmottakBehandling.person.settId(personMedId.id()!!)
-        val id = PostmottakBehandlingRepository(it).opprettBehandling(
+        val id = PostmottakBehandlingRepositoryImpl(it).opprettBehandling(
             postmottakBehandling
         )
         postmottakBehandling.medId(id)

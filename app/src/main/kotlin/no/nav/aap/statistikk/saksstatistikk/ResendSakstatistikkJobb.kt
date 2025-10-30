@@ -5,6 +5,7 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.postgresRepositoryRegistry
 import org.slf4j.LoggerFactory
 
 class ResendSakstatistikkJobbUtfører(
@@ -31,7 +32,7 @@ class ResendSakstatistikkJobb(
     override fun konstruer(connection: DBConnection): JobbUtfører {
         return ResendSakstatistikkJobbUtfører(
             sakStatikkService = sakStatistikkService(connection),
-            sakstatistikkRepository = SakstatistikkRepositoryImpl(connection)
+            sakstatistikkRepository = postgresRepositoryRegistry.provider(connection).provide()
         )
     }
 

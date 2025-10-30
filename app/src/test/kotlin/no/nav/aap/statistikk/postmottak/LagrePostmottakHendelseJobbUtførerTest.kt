@@ -91,7 +91,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
         dataSource: DataSource,
         referanse: UUID
     ) = dataSource.transaction {
-        PostmottakBehandlingRepository(it).hentEksisterendeBehandling(
+        PostmottakBehandlingRepositoryImpl(it).hentEksisterendeBehandling(
             referanse
         )
     }
@@ -100,7 +100,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
         payload: DokumentflytStoppetHendelse
     ): (DBConnection) -> Unit = {
         LagrePostmottakHendelseJobbUtfører(
-            PostmottakBehandlingService(PostmottakBehandlingRepository(it)), PersonService(
+            PostmottakBehandlingService(PostmottakBehandlingRepositoryImpl(it)), PersonService(
                 PersonRepository(it)
             )
         ).utfør(

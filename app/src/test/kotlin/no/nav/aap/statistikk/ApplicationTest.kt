@@ -62,7 +62,6 @@ class ApplicationTest {
                 hendelsesService = hendelsesService,
             ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb(
-                    mockk(),
                     mockk()
                 )
             ),
@@ -196,7 +195,6 @@ class ApplicationTest {
             LagreStoppetHendelseJobb(hendelsesService),
             LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb(
-                    mockk(),
                     mockk()
                 )
             ),

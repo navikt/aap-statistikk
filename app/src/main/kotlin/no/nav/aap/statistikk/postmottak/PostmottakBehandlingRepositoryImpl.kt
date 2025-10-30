@@ -1,14 +1,30 @@
 package no.nav.aap.statistikk.postmottak
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.Repository
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.person.Person
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class PostmottakBehandlingRepository(private val dbConnection: DBConnection) {
-    private val logger = LoggerFactory.getLogger(PostmottakBehandlingRepository::class.java)
-    fun opprettBehandling(behandling: PostmottakBehandling): Long {
+interface PostmottakBehandlingRepository : Repository {
+    fun opprettBehandling(behandling: PostmottakBehandling): Long
+    fun hentEksisterendeBehandling(referanse: UUID): PostmottakBehandling?
+    fun oppdaterBehandling(referanse: UUID, behandling: PostmottakOppdatering)
+}
+
+class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection) :
+    PostmottakBehandlingRepository {
+    private val logger = LoggerFactory.getLogger(PostmottakBehandlingRepositoryImpl::class.java)
+
+    companion object : RepositoryFactory<PostmottakBehandlingRepository> {
+        override fun konstruer(connection: DBConnection): PostmottakBehandlingRepository {
+            return PostmottakBehandlingRepositoryImpl(connection)
+        }
+    }
+
+    override fun opprettBehandling(behandling: PostmottakBehandling): Long {
         val sql = """
             INSERT INTO postmottak_behandling(journalpost_id, referanse, person_id, type_behandling,
                                               mottatt_tid)
@@ -47,7 +63,7 @@ class PostmottakBehandlingRepository(private val dbConnection: DBConnection) {
         return id
     }
 
-    fun hentEksisterendeBehandling(referanse: UUID): PostmottakBehandling? {
+    override fun hentEksisterendeBehandling(referanse: UUID): PostmottakBehandling? {
         val sql = """
             SELECT * FROM postmottak_behandling pb JOIN person p ON p.id = pb.person_id WHERE referanse = ? 
         """.trimIndent()
@@ -91,7 +107,7 @@ class PostmottakBehandlingRepository(private val dbConnection: DBConnection) {
         return behandling.medEndringer(endringer)
     }
 
-    fun oppdaterBehandling(referanse: UUID, behandling: PostmottakOppdatering) {
+    override fun oppdaterBehandling(referanse: UUID, behandling: PostmottakOppdatering) {
         // Sett forrige oppdatering til ikke-gjeldende:
         val sqlSettIkkeGjeldende = """
             update postmottak_behandling_historikk set gjeldende = false where postmottak_behandling_id = (select b.id from postmottak_behandling b where b.referanse = ?)

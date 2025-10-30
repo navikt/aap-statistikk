@@ -3,12 +3,19 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import org.slf4j.LoggerFactory
 import java.util.*
 
 class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
     SakstatistikkRepository {
+
+    companion object : RepositoryFactory<SakstatistikkRepository> {
+        override fun konstruer(connection: DBConnection): SakstatistikkRepository {
+            return SakstatistikkRepositoryImpl(connection)
+        }
+    }
 
     private val log = LoggerFactory.getLogger(javaClass)
 
