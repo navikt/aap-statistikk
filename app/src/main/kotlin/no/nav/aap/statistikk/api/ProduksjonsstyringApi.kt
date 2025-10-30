@@ -87,28 +87,18 @@ private val log = LoggerFactory.getLogger("ProduksjonsstyringApi")
 
 val modules = TagModule(listOf(Tags.Produksjonsstyring))
 
+data class BehandlingstidPerDagInput(
+    @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
+    ),
+    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+)
+
+data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
+
 fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     transactionExecutor: TransactionExecutor
 ) {
-    data class BehandlingstidPerDagInput(
-        @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
-        ),
-        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
-    )
-
-    data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
-    route("/behandlingstid").get<BehandlingstidPerDagInput, List<BehandlingstidPerDagDTO>>(
-        modules,
-        EndpointInfo(summary = "For en gitt dag, hva er gjennomsnittlig alder på alle behandlinger som ble avsluttet på denne dagen.")
-    ) { req ->
-        val respons = transactionExecutor.withinTransaction { conn ->
-            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(
-                req.behandlingstyper ?: listOf(), req.enheter.orEmpty()
-            )
-        }
-
-        respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
-    }
+    getBehandlingstidPerDag(transactionExecutor)
 
     data class ÅpneBehandlingerPerBehandlingstypeInput(
         @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
@@ -146,15 +136,22 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction {
             val (startDato, sluttDato) = when (req.oppslagsPeriode) {
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now().plusDays(1)
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now()
+                    .plusDays(1)
+
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now()
+                    .minusDays(1) to LocalDate.now()
+
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN -> LocalDate.now()
+                    .minusDays(7) to LocalDate.now()
+
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now()
+                    .minusDays(14) to LocalDate.now().minusDays(7)
             }
 
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnittGittPeriode(
                 behandlingsTyper = req.behandlingstyper.orEmpty(),
-                enheter =  req.enheter ?: listOf(),
+                enheter = req.enheter ?: listOf(),
                 startDato = startDato,
                 sluttDato = sluttDato
             )
@@ -248,10 +245,17 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction { connection ->
             val (startDato, sluttDato) = when (req.oppslagsPeriode) {
-                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now().plusDays(1)
-                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
-                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
-                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now()
+                    .plusDays(1)
+
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now()
+                    .minusDays(1) to LocalDate.now()
+
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN -> LocalDate.now()
+                    .minusDays(7) to LocalDate.now()
+
+                OppgaverPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now()
+                    .minusDays(14) to LocalDate.now().minusDays(7)
             }
             val repo = ProduksjonsstyringRepository(connection)
             val behandlingstyper = req.behandlingstyper.orEmpty()
@@ -351,10 +355,17 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
             val repo = ProduksjonsstyringRepository(connection)
 
             val (startDato, sluttDato) = when (req.oppslagsPeriode) {
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now().plusDays(1)
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now().minusDays(1) to LocalDate.now()
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN-> LocalDate.now().minusDays(7) to LocalDate.now()
-                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now().minusDays(14) to LocalDate.now().minusDays(7)
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IDAG -> LocalDate.now() to LocalDate.now()
+                    .plusDays(1)
+
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.IGÅR -> LocalDate.now()
+                    .minusDays(1) to LocalDate.now()
+
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.DENNE_UKEN -> LocalDate.now()
+                    .minusDays(7) to LocalDate.now()
+
+                BehandlingerPerBehandlingstypeInputMedPeriode.OppslagsPeriode.FORRIGE_UKE -> LocalDate.now()
+                    .minusDays(14) to LocalDate.now().minusDays(7)
             }
 
             repo.venteÅrsakOgGjennomsnittGittPeriode(
@@ -413,5 +424,22 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
             }
         }
         respond(respons)
+    }
+}
+
+private fun NormalOpenAPIRoute.getBehandlingstidPerDag(
+    transactionExecutor: TransactionExecutor
+) {
+    route("/behandlingstid").get<BehandlingstidPerDagInput, List<BehandlingstidPerDagDTO>>(
+        modules,
+        EndpointInfo(summary = "For en gitt dag, hva er gjennomsnittlig alder på alle behandlinger som ble avsluttet på denne dagen.")
+    ) { req ->
+        val respons = transactionExecutor.withinTransaction { conn ->
+            ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(
+                req.behandlingstyper ?: listOf(), req.enheter.orEmpty()
+            )
+        }
+
+        respond(respons.map { BehandlingstidPerDagDTO(it.dag, it.snitt) })
     }
 }
