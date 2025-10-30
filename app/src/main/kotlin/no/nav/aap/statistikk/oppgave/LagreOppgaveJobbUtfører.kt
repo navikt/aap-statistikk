@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
@@ -35,13 +36,15 @@ class LagreOppgaveJobb(
             OppgaveHendelseRepository(connection),
             OppgaveHistorikkLagrer.konstruer(
                 connection,
-                postgresRepositoryRegistry.provider(connection),
-                {
+                postgresRepositoryRegistry.provider(connection)
+            ) {
+                if (Miljø.erProd()) {
                     jobbAppender.leggTilLagreSakTilBigQueryJobb(
                         connection,
                         it
                     )
-                })
+                }
+            }
         )
     }
 
