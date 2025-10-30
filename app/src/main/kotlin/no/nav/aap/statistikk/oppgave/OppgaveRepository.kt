@@ -68,43 +68,10 @@ SELECT COALESCE(
     fun oppdaterOppgave(oppgave: Oppgave) {
         require(oppgave.id != null)
         // Sjekk reservasjon-status
-        if (oppgave.reservasjon == null) {
-            val setNullSql = """
-                update oppgave set reservasjon_id = null where id = ?
-            """.trimIndent()
-
-            dbConnection.execute(setNullSql) {
-                setParams { setLong(1, oppgave.id) }
-            }
-
-            val sql = """
-                delete from reservasjon where id in (select reservasjon_id from oppgave where id = ?)
-            """.trimIndent()
-
-            dbConnection.execute(sql) {
-                setParams {
-                    setLong(1, oppgave.id)
-                }
-            }
-        } else {
-            // Først fjern evnt eksisterende reservasjoner
-            val gammelReservasjonId =
-                dbConnection.queryFirstOrNull("select reservasjon_id from oppgave where id = ?") {
-                    setParams { setLong(1, oppgave.id) }
-                    setRowMapper { it.getLongOrNull("reservasjon_id") }
-                }
-
-            dbConnection.execute("update oppgave set reservasjon_id = null where id = ?") {
-                setParams {
-                    setLong(1, oppgave.id)
-                }
-            }
-
-            dbConnection.execute("delete from reservasjon where id = ?") {
-                setParams {
-                    setLong(1, gammelReservasjonId)
-                }
-            }
+        // Først fjern evnt eksisterende reservasjoner
+        fjernEksisterendeReservasjoner(oppgave.id)
+        if (oppgave.reservasjon != null) {
+            fjernEksisterendeReservasjoner(oppgave.id)
 
             // Sett inn på nytt
             val sql = """
@@ -135,37 +102,38 @@ where id = ?"""
         }
 
         // Oppdater enhetstilknytning
-        dbConnection.execute("update oppgave set enhet_id = ? where id = ?") {
+        dbConnection.execute(
+            """update oppgave
+                   set enhet_id           = ?,
+                       status             = ?,
+                       har_hastemarkering = ?
+                   where id = ?"""
+        ) {
             setParams {
                 setLong(1, oppgave.enhet.id)
-                setLong(2, oppgave.id)
+                setEnumName(2, oppgave.status)
+                setBoolean(3, oppgave.harHasteMarkering)
+                setLong(4, oppgave.id)
+            }
+        }
+    }
+
+    private fun fjernEksisterendeReservasjoner(id: Long) {
+        val gammelReservasjonId =
+            dbConnection.queryFirstOrNull("select reservasjon_id from oppgave where id = ?") {
+                setParams { setLong(1, id) }
+                setRowMapper { it.getLongOrNull("reservasjon_id") }
+            }
+
+        dbConnection.execute("update oppgave set reservasjon_id = null where id = ?") {
+            setParams {
+                setLong(1, id)
             }
         }
 
-        val sql = """
-            update oppgave
-            set status = ?
-            where id = ?
-        """.trimIndent()
-
-        dbConnection.execute(sql) {
+        dbConnection.execute("delete from reservasjon where id = ?") {
             setParams {
-                setEnumName(1, oppgave.status)
-                setLong(2, oppgave.id)
-            }
-        }
-
-        // Oppdater hastemarkering
-        val sqlOppdaterHastemarkering = """
-            update oppgave
-            set har_hastemarkering = ?
-            where id = ?
-        """.trimIndent()
-
-        dbConnection.execute(sqlOppdaterHastemarkering) {
-            setParams {
-                setBoolean(1, oppgave.harHasteMarkering)
-                setLong(2, oppgave.id)
+                setLong(1, gammelReservasjonId)
             }
         }
     }

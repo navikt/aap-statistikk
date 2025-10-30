@@ -61,10 +61,6 @@ annotation class Fakes {
     }
 
     class PdlFake(port: Int = 0) {
-        init {
-            System.setProperty("integrasjon.pdl.url", "http://localhost:$port")
-            System.setProperty("integrasjon.pdl.scope", "xxx")
-        }
         private val pdl = embeddedServer(Netty, port = port, module = { pdl() })
 
         fun start() {
@@ -73,6 +69,10 @@ annotation class Fakes {
 
         fun close() {
             pdl.stop(500L, 10_000L)
+        }
+
+        fun port(): Int {
+            return pdl.port()
         }
 
         private fun Application.pdl() {
@@ -124,6 +124,8 @@ annotation class Fakes {
         override fun beforeAll(context: ExtensionContext) {
             azure.start()
             pdl.start()
+            System.setProperty("integrasjon.pdl.url", "http://localhost:${pdl.port()}")
+            System.setProperty("integrasjon.pdl.scope", "xxx")
         }
 
         override fun afterAll(context: ExtensionContext) {
