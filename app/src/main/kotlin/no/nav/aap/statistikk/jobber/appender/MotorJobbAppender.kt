@@ -12,6 +12,7 @@ import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 class MotorJobbAppender(
     private val lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
@@ -29,7 +30,8 @@ class MotorJobbAppender(
 
     override fun leggTilLagreSakTilBigQueryJobb(
         connection: DBConnection,
-        behandlingId: BehandlingId
+        behandlingId: BehandlingId,
+        delayInMillis: Long
     ) {
         val behandling =
             postgresRepositoryRegistry.provider(connection).provide<IBehandlingRepository>()
@@ -43,7 +45,9 @@ class MotorJobbAppender(
         leggTil(
             connection,
             // For sak = behandlingId. Husk at "sak" er funksjonalt bare en concurrency-key
-            JobbInput(lagreSakinfoTilBigQueryJobb).medPayload(behandlingId)
+            JobbInput(lagreSakinfoTilBigQueryJobb)
+                .medPayload(behandlingId)
+                .medNesteKjøring(LocalDateTime.now().plusNanos(delayInMillis * 1000))
                 .forSak(stringToNumber(saksnummer.value))
         )
     }
