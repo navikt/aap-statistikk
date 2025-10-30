@@ -12,4 +12,5 @@ fun createGatewayProvider(body: GatewayRegistry.() -> Unit): GatewayProvider {
 /* Burde endre GatewayRegistry til å ikke være stateful. */
 fun defaultGatewayProvider(utvidelser: GatewayRegistry.() -> Unit = {}) = createGatewayProvider {
     register<PdlGraphQLGateway>()
+    utvidelser()
 }

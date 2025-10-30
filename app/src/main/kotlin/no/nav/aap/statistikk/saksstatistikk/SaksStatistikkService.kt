@@ -293,9 +293,10 @@ class SaksStatistikkService(
         behandling: Behandling
     ): String? {
         return when (behandling.status) {
-            BehandlingStatus.OPPRETTET -> null
+            BehandlingStatus.OPPRETTET,
             BehandlingStatus.UTREDES -> null
-            BehandlingStatus.IVERKSETTES -> null
+
+            BehandlingStatus.IVERKSETTES,
             BehandlingStatus.AVSLUTTET -> {
                 val behandlingReferanse = behandling.referanse
                 val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
