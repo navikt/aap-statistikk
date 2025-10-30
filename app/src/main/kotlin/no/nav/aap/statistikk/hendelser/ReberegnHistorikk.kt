@@ -27,7 +27,7 @@ class ReberegnHistorikk {
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
-                    hendelsesTidspunkt = curr.map { it.tidspunktSisteEndring() }.max(),
+                    hendelsesTidspunkt = curr.tidspunktSisteEndring()!!,
                     avklaringsBehov = curr.utledGjeldendeAvklaringsBehov()?.kode?.name,
                     avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
                     steggruppe = curr.utledGjeldendeStegType()?.gruppe,

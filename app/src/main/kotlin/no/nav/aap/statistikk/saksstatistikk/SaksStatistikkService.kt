@@ -124,7 +124,7 @@ class SaksStatistikkService(
             saksnummer = sak.saksnummer.value,
             tekniskTid = LocalDateTime.now(clock),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
-            endretTid = behandling.oppdatertTidspunkt ?: sisteHendelse.hendelsesTidspunkt,
+            endretTid = behandling.oppdatertTidspunkt(),
             versjon = sisteHendelse.versjon.verdi,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             opprettetAv = behandling.opprettetAv ?: KELVIN,
