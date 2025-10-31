@@ -106,8 +106,14 @@ class SaksStatistikkService(
             log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
         }
 
+        val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
+
+        if (saksbehandlerIdent == null) {
+            log.info("Fant ikke siste saksbehandler for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
+        }
+
         val saksbehandler =
-            if (erSkjermet) "-5" else sisteHendelse.saksbehandler?.ident
+            if (erSkjermet) "-5" else saksbehandlerIdent
 
         if (behandling.årsaker.size > 1) {
             log.info("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
@@ -230,8 +236,10 @@ class SaksStatistikkService(
         check(originaleMedNyData.map { it.endretTid }
             .toSet() == originaleHendelser.map { it.endretTid }.toSet())
 
-        val nyeTidspunkter = nyeHendelser.map { it.endretTid }.toSet().minus(originaleMedNyData.map { it.endretTid }.toSet())
-        val gamleTidspunkter = originaleHendelser.map { it.endretTid }.toSet().minus(nyeHendelser.map { it.endretTid }.toSet())
+        val nyeTidspunkter = nyeHendelser.map { it.endretTid }.toSet()
+            .minus(originaleMedNyData.map { it.endretTid }.toSet())
+        val gamleTidspunkter = originaleHendelser.map { it.endretTid }.toSet()
+            .minus(nyeHendelser.map { it.endretTid }.toSet())
         log.info("Nye tidspunkter: $nyeTidspunkter. Gamle tidspunkter: $gamleTidspunkter.")
 
         return (nyeQueue.toList() + originaleMedNyData).sortedBy { it.endretTid }
