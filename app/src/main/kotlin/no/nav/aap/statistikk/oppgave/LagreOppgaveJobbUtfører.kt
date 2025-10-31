@@ -2,11 +2,9 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 
 
@@ -24,9 +22,7 @@ class LagreOppgaveJobbUtfører(
     }
 }
 
-class LagreOppgaveJobb(
-    private val jobbAppender: JobbAppender
-) : Jobb {
+class LagreOppgaveJobb : Jobb {
     override fun beskrivelse(): String {
         return "Henter rene oppgavehendelser fra databasen og konverterer til modell."
     }
@@ -37,14 +33,7 @@ class LagreOppgaveJobb(
             OppgaveHistorikkLagrer.konstruer(
                 connection,
                 postgresRepositoryRegistry.provider(connection)
-            ) {
-                if (Miljø.erProd()) {
-                    jobbAppender.leggTilLagreSakTilBigQueryJobb(
-                        connection,
-                        it
-                    )
-                }
-            }
+            )
         )
     }
 

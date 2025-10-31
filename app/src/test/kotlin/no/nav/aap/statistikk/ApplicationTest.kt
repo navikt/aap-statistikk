@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk
 
-import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.httpclient.Header
@@ -61,9 +60,7 @@ class ApplicationTest {
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
                 hendelsesService = hendelsesService,
             ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
-                LagreOppgaveJobb(
-                    mockk()
-                )
+                LagreOppgaveJobb()
             ),
             lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(),
             lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
@@ -194,9 +191,7 @@ class ApplicationTest {
             azureConfig,
             LagreStoppetHendelseJobb(hendelsesService),
             LagreOppgaveHendelseJobb(
-                LagreOppgaveJobb(
-                    mockk()
-                )
+                LagreOppgaveJobb()
             ),
             LagrePostmottakHendelseJobb(),
             LagreAvklaringsbehovHendelseJobb(hendelsesService),

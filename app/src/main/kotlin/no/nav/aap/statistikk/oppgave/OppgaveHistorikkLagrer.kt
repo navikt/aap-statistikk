@@ -2,9 +2,6 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
-import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -15,24 +12,19 @@ class OppgaveHistorikkLagrer(
     private val oppgaveRepository: OppgaveRepository,
     private val enhetRepository: EnhetRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
-    private val behandlingRepository: IBehandlingRepository,
-    private val lagreSakInfotilBigQueryCallback: (BehandlingId) -> Unit
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
     companion object {
         fun konstruer(
             dbConnection: DBConnection,
-            repositoryProvider: RepositoryProvider,
-            lagreSakInfotilBigQueryCallback: (BehandlingId) -> Unit
+            repositoryProvider: RepositoryProvider
         ): OppgaveHistorikkLagrer {
             return OppgaveHistorikkLagrer(
                 personService = PersonService(repositoryProvider),
                 oppgaveRepository = OppgaveRepository(dbConnection),
                 enhetRepository = EnhetRepository(dbConnection),
                 saksbehandlerRepository = SaksbehandlerRepository(dbConnection),
-                behandlingRepository = repositoryProvider.provide(),
-                lagreSakInfotilBigQueryCallback = lagreSakInfotilBigQueryCallback
             )
         }
     }
@@ -69,21 +61,6 @@ class OppgaveHistorikkLagrer(
             oppgaveRepository.oppdaterOppgave(oppgaveMedOppdaterteFelter.copy(id = eksisterendeOppgave.id))
         } else {
             oppgaveRepository.lagreOppgave(oppgaveMedOppdaterteFelter)
-        }
-
-        if (oppgave.behandlingReferanse != null) {
-            val behandling = behandlingRepository.hent(oppgave.behandlingReferanse.referanse)
-
-            if (behandling != null) {
-                if (behandling.typeBehandling != TypeBehandling.Oppfølgingsbehandling) {
-                    log.info("Kaller lagreSakInfotilBigQueryCallback: $lagreSakInfotilBigQueryCallback")
-                    lagreSakInfotilBigQueryCallback(behandling.id!!)
-                }
-            } else {
-                log.info("Fant ikke behandling tilknyttet oppgaven, behandlingReferanse=${oppgave.behandlingReferanse.referanse}")
-            }
-        } else {
-            log.info("Mangler behandlingReferanse for oppgaven, oppgaveId=${oppgave.id}")
         }
     }
 }
