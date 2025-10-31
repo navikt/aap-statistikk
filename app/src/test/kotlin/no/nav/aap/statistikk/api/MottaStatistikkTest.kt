@@ -77,11 +77,7 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             fakeLagreStoppetHendelseJobb(),
-            LagreOppgaveHendelseJobb(
-                LagreOppgaveJobb(
-                    jobbAppender
-                )
-            ),
+            LagreOppgaveHendelseJobb(LagreOppgaveJobb()),
             LagrePostmottakHendelseJobb(),
             LagreAvklaringsbehovHendelseJobb { TODO() },
             jobbAppender,
@@ -283,11 +279,7 @@ class MottaStatistikkTest {
         }
         val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
         val lagreOppgaveHendelseJobb =
-            LagreOppgaveHendelseJobb(
-                LagreOppgaveJobb(
-                    jobbAppender
-                )
-            )
+            LagreOppgaveHendelseJobb(LagreOppgaveJobb())
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
 
@@ -367,11 +359,7 @@ class MottaStatistikkTest {
         )
 
         val lagreOppgaveHendelseJobb =
-            LagreOppgaveHendelseJobb(
-                LagreOppgaveJobb(
-                    jobbAppender
-                )
-            )
+            LagreOppgaveHendelseJobb(LagreOppgaveJobb())
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
         val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb { TODO() }
@@ -442,9 +430,7 @@ class MottaStatistikkTest {
         lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
         lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
     ): Motor {
-        val lagreOppgaveJobb = LagreOppgaveJobb(
-            jobbAppender
-        )
+        val lagreOppgaveJobb = LagreOppgaveJobb()
         return motor(
             dataSource = dataSource,
             jobber = listOf(
@@ -517,7 +503,7 @@ class MottaStatistikkTest {
             jobbAppender1
         )
 
-        val lagreOppgaveJobb = LagreOppgaveJobb(jobbAppender1)
+        val lagreOppgaveJobb = LagreOppgaveJobb()
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(lagreOppgaveJobb)
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
@@ -535,7 +521,7 @@ class MottaStatistikkTest {
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
 
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb() { TODO() }
+        val resendSakstatistikkJobb = ResendSakstatistikkJobb { TODO() }
         val motor = motor(
             dataSource = dataSource,
             jobber = listOf(
