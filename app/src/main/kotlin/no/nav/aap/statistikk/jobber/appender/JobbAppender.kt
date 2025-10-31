@@ -7,7 +7,7 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 interface JobbAppender {
     fun leggTil(connection: DBConnection, jobb: JobbInput)
     fun leggTilLagreSakTilBigQueryJobb(
-        connection: DBConnection, behandlingId: BehandlingId, delayInMillis: Long = 0
+        connection: DBConnection, behandlingId: BehandlingId, delayInSeconds: Long = 0
     )
 
     fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

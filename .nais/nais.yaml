@@ -102,3 +102,5 @@ spec:
       value: {{behandlingsflyt_azp}}
     - name: INTEGRASJON_OPPGAVE_AZP
       value: {{oppgave_azp}}
+    - name: HACKY_DELAY
+      value: "10"
