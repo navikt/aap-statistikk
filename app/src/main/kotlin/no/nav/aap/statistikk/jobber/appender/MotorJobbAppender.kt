@@ -31,7 +31,7 @@ class MotorJobbAppender(
     override fun leggTilLagreSakTilBigQueryJobb(
         connection: DBConnection,
         behandlingId: BehandlingId,
-        delayInMillis: Long
+        delayInSeconds: Long
     ) {
         val behandling =
             postgresRepositoryRegistry.provider(connection).provide<IBehandlingRepository>()
@@ -47,7 +47,7 @@ class MotorJobbAppender(
             // For sak = behandlingId. Husk at "sak" er funksjonalt bare en concurrency-key
             JobbInput(lagreSakinfoTilBigQueryJobb)
                 .medPayload(behandlingId)
-                .medNesteKjøring(LocalDateTime.now().plusNanos(delayInMillis * 1000))
+                .medNesteKjøring(LocalDateTime.now().plusSeconds(delayInSeconds))
                 .forSak(stringToNumber(saksnummer.value))
         )
     }

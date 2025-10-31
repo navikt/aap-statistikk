@@ -54,7 +54,7 @@ class HendelsesService(
                         it,
                         // Veldig hacky! Dette er for at jobben som kjører etter melidng fra
                         // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
-                        delayInMillis = 30_000L
+                        delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L
                     )
                 },
                 opprettRekjørSakstatistikkCallback = {
