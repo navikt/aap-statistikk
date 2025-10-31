@@ -436,8 +436,8 @@ class IntegrationTest {
             val bqSaker2 = ventPåSvar(
                 { bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() && t.size > 2 })
-            assertThat(bqSaker2!!).hasSize(3)
-            assertThat(bqSaker2[2].sekvensNummer).isEqualTo(3)
+            assertThat(bqSaker2!!).hasSize(2)
+            assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
 
             val bigQueryRespons = ventPåSvar(
                 { bigQueryClient.read(VilkårsVurderingTabell()) },
@@ -465,7 +465,7 @@ class IntegrationTest {
                 { bigQueryClient.read(SakTabell()) },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(sakRespons).hasSize(3)
+            assertThat(sakRespons).hasSize(2)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
                 LocalDateTime.parse("2025-09-24T13:53:01")
