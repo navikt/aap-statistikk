@@ -25,10 +25,8 @@ class ResendSakstatistikkJobbUtførerTest {
         }
 
         val input = JobbInput(
-            jobb = ResendSakstatistikkJobb(
-            ) {
+            jobb = ResendSakstatistikkJobb {
                 SaksStatistikkService.konstruer(
-                    it,
                     FakeBQSakRepository(),
                     gatewayProvider,
                     postgresRepositoryRegistry.provider(it)

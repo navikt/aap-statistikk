@@ -103,7 +103,6 @@ class ProduksjonsstyringRepositoryTest {
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
-                    conn,
                     gatewayProvider = defaultGatewayProvider { },
                     postgresRepositoryRegistry.provider(conn)
                 ) {},

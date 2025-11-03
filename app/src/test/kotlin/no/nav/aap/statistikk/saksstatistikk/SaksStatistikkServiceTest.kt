@@ -12,7 +12,7 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -87,7 +87,7 @@ class SaksStatistikkServiceTest {
                     opprettRekjørSakstatistikkCallback = { },
                 )
 
-                OppgaveHendelseRepository(it).lagreHendelse(
+                OppgaveHendelseRepositoryImpl(it).lagreHendelse(
                     OppgaveHendelse(
                         hendelse = HendelseType.OPPRETTET,
                         oppgaveId = 1L,

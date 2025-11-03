@@ -102,7 +102,6 @@ fun Application.startUp(
 
     val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
         SaksStatistikkService.konstruer(
-            it,
             bqSakRepository,
             gatewayProvider,
             repositoryRegistry.provider(it)
@@ -113,7 +112,7 @@ fun Application.startUp(
     val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
         ytelsesStatistikkTilBigQuery = { connection ->
             YtelsesStatistikkTilBigQuery.konstruer(
-                connection, bqRepository = bqYtelseRepository,
+                bqRepository = bqYtelseRepository,
                 repositoryProvider = repositoryRegistry.provider(connection)
             )
         }
@@ -133,7 +132,6 @@ fun Application.startUp(
         HendelsesService.konstruer(
             connection,
             AvsluttetBehandlingService.konstruer(
-                connection,
                 gatewayProvider = gatewayProvider,
                 repositoryProvider = repositoryProvider,
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->

@@ -37,7 +37,7 @@ import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -691,7 +691,7 @@ fun konstruerSakstatistikkService(
         bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
         bigQueryRepository = bQSakRepository,
         skjermingService = SkjermingService(FakePdlGateway()),
-        oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
+        oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(connection),
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
     )
 }

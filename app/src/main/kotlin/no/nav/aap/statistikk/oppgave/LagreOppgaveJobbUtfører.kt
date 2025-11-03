@@ -28,12 +28,10 @@ class LagreOppgaveJobb : Jobb {
     }
 
     override fun konstruer(connection: DBConnection): LagreOppgaveJobbUtfører {
+        val repositoryProvider = postgresRepositoryRegistry.provider(connection)
         return LagreOppgaveJobbUtfører(
-            OppgaveHendelseRepository(connection),
-            OppgaveHistorikkLagrer.konstruer(
-                connection,
-                postgresRepositoryRegistry.provider(connection)
-            )
+            repositoryProvider.provide(),
+            OppgaveHistorikkLagrer.konstruer(repositoryProvider)
         )
     }
 

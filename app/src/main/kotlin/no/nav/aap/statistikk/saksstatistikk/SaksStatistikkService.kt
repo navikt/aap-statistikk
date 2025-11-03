@@ -1,18 +1,15 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.hendelser.ferdigBehandletTid
 import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
@@ -37,19 +34,18 @@ class SaksStatistikkService(
 
     companion object {
         fun konstruer(
-            connection: DBConnection,
             bigQueryRepository: IBQSakstatistikkRepository,
             gatewayProvider: GatewayProvider,
             repositoryProvider: RepositoryProvider,
         ): SaksStatistikkService {
             return SaksStatistikkService(
                 behandlingRepository = repositoryProvider.provide(),
-                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
-                bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
+                rettighetstypeperiodeRepository = repositoryProvider.provide(),
+                bigQueryKvitteringRepository = repositoryProvider.provide(),
                 bigQueryRepository = bigQueryRepository,
                 skjermingService = SkjermingService.konstruer(gatewayProvider),
-                sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
-                oppgaveHendelseRepository = OppgaveHendelseRepository(connection),
+                sakstatistikkRepository = repositoryProvider.provide(),
+                oppgaveHendelseRepository = repositoryProvider.provide(),
             )
         }
     }

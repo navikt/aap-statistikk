@@ -5,10 +5,10 @@ import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.enhet.Enhet
-import no.nav.aap.statistikk.enhet.EnhetRepository
+import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.oppgave.BehandlingReferanse
 import no.nav.aap.statistikk.oppgave.Oppgave
-import no.nav.aap.statistikk.oppgave.OppgaveRepository
+import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -38,10 +38,10 @@ class BehandlingRepositoryTest {
 
         val enhet = dataSource.transaction {
             val enhetUtenId = Enhet(kode = "1337")
-            enhetUtenId.copy(id = EnhetRepository(it).lagreEnhet(enhetUtenId))
+            enhetUtenId.copy(id = EnhetRepositoryImpl(it).lagreEnhet(enhetUtenId))
         }
         dataSource.transaction {
-            OppgaveRepository(it).lagreOppgave(
+            OppgaveRepositoryImpl(it).lagreOppgave(
                 Oppgave(
                     identifikator = 123,
                     avklaringsbehov = "1337",

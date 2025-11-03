@@ -152,7 +152,6 @@ class MottaStatistikkTest {
             HendelsesService.konstruer(
                 it,
                 avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
-                    it,
                     gatewayProvider = defaultGatewayProvider(),
                     repositoryProvider = postgresRepositoryRegistry.provider(it)
                 ) { TODO() },
@@ -248,7 +247,6 @@ class MottaStatistikkTest {
 
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
-                it,
                 bqStatistikkRepository,
                 defaultGatewayProvider { },
                 postgresRepositoryRegistry.provider(it)
@@ -269,7 +267,6 @@ class MottaStatistikkTest {
             HendelsesService.konstruer(
                 it,
                 AvsluttetBehandlingService.konstruer(
-                    it,
                     gatewayProvider = defaultGatewayProvider(),
                     postgresRepositoryRegistry.provider(it)
                 ) {},
@@ -338,7 +335,6 @@ class MottaStatistikkTest {
 
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
-                it,
                 bqStatistikkRepository,
                 defaultGatewayProvider { },
                 postgresRepositoryRegistry.provider(it)
@@ -445,7 +441,6 @@ class MottaStatistikkTest {
                     HendelsesService.konstruer(
                         conn,
                         AvsluttetBehandlingService.konstruer(
-                            conn,
                             defaultGatewayProvider(),
                             postgresRepositoryRegistry.provider(conn)
                         ) {},
@@ -510,7 +505,6 @@ class MottaStatistikkTest {
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
             sakStatistikkService = {
                 SaksStatistikkService.konstruer(
-                    it,
                     bigQueryRepository = bqRepositorySak,
                     gatewayProvider = defaultGatewayProvider(),
                     repositoryProvider = postgresRepositoryRegistry.provider(it),

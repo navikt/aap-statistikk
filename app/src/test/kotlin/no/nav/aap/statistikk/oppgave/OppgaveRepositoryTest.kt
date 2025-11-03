@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.enhet.Enhet
-import no.nav.aap.statistikk.enhet.EnhetRepository
+import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
@@ -17,7 +17,7 @@ class OppgaveRepositoryTest {
     fun `sette inn og hent ut oppgave`(@Postgres dataSource: DataSource) {
         val enhet = dataSource.transaction {
             val enhet = Enhet(kode = "1234")
-            enhet.copy(id = EnhetRepository(it).lagreEnhet(enhet))
+            enhet.copy(id = EnhetRepositoryImpl(it).lagreEnhet(enhet))
         }
 
         val oppgave = Oppgave(
@@ -33,10 +33,10 @@ class OppgaveRepositoryTest {
         )
 
         dataSource.transaction {
-            OppgaveRepository(it).lagreOppgave(oppgave)
+            OppgaveRepositoryImpl(it).lagreOppgave(oppgave)
         }
 
-        val res = dataSource.transaction { OppgaveRepository(it).hentOppgave(12L) }
+        val res = dataSource.transaction { OppgaveRepositoryImpl(it).hentOppgave(12L) }
 
         assertThat(res).isNotNull
 

@@ -3,8 +3,8 @@ package no.nav.aap.statistikk.oppgave
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.enhet.EnhetRepository
-import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
+import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
+import no.nav.aap.statistikk.enhet.SaksbehandlerRepositoryImpl
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -27,7 +27,7 @@ class LagreOppgaveJobbUtførerTest {
         val oppgaveId = 123L
 
         dataSource.transaction {
-            OppgaveHendelseRepository(it).lagreHendelse(
+            OppgaveHendelseRepositoryImpl(it).lagreHendelse(
                 OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
                     mottattTidspunkt = LocalDateTime.now(),
@@ -50,23 +50,21 @@ class LagreOppgaveJobbUtførerTest {
 
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
-                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
+                oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
                     personService = PersonService(PersonRepository(it)),
-                    oppgaveRepository = OppgaveRepository(it),
-                    enhetRepository = EnhetRepository(it),
-                    saksbehandlerRepository = SaksbehandlerRepository(it),
+                    oppgaveRepository = OppgaveRepositoryImpl(it),
+                    enhetRepository = EnhetRepositoryImpl(it),
+                    saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
             ).utfør(
-                JobbInput(
-                    LagreOppgaveJobb(
-                    )
+                JobbInput(LagreOppgaveJobb()
                 ).medPayload(oppgaveId.toString())
             )
         }
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
 
         assertThat(oppgaverPåBehandling).isNotEmpty
@@ -102,7 +100,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
 
         assertThat(oppgaverPåBehandling.size).isEqualTo(1)
@@ -142,7 +140,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling2 = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
 
         assertThat(oppgaverPåBehandling2.size).isEqualTo(1)
@@ -172,7 +170,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
 
         assertThat(oppgaverPåBehandling.size).isEqualTo(1)
@@ -198,7 +196,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaveMedMarkering = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
         assertThat(oppgaveMedMarkering.first().harHasteMarkering).isTrue()
 
@@ -221,7 +219,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaveUtenMarkering = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
         assertThat(oppgaveUtenMarkering.first().harHasteMarkering).isFalse()
     }
@@ -252,7 +250,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
 
         assertThat(oppgaverPåBehandling.size).isEqualTo(1)
@@ -276,7 +274,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling2 = dataSource.transaction {
-            OppgaveRepository(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
         }
 
         assertThat(oppgaverPåBehandling2.size).isEqualTo(1)
@@ -303,8 +301,8 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverForEnhet = dataSource.transaction {
-            val uthentetEnhet = EnhetRepository(it).hentEnhet(enhet)!!
-            OppgaveRepository(it).hentOppgaverForEnhet(uthentetEnhet)
+            val uthentetEnhet = EnhetRepositoryImpl(it).hentEnhet(enhet)!!
+            OppgaveRepositoryImpl(it).hentOppgaverForEnhet(uthentetEnhet)
         }
 
         assertThat(oppgaverForEnhet).isNotEmpty
@@ -317,19 +315,19 @@ class LagreOppgaveJobbUtførerTest {
         oppgaveHendelse: OppgaveHendelse,
     ) {
         dataSource.transaction {
-            OppgaveHendelseRepository(it).lagreHendelse(
+            OppgaveHendelseRepositoryImpl(it).lagreHendelse(
                 oppgaveHendelse
             )
         }
 
         dataSource.transaction {
             LagreOppgaveJobbUtfører(
-                oppgaveHendelseRepository = OppgaveHendelseRepository(it),
+                oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
                     personService = PersonService(PersonRepository(it)),
-                    oppgaveRepository = OppgaveRepository(it),
-                    enhetRepository = EnhetRepository(it),
-                    saksbehandlerRepository = SaksbehandlerRepository(it),
+                    oppgaveRepository = OppgaveRepositoryImpl(it),
+                    enhetRepository = EnhetRepositoryImpl(it),
+                    saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 )
             ).utfør(
                 JobbInput(

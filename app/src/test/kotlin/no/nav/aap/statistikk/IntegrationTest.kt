@@ -31,7 +31,7 @@ import no.nav.aap.statistikk.hendelser.påTidspunkt
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
@@ -402,7 +402,7 @@ class IntegrationTest {
                 { it != null })
             assertThat(behandling).isNotNull
             val enhet = dataSource.transaction {
-                OppgaveHendelseRepository(it).hentEnhetForAvklaringsbehov(
+                OppgaveHendelseRepositoryImpl(it).hentEnhetForAvklaringsbehov(
                     behandling!!.referanse,
                     gjeldendeAVklaringsbehov.kode.name,
                 ).last()

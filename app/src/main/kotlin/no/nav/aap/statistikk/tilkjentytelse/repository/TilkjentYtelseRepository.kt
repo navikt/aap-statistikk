@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
@@ -12,15 +13,15 @@ import java.util.*
 
 private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.java)
 
-interface ITilkjentYtelseRepository {
-    fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long
-    fun hentTilkjentYtelse(tilkjentYtelseId: Int): TilkjentYtelse
-    fun hentForBehandling(behandlingId: UUID): TilkjentYtelse?
-}
-
 class TilkjentYtelseRepository(
     private val dbConnection: DBConnection
 ) : ITilkjentYtelseRepository {
+    companion object : RepositoryFactory<ITilkjentYtelseRepository> {
+        override fun konstruer(connection: DBConnection): ITilkjentYtelseRepository {
+            return TilkjentYtelseRepository(connection)
+        }
+    }
+
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
 
         val nøkkel =

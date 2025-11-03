@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
@@ -13,10 +12,8 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRe
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.slf4j.LoggerFactory
 
 class AvsluttetBehandlingService(
@@ -33,17 +30,16 @@ class AvsluttetBehandlingService(
 
     companion object {
         fun konstruer(
-            dbConnection: DBConnection,
             gatewayProvider: GatewayProvider,
             repositoryProvider: RepositoryProvider,
             opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
         ) = AvsluttetBehandlingService(
-            tilkjentYtelseRepository = TilkjentYtelseRepository(dbConnection),
+            tilkjentYtelseRepository = repositoryProvider.provide(),
             beregningsgrunnlagRepository = repositoryProvider.provide(),
-            vilkårsResultatRepository = VilkårsresultatRepository(dbConnection),
+            vilkårsResultatRepository = repositoryProvider.provide(),
             diagnoseRepository = repositoryProvider.provide(),
             behandlingRepository = repositoryProvider.provide(),
-            rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
+            rettighetstypeperiodeRepository = repositoryProvider.provide(),
             skjermingService = SkjermingService.konstruer(gatewayProvider),
             opprettBigQueryLagringYtelseCallback = opprettBigQueryLagringYtelseCallback
         )
