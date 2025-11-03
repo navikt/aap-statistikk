@@ -32,13 +32,13 @@ class OppgaveHendelseRepositoryTest {
             oppgaveId = oppgaveId
         )
         dataSource.transaction {
-            OppgaveHendelseRepository(it).lagreHendelse(
+            OppgaveHendelseRepositoryImpl(it).lagreHendelse(
                 hendelse = hendelse
             )
         }
 
         val uthentet = dataSource.transaction {
-            OppgaveHendelseRepository(it).hentHendelserForId(oppgaveId)
+            OppgaveHendelseRepositoryImpl(it).hentHendelserForId(oppgaveId)
         }
 
         assertThat(uthentet.first()).isEqualTo(hendelse)
@@ -66,13 +66,13 @@ class OppgaveHendelseRepositoryTest {
             oppgaveId = oppgaveId
         )
         dataSource.transaction {
-            OppgaveHendelseRepository(it).lagreHendelse(
+            OppgaveHendelseRepositoryImpl(it).lagreHendelse(
                 hendelse = hendelse
             )
         }
 
         val uthentet = dataSource.transaction {
-            OppgaveHendelseRepository(it).hentEnhetForAvklaringsbehov(behandlingRef, "5053")
+            OppgaveHendelseRepositoryImpl(it).hentEnhetForAvklaringsbehov(behandlingRef, "5053")
         }
 
         assertThat(uthentet).isEqualTo(

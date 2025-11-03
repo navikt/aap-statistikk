@@ -9,6 +9,7 @@ import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.oppgaveHendelseMottatt
+import no.nav.aap.statistikk.postgresRepositoryRegistry
 
 
 class LagreOppgaveHendelseJobbUtfører(
@@ -37,9 +38,10 @@ class LagreOppgaveHendelseJobb(
     }
 
     override fun konstruer(connection: DBConnection): LagreOppgaveHendelseJobbUtfører {
+        val provider = postgresRepositoryRegistry.provider(connection)
         return LagreOppgaveHendelseJobbUtfører(
-            OppgaveHendelseRepository(connection),
-            FlytJobbRepository(connection),
+            provider.provide(),
+            provider.provide(),
             lagreOppgaveJobb
         )
     }

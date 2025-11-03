@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
@@ -17,14 +16,13 @@ class OppgaveHistorikkLagrer(
 
     companion object {
         fun konstruer(
-            dbConnection: DBConnection,
             repositoryProvider: RepositoryProvider
         ): OppgaveHistorikkLagrer {
             return OppgaveHistorikkLagrer(
                 personService = PersonService(repositoryProvider),
-                oppgaveRepository = OppgaveRepository(dbConnection),
-                enhetRepository = EnhetRepository(dbConnection),
-                saksbehandlerRepository = SaksbehandlerRepository(dbConnection),
+                oppgaveRepository = repositoryProvider.provide(),
+                enhetRepository = repositoryProvider.provide(),
+                saksbehandlerRepository = repositoryProvider.provide()
             )
         }
     }
