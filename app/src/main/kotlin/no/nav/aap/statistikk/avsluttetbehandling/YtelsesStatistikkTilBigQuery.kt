@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
@@ -11,9 +10,7 @@ import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.hendelser.onlyOrNull
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
@@ -31,17 +28,16 @@ class YtelsesStatistikkTilBigQuery(
 
     companion object {
         fun konstruer(
-            connection: DBConnection,
             bqRepository: IBQYtelsesstatistikkRepository,
             repositoryProvider: RepositoryProvider
         ): YtelsesStatistikkTilBigQuery {
             return YtelsesStatistikkTilBigQuery(
                 bqRepository = bqRepository,
                 behandlingRepository = repositoryProvider.provide(),
-                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+                rettighetstypeperiodeRepository = repositoryProvider.provide(),
                 diagnoseRepository = repositoryProvider.provide(),
-                vilkårsresultatRepository = VilkårsresultatRepository(connection),
-                tilkjentYtelseRepository = TilkjentYtelseRepository(connection),
+                vilkårsresultatRepository = repositoryProvider.provide(),
+                tilkjentYtelseRepository = repositoryProvider.provide(),
                 beregningsgrunnlagRepository = repositoryProvider.provide(),
             )
         }

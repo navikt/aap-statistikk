@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.vilkårsresultat.repository
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -12,6 +13,12 @@ private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java
 class VilkårsresultatRepository(
     private val dbConnection: DBConnection
 ) : IVilkårsresultatRepository {
+    companion object : RepositoryFactory<IVilkårsresultatRepository> {
+        override fun konstruer(connection: DBConnection): IVilkårsresultatRepository {
+            return VilkårsresultatRepository(connection)
+        }
+    }
+
     override fun lagreVilkårsResultat(
         vilkårsresultat: VilkårsResultatEntity,
         behandlingId: BehandlingId
