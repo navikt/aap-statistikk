@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.MeldekortDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.DBConnection
@@ -12,6 +13,9 @@ import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.meldekort.ArbeidIPerioder
+import no.nav.aap.statistikk.meldekort.Meldekort
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
@@ -28,6 +32,7 @@ class HendelsesService(
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personService: PersonService,
     private val behandlingRepository: IBehandlingRepository,
+    private val meldekortRepository: MeldekortRepository,
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
     private val opprettRekjørSakstatistikkCallback: (BehandlingId) -> Unit,
 ) {
@@ -46,6 +51,7 @@ class HendelsesService(
                 personService = PersonService(repositoryProvider),
                 avsluttetBehandlingService = avsluttetBehandlingService,
                 behandlingRepository = BehandlingRepository(connection, clock),
+                meldekortRepository = MeldekortRepository(connection),
                 opprettBigQueryLagringSakStatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)
                         .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")
@@ -73,6 +79,10 @@ class HendelsesService(
             sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
 
         val behandlingId = hentEllerLagreBehandling(hendelse, sak).id!!
+
+        if (hendelse.nyeMeldekort.isNotEmpty()) {
+            meldekortRepository.lagre(behandlingId, hendelse.nyeMeldekort.tilDomene())
+        }
 
         if (hendelse.behandlingStatus == Status.AVSLUTTET) {
             // TODO: legg denne i en jobb
@@ -123,6 +133,20 @@ class HendelsesService(
         opprettRekjørSakstatistikkCallback(behandlingId)
     }
 
+    private fun List<MeldekortDTO>.tilDomene(): List<Meldekort> {
+        return this.map {meldekort ->
+            Meldekort(
+                journalpostId = meldekort.journalpostId,
+                arbeidIPeriodeDTO = meldekort.arbeidIPeriodeDTO.map {
+                    ArbeidIPerioder(
+                        periodeFom = it.periodeFom,
+                        periodeTom = it.periodeTom,
+                        timerArbeidet = it.timerArbeidet
+                    )
+                }
+            )
+        }
+    }
 
     private fun hentEllerLagreBehandling(
         dto: StoppetBehandling,

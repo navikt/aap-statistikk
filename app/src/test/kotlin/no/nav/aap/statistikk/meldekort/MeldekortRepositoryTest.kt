@@ -1,7 +1,5 @@
 package no.nav.aap.statistikk.meldekort
 
-import no.nav.aap.behandlingsflyt.kontrakt.datadeling.ArbeidIPeriodeDTO
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.MeldekortDTO
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingRepository
@@ -29,15 +27,15 @@ class MeldekortRepositoryTest {
         val person = opprettTestPerson(dataSource, "123456789")
         val sak = opprettTestSak(dataSource, "123456789".let(::Saksnummer), person)
 
-        val Meldekort = listOf(
-            MeldekortDTO(
+        val meldekort = listOf(
+            Meldekort(
                 journalpostId = "JP123456",
                 arbeidIPeriodeDTO = listOf()
             ),
-            MeldekortDTO(
+            Meldekort(
                 journalpostId = "JP654321",
                 arbeidIPeriodeDTO = listOf(
-                    ArbeidIPeriodeDTO(
+                    ArbeidIPerioder(
                         periodeFom = LocalDate.of(2024, 1, 1),
                         periodeTom = LocalDate.of(2024, 1, 7),
                         timerArbeidet = BigDecimal(20)
@@ -68,7 +66,7 @@ class MeldekortRepositoryTest {
         dataSource.transaction {
             MeldekortRepository(it).lagre(
                 behandlingId = behandlingId,
-                meldekort = Meldekort
+                meldekort = meldekort
             )
         }
 
@@ -78,8 +76,8 @@ class MeldekortRepositoryTest {
             )
         }
 
-        assertEquals(uthentet.size,Meldekort.size)
-        assertEquals(uthentet[0].journalpostId, Meldekort[0].journalpostId)
-        assert(uthentet[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt() == Meldekort[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt())
+        assertEquals(uthentet.size,meldekort.size)
+        assertEquals(uthentet[0].journalpostId, meldekort[0].journalpostId)
+        assert(uthentet[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt() == meldekort[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt())
     }
 }

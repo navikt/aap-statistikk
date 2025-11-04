@@ -1,14 +1,11 @@
 package no.nav.aap.statistikk.meldekort
 
-import io.ktor.http.parameters
-import no.nav.aap.behandlingsflyt.kontrakt.datadeling.ArbeidIPeriodeDTO
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.MeldekortDTO
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
 class MeldekortRepository(private val dbConnection: DBConnection) {
-    fun lagre(behandlingId: BehandlingId, meldekort: List<MeldekortDTO>) {
+    fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
         meldekort.forEach {
             lagreEnkeltMeldekort(behandlingId, it).let { meldekortId ->
                 lagreArbeidIPeriode(meldekortId, it.arbeidIPeriodeDTO)
@@ -16,7 +13,7 @@ class MeldekortRepository(private val dbConnection: DBConnection) {
         }
     }
 
-    private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: MeldekortDTO): Long {
+    private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: Meldekort): Long {
         return dbConnection.executeReturnKey(
             """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?)""".trimIndent()
         ) {
@@ -27,7 +24,7 @@ class MeldekortRepository(private val dbConnection: DBConnection) {
         }
     }
 
-    private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<ArbeidIPeriodeDTO>) {
+    private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<no.nav.aap.statistikk.meldekort.ArbeidIPerioder>) {
         dbConnection.executeBatch(
             """INSERT INTO arbeid_i_periode (meldekort_id, periode, timerArbeidet) VALUES (?,?::daterange,?)""".trimIndent(),
             arbeid
@@ -42,7 +39,7 @@ class MeldekortRepository(private val dbConnection: DBConnection) {
 
     fun hentMeldekortperioder(
         behandlingId: BehandlingId
-    ): List<MeldekortDTO> {
+    ): List<Meldekort> {
         return dbConnection.queryList(
             """SELECT * 
                FROM meldekort
@@ -52,7 +49,7 @@ class MeldekortRepository(private val dbConnection: DBConnection) {
                 setLong(1, behandlingId.id)
             }
             setRowMapper {
-                MeldekortDTO(
+                Meldekort(
                     journalpostId = it.getString("journalpost_id"),
                     arbeidIPeriodeDTO = hentArbeidIPerioder(it.getLong("id"))
                 )
@@ -62,7 +59,7 @@ class MeldekortRepository(private val dbConnection: DBConnection) {
 
     private fun hentArbeidIPerioder(
         meldekortId: Long
-    ): List<ArbeidIPeriodeDTO> {
+    ): List<ArbeidIPerioder> {
         return dbConnection.queryList(
             """SELECT periode, timerArbeidet 
                FROM arbeid_i_periode 
@@ -72,7 +69,7 @@ class MeldekortRepository(private val dbConnection: DBConnection) {
                 setLong(1, meldekortId)
             }
             setRowMapper {
-                ArbeidIPeriodeDTO(
+                ArbeidIPerioder(
                     periodeFom = it.getPeriode("periode").fom,
                     periodeTom = it.getPeriode("periode").tom,
                     timerArbeidet = it.getBigDecimal("timerArbeidet")
