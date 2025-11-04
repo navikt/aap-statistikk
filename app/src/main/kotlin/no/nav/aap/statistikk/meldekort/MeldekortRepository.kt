@@ -15,7 +15,7 @@ class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRep
 
     private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: Meldekort): Long {
         return dbConnection.executeReturnKey(
-            """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?)""".trimIndent()
+            """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?) ON CONFLICT DO NOTHING """.trimIndent()
         ) {
             setParams {
                 setLong(1, behandlingId.id)
@@ -24,7 +24,13 @@ class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRep
         }
     }
 
-    private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<no.nav.aap.statistikk.meldekort.ArbeidIPerioder>) {
+    private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<ArbeidIPerioder>) {
+        dbConnection.execute(
+            "DELETE FROM arbeid_i_periode WHERE meldekort_id = ?"
+        ) {
+            setParams { setLong(1, meldekortId) }
+        }
+
         dbConnection.executeBatch(
             """INSERT INTO arbeid_i_periode (meldekort_id, periode, timerArbeidet) VALUES (?,?::daterange,?)""".trimIndent(),
             arbeid
