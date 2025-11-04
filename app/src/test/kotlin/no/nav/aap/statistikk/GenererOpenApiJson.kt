@@ -43,7 +43,6 @@ fun main() {
     val server = embeddedServer(Netty, port = 8080) {
         module(
             transactionExecutor = noOpTransactionExecutor,
-            motor = mockk(relaxed = true),
             jobbAppender = MockJobbAppender(),
             azureConfig = azureConfig,
             motorApiCallback = { },

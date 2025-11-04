@@ -181,9 +181,10 @@ fun Application.startUp(
         motorApi(dataSource)
     }
 
+    motor.start()
+
     module(
         transactionExecutor,
-        motor,
         motorJobbAppender,
         azureConfig,
         motorApiCallback,
@@ -214,7 +215,6 @@ fun motor(
 
 fun Application.module(
     transactionExecutor: TransactionExecutor,
-    motor: Motor,
     jobbAppender: JobbAppender,
     azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
@@ -223,7 +223,6 @@ fun Application.module(
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
 ) {
-    motor.start()
     transactionExecutor.withinTransaction {
         RetryService(it).enable()
     }

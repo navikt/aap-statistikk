@@ -111,11 +111,11 @@ fun <E> testKlient(
         tokenProvider = ClientCredentialsTokenProvider,
         responseHandler = DefaultResponseHandler(),
     )
+    motor.start()
 
     val server = embeddedServer(Netty, port = 0) {
         module(
             transactionExecutor,
-            motor,
             jobbAppender,
             azureConfig,
             {},
