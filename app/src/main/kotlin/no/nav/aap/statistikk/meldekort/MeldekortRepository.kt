@@ -1,10 +1,19 @@
 package no.nav.aap.statistikk.meldekort
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
 class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRepository{
+
+    companion object : RepositoryFactory<IMeldekortRepository>{
+        override fun konstruer(connection: DBConnection): IMeldekortRepository {
+            return MeldekortRepository(connection)
+        }
+    }
+
+
     override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
         meldekort.forEach {
             lagreEnkeltMeldekort(behandlingId, it).let { meldekortId ->
@@ -25,12 +34,6 @@ class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRep
     }
 
     private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<ArbeidIPerioder>) {
-        dbConnection.execute(
-            "DELETE FROM arbeid_i_periode WHERE meldekort_id = ?"
-        ) {
-            setParams { setLong(1, meldekortId) }
-        }
-
         dbConnection.executeBatch(
             """INSERT INTO arbeid_i_periode (meldekort_id, periode, timerArbeidet) VALUES (?,?::daterange,?)""".trimIndent(),
             arbeid

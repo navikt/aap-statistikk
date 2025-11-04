@@ -16,7 +16,6 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.meldekort.ArbeidIPerioder
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
-import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
@@ -52,7 +51,7 @@ class HendelsesService(
                 personService = PersonService(repositoryProvider),
                 avsluttetBehandlingService = avsluttetBehandlingService,
                 behandlingRepository = BehandlingRepository(connection, clock),
-                meldekortRepository = MeldekortRepository(connection),
+                meldekortRepository = repositoryProvider.provide(),
                 opprettBigQueryLagringSakStatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)
                         .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")

@@ -9,8 +9,10 @@ import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.opprettTestBehandling
 import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -24,8 +26,10 @@ class MeldekortRepositoryTest {
 
     @Test
     fun `Lagre og hente ut igjen meldekort data`(@Postgres dataSource: DataSource) {
+        val behandlingRef = UUID.randomUUID()
         val person = opprettTestPerson(dataSource, "123456789")
         val sak = opprettTestSak(dataSource, "123456789".let(::Saksnummer), person)
+        val behandling = opprettTestBehandling(dataSource, behandlingRef, sak)
 
         val meldekort = listOf(
             Meldekort(
@@ -43,41 +47,24 @@ class MeldekortRepositoryTest {
                 )
             )
         )
-        val behandling = Behandling(
-            referanse = UUID.randomUUID(),
-            sak = sak,
-            typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.OPPRETTET,
-            opprettetTid = LocalDateTime.now(),
-            oppdatertTidspunkt = LocalDateTime.now(),
-            mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-            versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.PAPIR,
-            hendelser = listOf()
-        )
-
-        val behandlingId = dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
-                behandling
-            )
-        }
 
 
         dataSource.transaction {
             MeldekortRepository(it).lagre(
-                behandlingId = behandlingId,
+                behandlingId = behandling.id!!,
                 meldekort = meldekort
             )
         }
 
         val uthentet = dataSource.transaction {
             MeldekortRepository(it).hentMeldekortperioder(
-                behandlingId = behandlingId
+                behandlingId = behandling.id!!
             )
         }
 
         assertEquals(uthentet.size,meldekort.size)
         assertEquals(uthentet[0].journalpostId, meldekort[0].journalpostId)
+        assertThat(uthentet).isEqualTo(meldekort)
         assert(uthentet[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt() == meldekort[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt())
     }
 }
