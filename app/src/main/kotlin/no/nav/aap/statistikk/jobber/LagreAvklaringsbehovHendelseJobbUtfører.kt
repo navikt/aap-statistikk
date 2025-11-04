@@ -5,9 +5,11 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.hendelser.HendelsesService
+import no.nav.aap.statistikk.hendelser.ResendHendelseService
 
-class LagreAvklaringsbehovHendelseJobbUtfører(private val hendelsesService: HendelsesService) :
+class LagreAvklaringsbehovHendelseJobbUtfører(
+    private val resendHendelseService: ResendHendelseService
+) :
     JobbUtfører {
 
     private val logger = org.slf4j.LoggerFactory.getLogger(javaClass)
@@ -20,7 +22,7 @@ class LagreAvklaringsbehovHendelseJobbUtfører(private val hendelsesService: Hen
             val hendelseJSON = DefaultJsonMapper.toJson(dto)
             logger.info("Regenerer statistikk for behandling ${dto.behandlingReferanse}. Hendelse: $hendelseJSON")
         }
-        hendelsesService.prosesserNyHistorikkHendelse(dto)
+        resendHendelseService.prosesserNyHistorikkHendelse(dto)
         logger.info("Ferdig å regenerere statistikk for behandling ${dto.behandlingReferanse}.")
     }
 }

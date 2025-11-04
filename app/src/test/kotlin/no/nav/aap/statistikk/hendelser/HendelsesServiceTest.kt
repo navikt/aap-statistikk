@@ -128,34 +128,6 @@ class HendelsesServiceTest {
         checkUnnecessaryStub(opprettBigQueryLagringCallback)
     }
 
-    @Test
-    fun `beregn historikk, enkelt test`() {
-        val hendelse =
-            hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
-        val behandlingRepository = FakeBehandlingRepository()
-        val sakRepository = FakeSakRepository()
-        val skjermingService = SkjermingService(FakePdlGateway(emptyMap()))
-
-        val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
-
-        val rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
-        val diagnoseRepository = FakeDiagnoseRepository()
-        val hendelsesService = konstruerHendelsesService(
-            sakRepository,
-            diagnoseRepository,
-            behandlingRepository,
-            skjermingService,
-            rettighetstypeperiodeRepository,
-            opprettBigQueryLagringCallback
-        )
-
-        hendelsesService.prosesserNyHistorikkHendelse(hendelse)
-
-        val behandling = behandlingRepository.hent(hendelse.behandlingReferanse)!!
-
-        assertThat(behandling.status).isEqualTo(BehandlingStatus.AVSLUTTET)
-    }
-
     private fun konstruerHendelsesService(
         sakRepository: FakeSakRepository,
         diagnoseRepository: FakeDiagnoseRepository,
@@ -180,9 +152,8 @@ class HendelsesServiceTest {
                 opprettBigQueryLagringYtelseCallback = { TODO() },
             ),
             personService = PersonService(FakePersonRepository()),
-            behandlingRepository = behandlingRepository,
             opprettBigQueryLagringSakStatistikkCallback = opprettBigQueryLagringCallback,
-            opprettRekjørSakstatistikkCallback = {}
+            behandlingService = BehandlingService(behandlingRepository)
         )
     }
 
