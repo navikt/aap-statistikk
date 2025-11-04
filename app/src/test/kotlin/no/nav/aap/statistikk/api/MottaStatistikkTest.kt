@@ -139,6 +139,7 @@ class MottaStatistikkTest {
                         skjermingService = SkjermingService(FakePdlGateway()),
                         opprettBigQueryLagringYtelseCallback = {}),
                     behandlingRepository = behandlingRepository,
+                    meldekortRepository = FakeMeldekortRepository(),
                     opprettBigQueryLagringSakStatistikkCallback = { TODO() },
                     opprettRekjørSakstatistikkCallback = { TODO() },
                 )

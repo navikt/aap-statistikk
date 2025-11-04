@@ -48,6 +48,7 @@ class ApplicationTest {
                 ),
                 personService = PersonService(FakePersonRepository()),
                 behandlingRepository = FakeBehandlingRepository(),
+                meldekortRepository = FakeMeldekortRepository(),
                 opprettBigQueryLagringSakStatistikkCallback = { },
                 opprettRekjørSakstatistikkCallback = { },
             )
@@ -181,6 +182,7 @@ class ApplicationTest {
                     opprettBigQueryLagringYtelseCallback = {}
                 ),
                 behandlingRepository = behandlingRepository,
+                meldekortRepository = FakeMeldekortRepository(),
                 opprettBigQueryLagringSakStatistikkCallback = { TODO() },
                 opprettRekjørSakstatistikkCallback = { TODO() },
             )

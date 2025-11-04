@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.hendelser.HendelsesService
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postgresRepositoryRegistry
@@ -108,6 +109,7 @@ class ProduksjonsstyringRepositoryTest {
                 ) {},
                 personService = PersonService(PersonRepository(conn)),
                 behandlingRepository = BehandlingRepository(conn),
+                meldekortRepository = MeldekortRepository(conn),
                 opprettBigQueryLagringSakStatistikkCallback = { },
                 opprettRekjørSakstatistikkCallback = { TODO() },
             )

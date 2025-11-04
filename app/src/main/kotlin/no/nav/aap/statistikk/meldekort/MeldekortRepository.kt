@@ -4,8 +4,8 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
-class MeldekortRepository(private val dbConnection: DBConnection) {
-    fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
+class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRepository{
+    override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
         meldekort.forEach {
             lagreEnkeltMeldekort(behandlingId, it).let { meldekortId ->
                 lagreArbeidIPeriode(meldekortId, it.arbeidIPeriodeDTO)
@@ -37,7 +37,7 @@ class MeldekortRepository(private val dbConnection: DBConnection) {
         }
     }
 
-    fun hentMeldekortperioder(
+    override fun hentMeldekortperioder(
         behandlingId: BehandlingId
     ): List<Meldekort> {
         return dbConnection.queryList(

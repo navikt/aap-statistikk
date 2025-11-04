@@ -10,6 +10,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.hendelser.HendelsesService
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
@@ -83,6 +84,7 @@ class SaksStatistikkServiceTest {
                     avsluttetBehandlingService = mockk(relaxed = true),
                     personService = PersonService(PersonRepository(it)),
                     behandlingRepository = BehandlingRepository(it),
+                    meldekortRepository = MeldekortRepository(it),
                     opprettBigQueryLagringSakStatistikkCallback = {},
                     opprettRekjørSakstatistikkCallback = { },
                 )

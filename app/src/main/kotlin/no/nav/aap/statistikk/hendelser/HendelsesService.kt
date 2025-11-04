@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.meldekort.ArbeidIPerioder
+import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
@@ -32,7 +33,7 @@ class HendelsesService(
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personService: PersonService,
     private val behandlingRepository: IBehandlingRepository,
-    private val meldekortRepository: MeldekortRepository,
+    private val meldekortRepository: IMeldekortRepository,
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
     private val opprettRekjørSakstatistikkCallback: (BehandlingId) -> Unit,
 ) {
