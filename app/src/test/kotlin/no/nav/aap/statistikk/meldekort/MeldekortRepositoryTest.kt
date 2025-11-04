@@ -42,7 +42,7 @@ class MeldekortRepositoryTest {
                     ArbeidIPerioder(
                         periodeFom = LocalDate.of(2024, 1, 1),
                         periodeTom = LocalDate.of(2024, 1, 7),
-                        timerArbeidet = BigDecimal(20)
+                        timerArbeidet = BigDecimal("20.00")
                     )
                 )
             )
@@ -65,6 +65,5 @@ class MeldekortRepositoryTest {
         assertEquals(uthentet.size,meldekort.size)
         assertEquals(uthentet[0].journalpostId, meldekort[0].journalpostId)
         assertThat(uthentet).isEqualTo(meldekort)
-        assert(uthentet[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt() == meldekort[1].arbeidIPeriodeDTO.get(0).timerArbeidet.toInt())
     }
 }

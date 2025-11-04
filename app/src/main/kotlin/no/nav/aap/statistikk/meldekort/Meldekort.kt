@@ -10,7 +10,7 @@ data class Meldekort(
 )
 
 
-class ArbeidIPerioder(
+data class ArbeidIPerioder(
     val periodeFom: LocalDate,
     val periodeTom: LocalDate,
     val timerArbeidet: BigDecimal
