@@ -42,7 +42,6 @@ import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
 import no.nav.aap.statistikk.saksstatistikk.BQBehandling
@@ -166,8 +165,7 @@ fun <E> testKlientNoInjection(
             azureConfig,
             bigQueryClient,
             bigQueryClient,
-            defaultGatewayProvider(),
-            postgresRepositoryRegistry
+            defaultGatewayProvider()
         )
     }.start()
 

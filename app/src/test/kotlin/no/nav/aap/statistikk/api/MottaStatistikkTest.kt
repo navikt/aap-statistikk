@@ -21,11 +21,8 @@ import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
-import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
+import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.tilDomene
@@ -47,8 +44,6 @@ import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.net.URI
@@ -283,6 +278,7 @@ class MottaStatistikkTest {
         val motor = konstruerMotor(
             dataSource,
             jobbAppender,
+            bqRepositoryYtelse,
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
@@ -363,6 +359,7 @@ class MottaStatistikkTest {
         val motor = konstruerMotor(
             dataSource,
             jobbAppender,
+            bqRepositoryYtelse,
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
@@ -421,6 +418,7 @@ class MottaStatistikkTest {
     private fun konstruerMotor(
         dataSource: DataSource,
         jobbAppender: MotorJobbAppender,
+        bqYtelseRepository: IBQYtelsesstatistikkRepository,
         resendSakstatistikkJobb: ResendSakstatistikkJobb,
         lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
         lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
@@ -430,7 +428,7 @@ class MottaStatistikkTest {
         return motor(
             dataSource = dataSource,
             jobber = listOf(
-                LagreAvsluttetBehandlingTilBigQueryJobb { TODO() },
+                LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository),
                 lagreOppgaveJobb,
                 resendSakstatistikkJobb,
                 lagreAvklaringsbehovHendelseJobb,
@@ -452,19 +450,9 @@ class MottaStatistikkTest {
         )
     }
 
-    private fun konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse: FakeBQYtelseRepository): LagreAvsluttetBehandlingTilBigQueryJobb =
+    private fun konstruerLagreAvsluttetBehandlingTilBQJobb(bqYtelseRepository: IBQYtelsesstatistikkRepository): LagreAvsluttetBehandlingTilBigQueryJobb =
         LagreAvsluttetBehandlingTilBigQueryJobb(
-            ytelsesStatistikkTilBigQuery = {
-                YtelsesStatistikkTilBigQuery(
-                    bqRepository = bqRepositoryYtelse,
-                    behandlingRepository = BehandlingRepository(it),
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
-                    diagnoseRepository = DiagnoseRepositoryImpl(it),
-                    vilkårsresultatRepository = VilkårsresultatRepository(it),
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
-                )
-            },
+            bqYtelseRepository = bqYtelseRepository,
         )
 
     @Test

@@ -4,6 +4,8 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
+import no.nav.aap.statistikk.postgresRepositoryRegistry
 import java.util.*
 
 class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(private val ytelsesStatistikkTilBigQuery: YtelsesStatistikkTilBigQuery) :
@@ -15,11 +17,14 @@ class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(private val ytelsesStatist
 }
 
 class LagreAvsluttetBehandlingTilBigQueryJobb(
-    private val ytelsesStatistikkTilBigQuery: (DBConnection) -> YtelsesStatistikkTilBigQuery,
+    private val bqYtelseRepository: IBQYtelsesstatistikkRepository,
 ) : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         return LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
-            ytelsesStatistikkTilBigQuery(connection)
+            YtelsesStatistikkTilBigQuery.konstruer(
+                bqYtelseRepository,
+                postgresRepositoryRegistry.provider(connection)
+            )
         )
     }
 
