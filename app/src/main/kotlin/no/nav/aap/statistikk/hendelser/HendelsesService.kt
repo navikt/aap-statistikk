@@ -3,65 +3,55 @@ package no.nav.aap.statistikk.hendelser
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
-import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
-import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.verdityper.dokument.Kanal
 import org.slf4j.LoggerFactory
-import java.time.Clock
-import java.util.*
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 class HendelsesService(
     private val sakService: SakService,
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personService: PersonService,
-    private val behandlingRepository: IBehandlingRepository,
-    private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
-    private val opprettRekjørSakstatistikkCallback: (BehandlingId) -> Unit,
+    private val behandlingService: BehandlingService,
+    private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     companion object {
         fun konstruer(
-            connection: DBConnection,
             avsluttetBehandlingService: AvsluttetBehandlingService,
             jobbAppender: JobbAppender,
-            repositoryProvider: RepositoryProvider,
-            clock: Clock = Clock.systemDefaultZone()
+            repositoryProvider: RepositoryProvider
         ): HendelsesService {
             return HendelsesService(
                 sakService = SakService(repositoryProvider),
                 personService = PersonService(repositoryProvider),
                 avsluttetBehandlingService = avsluttetBehandlingService,
-                behandlingRepository = BehandlingRepository(connection, clock),
+                behandlingService = BehandlingService(repositoryProvider.provide()),
                 opprettBigQueryLagringSakStatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)
                         .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")
                     jobbAppender.leggTilLagreSakTilBigQueryJobb(
-                        connection,
+                        repositoryProvider,
                         it,
                         // Veldig hacky! Dette er for at jobben som kjører etter melidng fra
                         // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
                         delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L
                     )
-                },
-                opprettRekjørSakstatistikkCallback = {
-                    LoggerFactory.getLogger(HendelsesService::class.java)
-                        .info("Starter resending-jobb. BehandlingId: $it")
-                    jobbAppender.leggTilResendSakstatistikkJobb(connection, it)
-                })
+                }
+            )
         }
     }
 
@@ -72,7 +62,7 @@ class HendelsesService(
         val sak =
             sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
 
-        val behandlingId = hentEllerLagreBehandling(hendelse, sak).id!!
+        val behandlingId = behandlingService.hentEllerLagreBehandling(hendelse, sak).id!!
 
         if (hendelse.behandlingStatus == Status.AVSLUTTET) {
             // TODO: legg denne i en jobb
@@ -96,101 +86,6 @@ class HendelsesService(
 
         PrometheusProvider.prometheus.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
-    }
-
-    fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {
-        val person = personService.hentEllerLagrePerson(hendelse.ident)
-        val saksnummer = hendelse.saksnummer.let(::Saksnummer)
-
-        val sak =
-            sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
-        val behandling = konstruerBehandling(hendelse, sak)
-
-        val behandlingMedHistorikk =
-            ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
-
-        check(behandling.status == behandlingMedHistorikk.status)
-        { "Behandlingstatus er ikke lik behandling med historikk-status. Behandlingstatus: ${behandling.status}, behandling med historikk-status: ${behandlingMedHistorikk.status}. Saksnummer: ${hendelse.saksnummer}. Behandling: ${hendelse.behandlingReferanse}" }
-
-        val behandlingId = checkNotNull(hentEllerLagreBehandling(hendelse, sak).id)
-
-        val behandlingMedId = behandlingMedHistorikk.copy(id = behandlingId)
-
-        behandlingRepository.invaliderOgLagreNyHistorikk(behandlingMedId)
-
-        logger.info("Starter jobb for rekjøring av saksstatistikk for behandling med id ${behandlingMedId.id}.")
-
-        opprettRekjørSakstatistikkCallback(behandlingId)
-    }
-
-
-    private fun hentEllerLagreBehandling(
-        dto: StoppetBehandling,
-        sak: Sak
-    ): Behandling {
-        if (!Miljø.erProd()) {
-            logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
-        }
-
-        val behandling = konstruerBehandling(dto, sak)
-
-        val eksisterendeBehandlingId = behandling.id
-        val behandlingId = if (eksisterendeBehandlingId != null) {
-            behandlingRepository.oppdaterBehandling(
-                behandling.copy(id = eksisterendeBehandlingId)
-            )
-            logger.info("Oppdaterte behandling med referanse ${behandling.referanse} og id $eksisterendeBehandlingId.")
-            eksisterendeBehandlingId
-        } else {
-            val id = behandlingRepository.opprettBehandling(behandling)
-            logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
-            PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
-                .increment()
-            id
-        }
-        return behandling.copy(id = behandlingId)
-    }
-
-    private fun konstruerBehandling(
-        dto: StoppetBehandling,
-        sak: Sak
-    ): Behandling {
-        val behandling = Behandling(
-            referanse = dto.behandlingReferanse,
-            sak = sak,
-            typeBehandling = dto.behandlingType.tilDomene(),
-            opprettetTid = dto.behandlingOpprettetTidspunkt,
-            vedtakstidspunkt = dto.avklaringsbehov.utledVedtakTid(),
-            ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter(),
-            mottattTid = dto.mottattTid,
-            status = dto.behandlingStatus.tilDomene(),
-            versjon = Versjon(verdi = dto.versjon),
-            relaterteIdenter = dto.identerForSak,
-            sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
-            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov()?.kode?.name,
-            gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
-            søknadsformat = dto.soknadsFormat.tilDomene(),
-            venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
-            returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
-            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-            gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
-            årsaker = dto.vurderingsbehov.map { it.tilDomene() },
-            opprettetAv = dto.opprettetAv,
-            oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
-                ?: dto.hendelsesTidspunkt
-        )
-        val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
-
-        val relatertBehadling = hentRelatertBehandling(dto.relatertBehandling)
-        val behandlingMedRelatertBehandling =
-            behandling.copy(relatertBehandlingId = relatertBehadling?.id)
-        return behandlingMedRelatertBehandling.copy(id = eksisterendeBehandlingId)
-    }
-
-    private fun hentRelatertBehandling(relatertBehandlingUUID: UUID?): Behandling? {
-        val relatertBehadling =
-            relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
-        return relatertBehadling
     }
 }
 

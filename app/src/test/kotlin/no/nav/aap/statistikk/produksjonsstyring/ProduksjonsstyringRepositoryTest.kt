@@ -3,9 +3,9 @@ package no.nav.aap.statistikk.produksjonsstyring
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.defaultGatewayProvider
+import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -107,9 +107,8 @@ class ProduksjonsstyringRepositoryTest {
                     postgresRepositoryRegistry.provider(conn)
                 ) {},
                 personService = PersonService(PersonRepository(conn)),
-                behandlingRepository = BehandlingRepository(conn),
                 opprettBigQueryLagringSakStatistikkCallback = { },
-                opprettRekjørSakstatistikkCallback = { TODO() },
+                behandlingService = BehandlingService(postgresRepositoryRegistry.provider(conn)),
             )
 
             val hendelse = behandlingHendelse(

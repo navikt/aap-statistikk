@@ -27,14 +27,12 @@ import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.api.*
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Migrering
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -105,7 +103,8 @@ fun Application.startUp(
     }
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
 
-    val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
+    val lagreAvsluttetBehandlingTilBigQueryJobb =
+        LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
 
     val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
 
@@ -116,26 +115,10 @@ fun Application.startUp(
             resendSakstatistikkJobb
         )
 
-    val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
-        val repositoryProvider = postgresRepositoryRegistry.provider(connection)
-        HendelsesService.konstruer(
-            connection,
-            AvsluttetBehandlingService.konstruer(
-                gatewayProvider = gatewayProvider,
-                repositoryProvider = repositoryProvider,
-                opprettBigQueryLagringYtelseCallback = { behandlingId ->
-                    motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                        connection,
-                        behandlingId
-                    )
-                },
-            ),
-            jobbAppender = motorJobbAppender,
-            repositoryProvider = repositoryProvider,
-        )
-    }
-    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
-    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
+    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+        motorJobbAppender, gatewayProvider
+    )
+    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(motorJobbAppender)
 
     val lagreOppgaveJobb = LagreOppgaveJobb()
 

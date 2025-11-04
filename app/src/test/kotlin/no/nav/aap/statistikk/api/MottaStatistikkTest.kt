@@ -19,12 +19,10 @@ import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.*
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
-import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
@@ -32,17 +30,14 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepositoryImpl
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
-import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -71,10 +66,10 @@ class MottaStatistikkTest {
             noOpTransactionExecutor,
             motor,
             azureConfig,
-            fakeLagreStoppetHendelseJobb(),
+            LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { }),
             LagreOppgaveHendelseJobb(LagreOppgaveJobb()),
             LagrePostmottakHendelseJobb(),
-            LagreAvklaringsbehovHendelseJobb { TODO() },
+            LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -117,43 +112,9 @@ class MottaStatistikkTest {
         )
     }
 
-    private fun fakeLagreStoppetHendelseJobb(): LagreStoppetHendelseJobb =
-        LagreStoppetHendelseJobb(
-            hendelsesService = {
-                val behandlingRepository = FakeBehandlingRepository()
-                HendelsesService(
-                    sakService = SakService(FakeSakRepository()),
-                    personService = PersonService(FakePersonRepository()),
-                    avsluttetBehandlingService = AvsluttetBehandlingService(
-                        tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                        beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                        vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                        diagnoseRepository = FakeDiagnoseRepository(),
-                        behandlingRepository = behandlingRepository,
-                        rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                        skjermingService = SkjermingService(FakePdlGateway()),
-                        opprettBigQueryLagringYtelseCallback = {}),
-                    behandlingRepository = behandlingRepository,
-                    opprettBigQueryLagringSakStatistikkCallback = { TODO() },
-                    opprettRekjørSakstatistikkCallback = { TODO() },
-                )
-            },
-        )
-
     private fun ekteLagreStoppetHendelseJobb(
         jobbAppender: JobbAppender,
-    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        hendelsesService = {
-            HendelsesService.konstruer(
-                it,
-                avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
-                    gatewayProvider = defaultGatewayProvider(),
-                    repositoryProvider = postgresRepositoryRegistry.provider(it)
-                ) { TODO() },
-                jobbAppender = jobbAppender,
-                repositoryProvider = postgresRepositoryRegistry.provider(it),
-            )
-        })
+    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { })
 
     private val hendelse = StoppetBehandling(
         saksnummer = "4LFK2S0",
@@ -258,22 +219,12 @@ class MottaStatistikkTest {
             resendSakstatistikkJobb,
         )
 
-        val hendelsesService: (DBConnection) -> HendelsesService = {
-            HendelsesService.konstruer(
-                it,
-                AvsluttetBehandlingService.konstruer(
-                    gatewayProvider = defaultGatewayProvider(),
-                    postgresRepositoryRegistry.provider(it)
-                ) {},
-                jobbAppender,
-                repositoryProvider = postgresRepositoryRegistry.provider(it),
-            )
-        }
-        val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
+        val lagreStoppetHendelseJobb =
+            LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { })
         val lagreOppgaveHendelseJobb =
             LagreOppgaveHendelseJobb(LagreOppgaveJobb())
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
-        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
+        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
 
         val motor = konstruerMotor(
             dataSource,
@@ -354,7 +305,7 @@ class MottaStatistikkTest {
             LagreOppgaveHendelseJobb(LagreOppgaveJobb())
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
-        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb { TODO() }
+        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
 
         val motor = konstruerMotor(
             dataSource,
@@ -435,17 +386,7 @@ class MottaStatistikkTest {
                 lagrePostmottakHendelseJobb,
                 LagreOppgaveHendelseJobb(lagreOppgaveJobb),
                 lagreSakinfoTilBigQueryJobb,
-                LagreStoppetHendelseJobb { conn ->
-                    HendelsesService.konstruer(
-                        conn,
-                        AvsluttetBehandlingService.konstruer(
-                            defaultGatewayProvider(),
-                            postgresRepositoryRegistry.provider(conn)
-                        ) {},
-                        jobbAppender,
-                        repositoryProvider = postgresRepositoryRegistry.provider(conn),
-                    )
-                }
+                LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { })
             )
         )
     }
@@ -510,7 +451,7 @@ class MottaStatistikkTest {
                 resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,
                 lagreSakinfoTilBigQueryJobb,
-                LagreAvklaringsbehovHendelseJobb { TODO() },
+                LagreAvklaringsbehovHendelseJobb(jobbAppender1),
                 lagrePostmottakHendelseJobb,
                 lagreOppgaveHendelseJobb,
                 lagreOppgaveJobb,
@@ -530,7 +471,7 @@ class MottaStatistikkTest {
             lagreStoppetHendelseJobb,
             lagreOppgaveHendelseJobb,
             lagrePostmottakHendelseJobb,
-            LagreAvklaringsbehovHendelseJobb { TODO() },
+            LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
         ) { url, client ->
 

@@ -1,23 +1,17 @@
 package no.nav.aap.statistikk
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
-import no.nav.aap.statistikk.sak.SakService
-import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
@@ -33,37 +27,18 @@ class ApplicationTest {
     ) {
         val jobbAppender = MockJobbAppender()
 
-        val hendelsesService: (DBConnection) -> HendelsesService = {
-            HendelsesService(
-                sakService = SakService(FakeSakRepository()),
-                avsluttetBehandlingService = AvsluttetBehandlingService(
-                    tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                    beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                    vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                    diagnoseRepository = FakeDiagnoseRepository(),
-                    behandlingRepository = FakeBehandlingRepository(),
-                    rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                    skjermingService = SkjermingService(FakePdlGateway()),
-                    opprettBigQueryLagringYtelseCallback = {}
-                ),
-                personService = PersonService(FakePersonRepository()),
-                behandlingRepository = FakeBehandlingRepository(),
-                opprettBigQueryLagringSakStatistikkCallback = { },
-                opprettRekjørSakstatistikkCallback = { },
-            )
-        }
         testKlient(
             transactionExecutor = noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender = jobbAppender,
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-                hendelsesService = hendelsesService,
-            ), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
+                jobbAppender,
+                defaultGatewayProvider { }), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb()
             ),
             lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(),
-            lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
+            lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
         ) { url, client ->
             @Language("JSON") val body = """{
   "saksnummer": "123456789",
@@ -165,36 +140,16 @@ class ApplicationTest {
 
         val jobbAppender = MockJobbAppender()
 
-        val hendelsesService: (DBConnection) -> HendelsesService = {
-            val behandlingRepository = FakeBehandlingRepository()
-            HendelsesService(
-                sakService = SakService(FakeSakRepository()),
-                personService = PersonService(FakePersonRepository()),
-                avsluttetBehandlingService = AvsluttetBehandlingService(
-                    tilkjentYtelseRepository = FakeTilkjentYtelseRepository(),
-                    beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository(),
-                    vilkårsResultatRepository = FakeVilkårsResultatRepository(),
-                    diagnoseRepository = FakeDiagnoseRepository(),
-                    behandlingRepository = behandlingRepository,
-                    rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-                    skjermingService = SkjermingService(FakePdlGateway()),
-                    opprettBigQueryLagringYtelseCallback = {}
-                ),
-                behandlingRepository = behandlingRepository,
-                opprettBigQueryLagringSakStatistikkCallback = { TODO() },
-                opprettRekjørSakstatistikkCallback = { TODO() },
-            )
-        }
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
             azureConfig,
-            LagreStoppetHendelseJobb(hendelsesService),
+            LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { }),
             LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb()
             ),
             LagrePostmottakHendelseJobb(),
-            LagreAvklaringsbehovHendelseJobb(hendelsesService),
+            LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
