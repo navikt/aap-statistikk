@@ -94,6 +94,6 @@ class SkjermingServiceTest {
         val res = service.erSkjermet(behandling)
 
         assertThat(res).isFalse()
-        assertThat(listAppender.list.map { it.message }).anySatisfy { it.contains("Returnerer false for skjerming. Se stackTrace") }
+        assertThat(listAppender.list.map { it.message }).anySatisfy { assertThat(it).contains("Returnerer false for skjerming. Se stackTrace") }
     }
 }
