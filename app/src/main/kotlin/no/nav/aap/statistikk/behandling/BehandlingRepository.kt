@@ -91,15 +91,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
             }
         }
 
-        val tidssone = Clock.systemDefaultZone().zone.id
-        log.info(
-            "Tidssone brukt: $tidssone. Nå: ${LocalDateTime.now(clock)}. Forskjell: ${
-                LocalDateTime.now(
-                    clock
-                )
-            }"
-        )
-
         val historikkId = dbConnection.executeReturnKey(
             """INSERT INTO behandling_historikk (behandling_id,
                                   versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
