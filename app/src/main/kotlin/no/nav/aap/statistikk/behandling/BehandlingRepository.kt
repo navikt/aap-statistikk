@@ -75,21 +75,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
             setParams { setLong(1, behandlingId.id) }
         }
 
-        dbConnection.executeBatch(
-            "INSERT INTO person (ident) VALUES (?) ON CONFLICT DO NOTHING",
-            behandling.relaterteIdenter
-        ) {
-            setParams { ident ->
-                setString(1, ident)
-            }
-        }
-
-        dbConnection.execute("UPDATE behandling SET aarsaker_til_behandling = ? WHERE id = ?") {
-            setParams {
-                setArray(1, behandling.årsaker.map { it.name })
-                setLong(2, behandlingId.id)
-            }
-        }
+        oppdaterÅrsakerTilBehandling(behandling)
 
         val historikkId = dbConnection.executeReturnKey(
             """INSERT INTO behandling_historikk (behandling_id,
@@ -125,11 +111,39 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             }
         }
 
+        oppdaterRelaterteIdenter(behandling, historikkId)
+    }
+
+    private fun oppdaterÅrsakerTilBehandling(
+        behandling: Behandling,
+    ) {
+        val behandlingId = behandling.id!!
+        dbConnection.execute("UPDATE behandling SET aarsaker_til_behandling = ? WHERE id = ?") {
+            setParams {
+                setArray(1, behandling.årsaker.map { it.name })
+                setLong(2, behandlingId.id)
+            }
+        }
+    }
+
+    private fun oppdaterRelaterteIdenter(
+        behandling: Behandling,
+        historikkId: Long
+    ) {
+        dbConnection.executeBatch(
+            "INSERT INTO person (ident) VALUES (?) ON CONFLICT DO NOTHING",
+            behandling.relaterteIdenter
+        ) {
+            setParams { ident ->
+                setString(1, ident)
+            }
+        }
+
         dbConnection.executeBatch(
             """INSERT INTO relaterte_personer (behandling_id, person_id)
-SELECT $historikkId, id
-FROM person
-WHERE ident = ?""", behandling.relaterteIdenter
+    SELECT $historikkId, id
+    FROM person
+    WHERE ident = ?""", behandling.relaterteIdenter
         ) {
             setParams {
                 setString(1, it)
