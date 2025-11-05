@@ -2,7 +2,7 @@ CREATE TABLE meldekort
 (
     id SERIAL PRIMARY KEY,
     behandling_id BIGINT NOT NULL REFERENCES behandling (id) ON DELETE CASCADE,
-    journalpost_id VARCHAR(50) NOT NULL UNIQUE
+    journalpost_id TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE arbeid_i_periode (
