@@ -52,7 +52,6 @@ dependencies {
     implementation(libs.infrastructure)
     implementation(libs.server)
 
-    implementation("no.nav:ktor-openapi-generator:1.0.131")
     implementation(libs.behandlingsflytKontrakt)
     implementation(libs.tilgangKontrakt)
     implementation(libs.caffeine)
