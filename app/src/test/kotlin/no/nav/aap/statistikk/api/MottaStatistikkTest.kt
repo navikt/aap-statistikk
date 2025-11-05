@@ -112,6 +112,7 @@ class MottaStatistikkTest {
         )
     }
 
+
     private fun ekteLagreStoppetHendelseJobb(
         jobbAppender: JobbAppender,
     ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { })

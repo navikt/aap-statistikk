@@ -36,6 +36,8 @@ import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.meldekort.IMeldekortRepository
+import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
@@ -391,6 +393,20 @@ class MockJobbAppender : JobbAppender {
         behandlingId: BehandlingId
     ) {
         TODO("Not yet implemented")
+    }
+}
+
+class FakeMeldekortRepository: IMeldekortRepository {
+    private val meldekort = mutableMapOf<Long, List<Meldekort>>()
+    override fun lagre(
+        behandlingId: BehandlingId,
+        meldekort: List<Meldekort>
+    ) {
+        this.meldekort[behandlingId.id] = meldekort
+    }
+
+    override fun hentMeldekortperioder(behandlingId: BehandlingId): List<Meldekort> {
+        return meldekort[behandlingId.id] ?: emptyList()
     }
 }
 

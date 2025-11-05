@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.MeldekortDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.repository.RepositoryProvider
@@ -13,6 +14,10 @@ import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.meldekort.ArbeidIPerioder
+import no.nav.aap.statistikk.meldekort.IMeldekortRepository
+import no.nav.aap.statistikk.meldekort.Meldekort
+import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -25,7 +30,8 @@ class HendelsesService(
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personService: PersonService,
     private val behandlingService: BehandlingService,
-    private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit
+    private val meldekortRepository: IMeldekortRepository,
+    private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -40,6 +46,7 @@ class HendelsesService(
                 personService = PersonService(repositoryProvider),
                 avsluttetBehandlingService = avsluttetBehandlingService,
                 behandlingService = BehandlingService(repositoryProvider.provide()),
+                meldekortRepository = repositoryProvider.provide(),
                 opprettBigQueryLagringSakStatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)
                         .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")
@@ -64,6 +71,10 @@ class HendelsesService(
 
         val behandlingId = behandlingService.hentEllerLagreBehandling(hendelse, sak).id!!
 
+        if (hendelse.nyeMeldekort.isNotEmpty()) {
+            meldekortRepository.lagre(behandlingId, hendelse.nyeMeldekort.tilDomene())
+        }
+
         if (hendelse.behandlingStatus == Status.AVSLUTTET) {
             // TODO: legg denne i en jobb
             val avsluttetBehandling =
@@ -86,6 +97,21 @@ class HendelsesService(
 
         PrometheusProvider.prometheus.hendelseLagret().increment()
         logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
+    }
+
+    private fun List<MeldekortDTO>.tilDomene(): List<Meldekort> {
+        return this.map {meldekort ->
+            Meldekort(
+                journalpostId = meldekort.journalpostId,
+                arbeidIPeriodeDTO = meldekort.arbeidIPeriodeDTO.map {
+                    ArbeidIPerioder(
+                        periodeFom = it.periodeFom,
+                        periodeTom = it.periodeTom,
+                        timerArbeidet = it.timerArbeidet
+                    )
+                }
+            )
+        }
     }
 }
 
