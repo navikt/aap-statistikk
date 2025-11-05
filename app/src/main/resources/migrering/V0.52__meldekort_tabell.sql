@@ -8,6 +8,6 @@ CREATE TABLE meldekort
 CREATE TABLE arbeid_i_periode (
     id SERIAL PRIMARY KEY,
     periode daterange NOT NULL,
-    timerArbeidet NUMERIC(5,2) NOT NULL,
+    timerArbeidet integer NOT NULL,
     meldekort_id INTEGER NOT NULL REFERENCES meldekort (id) ON DELETE CASCADE
 );
