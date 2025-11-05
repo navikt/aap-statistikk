@@ -25,7 +25,7 @@ spec:
         relatert_behandling_uuid,
         relatert_fagsystem,
         behandling_type,
-        TIMESTAMP(DATETIME(ferdigbehandlet_tid, "Europe/Oslo")) AS ferdigbehandlet_tid,
+        TIMESTAMP(DATETIME(ferdigbehandlet_tid), "Europe/Oslo") AS ferdigbehandlet_tid,
         TIMESTAMP(DATETIME(endret_tid), "Europe/Oslo") AS endretTid,
         aktor_id AS fodselsnummer,
         TIMESTAMP(DATETIME(teknisk_tid), "Europe/Oslo") AS teknisk_tid,
