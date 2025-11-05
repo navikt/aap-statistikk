@@ -16,6 +16,8 @@ import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.meldekort.IMeldekortRepository
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
@@ -44,6 +46,7 @@ class HendelsesServiceTest {
         PrometheusProvider.prometheus = simpleMeterRegistry
         val hendelseLagretCounter = simpleMeterRegistry.hendelseLagret()
         val sakRepository = FakeSakRepository()
+        val meldekortRepository = FakeMeldekortRepository()
         val skjermingService = SkjermingService(FakePdlGateway(emptyMap()))
 
         val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
@@ -54,6 +57,7 @@ class HendelsesServiceTest {
             sakRepository,
             diagnoseRepository,
             behandlingRepository,
+            meldekortRepository,
             skjermingService,
             rettighetstypeperiodeRepository,
             opprettBigQueryLagringCallback
@@ -132,6 +136,7 @@ class HendelsesServiceTest {
         sakRepository: FakeSakRepository,
         diagnoseRepository: FakeDiagnoseRepository,
         behandlingRepository: FakeBehandlingRepository,
+        meldekortRepository: IMeldekortRepository,
         skjermingService: SkjermingService,
         rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
         opprettBigQueryLagringCallback: (BehandlingId) -> Unit
@@ -153,7 +158,8 @@ class HendelsesServiceTest {
             ),
             personService = PersonService(FakePersonRepository()),
             opprettBigQueryLagringSakStatistikkCallback = opprettBigQueryLagringCallback,
-            behandlingService = BehandlingService(behandlingRepository)
+            behandlingService = BehandlingService(behandlingRepository),
+            meldekortRepository = meldekortRepository
         )
     }
 
@@ -173,6 +179,7 @@ class HendelsesServiceTest {
             sakRepository,
             FakeDiagnoseRepository(),
             behandlingRepository,
+            FakeMeldekortRepository(),
             skjermingService,
             rettighetstypeperiodeRepository
         ) {}

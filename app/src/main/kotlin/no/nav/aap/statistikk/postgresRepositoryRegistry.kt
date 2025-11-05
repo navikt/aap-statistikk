@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepositoryImpl
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.person.PersonRepository
@@ -38,5 +39,6 @@ val postgresRepositoryRegistry = RepositoryRegistry()
     .register<RettighetstypeperiodeRepository>()
     .register<VilkårsresultatRepository>()
     .register<TilkjentYtelseRepository>()
+    .register<MeldekortRepository>()
 
 fun DBConnection.provider(): RepositoryProvider = postgresRepositoryRegistry.provider(this)
