@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.jobber.appender
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api.stringToNumber
@@ -25,16 +26,23 @@ class MotorJobbAppender(
         connection: DBConnection,
         jobb: JobbInput
     ) {
-        postgresRepositoryRegistry.provider(connection).provide<FlytJobbRepository>().leggTil(jobb)
+        leggTil(postgresRepositoryRegistry.provider(connection), jobb)
+    }
+
+    override fun leggTil(
+        repositoryProvider: RepositoryProvider,
+        jobb: JobbInput
+    ) {
+        repositoryProvider.provide<FlytJobbRepository>().leggTil(jobb)
     }
 
     override fun leggTilLagreSakTilBigQueryJobb(
-        connection: DBConnection,
+        repositoryProvider: RepositoryProvider,
         behandlingId: BehandlingId,
         delayInSeconds: Long
     ) {
         val behandling =
-            postgresRepositoryRegistry.provider(connection).provide<IBehandlingRepository>()
+            repositoryProvider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
         if (behandling.typeBehandling in listOf(TypeBehandling.Oppfølgingsbehandling)) {
             log.info("Prøver å legge til oppfølgingsbehandling til saksstatikk. Ignorerer. Behandling: $behandlingId. Referanse: ${behandling.referanse}")
@@ -43,7 +51,7 @@ class MotorJobbAppender(
 
         val saksnummer = behandling.sak.saksnummer
         leggTil(
-            connection,
+            repositoryProvider,
             // For sak = behandlingId. Husk at "sak" er funksjonalt bare en concurrency-key
             JobbInput(lagreSakinfoTilBigQueryJobb)
                 .medPayload(behandlingId)
@@ -70,16 +78,16 @@ class MotorJobbAppender(
     }
 
     override fun leggTilResendSakstatistikkJobb(
-        connection: DBConnection,
+        repositoryProvider: RepositoryProvider,
         behandlingId: BehandlingId
     ) {
         log.info("Starter resending-jobb. BehandlingId: $behandlingId")
         val behandling =
-            postgresRepositoryRegistry.provider(connection).provide<IBehandlingRepository>()
+            repositoryProvider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
         val saksnummer = behandling.sak.saksnummer
         leggTil(
-            connection,
+            repositoryProvider,
             JobbInput(resendSakstatistikkJobb).medPayload(behandlingId)
                 .forSak(stringToNumber(saksnummer.value))
         )

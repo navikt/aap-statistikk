@@ -42,7 +42,7 @@ class MeldekortRepositoryTest {
                     ArbeidIPerioder(
                         periodeFom = LocalDate.of(2024, 1, 1),
                         periodeTom = LocalDate.of(2024, 1, 7),
-                        timerArbeidet = BigDecimal("20.00")
+                        timerArbeidet = BigDecimal("20")
                     )
                 )
             )

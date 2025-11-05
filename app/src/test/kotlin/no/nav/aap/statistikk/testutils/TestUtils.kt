@@ -19,6 +19,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.avsluttetbehandling.*
@@ -44,7 +45,6 @@ import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
 import no.nav.aap.statistikk.saksstatistikk.BQBehandling
@@ -113,11 +113,11 @@ fun <E> testKlient(
         tokenProvider = ClientCredentialsTokenProvider,
         responseHandler = DefaultResponseHandler(),
     )
+    motor.start()
 
     val server = embeddedServer(Netty, port = 0) {
         module(
             transactionExecutor,
-            motor,
             jobbAppender,
             azureConfig,
             {},
@@ -168,8 +168,7 @@ fun <E> testKlientNoInjection(
             azureConfig,
             bigQueryClient,
             bigQueryClient,
-            defaultGatewayProvider(),
-            postgresRepositoryRegistry
+            defaultGatewayProvider()
         )
     }.start()
 
@@ -366,8 +365,15 @@ class MockJobbAppender : JobbAppender {
         jobber.add(jobb)
     }
 
+    override fun leggTil(
+        repositoryProvider: RepositoryProvider,
+        jobb: JobbInput
+    ) {
+        TODO("Not yet implemented")
+    }
+
     override fun leggTilLagreSakTilBigQueryJobb(
-        connection: DBConnection,
+        repositoryProvider: RepositoryProvider,
         behandlingId: BehandlingId,
         delayInSeconds: Long
     ) {
@@ -383,7 +389,7 @@ class MockJobbAppender : JobbAppender {
     }
 
     override fun leggTilResendSakstatistikkJobb(
-        connection: DBConnection,
+        repositoryProvider: RepositoryProvider,
         behandlingId: BehandlingId
     ) {
         TODO("Not yet implemented")

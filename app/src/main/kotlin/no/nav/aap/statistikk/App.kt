@@ -17,7 +17,6 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.Jobb
@@ -28,15 +27,12 @@ import no.nav.aap.motor.mdc.JobbLogInfoProvider
 import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.api.*
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
-import no.nav.aap.statistikk.avsluttetbehandling.YtelsesStatistikkTilBigQuery
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Migrering
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -78,8 +74,7 @@ fun main() {
             azureConfig,
             bigQueryClientSak,
             bigQueryClientYtelse,
-            gatewayProvider,
-            postgresRepositoryRegistry
+            gatewayProvider
         )
     }.start(wait = true)
 }
@@ -89,8 +84,7 @@ fun Application.startUp(
     azureConfig: AzureConfig,
     bigQueryClientSak: BigQueryClient,
     bigQueryClientYtelse: BigQueryClient,
-    gatewayProvider: GatewayProvider,
-    repositoryRegistry: RepositoryRegistry
+    gatewayProvider: GatewayProvider
 ) {
     log.info("Starter.")
 
@@ -104,19 +98,13 @@ fun Application.startUp(
         SaksStatistikkService.konstruer(
             bqSakRepository,
             gatewayProvider,
-            repositoryRegistry.provider(it)
+            postgresRepositoryRegistry.provider(it)
         )
     }
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
 
-    val lagreAvsluttetBehandlingTilBigQueryJobb = LagreAvsluttetBehandlingTilBigQueryJobb(
-        ytelsesStatistikkTilBigQuery = { connection ->
-            YtelsesStatistikkTilBigQuery.konstruer(
-                bqRepository = bqYtelseRepository,
-                repositoryProvider = repositoryRegistry.provider(connection)
-            )
-        }
-    )
+    val lagreAvsluttetBehandlingTilBigQueryJobb =
+        LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
 
     val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
 
@@ -127,26 +115,10 @@ fun Application.startUp(
             resendSakstatistikkJobb
         )
 
-    val hendelsesService: (DBConnection) -> HendelsesService = { connection ->
-        val repositoryProvider = repositoryRegistry.provider(connection)
-        HendelsesService.konstruer(
-            connection,
-            AvsluttetBehandlingService.konstruer(
-                gatewayProvider = gatewayProvider,
-                repositoryProvider = repositoryProvider,
-                opprettBigQueryLagringYtelseCallback = { behandlingId ->
-                    motorJobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                        connection,
-                        behandlingId
-                    )
-                },
-            ),
-            jobbAppender = motorJobbAppender,
-            repositoryProvider = repositoryProvider,
-        )
-    }
-    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(hendelsesService)
-    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(hendelsesService)
+    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
+        motorJobbAppender, gatewayProvider
+    )
+    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(motorJobbAppender)
 
     val lagreOppgaveJobb = LagreOppgaveJobb()
 
@@ -181,9 +153,10 @@ fun Application.startUp(
         motorApi(dataSource)
     }
 
+    motor.start()
+
     module(
         transactionExecutor,
-        motor,
         motorJobbAppender,
         azureConfig,
         motorApiCallback,
@@ -214,7 +187,6 @@ fun motor(
 
 fun Application.module(
     transactionExecutor: TransactionExecutor,
-    motor: Motor,
     jobbAppender: JobbAppender,
     azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
@@ -223,7 +195,6 @@ fun Application.module(
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
 ) {
-    motor.start()
     transactionExecutor.withinTransaction {
         RetryService(it).enable()
     }
