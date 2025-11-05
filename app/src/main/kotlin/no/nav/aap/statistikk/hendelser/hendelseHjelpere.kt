@@ -12,8 +12,6 @@ import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandlingStatus
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
-    if (this.any { it.status.returnert() }) return null
-
     // Hvis FATTE_VEDTAK er løst, men det fortsatt finnes åpne behov, så betyr at det
     // det har vært retur fra beslutter.
     val finnesÅpneBehov =
