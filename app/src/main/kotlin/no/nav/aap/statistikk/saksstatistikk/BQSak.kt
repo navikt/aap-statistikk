@@ -71,7 +71,8 @@ data class BQBehandling(
             sekvensNummer = sekvensNummer,
             erResending = erResending,
             tekniskTid = tekniskTid,
-            endretTid = endretTid
+            endretTid = endretTid,
+            versjon = versjon
         )
     }
 }
