@@ -17,7 +17,6 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.meldekort.ArbeidIPerioder
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
-import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -100,7 +99,7 @@ class HendelsesService(
     }
 
     private fun List<MeldekortDTO>.tilDomene(): List<Meldekort> {
-        return this.map {meldekort ->
+        return this.map { meldekort ->
             Meldekort(
                 journalpostId = meldekort.journalpostId,
                 arbeidIPeriodeDTO = meldekort.arbeidIPeriodeDTO.map {

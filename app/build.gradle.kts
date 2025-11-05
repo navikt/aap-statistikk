@@ -4,7 +4,7 @@ plugins {
     id("aap-statistikk.conventions")
     kotlin("jvm")
     alias(libs.plugins.ktor)
-    id("io.gitlab.arturbosch.detekt")
+    id("dev.detekt")
     application
 }
 
