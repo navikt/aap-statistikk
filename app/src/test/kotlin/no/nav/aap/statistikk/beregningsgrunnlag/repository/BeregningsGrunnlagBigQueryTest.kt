@@ -115,7 +115,7 @@ class BeregningsGrunnlagBigQueryTest {
         val client = BigQueryClient(bigQueryConfig, schemaRegistry)
         val tabell = BeregningsGrunnlagTabell()
 
-        val grunnlag_11_19 =
+        @Suppress("LocalVariableName") val grunnlag_11_19 =
             IBeregningsGrunnlag.Grunnlag_11_19(
                 12.2,
                 er6GBegrenset = true,
