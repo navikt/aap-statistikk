@@ -8,6 +8,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.isBeforeOrEqual
+import no.nav.aap.statistikk.onlyOrNull
 import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandlingStatus
 
@@ -44,7 +45,7 @@ fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
 }
 
-fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
+private fun AvklaringsbehovHendelseDto.tidspunktSisteEndring() =
     endringer.maxBy { it.tidsstempel }.tidsstempel
 
 fun List<AvklaringsbehovHendelseDto>.tidspunktSisteEndring(): LocalDateTime? =
@@ -115,14 +116,6 @@ fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
         .flatMap { it.endringer }.maxByOrNull { it.tidsstempel }?.årsakTilSattPåVent?.toString()
 }
 
-
-@JvmName("erAutomatisk")
-fun List<BehandlingHendelse>.erManuell(): Boolean {
-    return this.filterNot { it.avklaringsBehov == null }.any {
-        !Definisjon.forKode(it.avklaringsBehov!!).erAutomatisk()
-    }
-}
-
 fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): List<AvklaringsbehovHendelseDto> {
     return this
         .map {
@@ -139,20 +132,4 @@ fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): Lis
 
 fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
     return this.lastOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
-}
-
-fun <T> List<T>.only(): T {
-    require(this.size == 1) { "Skal ha lengde én, men har lengde ${this.size}: ${this.joinToString(",")}" }
-    return this.first()
-}
-
-fun <T> List<T>.onlyOrNull(): T? {
-    require(this.size <= 1) {
-        "Skal ha lengde maks én, men har lengde ${this.size}: ${
-            this.joinToString(
-                ","
-            )
-        }"
-    }
-    return this.firstOrNull()
 }

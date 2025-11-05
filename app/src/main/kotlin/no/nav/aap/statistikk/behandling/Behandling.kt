@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.hendelser.erManuell
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
@@ -150,6 +149,13 @@ data class Behandling(
         }
 
         return if (this.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
+    }
+}
+
+@JvmName("erAutomatisk")
+fun List<BehandlingHendelse>.erManuell(): Boolean {
+    return this.filterNot { it.avklaringsBehov == null }.any {
+        !Definisjon.forKode(it.avklaringsBehov!!).erAutomatisk()
     }
 }
 
