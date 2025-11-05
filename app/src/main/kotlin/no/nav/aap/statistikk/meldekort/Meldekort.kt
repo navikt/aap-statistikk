@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.meldekort
 
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.MeldekortDTO
 import java.math.BigDecimal
 import java.time.LocalDate
 

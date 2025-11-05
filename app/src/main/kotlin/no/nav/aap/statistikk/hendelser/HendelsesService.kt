@@ -32,7 +32,7 @@ class HendelsesService(
     private val meldekortRepository: IMeldekortRepository,
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(javaClass)
 
     companion object {
         fun konstruer(
@@ -70,6 +70,7 @@ class HendelsesService(
 
         val behandlingId = behandlingService.hentEllerLagreBehandling(hendelse, sak).id!!
 
+        log.info("Mottok ${hendelse.nyeMeldekort.size} nye meldekort for behandling ${hendelse.behandlingReferanse}.")
         if (hendelse.nyeMeldekort.isNotEmpty()) {
             meldekortRepository.lagre(behandlingId, hendelse.nyeMeldekort.tilDomene())
         }
@@ -95,7 +96,7 @@ class HendelsesService(
         }
 
         PrometheusProvider.prometheus.hendelseLagret().increment()
-        logger.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
+        log.info("Hendelse behandlet. Saksnr: ${hendelse.saksnummer}")
     }
 
     private fun List<MeldekortDTO>.tilDomene(): List<Meldekort> {
