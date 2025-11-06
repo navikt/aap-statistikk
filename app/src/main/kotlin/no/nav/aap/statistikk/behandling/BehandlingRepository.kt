@@ -432,14 +432,6 @@ WHERE b.id = ?"""
         }
     }
 
-    override fun tellFullførteBehandlinger(): Long {
-        return dbConnection.queryFirst("""SELECT count(*) FROM behandling_historikk where gjeldende = TRUE AND status = 'AVSLUTTET'""") {
-            setRowMapper {
-                it.getLong("count")
-            }
-        }
-    }
-
     private fun mapBehandling(it: Row) = Behandling(
         id = it.getLong("b_id").let(::BehandlingId),
         referanse = it.getUUID("br_referanse"),
