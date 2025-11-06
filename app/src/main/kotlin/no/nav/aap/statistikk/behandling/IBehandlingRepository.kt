@@ -15,6 +15,4 @@ interface IBehandlingRepository : Repository {
     fun hentEllerNull(id: BehandlingId): Behandling?
 
     fun hent(id: BehandlingId): Behandling
-
-    fun tellFullførteBehandlinger(): Long
 }

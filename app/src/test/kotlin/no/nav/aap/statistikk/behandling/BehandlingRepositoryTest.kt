@@ -19,11 +19,7 @@ import no.nav.aap.statistikk.testutils.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
@@ -306,12 +302,6 @@ class BehandlingRepositoryTest {
                 )
             )
         }
-
-        val antall = dataSource.transaction {
-            BehandlingRepository(it).tellFullførteBehandlinger()
-        }
-
-        assertThat(antall).isEqualTo(2)
     }
 
     @Test
