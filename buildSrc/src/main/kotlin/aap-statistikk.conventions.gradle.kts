@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+// Felles kode for alle build.gradle.kts filer som laster inn denne conventions pluginen
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -8,22 +8,7 @@ plugins {
 group = "no.nav.aap.statistikk"
 version = project.findProperty("version")?.toString() ?: "0.0.0"
 
-repositories {
-    mavenCentral()
-    maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/navikt/behandlingsflyt")
-        credentials {
-            username = "x-access-token"
-            password = (project.findProperty("githubPassword")
-                ?: System.getenv("GITHUB_PASSWORD")
-                ?: System.getenv("GITHUB_TOKEN")
-                ?: error("")).toString()
-        }
-    }
-}
-
+// https://docs.gradle.org/8.12.1/userguide/jvm_test_suite_plugin.html
 testing {
     suites {
         @Suppress("UnstableApiUsage") val test by getting(JvmTestSuite::class) {
@@ -32,23 +17,30 @@ testing {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
-}
+tasks {
+    test {
+        useJUnitPlatform()
+        maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
 
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
+    jacocoTestReport {
+        dependsOn(tasks.test)
+    }
 }
 
 kotlin {
     jvmToolchain(21)
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
     }
 }
 
-// Pass på at når vi kaller JavaExec eller Test tasks så bruker vi samme JVM som vi kompilerer med
+// Pass på at når vi kaller JavaExec eller Test tasks så bruker vi samme språk-versjon som vi kompilerer til
 val toolchainLauncher = javaToolchains.launcherFor {
     languageVersion.set(JavaLanguageVersion.of(21))
 }

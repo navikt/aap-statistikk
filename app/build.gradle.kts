@@ -83,23 +83,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-repositories {
-    mavenCentral()
-    maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    mavenLocal()
-}
-
 tasks {
     withType<ShadowJar> {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
         mergeServiceFiles()
     }
 
-    test {
-        useJUnitPlatform()
-        maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
-        testLogging {
-            events("passed", "skipped", "failed")
-        }
-    }
 }
