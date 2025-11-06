@@ -5,9 +5,9 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
-class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRepository{
+class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRepository {
 
-    companion object : RepositoryFactory<IMeldekortRepository>{
+    companion object : RepositoryFactory<IMeldekortRepository> {
         override fun konstruer(connection: DBConnection): IMeldekortRepository {
             return MeldekortRepository(connection)
         }
@@ -15,22 +15,23 @@ class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRep
 
 
     override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
-        meldekort.forEach {
-            lagreEnkeltMeldekort(behandlingId, it).let { meldekortId ->
-                lagreArbeidIPeriode(meldekortId, it.arbeidIPeriodeDTO)
-            }
+        meldekort.forEach { meldekort ->
+            lagreEnkeltMeldekort(
+                behandlingId,
+                meldekort
+            )?.let { lagreArbeidIPeriode(it, meldekort.arbeidIPeriodeDTO) }
         }
     }
 
-    private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: Meldekort): Long {
-        return dbConnection.executeReturnKey(
-            """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?) ON CONFLICT DO NOTHING """.trimIndent()
+    private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: Meldekort): Long? {
+        return dbConnection.executeReturnKeys(
+            """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?) ON CONFLICT DO NOTHING""".trimIndent()
         ) {
             setParams {
                 setLong(1, behandlingId.id)
                 setString(2, meldekort.journalpostId)
             }
-        }
+        }.firstOrNull()
     }
 
     private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<ArbeidIPerioder>) {
@@ -46,7 +47,7 @@ class MeldekortRepository(private val dbConnection: DBConnection): IMeldekortRep
         }
     }
 
-    override fun hentMeldekortperioder(
+    override fun hentMeldekort(
         behandlingId: BehandlingId
     ): List<Meldekort> {
         return dbConnection.queryList(

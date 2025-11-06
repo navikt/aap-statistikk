@@ -405,7 +405,7 @@ class FakeMeldekortRepository: IMeldekortRepository {
         this.meldekort[behandlingId.id] = meldekort
     }
 
-    override fun hentMeldekortperioder(behandlingId: BehandlingId): List<Meldekort> {
+    override fun hentMeldekort(behandlingId: BehandlingId): List<Meldekort> {
         return meldekort[behandlingId.id] ?: emptyList()
     }
 }
