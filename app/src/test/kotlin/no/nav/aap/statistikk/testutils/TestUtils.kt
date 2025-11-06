@@ -396,7 +396,7 @@ class MockJobbAppender : JobbAppender {
     }
 }
 
-class FakeMeldekortRepository: IMeldekortRepository {
+class FakeMeldekortRepository : IMeldekortRepository {
     private val meldekort = mutableMapOf<Long, List<Meldekort>>()
     override fun lagre(
         behandlingId: BehandlingId,
@@ -511,10 +511,6 @@ class FakeBehandlingRepository : IBehandlingRepository {
 
     override fun hentEllerNull(id: BehandlingId): Behandling? {
         return behandlinger[id.id]
-    }
-
-    override fun tellFullførteBehandlinger(): Long {
-        TODO("Not yet implemented")
     }
 }
 
