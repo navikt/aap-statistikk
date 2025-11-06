@@ -5,5 +5,5 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 
 interface IMeldekortRepository: Repository {
     fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>)
-    fun hentMeldekortperioder(behandlingId: BehandlingId): List<Meldekort>
+    fun hentMeldekort(behandlingId: BehandlingId): List<Meldekort>
 }
