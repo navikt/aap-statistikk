@@ -103,7 +103,7 @@ class HendelsesService(
         return this.map { meldekort ->
             Meldekort(
                 journalpostId = meldekort.journalpostId,
-                arbeidIPeriodeDTO = meldekort.arbeidIPeriodeDTO.map {
+                arbeidIPeriodeDTO = meldekort.arbeidIPeriode.map {
                     ArbeidIPerioder(
                         periodeFom = it.periodeFom,
                         periodeTom = it.periodeTom,
