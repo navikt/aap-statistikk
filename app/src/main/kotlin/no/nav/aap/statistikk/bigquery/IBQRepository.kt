@@ -7,9 +7,9 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import java.util.*
 
+@Deprecated("Vil erstattes av lagring+replikering.")
 interface IBQSakstatistikkRepository {
     fun lagre(payload: BQBehandling)
-    fun hentNyesteForBehandling(behandlingReferanse: UUID): BQBehandling?
 }
 
 interface IBQYtelsesstatistikkRepository {
