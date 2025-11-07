@@ -577,10 +577,6 @@ class FakeBQSakRepository : IBQSakstatistikkRepository {
     override fun lagre(payload: BQBehandling) {
         saker.add(payload)
     }
-
-    override fun hentNyesteForBehandling(behandlingReferanse: UUID): BQBehandling? {
-        TODO("Not yet implemented")
-    }
 }
 
 class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {

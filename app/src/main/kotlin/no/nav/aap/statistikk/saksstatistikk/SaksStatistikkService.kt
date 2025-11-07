@@ -65,14 +65,29 @@ class SaksStatistikkService(
         // TODO - kun lagre om endring siden sist
         bigQueryRepository.lagre(bqSak)
 
-
         val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
         if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
+            // Hvis vi ikke allerede har en inngangshendelse (når behandlingen ble
+            // opprettet), konstruer en.
+            // Dette er kun et teknisk krav fra Team Sak om at alle hendelser bør ha inngangshendelser.
+            // I praksis vil de "normale" hendelsene kun komme et par sekunder etter at behandlingen
+            // ble opprettet i behandlingsflyt.
+            if (!erInngangsHendelse(bqSak) && siste == null) {
+                sakstatistikkRepository.lagre(
+                    bqSak.copy(
+                        endretTid = bqSak.registrertTid,
+                        ferdigbehandletTid = null, vedtakTid = null, behandlingStatus = "OPPRETTET"
+                    )
+                )
+            }
             sakstatistikkRepository.lagre(bqSak)
         } else {
             log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
         }
+    }
 
+    private fun erInngangsHendelse(bqBehandling: BQBehandling): Boolean {
+        return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
     private fun hentRelatertBehandlingUUID(behandling: Behandling): UUID? =
@@ -259,13 +274,10 @@ class SaksStatistikkService(
     ): Boolean {
         val duration = Duration.between(originalTid, nyTid)
         return if (duration.abs().toMillis() <= 10) {
-            log.info("LIK NOK $duration")
             true
         } else {
-            log.info("IKKE NOK ${duration}")
             false
         }
-//        return original.endretTid == ny.endretTid
     }
 
     fun leggTilHvisIkkeDuplikat(

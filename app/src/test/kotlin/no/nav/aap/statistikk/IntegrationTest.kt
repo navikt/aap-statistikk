@@ -231,6 +231,26 @@ class IntegrationTest {
             assertThat(it.resultat).isEqualTo(ResultatKode.valueOf(("INNVILGET")))
         }
 
+        dataSource.transaction {
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                referanse!!
+            )
+        }.let {
+            val avsluttede = it.filter { it.behandlingStatus == "AVSLUTTET" }
+            println("...")
+            println(avsluttede)
+            println("...")
+        }
+
+
+        val alleHendelser = dataSource.transaction {
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse!!)
+        }
+
+        // Forvent kun én inngangshendelse.
+        assertThat(alleHendelser.filter { it.endretTid == it.registrertTid }.size).isEqualTo(1)
+
+
         // DEL 2: test resending
         testKlientNoInjection(
             dbConfig,
