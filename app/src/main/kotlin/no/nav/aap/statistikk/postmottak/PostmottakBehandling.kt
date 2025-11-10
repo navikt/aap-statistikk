@@ -18,7 +18,7 @@ class PostmottakBehandling(
 ) {
     init {
         require(behandlingType.kildeSystem == KildeSystem.Postmottak)
-        require(endringer.filter { it.gjeldende }.size <= 1)
+        require(endringer.count { it.gjeldende } <= 1)
     }
 
     internal fun medId(id: Long): PostmottakBehandling {
