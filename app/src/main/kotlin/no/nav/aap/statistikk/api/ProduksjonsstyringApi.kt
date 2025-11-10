@@ -45,7 +45,7 @@ data class FordelingInput(
     ),
     @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<@RegularExpression(
         pattern = "[0-9]{4}[0-9]{2}?"
-    ) String>? = listOf()
+    ) String>? = emptyList()
 ) {
     enum class Tidsenhet {
         DAG, UKE, MÅNED, ÅR,
@@ -56,7 +56,7 @@ data class BehandlingerPerBehandlingstypeInputMedPeriode(
     @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
     ),
-    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf(),
+    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList(),
     @param:QueryParam("For hvilke periode som skal gjøres oppslag på") val oppslagsPeriode: OppslagsPeriode = OppslagsPeriode.IDAG
 ) {
     enum class OppslagsPeriode {
@@ -71,9 +71,9 @@ data class OppgaverPerBehandlingstypeInputMedPeriode(
     @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
         TypeBehandling.Førstegangsbehandling
     ),
-    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf(),
+    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList(),
     @param:QueryParam("For hvilke periode som skal gjøres oppslag på") val oppslagsPeriode: OppslagsPeriode = OppslagsPeriode.IDAG,
-    @param:QueryParam("For hvilke oppgavetyper. Tom liste betyr alle.") val oppgaveTyper: List<String>? = listOf()
+    @param:QueryParam("For hvilke oppgavetyper. Tom liste betyr alle.") val oppgaveTyper: List<String>? = emptyList()
 ) {
     enum class OppslagsPeriode {
         IDAG,
@@ -90,7 +90,7 @@ val modules = TagModule(listOf(Tags.Produksjonsstyring))
 data class BehandlingstidPerDagInput(
     @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
     ),
-    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+    @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList()
 )
 
 data class BehandlingstidPerDagDTO(val dag: LocalDate, val snitt: Double)
@@ -104,7 +104,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList()
     )
 
     data class AntallÅpneOgTypeOgGjennomsnittsalder(
@@ -151,7 +151,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnittGittPeriode(
                 behandlingsTyper = req.behandlingstyper.orEmpty(),
-                enheter = req.enheter ?: listOf(),
+                enheter = req.enheter.orEmpty(),
                 startDato = startDato,
                 sluttDato = sluttDato
             )
@@ -169,8 +169,8 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf(),
-        @param:QueryParam("For hvilke oppgavetyper. Tom liste betyr alle.") val oppgaveTyper: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList(),
+        @param:QueryParam("For hvilke oppgavetyper. Tom liste betyr alle.") val oppgaveTyper: List<String>? = emptyList()
     )
     route("/behandling-per-steggruppe").get<BehandlingerPerSteggruppeInput, List<BehandlingPerSteggruppe>>(
         modules
@@ -291,7 +291,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList()
     )
 
     data class BehandlinEndringerPerDag(
@@ -334,7 +334,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList()
     )
     route("/behandlinger/på-vent").get<BehandlingerPåVentInput, List<VenteårsakOgGjennomsnitt>>(
         TagModule(listOf(Tags.Produksjonsstyring))
@@ -342,7 +342,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         val venteårsakOgGjennomsnitt = transactionExecutor.withinTransaction { connection ->
             val repo = ProduksjonsstyringRepository(connection)
             repo.venteÅrsakOgGjennomsnitt(
-                req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
+                req.behandlingstyper.orEmpty(), req.enheter.orEmpty()
             )
         }
         respond(venteårsakOgGjennomsnitt)
@@ -370,7 +370,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
 
             repo.venteÅrsakOgGjennomsnittGittPeriode(
                 behandlingsTyper = req.behandlingstyper.orEmpty(),
-                enheter = req.enheter ?: listOf(),
+                enheter = req.enheter.orEmpty(),
                 startDato = startDato,
                 sluttDato = sluttDato
             )
@@ -382,14 +382,14 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList()
     )
     route("/behandlinger/årsak-til-behandling").get<BehandlingAarsakAntallGjennomsnittInput, List<BehandlingAarsakAntallGjennomsnitt>>(
         TagModule(listOf(Tags.Produksjonsstyring))
     ) { req ->
         val årsakOgGjennomsnitt = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallBehandlingerPerÅrsak(
-                req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
+                req.behandlingstyper.orEmpty(), req.enheter.orEmpty(),
             )
         }
 
@@ -404,7 +404,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
         @param:QueryParam("For hvilke behandlingstyper. Tom liste betyr alle.") val behandlingstyper: List<TypeBehandling>? = listOf(
             TypeBehandling.Førstegangsbehandling
         ),
-        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = listOf()
+        @param:QueryParam("For hvilke enheter. Tom liste betyr alle.") val enheter: List<String>? = emptyList()
     )
     route("/behandlinger/retur").get<BehandlingerReturGjennomsnitt, List<BehandlingAvklaringsbehovReturDTO>>(
         modules,
@@ -412,7 +412,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             val data = ProduksjonsstyringRepository(conn).antallBehandlingerPerAvklaringsbehovRetur(
-                req.behandlingstyper ?: listOf(), req.enheter.orEmpty()
+                req.behandlingstyper.orEmpty(), req.enheter.orEmpty()
             )
 
             val groupedByBehov = data.groupBy { it.avklaringsbehov }.values.toList()
@@ -436,7 +436,7 @@ private fun NormalOpenAPIRoute.getBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction { conn ->
             ProduksjonsstyringRepository(conn).hentBehandlingstidPerDag(
-                req.behandlingstyper ?: listOf(), req.enheter.orEmpty()
+                req.behandlingstyper.orEmpty(), req.enheter.orEmpty()
             )
         }
 

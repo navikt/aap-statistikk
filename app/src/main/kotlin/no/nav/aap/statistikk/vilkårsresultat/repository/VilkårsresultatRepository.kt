@@ -138,12 +138,11 @@ WHERE br.referanse = ?;
         val vilkårId = it.getLongOrNull("v_id")
         val vilkårType = it.getStringOrNull("v_vilkar_type")
 
-        val vilkårPerioder = vilkårId?.let { getVilkårPerioder(dbConnection, vilkårId) }
-            ?: emptyList()
+        val vilkårPerioder = vilkårId?.let { getVilkårPerioder(dbConnection, vilkårId) }.orEmpty()
         val vilkårEntity = vilkårId?.let {
             VilkårEntity(
                 id = vilkårId,
-                vilkårType = vilkårType!!,
+                vilkårType = requireNotNull(vilkårType),
                 perioder = vilkårPerioder
             )
         }
