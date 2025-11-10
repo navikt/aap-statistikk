@@ -42,7 +42,7 @@ jobs:
           gradle-version: wrapper
 
       - name: Build
-        run: ./gradlew build -x test -x detekt
+        run: ./gradlew build -x test -x detektMain
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
