@@ -76,7 +76,6 @@ class HendelsesService(
         }
 
         if (hendelse.behandlingStatus == Status.AVSLUTTET) {
-            // TODO: legg denne i en jobb
             val avsluttetBehandling =
                 requireNotNull(hendelse.avsluttetBehandling) { "Om behandlingen er avsluttet, så må avsluttetBehandling være ikke-null." }
 
