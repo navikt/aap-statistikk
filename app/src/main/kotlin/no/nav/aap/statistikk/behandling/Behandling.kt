@@ -116,7 +116,8 @@ data class Behandling(
     }
 
     fun oppdatertTidspunkt(): LocalDateTime {
-        return hendelser.maxOfOrNull { it.hendelsesTidspunkt } ?: this.oppdatertTidspunkt!!
+        return hendelser.maxOfOrNull { it.hendelsesTidspunkt }
+            ?: requireNotNull(this.oppdatertTidspunkt) { "oppdatertTidspunkt er ikke satt på behandling $referanse." }
     }
 
     fun resultat(): ResultatKode? {
@@ -252,6 +253,6 @@ enum class Vurderingsbehov(val sortering: Int) {
 
 
 fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov {
-    return this.minByOrNull { it.sortering }!!
+    return this.minBy { it.sortering }
 }
 

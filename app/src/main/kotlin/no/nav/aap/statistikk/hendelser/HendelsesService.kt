@@ -150,6 +150,7 @@ fun Kanal.tilDomene(): SøknadsFormat {
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbehov {
     return when (this) {
         Vurderingsbehov.SØKNAD -> SØKNAD
