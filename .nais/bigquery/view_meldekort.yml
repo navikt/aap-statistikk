@@ -20,20 +20,23 @@ spec:
       SELECT
         br.referanse AS behandlingsreferanse,
         m.journalpost_id AS journalpost_id,
-        ARRAY(
-          SELECT
-            JSON_OBJECT("timer_arbeidet", timerarbeidet, "fra_dato", fra_dato, "til_dato", til_dato)
-          FROM
-            `datastream_hendelser.public_arbeid_i_periode`
-          WHERE
-            meldekort_id = meldekort_id) AS timer_arbeidet
+        ARRAY_AGG(STRUCT(fra_dato,
+            til_dato,
+            timerarbeidet)) AS timer_arbeidet
       FROM
         `datastream_hendelser.public_meldekort` m
       JOIN
         `datastream_hendelser.public_behandling` b
+      ON
+        b.id = m.behandling_id
       JOIN
         `datastream_hendelser.public_behandling_referanse` br
       ON
         b.referanse_id = br.id
+      JOIN
+        `datastream_hendelser.public_arbeid_i_periode` arb
       ON
-        b.id = m.behandling_id
+        arb.meldekort_id = m.id
+      GROUP BY
+        br.referanse,
+        m.journalpost_id
