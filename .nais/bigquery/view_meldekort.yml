@@ -20,13 +20,13 @@ spec:
       SELECT
         br.referanse AS behandlingsreferanse,
         m.journalpost_id AS journalpost_id,
-        JSON_ARRAY(ARRAY(
+        ARRAY(
           SELECT
             JSON_OBJECT("timer_arbeidet", timerarbeidet, "fra_dato", fra_dato, "til_dato", til_dato)
           FROM
             `datastream_hendelser.public_arbeid_i_periode`
           WHERE
-            meldekort_id = meldekort_id)) AS timer_arbeidet
+            meldekort_id = meldekort_id) AS timer_arbeidet
       FROM
         `datastream_hendelser.public_meldekort` m
       JOIN
