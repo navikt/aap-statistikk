@@ -65,7 +65,7 @@ dependencies {
 
     testImplementation(libs.motorTestUtils)
     testImplementation(libs.ktorServerTestHost)
-    testImplementation("com.nimbusds:nimbus-jose-jwt:10.5")
+    testImplementation("com.nimbusds:nimbus-jose-jwt:10.6")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("org.assertj:assertj-core:3.27.6")
     testImplementation("org.testcontainers:postgresql:$testContainersVersion")
