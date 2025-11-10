@@ -57,11 +57,15 @@ class MottaStatistikkTest {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
         val hendelsesTidspunkt = LocalDateTime.now()
+        val mottattTid = LocalDateTime.now().minusDays(1)
         val jobbAppender = MockJobbAppender()
 
         val motor = motorMock()
 
-        val mottattTid = LocalDateTime.now().minusDays(1)
+        val testHendelse = opprettTestStoppetBehandling(
+            behandlingReferanse, behandlingOpprettetTidspunkt, hendelsesTidspunkt, mottattTid
+        )
+
         testKlient(
             noOpTransactionExecutor,
             motor,
@@ -73,45 +77,16 @@ class MottaStatistikkTest {
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(
-                    StoppetBehandling(
-                        saksnummer = "123",
-                        behandlingStatus = Status.OPPRETTET,
-                        behandlingType = TypeBehandling.Førstegangsbehandling,
-                        ident = "0",
-                        behandlingReferanse = behandlingReferanse,
-                        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                        avklaringsbehov = listOf(),
-                        versjon = "UKJENT",
-                        mottattTid = mottattTid,
-                        sakStatus = SakStatus.UTREDES,
-                        hendelsesTidspunkt = hendelsesTidspunkt,
-                        vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                    )
-                )
+                URI.create("$url/stoppetBehandling"), PostRequest(testHendelse)
             )
         }
 
         assertThat(jobbAppender.jobber.first().payload()).isEqualTo(
             DefaultJsonMapper.toJson(
-                StoppetBehandling(
-                    saksnummer = "123",
-                    behandlingStatus = Status.OPPRETTET,
-                    behandlingType = TypeBehandling.Førstegangsbehandling,
-                    ident = "0",
-                    behandlingReferanse = behandlingReferanse,
-                    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-                    avklaringsbehov = listOf(),
-                    versjon = "UKJENT",
-                    mottattTid = mottattTid,
-                    sakStatus = SakStatus.UTREDES,
-                    hendelsesTidspunkt = hendelsesTidspunkt,
-                    vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
-                )
+                testHendelse
             )
         )
     }
-
 
     private fun ekteLagreStoppetHendelseJobb(
         jobbAppender: JobbAppender,
@@ -198,53 +173,32 @@ class MottaStatistikkTest {
         @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
     ) {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+        val testJobber = konstruerTestJobber()
 
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
-        val bqStatistikkRepository = FakeBQSakRepository()
-
-        val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
-            SaksStatistikkService.konstruer(
-                bqStatistikkRepository,
-                defaultGatewayProvider { },
-                postgresRepositoryRegistry.provider(it)
-            )
-        }
-        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
-        val lagreAvsluttetBehandlingTilBigQueryJobb =
-            konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
-        val resendSakstatistikkJobb =
-            ResendSakstatistikkJobb(sakStatistikkService)
-        val jobbAppender = MotorJobbAppender(
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb,
-        )
-
-        val lagreStoppetHendelseJobb =
-            LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { })
-        val lagreOppgaveHendelseJobb =
-            LagreOppgaveHendelseJobb(LagreOppgaveJobb())
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(LagreOppgaveJobb())
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
-        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
+        val lagreAvklaringsbehovHendelseJobb =
+            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
 
         val motor = konstruerMotor(
             dataSource,
-            jobbAppender,
-            bqRepositoryYtelse,
-            resendSakstatistikkJobb,
+            testJobber.motorJobbAppender,
+            FakeBQYtelseRepository(),
+            testJobber.resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            lagreSakinfoTilBigQueryJobb
+            testJobber.lagreSakinfoTilBigQueryJobb
         )
+
         testKlient(
             transactionExecutor,
             motor,
             azureConfig,
-            lagreStoppetHendelseJobb,
+            ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             lagreOppgaveHendelseJobb,
             lagrePostmottakHendelseJobb,
             lagreAvklaringsbehovHendelseJobb,
-            jobbAppender,
+            testJobber.motorJobbAppender,
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -267,6 +221,7 @@ class MottaStatistikkTest {
         }
     }
 
+
     @Test
     fun `kan motta mer avansert object`(
         @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
@@ -277,56 +232,32 @@ class MottaStatistikkTest {
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+        val testJobber = konstruerTestJobber()
 
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
-        val bqStatistikkRepository = FakeBQSakRepository()
-
-        val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
-            SaksStatistikkService.konstruer(
-                bqStatistikkRepository,
-                defaultGatewayProvider { },
-                postgresRepositoryRegistry.provider(it)
-            )
-        }
-        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
-        val lagreAvsluttetBehandlingTilBigQueryJobb =
-            konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
-        val resendSakstatistikkJobb =
-            ResendSakstatistikkJobb(sakStatistikkService)
-        val jobbAppender = MotorJobbAppender(
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb,
-        )
-        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
-            jobbAppender
-        )
-
-        val lagreOppgaveHendelseJobb =
-            LagreOppgaveHendelseJobb(LagreOppgaveJobb())
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(LagreOppgaveJobb())
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
-
-        val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
+        val lagreAvklaringsbehovHendelseJobb =
+            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
 
         val motor = konstruerMotor(
             dataSource,
-            jobbAppender,
-            bqRepositoryYtelse,
-            resendSakstatistikkJobb,
+            testJobber.motorJobbAppender,
+            FakeBQYtelseRepository(),
+            testJobber.resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            lagreSakinfoTilBigQueryJobb
+            testJobber.lagreSakinfoTilBigQueryJobb
         )
 
         testKlient(
             transactionExecutor,
             motor,
             azureConfig,
-            lagreStoppetHendelseJobb,
+            ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             lagreOppgaveHendelseJobb,
             lagrePostmottakHendelseJobb,
             lagreAvklaringsbehovHendelseJobb,
-            jobbAppender,
+            testJobber.motorJobbAppender,
         ) { url, client ->
 
             client.post<StoppetBehandling, Any>(
@@ -392,11 +323,6 @@ class MottaStatistikkTest {
         )
     }
 
-    private fun konstruerLagreAvsluttetBehandlingTilBQJobb(bqYtelseRepository: IBQYtelsesstatistikkRepository): LagreAvsluttetBehandlingTilBigQueryJobb =
-        LagreAvsluttetBehandlingTilBigQueryJobb(
-            bqYtelseRepository = bqYtelseRepository,
-        )
-
     @Test
     fun `kan motta postmottak-hendelse, og jobb blir utført`(
         @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
@@ -415,7 +341,6 @@ class MottaStatistikkTest {
         )
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-        val bqRepositoryYtelse = FakeBQYtelseRepository()
         val bqRepositorySak = FakeBQSakRepository()
 
         val meterRegistry = SimpleMeterRegistry()
@@ -424,9 +349,7 @@ class MottaStatistikkTest {
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
         val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(
-            jobbAppender1
-        )
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(jobbAppender1)
 
         val lagreOppgaveJobb = LagreOppgaveJobb()
         val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(lagreOppgaveJobb)
@@ -443,7 +366,7 @@ class MottaStatistikkTest {
         )
 
         val lagreAvsluttetBehandlingTilBigQueryJobb =
-            konstruerLagreAvsluttetBehandlingTilBQJobb(bqRepositoryYtelse)
+            LagreAvsluttetBehandlingTilBigQueryJobb(FakeBQYtelseRepository())
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb { TODO() }
         val motor = motor(
@@ -497,4 +420,64 @@ class MottaStatistikkTest {
 
         motor.stop()
     }
+
+    private fun konstruerTestJobber(
+        bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository(),
+        bqSakRepository: FakeBQSakRepository = FakeBQSakRepository()
+    ): TestJobberSetup {
+        val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
+            SaksStatistikkService.konstruer(
+                bqSakRepository,
+                defaultGatewayProvider { },
+                postgresRepositoryRegistry.provider(it)
+            )
+        }
+        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
+        val lagreAvsluttetBehandlingTilBigQueryJobb =
+            LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
+        val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
+        val motorJobbAppender = MotorJobbAppender(
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb,
+        )
+        return TestJobberSetup(
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb,
+            motorJobbAppender
+        )
+    }
+
+    private fun opprettTestStoppetBehandling(
+        behandlingReferanse: UUID,
+        behandlingOpprettetTidspunkt: LocalDateTime,
+        hendelsesTidspunkt: LocalDateTime,
+        mottattTid: LocalDateTime,
+        saksnummer: String = "123",
+        behandlingStatus: Status = Status.OPPRETTET,
+        behandlingType: TypeBehandling = TypeBehandling.Førstegangsbehandling,
+        ident: String = "0",
+        avklaringsbehov: List<AvklaringsbehovHendelseDto> = listOf()
+    ) = StoppetBehandling(
+        saksnummer = saksnummer,
+        behandlingStatus = behandlingStatus,
+        behandlingType = behandlingType,
+        ident = ident,
+        behandlingReferanse = behandlingReferanse,
+        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+        avklaringsbehov = avklaringsbehov,
+        versjon = "UKJENT",
+        mottattTid = mottattTid,
+        sakStatus = SakStatus.UTREDES,
+        hendelsesTidspunkt = hendelsesTidspunkt,
+        vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
+    )
+
+    private data class TestJobberSetup(
+        val lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
+        val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
+        val resendSakstatistikkJobb: ResendSakstatistikkJobb,
+        val motorJobbAppender: MotorJobbAppender
+    )
 }
