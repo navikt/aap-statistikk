@@ -22,7 +22,7 @@ class PostmottakBehandlingRepositoryTest {
 
     @Test
     fun `lagre og hente ut igjen`(@Postgres dataSource: DataSource) {
-        val oppdatertTid = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+        val oppdatertTid = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         val behandling = opprettBehandling(
             dataSource, PostmottakBehandling(
                 journalpostId = 213,
