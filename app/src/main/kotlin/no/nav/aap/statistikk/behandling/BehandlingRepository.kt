@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.Saksnummer
+import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDateTime
@@ -228,62 +229,65 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
     }
 
+    @Language("PostgreSQL")
+    private val hentQuery = """
+    SELECT b.id                                as b_id,
+           br.referanse                        as br_referanse,
+           b.type                              as b_type,
+           b.opprettet_tid                     as b_opprettet_tid,
+           b.forrige_behandling_id             as b_forrige_behandling_id,
+           b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
+           b.opprettet_av                      as b_opprettet_av,
+           s.id                                as s_id,
+           s.saksnummer                        as s_saksnummer,
+           sh.oppdatert_tid                    as sh_oppdatert_tid,
+           sh.sak_status                       as sh_sak_status,
+           sh.id                               as sh_id,
+           p.ident                             as p_ident,
+           p.id                                as p_id,
+           bh.status                           as bh_status,
+           bh.versjon_id                       as bh_versjon_id,
+           bh.mottatt_tid                      as bh_mottatt_tid,
+           bh.hendelsestidspunkt               as bh_hendelsestidspunkt,
+           bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
+           bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
+           bh.siste_saksbehandler              as bh_siste_saksbehandler,
+           bh.venteaarsak                      as bh_venteaarsak,
+           bh.retur_aarsak                     as bh_retur_aarsak,
+           bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
+           bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+           bh.resultat                         as bh_resultat,
+           bh.soknadsformat                    as bh_soknadsformat,
+           bh.steggruppe                       as bh_steggruppe,
+           bh.id                               as bh_id,
+           v.versjon                           as v_versjon,
+           rp.rp_ident                         as rp_ident
+    FROM behandling b
+             JOIN behandling_referanse br on b.referanse_id = br.id
+             JOIN sak s on b.sak_id = s.id
+             JOIN LATERAL (SELECT *
+                           FROM sak_historikk sh
+                           WHERE gjeldende = TRUE
+                             and sh.sak_id = s.id) sh on s.id = sh.sak_id
+             JOIN person p on p.id = s.person_id
+             JOIN LATERAL (SELECT *
+                           FROM behandling_historikk
+                           WHERE gjeldende = TRUE AND SLETTET = FALSE
+                             AND behandling_historikk.behandling_id = b.id) bh
+                  on bh.behandling_id = b.id
+             JOIN versjon v on v.id = bh.versjon_id
+             LEFT JOIN LATERAL (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
+                                FROM relaterte_personer rp
+                                         JOIN person pr ON rp.person_id = pr.id
+                                WHERE rp.behandling_id = bh.behandling_id
+                                GROUP BY rp.behandling_id) rp
+                       on rp.behandling_id = bh.id
+    """.trimIndent()
+
+    private val hentMedId = hentQuery + " WHERE b.id = ?"
+
     override fun hent(referanse: UUID): Behandling? {
-        val behandling = dbConnection.queryFirstOrNull(
-            """
-SELECT b.id                                as b_id,
-       br.referanse                        as br_referanse,
-       b.type                              as b_type,
-       b.opprettet_tid                     as b_opprettet_tid,
-       b.forrige_behandling_id             as b_forrige_behandling_id,
-       b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
-       b.opprettet_av                      as b_opprettet_av,
-       s.id                                as s_id,
-       s.saksnummer                        as s_saksnummer,
-       sh.oppdatert_tid                    as sh_oppdatert_tid,
-       sh.sak_status                       as sh_sak_status,
-       sh.id                               as sh_id,
-       p.ident                             as p_ident,
-       p.id                                as p_id,
-       bh.status                           as bh_status,
-       bh.versjon_id                       as bh_versjon_id,
-       bh.mottatt_tid                      as bh_mottatt_tid,
-       bh.hendelsestidspunkt               as bh_hendelsestidspunkt,
-       bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
-       bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
-       bh.siste_saksbehandler              as bh_siste_saksbehandler,
-       bh.venteaarsak                      as bh_venteaarsak,
-       bh.retur_aarsak                     as bh_retur_aarsak,
-       bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
-       bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
-       bh.resultat                         as bh_resultat,
-       bh.soknadsformat                    as bh_soknadsformat,
-       bh.steggruppe                       as bh_steggruppe,
-       bh.id                               as bh_id,
-       v.versjon                           as v_versjon,
-       rp.rp_ident                         as rp_ident
-FROM behandling b
-         JOIN behandling_referanse br on b.referanse_id = br.id
-         JOIN sak s on b.sak_id = s.id
-         JOIN LATERAL (SELECT *
-                       FROM sak_historikk sh
-                       WHERE gjeldende = TRUE
-                         and sh.sak_id = s.id) sh on s.id = sh.sak_id
-         JOIN person p on p.id = s.person_id
-         JOIN LATERAL (SELECT *
-                       FROM behandling_historikk
-                       WHERE gjeldende = TRUE AND SLETTET = FALSE
-                         AND behandling_historikk.behandling_id = b.id) bh
-              on bh.behandling_id = b.id
-         JOIN versjon v on v.id = bh.versjon_id
-         LEFT JOIN LATERAL (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
-                            FROM relaterte_personer rp
-                                     JOIN person pr ON rp.person_id = pr.id
-                            WHERE rp.behandling_id = bh.behandling_id
-                            GROUP BY rp.behandling_id) rp
-                   on rp.behandling_id = bh.id
-WHERE br.referanse = ?"""
-        ) {
+        val behandling = dbConnection.queryFirstOrNull(hentQuery + " WHERE br.referanse = ?") {
             setParams {
                 setUUID(1, referanse)
             }
@@ -295,61 +299,6 @@ WHERE br.referanse = ?"""
         }
         return behandling
     }
-
-    private val hentMedId = """
-SELECT b.id                                as b_id,
-       br.referanse                        as br_referanse,
-       b.type                              as b_type,
-       b.opprettet_tid                     as b_opprettet_tid,
-       b.forrige_behandling_id             as b_forrige_behandling_id,
-       b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
-       b.opprettet_av                      as b_opprettet_av,
-       s.id                                as s_id,
-       s.saksnummer                        as s_saksnummer,
-       sh.oppdatert_tid                    as sh_oppdatert_tid,
-       sh.sak_status                       as sh_sak_status,
-       sh.id                               as sh_id,
-       p.ident                             as p_ident,
-       p.id                                as p_id,
-       bh.status                           as bh_status,
-       bh.versjon_id                       as bh_versjon_id,
-       bh.mottatt_tid                      as bh_mottatt_tid,
-       bh.hendelsestidspunkt               as bh_hendelsestidspunkt,
-       bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
-       bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
-       bh.siste_saksbehandler              as bh_siste_saksbehandler,
-       bh.venteaarsak                      as bh_venteaarsak,
-       bh.retur_aarsak                     as bh_retur_aarsak,
-       bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
-       bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
-       bh.resultat                         as bh_resultat,
-       bh.soknadsformat                    as bh_soknadsformat,
-       bh.steggruppe                       as bh_steggruppe,
-       bh.id                               as bh_id,
-       v.versjon                           as v_versjon,
-       rp.rp_ident                         as rp_ident
-FROM behandling b
-         JOIN behandling_referanse br on b.referanse_id = br.id
-         JOIN sak s on b.sak_id = s.id
-         JOIN LATERAL (SELECT *
-                       FROM sak_historikk sh
-                       WHERE gjeldende = TRUE
-                         and sh.sak_id = s.id) sh on s.id = sh.sak_id
-         JOIN person p on p.id = s.person_id
-         JOIN LATERAL (SELECT *
-                       FROM behandling_historikk
-                       WHERE gjeldende = TRUE
-                         AND SLETTET = FALSE
-                         AND behandling_historikk.behandling_id = b.id) bh
-              on bh.behandling_id = b.id
-         JOIN versjon v on v.id = bh.versjon_id
-         LEFT JOIN LATERAL (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
-                            FROM relaterte_personer rp
-                                     JOIN person pr ON rp.person_id = pr.id
-                            WHERE rp.behandling_id = bh.behandling_id
-                            GROUP BY rp.behandling_id) rp
-                   on rp.behandling_id = bh.id
-WHERE b.id = ?"""
 
     override fun hent(id: BehandlingId): Behandling {
         val behandling = dbConnection.queryFirstOrNull(hentMedId) {

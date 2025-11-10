@@ -15,7 +15,7 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
     }
 
     override fun lagreOppgave(oppgave: Oppgave): Long {
-        require(oppgave.enhet.id != null) { "Enhet-ID må være satt på enhet-objektet i oppgave." }
+        requireNotNull(oppgave.enhet.id) { "Enhet-ID må være satt på enhet-objektet i oppgave." }
 
         val behandlingsReferanseId = oppgave.behandlingReferanse?.let {
             val sqlVersjon = """WITH ny_ref AS (
@@ -73,7 +73,7 @@ SELECT COALESCE(
     }
 
     override fun oppdaterOppgave(oppgave: Oppgave) {
-        require(oppgave.id != null)
+        requireNotNull(oppgave.id)
         // Sjekk reservasjon-status
         // Først fjern evnt eksisterende reservasjoner
         fjernEksisterendeReservasjoner(oppgave.id)
