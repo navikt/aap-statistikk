@@ -15,11 +15,11 @@ class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRe
 
 
     override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
-        meldekort.forEach { meldekort ->
+        meldekort.forEach { enkeltMeldekort ->
             lagreEnkeltMeldekort(
                 behandlingId,
-                meldekort
-            )?.let { lagreArbeidIPeriode(it, meldekort.arbeidIPeriodeDTO) }
+                enkeltMeldekort
+            )?.let { lagreArbeidIPeriode(it, enkeltMeldekort.arbeidIPeriodeDTO) }
         }
     }
 
@@ -36,13 +36,15 @@ class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRe
 
     private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<ArbeidIPerioder>) {
         dbConnection.executeBatch(
-            """INSERT INTO arbeid_i_periode (meldekort_id, periode, timerArbeidet) VALUES (?,?::daterange,?)""".trimIndent(),
+            """INSERT INTO arbeid_i_periode (meldekort_id, timerArbeidet, til_dato, fra_dato)
+VALUES (?, ?, ?, ?)""".trimIndent(),
             arbeid
         ) {
             setParams {
                 setLong(1, meldekortId)
-                setPeriode(2, Periode(it.periodeFom, it.periodeTom))
-                setBigDecimal(3, it.timerArbeidet)
+                setBigDecimal(2, it.timerArbeidet)
+                setLocalDate(3, it.periodeTom)
+                setLocalDate(4, it.periodeFom)
             }
         }
     }
@@ -71,8 +73,8 @@ class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRe
         meldekortId: Long
     ): List<ArbeidIPerioder> {
         return dbConnection.queryList(
-            """SELECT periode, timerArbeidet 
-               FROM arbeid_i_periode 
+            """SELECT fra_dato, til_dato, timerArbeidet 
+               FROM arbeid_i_periode
                WHERE meldekort_id = ?""".trimIndent()
         ) {
             setParams {
@@ -80,8 +82,8 @@ class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRe
             }
             setRowMapper {
                 ArbeidIPerioder(
-                    periodeFom = it.getPeriode("periode").fom,
-                    periodeTom = it.getPeriode("periode").tom,
+                    periodeFom = it.getLocalDate("fra_dato"),
+                    periodeTom = it.getLocalDate("til_dato"),
                     timerArbeidet = it.getBigDecimal("timerArbeidet")
                 )
             }
