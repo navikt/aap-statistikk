@@ -64,7 +64,7 @@ class LagreOppgaveJobbUtførerTest {
         }
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
 
         assertThat(oppgaverPåBehandling).isNotEmpty
@@ -100,7 +100,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
 
         assertThat(oppgaverPåBehandling.size).isEqualTo(1)
@@ -140,7 +140,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling2 = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
 
         assertThat(oppgaverPåBehandling2.size).isEqualTo(1)
@@ -170,7 +170,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
 
         assertThat(oppgaverPåBehandling.size).isEqualTo(1)
@@ -196,7 +196,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaveMedMarkering = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
         assertThat(oppgaveMedMarkering.first().harHasteMarkering).isTrue()
 
@@ -219,7 +219,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaveUtenMarkering = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
         assertThat(oppgaveUtenMarkering.first().harHasteMarkering).isFalse()
     }
@@ -250,7 +250,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
 
         assertThat(oppgaverPåBehandling.size).isEqualTo(1)
@@ -274,7 +274,7 @@ class LagreOppgaveJobbUtførerTest {
         )
 
         val oppgaverPåBehandling2 = dataSource.transaction {
-            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id!!)
+            OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
 
         assertThat(oppgaverPåBehandling2.size).isEqualTo(1)

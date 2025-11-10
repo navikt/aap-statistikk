@@ -16,8 +16,7 @@ fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     // Hvis FATTE_VEDTAK er løst, men det fortsatt finnes åpne behov, så betyr at det
     // det har vært retur fra beslutter.
     val finnesÅpneBehov =
-        this.filter { it.status.erÅpent() && it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.UTREDES && !it.avklaringsbehovDefinisjon.erVentebehov() }
-            .isNotEmpty()
+        this.any { it.status.erÅpent() && it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.UTREDES && !it.avklaringsbehovDefinisjon.erVentebehov() }
 
     if (finnesÅpneBehov) return null
 
@@ -34,8 +33,7 @@ fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
     // Hvis FATTE_VEDTAK er løst, men det fortsatt finnes åpne behov, så betyr at det
     // det har vært retur fra beslutter.
     val finnesÅpneBehov =
-        this.filter { it.status.erÅpent() && it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.UTREDES && !it.avklaringsbehovDefinisjon.erVentebehov() }
-            .isNotEmpty()
+        this.any { it.status.erÅpent() && it.avklaringsbehovDefinisjon.løsesISteg.status == KontraktBehandlingStatus.UTREDES && !it.avklaringsbehovDefinisjon.erVentebehov() }
 
     if (finnesÅpneBehov) return null
 
@@ -90,24 +88,24 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): Definisjon? {
-    return this.filter {
+    return this.firstOrNull {
         !it.avklaringsbehovDefinisjon.erVentebehov()
                 && it.status.erÅpent()
     }
-        .firstOrNull()?.avklaringsbehovDefinisjon
+        ?.avklaringsbehovDefinisjon
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
     return this
-        .filter { it.status.erÅpent() && !it.avklaringsbehovDefinisjon.erVentebehov() }
-        .firstOrNull()?.status
+        .firstOrNull { it.status.erÅpent() && !it.avklaringsbehovDefinisjon.erVentebehov() }
+        ?.status
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {
-    return this.filter {
+    return this.firstOrNull {
         !it.avklaringsbehovDefinisjon.erVentebehov()
                 && it.status.erÅpent()
-    }.firstOrNull()?.avklaringsbehovDefinisjon?.løsesISteg
+    }?.avklaringsbehovDefinisjon?.løsesISteg
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
@@ -119,8 +117,8 @@ fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
 fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): List<AvklaringsbehovHendelseDto> {
     return this
         .map {
-            val endringer = it.endringer.filter {
-                it.tidsstempel.isBeforeOrEqual(tidspunkt)
+            val endringer = it.endringer.filter { endring ->
+                endring.tidsstempel.isBeforeOrEqual(tidspunkt)
             }
             it.copy(
                 endringer = endringer,

@@ -55,7 +55,7 @@ class AvsluttetBehandlingService(
             vilkårsResultatRepository
                 .lagreVilkårsResultat(
                     VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat),
-                    uthentetBehandling.id!!
+                    uthentetBehandling.id()
                 )
         } else {
             error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
@@ -82,7 +82,7 @@ class AvsluttetBehandlingService(
         )
 
         if (!skjermingService.erSkjermet(uthentetBehandling)) {
-            opprettBigQueryLagringYtelseCallback(uthentetBehandling.id)
+            opprettBigQueryLagringYtelseCallback(uthentetBehandling.id())
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }

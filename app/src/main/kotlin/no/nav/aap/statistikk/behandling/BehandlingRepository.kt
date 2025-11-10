@@ -67,7 +67,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
     }
 
     override fun oppdaterBehandling(behandling: Behandling) {
-        val behandlingId = behandling.id!!
+        val behandlingId = behandling.id()
 
         val versjonId = lagreOgHentVersjonId(behandling.versjon)
 
@@ -117,7 +117,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
     private fun oppdaterÅrsakerTilBehandling(
         behandling: Behandling,
     ) {
-        val behandlingId = behandling.id!!
+        val behandlingId = behandling.id()
         dbConnection.execute("UPDATE behandling SET aarsaker_til_behandling = ? WHERE id = ?") {
             setParams {
                 setArray(1, behandling.årsaker.map { it.name })
@@ -184,7 +184,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
 
         dbConnection.execute(merkSomSlettetSql) {
             setParams {
-                setLong(1, behandling.id!!.id)
+                setLong(1, behandling.id().id)
             }
         }
 
@@ -204,7 +204,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams { (behandling, idx) ->
                 var c = 1
-                setLong(c++, behandling.id!!.id)
+                setLong(c++, behandling.id().id)
                 setLong(c++, versjonId)
                 setBoolean(c++, idx == oppdateringer.lastIndex)
                 setLocalDateTime(c++, LocalDateTime.now(clock))
@@ -225,7 +225,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.utbetalingId())
             }
         }
-        log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id} med versjon $versjonId.")
+        log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
     }
 
     override fun hent(referanse: UUID): Behandling? {
@@ -391,7 +391,7 @@ WHERE b.id = ?"""
                 """.trimIndent()
 
         dbConnection.queryList(historikkSpørring) {
-            setParams { setLong(1, behandling.id!!.id) }
+            setParams { setLong(1, behandling.id().id) }
             setRowMapper {
                 BehandlingHendelse(
                     tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),

@@ -145,7 +145,7 @@ class SaksStatistikkService(
             versjon = sisteHendelse.versjon.verdi,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             opprettetAv = behandling.opprettetAv ?: KELVIN,
-            ansvarligBeslutter = if (erSkjermet && sisteHendelse.ansvarligBeslutter !== null) "-5" else sisteHendelse.ansvarligBeslutter,
+            ansvarligBeslutter = if (erSkjermet && sisteHendelse.ansvarligBeslutter != null) "-5" else sisteHendelse.ansvarligBeslutter,
             vedtakTid = sisteHendelse.vedtakstidspunkt,
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
