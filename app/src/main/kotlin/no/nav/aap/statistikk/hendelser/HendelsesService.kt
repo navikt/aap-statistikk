@@ -68,7 +68,7 @@ class HendelsesService(
         val sak =
             sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
 
-        val behandlingId = behandlingService.hentEllerLagreBehandling(hendelse, sak).id!!
+        val behandlingId = behandlingService.hentEllerLagreBehandling(hendelse, sak).id()
 
         log.info("Mottok ${hendelse.nyeMeldekort.size} nye meldekort for behandling ${hendelse.behandlingReferanse}.")
         if (hendelse.nyeMeldekort.isNotEmpty()) {

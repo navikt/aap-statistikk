@@ -61,6 +61,10 @@ data class Behandling(
             .all { it }) { "Hendelser må være sortert." }
     }
 
+    fun id(): BehandlingId {
+        return requireNotNull(id)
+    }
+
     fun leggTilHendelse(hendelse: BehandlingHendelse): Behandling {
         return this.copy(
             hendelser = this.hendelser + hendelse,

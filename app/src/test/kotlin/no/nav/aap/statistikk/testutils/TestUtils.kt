@@ -278,7 +278,7 @@ fun opprettTestHendelse(
     )
 
     val sakId = sak.id!!
-    val behandlingId = behandling.id!!
+    val behandlingId = behandling.id()
 
     return Pair(behandlingId, sakId)
 }
