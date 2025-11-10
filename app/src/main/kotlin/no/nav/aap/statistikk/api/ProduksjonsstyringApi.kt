@@ -118,7 +118,7 @@ fun NormalOpenAPIRoute.hentBehandlingstidPerDag(
     ) { req ->
         val respons = transactionExecutor.withinTransaction {
             ProduksjonsstyringRepository(it).antallÅpneBehandlingerOgGjennomsnitt(
-                req.behandlingstyper.orEmpty(), req.enheter ?: listOf()
+                req.behandlingstyper.orEmpty(), req.enheter.orEmpty()
             )
         }
 
