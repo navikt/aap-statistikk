@@ -1,0 +1,39 @@
+apiVersion: bigquery.cnrm.cloud.google.com/v1beta1
+kind: BigQueryTable
+metadata:
+  name: view-meldekort
+  namespace: aap
+  labels:
+    team: aap
+  annotations:
+    cnrm.cloud.google.com/management-conflict-prevention-policy: none
+    cnrm.cloud.google.com/state-into-spec: absent
+    cnrm.cloud.google.com/project-id: {{project}}
+spec:
+  resourceID: view_meldekort
+  description: "View som viser meldekortdata."
+  datasetRef:
+    external: ytelsestatistikk
+  view:
+    useLegacySql: false
+    query: >-
+      SELECT
+        br.referanse AS behandlingsreferanse,
+        m.journalpost_id AS journalpost_id,
+        JSON_ARRAY(ARRAY(
+          SELECT
+            JSON_OBJECT("timer_arbeidet", timerarbeidet, "fra_dato", fra_dato, "til_dato", til_dato)
+          FROM
+            `datastream_hendelser.public_arbeid_i_periode`
+          WHERE
+            meldekort_id = meldekort_id)) AS timer_arbeidet
+      FROM
+        `datastream_hendelser.public_meldekort` m
+      JOIN
+        `datastream_hendelser.public_behandling` b
+      JOIN
+        `datastream_hendelser.public_behandling_referanse` br
+      ON
+        b.referanse_id = br.id
+      ON
+        b.id = m.behandling_id
