@@ -105,7 +105,9 @@ class SakstatistikkRepositoryImplTest {
             SakstatistikkRepositoryImpl(it).hentSisteHendelseForBehandling(referanse)
         }
 
-        assertThat(res).usingRecursiveComparison().isEqualTo(
+        assertThat(res).usingRecursiveComparison()
+            .withEqualsForType(datoSammenligner, LocalDateTime::class.java)
+            .isEqualTo(
             hendelse.copy(endretTid = endretTid)
         )
     }
