@@ -7,13 +7,19 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.function.BiPredicate
 import javax.sql.DataSource
 
 class PostmottakBehandlingRepositoryTest {
+    private val datoSammenligner: BiPredicate<LocalDateTime, LocalDateTime> = BiPredicate { t, u ->
+        t.truncatedTo(ChronoUnit.MILLIS).equals(u.truncatedTo(ChronoUnit.MILLIS))
+    }
+
     @Test
     fun `lagre og hente ut igjen`(@Postgres dataSource: DataSource) {
         val oppdatertTid = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
@@ -38,7 +44,10 @@ class PostmottakBehandlingRepositoryTest {
 
         val uthentet = hentUtBehandling(dataSource, behandling)
 
-        assertThat(uthentet).isEqualTo(behandling)
+        assertThat(uthentet)
+            .usingRecursiveComparison()
+            .withEqualsForType(datoSammenligner, LocalDateTime::class.java)
+            .isEqualTo(behandling)
     }
 
     @Test

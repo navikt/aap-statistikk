@@ -91,7 +91,6 @@ class VilkårsVurderingTabell : BQTable<BQVilkårsResultatPeriode> {
         fieldValueList.get(felt.feltNavn).stringValue
 
     override fun toRow(value: BQVilkårsResultatPeriode): RowToInsert {
-        // TODO: bruke ID?
         return RowToInsert.of(
             mapOf(
                 FeltNavn.SAKSNUMMER.feltNavn to value.saksnummer.value,
