@@ -12,6 +12,10 @@ detekt {
     ignoreFailures = true
 }
 
+tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
+    jvmTarget.set("21")
+}
+
 val mockkVersion = "1.14.6"
 val flywayVersion = "11.14.0"
 val testContainersVersion = "1.21.3"
