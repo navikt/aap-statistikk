@@ -341,8 +341,6 @@ class MottaStatistikkTest {
         )
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-        val bqRepositorySak = FakeBQSakRepository()
-
         val meterRegistry = SimpleMeterRegistry()
         PrometheusProvider.prometheus = meterRegistry
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
@@ -358,7 +356,6 @@ class MottaStatistikkTest {
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
             sakStatistikkService = {
                 SaksStatistikkService.konstruer(
-                    bigQueryRepository = bqRepositorySak,
                     gatewayProvider = defaultGatewayProvider(),
                     repositoryProvider = postgresRepositoryRegistry.provider(it),
                 )
@@ -422,12 +419,10 @@ class MottaStatistikkTest {
     }
 
     private fun konstruerTestJobber(
-        bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository(),
-        bqSakRepository: FakeBQSakRepository = FakeBQSakRepository()
+        bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository()
     ): TestJobberSetup {
         val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
             SaksStatistikkService.konstruer(
-                bqSakRepository,
                 defaultGatewayProvider { },
                 postgresRepositoryRegistry.provider(it)
             )
