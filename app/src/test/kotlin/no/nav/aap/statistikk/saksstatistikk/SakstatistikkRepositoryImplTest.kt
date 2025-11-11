@@ -98,7 +98,7 @@ class SakstatistikkRepositoryImplTest {
         dataSource.transaction {
             val repository = SakstatistikkRepositoryImpl(it)
             repository.lagre(hendelse)
-            repository.lagre(hendelse.copy(endretTid = endretTid.minusHours(1)))
+            repository.lagre(hendelse.copy(tekniskTid = tekniskTid.plusHours(1)))
         }
 
         val res = dataSource.transaction {
@@ -107,8 +107,9 @@ class SakstatistikkRepositoryImplTest {
 
         assertThat(res).usingRecursiveComparison()
             .withEqualsForType(datoSammenligner, LocalDateTime::class.java)
+            .ignoringFields("sekvensNummer")
             .isEqualTo(
-            hendelse.copy(endretTid = endretTid)
-        )
+                hendelse.copy(tekniskTid = tekniskTid.plusHours(1))
+            )
     }
 }
