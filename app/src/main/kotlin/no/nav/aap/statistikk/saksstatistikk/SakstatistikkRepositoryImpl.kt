@@ -100,7 +100,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
 
     override fun hentSisteHendelseForBehandling(uuid: UUID): BQBehandling? {
         val sql = """
-            select * from saksstatistikk where behandling_uuid = ? order by teknisk_tid, endret_tid desc limit 1
+            select * from saksstatistikk where behandling_uuid = ? order by endret_tid, teknisk_tid desc limit 1
         """.trimIndent()
 
         return dbConnection.queryFirstOrNull(sql) {
