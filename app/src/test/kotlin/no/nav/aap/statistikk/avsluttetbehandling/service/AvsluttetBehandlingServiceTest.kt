@@ -16,10 +16,8 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
-import no.nav.aap.statistikk.tilkjentytelse.BQTilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.*
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
@@ -155,17 +153,12 @@ class AvsluttetBehandlingServiceTest {
                     behandlingRepository = BehandlingRepository(it),
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
                     diagnoseRepository = DiagnoseRepositoryImpl(it),
-                    vilkårsresultatRepository = VilkårsresultatRepository(it),
-                    tilkjentYtelseRepository = TilkjentYtelseRepository(it),
-                    beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it),
                     clock = clock
                 )
             ).utfør(JobbInput(mockk()).medPayload(behandlingReferanse))
         }
 
         val utlestFraBehandlingTabell = bigQueryClient.read(BehandlingTabell()).first()
-        val utlestVilkårsVurderingFraBigQuery = bigQueryClient.read(VilkårsVurderingTabell())
-        val utlestTilkjentYtelseFraBigQuery = bigQueryClient.read(TilkjentYtelseTabell())
 
         val datoSammenligner: BiPredicate<LocalDateTime, LocalDateTime> = BiPredicate { t, u ->
             abs(
@@ -198,28 +191,6 @@ class AvsluttetBehandlingServiceTest {
                     vurderingsbehov = listOf(Vurderingsbehov.OVERGANG_UFORE.name),
                 )
             )
-
-        assertThat(utlestVilkårsVurderingFraBigQuery).hasSize(1)
-        assertThat(utlestVilkårsVurderingFraBigQuery.first().behandlingsReferanse).isEqualTo(
-            avsluttetBehandling.vilkårsresultat.behandlingsReferanse
-        )
-
-        assertThat(utlestTilkjentYtelseFraBigQuery).hasSize(2)
-        assertThat(utlestTilkjentYtelseFraBigQuery).containsExactlyInAnyOrderElementsOf(
-            avsluttetBehandling.tilkjentYtelse.perioder.map {
-                BQTilkjentYtelse(
-                    saksnummer,
-                    behandlingReferanse.toString(),
-                    it.fraDato,
-                    it.tilDato,
-                    it.dagsats,
-                    it.gradering,
-                    antallBarn = it.antallBarn,
-                    barnetillegg = it.barnetillegg,
-                    barnetilleggSats = it.barnetilleggSats,
-                    redusertDagsats = it.redusertDagsats
-                )
-            })
 
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
