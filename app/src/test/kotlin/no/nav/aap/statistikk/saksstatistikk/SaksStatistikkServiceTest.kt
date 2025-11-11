@@ -20,16 +20,13 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
-import no.nav.aap.statistikk.testutils.FakeBQSakRepository
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import no.nav.aap.verdityper.dokument.Kanal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
-import java.util.function.BiPredicate
 import javax.sql.DataSource
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as BehandlingStatus
@@ -44,29 +41,16 @@ class SaksStatistikkServiceTest {
             dataSource.transaction { BehandlingRepository(it).hent(referanse)!!.id!! }
 
         val alleHendelser = dataSource.transaction {
-            val sakStatikkService = konstruerSakstatistikkService(it, FakeBQSakRepository())
+            val sakStatikkService = konstruerSakstatistikkService(it)
 
             sakStatikkService.alleHendelserPåBehandling(behandlingId)
         }
 
-        val bQSakRepository = FakeBQSakRepository()
         dataSource.transaction {
             konstruerSakstatistikkService(
-                it,
-                bQSakRepository
+                it
             ).lagreSakInfoTilBigquery(behandlingId)
         }
-        assertThat(bQSakRepository.saker).hasSize(1)
-        assertThat(alleHendelser.last())
-            .usingRecursiveComparison()
-            .ignoringFields("sekvensNummer")
-            .withEqualsForFieldsMatchingRegexes(
-                BiPredicate { a: LocalDateTime, b: LocalDateTime ->
-                    Duration.between(a, b).abs() < Duration.ofSeconds(1)
-                },
-                "(endret|teknisk)Tid"
-            )
-            .isEqualTo(bQSakRepository.saker.first())
 
         assertThat(alleHendelser.last().ansvarligEnhetKode).isEqualTo("0220")
         assertThat(alleHendelser.map { it.endretTid }).doesNotHaveDuplicates()

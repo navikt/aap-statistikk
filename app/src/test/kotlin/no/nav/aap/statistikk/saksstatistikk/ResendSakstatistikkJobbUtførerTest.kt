@@ -5,7 +5,6 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.postgresRepositoryRegistry
-import no.nav.aap.statistikk.testutils.FakeBQSakRepository
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
@@ -27,7 +26,6 @@ class ResendSakstatistikkJobbUtførerTest {
         val input = JobbInput(
             jobb = ResendSakstatistikkJobb {
                 SaksStatistikkService.konstruer(
-                    FakeBQSakRepository(),
                     gatewayProvider,
                     postgresRepositoryRegistry.provider(it)
                 )
@@ -37,8 +35,7 @@ class ResendSakstatistikkJobbUtførerTest {
         dataSource.transaction {
             ResendSakstatistikkJobbUtfører(
                 konstruerSakstatistikkService(
-                    it,
-                    FakeBQSakRepository()
+                    it
                 ), SakstatistikkRepositoryImpl(it)
             ).utfør(input)
         }

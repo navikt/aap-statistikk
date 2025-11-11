@@ -46,7 +46,6 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
-import no.nav.aap.statistikk.saksstatistikk.BQBehandling
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -164,7 +163,6 @@ fun <E> testKlientNoInjection(
         startUp(
             dbConfig,
             azureConfig,
-            bigQueryClient,
             bigQueryClient,
             defaultGatewayProvider()
         )
@@ -439,13 +437,6 @@ class FakeSakRepository : SakRepository {
     }
 }
 
-class FakeBigQueryKvitteringRepository : IBigQueryKvitteringRepository {
-    private var kvitteringer = 0L
-    override fun lagreKvitteringForSak(behandling: Behandling): Long {
-        return kvitteringer++
-    }
-}
-
 class FakePersonRepository : IPersonRepository {
     private val personer = mutableMapOf<Long, Person>()
     override fun lagrePerson(person: Person): Long {
@@ -550,14 +541,6 @@ class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
 
     override fun start() {
         TODO("Not yet implemented")
-    }
-}
-
-class FakeBQSakRepository : IBQSakstatistikkRepository {
-    val saker = mutableListOf<BQBehandling>()
-
-    override fun lagre(payload: BQBehandling) {
-        saker.add(payload)
     }
 }
 
@@ -679,13 +662,12 @@ fun forberedDatabase(
 
 
 fun konstruerSakstatistikkService(
-    connection: DBConnection, bQSakRepository: FakeBQSakRepository
+    connection: DBConnection
 ): SaksStatistikkService {
     return SaksStatistikkService(
         behandlingRepository = BehandlingRepository(connection),
         rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
         bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
-        bigQueryRepository = bQSakRepository,
         skjermingService = SkjermingService(FakePdlGateway()),
         oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(connection),
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
@@ -693,4 +675,4 @@ fun konstruerSakstatistikkService(
 }
 
 
-val schemaRegistry: SchemaRegistry = schemaRegistryYtelseStatistikk + schemaRegistrySakStatistikk
+val schemaRegistry: SchemaRegistry = schemaRegistryYtelseStatistikk
