@@ -72,7 +72,7 @@ class SaksStatistikkService(
             // Dette er kun et teknisk krav fra Team Sak om at alle hendelser bør ha inngangshendelser.
             // I praksis vil de "normale" hendelsene kun komme et par sekunder etter at behandlingen
             // ble opprettet i behandlingsflyt.
-            if (erInngangsHendelse(bqSak) && siste == null) {
+            if (!erInngangsHendelse(bqSak) && siste == null) {
                 sakstatistikkRepository.lagre(
                     bqSak.copy(
                         endretTid = bqSak.registrertTid,
