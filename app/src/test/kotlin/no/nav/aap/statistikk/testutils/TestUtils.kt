@@ -24,7 +24,6 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsGrunnlagBQ
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
@@ -47,7 +46,6 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
-import no.nav.aap.statistikk.saksstatistikk.BQBehandling
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -55,7 +53,6 @@ import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
@@ -166,7 +163,6 @@ fun <E> testKlientNoInjection(
         startUp(
             dbConfig,
             azureConfig,
-            bigQueryClient,
             bigQueryClient,
             defaultGatewayProvider()
         )
@@ -441,13 +437,6 @@ class FakeSakRepository : SakRepository {
     }
 }
 
-class FakeBigQueryKvitteringRepository : IBigQueryKvitteringRepository {
-    private var kvitteringer = 0L
-    override fun lagreKvitteringForSak(behandling: Behandling): Long {
-        return kvitteringer++
-    }
-}
-
 class FakePersonRepository : IPersonRepository {
     private val personer = mutableMapOf<Long, Person>()
     override fun lagrePerson(person: Person): Long {
@@ -539,24 +528,8 @@ class FakeDiagnoseRepository : DiagnoseRepository {
 }
 
 class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
-    val vilkårsresultater = mutableListOf<Vilkårsresultat>()
     val tilkjentYtelse = mutableListOf<TilkjentYtelse>()
-    val beregningsgrunnlag = mutableListOf<BeregningsGrunnlagBQ>()
     val behandlinger = mutableListOf<BQYtelseBehandling>()
-
-    override fun lagre(payload: Vilkårsresultat) {
-        vilkårsresultater.add(payload)
-    }
-
-    override fun lagre(payload: TilkjentYtelse) {
-        tilkjentYtelse.add(payload)
-    }
-
-    override fun lagre(
-        payload: BeregningsGrunnlagBQ
-    ) {
-        beregningsgrunnlag.add(payload)
-    }
 
     override fun lagre(payload: BQYtelseBehandling) {
         behandlinger.add(payload)
@@ -568,14 +541,6 @@ class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
 
     override fun start() {
         TODO("Not yet implemented")
-    }
-}
-
-class FakeBQSakRepository : IBQSakstatistikkRepository {
-    val saker = mutableListOf<BQBehandling>()
-
-    override fun lagre(payload: BQBehandling) {
-        saker.add(payload)
     }
 }
 
@@ -697,13 +662,12 @@ fun forberedDatabase(
 
 
 fun konstruerSakstatistikkService(
-    connection: DBConnection, bQSakRepository: FakeBQSakRepository
+    connection: DBConnection
 ): SaksStatistikkService {
     return SaksStatistikkService(
         behandlingRepository = BehandlingRepository(connection),
         rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
         bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
-        bigQueryRepository = bQSakRepository,
         skjermingService = SkjermingService(FakePdlGateway()),
         oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(connection),
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
@@ -711,4 +675,4 @@ fun konstruerSakstatistikkService(
 }
 
 
-val schemaRegistry: SchemaRegistry = schemaRegistryYtelseStatistikk + schemaRegistrySakStatistikk
+val schemaRegistry: SchemaRegistry = schemaRegistryYtelseStatistikk

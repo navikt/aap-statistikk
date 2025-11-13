@@ -32,13 +32,8 @@ import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
-import no.nav.aap.statistikk.sak.tilSaksnummer
-import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -164,7 +159,7 @@ class IntegrationTest {
 
         // Sekvensnummer økes med 1 med ny info på sak
         val bqSaker2 = ventPåSvar(
-            { bigQueryClient.read(SakTabell()) },
+            { dataSource.transaction { SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse!!) } },
             { t -> t !== null && t.isNotEmpty() && t.size > 2 })
 //        assertThat(bqSaker2!!).hasSize(hendelserFraDBDump.size)
         assertThat(bqSaker2!!.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
@@ -176,6 +171,7 @@ class IntegrationTest {
             "AVSLUTTET"
         )
         assertThat(bqSaker2.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
+            "OPPRETTET",
             "UNDER_BEHANDLING",
             "IVERKSETTES",
             "AVSLUTTET",
@@ -206,17 +202,6 @@ class IntegrationTest {
             "FATTE_VEDTAK",
             "MANUELL",
         )
-
-        // Sjekk tilkjent ytelse
-        val tilkjentYtelse = ventPåSvar(
-            { bigQueryClient.read(TilkjentYtelseTabell()) },
-            { t -> t !== null && t.isNotEmpty() })
-
-        assertThat(tilkjentYtelse!!).allSatisfy {
-            assertThat(it.behandlingsreferanse).isEqualTo(referanse.toString())
-            assertThat(it.dagsats).isEqualTo(974.0)
-            assertThat(it.antallBarn).isEqualTo(1)
-        }
 
         // Sjekk ytelsesstatistikk
         val bqYtelse = ventPåSvar(
@@ -349,7 +334,6 @@ class IntegrationTest {
     ) {
 
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
-        val saksnummer = "4LDRRYo".tilSaksnummer()
 
         val hendelse =
             object {}.javaClass.getResource("/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")!!
@@ -430,12 +414,6 @@ class IntegrationTest {
             assertThat(enhet.enhet).isEqualTo("0400")
 
             testUtil.ventPåSvar()
-            val bqSaker = ventPåSvar(
-                { bigQueryClient.read(SakTabell()).sortedBy { it.sekvensNummer } },
-                { t -> t !== null && t.isNotEmpty() && t.size == 3 })
-            assertThat(bqSaker).isNotNull
-            assertThat(bqSaker).hasSize(2)
-            assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
 //            assertThat(bqSaker).anySatisfy {
 //                assertThat(it.ansvarligEnhetKode).isEqualTo("0400")
@@ -448,47 +426,6 @@ class IntegrationTest {
                         avsluttetBehandling = hendelse.avsluttetBehandling
                     )
                 )
-            )
-
-            testUtil.ventPåSvar()
-
-            // Sekvensnummer økes med 1 med ny info på sak
-            val bqSaker2 = ventPåSvar(
-                { bigQueryClient.read(SakTabell()) },
-                { t -> t !== null && t.isNotEmpty() && t.size > 2 })
-            assertThat(bqSaker2!!).hasSize(2)
-            assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
-
-            val bigQueryRespons = ventPåSvar(
-                { bigQueryClient.read(VilkårsVurderingTabell()) },
-                { t -> t !== null && t.isNotEmpty() })
-
-            assertThat(bigQueryRespons).hasSize(8)
-            val vilkårsVurderingRad = bigQueryRespons!!.first()
-
-            assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
-            assertThat(vilkårsVurderingRad.saksnummer).isEqualTo(saksnummer)
-            assertThat(vilkårsVurderingRad.vilkårtype).isEqualTo(Vilkårtype.ALDERSVILKÅRET)
-
-            val tilkjentBigQuery = ventPåSvar(
-                { bigQueryClient.read(TilkjentYtelseTabell()) },
-                { t -> t !== null && t.isNotEmpty() })
-
-            assertThat(tilkjentBigQuery!!).hasSize(27)
-            val tilkjentYtelse = tilkjentBigQuery.first()
-            assertThat(tilkjentYtelse.behandlingsreferanse).isEqualTo(behandlingReferanse.toString())
-            assertThat(tilkjentYtelse.dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[0].dagsats)
-            assertThat(tilkjentBigQuery[1].dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[1].dagsats)
-
-
-            val sakRespons = ventPåSvar(
-                { bigQueryClient.read(SakTabell()) },
-                { t -> t !== null && t.isNotEmpty() })
-
-            assertThat(sakRespons).hasSize(2)
-            assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
-            assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
-                LocalDateTime.parse("2025-09-24T13:53:01")
             )
         }
     }
