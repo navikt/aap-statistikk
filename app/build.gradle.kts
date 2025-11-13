@@ -18,7 +18,7 @@ tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
 
 val mockkVersion = "1.14.6"
 val flywayVersion = "11.14.0"
-val testContainersVersion = "1.21.3"
+val testContainersVersion = "2.0.1"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
@@ -72,17 +72,9 @@ dependencies {
     testImplementation("com.nimbusds:nimbus-jose-jwt:10.6")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("org.assertj:assertj-core:3.27.6")
-    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
-    constraints {
-        implementation("org.apache.commons:commons-compress:1.28.0") {
-            because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
-        }
-        implementation("org.apache.commons:commons-lang3:3.19.0") {
-            because("https://www.mend.io/vulnerability-database/CVE-2025-48924?utm_source=JetBrains")
-        }
-    }
-    testImplementation("org.testcontainers:gcloud:$testContainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.testcontainers:testcontainers-postgresql:${testContainersVersion}")
+    testImplementation("org.testcontainers:testcontainers-gcloud:${testContainersVersion}")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:${testContainersVersion}")
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
