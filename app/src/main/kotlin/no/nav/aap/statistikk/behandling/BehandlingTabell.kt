@@ -55,7 +55,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val behandlingsType = Field.newBuilder("behandlingsType", StandardSQLTypeName.STRING)
                 .setDescription(
                     "Behandlingstype. Mulige verdier ${
-                        TypeBehandling.entries.map { it.name }.joinToString()
+                        TypeBehandling.entries.joinToString { it.name }
                     }"
                 ).build()
             val datoAvsluttet = Field.newBuilder("datoAvsluttet", StandardSQLTypeName.DATETIME)
@@ -77,7 +77,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             )
                 .setDescription("Samme beskrivelse som for 'kodeverk'.")
                 .setMode(Field.Mode.REPEATED)
-                .build();
+                .build()
             val rettighetstypePeriode = Field.newBuilder(
                 "rettighetstypePerioder",
                 StandardSQLTypeName.STRUCT,

@@ -36,9 +36,9 @@ import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
-import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelseTabell
-import no.nav.aap.statistikk.vilkårsresultat.VilkårsVurderingTabell
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -209,11 +209,10 @@ class IntegrationTest {
 
         // Sjekk tilkjent ytelse
         val tilkjentYtelse = ventPåSvar(
-            { bigQueryClient.read(TilkjentYtelseTabell()) },
+            { dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse!!)?.perioder } },
             { t -> t !== null && t.isNotEmpty() })
 
         assertThat(tilkjentYtelse!!).allSatisfy {
-            assertThat(it.behandlingsreferanse).isEqualTo(referanse.toString())
             assertThat(it.dagsats).isEqualTo(974.0)
             assertThat(it.antallBarn).isEqualTo(1)
         }
@@ -459,26 +458,29 @@ class IntegrationTest {
             assertThat(bqSaker2!!).hasSize(2)
             assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
 
-            val bigQueryRespons = ventPåSvar(
-                { bigQueryClient.read(VilkårsVurderingTabell()) },
+            val vilkårRespons = ventPåSvar(
+                { dataSource.transaction { VilkårsresultatRepository(it).hentForBehandling(behandlingReferanse) }.vilkår },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(bigQueryRespons).hasSize(8)
-            val vilkårsVurderingRad = bigQueryRespons!!.first()
+            assertThat(vilkårRespons).hasSize(9)
+            val vilkårsVurderingRad = vilkårRespons!!.first()
 
-            assertThat(vilkårsVurderingRad.behandlingsReferanse).isEqualTo(behandlingReferanse)
-            assertThat(vilkårsVurderingRad.saksnummer).isEqualTo(saksnummer)
-            assertThat(vilkårsVurderingRad.vilkårtype).isEqualTo(Vilkårtype.ALDERSVILKÅRET)
+            assertThat(vilkårsVurderingRad.vilkårType).isEqualTo(Vilkårtype.ALDERSVILKÅRET.name)
 
-            val tilkjentBigQuery = ventPåSvar(
-                { bigQueryClient.read(TilkjentYtelseTabell()) },
+            val tilkjent = ventPåSvar(
+                {
+                    dataSource.transaction {
+                        TilkjentYtelseRepository(it).hentForBehandling(
+                            behandlingReferanse
+                        )!!.perioder
+                    }
+                },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(tilkjentBigQuery!!).hasSize(27)
-            val tilkjentYtelse = tilkjentBigQuery.first()
-            assertThat(tilkjentYtelse.behandlingsreferanse).isEqualTo(behandlingReferanse.toString())
+            assertThat(tilkjent!!).hasSize(27)
+            val tilkjentYtelse = tilkjent.first()
             assertThat(tilkjentYtelse.dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[0].dagsats)
-            assertThat(tilkjentBigQuery[1].dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[1].dagsats)
+            assertThat(tilkjent[1].dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[1].dagsats)
 
 
             val sakRespons = ventPåSvar(
