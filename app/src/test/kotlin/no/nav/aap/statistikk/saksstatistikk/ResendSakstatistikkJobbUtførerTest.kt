@@ -3,10 +3,6 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.defaultGatewayProvider
-import no.nav.aap.statistikk.postgresRepositoryRegistry
-import no.nav.aap.statistikk.testutils.FakeBQSakRepository
-import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import org.assertj.core.api.Assertions.assertThat
@@ -20,34 +16,19 @@ class ResendSakstatistikkJobbUtførerTest {
         val ref = SaksStatistikkServiceTest.lagreHendelser(dataSource)
         val behandlingId = dataSource.transaction { BehandlingRepository(it).hent(ref) }?.id!!
 
-        val gatewayProvider = defaultGatewayProvider {
-            register<FakePdlGateway>()
-        }
-
         val input = JobbInput(
-            jobb = ResendSakstatistikkJobb {
-                SaksStatistikkService.konstruer(
-                    FakeBQSakRepository(),
-                    gatewayProvider,
-                    postgresRepositoryRegistry.provider(it)
-                )
-            }
+            jobb = ResendSakstatistikkJobb()
         ).medPayload(behandlingId)
 
         dataSource.transaction {
             ResendSakstatistikkJobbUtfører(
-                konstruerSakstatistikkService(
-                    it,
-                    FakeBQSakRepository()
-                ), SakstatistikkRepositoryImpl(it)
+                konstruerSakstatistikkService(it), SakstatistikkRepositoryImpl(it)
             ).utfør(input)
         }
 
         val uthentet =
             dataSource.transaction {
-                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                    ref
-                )
+                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(ref)
             }
 
         assertThat(uthentet).isNotEmpty

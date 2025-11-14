@@ -5,6 +5,7 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import org.slf4j.LoggerFactory
 
@@ -26,12 +27,15 @@ class ResendSakstatistikkJobbUtfører(
     }
 }
 
-class ResendSakstatistikkJobb(
-    private val sakStatistikkService: (DBConnection) -> SaksStatistikkService,
-) : Jobb {
+class ResendSakstatistikkJobb() : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
+        val sakStatistikkService =
+            SaksStatistikkService.konstruer(
+                defaultGatewayProvider(),
+                postgresRepositoryRegistry.provider(connection)
+            )
         return ResendSakstatistikkJobbUtfører(
-            sakStatikkService = sakStatistikkService(connection),
+            sakStatikkService = sakStatistikkService,
             sakstatistikkRepository = postgresRepositoryRegistry.provider(connection).provide()
         )
     }

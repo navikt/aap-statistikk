@@ -32,8 +32,6 @@ import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
-import no.nav.aap.statistikk.sak.tilSaksnummer
-import no.nav.aap.statistikk.saksstatistikk.SakTabell
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -164,7 +162,13 @@ class IntegrationTest {
 
         // Sekvensnummer økes med 1 med ny info på sak
         val bqSaker2 = ventPåSvar(
-            { bigQueryClient.read(SakTabell()) },
+            {
+                dataSource.transaction {
+                    SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                        referanse!!
+                    )
+                }
+            },
             { t -> t !== null && t.isNotEmpty() && t.size > 2 })
 //        assertThat(bqSaker2!!).hasSize(hendelserFraDBDump.size)
         assertThat(bqSaker2!!.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
@@ -176,6 +180,7 @@ class IntegrationTest {
             "AVSLUTTET"
         )
         assertThat(bqSaker2.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
+            "OPPRETTET",
             "UNDER_BEHANDLING",
             "IVERKSETTES",
             "AVSLUTTET",
@@ -348,7 +353,6 @@ class IntegrationTest {
     ) {
 
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
-        val saksnummer = "4LDRRYo".tilSaksnummer()
 
         val hendelse =
             object {}.javaClass.getResource("/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")!!
@@ -430,10 +434,16 @@ class IntegrationTest {
 
             testUtil.ventPåSvar()
             val bqSaker = ventPåSvar(
-                { bigQueryClient.read(SakTabell()).sortedBy { it.sekvensNummer } },
+                {
+                    dataSource.transaction {
+                        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                            behandling!!.referanse
+                        )
+                    }
+                },
                 { t -> t !== null && t.isNotEmpty() && t.size == 3 })
             assertThat(bqSaker).isNotNull
-            assertThat(bqSaker).hasSize(2)
+            assertThat(bqSaker).hasSize(3)
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
 //            assertThat(bqSaker).anySatisfy {
@@ -453,13 +463,25 @@ class IntegrationTest {
 
             // Sekvensnummer økes med 1 med ny info på sak
             val bqSaker2 = ventPåSvar(
-                { bigQueryClient.read(SakTabell()) },
+                {
+                    dataSource.transaction {
+                        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                            behandling!!.referanse
+                        )
+                    }
+                },
                 { t -> t !== null && t.isNotEmpty() && t.size > 2 })
-            assertThat(bqSaker2!!).hasSize(2)
+            assertThat(bqSaker2!!).hasSize(3)
             assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
 
             val vilkårRespons = ventPåSvar(
-                { dataSource.transaction { VilkårsresultatRepository(it).hentForBehandling(behandlingReferanse) }.vilkår },
+                {
+                    dataSource.transaction {
+                        VilkårsresultatRepository(it).hentForBehandling(
+                            behandlingReferanse
+                        )
+                    }.vilkår
+                },
                 { t -> t !== null && t.isNotEmpty() })
 
             assertThat(vilkårRespons).hasSize(9)
@@ -484,10 +506,16 @@ class IntegrationTest {
 
 
             val sakRespons = ventPåSvar(
-                { bigQueryClient.read(SakTabell()) },
+                {
+                    dataSource.transaction {
+                        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                            behandlingReferanse
+                        )
+                    }
+                },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(sakRespons).hasSize(2)
+            assertThat(sakRespons).hasSize(3)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
                 LocalDateTime.parse("2025-09-24T13:53:01")

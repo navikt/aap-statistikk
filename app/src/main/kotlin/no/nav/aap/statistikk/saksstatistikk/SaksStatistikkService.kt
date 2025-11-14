@@ -7,7 +7,6 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.bigquery.IBQSakstatistikkRepository
 import no.nav.aap.statistikk.hendelser.ferdigBehandletTid
 import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
@@ -25,7 +24,6 @@ class SaksStatistikkService(
     private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
-    private val bigQueryRepository: IBQSakstatistikkRepository,
     private val skjermingService: SkjermingService,
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val sakstatistikkRepository: SakstatistikkRepository,
@@ -35,7 +33,6 @@ class SaksStatistikkService(
 
     companion object {
         fun konstruer(
-            bigQueryRepository: IBQSakstatistikkRepository,
             gatewayProvider: GatewayProvider,
             repositoryProvider: RepositoryProvider,
         ): SaksStatistikkService {
@@ -43,7 +40,6 @@ class SaksStatistikkService(
                 behandlingRepository = repositoryProvider.provide(),
                 rettighetstypeperiodeRepository = repositoryProvider.provide(),
                 bigQueryKvitteringRepository = repositoryProvider.provide(),
-                bigQueryRepository = bigQueryRepository,
                 skjermingService = SkjermingService.konstruer(gatewayProvider),
                 sakstatistikkRepository = repositoryProvider.provide(),
                 oppgaveHendelseRepository = repositoryProvider.provide(),
@@ -62,9 +58,6 @@ class SaksStatistikkService(
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
 
         val bqSak = bqBehandlingForBehandling(behandling, erSkjermet, sekvensNummer)
-
-        // TODO - kun lagre om endring siden sist
-        bigQueryRepository.lagre(bqSak)
 
         val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
         if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {

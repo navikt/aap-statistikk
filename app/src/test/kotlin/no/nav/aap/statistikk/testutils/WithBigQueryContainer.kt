@@ -5,8 +5,8 @@ import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import org.junit.jupiter.api.extension.*
-import org.testcontainers.containers.BigQueryEmulatorContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import org.testcontainers.gcloud.BigQueryEmulatorContainer
 import java.time.Duration
 import java.util.*
 
@@ -31,7 +31,7 @@ class BigQueryExtension : ParameterResolver, AfterAllCallback {
                 HostPortWaitStrategy().withStartupTimeout(
                     Duration.ofSeconds(10)
                 )
-            ).withCommand("--log-level=debug --project test-project");
+            ).withCommand("--log-level=debug --project test-project")
 
         init {
             bigQueryContainer.start()

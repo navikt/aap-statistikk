@@ -8,7 +8,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
@@ -36,7 +35,6 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
-import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
@@ -341,8 +339,6 @@ class MottaStatistikkTest {
         )
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
-        val bqRepositorySak = FakeBQSakRepository()
-
         val meterRegistry = SimpleMeterRegistry()
         PrometheusProvider.prometheus = meterRegistry
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
@@ -356,19 +352,12 @@ class MottaStatistikkTest {
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
         val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
-            sakStatistikkService = {
-                SaksStatistikkService.konstruer(
-                    bigQueryRepository = bqRepositorySak,
-                    gatewayProvider = defaultGatewayProvider(),
-                    repositoryProvider = postgresRepositoryRegistry.provider(it),
-                )
-            },
         )
 
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             LagreAvsluttetBehandlingTilBigQueryJobb(FakeBQYtelseRepository())
 
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb { TODO() }
+        val resendSakstatistikkJobb = ResendSakstatistikkJobb()
         val motor = motor(
             dataSource = dataSource,
             jobber = listOf(
@@ -422,20 +411,12 @@ class MottaStatistikkTest {
     }
 
     private fun konstruerTestJobber(
-        bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository(),
-        bqSakRepository: FakeBQSakRepository = FakeBQSakRepository()
+        bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository()
     ): TestJobberSetup {
-        val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
-            SaksStatistikkService.konstruer(
-                bqSakRepository,
-                defaultGatewayProvider { },
-                postgresRepositoryRegistry.provider(it)
-            )
-        }
-        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
+        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
+        val resendSakstatistikkJobb = ResendSakstatistikkJobb()
         val motorJobbAppender = MotorJobbAppender(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
