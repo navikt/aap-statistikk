@@ -87,16 +87,24 @@ class SakstatistikkRepositoryImplTest {
     @Test
     fun `hent siste for behandling sorterer både tekniskTid og endretTid`(@Postgres dataSource: DataSource) {
         val referanse = UUID.randomUUID()
-        val tekniskTid = LocalDateTime.now()
-        val registrertTid = LocalDateTime.now().minusMinutes(10)
-        val mottattTid = LocalDateTime.now().minusMinutes(20)
-        val endretTid = LocalDateTime.now().plusSeconds(1)
+        val nå = LocalDateTime.of(2025, 4, 1, 12, 0)
+        val tekniskTid = nå
+        val registrertTid = nå.minusMinutes(10)
+        val mottattTid = nå.minusMinutes(20)
+        val endretTid = nå.plusSeconds(1)
 
         val hendelse =
             opprettTestHendelse(referanse, tekniskTid, registrertTid, mottattTid, endretTid)
 
         dataSource.transaction {
             val repository = SakstatistikkRepositoryImpl(it)
+            repository.lagre(
+                hendelse.copy(
+                    endretTid = endretTid.minusHours(1),
+                    tekniskTid = tekniskTid.minusHours(1),
+                    behandlingStatus = "OPPRETTET"
+                )
+            )
             repository.lagre(hendelse)
             repository.lagre(hendelse.copy(tekniskTid = tekniskTid.plusHours(1)))
         }
