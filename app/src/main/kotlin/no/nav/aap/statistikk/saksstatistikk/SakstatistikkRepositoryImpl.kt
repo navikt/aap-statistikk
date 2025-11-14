@@ -117,7 +117,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         referanse: UUID
     ): List<BQBehandling> {
         val sql = """
-            select * from saksstatistikk where behandling_uuid = ? order by teknisk_tid
+            select * from saksstatistikk where behandling_uuid = ? order by endret_tid, teknisk_tid
         """.trimIndent()
 
         return dbConnection.queryList(sql) {
