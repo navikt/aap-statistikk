@@ -5,6 +5,8 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.defaultGatewayProvider
+import no.nav.aap.statistikk.postgresRepositoryRegistry
 
 class LagreSakinfoTilBigQueryJobbUtfører(private val sakStatistikkService: SaksStatistikkService) :
     JobbUtfører {
@@ -15,15 +17,17 @@ class LagreSakinfoTilBigQueryJobbUtfører(private val sakStatistikkService: Saks
     }
 }
 
-class LagreSakinfoTilBigQueryJobb(
-    private val sakStatistikkService: (DBConnection) -> SaksStatistikkService,
-) : Jobb {
+class LagreSakinfoTilBigQueryJobb() : Jobb {
     override fun beskrivelse(): String {
         return "Lagrer sakinfo til BigQuery"
     }
 
     override fun konstruer(connection: DBConnection): JobbUtfører {
-        return LagreSakinfoTilBigQueryJobbUtfører(sakStatistikkService(connection))
+        val sakStatistikkService = SaksStatistikkService.konstruer(
+            defaultGatewayProvider(),
+            postgresRepositoryRegistry.provider(connection)
+        )
+        return LagreSakinfoTilBigQueryJobbUtfører(sakStatistikkService)
     }
 
     override fun navn(): String {

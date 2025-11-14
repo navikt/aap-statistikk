@@ -28,7 +28,10 @@ import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
-import no.nav.aap.statistikk.bigquery.*
+import no.nav.aap.statistikk.bigquery.BQYtelseRepository
+import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
+import no.nav.aap.statistikk.bigquery.schemaRegistryYtelseStatistikk
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Migrering
@@ -41,10 +44,8 @@ import no.nav.aap.statistikk.kodeverk.kodeverk
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
-import no.nav.aap.statistikk.saksstatistikk.BigQuerySakstatikkRepository
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
-import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
@@ -59,10 +60,8 @@ fun main() {
         log.error("Uhåndtert feil av type ${e.javaClass}", e)
     }
     val dbConfig = DbConfig.fraMiljøVariabler()
-    val bgConfigSak = BigQueryConfigFromEnv("saksstatistikk")
     val bgConfigYtelse = BigQueryConfigFromEnv("ytelsestatistikk")
     val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistryYtelseStatistikk)
-    val bigQueryClientSak = BigQueryClient(bgConfigSak, schemaRegistrySakStatistikk)
 
     val azureConfig = azureconfigFraMiljøVariabler()
 
@@ -72,7 +71,6 @@ fun main() {
         startUp(
             dbConfig,
             azureConfig,
-            bigQueryClientSak,
             bigQueryClientYtelse,
             gatewayProvider
         )
@@ -82,7 +80,6 @@ fun main() {
 fun Application.startUp(
     dbConfig: DbConfig,
     azureConfig: AzureConfig,
-    bigQueryClientSak: BigQueryClient,
     bigQueryClientYtelse: BigQueryClient,
     gatewayProvider: GatewayProvider
 ) {
@@ -91,22 +88,14 @@ fun Application.startUp(
     val flyway = Migrering(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
 
-    val bqSakRepository = BigQuerySakstatikkRepository(bigQueryClientSak)
     val bqYtelseRepository = BQYtelseRepository(bigQueryClientYtelse)
 
-    val sakStatistikkService: (DBConnection) -> SaksStatistikkService = {
-        SaksStatistikkService.konstruer(
-            bqSakRepository,
-            gatewayProvider,
-            postgresRepositoryRegistry.provider(it)
-        )
-    }
-    val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(sakStatistikkService)
+    val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
 
     val lagreAvsluttetBehandlingTilBigQueryJobb =
         LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
 
-    val resendSakstatistikkJobb = ResendSakstatistikkJobb(sakStatistikkService)
+    val resendSakstatistikkJobb = ResendSakstatistikkJobb()
 
     val motorJobbAppender =
         MotorJobbAppender(

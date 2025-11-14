@@ -20,7 +20,6 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
-import no.nav.aap.statistikk.testutils.FakeBQSakRepository
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import no.nav.aap.verdityper.dokument.Kanal
@@ -44,19 +43,21 @@ class SaksStatistikkServiceTest {
             dataSource.transaction { BehandlingRepository(it).hent(referanse)!!.id!! }
 
         val alleHendelser = dataSource.transaction {
-            val sakStatikkService = konstruerSakstatistikkService(it, FakeBQSakRepository())
+            val sakStatikkService = konstruerSakstatistikkService(it)
 
             sakStatikkService.alleHendelserPåBehandling(behandlingId)
         }
 
-        val bQSakRepository = FakeBQSakRepository()
         dataSource.transaction {
             konstruerSakstatistikkService(
-                it,
-                bQSakRepository
+                it
             ).lagreSakInfoTilBigquery(behandlingId)
         }
-        assertThat(bQSakRepository.saker).hasSize(1)
+
+        val nedlagrete = dataSource.transaction {
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
+        }
+        assertThat(nedlagrete).hasSize(2)
         assertThat(alleHendelser.last())
             .usingRecursiveComparison()
             .ignoringFields("sekvensNummer")
@@ -66,7 +67,7 @@ class SaksStatistikkServiceTest {
                 },
                 "(endret|teknisk)Tid"
             )
-            .isEqualTo(bQSakRepository.saker.first())
+            .isEqualTo(nedlagrete.last())
 
         assertThat(alleHendelser.last().ansvarligEnhetKode).isEqualTo("0220")
         assertThat(alleHendelser.map { it.endretTid }).doesNotHaveDuplicates()
