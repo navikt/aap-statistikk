@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.gateway.GatewayProvider
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
@@ -81,6 +82,11 @@ class SaksStatistikkService(
                 )
             }
             sakstatistikkRepository.lagre(bqSak)
+            if (siste != null && siste.endretTid == bqSak.endretTid) {
+                if (!Miljø.erProd()) {
+                    log.info("Ny hendelse med samme endretTid. Forrige: $siste. Ny: $bqSak.")
+                }
+            }
         } else {
             log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
         }
