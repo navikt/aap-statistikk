@@ -82,10 +82,7 @@ class SaksStatistikkService(
                 )
             }
             sakstatistikkRepository.lagre(bqSak)
-            if (siste != null && siste.endretTid.truncatedTo(ChronoUnit.SECONDS) == bqSak.endretTid.truncatedTo(
-                    ChronoUnit.SECONDS
-                )
-            ) {
+            if (siste != null) {
                 if (!Miljø.erProd()) {
                     log.info("Ny hendelse med samme endretTid. Forrige: $siste. Ny: $bqSak.")
                 }
