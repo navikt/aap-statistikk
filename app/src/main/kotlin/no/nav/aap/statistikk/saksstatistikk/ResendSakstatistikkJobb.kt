@@ -27,7 +27,7 @@ class ResendSakstatistikkJobbUtfører(
     }
 }
 
-class ResendSakstatistikkJobb() : Jobb {
+class ResendSakstatistikkJobb : Jobb {
     override fun konstruer(connection: DBConnection): JobbUtfører {
         val sakStatistikkService =
             SaksStatistikkService.konstruer(

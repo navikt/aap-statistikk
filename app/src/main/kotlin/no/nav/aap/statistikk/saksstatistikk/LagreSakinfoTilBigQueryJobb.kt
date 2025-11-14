@@ -17,7 +17,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(private val sakStatistikkService: Saks
     }
 }
 
-class LagreSakinfoTilBigQueryJobb() : Jobb {
+class LagreSakinfoTilBigQueryJobb : Jobb {
     override fun beskrivelse(): String {
         return "Lagrer sakinfo til BigQuery"
     }

@@ -13,7 +13,7 @@ class ReberegnHistorikk {
         val avklaringsbehov = dto.avklaringsbehov
 
         val endringsTidspunkter = avklaringsbehov.flatMap {
-            it.endringer.map { it.tidsstempel }
+            it.endringer.map { endring -> endring.tidsstempel }
         }.sortedBy { it }
 
         val avklaringsbehovHistorikk = endringsTidspunkter.map { tidspunkt ->
@@ -27,7 +27,7 @@ class ReberegnHistorikk {
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
-                    hendelsesTidspunkt = curr.tidspunktSisteEndring()!!,
+                    hendelsesTidspunkt = requireNotNull(curr.tidspunktSisteEndring()),
                     avklaringsBehov = curr.utledGjeldendeAvklaringsBehov()?.kode?.name,
                     avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
                     steggruppe = curr.utledGjeldendeStegType()?.gruppe,
