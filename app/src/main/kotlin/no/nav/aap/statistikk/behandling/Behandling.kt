@@ -253,6 +253,6 @@ enum class Vurderingsbehov(val sortering: Int) {
 
 
 fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov {
-    return this.minBy { it.sortering }
+    return this.sortedBy { it.name }.minBy { it.sortering }
 }
 
