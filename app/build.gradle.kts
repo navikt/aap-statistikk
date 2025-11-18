@@ -18,7 +18,7 @@ tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
 
 val mockkVersion = "1.14.6"
 val flywayVersion = "11.14.0"
-val testContainersVersion = "2.0.1"
+val testContainersVersion = "2.0.2"
 
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
