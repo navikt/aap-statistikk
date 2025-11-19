@@ -343,7 +343,7 @@ class SaksStatistikkService(
                     ResultatKode.KLAGE_AVSLÅTT -> "KLAGE_AVSLÅTT"
                     ResultatKode.KLAGE_TRUKKET -> "KLAGE_TRUKKET"
                     ResultatKode.AVBRUTT -> "AVBRUTT"
-                    null -> null
+                    null -> "UDEFINERT"
                 }
             }
         }
