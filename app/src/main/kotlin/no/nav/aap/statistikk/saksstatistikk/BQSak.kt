@@ -52,8 +52,9 @@ data class BQBehandling(
 
         // Bug i SAF i mars.
         if (mottattTid.isAfter(LocalDate.of(2025, 4, 1).atStartOfDay())) {
-            require(mottattTid.isBeforeOrEqual(registrertTid))
-            { "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID" }
+            if (!mottattTid.isBeforeOrEqual(registrertTid)) {
+                logger.warn("Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID")
+            }
         }
         if (ansvarligEnhetKode == null) {
             logger.info("Fant ikke ansvarlig enhet for behandling $behandlingUUID med saksnummer $saksnummer.")
