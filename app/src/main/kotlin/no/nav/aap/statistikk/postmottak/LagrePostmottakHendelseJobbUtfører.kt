@@ -96,7 +96,7 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
     return this.filter(function()).sortedByDescending {
-            it.endringer.minByOrNull { endring -> endring.tidsstempel }!!.tidsstempel
+            it.endringer.minBy { endring -> endring.tidsstempel }.tidsstempel
         }.map { it.avklaringsbehovDefinisjon.kode }.firstOrNull()?.toString()
 }
 
