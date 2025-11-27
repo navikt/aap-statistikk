@@ -25,10 +25,10 @@ class ResendHendelseService(
             personService = PersonService(repositoryProvider),
             behandlingRepository = repositoryProvider.provide(),
             behandlingService = BehandlingService(repositoryProvider),
-            opprettRekjørSakstatistikkCallback = {
+            opprettRekjørSakstatistikkCallback = { behandlingId ->
                 LoggerFactory.getLogger(HendelsesService::class.java)
-                    .info("Starter resending-jobb. BehandlingId: $it")
-                jobbAppender.leggTilResendSakstatistikkJobb(repositoryProvider, it)
+                    .info("Starter resending-jobb. BehandlingId: $behandlingId")
+                jobbAppender.leggTilResendSakstatistikkJobb(repositoryProvider, behandlingId)
             }
         )
     }
