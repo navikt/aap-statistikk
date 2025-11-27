@@ -160,7 +160,7 @@ data class Behandling(
 @JvmName("erAutomatisk")
 fun List<BehandlingHendelse>.erManuell(): Boolean {
     return this.filterNot { it.avklaringsBehov == null }.any {
-        !Definisjon.forKode(it.avklaringsBehov!!).erAutomatisk()
+        !Definisjon.forKode(requireNotNull(it.avklaringsBehov)).erAutomatisk()
     }
 }
 

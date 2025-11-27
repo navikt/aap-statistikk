@@ -21,7 +21,7 @@ fun AvsluttetBehandlingDTO.tilDomene(
             behandlingsReferanse = behandlingsReferanse
         ),
         vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse),
-        beregningsgrunnlag = if (beregningsGrunnlag == null) null else tilDomene(beregningsGrunnlag!!),
+        beregningsgrunnlag = beregningsGrunnlag?.let { tilDomene(it) },
         diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
         behandlingsReferanse = behandlingsReferanse,
         behandlingResultat = resultat.resultatTilDomene(),
@@ -119,7 +119,8 @@ fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.Grunnla
 
 fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag {
     val grunnlagYrkesskade = beregningsgrunnlagDTO.grunnlagYrkesskade
-    @Suppress("LocalVariableName", "VariableNaming") val grunnlag11_19dto = beregningsgrunnlagDTO.grunnlag11_19dto
+    @Suppress("LocalVariableName", "VariableNaming") val grunnlag11_19dto =
+        beregningsgrunnlagDTO.grunnlag11_19dto
     val grunnlagUføre = beregningsgrunnlagDTO.grunnlagUføre
     return when {
         grunnlag11_19dto != null -> IBeregningsGrunnlag.Grunnlag_11_19(
