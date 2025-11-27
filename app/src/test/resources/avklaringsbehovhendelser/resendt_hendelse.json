@@ -1,0 +1,881 @@
+{
+  "saksnummer" : "4NP3E2o",
+  "sakStatus" : "UTREDES",
+  "behandlingReferanse" : "ba310150-a970-44e6-ba3b-42027b55941d",
+  "relatertBehandling" : null,
+  "behandlingOpprettetTidspunkt" : "2025-06-24T12:13:39.945",
+  "mottattTid" : "2025-06-24T12:13:31",
+  "behandlingStatus" : "AVSLUTTET",
+  "behandlingType" : "Førstegangsbehandling",
+  "soknadsFormat" : "DIGITAL",
+  "ident" : "194181*****",
+  "versjon" : "1ab738411a397c0b653163b91513fdb8f126cd9a",
+  "vurderingsbehov" : [ "SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND", "SØKNAD" ],
+  "avklaringsbehov" : [ {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5003",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "AVKLAR_SYKDOM",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : true,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    },
+    "status" : "TOTRINNS_VURDERT",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T12:13:43.591",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:19:28.141",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdering av § 11-5"
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:20:43.508",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdering av § 11-5"
+    }, {
+      "status" : "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+      "tidsstempel" : "2025-06-24T13:49:04.123",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ {
+        "årsak" : "MANGLENDE_UTREDNING"
+      }, {
+        "årsak" : "MANGELFULL_BEGRUNNELSE"
+      }, {
+        "årsak" : "FEIL_LOVANVENDELSE"
+      }, {
+        "årsak" : "ANNET"
+      } ],
+      "begrunnelse" : "ikke individuell vurdering"
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:49:24.635",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdering av § 11-5"
+    }, {
+      "status" : "SENDT_TILBAKE_FRA_KVALITETSSIKRER",
+      "tidsstempel" : "2025-06-24T13:51:03.363",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ {
+        "årsak" : "MANGLENDE_UTREDNING"
+      }, {
+        "årsak" : "MANGELFULL_BEGRUNNELSE"
+      }, {
+        "årsak" : "FEIL_LOVANVENDELSE"
+      }, {
+        "årsak" : "ANNET"
+      } ],
+      "begrunnelse" : "ikke individuell vurdering"
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:51:10.704",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdering av § 11-5"
+    }, {
+      "status" : "KVALITETSSIKRET",
+      "tidsstempel" : "2025-06-24T13:52:06.219",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "SENDT_TILBAKE_FRA_BESLUTTER",
+      "tidsstempel" : "2025-06-24T14:23:00.936",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ {
+        "årsak" : "MANGLENDE_UTREDNING"
+      }, {
+        "årsak" : "MANGELFULL_BEGRUNNELSE"
+      }, {
+        "årsak" : "FEIL_LOVANVENDELSE"
+      }, {
+        "årsak" : "ANNET"
+      } ],
+      "begrunnelse" : "asrfgedh"
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:23:31.842",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdering av § 11-5"
+    }, {
+      "status" : "TOTRINNS_VURDERT",
+      "tidsstempel" : "2025-06-24T14:31:41.842",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "9003",
+      "type" : "VENTEPUNKT",
+      "løsesISteg" : "UDEFINERT",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING", "SAKSBEHANDLER_NASJONAL" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T12:38:37.888",
+      "frist" : "2025-07-22",
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : "VENTER_PÅ_MEDISINSKE_OPPLYSNINGER",
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T12:39:04.146",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Tatt av vent (ventet på bestilling av legeerklæring)"
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5006",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "VURDER_BISTANDSBEHOV",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : true,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    },
+    "status" : "TOTRINNS_VURDERT",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:19:30.809",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:26:37.012",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "§ 11-6"
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:49:04.135",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:49:46.782",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "§ 11-6"
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:51:03.373",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:51:31.771",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "§ 11-6"
+    }, {
+      "status" : "KVALITETSSIKRET",
+      "tidsstempel" : "2025-06-24T13:52:06.225",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T14:23:00.945",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:23:49.616",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "§ 11-6"
+    }, {
+      "status" : "TOTRINNS_VURDERT",
+      "tidsstempel" : "2025-06-24T14:31:41.849",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5026",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "REFUSJON_KRAV",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_OPPFOLGING" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:26:37.325",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:47:57.764",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdert refusjonskrav"
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T14:23:00.959",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:24:09.366",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdert refusjonskrav"
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5097",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "KVALITETSSIKRING",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "KVALITETSSIKRER" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:47:57.989",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:49:04.142",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "ikke individuell vurdering"
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:49:47.135",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:51:03.378",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "ikke individuell vurdering"
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:51:32.069",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:52:06.232",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5008",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "FASTSETT_BEREGNINGSTIDSPUNKT",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_NASJONAL" ]
+    },
+    "status" : "TOTRINNS_VURDERT",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:52:06.693",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T13:55:04.317",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "ble syk"
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T14:23:00.952",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:24:21.451",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "ble syk"
+    }, {
+      "status" : "TOTRINNS_VURDERT",
+      "tidsstempel" : "2025-06-24T14:31:41.857",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5098",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "FORESLÅ_VEDTAK",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_NASJONAL" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T13:55:08.652",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:22:00.292",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVBRUTT",
+      "tidsstempel" : "2025-06-24T14:23:01.191",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T14:24:22.864",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:24:34.236",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5099",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "FATTE_VEDTAK",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "BESLUTTER" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T14:22:01.971",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:23:00.968",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T14:24:34.499",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:31:41.866",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    } ],
+    "typeBrev" : null
+  }, {
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5051",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "BREV",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "BESLUTTER" ]
+    },
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-06-24T14:31:42.88",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : ""
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-06-24T14:41:28.895",
+      "frist" : null,
+      "endretAv" : "Z994573",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Brev ferdig"
+    } ],
+    "typeBrev" : null
+  } ],
+  "hendelsesTidspunkt" : "2025-10-01T14:13:09.654784674",
+  "avsluttetBehandling" : {
+    "tilkjentYtelse" : {
+      "perioder" : [ {
+        "fraDato" : "2025-06-24",
+        "tilDato" : "2025-07-06",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-07-07",
+        "tilDato" : "2025-07-20",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-07-21",
+        "tilDato" : "2025-08-03",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-08-04",
+        "tilDato" : "2025-08-17",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-08-18",
+        "tilDato" : "2025-08-31",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-09-01",
+        "tilDato" : "2025-09-14",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-09-15",
+        "tilDato" : "2025-09-28",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-09-29",
+        "tilDato" : "2025-10-12",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-10-13",
+        "tilDato" : "2025-10-26",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-10-27",
+        "tilDato" : "2025-11-09",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-11-10",
+        "tilDato" : "2025-11-23",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-11-24",
+        "tilDato" : "2025-12-07",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-12-08",
+        "tilDato" : "2025-12-21",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2025-12-22",
+        "tilDato" : "2026-01-04",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-01-05",
+        "tilDato" : "2026-01-18",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-01-19",
+        "tilDato" : "2026-02-01",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-02-02",
+        "tilDato" : "2026-02-15",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-02-16",
+        "tilDato" : "2026-03-01",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-03-02",
+        "tilDato" : "2026-03-15",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-03-16",
+        "tilDato" : "2026-03-29",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-03-30",
+        "tilDato" : "2026-04-12",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-04-13",
+        "tilDato" : "2026-04-26",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-04-27",
+        "tilDato" : "2026-05-10",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-05-11",
+        "tilDato" : "2026-05-24",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-05-25",
+        "tilDato" : "2026-06-07",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-06-08",
+        "tilDato" : "2026-06-21",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      }, {
+        "fraDato" : "2026-06-22",
+        "tilDato" : "2026-06-23",
+        "dagsats" : 1032.0,
+        "gradering" : 100.0,
+        "redusertDagsats" : 1069.0,
+        "antallBarn" : 1,
+        "barnetilleggSats" : 37.0,
+        "barnetillegg" : 37.0
+      } ]
+    },
+    "vilkårsResultat" : {
+      "typeBehandling" : "Førstegangsbehandling",
+      "vilkår" : [ {
+        "vilkårType" : "ALDERSVILKÅRET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2026-06-23",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : "null",
+          "avslagsårsak" : "null"
+        } ]
+      }, {
+        "vilkårType" : "BISTANDSVILKÅRET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2026-06-23",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : "null",
+          "avslagsårsak" : "null"
+        } ]
+      }, {
+        "vilkårType" : "GRUNNLAGET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2026-06-23",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : "null",
+          "avslagsårsak" : "null"
+        } ]
+      }, {
+        "vilkårType" : "LOVVALG",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2026-06-23",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : "null",
+          "avslagsårsak" : "null"
+        } ]
+      }, {
+        "vilkårType" : "MEDLEMSKAP",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2026-06-23",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : "null",
+          "avslagsårsak" : "null"
+        } ]
+      }, {
+        "vilkårType" : "SAMORDNING",
+        "perioder" : [ ]
+      }, {
+        "vilkårType" : "SYKDOMSVILKÅRET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2026-06-23",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : "null",
+          "avslagsårsak" : "null"
+        } ]
+      } ]
+    },
+    "beregningsGrunnlag" : {
+      "grunnlag11_19dto" : {
+        "inntekter" : {
+          "2022" : 342764.0,
+          "2023" : 362918.0,
+          "2024" : 381607.0
+        },
+        "grunnlaget" : 3.1221686657,
+        "er6GBegrenset" : false,
+        "erGjennomsnitt" : false
+      },
+      "grunnlagYrkesskade" : null,
+      "grunnlagUføre" : null
+    },
+    "diagnoser" : {
+      "kodeverk" : "ICPC2",
+      "diagnosekode" : "N88",
+      "bidiagnoser" : [ ]
+    },
+    "rettighetstypePerioder" : [ {
+      "fraDato" : "2025-06-24",
+      "tilDato" : "2026-06-23",
+      "rettighetstype" : "BISTANDSBEHOV"
+    } ],
+    "resultat" : "INNVILGET"
+  },
+  "identerForSak" : [ "194181*****", "104222*****" ]
+}

@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.hendelser
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
+import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 
@@ -16,6 +17,24 @@ class ReberegnHistorikk {
             it.endringer.map { endring -> endring.tidsstempel }
         }.sortedBy { it }
 
+        val inngangshendelse = BehandlingHendelse(
+            tidspunkt = dto.behandlingOpprettetTidspunkt,
+            hendelsesTidspunkt = dto.hendelsesTidspunkt,
+            avklaringsBehov = null,
+            steggruppe = null,
+            avklaringsbehovStatus = null,
+            venteÅrsak = null,
+            returÅrsak = null,
+            saksbehandler = null,
+            resultat = null,
+            versjon = dto.versjon.let(::Versjon),
+            status = BehandlingStatus.OPPRETTET,
+            ansvarligBeslutter = null,
+            vedtakstidspunkt = null,
+            mottattTid = dto.mottattTid,
+            søknadsformat = dto.soknadsFormat.tilDomene(),
+        )
+
         val avklaringsbehovHistorikk = endringsTidspunkter.map { tidspunkt ->
             avklaringsbehov.påTidspunkt(tidspunkt)
         }.filterNot {
@@ -23,7 +42,7 @@ class ReberegnHistorikk {
             it.utledAnsvarligBeslutter() == null && it.sisteAvklaringsbehovStatus() == null
         }
 
-        return avklaringsbehovHistorikk.fold(behandling) { acc, curr ->
+        return avklaringsbehovHistorikk.fold(behandling.leggTilHendelse(inngangshendelse)) { acc, curr ->
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles

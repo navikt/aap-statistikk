@@ -53,4 +53,46 @@ class ReberegnHistorikkTest {
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.gjeldendeAvklaringsBehov).isNull()
     }
+
+    @Test
+    fun `reberegne historikk for tom behandling`() {
+        val hendelse =
+            hendelseFraFil("avklaringsbehovhendelser/resendt_revurdering_automatisk.json")
+
+        val behandling = Behandling(
+            referanse = hendelse.behandlingReferanse,
+            sak = Sak(
+                saksnummer = hendelse.saksnummer.let(::Saksnummer),
+                person = Person(ident = hendelse.ident),
+                sakStatus = hendelse.sakStatus.tilDomene(),
+                sistOppdatert = hendelse.hendelsesTidspunkt,
+            ),
+            typeBehandling = hendelse.behandlingType.tilDomene(),
+            status = hendelse.behandlingStatus.tilDomene(),
+            opprettetTid = hendelse.behandlingOpprettetTidspunkt,
+            mottattTid = hendelse.mottattTid,
+            vedtakstidspunkt = null,
+            ansvarligBeslutter = null,
+            versjon = Versjon(UUID.randomUUID().toString()),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            sisteSaksbehandler = null,
+            relaterteIdenter = listOf(),
+            relatertBehandlingId = null,
+            gjeldendeAvklaringsBehov = null,
+            gjeldendeAvklaringsbehovStatus = null,
+            venteÅrsak = null,
+            returÅrsak = null,
+            gjeldendeStegGruppe = null,
+            årsaker = listOf(),
+            resultat = null,
+            oppdatertTidspunkt = null,
+            hendelser = listOf()
+        )
+
+        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+
+        assertThat(res.status).isEqualTo(BehandlingStatus.OPPRETTET)
+        assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.OPPRETTET)
+        assertThat(res.hendelser).hasSize(1)
+    }
 }
