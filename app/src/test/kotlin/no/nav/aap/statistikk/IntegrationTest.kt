@@ -290,6 +290,7 @@ class IntegrationTest {
             "AVSLUTTET"
         )
         assertThat(resendinger.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
+            "REGISTRERT",
             "UNDER_BEHANDLING",
             "IVERKSETTES",
             "AVSLUTTET",
