@@ -19,7 +19,6 @@ import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
-import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbSpesifikasjon
 import no.nav.aap.motor.Motor
@@ -116,6 +115,7 @@ fun Application.startUp(
 
     val motor = motor(
         dataSource,
+        gatewayProvider,
         listOf(
             lagreStoppetHendelseJobb,
             lagreAvklaringsbehovHendelseJobb,
@@ -157,6 +157,7 @@ fun Application.startUp(
 
 fun motor(
     dataSource: DataSource,
+    gatewayProvider: GatewayProvider,
     jobber: List<JobbSpesifikasjon>,
 ): Motor {
     return Motor(
@@ -171,7 +172,7 @@ fun motor(
         jobber = jobber,
         prometheus = PrometheusProvider.prometheus,
         repositoryRegistry = postgresRepositoryRegistry,
-        gatewayProvider = defaultGatewayProvider { },
+        gatewayProvider = gatewayProvider,
     )
 }
 
