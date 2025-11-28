@@ -1,5 +1,5 @@
 [versions]
-ktor = "3.3.2"
+ktor = "3.3.3"
 komponenter = "1.0.448"
 tilgang = "1.0.164"
 behandlingsflyt = "0.0.492"
@@ -7,7 +7,7 @@ oppgave = "0.0.131"
 utbetaling = "0.0.68"
 postmottak = "6.0.2"
 
-flyway = "11.17.1"
+flyway = "11.17.2"
 
 [libraries]
 ktorServerTestHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
