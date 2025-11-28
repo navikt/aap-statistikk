@@ -378,7 +378,7 @@ class MockJobbAppender : JobbAppender {
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-        connection: DBConnection,
+        provider: RepositoryProvider,
         behandlingId: BehandlingId
     ) {
         TODO("Not yet implemented")

@@ -13,7 +13,7 @@ interface JobbAppender {
     )
 
     fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-        connection: DBConnection, behandlingId: BehandlingId
+        provider: RepositoryProvider, behandlingId: BehandlingId
     )
 
     fun leggTilResendSakstatistikkJobb(

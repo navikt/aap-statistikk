@@ -1,44 +1,40 @@
 package no.nav.aap.statistikk.jobber
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.motor.Jobb
+import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
-import no.nav.aap.statistikk.postgresRepositoryRegistry
 
 class LagreStoppetHendelseJobb(
-    private val jobbAppender: JobbAppender,
-    private val gatewayProvider: GatewayProvider,
-) : Jobb {
-    override fun konstruer(connection: DBConnection): LagreStoppetHendelseJobbUtfører {
+    private val jobbAppender: JobbAppender
+) : ProvidersJobbSpesifikasjon {
+    override fun konstruer(
+        repositoryProvider: RepositoryProvider,
+        gatewayProvider: GatewayProvider
+    ): JobbUtfører {
         val hendelsesService = HendelsesService.konstruer(
             avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
                 gatewayProvider = gatewayProvider,
-                repositoryProvider = postgresRepositoryRegistry.provider(connection),
+                repositoryProvider = repositoryProvider,
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->
                     jobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                        connection,
+                        repositoryProvider,
                         behandlingId
                     )
                 }
             ),
             jobbAppender = jobbAppender,
-            repositoryProvider =postgresRepositoryRegistry.provider(connection)
+            repositoryProvider = repositoryProvider
         )
         return LagreStoppetHendelseJobbUtfører(hendelsesService)
     }
 
-    override fun type(): String {
-        return "statistikk.lagreHendelse"
-    }
+    override val type = "statistikk.lagreHendelse"
 
-    override fun navn(): String {
-        return "lagreHendelse"
-    }
+    override val navn = "lagreHendelse"
+    override val beskrivelse = "beskrivelse"
 
-    override fun beskrivelse(): String {
-        return "beskrivelse"
-    }
 }

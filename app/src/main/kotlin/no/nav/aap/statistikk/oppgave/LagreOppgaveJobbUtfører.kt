@@ -1,11 +1,10 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.motor.Jobb
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.statistikk.postgresRepositoryRegistry
+import no.nav.aap.motor.ProviderJobbSpesifikasjon
 
 
 class LagreOppgaveJobbUtfører(
@@ -22,24 +21,17 @@ class LagreOppgaveJobbUtfører(
     }
 }
 
-class LagreOppgaveJobb : Jobb {
-    override fun beskrivelse(): String {
-        return "Henter rene oppgavehendelser fra databasen og konverterer til modell."
-    }
-
-    override fun konstruer(connection: DBConnection): LagreOppgaveJobbUtfører {
-        val repositoryProvider = postgresRepositoryRegistry.provider(connection)
+class LagreOppgaveJobb : ProviderJobbSpesifikasjon {
+    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
+        val repositoryProvider = repositoryProvider
         return LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
             OppgaveHistorikkLagrer.konstruer(repositoryProvider)
         )
     }
 
-    override fun navn(): String {
-        return "Konverter oppgavehendelser til modell"
-    }
-
-    override fun type(): String {
-        return "statistikk.konverterOppgavehendelserTilModell"
-    }
+    override val type: String = "statistikk.konverterOppgavehendelserTilModell"
+    override val navn: String = "Konverter oppgavehendelser til modell"
+    override val beskrivelse: String =
+        "Henter rene oppgavehendelser fra databasen og konverterer til modell."
 }
