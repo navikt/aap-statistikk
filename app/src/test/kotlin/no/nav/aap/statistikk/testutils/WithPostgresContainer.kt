@@ -4,8 +4,8 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Migrering
 import org.junit.jupiter.api.extension.*
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import org.testcontainers.postgresql.PostgreSQLContainer
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
@@ -27,7 +27,7 @@ annotation class Postgres
 class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
     companion object {
-        private val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16").apply {
+        private val postgresContainer = PostgreSQLContainer("postgres:16").apply {
             waitingFor(
                 HostPortWaitStrategy().withStartupTimeout(
                     Duration.of(

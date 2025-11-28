@@ -68,7 +68,7 @@ class MottaStatistikkTest {
             noOpTransactionExecutor,
             motor,
             azureConfig,
-            LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { }),
+            LagreStoppetHendelseJobb(jobbAppender),
             LagreOppgaveHendelseJobb(LagreOppgaveJobb()),
             LagrePostmottakHendelseJobb(),
             LagreAvklaringsbehovHendelseJobb(jobbAppender),
@@ -88,7 +88,7 @@ class MottaStatistikkTest {
 
     private fun ekteLagreStoppetHendelseJobb(
         jobbAppender: JobbAppender,
-    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { })
+    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender)
 
     private val hendelse = StoppetBehandling(
         saksnummer = "4LFK2S0",
@@ -316,7 +316,7 @@ class MottaStatistikkTest {
                 lagrePostmottakHendelseJobb,
                 LagreOppgaveHendelseJobb(lagreOppgaveJobb),
                 lagreSakinfoTilBigQueryJobb,
-                LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { })
+                LagreStoppetHendelseJobb(jobbAppender)
             )
         )
     }

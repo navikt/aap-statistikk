@@ -61,15 +61,15 @@ class MotorJobbAppender(
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-        connection: DBConnection,
+        provider: RepositoryProvider,
         behandlingId: BehandlingId
     ) {
         val behandling =
-            postgresRepositoryRegistry.provider(connection).provide<IBehandlingRepository>()
+            provider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
         val saksnummer = behandling.sak.saksnummer
         leggTil(
-            connection, JobbInput(lagreAvsluttetBehandlingTilBigQueryJobb).medPayload(
+            provider, JobbInput(lagreAvsluttetBehandlingTilBigQueryJobb).medPayload(
                 behandling.referanse
             ).forSak(
                 stringToNumber(saksnummer.value)

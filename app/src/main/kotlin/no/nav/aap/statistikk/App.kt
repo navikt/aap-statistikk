@@ -105,9 +105,7 @@ fun Application.startUp(
             resendSakstatistikkJobb
         )
 
-    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-        motorJobbAppender, gatewayProvider
-    )
+    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(motorJobbAppender)
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(motorJobbAppender)
 
     val lagreOppgaveJobb = LagreOppgaveJobb()
@@ -173,7 +171,7 @@ fun motor(
         jobber = jobber,
         prometheus = PrometheusProvider.prometheus,
         repositoryRegistry = postgresRepositoryRegistry,
-        gatewayProvider = defaultGatewayProvider {  },
+        gatewayProvider = defaultGatewayProvider { },
     )
 }
 

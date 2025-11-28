@@ -32,9 +32,8 @@ class ApplicationTest {
             motor = motorMock(),
             jobbAppender = jobbAppender,
             azureConfig = azureConfig,
-            lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(
-                jobbAppender,
-                defaultGatewayProvider { }), lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
+            lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender),
+            lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb()
             ),
             lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(),
@@ -144,7 +143,7 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             azureConfig,
-            LagreStoppetHendelseJobb(jobbAppender, defaultGatewayProvider { }),
+            LagreStoppetHendelseJobb(jobbAppender),
             LagreOppgaveHendelseJobb(
                 LagreOppgaveJobb()
             ),
