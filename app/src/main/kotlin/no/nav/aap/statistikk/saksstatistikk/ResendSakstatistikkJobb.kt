@@ -1,12 +1,11 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.motor.Jobb
+import no.nav.aap.komponenter.gateway.GatewayProvider
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.defaultGatewayProvider
-import no.nav.aap.statistikk.postgresRepositoryRegistry
 import org.slf4j.LoggerFactory
 
 class ResendSakstatistikkJobbUtfører(
@@ -27,31 +26,25 @@ class ResendSakstatistikkJobbUtfører(
     }
 }
 
-class ResendSakstatistikkJobb : Jobb {
-    override fun konstruer(connection: DBConnection): JobbUtfører {
+class ResendSakstatistikkJobb : ProvidersJobbSpesifikasjon {
+
+    override fun konstruer(
+        repositoryProvider: RepositoryProvider,
+        gatewayProvider: GatewayProvider
+    ): JobbUtfører {
         val sakStatistikkService =
             SaksStatistikkService.konstruer(
-                defaultGatewayProvider(),
-                postgresRepositoryRegistry.provider(connection)
+                gatewayProvider,
+                repositoryProvider
             )
         return ResendSakstatistikkJobbUtfører(
             sakStatikkService = sakStatistikkService,
-            sakstatistikkRepository = postgresRepositoryRegistry.provider(connection).provide()
+            sakstatistikkRepository = repositoryProvider.provide()
         )
     }
 
-    override fun type(): String {
-        return "statistikk.resendSakstatistikk"
-    }
+    override val type: String = "statistikk.resendSakstatistikk"
+    override val navn: String = "Resend saksstatikk"
+    override val beskrivelse: String = "Resend saksstatikk"
 
-    override fun navn(): String {
-        return "Resend saksstatikk"
-    }
-
-    override fun beskrivelse(): String {
-        return "Resend saksstatikk"
-    }
-
-    override val retries: Int
-        get() = 1
 }

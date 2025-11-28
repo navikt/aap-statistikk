@@ -11,15 +11,9 @@ class ReberegnHistorikk {
     fun avklaringsbehovTilHistorikk(
         dto: StoppetBehandling, behandling: Behandling
     ): Behandling {
-        val avklaringsbehov = dto.avklaringsbehov
-
-        val endringsTidspunkter = avklaringsbehov.flatMap {
-            it.endringer.map { endring -> endring.tidsstempel }
-        }.sortedBy { it }
-
         val inngangshendelse = BehandlingHendelse(
             tidspunkt = dto.behandlingOpprettetTidspunkt,
-            hendelsesTidspunkt = dto.hendelsesTidspunkt,
+            hendelsesTidspunkt = dto.behandlingOpprettetTidspunkt,
             avklaringsBehov = null,
             steggruppe = null,
             avklaringsbehovStatus = null,
@@ -34,6 +28,35 @@ class ReberegnHistorikk {
             mottattTid = dto.mottattTid,
             søknadsformat = dto.soknadsFormat.tilDomene(),
         )
+        val avklaringsbehov = dto.avklaringsbehov
+
+        if (avklaringsbehov.isEmpty() && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
+            return behandling
+                .leggTilHendelse(inngangshendelse)
+                .leggTilHendelse(
+                    BehandlingHendelse(
+                        tidspunkt = dto.tidspunktSisteEndring,
+                        hendelsesTidspunkt = dto.hendelsesTidspunkt,
+                        avklaringsBehov = null,
+                        steggruppe = null,
+                        avklaringsbehovStatus = null,
+                        venteÅrsak = null,
+                        returÅrsak = null,
+                        saksbehandler = null,
+                        resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+                        versjon = dto.versjon.let(::Versjon),
+                        status = dto.behandlingStatus.tilDomene(),
+                        ansvarligBeslutter = null,
+                        vedtakstidspunkt = dto.tidspunktSisteEndring,
+                        mottattTid = dto.mottattTid,
+                        søknadsformat = dto.soknadsFormat.tilDomene(),
+                    )
+                )
+        }
+
+        val endringsTidspunkter = avklaringsbehov.flatMap {
+            it.endringer.map { endring -> endring.tidsstempel }
+        }.sortedBy { it }
 
         val avklaringsbehovHistorikk = endringsTidspunkter.map { tidspunkt ->
             avklaringsbehov.påTidspunkt(tidspunkt)

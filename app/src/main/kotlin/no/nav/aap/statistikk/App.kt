@@ -21,6 +21,7 @@ import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
+import no.nav.aap.motor.JobbSpesifikasjon
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.mdc.JobbLogInfoProvider
@@ -158,7 +159,7 @@ fun Application.startUp(
 
 fun motor(
     dataSource: DataSource,
-    jobber: List<Jobb>,
+    jobber: List<JobbSpesifikasjon>,
 ): Motor {
     return Motor(
         dataSource = dataSource, antallKammer = 8,
@@ -171,6 +172,8 @@ fun motor(
         },
         jobber = jobber,
         prometheus = PrometheusProvider.prometheus,
+        repositoryRegistry = postgresRepositoryRegistry,
+        gatewayProvider = defaultGatewayProvider {  },
     )
 }
 

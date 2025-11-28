@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
+import java.net.http.HttpConnectTimeoutException
 
 private val logger = org.slf4j.LoggerFactory.getLogger("SkjermingService")
 
@@ -23,8 +24,11 @@ class SkjermingService(
             return hentPersoner
                 .flatMap { it.adressebeskyttelse }
                 .any { it.gradering.erHemmelig() }
-        } catch (e: Exception) {
-            logger.error("Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.", e)
+        } catch (e: HttpConnectTimeoutException) {
+            logger.error(
+                "Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.",
+                e
+            )
             return false;
         }
     }
