@@ -70,7 +70,9 @@ class SaksStatistikkService(
                 sakstatistikkRepository.lagre(
                     bqSak.copy(
                         endretTid = bqSak.registrertTid,
-                        ferdigbehandletTid = null, vedtakTid = null, behandlingStatus = "OPPRETTET"
+                        ferdigbehandletTid = null,
+                        vedtakTid = null,
+                        behandlingStatus = "OPPRETTET"
                     )
                 )
             }
@@ -86,6 +88,7 @@ class SaksStatistikkService(
     }
 
     private fun erInngangsHendelse(bqBehandling: BQBehandling): Boolean {
+        println("REG TID ${bqBehandling.registrertTid} ENDRET TID ${bqBehandling.endretTid}")
         return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
@@ -369,7 +372,7 @@ class SaksStatistikkService(
 
 
         return when (hendelse.status) {
-            BehandlingStatus.OPPRETTET -> "REGISTRERT"
+            BehandlingStatus.OPPRETTET -> "OPPRETTET"
             BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
             BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
             BehandlingStatus.AVSLUTTET -> "AVSLUTTET"

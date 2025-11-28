@@ -254,7 +254,7 @@ class IntegrationTest {
         // Forvent kun én inngangshendelse.
         assertThat(alleHendelser.filter { it.endretTid == it.registrertTid }.size).isEqualTo(1)
 
-
+        println("RESENDING")
         // DEL 2: test resending
         testKlientNoInjection(
             dbConfig,
@@ -290,7 +290,7 @@ class IntegrationTest {
             "AVSLUTTET"
         )
         assertThat(resendinger.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
-            "REGISTRERT",
+            "OPPRETTET",
             "UNDER_BEHANDLING",
             "IVERKSETTES",
             "AVSLUTTET",

@@ -70,7 +70,7 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
             årsaker = dto.vurderingsbehov.map { it.tilDomene() },
             opprettetAv = dto.opprettetAv,
             oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
-                ?: dto.hendelsesTidspunkt
+                ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 
