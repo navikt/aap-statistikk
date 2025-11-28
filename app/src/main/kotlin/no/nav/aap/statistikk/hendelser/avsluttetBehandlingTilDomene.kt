@@ -134,10 +134,10 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             var beregningsGrunnlag: IBeregningsGrunnlag? = null
             if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre != null) {
                 beregningsGrunnlag =
-                    tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre!!)
-            } else if (beregningsgrunnlagDTO.grunnlagYrkesskade!!.beregningsgrunnlag.grunnlagYrkesskade != null) {
+                    grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre?.let { tilDomene(it) }
+            } else if (beregningsgrunnlagDTO.grunnlagYrkesskade?.beregningsgrunnlag?.grunnlagYrkesskade != null) {
                 beregningsGrunnlag =
-                    tilDomene(grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade!!)
+                    grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade?.let { tilDomene(it) }
             } else if (grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto != null) {
                 beregningsGrunnlag =
                     grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene()

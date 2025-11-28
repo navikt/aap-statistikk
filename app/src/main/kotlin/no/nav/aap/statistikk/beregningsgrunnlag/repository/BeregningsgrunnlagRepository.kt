@@ -103,7 +103,7 @@ WHERE br.referanse = ?"""
         beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagYrkesskade
     ): Long {
         val grunnlagType: String
-        val id = when (beregningsGrunnlag.beregningsgrunnlag) {
+        when (beregningsGrunnlag.beregningsgrunnlag) {
             is IBeregningsGrunnlag.Grunnlag_11_19 -> {
                 grunnlagType = "normal"
                 lagre11_19(
