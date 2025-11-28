@@ -308,6 +308,7 @@ class MottaStatistikkTest {
         val lagreOppgaveJobb = LagreOppgaveJobb()
         return motor(
             dataSource = dataSource,
+            gatewayProvider = defaultGatewayProvider {  },
             jobber = listOf(
                 LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository),
                 lagreOppgaveJobb,
@@ -360,6 +361,7 @@ class MottaStatistikkTest {
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
         val motor = motor(
             dataSource = dataSource,
+            gatewayProvider = defaultGatewayProvider {  },
             jobber = listOf(
                 resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,
