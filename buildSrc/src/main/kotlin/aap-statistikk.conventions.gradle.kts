@@ -22,6 +22,7 @@ tasks {
         useJUnitPlatform()
         maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
         testLogging {
+            showStandardStreams = true
             events("passed", "skipped", "failed")
         }
     }
