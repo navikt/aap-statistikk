@@ -30,6 +30,12 @@ class SkjermingService(
                 e
             )
             return false;
+        } catch (e: java.net.ConnectException) {
+            logger.error(
+                "Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.",
+                e
+            )
+            return false;
         }
     }
 }
