@@ -19,10 +19,17 @@ testing {
 
 tasks {
     test {
+        // Define the log file path
+        val logFile = file("${layout.buildDirectory}/logs/test.log")
+
+        // Create a new file for each test run
+        doFirst {
+            logFile.parentFile.mkdirs()
+            logFile.writeText("")
+        }
         useJUnitPlatform()
         maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
         testLogging {
-            showStandardStreams = true
             events("passed", "skipped", "failed")
         }
     }
