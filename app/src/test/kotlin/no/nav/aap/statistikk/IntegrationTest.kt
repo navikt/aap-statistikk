@@ -15,6 +15,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
+import no.nav.aap.motor.retry.DriftJobbRepositoryExposed
 import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveTilStatistikkDto
@@ -60,6 +61,8 @@ class IntegrationTest {
             System.setProperty("integrasjon.oppgave.azp", azp)
         }
     }
+
+    private val log = LoggerFactory.getLogger(IntegrationTest::class.java)
 
     data class Jobbdump(
         val payload: String,
@@ -126,8 +129,8 @@ class IntegrationTest {
         ).hasSize(1)
 
         val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
-
         val bigQueryClient = bigQueryClient(config)
+        val x = 2
         var referanse: UUID? = null
         testKlientNoInjection(
             dbConfig,
@@ -151,6 +154,8 @@ class IntegrationTest {
                 }
                 logger.info("Hendelse nr ${c++}: ${it.data::class.simpleName} av ${hendelserFraDBDump.size}")
             }
+            val feilende = dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
+            log.info("Feilende jobber: $feilende")
             testUtil.ventPåSvar()
 
             val behandling = ventPåSvar(
