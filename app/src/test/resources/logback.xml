@@ -7,12 +7,19 @@
         </encoder>
     </appender>
 
+    <appender name="jsonFile" class="ch.qos.logback.core.FileAppender">
+        <file>build/test-logs/test.json</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="pretty"/>
+        <appender-ref ref="jsonFile"/>
     </root>
 
     <logger name="secureLog" level="TRACE" additivity="false">
         <appender-ref ref="pretty"/>
+        <appender-ref ref="jsonFile"/>
     </logger>
 
     <logger name="io.netty" level="INFO" />
