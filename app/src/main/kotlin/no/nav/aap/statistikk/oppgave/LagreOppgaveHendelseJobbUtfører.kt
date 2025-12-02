@@ -1,15 +1,14 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.FlytJobbRepository
-import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.motor.ProviderJobbSpesifikasjon
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.oppgaveHendelseMottatt
-import no.nav.aap.statistikk.postgresRepositoryRegistry
 
 
 class LagreOppgaveHendelseJobbUtfører(
@@ -32,25 +31,17 @@ class LagreOppgaveHendelseJobbUtfører(
 
 class LagreOppgaveHendelseJobb(
     val lagreOppgaveJobb: LagreOppgaveJobb,
-) : Jobb {
-    override fun beskrivelse(): String {
-        return "Lagrer rene oppgavehendelser fra oppgave-appen."
-    }
-
-    override fun konstruer(connection: DBConnection): LagreOppgaveHendelseJobbUtfører {
-        val provider = postgresRepositoryRegistry.provider(connection)
+) : ProviderJobbSpesifikasjon {
+    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
         return LagreOppgaveHendelseJobbUtfører(
-            provider.provide(),
-            provider.provide(),
+            repositoryProvider.provide(),
+            repositoryProvider.provide(),
             lagreOppgaveJobb
         )
     }
 
-    override fun navn(): String {
-        return "lagreOppgaveHendelse"
-    }
+    override val type: String = "statistikk.lagreOppgaveHendelseJobb"
+    override val navn: String = "lagreOppgaveHendelse"
 
-    override fun type(): String {
-        return "statistikk.lagreOppgaveHendelseJobb"
-    }
+    override val beskrivelse: String = "Lagrer rene oppgavehendelser fra oppgave-appen."
 }
