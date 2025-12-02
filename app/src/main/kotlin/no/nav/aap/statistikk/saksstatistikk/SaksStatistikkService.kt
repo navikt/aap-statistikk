@@ -59,6 +59,10 @@ class SaksStatistikkService(
 
         val bqSak = bqBehandlingForBehandling(behandling, erSkjermet, sekvensNummer)
 
+        lagreBQBehandling(bqSak)
+    }
+
+    fun lagreBQBehandling(bqSak: BQBehandling) {
         val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
         if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
             // Hvis vi ikke allerede har en inngangshendelse (når behandlingen ble
@@ -88,7 +92,6 @@ class SaksStatistikkService(
     }
 
     private fun erInngangsHendelse(bqBehandling: BQBehandling): Boolean {
-        println("REG TID ${bqBehandling.registrertTid} ENDRET TID ${bqBehandling.endretTid}")
         return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
@@ -201,7 +204,7 @@ class SaksStatistikkService(
 
         var forrigeNye: BQBehandling? = null
         val originaleMedNyData = originaleHendelser
-            .sortedBy { it.endretTid }
+            .sorted()
             .map {
                 if (nyeQueue.isEmpty()) {
                     val last = sorterteNye.last()
@@ -255,7 +258,7 @@ class SaksStatistikkService(
             .minus(nyeHendelser.map { it.endretTid }.toSet())
         log.info("Nye tidspunkter: $nyeTidspunkter. Gamle tidspunkter: $gamleTidspunkter.")
 
-        return (nyeQueue.toList() + originaleMedNyData).sortedBy { it.endretTid }
+        return (nyeQueue.toList() + originaleMedNyData).sorted()
             .fold(listOf()) { acc, curr ->
                 val forrige = acc.lastOrNull()
                 if (forrige == null) {

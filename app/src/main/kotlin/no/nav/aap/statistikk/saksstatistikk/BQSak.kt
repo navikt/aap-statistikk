@@ -44,7 +44,7 @@ data class BQBehandling(
     val ansvarligEnhetKode: String?,
     val sakYtelse: String,
     val erResending: Boolean
-) {
+) : Comparable<BQBehandling> {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     init {
@@ -74,6 +74,12 @@ data class BQBehandling(
             tekniskTid = tekniskTid,
             endretTid = endretTid,
             versjon = versjon
+        )
+    }
+
+    override fun compareTo(other: BQBehandling): Int {
+        if (endretTid == other.endretTid) return tekniskTid.compareTo(other.tekniskTid) else return endretTid.compareTo(
+            other.endretTid
         )
     }
 }

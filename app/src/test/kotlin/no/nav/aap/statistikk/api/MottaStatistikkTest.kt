@@ -214,7 +214,7 @@ class MottaStatistikkTest {
                         .hentAlleHendelserPåBehandling(behandling.referanse)
                 )
             }
-            assertThat(behandling.hendelser.sortedBy { it.hendelsesTidspunkt }).hasSize(5)
+            assertThat(behandling.hendelser.sortedBy { it.hendelsesTidspunkt }).hasSize(4)
             assertThat(bqBehandlinger).hasSize(5)
         }
     }
