@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.nyBehandlingOpprettet
@@ -53,7 +54,9 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
             sak = sak,
             typeBehandling = dto.behandlingType.tilDomene(),
             opprettetTid = dto.behandlingOpprettetTidspunkt,
-            vedtakstidspunkt = dto.avklaringsbehov.utledVedtakTid(),
+            vedtakstidspunkt = dto.avklaringsbehov.utledVedtakTid().let {
+                if (it == null && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) dto.tidspunktSisteEndring else it
+            },
             ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter(),
             mottattTid = dto.mottattTid,
             status = dto.behandlingStatus.tilDomene(),

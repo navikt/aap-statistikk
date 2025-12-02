@@ -154,7 +154,8 @@ class IntegrationTest {
                 }
                 logger.info("Hendelse nr ${c++}: ${it.data::class.simpleName} av ${hendelserFraDBDump.size}")
             }
-            val feilende = dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
+            val feilende =
+                dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
             log.info("Feilende jobber: $feilende")
             testUtil.ventPåSvar()
 
@@ -192,6 +193,8 @@ class IntegrationTest {
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
         )
+        assertThat(bqSaker2.filter { it.behandlingStatus == "AVSLUTTET" }
+            .onlyOrNull()?.vedtakTid).isNotNull
         assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).isNotEmpty
         assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).allSatisfy {
             assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
