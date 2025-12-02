@@ -18,7 +18,8 @@ class ReberegnHistorikk {
                 .leggTilHendelse(
                     BehandlingHendelse(
                         tidspunkt = dto.tidspunktSisteEndring,
-                        hendelsesTidspunkt = dto.hendelsesTidspunkt,
+                        hendelsesTidspunkt = dto.tidspunktSisteEndring
+                            ?: dto.behandlingOpprettetTidspunkt,
                         avklaringsBehov = null,
                         steggruppe = null,
                         avklaringsbehovStatus = null,
