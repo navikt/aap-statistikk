@@ -18,7 +18,8 @@ class ReberegnHistorikk {
                 .leggTilHendelse(
                     BehandlingHendelse(
                         tidspunkt = dto.tidspunktSisteEndring,
-                        hendelsesTidspunkt = dto.tidspunktSisteEndring
+                        hendelsesTidspunkt = dto.avsluttetBehandling?.vedtakstidspunkt
+                            ?: dto.tidspunktSisteEndring
                             ?: dto.behandlingOpprettetTidspunkt,
                         avklaringsBehov = null,
                         steggruppe = null,
@@ -30,7 +31,8 @@ class ReberegnHistorikk {
                         versjon = dto.versjon.let(::Versjon),
                         status = dto.behandlingStatus.tilDomene(),
                         ansvarligBeslutter = null,
-                        vedtakstidspunkt = dto.tidspunktSisteEndring,
+                        vedtakstidspunkt = dto.avsluttetBehandling?.vedtakstidspunkt
+                            ?: dto.tidspunktSisteEndring,
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                     )
