@@ -22,7 +22,7 @@ class ResendSakstatistikkJobbUtførerTest {
 
         dataSource.transaction {
             ResendSakstatistikkJobbUtfører(
-                konstruerSakstatistikkService(it), SakstatistikkRepositoryImpl(it)
+                konstruerSakstatistikkService(it)
             ).utfør(input)
         }
 

@@ -9,8 +9,7 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
 
 class ResendSakstatistikkJobbUtfører(
-    val sakStatikkService: SaksStatistikkService,
-    val sakstatistikkRepository: SakstatistikkRepository
+    val sakStatikkService: SaksStatistikkService
 ) : JobbUtfører {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -21,7 +20,10 @@ class ResendSakstatistikkJobbUtfører(
 
         val alleHendelser = sakStatikkService.alleHendelserPåBehandling(behandlingId)
             .map { it.copy(erResending = true) }
-        sakstatistikkRepository.lagreFlere(alleHendelser)
+
+        alleHendelser.forEach {
+            sakStatikkService.lagreBQBehandling(it)
+        }
         log.info("Lagret ${alleHendelser.size} hendelser i sakssakstatistikk-tabell.")
     }
 }
@@ -39,7 +41,6 @@ class ResendSakstatistikkJobb : ProvidersJobbSpesifikasjon {
             )
         return ResendSakstatistikkJobbUtfører(
             sakStatikkService = sakStatistikkService,
-            sakstatistikkRepository = repositoryProvider.provide()
         )
     }
 

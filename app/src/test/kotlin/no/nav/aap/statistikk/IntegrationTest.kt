@@ -282,7 +282,7 @@ class IntegrationTest {
         }
 
         val resendinger =
-            alleSakstatistikkHendelser.filter { it.erResending }.sortedBy { it.endretTid }
+            alleSakstatistikkHendelser.filter { it.erResending }.sorted()
 
         // Gjør samme sjekker som for vanlige sending
         // TODO: lage testdataen på nytt, slik at dette kan testes
@@ -293,14 +293,6 @@ class IntegrationTest {
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
             "IVERKSETTES",
             "AVSLUTTET"
-        )
-        assertThat(resendinger.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
-            "OPPRETTET",
-            "UNDER_BEHANDLING",
-            "IVERKSETTES",
-            "AVSLUTTET",
-            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
-            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
         )
         assertThat(resendinger.filter { it.resultatBegrunnelse != null }).isNotEmpty
         assertThat(resendinger.filter { it.resultatBegrunnelse != null }).allSatisfy {

@@ -93,9 +93,8 @@ class ReberegnHistorikkTest {
 
         assertThat(res.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
-        assertThat(res.hendelser).hasSize(2)
+        assertThat(res.hendelser).hasSize(1)
 
-        assertThat(res.hendelser.first().status).isEqualTo(BehandlingStatus.OPPRETTET)
         assertThat(res.hendelser.last().status).isEqualTo(BehandlingStatus.AVSLUTTET)
     }
 }

@@ -11,28 +11,10 @@ class ReberegnHistorikk {
     fun avklaringsbehovTilHistorikk(
         dto: StoppetBehandling, behandling: Behandling
     ): Behandling {
-        val inngangshendelse = BehandlingHendelse(
-            tidspunkt = dto.behandlingOpprettetTidspunkt,
-            hendelsesTidspunkt = dto.behandlingOpprettetTidspunkt,
-            avklaringsBehov = null,
-            steggruppe = null,
-            avklaringsbehovStatus = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            saksbehandler = null,
-            resultat = null,
-            versjon = dto.versjon.let(::Versjon),
-            status = BehandlingStatus.OPPRETTET,
-            ansvarligBeslutter = null,
-            vedtakstidspunkt = null,
-            mottattTid = dto.mottattTid,
-            søknadsformat = dto.soknadsFormat.tilDomene(),
-        )
         val avklaringsbehov = dto.avklaringsbehov
 
         if (avklaringsbehov.isEmpty() && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
             return behandling
-                .leggTilHendelse(inngangshendelse)
                 .leggTilHendelse(
                     BehandlingHendelse(
                         tidspunkt = dto.tidspunktSisteEndring,
@@ -65,7 +47,7 @@ class ReberegnHistorikk {
             it.utledAnsvarligBeslutter() == null && it.sisteAvklaringsbehovStatus() == null
         }
 
-        return avklaringsbehovHistorikk.fold(behandling.leggTilHendelse(inngangshendelse)) { acc, curr ->
+        return avklaringsbehovHistorikk.fold(behandling) { acc, curr ->
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
