@@ -49,14 +49,17 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
         dto: StoppetBehandling,
         sak: Sak
     ): Behandling {
+        val vedtakstidspunkt =
+            dto.avsluttetBehandling?.vedtakstidspunkt ?: dto.avklaringsbehov.utledVedtakTid().let {
+                if (it == null && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) dto.tidspunktSisteEndring else it
+            }
+
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
             typeBehandling = dto.behandlingType.tilDomene(),
             opprettetTid = dto.behandlingOpprettetTidspunkt,
-            vedtakstidspunkt = dto.avklaringsbehov.utledVedtakTid().let {
-                if (it == null && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) dto.tidspunktSisteEndring else it
-            },
+            vedtakstidspunkt = vedtakstidspunkt,
             ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter(),
             mottattTid = dto.mottattTid,
             status = dto.behandlingStatus.tilDomene(),

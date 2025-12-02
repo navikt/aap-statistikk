@@ -50,12 +50,6 @@ data class Behandling(
     val opprettetAv: String? = null,
 ) {
     init {
-        if (typeBehandling == TypeBehandling.Førstegangsbehandling) {
-            require((ansvarligBeslutter != null && vedtakstidspunkt != null) || (ansvarligBeslutter == null && vedtakstidspunkt == null)) {
-                "Om behandlingen er besluttet, så må både vedtakstidspunkt og ansvarlig beslutter være ikke-null. Har ansvarlig beslutter: $ansvarligBeslutter, har vedtakstidspunkt: $vedtakstidspunkt"
-            }
-        }
-
         require(hendelser.sortedBy { it.hendelsesTidspunkt }
             .zipWithNext { a, b -> a.hendelsesTidspunkt <= b.hendelsesTidspunkt }
             .all { it }) { "Hendelser må være sortert." }
