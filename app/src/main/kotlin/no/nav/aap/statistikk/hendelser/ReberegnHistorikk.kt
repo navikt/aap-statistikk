@@ -63,7 +63,8 @@ class ReberegnHistorikk {
                     versjon = dto.versjon.let(::Versjon),
                     status = curr.utledBehandlingStatus(),
                     ansvarligBeslutter = curr.utledAnsvarligBeslutter(),
-                    vedtakstidspunkt = curr.utledVedtakTid(),
+                    vedtakstidspunkt = if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET) behandling.vedtakstidspunkt
+                        ?: curr.utledVedtakTid() else null,
                     mottattTid = dto.mottattTid,
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                 )
