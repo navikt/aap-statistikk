@@ -1,11 +1,10 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.motor.Jobb
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.motor.ProviderJobbSpesifikasjon
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
-import no.nav.aap.statistikk.postgresRepositoryRegistry
 import java.util.*
 
 class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(private val ytelsesStatistikkTilBigQuery: YtelsesStatistikkTilBigQuery) :
@@ -18,29 +17,22 @@ class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(private val ytelsesStatist
 
 class LagreAvsluttetBehandlingTilBigQueryJobb(
     private val bqYtelseRepository: IBQYtelsesstatistikkRepository,
-) : Jobb {
-    override fun konstruer(connection: DBConnection): JobbUtfører {
+) : ProviderJobbSpesifikasjon {
+
+    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
         return LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
             YtelsesStatistikkTilBigQuery.konstruer(
                 bqYtelseRepository,
-                postgresRepositoryRegistry.provider(connection)
+                repositoryProvider
             )
         )
     }
 
-    override fun type(): String {
-        return "statistikk.lagreAvsluttetBehandlingTilBigQueryJobb"
-    }
+    override val retries: Int = 1
 
-    override fun navn(): String {
-        return "lagreAvsluttetBehandlingTilBigQuery"
-    }
+    override val type: String = "statistikk.lagreAvsluttetBehandlingTilBigQueryJobb"
 
-    override fun beskrivelse(): String {
-        return "Lagrer avsluttet behandling til BigQuery (til Team Spenn)."
-    }
+    override val navn: String = "lagreAvsluttetBehandlingTilBigQuery"
 
-    override fun retries(): Int {
-        return 1
-    }
+    override val beskrivelse: String = "Lagrer avsluttet behandling til BigQuery (til Team Spenn)."
 }

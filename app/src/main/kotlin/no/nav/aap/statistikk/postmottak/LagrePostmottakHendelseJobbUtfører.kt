@@ -1,9 +1,9 @@
 package no.nav.aap.statistikk.postmottak
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.motor.Jobb
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.motor.ProviderJobbSpesifikasjon
 import no.nav.aap.postmottak.kontrakt.avklaringsbehov.Status
 import no.nav.aap.postmottak.kontrakt.behandling.TypeBehandling
 import no.nav.aap.postmottak.kontrakt.hendelse.AvklaringsbehovHendelseDto
@@ -12,7 +12,6 @@ import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.provider
 import org.slf4j.LoggerFactory
 
 class LagrePostmottakHendelseJobbUtfører(
@@ -36,27 +35,19 @@ class LagrePostmottakHendelseJobbUtfører(
     }
 }
 
-class LagrePostmottakHendelseJobb : Jobb {
-    override fun konstruer(connection: DBConnection): LagrePostmottakHendelseJobbUtfører {
+class LagrePostmottakHendelseJobb : ProviderJobbSpesifikasjon {
+    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
         return LagrePostmottakHendelseJobbUtfører(
             postmottakBehandlingService = PostmottakBehandlingService(
-                connection.provider().provide()
+                repositoryProvider.provide()
             ),
-            personService = PersonService(connection.provider()),
+            personService = PersonService(repositoryProvider),
         )
     }
 
-    override fun navn(): String {
-        return "Konverter postmottakhendelser"
-    }
-
-    override fun type(): String {
-        return "statistikk.lagrePostmottakHendelse"
-    }
-
-    override fun beskrivelse(): String {
-        return "Konverter oppgavehendelser"
-    }
+    override val type: String = "statistikk.lagrePostmottakHendelse"
+    override val navn: String = "Konverter postmottakhendelser"
+    override val beskrivelse: String = "Konverter oppgavehendelser"
 }
 
 fun DokumentflytStoppetHendelse.tilDomene(person: Person): PostmottakBehandling {
@@ -96,8 +87,8 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
     return this.filter(function()).sortedByDescending {
-            it.endringer.minBy { endring -> endring.tidsstempel }.tidsstempel
-        }.map { it.avklaringsbehovDefinisjon.kode }.firstOrNull()?.toString()
+        it.endringer.minBy { endring -> endring.tidsstempel }.tidsstempel
+    }.map { it.avklaringsbehovDefinisjon.kode }.firstOrNull()?.toString()
 }
 
 private fun function(): (AvklaringsbehovHendelseDto) -> Boolean = {
