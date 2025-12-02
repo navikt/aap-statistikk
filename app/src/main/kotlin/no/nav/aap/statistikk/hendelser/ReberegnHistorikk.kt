@@ -69,6 +69,31 @@ class ReberegnHistorikk {
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                 )
             )
+        }.let {
+            if (it.behandlingStatus() != BehandlingStatus.AVSLUTTET && behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET) {
+                it.leggTilHendelse(
+                    BehandlingHendelse(
+                        tidspunkt = null, // Vil etterfylles
+                        hendelsesTidspunkt = requireNotNull(
+                            dto.avsluttetBehandling?.vedtakstidspunkt ?: dto.tidspunktSisteEndring
+                        ),
+                        avklaringsBehov = null,
+                        avklaringsbehovStatus = null,
+                        steggruppe = null,
+                        venteÅrsak = null,
+                        returÅrsak = null,
+                        saksbehandler = null,
+                        resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+                        versjon = dto.versjon.let(::Versjon),
+                        status = behandling.behandlingStatus(),
+                        ansvarligBeslutter = behandling.hendelsesHistorikk()
+                            .lastOrNull()?.ansvarligBeslutter,
+                        vedtakstidspunkt = behandling.vedtakstidspunkt,
+                        mottattTid = dto.mottattTid,
+                        søknadsformat = dto.soknadsFormat.tilDomene(),
+                    )
+                )
+            } else it
         }
     }
 }

@@ -1,0 +1,607 @@
+{
+  "saksnummer": "4oT6Xo0",
+  "sakStatus": "UTREDES",
+  "behandlingReferanse": "b016f463-6f6c-4f5d-8fc0-0e7460acdd63",
+  "relatertBehandling": "2f377d43-4b8d-4c04-806f-4050655f6918",
+  "behandlingOpprettetTidspunkt": "2025-12-02T14:26:08.079",
+  "mottattTid": "2025-12-02T14:26:08.079",
+  "tidspunktSisteEndring": "2025-12-02T14:27:26.272",
+  "behandlingStatus": "AVSLUTTET",
+  "behandlingType": "Revurdering",
+  "soknadsFormat": "DIGITAL",
+  "ident": "18458534108",
+  "versjon": "fb8f6ecb26758ccbe4504b7e0b75aa0e2e04c945",
+  "vurderingsbehov": [
+    "REVURDERING_AVBRUTT",
+    "REVURDER_BEREGNING"
+  ],
+  "avklaringsbehov": [
+    {
+      "avklaringsbehovDefinisjon": {
+        "kode": "5033",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "AVBRYT_REVURDERING",
+        "kreverToTrinn": false,
+        "kvalitetssikres": false,
+        "løsesAv": [
+          "BESLUTTER"
+        ]
+      },
+      "status": "AVSLUTTET",
+      "endringer": [
+        {
+          "status": "OPPRETTET",
+          "tidsstempel": "2025-12-02T14:27:15.495",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        },
+        {
+          "status": "AVSLUTTET",
+          "tidsstempel": "2025-12-02T14:27:21.621",
+          "frist": null,
+          "endretAv": "Z994573",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": "v"
+        }
+      ]
+    },
+    {
+      "avklaringsbehovDefinisjon": {
+        "kode": "5008",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
+        "kreverToTrinn": true,
+        "kvalitetssikres": false,
+        "løsesAv": [
+          "SAKSBEHANDLER_NASJONAL"
+        ]
+      },
+      "status": "AVBRUTT",
+      "endringer": [
+        {
+          "status": "OPPRETTET",
+          "tidsstempel": "2025-12-02T14:26:10.336",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        },
+        {
+          "status": "AVBRUTT",
+          "tidsstempel": "2025-12-02T14:27:23.737",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        }
+      ]
+    },
+    {
+      "avklaringsbehovDefinisjon": {
+        "kode": "5014",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
+        "kreverToTrinn": true,
+        "kvalitetssikres": false,
+        "løsesAv": [
+          "SAKSBEHANDLER_NASJONAL"
+        ]
+      },
+      "status": "AVBRUTT",
+      "endringer": [
+        {
+          "status": "OPPRETTET",
+          "tidsstempel": "2025-12-02T14:26:10.381",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        },
+        {
+          "status": "AVBRUTT",
+          "tidsstempel": "2025-12-02T14:27:23.774",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        }
+      ]
+    }
+  ],
+  "hendelsesTidspunkt": "2025-12-02T14:41:47.132383848",
+  "avsluttetBehandling": {
+    "tilkjentYtelse": {
+      "perioder": [
+        {
+          "fraDato": "2025-09-15",
+          "tilDato": "2025-09-28",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-09-29",
+          "tilDato": "2025-10-12",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-10-13",
+          "tilDato": "2025-10-26",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-10-27",
+          "tilDato": "2025-11-09",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-11-10",
+          "tilDato": "2025-11-23",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-11-24",
+          "tilDato": "2025-12-07",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-12-08",
+          "tilDato": "2025-12-21",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-12-22",
+          "tilDato": "2026-01-04",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-01-05",
+          "tilDato": "2026-01-18",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-01-19",
+          "tilDato": "2026-02-01",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-02-02",
+          "tilDato": "2026-02-15",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-02-16",
+          "tilDato": "2026-03-01",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-03-02",
+          "tilDato": "2026-03-15",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-03-16",
+          "tilDato": "2026-03-29",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-03-30",
+          "tilDato": "2026-04-12",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-04-13",
+          "tilDato": "2026-04-26",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-04-27",
+          "tilDato": "2026-05-10",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-05-11",
+          "tilDato": "2026-05-24",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-05-25",
+          "tilDato": "2026-06-07",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-06-08",
+          "tilDato": "2026-06-21",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-06-22",
+          "tilDato": "2026-07-05",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-07-06",
+          "tilDato": "2026-07-19",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-07-20",
+          "tilDato": "2026-08-02",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-08-03",
+          "tilDato": "2026-08-16",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-08-17",
+          "tilDato": "2026-08-30",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-08-31",
+          "tilDato": "2026-09-13",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-09-14",
+          "tilDato": "2026-09-14",
+          "dagsats": 1094.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        }
+      ]
+    },
+    "vilkårsResultat": {
+      "typeBehandling": "Revurdering",
+      "vilkår": [
+        {
+          "vilkårType": "ALDERSVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "BISTANDSVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "IKKE_OPPFYLT",
+              "manuellVurdering": true,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": "IKKE_BEHOV_FOR_OPPFOLGING"
+            }
+          ]
+        },
+        {
+          "vilkårType": "GRUNNLAGET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "LOVVALG",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "MEDLEMSKAP",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "OVERGANGARBEIDVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "IKKE_VURDERT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "OVERGANGUFØREVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2025-09-15",
+              "utfall": "IKKE_VURDERT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            },
+            {
+              "fraDato": "2025-09-16",
+              "tilDato": "2026-05-15",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "VURDERES_FOR_UFØRETRYGD",
+              "avslagsårsak": null
+            },
+            {
+              "fraDato": "2026-05-16",
+              "tilDato": "2026-09-14",
+              "utfall": "IKKE_VURDERT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "SAMORDNING",
+          "perioder": []
+        },
+        {
+          "vilkårType": "SYKDOMSVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "YRKESSKADE_ÅRSAKSSAMMENHENG",
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "SYKEPENGEERSTATNING",
+          "perioder": [
+            {
+              "fraDato": "2025-09-15",
+              "tilDato": "2026-09-14",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        }
+      ]
+    },
+    "beregningsGrunnlag": {
+      "grunnlag11_19dto": null,
+      "grunnlagYrkesskade": {
+        "grunnlaget": 3.3118425098,
+        "inkludererUføre": false,
+        "beregningsgrunnlag": {
+          "grunnlag11_19dto": {
+            "inntekter": {
+              "2021": 326941.0,
+              "2022": 342764.0,
+              "2023": 362918.0
+            },
+            "grunnlaget": 3.1221707,
+            "er6GBegrenset": false,
+            "erGjennomsnitt": false
+          },
+          "grunnlagYrkesskade": null,
+          "grunnlagUføre": null
+        },
+        "terskelverdiForYrkesskade": 70,
+        "andelSomSkyldesYrkesskade": 1.1263230198,
+        "andelYrkesskade": 30,
+        "benyttetAndelForYrkesskade": 30,
+        "andelSomIkkeSkyldesYrkesskade": 2.1855194900,
+        "antattÅrligInntektYrkesskadeTidspunktet": 481000.00,
+        "yrkesskadeTidspunkt": 2025,
+        "grunnlagForBeregningAvYrkesskadeandel": 3.7544100659,
+        "yrkesskadeinntektIG": 3.7544100659,
+        "grunnlagEtterYrkesskadeFordel": 3.3118425098
+      },
+      "grunnlagUføre": null
+    },
+    "diagnoser": {
+      "kodeverk": "ICPC2",
+      "diagnosekode": "L74",
+      "bidiagnoser": [
+        "A09"
+      ]
+    },
+    "rettighetstypePerioder": [
+      {
+        "fraDato": "2025-09-15",
+        "tilDato": "2025-09-15",
+        "rettighetstype": "SYKEPENGEERSTATNING"
+      },
+      {
+        "fraDato": "2025-09-16",
+        "tilDato": "2026-05-15",
+        "rettighetstype": "VURDERES_FOR_UFØRETRYGD"
+      },
+      {
+        "fraDato": "2026-05-16",
+        "tilDato": "2026-09-14",
+        "rettighetstype": "SYKEPENGEERSTATNING"
+      }
+    ],
+    "resultat": "AVBRUTT",
+    "vedtakstidspunkt": "2025-12-02T14:27:26.019"
+  },
+  "identerForSak": [
+    "18458534108",
+    "27452590307"
+  ],
+  "opprettetAv": null,
+  "nyeMeldekort": [],
+  "søknadIder": [
+    {
+      "identifikator": "1757932687980"
+    }
+  ]
+}
