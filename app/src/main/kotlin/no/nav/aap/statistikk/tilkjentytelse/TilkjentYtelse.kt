@@ -9,14 +9,19 @@ data class TilkjentYtelsePeriode(
     val tilDato: LocalDate,
     val dagsats: Double,
     val gradering: Double,
-    val redusertDagsats: Double = dagsats * gradering / 100.0,
+    val redusertDagsats: Double,
     val antallBarn: Int = 0,
-    val barnetilleggSats: Double = 37.0,
-    val barnetillegg: Double = 0.0
+    val barnetilleggSats: Double,
+    val barnetillegg: Double,
+    val utbetalingsdato: LocalDate
 )
 
 data class TilkjentYtelse(
     val saksnummer: Saksnummer,
     val behandlingsReferanse: UUID,
     val perioder: List<TilkjentYtelsePeriode>
-)
+) {
+    fun begrensPerioderTil(vedtaksdato: LocalDate): TilkjentYtelse {
+        return this.copy(perioder = perioder.filter { it.utbetalingsdato <= vedtaksdato })
+    }
+}

@@ -32,7 +32,8 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                     redusertDagsats = 1337.420 * 90.0 / 100.0,
                     antallBarn = 1,
                     barnetilleggSats = 37.0,
-                    barnetillegg = 37.0
+                    barnetillegg = 37.0,
+                    utbetalingsdato = LocalDate.now().minusDays(1)
                 ),
                 TilkjentYtelsePeriodeDTO(
                     fraDato = LocalDate.now().minusYears(3),
@@ -42,7 +43,8 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                     redusertDagsats = 1337.420 * 45.0 / 100.0,
                     antallBarn = 1,
                     barnetilleggSats = 37.0,
-                    barnetillegg = 37.0
+                    barnetillegg = 37.0,
+                    utbetalingsdato = LocalDate.now().minusYears(2)
                 )
             )
         ),

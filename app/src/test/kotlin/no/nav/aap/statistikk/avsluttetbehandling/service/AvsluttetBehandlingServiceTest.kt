@@ -69,12 +69,22 @@ class AvsluttetBehandlingServiceTest {
                         tilDato = datoNå.plusDays(1),
                         dagsats = 1337.420,
                         gradering = 90.0,
+                        redusertDagsats = 1337.420 * 0.9,
+                        utbetalingsdato = datoNå.minusDays(1),
+                        antallBarn = 0,
+                        barnetilleggSats = 37.0,
+                        barnetillegg = 0.0,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = datoNå.minusYears(3),
                         tilDato = datoNå.minusYears(2),
                         dagsats = 1234.0,
                         gradering = 45.0,
+                        redusertDagsats = 1234.0 * 0.45,
+                        utbetalingsdato = datoNå.minusYears(2),
+                        antallBarn = 0,
+                        barnetilleggSats = 37.0,
+                        barnetillegg = 0.0,
                     )
                 )
             ),
@@ -126,7 +136,8 @@ class AvsluttetBehandlingServiceTest {
                     datoNå.minusYears(2),
                     rettighetstype = RettighetsType.BISTANDSBEHOV
                 )
-            )
+            ),
+            vedtakstidspunkt = opprettetTidspunkt
         )
 
         val meterRegistry = SimpleMeterRegistry()
@@ -196,7 +207,17 @@ class AvsluttetBehandlingServiceTest {
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
         assertThat(uthentetTilkjentYtelse).isNotNull()
         assertThat(uthentetTilkjentYtelse.perioder).hasSize(2)
-        assertThat(uthentetTilkjentYtelse.perioder).isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
+        assertThat(uthentetTilkjentYtelse.perioder).usingRecursiveComparison()
+            .withComparatorForType(
+                { a, b ->
+                    val diff = b.toDouble() - a.toDouble()
+                    if (abs(diff) < 0.00001) 0 else {
+                        if (diff > 0) 1 else -1
+                    }
+                },
+                Double::class.java
+            )
+            .isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
         assertThat(counter.count()).isEqualTo(1.0)
     }
 
@@ -233,6 +254,10 @@ class AvsluttetBehandlingServiceTest {
                         dagsats = 1234.0,
                         gradering = 45.0,
                         redusertDagsats = 1234.0 * 0.45,
+                        utbetalingsdato = nå.minusYears(2),
+                        antallBarn = 0,
+                        barnetilleggSats = 37.0,
+                        barnetillegg = 0.0,
                     )
                 )
             ),
@@ -285,7 +310,8 @@ class AvsluttetBehandlingServiceTest {
                     nå.minusYears(2),
                     rettighetstype = RettighetsType.BISTANDSBEHOV
                 )
-            )
+            ),
+            vedtakstidspunkt = LocalDateTime.now()
         )
 
         dataSource.transaction {

@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.lang.Double
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
@@ -56,6 +57,10 @@ class TilkjentYtelseRepositoryTest {
                         dagsats = 1337.420,
                         gradering = 90.0,
                         redusertDagsats = 1337.420 * 0.9,
+                        utbetalingsdato = LocalDate.now().minusDays(1),
+                        antallBarn = 0,
+                        barnetilleggSats = 37.0,
+                        barnetillegg = 0.0,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = LocalDate.now().minusYears(3),
@@ -64,8 +69,9 @@ class TilkjentYtelseRepositoryTest {
                         gradering = 45.0,
                         redusertDagsats = 1234.0 * 0.45,
                         antallBarn = 1,
+                        barnetillegg = 37.0,
                         barnetilleggSats = 37.0,
-                        barnetillegg = 37.0
+                        utbetalingsdato = LocalDate.now().minusDays(1),
                     )
                 )
             )
@@ -92,7 +98,7 @@ class TilkjentYtelseRepositoryTest {
             .usingRecursiveComparison()
             .withEqualsForType(
                 { a, b -> abs(a.toDouble() - b.toDouble()) < 0.00001 },
-                java.lang.Double::class.java
+                Double::class.java
             )
             .isEqualTo(tilkjentYtelse.perioder)
 

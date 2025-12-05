@@ -500,11 +500,9 @@ class IntegrationTest {
                 },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(tilkjent!!).hasSize(27)
+            assertThat(tilkjent!!).hasSize(1)
             val tilkjentYtelse = tilkjent.first()
             assertThat(tilkjentYtelse.dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[0].dagsats)
-            assertThat(tilkjent[1].dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[1].dagsats)
-
 
             val sakRespons = ventPåSvar(
                 {
@@ -519,7 +517,7 @@ class IntegrationTest {
             assertThat(sakRespons).hasSize(3)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
-                LocalDateTime.parse("2025-09-24T13:53:01")
+                LocalDateTime.parse("2025-10-06T13:53:01")
             )
         }
     }

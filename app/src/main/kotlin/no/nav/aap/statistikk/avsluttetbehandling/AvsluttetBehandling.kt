@@ -5,6 +5,7 @@ import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk.avsluttetbehandling")
@@ -16,7 +17,8 @@ data class AvsluttetBehandling(
     val beregningsgrunnlag: IBeregningsGrunnlag?,
     val diagnoser: Diagnoser?,
     val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList(),
-    val behandlingResultat: ResultatKode?
+    val behandlingResultat: ResultatKode?,
+    val vedtakstidspunkt: LocalDateTime?
 ) {
     init {
         if (behandlingResultat == null) {
