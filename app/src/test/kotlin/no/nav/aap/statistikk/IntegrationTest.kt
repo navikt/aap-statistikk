@@ -517,7 +517,7 @@ class IntegrationTest {
             assertThat(sakRespons).hasSize(3)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
-                LocalDateTime.parse("2025-10-06T13:53:01")
+                LocalDateTime.parse("2025-10-06T13:56:38")
             )
         }
     }
