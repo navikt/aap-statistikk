@@ -63,7 +63,12 @@ class AvsluttetBehandlingService(
 
         tilkjentYtelseRepository.lagreTilkjentYtelse(
             TilkjentYtelseEntity.fraDomene(
-                avsluttetBehandling.tilkjentYtelse
+                avsluttetBehandling.vedtakstidspunkt?.let {
+                    avsluttetBehandling.tilkjentYtelse.begrensPerioderTil(
+                        it.toLocalDate()
+                    )
+                }
+                    ?: avsluttetBehandling.tilkjentYtelse
             )
         )
 

@@ -34,8 +34,8 @@ class TilkjentYtelseRepository(
 
         val sql =
             """INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID,
-                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         tilkjentYtelse.perioder.forEach { periode ->
             dbConnection.execute(sql) {
                 setParams {
@@ -48,6 +48,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     setInt(7, periode.antallBarn)
                     setDouble(8, periode.barnetilleggSats)
                     setDouble(9, periode.barnetillegg)
+                    setLocalDate(10, periode.utbetalingsdato)
                 }
             }
         }
@@ -134,6 +135,8 @@ WHERE br.referanse = ?"""
         val antallBarn = row.getInt("antall_barn")
         val barnetilleggSats = row.getDouble("barnetillegg_sats")
         val barnetillegg = row.getDouble("barnetillegg")
+        // Fallback for gammel data.
+        val utbetalingsdato = row.getLocalDateOrNull("utbetalingsdato") ?: tilDato.plusDays(1)
 
         Triple(
             TilkjentYtelsePeriode(
@@ -145,6 +148,7 @@ WHERE br.referanse = ?"""
                 antallBarn = antallBarn,
                 barnetilleggSats = barnetilleggSats,
                 barnetillegg = barnetillegg,
+                utbetalingsdato = utbetalingsdato
             ), row.getUUID("referanse"), row.getString("saksnummer")
         )
     }

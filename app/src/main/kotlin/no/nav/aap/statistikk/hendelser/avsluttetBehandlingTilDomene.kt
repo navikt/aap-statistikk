@@ -25,6 +25,7 @@ fun AvsluttetBehandlingDTO.tilDomene(
         diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
         behandlingsReferanse = behandlingsReferanse,
         behandlingResultat = resultat.resultatTilDomene(),
+        vedtakstidspunkt = this.vedtakstidspunkt,
         rettighetstypeperioder = this.rettighetstypePerioder.map {
             RettighetstypePeriode(
                 it.fraDato,
@@ -75,7 +76,8 @@ fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
         gradering = gradering,
         antallBarn = antallBarn,
         barnetilleggSats = barnetilleggSats,
-        barnetillegg = barnetillegg
+        barnetillegg = barnetillegg,
+        utbetalingsdato = this.utbetalingsdato
     )
 }
 
