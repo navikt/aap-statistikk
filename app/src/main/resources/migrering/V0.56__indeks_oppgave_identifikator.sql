@@ -1,0 +1,1 @@
+CREATE INDEX IDX_OPPGAVE_IDENTIFIKATOR ON oppgave_hendelser (identifikator);
