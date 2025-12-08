@@ -41,7 +41,8 @@ enum class Vilkårtype {
     LOVVALG,
     SAMORDNING,
     OVERGANGARBEIDVILKÅRET,
-    OVERGANGUFØREVILKÅRET
+    OVERGANGUFØREVILKÅRET,
+    STRAFFEGJENNOMFØRING,
 }
 
 enum class Utfall {
