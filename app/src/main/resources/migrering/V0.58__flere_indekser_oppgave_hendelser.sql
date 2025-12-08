@@ -1,0 +1,3 @@
+CREATE INDEX IDX_OPPGAVE_HENDELSER_REFERANSE ON oppgave_hendelser (behandling_referanse);
+
+CREATE INDEX IDX_OPPGAVE_HENDELSER_AVKLARINGSBEHOV_KODE ON oppgave_hendelser (avklaringsbehov_kode);
