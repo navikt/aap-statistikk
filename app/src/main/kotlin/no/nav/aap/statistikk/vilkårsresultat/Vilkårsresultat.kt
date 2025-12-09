@@ -43,6 +43,8 @@ enum class Vilkårtype {
     OVERGANGARBEIDVILKÅRET,
     OVERGANGUFØREVILKÅRET,
     STRAFFEGJENNOMFØRING,
+    AKTIVITETSPLIKT,
+    OPPHOLDSKRAV,
 }
 
 enum class Utfall {
