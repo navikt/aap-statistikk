@@ -57,5 +57,7 @@ private fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.tilDomene
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.OVERGANGARBEIDVILKÅRET -> Vilkårtype.OVERGANGARBEIDVILKÅRET
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.OVERGANGUFØREVILKÅRET -> Vilkårtype.OVERGANGUFØREVILKÅRET
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.STRAFFEGJENNOMFØRING -> Vilkårtype.STRAFFEGJENNOMFØRING
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.AKTIVITETSPLIKT -> Vilkårtype.AKTIVITETSPLIKT
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.OPPHOLDSKRAV -> Vilkårtype.OPPHOLDSKRAV
     }
 }
