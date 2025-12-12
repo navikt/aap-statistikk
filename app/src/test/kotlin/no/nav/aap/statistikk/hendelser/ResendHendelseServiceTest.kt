@@ -32,7 +32,7 @@ class ResendHendelseServiceTest {
 
         val behandling = behandlingRepository.hent(hendelse.behandlingReferanse)!!
 
-        assertThat(behandling.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(behandling.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
     }
 
 }

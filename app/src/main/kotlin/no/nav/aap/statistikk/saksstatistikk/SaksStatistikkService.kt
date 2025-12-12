@@ -64,6 +64,7 @@ class SaksStatistikkService(
 
     fun lagreBQBehandling(bqSak: BQBehandling) {
         val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
+
         if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
             // Hvis vi ikke allerede har en inngangshendelse (når behandlingen ble
             // opprettet), konstruer en.
@@ -180,7 +181,8 @@ class SaksStatistikkService(
             sakstatistikkRepository.hentAlleHendelserPåBehandling(behandling.referanse)
 
         val alleHendelser =
-            (1..<behandling.hendelser.size + 1).map { behandling.hendelser.subList(0, it) }
+            (1..<behandling.hendelser.size + 1)
+                .map { behandling.hendelser.subList(0, it) }
                 .map { hendelser ->
                     bqBehandlingForBehandling(
                         behandling = behandling.copy(hendelser = hendelser),
@@ -317,7 +319,7 @@ class SaksStatistikkService(
     private fun regnUtBehandlingResultat(
         behandling: Behandling
     ): String? {
-        return when (behandling.status) {
+        return when (behandling.behandlingStatus()) {
             BehandlingStatus.OPPRETTET,
             BehandlingStatus.UTREDES -> null
 
@@ -372,7 +374,6 @@ class SaksStatistikkService(
         val returStatus = hendelse.avklaringsbehovStatus
             ?.takeIf { it.returnert() }
             ?.let { "_${it.name.uppercase()}" }.orEmpty()
-
 
         return when (hendelse.status) {
             BehandlingStatus.OPPRETTET -> "OPPRETTET"

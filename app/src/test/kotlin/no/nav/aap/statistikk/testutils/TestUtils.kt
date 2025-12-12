@@ -458,7 +458,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
                 hendelsesTidspunkt = LocalDateTime.now(),
-                status = behandling.status,
+                status = behandling.behandlingStatus(),
                 avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
                 versjon = behandling.versjon,
                 mottattTid = behandling.mottattTid,
@@ -477,7 +477,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
                 hendelsesTidspunkt = LocalDateTime.now(),
-                status = behandling.status,
+                status = behandling.behandlingStatus(),
                 avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
                 versjon = behandling.versjon,
                 mottattTid = behandling.mottattTid,
@@ -535,11 +535,11 @@ class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
     }
 
     override fun commit() {
-        TODO()
+
     }
 
     override fun start() {
-        TODO("Not yet implemented")
+
     }
 }
 

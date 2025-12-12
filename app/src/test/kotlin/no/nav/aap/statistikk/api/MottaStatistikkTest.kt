@@ -6,7 +6,13 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.AvsluttetBehandlingDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BeregningsgrunnlagDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Diagnoser
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ResultatKode
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TilkjentYtelseDTO
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsResultatDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
@@ -18,6 +24,7 @@ import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.*
+import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
@@ -214,8 +221,101 @@ class MottaStatistikkTest {
                         .hentAlleHendelserPåBehandling(behandling.referanse)
                 )
             }
-            assertThat(behandling.hendelser.sortedBy { it.hendelsesTidspunkt }).hasSize(4)
-            assertThat(bqBehandlinger).hasSize(5)
+            assertThat(behandling.hendelser.sortedBy { it.hendelsesTidspunkt }).hasSize(5)
+            assertThat(bqBehandlinger).hasSize(6)
+        }
+    }
+
+    private val meldekorthendelse = StoppetBehandling(
+        saksnummer = "4LFK2S0",
+        behandlingReferanse = UUID.fromString("96175156-0950-475a-8de0-41a25f4c0cec"),
+        behandlingStatus = Status.AVSLUTTET,
+        behandlingType = TypeBehandling.Revurdering,
+        ident = "14890097570",
+        avklaringsbehov = emptyList(),
+        behandlingOpprettetTidspunkt = LocalDateTime.parse("2025-12-08T08:53:12.000"),
+        versjon = "UKJENT",
+        mottattTid = LocalDateTime.parse("2025-12-08T08:53:12.000"),
+        sakStatus = SakStatus.UTREDES,
+        hendelsesTidspunkt = LocalDateTime.parse("2025-12-08T08:53:15.030000"),
+        vurderingsbehov = listOf(Vurderingsbehov.MELDEKORT),
+        avsluttetBehandling = AvsluttetBehandlingDTO(
+            tilkjentYtelse = TilkjentYtelseDTO(emptyList()),
+            vilkårsResultat = VilkårsResultatDTO(TypeBehandling.Revurdering, emptyList()),
+            beregningsGrunnlag = null,
+            diagnoser = Diagnoser("SBC", "BC", emptyList()),
+            rettighetstypePerioder = emptyList(),
+            resultat = null,
+            vedtakstidspunkt = LocalDateTime.parse("2025-12-08T08:53:14.437000")
+        )
+    )
+
+    @Test
+    fun `resende meldekort-behandlinger`(
+        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
+    ) {
+        val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+        val testJobber = konstruerTestJobber()
+
+
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(LagreOppgaveJobb())
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
+        val lagreAvklaringsbehovHendelseJobb =
+            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
+
+        val motor = konstruerMotor(
+            dataSource,
+            testJobber.motorJobbAppender,
+            FakeBQYtelseRepository(),
+            testJobber.resendSakstatistikkJobb,
+            lagreAvklaringsbehovHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            testJobber.lagreSakinfoTilBigQueryJobb
+        )
+
+        testKlient(
+            transactionExecutor,
+            motor,
+            azureConfig,
+            ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
+            lagreOppgaveHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            lagreAvklaringsbehovHendelseJobb,
+            testJobber.motorJobbAppender,
+        ) { url, client ->
+
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/stoppetBehandling"), PostRequest(meldekorthendelse)
+            )
+
+            TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
+
+            client.post<StoppetBehandling, Any>(
+                URI.create("$url/oppdatertBehandling"),
+                PostRequest(
+                    meldekorthendelse
+                )
+            )
+
+
+            TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
+
+            val bqBehandlinger = dataSource.transaction {
+                val behandling =
+                    BehandlingRepository(it).hent(meldekorthendelse.behandlingReferanse)!!
+
+                it.provider().provide<SakstatistikkRepository>()
+                    .hentAlleHendelserPåBehandling(behandling.referanse)
+
+            }
+            bqBehandlinger.forEach {
+                println(it)
+            }
+            assertThat(bqBehandlinger).hasSize(4)
+            assertThat(bqBehandlinger.map { it.behandlingStatus }).containsSubsequence(
+                "OPPRETTET",
+                "AVSLUTTET"
+            )
         }
     }
 
@@ -288,7 +388,7 @@ class MottaStatistikkTest {
             hendelse.behandlingOpprettetTidspunkt
         )
         assertThat(uthentetBehandling.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
-        assertThat(uthentetBehandling.status).isEqualTo(hendelse.behandlingStatus.tilDomene())
+        assertThat(uthentetBehandling.behandlingStatus()).isEqualTo(hendelse.behandlingStatus.tilDomene())
 
         assertThat(avsluttetBehandlingCounter.count()).isEqualTo(0.0)
         assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(1.0)
@@ -308,7 +408,7 @@ class MottaStatistikkTest {
         val lagreOppgaveJobb = LagreOppgaveJobb()
         return motor(
             dataSource = dataSource,
-            gatewayProvider = defaultGatewayProvider {  },
+            gatewayProvider = defaultGatewayProvider { },
             jobber = listOf(
                 LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository),
                 lagreOppgaveJobb,
@@ -361,7 +461,7 @@ class MottaStatistikkTest {
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
         val motor = motor(
             dataSource = dataSource,
-            gatewayProvider = defaultGatewayProvider {  },
+            gatewayProvider = defaultGatewayProvider { },
             jobber = listOf(
                 resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,

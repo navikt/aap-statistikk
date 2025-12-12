@@ -163,7 +163,7 @@ class IntegrationTest {
                 { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
                 { it != null })
 
-            assertThat(behandling!!.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+            assertThat(behandling!!.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         }
 
         // Sekvensnummer økes med 1 med ny info på sak

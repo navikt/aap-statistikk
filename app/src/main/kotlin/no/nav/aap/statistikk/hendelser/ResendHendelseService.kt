@@ -46,8 +46,8 @@ class ResendHendelseService(
         val behandlingMedHistorikk =
             ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
-        check(behandling.status == behandlingMedHistorikk.status)
-        { "Behandlingstatus er ikke lik behandling med historikk-status. Behandlingstatus: ${behandling.status}, behandling med historikk-status: ${behandlingMedHistorikk.status}. Saksnummer: ${hendelse.saksnummer}. Behandling: ${hendelse.behandlingReferanse}" }
+        check(behandling.behandlingStatus() == behandlingMedHistorikk.behandlingStatus())
+        { "Behandlingstatus er ikke lik behandling med historikk-status. Behandlingstatus: ${behandling.behandlingStatus()}, behandling med historikk-status: ${behandlingMedHistorikk.behandlingStatus()}. Saksnummer: ${hendelse.saksnummer}. Behandling: ${hendelse.behandlingReferanse}" }
 
         val behandlingId =
             checkNotNull(behandlingService.hentEllerLagreBehandling(hendelse, sak).id)
