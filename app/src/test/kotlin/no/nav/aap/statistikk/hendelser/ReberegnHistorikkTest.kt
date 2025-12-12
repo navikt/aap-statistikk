@@ -49,7 +49,6 @@ class ReberegnHistorikkTest {
 
         val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
-        assertThat(res.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.gjeldendeAvklaringsBehov).isNull()
     }
@@ -91,9 +90,9 @@ class ReberegnHistorikkTest {
 
         val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
-        assertThat(res.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
-        assertThat(res.hendelser).hasSize(1)
+        assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(res.hendelser).hasSize(2)
 
         assertThat(res.hendelser.last().status).isEqualTo(BehandlingStatus.AVSLUTTET)
     }
@@ -134,11 +133,61 @@ class ReberegnHistorikkTest {
 
         val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
-        assertThat(res.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
-        assertThat(res.hendelser).hasSize(6)
+        assertThat(res.hendelser).hasSize(7)
 
-        assertThat(res.hendelser.last().status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        val førsteHendelse = res.hendelser.first()
+        val sisteHendelse = res.hendelser.last()
+        assertThat(førsteHendelse.status).isEqualTo(BehandlingStatus.OPPRETTET)
+        assertThat(sisteHendelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
 
+        assertThat(førsteHendelse.hendelsesTidspunkt).isNotEqualTo(sisteHendelse.hendelsesTidspunkt)
+    }
+
+    @Test
+    fun `meldekort-behandling`() {
+        val hendelse =
+            hendelseFraFil("avklaringsbehovhendelser/meldekort_behandling.json")
+        val behandling = Behandling(
+            referanse = hendelse.behandlingReferanse,
+            sak = Sak(
+                saksnummer = hendelse.saksnummer.let(::Saksnummer),
+                person = Person(ident = hendelse.ident),
+                sakStatus = hendelse.sakStatus.tilDomene(),
+                sistOppdatert = hendelse.hendelsesTidspunkt,
+            ),
+            typeBehandling = hendelse.behandlingType.tilDomene(),
+            status = hendelse.behandlingStatus.tilDomene(),
+            opprettetTid = hendelse.behandlingOpprettetTidspunkt,
+            mottattTid = hendelse.mottattTid,
+            vedtakstidspunkt = null,
+            ansvarligBeslutter = null,
+            versjon = Versjon(UUID.randomUUID().toString()),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            sisteSaksbehandler = null,
+            relaterteIdenter = listOf(),
+            relatertBehandlingId = null,
+            gjeldendeAvklaringsBehov = null,
+            gjeldendeAvklaringsbehovStatus = null,
+            venteÅrsak = null,
+            returÅrsak = null,
+            gjeldendeStegGruppe = null,
+            årsaker = listOf(),
+            resultat = null,
+            oppdatertTidspunkt = null,
+            hendelser = listOf()
+        )
+
+        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+
+        assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(res.hendelser).hasSize(2)
+
+        val førsteHendelse = res.hendelser.first()
+        val sisteHendelse = res.hendelser.last()
+        assertThat(førsteHendelse.status).isEqualTo(BehandlingStatus.OPPRETTET)
+        assertThat(sisteHendelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+
+        assertThat(førsteHendelse.hendelsesTidspunkt).isNotEqualTo(sisteHendelse.hendelsesTidspunkt)
     }
 }

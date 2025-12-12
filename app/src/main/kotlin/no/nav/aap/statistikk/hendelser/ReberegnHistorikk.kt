@@ -12,15 +12,32 @@ class ReberegnHistorikk {
         dto: StoppetBehandling, behandling: Behandling
     ): Behandling {
         val avklaringsbehov = dto.avklaringsbehov
+        val inngangshendelse = BehandlingHendelse(
+            tidspunkt = dto.mottattTid,
+            hendelsesTidspunkt = dto.mottattTid,
+            avklaringsBehov = null,
+            steggruppe = null,
+            avklaringsbehovStatus = null,
+            venteÅrsak = null,
+            returÅrsak = null,
+            saksbehandler = null,
+            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+            versjon = dto.versjon.let(::Versjon),
+            status = BehandlingStatus.OPPRETTET,
+            ansvarligBeslutter = null,
+            vedtakstidspunkt = null,
+            mottattTid = dto.mottattTid,
+            søknadsformat = dto.soknadsFormat.tilDomene(),
+        )
 
         if (avklaringsbehov.isEmpty() && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
             return behandling
+                .leggTilHendelse(inngangshendelse)
                 .leggTilHendelse(
                     BehandlingHendelse(
                         tidspunkt = dto.tidspunktSisteEndring,
                         hendelsesTidspunkt = dto.avsluttetBehandling?.vedtakstidspunkt
-                            ?: dto.tidspunktSisteEndring
-                            ?: dto.behandlingOpprettetTidspunkt,
+                            ?: dto.tidspunktSisteEndring ?: dto.behandlingOpprettetTidspunkt,
                         avklaringsBehov = null,
                         steggruppe = null,
                         avklaringsbehovStatus = null,
@@ -50,7 +67,18 @@ class ReberegnHistorikk {
             it.utledAnsvarligBeslutter() == null && it.sisteAvklaringsbehovStatus() == null
         }
 
-        return avklaringsbehovHistorikk.fold(behandling) { acc, curr ->
+        val finnesInngangshendelse =
+            behandling.hendelsesHistorikk()
+                .any { it.behandlingStatus() == BehandlingStatus.OPPRETTET }
+
+        val behandlingMedEllerUtenInngangshendelse =
+            if (finnesInngangshendelse) behandling else behandling.copy(
+                hendelser = listOf(
+                    inngangshendelse
+                ) + behandling.hendelser
+            )
+
+        return avklaringsbehovHistorikk.fold(behandlingMedEllerUtenInngangshendelse) { acc, curr ->
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
@@ -65,14 +93,14 @@ class ReberegnHistorikk {
                     versjon = dto.versjon.let(::Versjon),
                     status = curr.utledBehandlingStatus(),
                     ansvarligBeslutter = curr.utledAnsvarligBeslutter(),
-                    vedtakstidspunkt = if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET) behandling.vedtakstidspunkt
+                    vedtakstidspunkt = if (behandlingMedEllerUtenInngangshendelse.behandlingStatus() == BehandlingStatus.AVSLUTTET) behandlingMedEllerUtenInngangshendelse.vedtakstidspunkt
                         ?: curr.utledVedtakTid() else null,
                     mottattTid = dto.mottattTid,
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                 )
             )
         }.let {
-            if (it.behandlingStatus() != BehandlingStatus.AVSLUTTET && behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET) {
+            if (it.behandlingStatus() != BehandlingStatus.AVSLUTTET && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
                 it.leggTilHendelse(
                     BehandlingHendelse(
                         tidspunkt = null, // Vil etterfylles
@@ -87,10 +115,10 @@ class ReberegnHistorikk {
                         saksbehandler = null,
                         resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
                         versjon = dto.versjon.let(::Versjon),
-                        status = behandling.behandlingStatus(),
-                        ansvarligBeslutter = behandling.hendelsesHistorikk()
+                        status = BehandlingStatus.AVSLUTTET,
+                        ansvarligBeslutter = behandlingMedEllerUtenInngangshendelse.hendelsesHistorikk()
                             .lastOrNull()?.ansvarligBeslutter,
-                        vedtakstidspunkt = behandling.vedtakstidspunkt,
+                        vedtakstidspunkt = behandlingMedEllerUtenInngangshendelse.vedtakstidspunkt,
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                     )

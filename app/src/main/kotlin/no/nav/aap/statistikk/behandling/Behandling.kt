@@ -27,7 +27,7 @@ data class Behandling(
     val referanse: UUID,
     val sak: Sak,
     val typeBehandling: TypeBehandling,
-    val status: BehandlingStatus,
+    private val status: BehandlingStatus,
     val opprettetTid: LocalDateTime,
     val mottattTid: LocalDateTime,
     val vedtakstidspunkt: LocalDateTime? = null,

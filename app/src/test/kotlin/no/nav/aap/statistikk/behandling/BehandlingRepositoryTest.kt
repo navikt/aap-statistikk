@@ -87,7 +87,7 @@ class BehandlingRepositoryTest {
         val uthentet = dataSource.transaction { BehandlingRepository(it).hent(referanse) }
 
         uthentet!!
-        assertThat(uthentet.status).isEqualTo(BehandlingStatus.UTREDES)
+        assertThat(uthentet.behandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
         assertThat(uthentet.sak.sakStatus).isEqualTo(SakStatus.UTREDES)
         assertThat(uthentet.relaterteIdenter).containsExactlyInAnyOrder("123", "456", "123456789")
         assertThat(uthentet.gjeldendeAvklaringsBehov).isEqualTo("0559")
