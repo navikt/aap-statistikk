@@ -26,7 +26,7 @@ behandlingsflytKontrakt = { module = "no.nav.aap.behandlingsflyt:kontrakt", vers
 utbetalKontrakt = { module = "no.nav.aap.utbetal:api-kontrakt", version.ref = "utbetaling" }
 oppgaveKontrakt = { module = "no.nav.aap.oppgave:api-kontrakt", version.ref = "oppgave" }
 postmottakKontrakt = { module = "no.nav.aap.postmottak:kontrakt", version.ref = "postmottak" }
-logback = { module = "ch.qos.logback:logback-classic", version = "1.5.21" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.5.22" }
 logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
 flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway"}
 flywayPostgres = {module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway"}
