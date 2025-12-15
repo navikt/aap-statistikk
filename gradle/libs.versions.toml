@@ -1,8 +1,8 @@
 [versions]
 ktor = "3.3.3"
-komponenter = "1.0.459"
-tilgang = "1.0.169"
-behandlingsflyt = "0.0.506"
+komponenter = "1.0.461"
+tilgang = "1.0.170"
+behandlingsflyt = "0.0.508"
 oppgave = "0.0.132"
 utbetaling = "0.0.68"
 postmottak = "6.0.2"
