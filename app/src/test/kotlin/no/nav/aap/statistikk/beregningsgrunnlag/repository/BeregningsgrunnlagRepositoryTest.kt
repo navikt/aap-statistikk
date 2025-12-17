@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -120,6 +121,10 @@ class BeregningsgrunnlagRepositoryTest {
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 uføregrad = 50,
+                uføregrader = mapOf(
+                    LocalDate.of(2020, 1, 1) to 50,
+                    LocalDate.of(2021, 1, 1) to 60
+                ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
@@ -182,6 +187,10 @@ class BeregningsgrunnlagRepositoryTest {
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 uføregrad = 50,
+                uføregrader = mapOf(
+                    LocalDate.of(2020, 1, 1) to 50,
+                    LocalDate.of(2021, 1, 1) to 60
+                ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
@@ -238,6 +247,10 @@ class BeregningsgrunnlagRepositoryTest {
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 uføregrad = 50,
+                uføregrader = mapOf(
+                    LocalDate.of(2020, 1, 1) to 50,
+                    LocalDate.of(2021, 1, 1) to 60
+                ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
@@ -268,6 +281,10 @@ class BeregningsgrunnlagRepositoryTest {
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
                 uføregrad = 50,
+                uføregrader = mapOf(
+                    LocalDate.of(2020, 1, 1) to 50,
+                    LocalDate.of(2021, 1, 1) to 60
+                ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
@@ -387,6 +404,11 @@ fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre {
         grunnlag = (10000..50000).random().toDouble(),
         grunnlag11_19 = genererTilfeldig1119Grunnlag(),
         uføregrad = (0..100).random(),
+        uføregrader = mapOf(
+            LocalDate.of(2015, 1, 1) to (0..100).random(),
+            LocalDate.of(2022, 1, 1) to (0..100).random(),
+            LocalDate.of(2023, 1, 1) to (0..100).random()
+        ),
         type = UføreType.entries.toTypedArray().random(),
         uføreInntekterFraForegåendeÅr = mapOf(
             2018 to (20000..60000).random().toDouble(),

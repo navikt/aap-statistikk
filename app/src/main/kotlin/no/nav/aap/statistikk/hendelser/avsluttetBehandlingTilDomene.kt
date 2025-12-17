@@ -114,6 +114,7 @@ fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.Grunnla
         type = grunnlagUføreDTO.type.tilDomene(),
         grunnlag11_19 = grunnlagUføreDTO.grunnlag.tilDomene(),
         uføregrad = grunnlagUføreDTO.uføregrad,
+        uføregrader = grunnlagUføreDTO.uføregrader.associate { it.virkningstidspunkt to it.grad },
         uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføreDTO.uføreYtterligereNedsattArbeidsevneÅr,
         uføreInntekterFraForegåendeÅr = grunnlagUføreDTO.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() }
     )
@@ -167,6 +168,7 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
             uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() },
             uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
             uføregrad = grunnlagUføre.uføregrad,
+            uføregrader = grunnlagUføre.uføregrader.associate { it.virkningstidspunkt to it.grad },
             grunnlag = grunnlagUføre.grunnlaget.toDouble(),
             type = grunnlagUføre.type.tilDomene()
         )

@@ -35,9 +35,11 @@ import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.motor
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
@@ -46,6 +48,8 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
+import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
+import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -134,6 +138,86 @@ fun <E> testKlient(
 
     return res
 }
+
+data class TestJobberSetup(
+    val lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
+    val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
+    val resendSakstatistikkJobb: ResendSakstatistikkJobb,
+    val motorJobbAppender: MotorJobbAppender,
+)
+
+fun konstruerTestJobber(
+    bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository()
+): TestJobberSetup {
+    val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
+    val lagreAvsluttetBehandlingTilBigQueryJobb =
+        LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
+    val resendSakstatistikkJobb = ResendSakstatistikkJobb()
+    val motorJobbAppender = MotorJobbAppender(
+        lagreSakinfoTilBigQueryJobb,
+        lagreAvsluttetBehandlingTilBigQueryJobb,
+        resendSakstatistikkJobb,
+    )
+    return TestJobberSetup(
+        lagreSakinfoTilBigQueryJobb,
+        lagreAvsluttetBehandlingTilBigQueryJobb,
+        resendSakstatistikkJobb,
+        motorJobbAppender
+    )
+}
+
+fun konstruerMotor(
+    dataSource: DataSource,
+    jobbAppender: MotorJobbAppender,
+    bqYtelseRepository: IBQYtelsesstatistikkRepository,
+    resendSakstatistikkJobb: ResendSakstatistikkJobb,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
+): Motor {
+    val lagreOppgaveJobb = no.nav.aap.statistikk.oppgave.LagreOppgaveJobb()
+    return motor(
+        dataSource = dataSource,
+        gatewayProvider = defaultGatewayProvider { },
+        jobber = listOf(
+            LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository),
+            lagreOppgaveJobb,
+            resendSakstatistikkJobb,
+            lagreAvklaringsbehovHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb(lagreOppgaveJobb),
+            lagreSakinfoTilBigQueryJobb,
+            LagreStoppetHendelseJobb(jobbAppender)
+        )
+    )
+}
+
+@JvmOverloads
+fun opprettTestStoppetBehandling(
+    behandlingReferanse: UUID,
+    behandlingOpprettetTidspunkt: LocalDateTime,
+    hendelsesTidspunkt: LocalDateTime,
+    mottattTid: LocalDateTime,
+    saksnummer: String = "123",
+    behandlingStatus: no.nav.aap.behandlingsflyt.kontrakt.behandling.Status = no.nav.aap.behandlingsflyt.kontrakt.behandling.Status.OPPRETTET,
+    behandlingType: no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling = no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling,
+    ident: String = "0",
+    avklaringsbehov: List<no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto> = listOf()
+): no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling =
+    no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling(
+        saksnummer = saksnummer,
+        behandlingStatus = behandlingStatus,
+        behandlingType = behandlingType,
+        ident = ident,
+        behandlingReferanse = behandlingReferanse,
+        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+        avklaringsbehov = avklaringsbehov,
+        versjon = "UKJENT",
+        mottattTid = mottattTid,
+        sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
+        hendelsesTidspunkt = hendelsesTidspunkt,
+        vurderingsbehov = listOf(no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov.SØKNAD)
+    )
 
 fun <E> testKlientNoInjection(
     dbConfig: DbConfig,
