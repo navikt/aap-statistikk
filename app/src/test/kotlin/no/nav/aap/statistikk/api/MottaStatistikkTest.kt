@@ -6,28 +6,18 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.AvsluttetBehandlingDTO
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.BeregningsgrunnlagDTO
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Diagnoser
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ResultatKode
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TilkjentYtelseDTO
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsResultatDTO
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.motor.Motor
 import no.nav.aap.motor.testutil.TestUtil
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.*
-import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
@@ -396,32 +386,6 @@ class MottaStatistikkTest {
         motor.stop()
     }
 
-    private fun konstruerMotor(
-        dataSource: DataSource,
-        jobbAppender: MotorJobbAppender,
-        bqYtelseRepository: IBQYtelsesstatistikkRepository,
-        resendSakstatistikkJobb: ResendSakstatistikkJobb,
-        lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
-        lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-        lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
-    ): Motor {
-        val lagreOppgaveJobb = LagreOppgaveJobb()
-        return motor(
-            dataSource = dataSource,
-            gatewayProvider = defaultGatewayProvider { },
-            jobber = listOf(
-                LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository),
-                lagreOppgaveJobb,
-                resendSakstatistikkJobb,
-                lagreAvklaringsbehovHendelseJobb,
-                lagrePostmottakHendelseJobb,
-                LagreOppgaveHendelseJobb(lagreOppgaveJobb),
-                lagreSakinfoTilBigQueryJobb,
-                LagreStoppetHendelseJobb(jobbAppender)
-            )
-        )
-    }
-
     @Test
     fun `kan motta postmottak-hendelse, og jobb blir utført`(
         @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
@@ -511,56 +475,4 @@ class MottaStatistikkTest {
 
         motor.stop()
     }
-
-    private fun konstruerTestJobber(
-        bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository()
-    ): TestJobberSetup {
-        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
-        val lagreAvsluttetBehandlingTilBigQueryJobb =
-            LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
-        val resendSakstatistikkJobb = ResendSakstatistikkJobb()
-        val motorJobbAppender = MotorJobbAppender(
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb,
-        )
-        return TestJobberSetup(
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb,
-            motorJobbAppender
-        )
-    }
-
-    private fun opprettTestStoppetBehandling(
-        behandlingReferanse: UUID,
-        behandlingOpprettetTidspunkt: LocalDateTime,
-        hendelsesTidspunkt: LocalDateTime,
-        mottattTid: LocalDateTime,
-        saksnummer: String = "123",
-        behandlingStatus: Status = Status.OPPRETTET,
-        behandlingType: TypeBehandling = TypeBehandling.Førstegangsbehandling,
-        ident: String = "0",
-        avklaringsbehov: List<AvklaringsbehovHendelseDto> = listOf()
-    ) = StoppetBehandling(
-        saksnummer = saksnummer,
-        behandlingStatus = behandlingStatus,
-        behandlingType = behandlingType,
-        ident = ident,
-        behandlingReferanse = behandlingReferanse,
-        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-        avklaringsbehov = avklaringsbehov,
-        versjon = "UKJENT",
-        mottattTid = mottattTid,
-        sakStatus = SakStatus.UTREDES,
-        hendelsesTidspunkt = hendelsesTidspunkt,
-        vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
-    )
-
-    private data class TestJobberSetup(
-        val lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
-        val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
-        val resendSakstatistikkJobb: ResendSakstatistikkJobb,
-        val motorJobbAppender: MotorJobbAppender
-    )
 }

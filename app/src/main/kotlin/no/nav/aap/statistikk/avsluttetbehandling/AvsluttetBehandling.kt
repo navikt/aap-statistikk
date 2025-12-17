@@ -114,7 +114,8 @@ sealed interface IBeregningsGrunnlag {
         val grunnlag: Double,
         val type: UføreType,
         @Suppress("PropertyName", "ConstructorParameterNaming") val grunnlag11_19: Grunnlag_11_19,
-        val uføregrad: Int,
+        @Deprecated("Bruk uføregrader.") val uføregrad: Int,
+        val uføregrader: Map<LocalDate, Int>,
         val uføreInntekterFraForegåendeÅr: Map<Int, Double>,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,
     ) : IBeregningsGrunnlag {

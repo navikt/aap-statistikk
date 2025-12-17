@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
@@ -12,8 +13,10 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.orEmpty
 
 
 interface IBeregningsgrunnlagRepository : Repository {
@@ -174,7 +177,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                                ufore_ytterligere_nedsatt_arbeidsevne_ar)
     VALUES (?, ?, ?, ?, ?, ?::jsonb, ?)"""
 
-        return connection.executeReturnKey(insertQuery) {
+        val executeReturnKey = connection.executeReturnKey(insertQuery) {
             var c = 1
             setParams {
                 setLong(c++, baseGrunnlagId)
@@ -189,6 +192,21 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 setInt(c, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
             }
         }
+
+        connection.executeBatch(
+            """
+            insert into grunnlag_uforegrader(grunnlag_ufore_id, uforegrad, virkningstidspunkt)
+            values (?, ?, ?)
+        """.trimIndent(), beregningsGrunnlag.uføregrader.entries
+        ) {
+            setParams { (virkningstidspunkt, grad) ->
+                setLong(1, executeReturnKey)
+                setInt(2, grad)
+                setLocalDate(3, virkningstidspunkt)
+            }
+        }
+
+        return executeReturnKey
     }
 
     override fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
@@ -220,6 +238,10 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
        gu.type                                        as gu_type,
        gu.grunnlag_11_19_id                           as gu_grunnlag_11_19_id,
        gu.uforegrad                                   as gu_uforegrad,
+       (select json_agg(json_build_object('virkningstidspunkt', virkningstidspunkt, 'uforegrad',
+                                          uforegrad))
+        from grunnlag_uforegrader
+        where grunnlag_ufore_id = gu.id)              as gu_uforegrader,
        gu.ufore_inntekter_fra_foregaende_ar           as gu_ufore_inntekter_fra_foregaende_ar,
        gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    as gu_ufore_ytterligere_nedsatt_arbeidsevne_ar,
        br.referanse                                   as b_referanse
@@ -290,12 +312,17 @@ where br.referanse = ?
         )
     }
 
+    private data class UføregradOgDato(val uforegrad: Int, val virkningstidspunkt: LocalDate)
+
     private fun hentUtGrunnlagUføre(resultSet: Row): IBeregningsGrunnlag.GrunnlagUføre {
         return IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag = resultSet.getDouble("gu_grunnlag"),
             grunnlag11_19 = hentGrunnlag11_19(resultSet),
             type = UføreType.valueOf(resultSet.getString("gu_type")),
             uføregrad = resultSet.getInt("gu_uforegrad"),
+            uføregrader = resultSet.getStringOrNull("gu_uforegrader")
+                ?.let { DefaultJsonMapper.fromJson<List<UføregradOgDato>>(it) }.orEmpty()
+                .associate { it.virkningstidspunkt to it.uforegrad },
             uføreInntekterFraForegåendeÅr = ObjectMapper().readValue(
                 resultSet.getString(
                     "gu_ufore_inntekter_fra_foregaende_ar"
