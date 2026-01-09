@@ -128,54 +128,20 @@ class IntegrationTest {
             avsluttetBehandlingHendelser
         ).hasSize(1)
 
-        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
-        val bigQueryClient = bigQueryClient(config)
-        val x = 2
-        var referanse: UUID? = null
+        val (testUtil, bigQueryClient) = setupTestEnvironment(dataSource, config)
+        lateinit var referanse: UUID
         testKlientNoInjection(
             dbConfig,
             azureConfig = azureConfig,
             bigQueryClient,
         ) { url, client ->
-
-            var c = 1
-            hendelserFraDBDump.forEach {
-                when (it) {
-                    is BehandlingHendelseData -> {
-                        postBehandlingsflytHendelse(url, client, it.data)
-                        referanse = it.data.behandlingReferanse
-                        testUtil.ventPåSvar()
-                    }
-
-                    is OppgaveHendelseData -> {
-                        postOppgaveHendelse(dataSource, it.data)
-                        testUtil.ventPåSvar()
-                    }
-                }
-                logger.info("Hendelse nr ${c++}: ${it.data::class.simpleName} av ${hendelserFraDBDump.size}")
-            }
-            val feilende =
-                dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
-            log.info("Feilende jobber: $feilende")
-            testUtil.ventPåSvar()
-
-            val behandling = ventPåSvar(
-                { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
-                { it != null })
-
-            assertThat(behandling!!.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
+            referanse = prosesserHendelserOgVerifiserBehandling(
+                dataSource, url, client, hendelserFraDBDump, testUtil
+            )
         }
 
         // Sekvensnummer økes med 1 med ny info på sak
-        val bqSaker2 = ventPåSvar(
-            {
-                dataSource.transaction {
-                    SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                        referanse!!
-                    )
-                }
-            },
-            { t -> t !== null && t.isNotEmpty() && t.size > 2 })
+        val bqSaker2 = hentSakstatistikkHendelser(dataSource, referanse, minSize = 2)
 //        assertThat(bqSaker2!!).hasSize(hendelserFraDBDump.size)
         assertThat(bqSaker2!!.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
         assertThat(bqSaker2.map { it.behandlingStatus }).containsSubsequence(
@@ -222,7 +188,7 @@ class IntegrationTest {
 
         // Sjekk tilkjent ytelse
         val tilkjentYtelse = ventPåSvar(
-            { dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse!!)?.perioder } },
+            { dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse)?.perioder } },
             { t -> t !== null && t.isNotEmpty() })
 
         assertThat(tilkjentYtelse!!).allSatisfy {
@@ -245,7 +211,7 @@ class IntegrationTest {
 
         dataSource.transaction {
             SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                referanse!!
+                referanse
             )
         }.let {
             val avsluttede = it.filter { it.behandlingStatus == "AVSLUTTET" }
@@ -254,9 +220,8 @@ class IntegrationTest {
             println("...")
         }
 
-
         val alleHendelser = dataSource.transaction {
-            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse!!)
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
         }
 
         // Forvent kun én inngangshendelse.
@@ -346,6 +311,55 @@ class IntegrationTest {
     }
 
     @Test
+    fun `dump av hendelser for klage`(
+        @Postgres dbConfig: DbConfig,
+        @Postgres dataSource: DataSource,
+        @BigQuery config: BigQueryConfig,
+        @Fakes azureConfig: AzureConfig
+    ) {
+        /**
+         * Filen er lagd slik:
+         *  - Inne i FakeServers i behandlingsflyt, legg til denne på endepunktet for statistikk:
+         *                 val jsonFile = File("klage_hendelser.json")
+         *                 if (!jsonFile.exists()) {
+         *                     // Create if not exists
+         *                     jsonFile.createNewFile()
+         *                 }
+         *                 val jsonContent = DefaultJsonMapper.toJson(receive)
+         *                 jsonFile.appendText(jsonContent)
+         */
+        val lines = object {}.javaClass.getResource("/hendelser_klage.json")?.readText()
+        assertThat(lines).isNotNull
+
+        val hendelserFraFlyt = DefaultJsonMapper.fromJson<List<StoppetBehandling>>(lines!!)
+
+        val (testUtil, bigQueryClient) = setupTestEnvironment(dataSource, config)
+        lateinit var referanse: UUID
+        testKlientNoInjection(
+            dbConfig,
+            azureConfig = azureConfig,
+            bigQueryClient,
+        ) { url, client ->
+            val behandlingHendelser = hendelserFraFlyt.map {
+                BehandlingHendelseData(it, LocalDateTime.now())
+            }
+            referanse = prosesserHendelserOgVerifiserBehandling(
+                dataSource, url, client, behandlingHendelser, testUtil
+            )
+        }
+
+        // Sekvensnummer økes med 1 med ny info på sak
+        val bqSaker2 = hentSakstatistikkHendelser(dataSource, referanse, minSize = 2)
+
+        assertThat(bqSaker2!!.map { it.behandlingStatus }).containsSubsequence(
+            "OPPRETTET",
+            "UNDER_BEHANDLING",
+            "IVERKSETTES",
+            "OVERSENDT_KA"
+        )
+    }
+
+    @Test
     fun `test flyt`(
         @Postgres dbConfig: DbConfig,
         @Postgres dataSource: DataSource,
@@ -378,9 +392,7 @@ class IntegrationTest {
             bigQueryClient,
         ) { url, client ->
 
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(hendelsx)
-            )
+            postBehandlingsflytHendelse(url, client, hendelsx)
 
             testUtil.ventPåSvar()
 
@@ -412,9 +424,7 @@ class IntegrationTest {
             testUtil.ventPåSvar()
 
 
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(hendelse)
-            )
+            postBehandlingsflytHendelse(url, client, hendelse)
 
             testUtil.ventPåSvar()
             val behandling = ventPåSvar(
@@ -434,44 +444,24 @@ class IntegrationTest {
             assertThat(enhet.enhet).isEqualTo("0400")
 
             testUtil.ventPåSvar()
-            val bqSaker = ventPåSvar(
-                {
-                    dataSource.transaction {
-                        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                            behandling!!.referanse
-                        )
-                    }
-                },
-                { t -> t !== null && t.isNotEmpty() && t.size == 3 })
+            val bqSaker = hentSakstatistikkHendelserMedEksaktAntall(
+                dataSource, behandling!!.referanse, expectedSize = 3
+            )
             assertThat(bqSaker).isNotNull
             assertThat(bqSaker).hasSize(3)
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
-//            assertThat(bqSaker).anySatisfy {
-//                assertThat(it.ansvarligEnhetKode).isEqualTo("0400")
-//            }
-
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(
-                    hendelse.copy(
-                        behandlingStatus = Status.AVSLUTTET,
-                        avsluttetBehandling = hendelse.avsluttetBehandling
-                    )
+            postBehandlingsflytHendelse(
+                url, client, hendelse.copy(
+                    behandlingStatus = Status.AVSLUTTET,
+                    avsluttetBehandling = hendelse.avsluttetBehandling
                 )
             )
 
             testUtil.ventPåSvar()
 
             // Sekvensnummer økes med 1 med ny info på sak
-            val bqSaker2 = ventPåSvar(
-                {
-                    dataSource.transaction {
-                        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                            behandling!!.referanse
-                        )
-                    }
-                },
-                { t -> t !== null && t.isNotEmpty() && t.size > 2 })
+            val bqSaker2 = hentSakstatistikkHendelser(dataSource, behandling.referanse, minSize = 2)
             assertThat(bqSaker2!!).hasSize(3)
             assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
 
@@ -532,6 +522,80 @@ class IntegrationTest {
 
         return client
     }
+
+    private fun setupTestEnvironment(
+        dataSource: DataSource,
+        config: BigQueryConfig
+    ): Pair<TestUtil, BigQueryClient> {
+        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
+        val bigQueryClient = bigQueryClient(config)
+        return testUtil to bigQueryClient
+    }
+
+    private fun prosesserHendelserOgVerifiserBehandling(
+        dataSource: DataSource,
+        url: String,
+        client: RestClient<InputStream>,
+        hendelser: List<HendelseData>,
+        testUtil: TestUtil,
+        expectedStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET
+    ): UUID {
+        var referanse: UUID? = null
+        var c = 1
+        hendelser.forEach {
+            when (it) {
+                is BehandlingHendelseData -> {
+                    postBehandlingsflytHendelse(url, client, it.data)
+                    referanse = it.data.behandlingReferanse
+                    testUtil.ventPåSvar()
+                }
+
+                is OppgaveHendelseData -> {
+                    postOppgaveHendelse(dataSource, it.data)
+                    testUtil.ventPåSvar()
+                }
+            }
+            logger.info("Hendelse nr ${c++}: ${it.data::class.simpleName} av ${hendelser.size}")
+        }
+
+        val feilende = dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
+        log.info("Feilende jobber: $feilende")
+        testUtil.ventPåSvar()
+
+        val behandling = ventPåSvar(
+            { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
+            { it != null }
+        )
+
+        assertThat(behandling!!.behandlingStatus()).isEqualTo(expectedStatus)
+        return referanse!!
+    }
+
+    private fun hentSakstatistikkHendelser(
+        dataSource: DataSource,
+        referanse: UUID,
+        minSize: Int = 0
+    ) = ventPåSvar(
+        {
+            dataSource.transaction {
+                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
+            }
+        },
+        { t -> t !== null && t.isNotEmpty() && t.size > minSize }
+    )
+
+    private fun hentSakstatistikkHendelserMedEksaktAntall(
+        dataSource: DataSource,
+        referanse: UUID,
+        expectedSize: Int
+    ) = ventPåSvar(
+        {
+            dataSource.transaction {
+                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
+            }
+        },
+        { t -> t !== null && t.isNotEmpty() && t.size == expectedSize }
+    )
 
 
 }

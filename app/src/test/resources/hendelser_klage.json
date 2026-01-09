@@ -1,0 +1,1373 @@
+[
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": null,
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:29:35.753",
+    "behandlingStatus": "UTREDES",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:29:35.761426",
+    "avsluttetBehandling": null,
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  },
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": "ec70e3a7-38e0-4d56-bb54-bb381f85925f",
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:29:48.521",
+    "behandlingStatus": "UTREDES",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:48.369",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Vurdert påklaget behandling"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6009",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FULLMEKTIG",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:48.519",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:29:48.530813",
+    "avsluttetBehandling": null,
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  },
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": "ec70e3a7-38e0-4d56-bb54-bb381f85925f",
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:29:53.764",
+    "behandlingStatus": "UTREDES",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:48.369",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Vurdert påklaget behandling"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6009",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FULLMEKTIG",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:48.519",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:53.386",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastatt fullmektig"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6000",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FORMKRAV",
+          "kreverToTrinn": true,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:53.759",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:29:53.772358",
+    "avsluttetBehandling": null,
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  },
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": "ec70e3a7-38e0-4d56-bb54-bb381f85925f",
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:29:58.377",
+    "behandlingStatus": "UTREDES",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:48.369",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Vurdert påklaget behandling"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6009",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FULLMEKTIG",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:48.519",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:53.386",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastatt fullmektig"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6000",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FORMKRAV",
+          "kreverToTrinn": true,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:53.759",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:57.993",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asdasd"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6001",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "BEHANDLENDE_ENHET",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:58.374",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:29:58.38624",
+    "avsluttetBehandling": null,
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  },
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": "ec70e3a7-38e0-4d56-bb54-bb381f85925f",
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:30:03.495",
+    "behandlingStatus": "UTREDES",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:48.369",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Vurdert påklaget behandling"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6009",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FULLMEKTIG",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:48.519",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:53.386",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastatt fullmektig"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6000",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FORMKRAV",
+          "kreverToTrinn": true,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:53.759",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:57.993",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asdasd"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6001",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "BEHANDLENDE_ENHET",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:58.374",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:03.258",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastsatt behandlende enhet"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6002",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "KLAGEBEHANDLING_KONTOR",
+          "kreverToTrinn": true,
+          "kvalitetssikres": true,
+          "løsesAv": [
+            "SAKSBEHANDLER_OPPFOLGING"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:03.492",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:30:03.50619",
+    "avsluttetBehandling": null,
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  },
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": "ec70e3a7-38e0-4d56-bb54-bb381f85925f",
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:30:18.343",
+    "behandlingStatus": "UTREDES",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:48.369",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Vurdert påklaget behandling"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6009",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FULLMEKTIG",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:48.519",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:53.386",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastatt fullmektig"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6000",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FORMKRAV",
+          "kreverToTrinn": true,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:53.759",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:57.993",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asdasd"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6001",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "BEHANDLENDE_ENHET",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:58.374",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:03.258",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastsatt behandlende enhet"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6002",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "KLAGEBEHANDLING_KONTOR",
+          "kreverToTrinn": true,
+          "kvalitetssikres": true,
+          "løsesAv": [
+            "SAKSBEHANDLER_OPPFOLGING"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:03.492",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:18.193",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asd"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5097",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "KVALITETSSIKRING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "KVALITETSSIKRER"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:18.337",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:30:18.356694",
+    "avsluttetBehandling": null,
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  },
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": "ec70e3a7-38e0-4d56-bb54-bb381f85925f",
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:30:21.638",
+    "behandlingStatus": "IVERKSETTES",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:48.369",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Vurdert påklaget behandling"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6009",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FULLMEKTIG",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:48.519",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:53.386",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastatt fullmektig"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6000",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FORMKRAV",
+          "kreverToTrinn": true,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:53.759",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:57.993",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asdasd"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6001",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "BEHANDLENDE_ENHET",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:58.374",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:03.258",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastsatt behandlende enhet"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6002",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "KLAGEBEHANDLING_KONTOR",
+          "kreverToTrinn": true,
+          "kvalitetssikres": true,
+          "løsesAv": [
+            "SAKSBEHANDLER_OPPFOLGING"
+          ]
+        },
+        "status": "KVALITETSSIKRET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:03.492",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:18.193",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asd"
+          },
+          {
+            "status": "KVALITETSSIKRET",
+            "tidsstempel": "2026-01-09T13:30:21.018",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5097",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "KVALITETSSIKRING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "KVALITETSSIKRER"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:18.337",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:21.021",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5051",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "BREV",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "BESLUTTER"
+          ]
+        },
+        "status": "OPPRETTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:21.606",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:30:21.64417",
+    "avsluttetBehandling": null,
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  },
+  {
+    "saksnummer": "4LDZA0W",
+    "sakStatus": "UTREDES",
+    "behandlingReferanse": "8eed111d-f282-4a69-b76b-3b9e2ac00e79",
+    "relatertBehandling": "ec70e3a7-38e0-4d56-bb54-bb381f85925f",
+    "behandlingOpprettetTidspunkt": "2026-01-09T13:29:35.766",
+    "mottattTid": "2026-01-09T13:29:35.766",
+    "tidspunktSisteEndring": "2026-01-09T13:30:25.349",
+    "behandlingStatus": "AVSLUTTET",
+    "behandlingType": "Klage",
+    "soknadsFormat": "DIGITAL",
+    "ident": "01410035835",
+    "versjon": "20578fdab8fa8ac50e2713219a70bfe859cb914d\n",
+    "vurderingsbehov": [
+      "KLAGE"
+    ],
+    "avklaringsbehov": [
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5999",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "PÅKLAGET_BEHANDLING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:35.751",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:48.369",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Vurdert påklaget behandling"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6009",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FULLMEKTIG",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:48.519",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:53.386",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastatt fullmektig"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6000",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "FORMKRAV",
+          "kreverToTrinn": true,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:53.759",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:29:57.993",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asdasd"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6001",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "BEHANDLENDE_ENHET",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "SAKSBEHANDLER_NASJONAL"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:29:58.374",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:03.258",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Fastsatt behandlende enhet"
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "6002",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "KLAGEBEHANDLING_KONTOR",
+          "kreverToTrinn": true,
+          "kvalitetssikres": true,
+          "løsesAv": [
+            "SAKSBEHANDLER_OPPFOLGING"
+          ]
+        },
+        "status": "KVALITETSSIKRET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:03.492",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:18.193",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "asd"
+          },
+          {
+            "status": "KVALITETSSIKRET",
+            "tidsstempel": "2026-01-09T13:30:21.018",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5097",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "KVALITETSSIKRING",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "KVALITETSSIKRER"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:18.337",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:21.021",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          }
+        ]
+      },
+      {
+        "avklaringsbehovDefinisjon": {
+          "kode": "5051",
+          "type": "MANUELT_PÅKREVD",
+          "løsesISteg": "BREV",
+          "kreverToTrinn": false,
+          "kvalitetssikres": false,
+          "løsesAv": [
+            "BESLUTTER"
+          ]
+        },
+        "status": "AVSLUTTET",
+        "endringer": [
+          {
+            "status": "OPPRETTET",
+            "tidsstempel": "2026-01-09T13:30:21.606",
+            "frist": null,
+            "endretAv": "Kelvin",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": ""
+          },
+          {
+            "status": "AVSLUTTET",
+            "tidsstempel": "2026-01-09T13:30:25.21",
+            "frist": null,
+            "endretAv": "SAKSBEHANDLER",
+            "årsakTilSattPåVent": null,
+            "årsakTilRetur": [],
+            "begrunnelse": "Brev ferdig"
+          }
+        ]
+      }
+    ],
+    "hendelsesTidspunkt": "2026-01-09T13:30:25.367036",
+    "avsluttetBehandling": {
+      "tilkjentYtelse": {
+        "perioder": []
+      },
+      "vilkårsResultat": {
+        "typeBehandling": "Klage",
+        "vilkår": []
+      },
+      "beregningsGrunnlag": null,
+      "diagnoser": null,
+      "rettighetstypePerioder": [],
+      "resultat": "KLAGE_OPPRETTHOLDES",
+      "vedtakstidspunkt": "2026-01-09T13:30:21.577"
+    },
+    "identerForSak": [
+      "01410035835"
+    ],
+    "opprettetAv": null,
+    "nyeMeldekort": [],
+    "søknadIder": [
+      {
+        "identifikator": "1767952693370"
+      }
+    ]
+  }
+]

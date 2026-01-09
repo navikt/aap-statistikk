@@ -160,7 +160,7 @@ class SaksStatistikkService(
                     "Behandling $behandlingReferanse er automatisk behandlet. Behandling $behandling"
                 )
             },
-            behandlingStatus = behandlingStatus(sisteHendelse),
+            behandlingStatus = behandlingStatus(behandling, sisteHendelse),
             behandlingÅrsak = behandling.årsaker.prioriterÅrsaker().name,
             behandlingResultat = regnUtBehandlingResultat(behandling),
             resultatBegrunnelse = resultatBegrunnelse(hendelser),
@@ -367,9 +367,7 @@ class SaksStatistikkService(
         return enhet
     }
 
-    fun behandlingStatus(hendelse: BehandlingHendelse): String {
-        // TODO: når klage er implementert, må dette fikses her
-
+    fun behandlingStatus(behandling: Behandling, hendelse: BehandlingHendelse): String {
         val venteÅrsak = hendelse.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
         val returStatus = hendelse.avklaringsbehovStatus
             ?.takeIf { it.returnert() }
@@ -379,7 +377,13 @@ class SaksStatistikkService(
             BehandlingStatus.OPPRETTET -> "OPPRETTET"
             BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
             BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
-            BehandlingStatus.AVSLUTTET -> "AVSLUTTET"
+            BehandlingStatus.AVSLUTTET -> {
+                if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()?.sendesTilKA() == true) {
+                    "OVERSENDT_KA"
+                } else {
+                    "AVSLUTTET"
+                }
+            }
         }
     }
 
