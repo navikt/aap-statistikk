@@ -39,7 +39,11 @@ enum class ResultatKode {
     KLAGE_DELVIS_OMGJØRES,
     KLAGE_AVSLÅTT,
     KLAGE_TRUKKET,
-    AVBRUTT
+    AVBRUTT;
+
+    fun sendesTilKA(): Boolean {
+        return this == KLAGE_OPPRETTHOLDES || this == KLAGE_DELVIS_OMGJØRES
+    }
 }
 
 data class RettighetstypePeriode(
