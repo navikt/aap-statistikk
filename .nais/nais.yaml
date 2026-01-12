@@ -52,8 +52,6 @@ spec:
     initialDelay: 5
     periodSeconds: 5
     failureThreshold: 21
-  secureLogs:
-    enabled: true
   accessPolicy:
     inbound:
       rules:
@@ -69,6 +67,9 @@ spec:
           cluster: dev-gcp
         {{/if}}
     outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
       external:
         - host: {{pdl_url}}
   gcp:
