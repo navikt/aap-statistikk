@@ -201,29 +201,29 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
                                   hendelsestidspunkt, slettet, utbetaling_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, oppdateringer.mapIndexed { index, behandling -> Pair(behandling, index) }
+            """, oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) }
         ) {
-            setParams { (behandling, idx) ->
+            setParams { (hendelse, idx) ->
                 var c = 1
-                setLong(c++, behandling.id().id)
+                setLong(c++, hendelse.id().id)
                 setLong(c++, versjonId)
                 setBoolean(c++, idx == oppdateringer.lastIndex)
                 setLocalDateTime(c++, LocalDateTime.now(clock))
-                setLocalDateTime(c++, behandling.mottattTid)
-                setLocalDateTime(c++, behandling.vedtakstidspunkt)
-                setString(c++, behandling.ansvarligBeslutter)
-                setString(c++, behandling.behandlingStatus().name)
-                setString(c++, behandling.sisteSaksbehandler)
-                setString(c++, behandling.gjeldendeAvklaringsBehov)
-                setString(c++, behandling.gjeldendeAvklaringsbehovStatus?.name)
-                setEnumName(c++, behandling.søknadsformat)
-                setString(c++, behandling.venteÅrsak)
-                setEnumName(c++, behandling.gjeldendeStegGruppe)
-                setString(c++, behandling.returÅrsak)
-                setEnumName(c++, behandling.resultat)
-                setLocalDateTime(c++, behandling.oppdatertTidspunkt())
+                setLocalDateTime(c++, hendelse.mottattTid)
+                setLocalDateTime(c++, hendelse.vedtakstidspunkt)
+                setString(c++, hendelse.ansvarligBeslutter)
+                setString(c++, hendelse.behandlingStatus().name)
+                setString(c++, hendelse.sisteSaksbehandler)
+                setString(c++, hendelse.gjeldendeAvklaringsBehov)
+                setString(c++, hendelse.gjeldendeAvklaringsbehovStatus?.name)
+                setEnumName(c++, hendelse.søknadsformat)
+                setString(c++, hendelse.venteÅrsak)
+                setEnumName(c++, hendelse.gjeldendeStegGruppe)
+                setString(c++, hendelse.returÅrsak)
+                setEnumName(c++, hendelse.resultat)
+                setLocalDateTime(c++, hendelse.oppdatertTidspunkt())
                 setBoolean(c++, false)
-                setString(c++, behandling.utbetalingId())
+                setString(c++, hendelse.utbetalingId())
             }
         }
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
