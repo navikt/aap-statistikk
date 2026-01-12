@@ -22,6 +22,8 @@ class KodeverksTest {
 
         assertThat(vilkår).containsExactlyInAnyOrder(*Vilkårtype.entries.map { it.name }
             .toTypedArray())
+        assertThat(vilkår).containsExactlyInAnyOrder(*no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.entries.map { it.name }
+            .toTypedArray())
     }
 
     @Test
@@ -34,6 +36,8 @@ class KodeverksTest {
 
         assertThat(resultatkoder).containsExactlyInAnyOrder(*ResultatKode.entries.map { it.name }
             .toTypedArray())
+        assertThat(resultatkoder).containsExactlyInAnyOrder(*no.nav.aap.behandlingsflyt.kontrakt.statistikk.ResultatKode.entries.map { it.name }
+            .toTypedArray())
     }
 
     @Test
@@ -45,10 +49,11 @@ class KodeverksTest {
         }
 
         val rettighetstyper = RettighetsType.entries.map { it.name }
+        val rettighetstyperFraBehandlingsflyt = no.nav.aap.behandlingsflyt.kontrakt.statistikk.RettighetsType.entries.map { it.name }
 
         // Oppdater når det kommer flere
         assertThat(rettighetstyperFraDB).containsExactlyInAnyOrder(*rettighetstyper.toTypedArray())
-
+        assertThat(rettighetstyperFraDB).containsExactlyInAnyOrder(*rettighetstyperFraBehandlingsflyt.toTypedArray())
     }
 
     @Test
