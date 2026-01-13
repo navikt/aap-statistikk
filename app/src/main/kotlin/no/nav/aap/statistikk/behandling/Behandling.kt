@@ -247,7 +247,7 @@ enum class Vurderingsbehov(val sortering: Int) {
     REVURDER_SYKEPENGEERSTATNING(1), BARNETILLEGG_SATS_REGULERING(0), AUTOMATISK_OPPDATER_VILKÅR(1)
 }
 
-
+@Deprecated("Når aarsak_til_opprettelse finnes for alle nye behandlinger, slett denne.")
 fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov {
     return this.sortedBy { it.name }.minBy { it.sortering }
 }

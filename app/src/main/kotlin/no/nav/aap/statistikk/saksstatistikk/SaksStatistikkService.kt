@@ -129,12 +129,13 @@ class SaksStatistikkService(
             log.info("Fant ikke siste saksbehandler for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
         }
 
+        val årsakTilOpprettelse = behandling.årsakTilOpprettelse
+        if (årsakTilOpprettelse == null) {
+            log.info("Årsak til opprettelse er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}.")
+        }
+
         val saksbehandler =
             if (erSkjermet) "-5" else saksbehandlerIdent
-
-        if (behandling.årsaker.size > 1) {
-            log.info("Behandling med referanse $behandlingReferanse hadde mer enn én årsak. Avgir den første.")
-        }
 
         return BQBehandling(
             sekvensNummer = sekvensNummer,
@@ -161,7 +162,7 @@ class SaksStatistikkService(
                 )
             },
             behandlingStatus = behandlingStatus(behandling, sisteHendelse),
-            behandlingÅrsak = behandling.årsaker.prioriterÅrsaker().name,
+            behandlingÅrsak = årsakTilOpprettelse ?: behandling.årsaker.prioriterÅrsaker().name,
             behandlingResultat = regnUtBehandlingResultat(behandling),
             resultatBegrunnelse = resultatBegrunnelse(hendelser),
             ansvarligEnhetKode = ansvarligEnhet,
@@ -378,7 +379,9 @@ class SaksStatistikkService(
             BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
             BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
             BehandlingStatus.AVSLUTTET -> {
-                if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()?.sendesTilKA() == true) {
+                if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()
+                        ?.sendesTilKA() == true
+                ) {
                     "OVERSENDT_KA"
                 } else {
                     "AVSLUTTET"
