@@ -115,6 +115,7 @@ class HendelsesServiceTest {
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID,
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
+                årsakTilOpprettelse = "SØKNAD"
             )
         )
 
@@ -210,6 +211,7 @@ class HendelsesServiceTest {
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
+                årsakTilOpprettelse = "SØKNAD"
             )
         )
 

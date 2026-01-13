@@ -185,7 +185,7 @@ fun konstruerMotor(
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb(lagreOppgaveJobb),
+            LagreOppgaveHendelseJobb(lagreOppgaveJobb),
             lagreSakinfoTilBigQueryJobb,
             LagreStoppetHendelseJobb(jobbAppender)
         )
@@ -216,7 +216,8 @@ fun opprettTestStoppetBehandling(
         mottattTid = mottattTid,
         sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
         hendelsesTidspunkt = hendelsesTidspunkt,
-        vurderingsbehov = listOf(no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov.SØKNAD)
+        vurderingsbehov = listOf(no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov.SØKNAD),
+        årsakTilOpprettelse = "SØKNAD"
     )
 
 fun <E> testKlientNoInjection(

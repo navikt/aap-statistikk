@@ -160,7 +160,8 @@ class MottaStatistikkTest {
         mottattTid = LocalDateTime.parse("2024-08-14T10:33:33.595").minusDays(1),
         sakStatus = SakStatus.UTREDES,
         hendelsesTidspunkt = LocalDateTime.now(),
-        vurderingsbehov = listOf(Vurderingsbehov.SØKNAD)
+        vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
+        årsakTilOpprettelse = "SØKNAD"
     )
 
     @Test
@@ -229,6 +230,7 @@ class MottaStatistikkTest {
         sakStatus = SakStatus.UTREDES,
         hendelsesTidspunkt = LocalDateTime.parse("2025-12-08T08:53:15.030000"),
         vurderingsbehov = listOf(Vurderingsbehov.MELDEKORT),
+        årsakTilOpprettelse = "MELDEKORT",
         avsluttetBehandling = AvsluttetBehandlingDTO(
             tilkjentYtelse = TilkjentYtelseDTO(emptyList()),
             vilkårsResultat = VilkårsResultatDTO(TypeBehandling.Revurdering, emptyList()),
