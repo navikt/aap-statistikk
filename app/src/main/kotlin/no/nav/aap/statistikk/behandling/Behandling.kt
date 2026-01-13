@@ -44,6 +44,7 @@ data class Behandling(
     val returÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<Vurderingsbehov> = listOf(),
+    val årsakTilOpprettelse: String? = null,
     val resultat: ResultatKode? = null,
     private val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
     val hendelser: List<BehandlingHendelse> = listOf(),

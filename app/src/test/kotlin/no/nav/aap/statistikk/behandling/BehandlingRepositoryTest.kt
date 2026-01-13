@@ -53,77 +53,49 @@ class BehandlingRepositoryTest {
 
         val vedtakstidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS)
         val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
+
+        val behandling = Behandling(
+            referanse = referanse,
+            sak = sak,
+            typeBehandling = TypeBehandling.Førstegangsbehandling,
+            status = BehandlingStatus.UTREDES,
+            opprettetTid = LocalDateTime.now(),
+            mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+            vedtakstidspunkt = vedtakstidspunkt,
+            ansvarligBeslutter = "Josgeir Dalføre",
+            versjon = Versjon("xxx"),
+            søknadsformat = SøknadsFormat.PAPIR,
+            sisteSaksbehandler = "Joark Jorgensen",
+            relaterteIdenter = listOf("123", "456", "123456789"),
+            gjeldendeAvklaringsBehov = "0559",
+            gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
+            venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
+            returÅrsak = "MANGELFULL_BEGRUNNELSE",
+            gjeldendeStegGruppe = StegGruppe.BREV,
+            resultat = ResultatKode.INNVILGET,
+            årsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.G_REGULERING),
+            årsakTilOpprettelse = "SØKNAD",
+            oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
+            opprettetAv = "Saksbehandler"
+        )
         dataSource.transaction {
-            BehandlingRepository(
-                it,
-                clock = clock
-            ).opprettBehandling(
-                Behandling(
-                    referanse = referanse,
-                    sak = sak,
-                    typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
-                    opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    vedtakstidspunkt = vedtakstidspunkt,
-                    ansvarligBeslutter = "Josgeir Dalføre",
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
-                    sisteSaksbehandler = "Joark Jorgensen",
-                    relaterteIdenter = listOf("123", "456", "123456789"),
-                    gjeldendeAvklaringsBehov = "0559",
-                    gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
-                    venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
-                    returÅrsak = "MANGELFULL_BEGRUNNELSE",
-                    gjeldendeStegGruppe = StegGruppe.BREV,
-                    resultat = ResultatKode.INNVILGET,
-                    årsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.G_REGULERING),
-                    oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
-                    opprettetAv = "Saksbehandler"
-                )
-            )
+            BehandlingRepository(it, clock = clock).opprettBehandling(behandling)
         }
 
         val uthentet = dataSource.transaction { BehandlingRepository(it).hent(referanse) }
 
-        uthentet!!
-        assertThat(uthentet.behandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
-        assertThat(uthentet.sak.sakStatus).isEqualTo(SakStatus.UTREDES)
-        assertThat(uthentet.relaterteIdenter).containsExactlyInAnyOrder("123", "456", "123456789")
-        assertThat(uthentet.gjeldendeAvklaringsBehov).isEqualTo("0559")
-        assertThat(uthentet.søknadsformat).isEqualTo(SøknadsFormat.PAPIR)
-        assertThat(uthentet.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
-        assertThat(uthentet.gjeldendeStegGruppe).isEqualTo(StegGruppe.BREV)
-        assertThat(uthentet.vedtakstidspunkt).isEqualTo(vedtakstidspunkt)
-        assertThat(uthentet.ansvarligBeslutter).isEqualTo("Josgeir Dalføre")
-        assertThat(uthentet.årsaker).containsExactlyInAnyOrder(
-            Vurderingsbehov.SØKNAD,
-            Vurderingsbehov.G_REGULERING
-        )
-        assertThat(uthentet.gjeldendeAvklaringsbehovStatus).isEqualTo(Status.OPPRETTET)
-        assertThat(uthentet.resultat).isEqualTo(ResultatKode.INNVILGET)
-        assertThat(uthentet.hendelser).hasSize(1)
-        assertThat(uthentet.resultat()).isEqualTo(ResultatKode.INNVILGET)
-        assertThat(uthentet.hendelser).satisfiesExactly(
-            {
-                assertThat(it.tidspunkt).isCloseTo(
-                    LocalDateTime.now(clock),
-                    within(500, ChronoUnit.MILLIS)
-                )
-                assertThat(it.saksbehandler?.ident).isEqualTo("Joark Jorgensen")
-                assertThat(it.avklaringsbehovStatus).isEqualTo(Status.OPPRETTET)
-            },
-        )
-        assertThat(uthentet.returÅrsak).isEqualTo("MANGELFULL_BEGRUNNELSE")
-        assertThat(uthentet.oppdatertTidspunkt()).isCloseTo(
-            LocalDateTime.now(clock).minusMinutes(1),
-            within(500, ChronoUnit.MILLIS)
-        )
-        assertThat(uthentet.opprettetAv).isEqualTo("Saksbehandler")
+        assertThat(uthentet)
+            .usingRecursiveComparison()
+            .ignoringCollectionOrder()
+            .ignoringFields("id", "hendelser", "snapShotId", "versjon.id", "sak.snapShotId")
+            .withComparatorForType({ a, b ->
+                a.truncatedTo(ChronoUnit.SECONDS).compareTo(b.truncatedTo(ChronoUnit.SECONDS))
+            }, LocalDateTime::class.java)
+            .isEqualTo(behandling)
 
         dataSource.transaction {
             BehandlingRepository(it).oppdaterBehandling(
-                uthentet.copy(
+                uthentet!!.copy(
                     venteÅrsak = "XXX"
                 )
             )
@@ -135,7 +107,7 @@ class BehandlingRepositoryTest {
             )
         }
 
-        val uthentet2 = dataSource.transaction { BehandlingRepository(it).hent(uthentet.referanse) }
+        val uthentet2 = dataSource.transaction { BehandlingRepository(it).hent(uthentet!!.referanse) }
 
         assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 ->
             c1.hendelsesTidspunkt.compareTo(

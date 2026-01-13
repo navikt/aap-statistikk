@@ -11,6 +11,7 @@
   "ident" : "01410022806",
   "versjon" : "LATEST-TEST",
   "vurderingsbehov" : [ "SØKNAD" ],
+  "årsakTilOpprettelse": "SØKNAD",
   "avklaringsbehov" : [ {
     "avklaringsbehovDefinisjon" : {
       "kode" : "5003",

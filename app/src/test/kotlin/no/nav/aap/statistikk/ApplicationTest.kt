@@ -58,6 +58,7 @@ class ApplicationTest {
   "ident": "1403199012345",
   "avklaringsbehov": [],
   "vurderingsbehov":  [],
+  "årsakTilOpprettelse": "SØKNAD",
   "årsakTilBehandling":  [],
   "versjon": "UKJENT",
   "mottattTid": [
@@ -115,6 +116,7 @@ class ApplicationTest {
   "avklaringsbehov": [],
   "vurderingsbehov":  [],
   "årsakTilBehandling":  [],
+  "årsakTilOpprettelse": "SØKNAD",
   "versjon": "UKJENT",
   "mottattTid": [
     2024,
