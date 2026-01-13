@@ -44,10 +44,21 @@ spec:
            UNNEST(JSON_EXTRACT_ARRAY(b.aarsaker_til_behandling)) AS value ), ', ' ) AS joined_string,
        p.ident AS brukerFnr,
        bh.resultat,
+       bh.vedtak_tidspunkt as vedtakstidspunkt,
        d.kodeverk AS kodeverk,
        d.diagnosekode AS diagnosekode,
        d.bidiagnoser AS bidiagnoser,
-       rettighetstyper.perioder AS perioder
+       rettighetstyper.perioder AS perioder,
+       DATETIME(
+           timestamp_millis(
+             greatest(
+               b.datastream_metadata.source_timestamp,
+               bh.datastream_metadata.source_timestamp,
+               br.datastream_metadata.source_timestamp,
+               s.datastream_metadata.source_timestamp,
+               d.datastream_metadata.source_timestamp)),
+           'Europe/Oslo') AS endret_tid,
+         concat(b.id, '-', bh.id, '-', br.id, '-', s.id, '-', d.id) AS unik_id
      FROM
        `datastream_hendelser.public_behandling` b
      JOIN
