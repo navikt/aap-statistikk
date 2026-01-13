@@ -70,7 +70,7 @@ class PdlGraphQLGateway :
             val graphQLdata =
                 requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
 
-            graphQLdata.hentPersonBolk.map { requireNotNull(it.person) { "Fant ikke info om person ${it.ident}" } }
+            graphQLdata.hentPersonBolk.map { personBolk -> requireNotNull(personBolk.person) { "Fant ikke info om person ${personBolk.ident}" } }
         }
     }
 }
