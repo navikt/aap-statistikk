@@ -15,6 +15,7 @@
     "REVURDERING_AVBRUTT",
     "REVURDER_BEREGNING"
   ],
+  "årsakTilOpprettelse": "MANUELL_OPPRETTELSE",
   "avklaringsbehov": [
     {
       "avklaringsbehovDefinisjon": {
