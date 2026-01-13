@@ -49,8 +49,8 @@ SELECT COALESCE(
 
         val behandlingId = dbConnection.executeReturnKey(
             """INSERT INTO behandling (sak_id, referanse_id, type, opprettet_tid, forrige_behandling_id,
-                        aarsaker_til_behandling, opprettet_av)
-VALUES (?, ?, ?, ?, ?, ?, ?)"""
+                        aarsaker_til_behandling, opprettet_av, aarsak_til_opprettelse)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
         ) {
             setParams {
                 setLong(1, requireNotNull(behandling.sak.id))
@@ -60,6 +60,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?)"""
                 setLong(5, behandling.relatertBehandlingId?.id)
                 setArray(6, behandling.årsaker.map { it.name })
                 setString(7, behandling.opprettetAv)
+                setString(8, behandling.årsakTilOpprettelse)
             }
         }
         oppdaterBehandling(behandling.copy(id = behandlingId.let(::BehandlingId)))
@@ -237,6 +238,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
            b.opprettet_tid                     as b_opprettet_tid,
            b.forrige_behandling_id             as b_forrige_behandling_id,
            b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
+           b.aarsak_til_opprettelse            as b_aarsak_til_opprettelse,
            b.opprettet_av                      as b_opprettet_av,
            s.id                                as s_id,
            s.saksnummer                        as s_saksnummer,
@@ -272,7 +274,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
              JOIN person p on p.id = s.person_id
              JOIN LATERAL (SELECT *
                            FROM behandling_historikk
-                           WHERE gjeldende = TRUE AND SLETTET = FALSE
+                           WHERE gjeldende = TRUE
+                             AND SLETTET = FALSE
                              AND behandling_historikk.behandling_id = b.id) bh
                   on bh.behandling_id = b.id
              JOIN versjon v on v.id = bh.versjon_id
@@ -416,6 +419,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
             .map { Vurderingsbehov.valueOf(it) },
+        årsakTilOpprettelse = it.getStringOrNull("b_aarsak_til_opprettelse"),
         resultat = it.getEnumOrNull("bh_resultat"),
         oppdatertTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt")
     )

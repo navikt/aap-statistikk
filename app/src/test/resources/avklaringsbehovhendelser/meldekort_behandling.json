@@ -12,6 +12,7 @@
   "ident" : "27048312345",
   "versjon" : "49bf2a127ce4f39e4517b3ecfb4ad32cd65ed821",
   "vurderingsbehov" : [ "MELDEKORT" ],
+  "årsakTilOpprettelse": "MELDEKORT",
   "avklaringsbehov" : [ ],
   "hendelsesTidspunkt" : "2025-12-10T10:56:01.939607662",
   "avsluttetBehandling" : {

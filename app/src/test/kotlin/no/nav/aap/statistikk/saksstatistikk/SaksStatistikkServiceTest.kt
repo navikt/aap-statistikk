@@ -123,6 +123,7 @@ class SaksStatistikkServiceTest {
                         ident = "1233456",
                         versjon = "1",
                         vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                        årsakTilOpprettelse = "SØKNAD",
                         avklaringsbehov = listOf(
                             AvklaringsbehovHendelseDto(
                                 avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
@@ -156,6 +157,7 @@ class SaksStatistikkServiceTest {
                         ident = "1233456",
                         versjon = "1",
                         vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                        årsakTilOpprettelse = "SØKNAD",
                         avklaringsbehov = listOf(
                             AvklaringsbehovHendelseDto(
                                 avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
