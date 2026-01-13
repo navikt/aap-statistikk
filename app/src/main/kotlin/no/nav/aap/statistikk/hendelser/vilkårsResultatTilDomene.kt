@@ -60,5 +60,6 @@ private fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.tilDomene
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.AKTIVITETSPLIKT -> Vilkårtype.AKTIVITETSPLIKT
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.OPPHOLDSKRAV -> Vilkårtype.OPPHOLDSKRAV
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.INNTEKTSBORTFALL -> Vilkårtype.INNTEKTSBORTFALL
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.SAMORDNING_ANNEN_LOVGIVNING -> Vilkårtype.SAMORDNING_ANNEN_LOVGIVNING
     }
 }
