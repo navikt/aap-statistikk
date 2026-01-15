@@ -27,7 +27,15 @@ spec:
              vp.innvilgelsesaarsak as innvilgelsesaarsak,
              datetime(vr.opprettet_tidspunkt) as reg_dato,
              DATETIME(timestamp_millis(greatest(b.datastream_metadata.source_timestamp, v.datastream_metadata.source_timestamp, vr.datastream_metadata.source_timestamp, vp.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endret_tid,
-             concat(b.id, '-', v.id, '-', vr.id, '-', vp.id, '-', br.id, '-', s.id, '-', COALESCE(vp.innvilgelsesaarsak, '0')) as unik_id
+             concat(
+               COALESCE(CAST(b.id AS STRING), '0'), '-', 
+               COALESCE(CAST(v.id AS STRING), '0'), '-', 
+               COALESCE(CAST(vr.id AS STRING), '0'), '-', 
+               COALESCE(CAST(vp.id AS STRING), '0'), '-', 
+               COALESCE(CAST(br.id AS STRING), '0'), '-', 
+               COALESCE(CAST(s.id AS STRING), '0'), '-', 
+               COALESCE(vp.innvilgelsesaarsak, '0')
+             ) as unik_id
       FROM datastream_hendelser.public_vilkarsresultat vr
                LEFT JOIN `datastream_hendelser.public_vilkar` v ON vr.id = v.vilkarresult_id
                join `datastream_hendelser.public_vilkarsperiode` vp on v.id = vp.vilkar_id
