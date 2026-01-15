@@ -13,8 +13,7 @@ import no.nav.aap.statistikk.oppgaveHendelseMottatt
 
 class LagreOppgaveHendelseJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
-    private val flytJobbRepository: FlytJobbRepository,
-    private val lagreOppgaveJobb: LagreOppgaveJobb
+    private val flytJobbRepository: FlytJobbRepository
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val hendelse = DefaultJsonMapper.fromJson<OppgaveHendelse>(input.payload())
@@ -22,21 +21,18 @@ class LagreOppgaveHendelseJobbUtfører(
         oppgaveHendelseRepository.lagreHendelse(hendelse)
 
         flytJobbRepository.leggTil(
-            JobbInput(lagreOppgaveJobb).medPayload(hendelse.oppgaveId.toString())
+            JobbInput(LagreOppgaveJobb()).medPayload(hendelse.oppgaveId.toString())
                 .forSak(hendelse.saksnummer?.let(::stringToNumber) ?: hendelse.oppgaveId)
         )
         PrometheusProvider.prometheus.oppgaveHendelseMottatt().increment()
     }
 }
 
-class LagreOppgaveHendelseJobb(
-    val lagreOppgaveJobb: LagreOppgaveJobb,
-) : ProviderJobbSpesifikasjon {
+class LagreOppgaveHendelseJobb : ProviderJobbSpesifikasjon {
     override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
         return LagreOppgaveHendelseJobbUtfører(
             repositoryProvider.provide(),
-            repositoryProvider.provide(),
-            lagreOppgaveJobb
+            repositoryProvider.provide()
         )
     }
 

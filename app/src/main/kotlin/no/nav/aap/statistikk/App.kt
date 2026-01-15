@@ -108,9 +108,7 @@ fun Application.startUp(
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(motorJobbAppender)
 
     val lagreOppgaveJobb = LagreOppgaveJobb()
-
-    val lagreOppgaveHendelseJobb =
-        LagreOppgaveHendelseJobb(lagreOppgaveJobb)
+    val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
     val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
     val motor = motor(

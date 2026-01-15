@@ -30,7 +30,6 @@ import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.påTidspunkt
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
-import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
@@ -291,9 +290,7 @@ class IntegrationTest {
         dataSource.transaction {
             FlytJobbRepository(it).leggTil(
                 JobbInput(
-                    LagreOppgaveHendelseJobb(
-                        LagreOppgaveJobb()
-                    )
+                    LagreOppgaveHendelseJobb()
                 ).medPayload(
                     DefaultJsonMapper.toJson(hendelse)
                 ).forSak(stringToNumber(hendelse.saksnummer!!))
