@@ -66,7 +66,7 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             LagreStoppetHendelseJobb(jobbAppender),
-            LagreOppgaveHendelseJobb(LagreOppgaveJobb()),
+            LagreOppgaveHendelseJobb(),
             LagrePostmottakHendelseJobb(),
             LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
@@ -171,7 +171,7 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(LagreOppgaveJobb())
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -250,7 +250,7 @@ class MottaStatistikkTest {
         val testJobber = konstruerTestJobber()
 
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(LagreOppgaveJobb())
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -324,7 +324,7 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(LagreOppgaveJobb())
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -411,20 +411,22 @@ class MottaStatistikkTest {
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
         val avsluttetBehandlingCounter = meterRegistry.avsluttetBehandlingLagret()
 
-        val jobbAppender1 = MockJobbAppender()
-        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(jobbAppender1)
-
         val lagreOppgaveJobb = LagreOppgaveJobb()
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(lagreOppgaveJobb)
+        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
 
-        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb(
-        )
+        val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
 
         val lagreAvsluttetBehandlingTilBigQueryJobb =
             LagreAvsluttetBehandlingTilBigQueryJobb(FakeBQYtelseRepository())
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
+        val jobbAppender = MotorJobbAppender(
+            lagreSakinfoTilBigQueryJobb,
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            resendSakstatistikkJobb,
+        )
+        val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(jobbAppender)
         val motor = motor(
             dataSource = dataSource,
             gatewayProvider = defaultGatewayProvider { },
@@ -432,17 +434,12 @@ class MottaStatistikkTest {
                 resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,
                 lagreSakinfoTilBigQueryJobb,
-                LagreAvklaringsbehovHendelseJobb(jobbAppender1),
+                LagreAvklaringsbehovHendelseJobb(jobbAppender),
                 lagrePostmottakHendelseJobb,
                 lagreOppgaveHendelseJobb,
                 lagreOppgaveJobb,
                 lagreStoppetHendelseJobb
             )
-        )
-        val jobbAppender = MotorJobbAppender(
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb,
         )
 
         testKlient(

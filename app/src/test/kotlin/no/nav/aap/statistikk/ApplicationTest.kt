@@ -10,7 +10,6 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
-import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
@@ -33,9 +32,7 @@ class ApplicationTest {
             jobbAppender = jobbAppender,
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender),
-            lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(
-                LagreOppgaveJobb()
-            ),
+            lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb(),
             lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb(),
             lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
         ) { url, client ->
@@ -146,9 +143,7 @@ class ApplicationTest {
             motorMock(),
             azureConfig,
             LagreStoppetHendelseJobb(jobbAppender),
-            LagreOppgaveHendelseJobb(
-                LagreOppgaveJobb()
-            ),
+            LagreOppgaveHendelseJobb(),
             LagrePostmottakHendelseJobb(),
             LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,

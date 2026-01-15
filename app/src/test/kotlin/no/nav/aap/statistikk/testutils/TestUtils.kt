@@ -185,7 +185,7 @@ fun konstruerMotor(
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            LagreOppgaveHendelseJobb(lagreOppgaveJobb),
+            LagreOppgaveHendelseJobb(),
             lagreSakinfoTilBigQueryJobb,
             LagreStoppetHendelseJobb(jobbAppender)
         )
