@@ -36,19 +36,19 @@ spec:
        s.saksnummer AS saksnummer,
        br.referanse AS behandlingsreferanse,
        b.type AS behandlingsType,
-       b.opprettet_tid AS opprettet_tid,
-       ARRAY_TO_STRING( ARRAY(
+       b.opprettet_tid AS behandling_opprettet_tid,
+       ARRAY_TO_STRING(ARRAY(
          SELECT
            JSON_VALUE(value)
          FROM
-           UNNEST(JSON_EXTRACT_ARRAY(b.aarsaker_til_behandling)) AS value ), ', ' ) AS joined_string,
+           UNNEST(JSON_EXTRACT_ARRAY(b.aarsaker_til_behandling)) AS value ), ', ' ) AS behandling_aarsak,
        p.ident AS brukerFnr,
-       bh.resultat,
-       bh.vedtak_tidspunkt as vedtakstidspunkt,
-       d.kodeverk AS kodeverk,
-       d.diagnosekode AS diagnosekode,
-       d.bidiagnoser AS bidiagnoser,
-       rettighetstyper.perioder AS perioder,
+       bh.resultat as behandlingsresultat,
+       bh.vedtak_tidspunkt as vedtak_tidspunkt,
+       d.kodeverk AS diagnose_kodeverk,
+       d.diagnosekode AS diagnose_kode,
+       d.bidiagnoser AS bidiagnoser_kode,
+       rettighetstyper.perioder AS rettighetstype,
        DATETIME(
            timestamp_millis(
              greatest(
@@ -57,7 +57,7 @@ spec:
                br.datastream_metadata.source_timestamp,
                s.datastream_metadata.source_timestamp,
                ifnull(d.datastream_metadata.source_timestamp, 0))),
-           'Europe/Oslo') AS endret_tid,
+           'Europe/Oslo') AS rad_endret_tid,
        concat(b.id, '-', bh.id, '-', br.id, '-', s.id, '-', ifnull(cast(d.id as string), '')) AS unik_id
      FROM
        `datastream_hendelser.public_behandling` b
