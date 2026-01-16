@@ -80,6 +80,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
         }
 
         oppdaterÅrsakerTilBehandling(behandling)
+        oppdaterÅrsakTilOpprettelse(behandling)
 
         val historikkId = dbConnection.executeReturnKey(
             """INSERT INTO behandling_historikk (behandling_id,
@@ -116,6 +117,17 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         }
 
         oppdaterRelaterteIdenter(behandling, historikkId)
+    }
+
+    @Deprecated("Fjern denne når alle aktive behandlinger har dette feltet.")
+    private fun oppdaterÅrsakTilOpprettelse(behandling: Behandling) {
+        val behandlingId = behandling.id()
+        dbConnection.execute("UPDATE behandling SET aarsak_til_opprettelse = ? WHERE id = ? AND aarsak_til_opprettelse IS NULL") {
+            setParams {
+                setString(1, behandling.årsakTilOpprettelse)
+                setLong(2, behandlingId.id)
+            }
+        }
     }
 
     private fun oppdaterÅrsakerTilBehandling(
