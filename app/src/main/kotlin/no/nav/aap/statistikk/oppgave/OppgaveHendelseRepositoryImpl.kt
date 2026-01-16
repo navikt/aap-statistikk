@@ -97,7 +97,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
 
     override fun hentEnhetForAvklaringsbehov(
         behandlingReferanse: UUID,
-        avklaringsbehovKode: String
+        avklaringsbehovKode: Definisjon
     ): List<EnhetOgTidspunkt> {
         val sql = """
             select enhet, opprettet_tidspunkt
@@ -110,7 +110,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
         return dbConnection.queryList(sql) {
             setParams {
                 setUUID(1, behandlingReferanse)
-                setString(2, avklaringsbehovKode)
+                setString(2, avklaringsbehovKode.kode.name)
             }
             setRowMapper {
                 EnhetOgTidspunkt(

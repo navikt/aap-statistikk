@@ -66,7 +66,7 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
-            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov()?.kode?.name,
+            gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsBehov(),
             gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
             søknadsformat = dto.soknadsFormat.tilDomene(),
             venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),

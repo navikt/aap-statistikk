@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
@@ -86,8 +87,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  hendelsestidspunkt, slettet, utbetaling_id, avklaringsbehov_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -100,7 +101,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.ansvarligBeslutter)
                 setString(c++, behandling.behandlingStatus().name)
                 setString(c++, behandling.sisteSaksbehandler)
-                setString(c++, behandling.gjeldendeAvklaringsBehov)
+                setString(c++, behandling.gjeldendeAvklaringsBehov?.definisjon?.kode?.name)
                 setString(c++, behandling.gjeldendeAvklaringsbehovStatus?.name)
                 setEnumName(c++, behandling.søknadsformat)
                 setString(c++, behandling.venteÅrsak)
@@ -110,6 +111,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setLocalDateTime(c++, behandling.oppdatertTidspunkt())
                 setBoolean(c++, false)
                 setString(c++, behandling.utbetalingId())
+                setLong(c++, behandling.gjeldendeAvklaringsBehov?.id)
             }
         }
 
@@ -200,8 +202,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  hendelsestidspunkt, slettet, utbetaling_id, avklaringsbehov_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) }
         ) {
             setParams { (hendelse, idx) ->
@@ -215,7 +217,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, hendelse.ansvarligBeslutter)
                 setString(c++, hendelse.behandlingStatus().name)
                 setString(c++, hendelse.sisteSaksbehandler)
-                setString(c++, hendelse.gjeldendeAvklaringsBehov)
+                setString(c++, hendelse.gjeldendeAvklaringsBehov?.definisjon?.kode?.name)
                 setString(c++, hendelse.gjeldendeAvklaringsbehovStatus?.name)
                 setEnumName(c++, hendelse.søknadsformat)
                 setString(c++, hendelse.venteÅrsak)
@@ -225,6 +227,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setLocalDateTime(c++, hendelse.oppdatertTidspunkt())
                 setBoolean(c++, false)
                 setString(c++, hendelse.utbetalingId())
+                setLong(c++, hendelse.gjeldendeAvklaringsBehov?.id)
             }
         }
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
@@ -257,6 +260,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
            bh.venteaarsak                      as bh_venteaarsak,
            bh.retur_aarsak                     as bh_retur_aarsak,
            bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
+           bh.avklaringsbehov_id               as bh_avklaringsbehov_id,
            bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
            bh.resultat                         as bh_resultat,
            bh.soknadsformat                    as bh_soknadsformat,
@@ -326,6 +330,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
               bh.venteaarsak                      as bh_venteaarsak,
               bh.retur_aarsak                     as bh_retur_aarsak,
               bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
+              bh.avklaringsbehov_id               as bh_avklaringsbehov_id,
               bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
               bh.steggruppe                       as bh_steggruppe,
               bh.soknadsformat                    as bh_soknadsformat,
@@ -345,10 +350,17 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         dbConnection.queryList(historikkSpørring) {
             setParams { setLong(1, behandling.id().id) }
             setRowMapper {
+                val avklaringsbehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
+                    ?.let { kode ->
+                        Avklaringsbehov(
+                            Definisjon.forKode(kode),
+                            it.getLongOrNull("bh_avklaringsbehov_id")
+                        )
+                    }
                 BehandlingHendelse(
                     tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),
                     hendelsesTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt"),
-                    avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov"),
+                    avklaringsBehov = avklaringsbehov,
                     avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
                     steggruppe = it.getEnumOrNull("bh_steggruppe"),
                     venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
@@ -412,7 +424,12 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id")?.let(::BehandlingId),
         snapShotId = it.getLong("bh_id"),
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
-            ?.ifBlank { null },
+            ?.ifBlank { null }?.let { kode ->
+                Avklaringsbehov(
+                    Definisjon.forKode(kode),
+                    it.getLongOrNull("bh_avklaringsbehov_id")
+                )
+            },
         gjeldendeAvklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
         returÅrsak = it.getStringOrNull("bh_retur_aarsak")?.ifBlank { null },

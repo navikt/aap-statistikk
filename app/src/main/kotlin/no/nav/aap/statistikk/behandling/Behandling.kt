@@ -19,6 +19,8 @@ data class Versjon(
 
 private val log = LoggerFactory.getLogger(Behandling::class.java)
 
+data class Avklaringsbehov(val definisjon: Definisjon, val id: Long? = null)
+
 /**
  * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
  */
@@ -38,7 +40,7 @@ data class Behandling(
     val relaterteIdenter: List<String> = listOf(),
     val relatertBehandlingId: BehandlingId? = null,
     val snapShotId: Long? = null,
-    val gjeldendeAvklaringsBehov: String? = null,
+    val gjeldendeAvklaringsBehov: Avklaringsbehov? = null,
     val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
@@ -129,12 +131,12 @@ data class Behandling(
             return BehandlingMetode.AUTOMATISK
         }
         val sisteHendelse = this.hendelser.last()
-        if (sisteHendelse.avklaringsBehov.isNullOrBlank()) {
+        if (sisteHendelse.avklaringsBehov == null) {
             log.info("Ingen avkl.funnet for siste hendelse. Behandling: ${this.referanse}. Antall hendelser: ${this.hendelser.size}")
             return this.copy(hendelser = this.hendelser.dropLast(1)).behandlingMetode()
         }
 
-        val sisteDefinisjon = Definisjon.forKode(sisteHendelse.avklaringsBehov)
+        val sisteDefinisjon = sisteHendelse.avklaringsBehov.definisjon
 
         if (sisteDefinisjon == Definisjon.KVALITETSSIKRING) {
             return BehandlingMetode.KVALITETSSIKRING
@@ -155,7 +157,7 @@ data class Behandling(
 @JvmName("erAutomatisk")
 fun List<BehandlingHendelse>.erManuell(): Boolean {
     return this.filterNot { it.avklaringsBehov == null }.any {
-        !Definisjon.forKode(requireNotNull(it.avklaringsBehov)).erAutomatisk()
+        !requireNotNull(it.avklaringsBehov?.definisjon).erAutomatisk()
     }
 }
 
@@ -166,7 +168,7 @@ fun List<BehandlingHendelse>.erManuell(): Boolean {
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime?,
     val hendelsesTidspunkt: LocalDateTime,
-    val avklaringsBehov: String? = null,
+    val avklaringsBehov: Avklaringsbehov? = null,
     val steggruppe: StegGruppe? = null,
     val avklaringsbehovStatus: AvklaringsbehovStatus?,
     val venteÅrsak: String? = null,
