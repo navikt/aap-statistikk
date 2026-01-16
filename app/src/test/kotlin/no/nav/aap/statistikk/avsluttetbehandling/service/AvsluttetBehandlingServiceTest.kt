@@ -23,17 +23,15 @@ import no.nav.aap.statistikk.vilkårsresultat.*
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.util.DoubleComparator
 import org.junit.jupiter.api.Test
-import java.lang.Double
 import java.math.BigDecimal
 import java.time.*
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.function.BiPredicate
 import javax.sql.DataSource
-import kotlin.Pair
 import kotlin.math.abs
-import kotlin.to
 
 class AvsluttetBehandlingServiceTest {
     @Test
@@ -209,13 +207,8 @@ class AvsluttetBehandlingServiceTest {
         assertThat(uthentetTilkjentYtelse.perioder).hasSize(2)
         assertThat(uthentetTilkjentYtelse.perioder).usingRecursiveComparison()
             .withComparatorForType(
-                { a, b ->
-                    val diff = b.toDouble() - a.toDouble()
-                    if (abs(diff) < 0.00001) 0 else {
-                        if (diff > 0) 1 else -1
-                    }
-                },
-                Double::class.java
+                DoubleComparator(0.00001),
+                Double::class.javaObjectType
             )
             .isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
         assertThat(counter.count()).isEqualTo(1.0)
@@ -326,9 +319,9 @@ class AvsluttetBehandlingServiceTest {
         }
 
         assertThat(uthentet.perioder).usingRecursiveComparison()
-            .withEqualsForType(
-                { a, b -> abs(a.toDouble() - b.toDouble()) < 0.00001 },
-                Double::class.java
+            .withComparatorForType(
+                DoubleComparator(0.00001),
+                Double::class.javaObjectType
             )
             .ignoringCollectionOrder()
             .isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)

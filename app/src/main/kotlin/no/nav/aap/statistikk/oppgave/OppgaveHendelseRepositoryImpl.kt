@@ -100,11 +100,11 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
         avklaringsbehovKode: String
     ): List<EnhetOgTidspunkt> {
         val sql = """
-            select enhet, opprettet_tidspunkt
+            select enhet, mottatt_tidspunkt
             from oppgave_hendelser
             where behandling_referanse = ?
               and avklaringsbehov_kode = ?
-            order by opprettet_tidspunkt desc
+            order by mottatt_tidspunkt desc
         """.trimIndent()
 
         return dbConnection.queryList(sql) {
@@ -115,8 +115,29 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
             setRowMapper {
                 EnhetOgTidspunkt(
                     enhet = it.getString("enhet"),
-                    tidspunkt = it.getLocalDateTime("opprettet_tidspunkt")
+                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt")
                 )
+            }
+        }
+    }
+
+    override fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID): Pair<EnhetOgTidspunkt, String>? {
+        val sql = """
+            select enhet, mottatt_tidspunkt, avklaringsbehov_kode
+            from oppgave_hendelser
+            where behandling_referanse = ?
+            order by mottatt_tidspunkt desc limit 1
+        """.trimIndent()
+
+        return dbConnection.queryFirstOrNull(sql) {
+            setParams {
+                setUUID(1, behandlingReferanse)
+            }
+            setRowMapper {
+                EnhetOgTidspunkt(
+                    enhet = it.getString("enhet"),
+                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt")
+                ) to it.getString("avklaringsbehov_kode")
             }
         }
     }

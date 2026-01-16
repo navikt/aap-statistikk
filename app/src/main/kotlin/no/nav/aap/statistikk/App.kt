@@ -99,7 +99,6 @@ fun Application.startUp(
 
     val motorJobbAppender =
         MotorJobbAppender(
-            lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
             resendSakstatistikkJobb
         )
@@ -147,9 +146,6 @@ fun Application.startUp(
         azureConfig,
         motorApiCallback,
         lagreStoppetHendelseJobb,
-        lagreOppgaveHendelseJobb,
-        lagrePostmottakHendelseJobb,
-        lagreAvklaringsbehovHendelseJobb,
     )
 }
 
@@ -180,9 +176,6 @@ fun Application.module(
     azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
 ) {
     transactionExecutor.withinTransaction {
         RetryService(it).enable()
@@ -211,13 +204,11 @@ fun Application.module(
                 mottaOppdatertBehandling(
                     transactionExecutor,
                     jobbAppender,
-                    lagreAvklaringsbehovHendelseJobb
                 )
-                mottaOppgaveOppdatering(transactionExecutor, jobbAppender, lagreOppgaveHendelseJobb)
+                mottaOppgaveOppdatering(transactionExecutor, jobbAppender)
                 mottaPostmottakOppdatering(
                     transactionExecutor,
                     jobbAppender,
-                    lagrePostmottakHendelseJobb
                 )
                 hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()
