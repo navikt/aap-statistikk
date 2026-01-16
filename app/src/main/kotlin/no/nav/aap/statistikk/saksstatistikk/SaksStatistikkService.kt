@@ -378,6 +378,8 @@ class SaksStatistikkService(
                 val fallbackEnhet = enhetOgTidspunkt.enhet
                 log.info("Fallback-enhet: $fallbackEnhet for avklaringsbehov ${avklaringsBehov}. Originalt behov: $sisteHendelsevklaringsbehov. Referanse: $behandlingReferanse")
                 return fallbackEnhet
+            } else {
+                log.info("Fant ingen enhet eller fallbackenhet. Referanse: $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov.")
             }
         }
         if (erSkjermet) {
