@@ -355,7 +355,8 @@ class SaksStatistikkService(
         sisteHendelse: BehandlingHendelse,
         erSkjermet: Boolean,
     ): String? {
-        val enhet = sisteHendelse.avklaringsBehov?.let {
+        val sisteHendelsevklaringsbehov = sisteHendelse.avklaringsBehov
+        val enhet = sisteHendelsevklaringsbehov?.let {
             oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
                 behandlingReferanse,
                 it
@@ -368,14 +369,14 @@ class SaksStatistikkService(
         }?.enhet
 
         if (enhet == null) {
-            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
+            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov.")
             val fallbackEnhet =
                 oppgaveHendelseRepository.hentSisteEnhetPåBehandling(behandlingReferanse)
 
             if (fallbackEnhet != null) {
                 val (enhetOgTidspunkt, avklaringsBehov) = fallbackEnhet
                 val fallbackEnhet = enhetOgTidspunkt.enhet
-                log.info("Fallback-enhet: $fallbackEnhet for avklaringsbehov ${avklaringsBehov}. Referanse: $behandlingReferanse")
+                log.info("Fallback-enhet: $fallbackEnhet for avklaringsbehov ${avklaringsBehov}. Originalt behov: $sisteHendelsevklaringsbehov. Referanse: $behandlingReferanse")
                 return fallbackEnhet
             }
         }
