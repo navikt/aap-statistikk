@@ -63,7 +63,6 @@ fun NormalOpenAPIRoute.mottaStoppetBehandling(
 fun NormalOpenAPIRoute.mottaOppdatertBehandling(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
 ) {
     route("/oppdatertBehandling").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, StoppetBehandling>(
@@ -78,7 +77,7 @@ fun NormalOpenAPIRoute.mottaOppdatertBehandling(
 
                 jobbAppender.leggTil(
                     conn,
-                    JobbInput(lagreAvklaringsbehovHendelseJobb)
+                    JobbInput(LagreAvklaringsbehovHendelseJobb(jobbAppender))
                         .medPayload(stringified)
                         .medCallId()
                         .forSak(encodedSaksNummer)
@@ -92,7 +91,6 @@ fun NormalOpenAPIRoute.mottaOppdatertBehandling(
 fun NormalOpenAPIRoute.mottaOppgaveOppdatering(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
 ) {
     route("/oppgave").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, OppgaveHendelse>(
@@ -109,7 +107,7 @@ fun NormalOpenAPIRoute.mottaOppgaveOppdatering(
 
                 jobbAppender.leggTil(
                     conn,
-                    JobbInput(lagreOppgaveHendelseJobb).medPayload(
+                    JobbInput(LagreOppgaveHendelseJobb()).medPayload(
                         DefaultJsonMapper.toJson(dto.tilDomene())
                     ).let {
                         if (encodedSaksNummer != null) {
@@ -130,7 +128,6 @@ fun NormalOpenAPIRoute.mottaOppgaveOppdatering(
 fun NormalOpenAPIRoute.mottaPostmottakOppdatering(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
 ) {
     route("/postmottak").status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, DokumentflytStoppetHendelse>(
@@ -143,7 +140,7 @@ fun NormalOpenAPIRoute.mottaPostmottakOppdatering(
             transactionExecutor.withinTransaction { conn ->
                 jobbAppender.leggTil(
                     conn,
-                    JobbInput(lagrePostmottakHendelseJobb).medPayload(
+                    JobbInput(LagrePostmottakHendelseJobb()).medPayload(
                         DefaultJsonMapper.toJson(dto)
                     ).medCallId().forSak(dto.journalpostId.referanse)
                 )

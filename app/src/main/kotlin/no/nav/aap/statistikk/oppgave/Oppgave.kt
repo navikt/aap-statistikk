@@ -44,6 +44,8 @@ enum class HendelseType {
 
 /**
  * Dette er den persisterte modellen. Ha gjeldende = true - felt.
+ *
+ * @param mottattTidspunkt Når hendelsen kom til statistikkappen.
  */
 data class OppgaveHendelse(
     val hendelse: HendelseType,
