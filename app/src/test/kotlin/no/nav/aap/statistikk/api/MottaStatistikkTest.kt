@@ -373,9 +373,9 @@ class MottaStatistikkTest {
         }
 
         assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
-        assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5051")
+        assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov!!.definisjon.kode.name).isEqualTo("5051")
         assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
-        assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
+        assertThat(uthentetBehandling.sak.saksnummer.value).isEqualTo(hendelse.saksnummer)
         assertThat(uthentetBehandling.opprettetTid).isEqualTo(
             hendelse.behandlingOpprettetTidspunkt
         )

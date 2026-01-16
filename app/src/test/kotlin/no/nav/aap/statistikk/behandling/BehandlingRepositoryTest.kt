@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -10,14 +11,12 @@ import no.nav.aap.statistikk.oppgave.BehandlingReferanse
 import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestPerson
 import no.nav.aap.statistikk.testutils.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import java.time.*
 import java.time.temporal.ChronoUnit
@@ -67,7 +66,7 @@ class BehandlingRepositoryTest {
             søknadsformat = SøknadsFormat.PAPIR,
             sisteSaksbehandler = "Joark Jorgensen",
             relaterteIdenter = listOf("123", "456", "123456789"),
-            gjeldendeAvklaringsBehov = "0559",
+            gjeldendeAvklaringsBehov = Avklaringsbehov(Definisjon.AVKLAR_LOVVALG_MEDLEMSKAP),
             gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
             venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
             returÅrsak = "MANGELFULL_BEGRUNNELSE",

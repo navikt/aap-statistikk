@@ -31,7 +31,7 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledVedtakTid()).isNull()
             assertThat(hendelser.årsakTilRetur()).isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
-            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()?.definisjon).isEqualTo(
                 FASTSETT_BEREGNINGSTIDSPUNKT
             )
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
@@ -55,7 +55,7 @@ class HendelseHjelpereKtTest {
                 ÅrsakTilReturKode.MANGLENDE_UTREDNING
             )
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
-            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()?.definisjon).isEqualTo(
                 AVKLAR_SYKDOM
             )
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER)
@@ -77,7 +77,7 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
             assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.IVERKSETTES)
-            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()?.definisjon).isEqualTo(
                 SKRIV_VEDTAKSBREV
             )
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
@@ -121,7 +121,7 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-04-15T13:27:58.401"))
             assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.IVERKSETTES)
-            assertThat(hendelser.utledGjeldendeAvklaringsBehov()).isEqualTo(
+            assertThat(hendelser.utledGjeldendeAvklaringsBehov()?.definisjon).isEqualTo(
                 SKRIV_VEDTAKSBREV
             )
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.OPPRETTET)
@@ -173,7 +173,7 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `utled gjeldende avklaringsbehov ekte data`() {
-        assertThat(ekte2.utledGjeldendeAvklaringsBehov()).isEqualTo(
+        assertThat(ekte2.utledGjeldendeAvklaringsBehov()?.definisjon).isEqualTo(
             AVKLAR_SYKDOM
         )
     }
@@ -215,7 +215,7 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `utled gjeldende avklaringsbehov`() {
-        assertThat(ufullførtBehandlingEndringer.utledGjeldendeAvklaringsBehov())
+        assertThat(ufullførtBehandlingEndringer.utledGjeldendeAvklaringsBehov()?.definisjon)
             .isEqualTo(FATTE_VEDTAK)
     }
 

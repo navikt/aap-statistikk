@@ -110,14 +110,7 @@ class SaksStatistikkService(
         val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
 
-        val enhet = sisteHendelse.avklaringsBehov?.let {
-            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(behandlingReferanse, it)
-        }?.lastOrNull {
-            it.tidspunkt.isBefore(
-                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
-            )
-        }?.enhet
-        val ansvarligEnhet = ansvarligEnhet(enhet, erSkjermet)
+        val ansvarligEnhet = ansvarligEnhet(behandlingReferanse, sisteHendelse, erSkjermet)
 
         if (ansvarligEnhet == null) {
             log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
@@ -359,9 +352,17 @@ class SaksStatistikkService(
     }
 
     private fun ansvarligEnhet(
-        enhet: String?,
+        behandlingReferanse: UUID,
+        sisteHendelse: BehandlingHendelse,
         erSkjermet: Boolean,
     ): String? {
+        val enhet = sisteHendelse.avklaringsBehov?.let {
+            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(behandlingReferanse, it.definisjon)
+        }?.lastOrNull {
+            it.tidspunkt.isBefore(
+                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
+            )
+        }?.enhet
         if (erSkjermet) {
             return "-5"
         }

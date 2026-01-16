@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.oppgave
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
@@ -72,7 +73,10 @@ class OppgaveHendelseRepositoryTest {
         }
 
         val uthentet = dataSource.transaction {
-            OppgaveHendelseRepositoryImpl(it).hentEnhetForAvklaringsbehov(behandlingRef, "5053")
+            OppgaveHendelseRepositoryImpl(it).hentEnhetForAvklaringsbehov(
+                behandlingRef,
+                Definisjon.SKRIV_SYKDOMSVURDERING_BREV
+            )
         }
 
         assertThat(uthentet).isEqualTo(
