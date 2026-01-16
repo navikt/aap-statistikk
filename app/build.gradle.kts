@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("aap-statistikk.conventions")
+    id("aap.conventions")
     kotlin("jvm")
     alias(libs.plugins.ktor)
     id("dev.detekt")
