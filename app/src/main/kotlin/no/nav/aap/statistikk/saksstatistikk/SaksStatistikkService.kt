@@ -113,7 +113,7 @@ class SaksStatistikkService(
         val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
 
-        val ansvarligEnhet = ansvarligEnhet(behandlingReferanse, sisteHendelse, erSkjermet)
+        val ansvarligEnhet = ansvarligEnhet(behandlingReferanse, behandling, erSkjermet)
         val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
 
         if (saksbehandlerIdent == null) {
@@ -352,9 +352,10 @@ class SaksStatistikkService(
 
     private fun ansvarligEnhet(
         behandlingReferanse: UUID,
-        sisteHendelse: BehandlingHendelse,
+        behandling: Behandling,
         erSkjermet: Boolean,
     ): String? {
+        val sisteHendelse = behandling.hendelser.last()
         val sisteHendelsevklaringsbehov = sisteHendelse.avklaringsBehov
         val enhet = sisteHendelsevklaringsbehov?.let {
             oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
@@ -369,17 +370,17 @@ class SaksStatistikkService(
         }?.enhet
 
         if (enhet == null) {
-            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov.")
+            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
             val fallbackEnhet =
                 oppgaveHendelseRepository.hentSisteEnhetPåBehandling(behandlingReferanse)
 
             if (fallbackEnhet != null) {
                 val (enhetOgTidspunkt, avklaringsBehov) = fallbackEnhet
                 val fallbackEnhet = enhetOgTidspunkt.enhet
-                log.info("Fallback-enhet: $fallbackEnhet for avklaringsbehov ${avklaringsBehov}. Originalt behov: $sisteHendelsevklaringsbehov. Referanse: $behandlingReferanse")
+                log.info("Fallback-enhet: $fallbackEnhet for avklaringsbehov ${avklaringsBehov}. Originalt behov: $sisteHendelsevklaringsbehov. Referanse: $behandlingReferanse. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
                 return fallbackEnhet
             } else {
-                log.info("Fant ingen enhet eller fallbackenhet. Referanse: $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov.")
+                log.info("Fant ingen enhet eller fallbackenhet. Referanse: $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}.")
             }
         }
         if (erSkjermet) {
