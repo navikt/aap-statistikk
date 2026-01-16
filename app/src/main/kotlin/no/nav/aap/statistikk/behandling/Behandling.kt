@@ -207,6 +207,7 @@ enum class TypeBehandling(val kildeSystem: KildeSystem) {
     Journalføring(kildeSystem = KildeSystem.Postmottak), Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Aktivitetsplikt(
         kildeSystem = KildeSystem.Behandlingsflyt
     ),
+    @Suppress("EnumEntryName")
     Aktivitetsplikt11_9(kildeSystem = KildeSystem.Behandlingsflyt),
 }
 
@@ -244,7 +245,7 @@ enum class Vurderingsbehov(val sortering: Int) {
     REVURDER_SAMORDNING_ANDRE_STATLIGE_YTELSER(1), REVURDER_SAMORDNING_ARBEIDSGIVER(1), REVURDER_SAMORDNING_TJENESTEPENSJON(
         1
     ),
-    REVURDER_SYKEPENGEERSTATNING(1), BARNETILLEGG_SATS_REGULERING(0), AUTOMATISK_OPPDATER_VILKÅR(1)
+    REVURDER_SYKEPENGEERSTATNING(1), BARNETILLEGG_SATS_REGULERING(0), UTVID_VEDTAKSLENGDE(1)
 }
 
 @Deprecated("Når aarsak_til_opprettelse finnes for alle nye behandlinger, slett denne.")
