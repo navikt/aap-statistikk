@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 class MotorJobbAppender(
-    private val lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
     private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
     private val resendSakstatistikkJobb: ResendSakstatistikkJobb,
 ) : JobbAppender {
@@ -53,7 +52,7 @@ class MotorJobbAppender(
         leggTil(
             repositoryProvider,
             // For sak = behandlingId. Husk at "sak" er funksjonalt bare en concurrency-key
-            JobbInput(lagreSakinfoTilBigQueryJobb)
+            JobbInput(LagreSakinfoTilBigQueryJobb())
                 .medPayload(behandlingId)
                 .medNesteKjøring(LocalDateTime.now().plusSeconds(delayInSeconds))
                 .forSak(stringToNumber(saksnummer.value))

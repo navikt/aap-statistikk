@@ -66,9 +66,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             LagreStoppetHendelseJobb(jobbAppender),
-            LagreOppgaveHendelseJobb(),
-            LagrePostmottakHendelseJobb(),
-            LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -191,9 +188,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
             testJobber.motorJobbAppender,
         ) { url, client ->
 
@@ -270,9 +264,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
             testJobber.motorJobbAppender,
         ) { url, client ->
 
@@ -344,9 +335,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
             testJobber.motorJobbAppender,
         ) { url, client ->
 
@@ -422,7 +410,6 @@ class MottaStatistikkTest {
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
         val jobbAppender = MotorJobbAppender(
-            lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
             resendSakstatistikkJobb,
         )
@@ -447,9 +434,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             lagreStoppetHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
         ) { url, client ->
 

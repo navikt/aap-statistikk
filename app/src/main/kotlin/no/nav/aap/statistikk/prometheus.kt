@@ -21,3 +21,6 @@ fun MeterRegistry.oppgaveHendelseMottatt(): Counter =
 
 fun MeterRegistry.lagretPostmottakHendelse(): Counter =
     this.counter("statistikk_lagret_postmottak_hendelse_total")
+
+fun MeterRegistry.årsakTilOpprettelseIkkeSatt(): Counter =
+    this.counter("statistikk_aarsak_til_opprettelse_ikke_satt_total")

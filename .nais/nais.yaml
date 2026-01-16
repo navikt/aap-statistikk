@@ -104,6 +104,6 @@ spec:
     - name: INTEGRASJON_OPPGAVE_AZP
       value: {{oppgave_azp}}
     - name: HACKY_DELAY
-      value: "10"
+      value: "20"
     - name: JDK_JAVA_OPTIONS
       value: "-XX:+UseParallelGC -XX:ActiveProcessorCount=4"
