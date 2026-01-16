@@ -1,28 +1,18 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.MeldekortDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.statistikk.behandling.SøknadsFormat
-import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
-import no.nav.aap.statistikk.meldekort.ArbeidIPerioder
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
-import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
-import no.nav.aap.verdityper.dokument.Kanal
 import org.slf4j.LoggerFactory
-import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 class HendelsesService(
     private val sakService: SakService,
@@ -52,7 +42,7 @@ class HendelsesService(
                     jobbAppender.leggTilLagreSakTilBigQueryJobb(
                         repositoryProvider,
                         it,
-                        // Veldig hacky! Dette er for at jobben som kjører etter melidng fra
+                        // Veldig hacky! Dette er for at jobben som kjører etter melding fra
                         // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
                         delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L
                     )

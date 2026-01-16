@@ -91,9 +91,6 @@ fun <E> testKlient(
         clientSecret = "xxx",
     ),
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
     jobbAppender: JobbAppender,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
@@ -123,9 +120,6 @@ fun <E> testKlient(
             azureConfig,
             {},
             lagreStoppetHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
         )
     }.start()
 
@@ -154,7 +148,6 @@ fun konstruerTestJobber(
         LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
     val resendSakstatistikkJobb = ResendSakstatistikkJobb()
     val motorJobbAppender = MotorJobbAppender(
-        lagreSakinfoTilBigQueryJobb,
         lagreAvsluttetBehandlingTilBigQueryJobb,
         resendSakstatistikkJobb,
     )

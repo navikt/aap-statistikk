@@ -7,13 +7,12 @@ import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.util.DoubleComparator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.Double
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
-import kotlin.math.abs
 
 class TilkjentYtelseRepositoryTest {
     @Test
@@ -96,9 +95,9 @@ class TilkjentYtelseRepositoryTest {
 
         assertThat(uthentet.perioder)
             .usingRecursiveComparison()
-            .withEqualsForType(
-                { a, b -> abs(a.toDouble() - b.toDouble()) < 0.00001 },
-                Double::class.java
+            .withComparatorForType(
+                DoubleComparator(0.00001),
+                Double::class.javaObjectType
             )
             .isEqualTo(tilkjentYtelse.perioder)
 
