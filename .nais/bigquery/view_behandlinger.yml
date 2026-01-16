@@ -56,9 +56,9 @@ spec:
                bh.datastream_metadata.source_timestamp,
                br.datastream_metadata.source_timestamp,
                s.datastream_metadata.source_timestamp,
-               d.datastream_metadata.source_timestamp)),
+               ifnull(d.datastream_metadata.source_timestamp, 0))),
            'Europe/Oslo') AS endret_tid,
-         concat(b.id, '-', bh.id, '-', br.id, '-', s.id, '-', d.id) AS unik_id
+       concat(b.id, '-', bh.id, '-', br.id, '-', s.id, '-', ifnull(cast(d.id as string), '')) AS unik_id
      FROM
        `datastream_hendelser.public_behandling` b
      JOIN
