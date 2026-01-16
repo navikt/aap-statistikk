@@ -8,14 +8,14 @@ import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.person.Person
 
 class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRepository {
-    companion object: RepositoryFactory<OppgaveRepository> {
+    companion object : RepositoryFactory<OppgaveRepository> {
         override fun konstruer(connection: DBConnection): OppgaveRepository {
             return OppgaveRepositoryImpl(connection)
         }
     }
 
     override fun lagreOppgave(oppgave: Oppgave): Long {
-        requireNotNull(oppgave.enhet.id) { "Enhet-ID må være satt på enhet-objektet i oppgave." }
+        requireNotNull(oppgave.enhet.id) { "Enhet-ID må være satt på enhet-objektet i oppgave. Oppgave-ID: ${oppgave.identifikator}" }
 
         val behandlingsReferanseId = oppgave.behandlingReferanse?.let {
             val sqlVersjon = """WITH ny_ref AS (
@@ -73,7 +73,7 @@ SELECT COALESCE(
     }
 
     override fun oppdaterOppgave(oppgave: Oppgave) {
-        requireNotNull(oppgave.id)
+        requireNotNull(oppgave.id) { "Oppgave må ha ID før den kan oppdateres. Identifikator: ${oppgave.identifikator}" }
         // Sjekk reservasjon-status
         // Først fjern evnt eksisterende reservasjoner
         fjernEksisterendeReservasjoner(oppgave.id)

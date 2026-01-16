@@ -145,7 +145,7 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
                 beregningsGrunnlag =
                     grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene()
             }
-            beregningsGrunnlag = requireNotNull(beregningsGrunnlag)
+            beregningsGrunnlag = requireNotNull(beregningsGrunnlag) { "Beregningsgrunnlag må være satt for yrkesskade" }
 
             IBeregningsGrunnlag.GrunnlagYrkesskade(
                 grunnlaget = grunnlagYrkesskade.grunnlaget.toDouble(),

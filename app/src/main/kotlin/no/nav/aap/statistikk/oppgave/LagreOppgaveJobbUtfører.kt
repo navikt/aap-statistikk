@@ -23,7 +23,6 @@ class LagreOppgaveJobbUtfører(
 
 class LagreOppgaveJobb : ProviderJobbSpesifikasjon {
     override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
-        val repositoryProvider = repositoryProvider
         return LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
             OppgaveHistorikkLagrer.konstruer(repositoryProvider)

@@ -86,7 +86,8 @@ WHERE sak.id = ?
     )
 
     override fun settInnSak(sak: Sak): Long {
-        val personId = requireNotNull(sak.person.id())
+        val personId =
+            requireNotNull(sak.person.id()) { "Person må ha ID før sak kan settes inn. Saksnummer: ${sak.saksnummer}" }
 
         val query = """
             WITH INSERTED AS (
@@ -117,7 +118,8 @@ WHERE sak.id = ?
     }
 
     override fun oppdaterSak(sak: Sak) {
-        val sakId = requireNotNull(sak.id)
+        val sakId =
+            requireNotNull(sak.id) { "Sak må ha ID før den kan oppdateres. Saksnummer: ${sak.saksnummer}." }
 
         dbConnection.execute("UPDATE sak_historikk SET gjeldende = FALSE where sak_id = ?") {
             setParams { setLong(1, sakId) }
@@ -137,7 +139,7 @@ WHERE sak.id = ?
 
     override fun tellSaker(): Int {
         val query = "SELECT COUNT(*) AS total FROM sak"
-        return dbConnection.queryFirst<Int>(query) {
+        return dbConnection.queryFirst(query) {
             setRowMapper { row ->
                 row.getInt("total")
             }

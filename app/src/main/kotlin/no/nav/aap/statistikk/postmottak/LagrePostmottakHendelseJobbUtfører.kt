@@ -51,7 +51,7 @@ class LagrePostmottakHendelseJobb : ProviderJobbSpesifikasjon {
 }
 
 fun DokumentflytStoppetHendelse.tilDomene(person: Person): PostmottakBehandling {
-    requireNotNull(person.id())
+    requireNotNull(person.id()) { "Person må ha ID før DokumentflytStoppetHendelse kan opprettes." }
     return PostmottakBehandling(
         journalpostId = this.journalpostId.referanse,
         person = person,

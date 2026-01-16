@@ -14,7 +14,9 @@ class PostmottakBehandlingService(private val postmottakBehandlingRepository: Po
                 innkommendeBehandling.referanse,
                 behandling = innkommendeBehandling.endringer().first() // "Only"
             )
-            postmottakBehandlingRepository.hentEksisterendeBehandling(innkommendeBehandling.referanse)!!
+            requireNotNull(postmottakBehandlingRepository.hentEksisterendeBehandling(innkommendeBehandling.referanse)) {
+                "Behandling med referanse ${innkommendeBehandling.referanse} forsvant etter oppdatering."
+            }
         }
     }
 }

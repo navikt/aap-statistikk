@@ -19,8 +19,12 @@ class BigQueryKvitteringRepository(private val dbConnection: DBConnection) :
             "INSERT INTO bigquery_kvittering (sak_snapshot_id, behandling_snapshot_id, tidspunkt) VALUES (?, ?, CURRENT_TIMESTAMP)"
         return dbConnection.executeReturnKey(query) {
             setParams {
-                setLong(1, requireNotNull(sak.snapShotId))
-                setLong(2, requireNotNull(behandling.snapShotId))
+                setLong(
+                    1,
+                    requireNotNull(sak.snapShotId) { "Sak må ha snapShotId. Saksnummer: ${sak.saksnummer}" })
+                setLong(
+                    2,
+                    requireNotNull(behandling.snapShotId) { "Behandling må ha snapShotId. Behandlingsreferanse: ${behandling.referanse}" })
             }
         }
     }

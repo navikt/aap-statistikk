@@ -142,7 +142,7 @@ WHERE br.referanse = ?;
         val vilkårEntity = vilkårId?.let {
             VilkårEntity(
                 id = vilkårId,
-                vilkårType = requireNotNull(vilkårType),
+                vilkårType = requireNotNull(vilkårType) { "VilkårType må være satt når vilkårId finnes. Vilkår-ID: $vilkårId." },
                 perioder = vilkårPerioder
             )
         }
