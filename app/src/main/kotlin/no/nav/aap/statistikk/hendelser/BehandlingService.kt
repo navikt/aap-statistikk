@@ -75,6 +75,7 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
             gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
             årsaker = dto.vurderingsbehov.map { it.tilDomene() },
             opprettetAv = dto.opprettetAv,
+            årsakTilOpprettelse = dto.årsakTilOpprettelse,
             oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
                 ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt
         )
