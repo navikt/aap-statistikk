@@ -1,4 +1,4 @@
-rootProject.name = "aap-statistikk"
+rootProject.name = "statistikk"
 
 include("app")
 
