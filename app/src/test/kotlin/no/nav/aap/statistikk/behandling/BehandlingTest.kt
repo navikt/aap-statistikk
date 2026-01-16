@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
@@ -10,7 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 
 class BehandlingTest {
 
@@ -39,8 +40,8 @@ class BehandlingTest {
             versjon = Versjon(UUID.randomUUID().toString()),
             søknadsformat = SøknadsFormat.PAPIR,
             hendelser = listOf(
-                behandlingHendelse("SYKDOM"),
-                behandlingHendelse("INSTITUSJON")
+                behandlingHendelse(Definisjon.AVKLAR_SYKDOM),
+                behandlingHendelse(Definisjon.AVKLAR_HELSEINSTITUSJON)
             )
         )
 
@@ -49,18 +50,18 @@ class BehandlingTest {
         assertThat(res.size).isEqualTo(2)
         assertThat(res.first().hendelser.size).isEqualTo(1)
         assertThat(res[1].hendelser.size).isEqualTo(2)
-        assertThat(res[0].gjeldendeAvklaringsBehov).isEqualTo("SYKDOM")
-        assertThat(res[1].gjeldendeAvklaringsBehov).isEqualTo("INSTITUSJON")
-        assertThat(res[0].hendelser.first().avklaringsBehov).isEqualTo("SYKDOM")
-        assertThat(res[1].hendelser.first().avklaringsBehov).isEqualTo("SYKDOM")
-        assertThat(res[1].hendelser[1].avklaringsBehov).isEqualTo("INSTITUSJON")
+        assertThat(res[0].gjeldendeAvklaringsBehov?.definisjon).isEqualTo(Definisjon.AVKLAR_SYKDOM)
+        assertThat(res[1].gjeldendeAvklaringsBehov?.definisjon).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON)
+        assertThat(res[0].hendelser.first().avklaringsBehov?.definisjon).isEqualTo(Definisjon.AVKLAR_SYKDOM)
+        assertThat(res[1].hendelser.first().avklaringsBehov?.definisjon).isEqualTo(Definisjon.AVKLAR_SYKDOM)
+        assertThat(res[1].hendelser[1].avklaringsBehov?.definisjon).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON)
     }
 
-    private fun behandlingHendelse(avklaringsbehov: String): BehandlingHendelse {
+    private fun behandlingHendelse(avklaringsbehov: Definisjon): BehandlingHendelse {
         return BehandlingHendelse(
             tidspunkt = LocalDateTime.now(),
             hendelsesTidspunkt = LocalDateTime.now(),
-            avklaringsBehov = avklaringsbehov,
+            avklaringsBehov = Avklaringsbehov(avklaringsbehov, null),
             avklaringsbehovStatus = Status.OPPRETTET,
             saksbehandler = Saksbehandler(ident = "Albert"),
             versjon = Versjon("323"),

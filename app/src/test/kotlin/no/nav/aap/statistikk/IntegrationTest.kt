@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -393,9 +392,8 @@ class IntegrationTest {
 
             testUtil.ventPåSvar()
 
-            val gjeldendeAVklaringsbehov =
+            val gjeldendeAvklaringsbehov =
                 dataSource.transaction { BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!.gjeldendeAvklaringsBehov }!!
-                    .let { Definisjon.forKode(it) }
 
             client.post<no.nav.aap.oppgave.statistikk.OppgaveHendelse, Any>(
                 URI.create("$url/oppgave"), PostRequest(
@@ -407,7 +405,7 @@ class IntegrationTest {
                             saksnummer = hendelse.saksnummer,
                             behandlingRef = hendelse.behandlingReferanse,
                             enhet = "0400",
-                            avklaringsbehovKode = gjeldendeAVklaringsbehov.kode.name,
+                            avklaringsbehovKode = gjeldendeAvklaringsbehov.definisjon.name,
                             status = no.nav.aap.oppgave.verdityper.Status.OPPRETTET,
                             behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
                             reservertAv = "Karl Korrodheid",
@@ -435,7 +433,7 @@ class IntegrationTest {
             val enhet = dataSource.transaction {
                 OppgaveHendelseRepositoryImpl(it).hentEnhetForAvklaringsbehov(
                     behandling!!.referanse,
-                    gjeldendeAVklaringsbehov.kode.name,
+                    gjeldendeAvklaringsbehov.definisjon
                 ).last()
             }
             assertThat(enhet.enhet).isEqualTo("0400")

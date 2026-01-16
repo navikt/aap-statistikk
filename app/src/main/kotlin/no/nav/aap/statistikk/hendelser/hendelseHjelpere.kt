@@ -5,6 +5,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
+import no.nav.aap.statistikk.behandling.Avklaringsbehov
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.isBeforeOrEqual
@@ -91,12 +92,14 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
         .maxByOrNull { it.tidsstempel }?.endretAv
 }
 
-fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): Definisjon? {
+fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): Avklaringsbehov? {
     return this.firstOrNull {
         !it.avklaringsbehovDefinisjon.erVentebehov()
                 && it.status.erÅpent()
     }
-        ?.avklaringsbehovDefinisjon
+        ?.let {
+            Avklaringsbehov(it.avklaringsbehovDefinisjon, it.id)
+        }
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
