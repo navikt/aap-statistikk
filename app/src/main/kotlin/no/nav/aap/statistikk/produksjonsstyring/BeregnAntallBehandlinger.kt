@@ -38,7 +38,7 @@ object BeregnAntallBehandlinger {
         var justertAntallBehandlinger = antallÅpneBehandlinger
         antallBehandlinger.keys.sorted().reversed().forEach {
             val antall = antallBehandlinger[it]
-            requireNotNull(antall)
+            requireNotNull(antall) { "Antall behandlinger må være satt for dato $it" }
             antallBehandlinger[it] = antall.copy(totalt = justertAntallBehandlinger)
             justertAntallBehandlinger -= antall.nye
             justertAntallBehandlinger += antall.avsluttede

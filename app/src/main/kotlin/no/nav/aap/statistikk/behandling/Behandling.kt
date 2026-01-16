@@ -57,7 +57,7 @@ data class Behandling(
     }
 
     fun id(): BehandlingId {
-        return requireNotNull(id)
+        return requireNotNull(id) { "Behandling må ha ID" }
     }
 
     fun leggTilHendelse(hendelse: BehandlingHendelse): Behandling {

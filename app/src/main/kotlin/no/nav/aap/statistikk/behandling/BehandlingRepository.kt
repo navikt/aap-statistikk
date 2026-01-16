@@ -53,7 +53,9 @@ SELECT COALESCE(
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
         ) {
             setParams {
-                setLong(1, requireNotNull(behandling.sak.id))
+                setLong(
+                    1,
+                    requireNotNull(behandling.sak.id) { "Sak må ha ID før behandling kan lagres. Behandlingsreferanse: ${behandling.referanse}" })
                 setLong(2, id)
                 setString(3, behandling.typeBehandling.toString())
                 setLocalDateTime(4, behandling.opprettetTid)
