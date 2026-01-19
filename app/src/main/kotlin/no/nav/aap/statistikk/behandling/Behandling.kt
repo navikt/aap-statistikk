@@ -21,6 +21,8 @@ private val log = LoggerFactory.getLogger(Behandling::class.java)
 
 /**
  * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
+ * @param relatertBehandlingId Referer til en relatert Kelvin-behandling.
+ * @param relatertBehandlingReferanse Referer til en relatert behandling som ikke nødvendigvis er en Kelvin-behandling.
  */
 data class Behandling(
     val id: BehandlingId? = null,
@@ -37,6 +39,7 @@ data class Behandling(
     val sisteSaksbehandler: String? = null,
     val relaterteIdenter: List<String> = listOf(),
     val relatertBehandlingId: BehandlingId? = null,
+    val relatertBehandlingReferanse: String? = null,
     val snapShotId: Long? = null,
     val gjeldendeAvklaringsBehov: String? = null,
     val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,
@@ -77,6 +80,7 @@ data class Behandling(
             sisteSaksbehandler = hendelse.saksbehandler?.ident,
             søknadsformat = hendelse.søknadsformat,
             resultat = hendelse.resultat,
+            relatertBehandlingReferanse = hendelse.relatertBehandlingReferanse,
         )
     }
 
@@ -179,6 +183,7 @@ data class BehandlingHendelse(
     val vedtakstidspunkt: LocalDateTime? = null,
     val mottattTid: LocalDateTime,
     val søknadsformat: SøknadsFormat,
+    val relatertBehandlingReferanse: String?
 )
 
 enum class SøknadsFormat {
