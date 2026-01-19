@@ -22,7 +22,7 @@ spec:
        SELECT
          r.id,
          r.behandling_id,
-         ARRAY_AGG(rp) AS perioder
+         ARRAY_AGG(struct(fra_dato, til_dato, rettighetstype)) AS perioder
        FROM
          `datastream_hendelser.public_rettighetstype` r
        JOIN
