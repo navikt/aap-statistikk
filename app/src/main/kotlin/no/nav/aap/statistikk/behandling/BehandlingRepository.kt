@@ -89,8 +89,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -113,6 +113,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setLocalDateTime(c++, behandling.oppdatertTidspunkt())
                 setBoolean(c++, false)
                 setString(c++, behandling.utbetalingId())
+                setString(c++, behandling.relatertBehandlingReferanse)
             }
         }
 
@@ -122,12 +123,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
     @Deprecated("Fjern denne når alle aktive behandlinger har dette feltet.")
     private fun oppdaterÅrsakTilOpprettelse(behandling: Behandling) {
         val behandlingId = behandling.id()
-        dbConnection.execute("UPDATE behandling SET aarsak_til_opprettelse = ? WHERE id = ? AND aarsak_til_opprettelse IS NULL") {
+        val oppdaterte = dbConnection.executeReturnUpdated("UPDATE behandling SET aarsak_til_opprettelse = ? WHERE id = ? AND aarsak_til_opprettelse IS NULL") {
             setParams {
                 setString(1, behandling.årsakTilOpprettelse)
                 setLong(2, behandlingId.id)
             }
         }
+        log.info("Oppdaterte $oppdaterte rader med årsak til opprettelse.")
     }
 
     private fun oppdaterÅrsakerTilBehandling(
@@ -214,8 +216,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) }
         ) {
             setParams { (hendelse, idx) ->
@@ -239,6 +241,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setLocalDateTime(c++, hendelse.oppdatertTidspunkt())
                 setBoolean(c++, false)
                 setString(c++, hendelse.utbetalingId())
+                setString(c++, hendelse.relatertBehandlingReferanse)
             }
         }
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
@@ -272,6 +275,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
            bh.retur_aarsak                     as bh_retur_aarsak,
            bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
            bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
+           bh.relatert_behandling_referanse    as bh_relatert_behandling_referanse,
            bh.resultat                         as bh_resultat,
            bh.soknadsformat                    as bh_soknadsformat,
            bh.steggruppe                       as bh_steggruppe,
@@ -349,6 +353,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
               bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
               bh.mottatt_tid                      as bh_mottatt_tid,
               bh.versjon_id                       as bh_versjon_id,
+              bh.relatert_behandling_referanse    as bh_relatert_behandling_referanse,
               v.versjon                           as bh_versjon
        from behandling_historikk bh
                 join versjon v on bh.versjon_id = v.id
@@ -381,7 +386,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     søknadsformat = it.getEnum("bh_soknadsformat"),
                     versjon = Versjon(
                         id = it.getLong("bh_versjon_id"), verdi = it.getString("bh_versjon")
-                    )
+                    ),
+                    relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")
                 )
             }
         }
@@ -424,6 +430,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
         relaterteIdenter = it.getArray("rp_ident", String::class),
         relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id")?.let(::BehandlingId),
+        relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")?.ifBlank { null },
         snapShotId = it.getLong("bh_id"),
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
             ?.ifBlank { null },

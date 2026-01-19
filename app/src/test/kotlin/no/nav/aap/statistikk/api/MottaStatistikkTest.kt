@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.api
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -168,7 +169,6 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -243,8 +243,6 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -315,7 +313,6 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)

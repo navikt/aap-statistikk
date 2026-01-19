@@ -68,7 +68,8 @@ class BehandlingTest {
             ansvarligBeslutter = "Åberg",
             vedtakstidspunkt = LocalDateTime.now(),
             mottattTid = LocalDateTime.now(),
-            søknadsformat = SøknadsFormat.DIGITAL
+            søknadsformat = SøknadsFormat.DIGITAL,
+            relatertBehandlingReferanse = null
         )
     }
 }

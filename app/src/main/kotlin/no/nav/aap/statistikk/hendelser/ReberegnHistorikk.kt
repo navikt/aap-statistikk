@@ -28,6 +28,7 @@ class ReberegnHistorikk {
             vedtakstidspunkt = null,
             mottattTid = dto.mottattTid,
             søknadsformat = dto.soknadsFormat.tilDomene(),
+            relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
         )
 
         if (avklaringsbehov.isEmpty() && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
@@ -52,6 +53,7 @@ class ReberegnHistorikk {
                             ?: dto.tidspunktSisteEndring,
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
+                        relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                     )
                 )
         }
@@ -97,6 +99,7 @@ class ReberegnHistorikk {
                         ?: curr.utledVedtakTid() else null,
                     mottattTid = dto.mottattTid,
                     søknadsformat = dto.soknadsFormat.tilDomene(),
+                    relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                 )
             )
         }.let {
@@ -121,6 +124,7 @@ class ReberegnHistorikk {
                         vedtakstidspunkt = behandlingMedEllerUtenInngangshendelse.vedtakstidspunkt,
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
+                        relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                     )
                 )
             } else it
