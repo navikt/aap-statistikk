@@ -99,8 +99,15 @@ class SaksStatistikkService(
         return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
-    private fun hentRelatertBehandlingUUID(behandling: Behandling): UUID? =
-        behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
+    private fun hentRelatertBehandlingUUID(behandling: Behandling): String? {
+        val eksisterendeBehandling =
+            behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
+        return if (eksisterendeBehandling == null) {
+            behandling.relatertBehandlingReferanse
+        } else {
+            eksisterendeBehandling.toString()
+        }
+    }
 
     fun bqBehandlingForBehandling(
         behandling: Behandling,
