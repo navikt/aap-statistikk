@@ -46,7 +46,7 @@ dependencies {
 
     implementation(libs.flyway)
     implementation(libs.flywayPostgres)
-    runtimeOnly("org.postgresql:postgresql:42.7.8")
+    runtimeOnly("org.postgresql:postgresql:42.7.9")
     implementation("com.zaxxer:HikariCP:7.0.2")
 
     implementation(libs.motor)

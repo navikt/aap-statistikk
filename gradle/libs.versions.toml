@@ -7,7 +7,7 @@ oppgave = "0.0.135"
 utbetaling = "0.0.71"
 postmottak = "6.0.3"
 
-flyway = "11.20.1"
+flyway = "11.20.2"
 
 [libraries]
 ktorServerTestHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
