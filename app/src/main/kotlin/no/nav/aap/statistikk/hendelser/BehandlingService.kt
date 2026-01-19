@@ -10,7 +10,6 @@ import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.sak.Sak
-import java.util.UUID
 
 class BehandlingService(private val behandlingRepository: IBehandlingRepository) {
     constructor(repositoryProvider: RepositoryProvider) : this(repositoryProvider.provide())
@@ -65,6 +64,7 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
             status = dto.behandlingStatus.tilDomene(),
             versjon = Versjon(verdi = dto.versjon),
             relaterteIdenter = dto.identerForSak,
+            relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
             gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()?.kode?.name,
             gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
@@ -81,15 +81,20 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
         )
         val eksisterendeBehandlingId = behandlingRepository.hent(dto.behandlingReferanse)?.id
 
-        val relatertBehadling = hentRelatertBehandling(dto.relatertBehandling)
+        val relatertBehandling = hentRelatertBehandling(dto)
         val behandlingMedRelatertBehandling =
-            behandling.copy(relatertBehandlingId = relatertBehadling?.id)
+            behandling.copy(relatertBehandlingId = relatertBehandling?.id)
         return behandlingMedRelatertBehandling.copy(id = eksisterendeBehandlingId)
     }
 
-    private fun hentRelatertBehandling(relatertBehandlingUUID: UUID?): Behandling? {
+    private fun hentRelatertBehandling(dto: StoppetBehandling): Behandling? {
+        val relatertBehandlingUUID = dto.relatertBehandling
         val relatertBehadling =
             relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
+
+        if (relatertBehadling == null) {
+            logger.warn("Fant ikke relatert behandling med UUID $relatertBehandlingUUID for behandling ${dto.behandlingReferanse}.")
+        }
         return relatertBehadling
     }
 }

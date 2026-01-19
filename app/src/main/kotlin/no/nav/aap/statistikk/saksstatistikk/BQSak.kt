@@ -19,7 +19,7 @@ data class BQBehandling(
     val fagsystemNavn: String = "Kelvin",
     val sekvensNummer: Long?,
     val behandlingUUID: UUID,
-    val relatertBehandlingUUID: UUID? = null,
+    val relatertBehandlingUUID: String? = null,
     val relatertFagsystem: String? = null,
     val ferdigbehandletTid: LocalDateTime? = null,
     val behandlingType: String,

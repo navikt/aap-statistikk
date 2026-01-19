@@ -64,7 +64,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         setString(1, bqBehandling.fagsystemNavn)
         setUUID(2, bqBehandling.behandlingUUID)
         setString(3, bqBehandling.saksnummer)
-        setUUID(4, bqBehandling.relatertBehandlingUUID)
+        setUUID(4, bqBehandling.relatertBehandlingUUID?.let(UUID::fromString))
         setString(5, bqBehandling.relatertFagsystem)
         setString(6, bqBehandling.behandlingType)
         setString(7, bqBehandling.aktorId)
@@ -137,7 +137,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         sekvensNummer = row.getLong("id"),
         saksnummer = row.getString("saksnummer"),
         behandlingUUID = row.getUUID("behandling_uuid"),
-        relatertBehandlingUUID = row.getUUIDOrNull("relatert_behandling_uuid"),
+        relatertBehandlingUUID = row.getUUIDOrNull("relatert_behandling_uuid")?.toString(),
         relatertFagsystem = row.getStringOrNull("relatert_fagsystem"),
         ferdigbehandletTid = row.getLocalDateTimeOrNull("ferdigbehandlet_tid"),
         behandlingType = row.getString("behandling_type"),

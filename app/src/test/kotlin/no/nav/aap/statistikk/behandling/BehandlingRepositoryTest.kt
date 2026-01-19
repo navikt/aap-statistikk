@@ -62,6 +62,7 @@ class BehandlingRepositoryTest {
             opprettetTid = LocalDateTime.now(),
             mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
             vedtakstidspunkt = vedtakstidspunkt,
+            relatertBehandlingReferanse = "REFERANSE",
             ansvarligBeslutter = "Josgeir Dalføre",
             versjon = Versjon("xxx"),
             søknadsformat = SøknadsFormat.PAPIR,
