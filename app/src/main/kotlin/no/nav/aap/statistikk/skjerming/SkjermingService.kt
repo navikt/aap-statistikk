@@ -19,23 +19,22 @@ class SkjermingService(
 
     fun erSkjermet(behandling: Behandling): Boolean {
         val identer = behandling.identerPåBehandling()
-        try {
+        return try {
             val hentPersoner = pdlGateway.hentPersoner(identer)
-            return hentPersoner
+            hentPersoner
                 .flatMap { it.adressebeskyttelse }
                 .any { it.gradering.erHemmelig() }
-        } catch (e: HttpConnectTimeoutException) {
-            logger.error(
-                "Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.",
-                e
-            )
-            return false;
-        } catch (e: java.net.ConnectException) {
-            logger.error(
-                "Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.",
-                e
-            )
-            return false;
+        } catch (e: Exception) {
+            when (e) {
+                is HttpConnectTimeoutException, is java.net.ConnectException -> {
+                    logger.error(
+                        "Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.",
+                        e
+                    )
+                    false
+                }
+                else -> throw e
+            }
         }
     }
 }

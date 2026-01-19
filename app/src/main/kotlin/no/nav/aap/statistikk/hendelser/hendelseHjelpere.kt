@@ -91,12 +91,18 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
         .maxByOrNull { it.tidsstempel }?.endretAv
 }
 
-fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): Definisjon? {
+fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsbehov(): Definisjon? {
     return this.firstOrNull {
         !it.avklaringsbehovDefinisjon.erVentebehov()
                 && it.status.erÅpent()
     }
         ?.avklaringsbehovDefinisjon
+}
+
+fun List<AvklaringsbehovHendelseDto>.utledForrigeLøsteAvklaringsbehov(): Definisjon? {
+    return this.lastOrNull {
+        it.status.erAvsluttet() && !it.avklaringsbehovDefinisjon.erVentebehov()
+    }?.avklaringsbehovDefinisjon
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {

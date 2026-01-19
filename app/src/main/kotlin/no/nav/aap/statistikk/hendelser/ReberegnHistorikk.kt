@@ -83,7 +83,7 @@ class ReberegnHistorikk {
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
                     hendelsesTidspunkt = requireNotNull(curr.tidspunktSisteEndring()),
-                    avklaringsBehov = curr.utledGjeldendeAvklaringsBehov()?.kode?.name,
+                    avklaringsBehov = curr.utledGjeldendeAvklaringsbehov()?.kode?.name,
                     avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
                     steggruppe = curr.utledGjeldendeStegType()?.gruppe,
                     venteÅrsak = curr.utledÅrsakTilSattPåVent(),
