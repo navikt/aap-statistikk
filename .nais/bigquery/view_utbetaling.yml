@@ -24,33 +24,46 @@ spec:
         b.type AS behandling_type,
         b.opprettet_tid AS behandling_opprettet_tid,
         bh.utbetaling_id AS utbetaling_id,
-        bh.oppdatert_tid as oppdatert_tid
+        DATETIME(
+          timestamp_millis(
+            greatest(
+              b.datastream_metadata.source_timestamp,
+              bh.datastream_metadata.source_timestamp,
+              br.datastream_metadata.source_timestamp,
+              s.datastream_metadata.source_timestamp,
+              p.datastream_metadata.source_timestamp)),
+          'Europe/Oslo') AS rad_endret_tid,
+        concat(b.id, '-', bh.id, '-', br.id, '-', s.id, '-', p.id) AS unik_id
       FROM
         `datastream_hendelser.public_behandling` b
       JOIN
         `datastream_hendelser.public_sak` s
-      ON
-        b.sak_id = s.id
+        ON
+          b.sak_id = s.id
       JOIN
         `datastream_hendelser.public_behandling_referanse` br
-      ON
-        b.referanse_id = br.id
+        ON
+          b.referanse_id = br.id
       JOIN
         `datastream_hendelser.public_behandling_historikk` bh
-      ON
-        bh.behandling_id = b.id
+        ON
+          bh.behandling_id = b.id
       JOIN
         `datastream_hendelser.public_person` p
-      ON
-        p.id = s.person_id
+        ON
+          p.id = s.person_id
       WHERE
         bh.gjeldende = TRUE
-        AND (bh.slettet IS FALSE
-          OR bh.slettet IS NULL )
-        AND b.type IN ('Førstegangsbehandling',
+        AND (
+          bh.slettet IS FALSE
+          OR bh.slettet IS NULL)
+        AND b.type IN (
+          'Førstegangsbehandling',
           'Revurdering')
         AND bh.status = 'AVSLUTTET'
-        AND (bh.resultat NOT IN ('TRUKKET',
+        AND (
+          bh.resultat NOT IN (
+            'TRUKKET',
             'KLAGE_TRUKKET')
           OR bh.resultat IS NULL)
         AND b.type NOT IN ('Oppfølgingsbehandling')
