@@ -45,6 +45,7 @@ spec:
        p.ident AS brukerFnr,
        bh.resultat as behandlingsresultat,
        bh.vedtak_tidspunkt as vedtak_tidspunkt,
+       bh.utbetaling_id AS utbetaling_id,
        d.kodeverk AS diagnose_kodeverk,
        d.diagnosekode AS diagnose_kode,
        d.bidiagnoser AS bidiagnoser_kode,
