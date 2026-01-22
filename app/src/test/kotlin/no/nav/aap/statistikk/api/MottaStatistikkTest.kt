@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.api
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -66,9 +67,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             LagreStoppetHendelseJobb(jobbAppender),
-            LagreOppgaveHendelseJobb(),
-            LagrePostmottakHendelseJobb(),
-            LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -171,7 +169,6 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -191,9 +188,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
             testJobber.motorJobbAppender,
         ) { url, client ->
 
@@ -249,8 +243,6 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -270,9 +262,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
             testJobber.motorJobbAppender,
         ) { url, client ->
 
@@ -324,7 +313,6 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
-        val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
@@ -344,9 +332,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
             testJobber.motorJobbAppender,
         ) { url, client ->
 
@@ -422,7 +407,6 @@ class MottaStatistikkTest {
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
         val jobbAppender = MotorJobbAppender(
-            lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
             resendSakstatistikkJobb,
         )
@@ -447,9 +431,6 @@ class MottaStatistikkTest {
             motor,
             azureConfig,
             lagreStoppetHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            LagreAvklaringsbehovHendelseJobb(jobbAppender),
             jobbAppender,
         ) { url, client ->
 

@@ -11,6 +11,9 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.gateway.Factory
@@ -41,6 +44,7 @@ import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.motor
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
+import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
@@ -91,9 +95,6 @@ fun <E> testKlient(
         clientSecret = "xxx",
     ),
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
-    lagreOppgaveHendelseJobb: LagreOppgaveHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
     jobbAppender: JobbAppender,
     test: (url: String, client: RestClient<InputStream>) -> E?,
 ): E? {
@@ -123,9 +124,6 @@ fun <E> testKlient(
             azureConfig,
             {},
             lagreStoppetHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
         )
     }.start()
 
@@ -154,7 +152,6 @@ fun konstruerTestJobber(
         LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
     val resendSakstatistikkJobb = ResendSakstatistikkJobb()
     val motorJobbAppender = MotorJobbAppender(
-        lagreSakinfoTilBigQueryJobb,
         lagreAvsluttetBehandlingTilBigQueryJobb,
         resendSakstatistikkJobb,
     )
@@ -175,7 +172,7 @@ fun konstruerMotor(
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
 ): Motor {
-    val lagreOppgaveJobb = no.nav.aap.statistikk.oppgave.LagreOppgaveJobb()
+    val lagreOppgaveJobb = LagreOppgaveJobb()
     return motor(
         dataSource = dataSource,
         gatewayProvider = defaultGatewayProvider { },
@@ -199,12 +196,12 @@ fun opprettTestStoppetBehandling(
     hendelsesTidspunkt: LocalDateTime,
     mottattTid: LocalDateTime,
     saksnummer: String = "123",
-    behandlingStatus: no.nav.aap.behandlingsflyt.kontrakt.behandling.Status = no.nav.aap.behandlingsflyt.kontrakt.behandling.Status.OPPRETTET,
+    behandlingStatus: Status = Status.OPPRETTET,
     behandlingType: no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling = no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling,
     ident: String = "0",
-    avklaringsbehov: List<no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto> = listOf()
-): no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling =
-    no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling(
+    avklaringsbehov: List<AvklaringsbehovHendelseDto> = listOf()
+): StoppetBehandling =
+    StoppetBehandling(
         saksnummer = saksnummer,
         behandlingStatus = behandlingStatus,
         behandlingType = behandlingType,
@@ -548,6 +545,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 versjon = behandling.versjon,
                 mottattTid = behandling.mottattTid,
                 søknadsformat = behandling.søknadsformat,
+                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse
             )
         )
         nextId++
@@ -566,7 +564,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
                 versjon = behandling.versjon,
                 mottattTid = behandling.mottattTid,
-                søknadsformat = behandling.søknadsformat
+                søknadsformat = behandling.søknadsformat,
+                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse
             )
         )
     }

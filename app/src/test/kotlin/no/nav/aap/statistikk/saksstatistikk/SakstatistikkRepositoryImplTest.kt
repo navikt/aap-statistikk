@@ -24,7 +24,7 @@ class SakstatistikkRepositoryImplTest {
         registrertTid: LocalDateTime,
         mottattTid: LocalDateTime,
         endretTid: LocalDateTime,
-        relatertBehandlingUUID: UUID = UUID.randomUUID()
+        relatertBehandlingUUID: String = UUID.randomUUID().toString()
     ) = BQBehandling(
         fagsystemNavn = "KELVIN",
         sekvensNummer = 1,

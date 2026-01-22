@@ -21,6 +21,8 @@ private val log = LoggerFactory.getLogger(Behandling::class.java)
 
 /**
  * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
+ * @param relatertBehandlingId Referer til en relatert Kelvin-behandling.
+ * @param relatertBehandlingReferanse Referer til en relatert behandling som ikke nødvendigvis er en Kelvin-behandling.
  */
 data class Behandling(
     val id: BehandlingId? = null,
@@ -37,6 +39,7 @@ data class Behandling(
     val sisteSaksbehandler: String? = null,
     val relaterteIdenter: List<String> = listOf(),
     val relatertBehandlingId: BehandlingId? = null,
+    val relatertBehandlingReferanse: String? = null,
     val snapShotId: Long? = null,
     val gjeldendeAvklaringsBehov: String? = null,
     val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,
@@ -57,7 +60,7 @@ data class Behandling(
     }
 
     fun id(): BehandlingId {
-        return requireNotNull(id)
+        return requireNotNull(id) { "Behandling må ha ID" }
     }
 
     fun leggTilHendelse(hendelse: BehandlingHendelse): Behandling {
@@ -77,6 +80,7 @@ data class Behandling(
             sisteSaksbehandler = hendelse.saksbehandler?.ident,
             søknadsformat = hendelse.søknadsformat,
             resultat = hendelse.resultat,
+            relatertBehandlingReferanse = hendelse.relatertBehandlingReferanse,
         )
     }
 
@@ -106,8 +110,7 @@ data class Behandling(
     }
 
     fun avsluttetTid(): LocalDateTime {
-        return hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }
-            .maxOf { it.hendelsesTidspunkt }
+        return hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }.maxOf { it.hendelsesTidspunkt }
     }
 
     fun oppdatertTidspunkt(): LocalDateTime {
@@ -179,6 +182,7 @@ data class BehandlingHendelse(
     val vedtakstidspunkt: LocalDateTime? = null,
     val mottattTid: LocalDateTime,
     val søknadsformat: SøknadsFormat,
+    val relatertBehandlingReferanse: String?
 )
 
 enum class SøknadsFormat {
@@ -207,6 +211,7 @@ enum class TypeBehandling(val kildeSystem: KildeSystem) {
     Journalføring(kildeSystem = KildeSystem.Postmottak), Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Aktivitetsplikt(
         kildeSystem = KildeSystem.Behandlingsflyt
     ),
+
     @Suppress("EnumEntryName")
     Aktivitetsplikt11_9(kildeSystem = KildeSystem.Behandlingsflyt),
 }
@@ -245,7 +250,9 @@ enum class Vurderingsbehov(val sortering: Int) {
     REVURDER_SAMORDNING_ANDRE_STATLIGE_YTELSER(1), REVURDER_SAMORDNING_ARBEIDSGIVER(1), REVURDER_SAMORDNING_TJENESTEPENSJON(
         1
     ),
-    REVURDER_SYKEPENGEERSTATNING(1), BARNETILLEGG_SATS_REGULERING(0), UTVID_VEDTAKSLENGDE(1)
+    REVURDER_SYKEPENGEERSTATNING(1), BARNETILLEGG_SATS_REGULERING(0), UTVID_VEDTAKSLENGDE(1), REVURDER_SYKESTIPEND(1), MIGRER_RETTIGHETSPERIODE(
+        1
+    );
 }
 
 @Deprecated("Når aarsak_til_opprettelse finnes for alle nye behandlinger, slett denne.")

@@ -4,14 +4,17 @@ import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.ferdigBehandletTid
 import no.nav.aap.statistikk.hendelser.returnert
+import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.årsakTilOpprettelseIkkeSatt
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Clock.systemDefaultZone
@@ -96,8 +99,15 @@ class SaksStatistikkService(
         return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
-    private fun hentRelatertBehandlingUUID(behandling: Behandling): UUID? =
-        behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
+    private fun hentRelatertBehandlingUUID(behandling: Behandling): String? {
+        val eksisterendeBehandling =
+            behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
+        return if (eksisterendeBehandling == null) {
+            behandling.relatertBehandlingReferanse
+        } else {
+            eksisterendeBehandling.toString()
+        }
+    }
 
     fun bqBehandlingForBehandling(
         behandling: Behandling,
@@ -110,19 +120,7 @@ class SaksStatistikkService(
         val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
 
-        val enhet = sisteHendelse.avklaringsBehov?.let {
-            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(behandlingReferanse, it)
-        }?.lastOrNull {
-            it.tidspunkt.isBefore(
-                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
-            )
-        }?.enhet
-        val ansvarligEnhet = ansvarligEnhet(enhet, erSkjermet)
-
-        if (ansvarligEnhet == null) {
-            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
-        }
-
+        val ansvarligEnhet = ansvarligEnhet(behandlingReferanse, behandling, erSkjermet)
         val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
 
         if (saksbehandlerIdent == null) {
@@ -132,6 +130,7 @@ class SaksStatistikkService(
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         if (årsakTilOpprettelse == null) {
             log.info("Årsak til opprettelse er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}.")
+            PrometheusProvider.prometheus.årsakTilOpprettelseIkkeSatt().increment()
         }
 
         val saksbehandler =
@@ -359,9 +358,38 @@ class SaksStatistikkService(
     }
 
     private fun ansvarligEnhet(
-        enhet: String?,
+        behandlingReferanse: UUID,
+        behandling: Behandling,
         erSkjermet: Boolean,
     ): String? {
+        val sisteHendelse = behandling.hendelser.last()
+        val sisteHendelsevklaringsbehov = sisteHendelse.avklaringsBehov
+        val enhet = sisteHendelsevklaringsbehov?.let {
+            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
+                behandlingReferanse,
+                it
+            )
+        }?.lastOrNull {
+            // I tilfelle enhet har flyttet seg på samme avklaringsbehov
+            it.tidspunkt.isBefore(
+                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
+            )
+        }?.enhet
+
+        if (enhet == null) {
+            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
+            val fallbackEnhet =
+                oppgaveHendelseRepository.hentSisteEnhetPåBehandling(behandlingReferanse)
+
+            if (fallbackEnhet != null) {
+                val (enhetOgTidspunkt, avklaringsBehov) = fallbackEnhet
+                val fallbackEnhet = enhetOgTidspunkt.enhet
+                log.info("Fallback-enhet: $fallbackEnhet for avklaringsbehov ${avklaringsBehov}. Originalt behov: $sisteHendelsevklaringsbehov. Referanse: $behandlingReferanse. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
+                return fallbackEnhet
+            } else {
+                log.info("Fant ingen enhet eller fallbackenhet. Referanse: $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}.")
+            }
+        }
         if (erSkjermet) {
             return "-5"
         }

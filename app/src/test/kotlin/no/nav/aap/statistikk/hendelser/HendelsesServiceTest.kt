@@ -17,7 +17,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
-import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
@@ -84,6 +83,7 @@ class HendelsesServiceTest {
                     verdi = "1111"
                 ),
                 søknadsformat = SøknadsFormat.PAPIR,
+                årsakTilOpprettelse = "SØKNAD",
             )
         )
 
@@ -121,6 +121,7 @@ class HendelsesServiceTest {
 
         val uthentet = behandlingRepository.hent(behandlingReferanse)
         assertThat(uthentet).isNotNull()
+        assertThat(uthentet?.årsakTilOpprettelse).isEqualTo("SØKNAD")
         assertThat(uthentet!!.relatertBehandlingId).isNotNull()
 
         verify { opprettBigQueryLagringCallback(uthentet.id!!) }
