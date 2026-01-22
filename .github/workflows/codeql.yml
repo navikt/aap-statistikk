@@ -42,7 +42,9 @@ jobs:
           gradle-version: wrapper
 
       - name: Build
-        run: ./gradlew build -x test -x detekt
+        run: ./gradlew assemble --no-build-cache --no-configuration-cache -x detekt
+        # temporary while waiting for kotlin 2.3 support in CodeQL FIXME
+        continue-on-error: true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
@@ -50,7 +52,12 @@ jobs:
           category: "/language:${{matrix.language}}"
 
       - run: ./gradlew detektMain
+        # temporary while waiting for kotlin 2.3 support in CodeQL FIXME
+        continue-on-error: true
 
-      - uses: github/codeql-action/upload-sarif@v4
+      - name: Upload Detekt SARIF
+        # temporary while waiting for kotlin 2.3 support in CodeQL FIXME
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: app/build/reports/detekt/main.sarif
