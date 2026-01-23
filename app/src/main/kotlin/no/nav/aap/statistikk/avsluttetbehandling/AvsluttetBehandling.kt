@@ -55,7 +55,7 @@ data class RettighetstypePeriode(
 /**
  * Ved oppdateringer her må tabellen `kodeverk_rettighetstype` oppdateres. Lag migrering!
  */
-enum class RettighetsType(val hjemmel: String) {
+enum class RettighetsType(@Suppress("unused") val hjemmel: String) {
     BISTANDSBEHOV(hjemmel = "§ 11-6"),
     SYKEPENGEERSTATNING(hjemmel = "§ 11-13"),
     STUDENT(hjemmel = "§ 11-14"),
@@ -118,7 +118,6 @@ sealed interface IBeregningsGrunnlag {
         val grunnlag: Double,
         val type: UføreType,
         @Suppress("PropertyName", "ConstructorParameterNaming") val grunnlag11_19: Grunnlag_11_19,
-        @Deprecated("Bruk uføregrader.") val uføregrad: Int,
         val uføregrader: Map<LocalDate, Int>,
         val uføreInntekterFraForegåendeÅr: Map<Int, Double>,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,

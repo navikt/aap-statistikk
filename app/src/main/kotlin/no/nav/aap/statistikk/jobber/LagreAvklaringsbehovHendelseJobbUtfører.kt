@@ -9,8 +9,7 @@ import no.nav.aap.statistikk.hendelser.ResendHendelseService
 
 class LagreAvklaringsbehovHendelseJobbUtfører(
     private val resendHendelseService: ResendHendelseService
-) :
-    JobbUtfører {
+) : JobbUtfører {
 
     private val logger = org.slf4j.LoggerFactory.getLogger(javaClass)
 
