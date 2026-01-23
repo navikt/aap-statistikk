@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.json.DefaultJsonMapper
@@ -13,7 +12,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -199,7 +197,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
                 setString(
                     c++,
-                    ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr.entries.map {
+                    DefaultJsonMapper.toJson(beregningsGrunnlag.uføreInntekterFraForegåendeÅr.entries.map {
                         ÅrOgInntekt(
                             it.key,
                             it.value
@@ -234,6 +232,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
        g.er6g_begrenset                               as g_er6g_begrenset,
        g.er_gjennomsnitt                              as g_er_gjennomsnitt,
        g.inntekter                                    as g_inntekter,
+       g.inntekter_foregaaende_aar                    as g_inntekter_foregaaende_aar,
        gy.id                                          as gy_id,
        gy.grunnlag                                    as gy_grunnlag,
        gy.beregningsgrunnlag_id                       as gy_beregningsgrunnlag_id,
@@ -363,18 +362,16 @@ where br.referanse = ?
     }
 
     @Suppress("FunctionName")
-    private fun hentGrunnlag11_19(grunnlagUføreRs: Row): IBeregningsGrunnlag.Grunnlag_11_19 {
-        val typeRef
-                : TypeReference<Map<Int, Double>> =
-            object : TypeReference<Map<Int, Double>>() {}
-        val parsedMap = ObjectMapper().readValue(grunnlagUføreRs.getString("g_inntekter"), typeRef)
+    private fun hentGrunnlag11_19(row: Row): IBeregningsGrunnlag.Grunnlag_11_19 {
+        val inntekter =
+            DefaultJsonMapper.fromJson<List<ÅrOgInntekt>>(row.getString("g_inntekter_foregaaende_aar"))
 
         @Suppress("LocalVariableName", "VariableNaming") val grunnlag11_19 =
             IBeregningsGrunnlag.Grunnlag_11_19(
-                grunnlag = grunnlagUføreRs.getDouble("g_grunnlag"),
-                er6GBegrenset = grunnlagUføreRs.getBoolean("g_er6g_begrenset"),
-                erGjennomsnitt = grunnlagUføreRs.getBoolean("g_er_gjennomsnitt"),
-                inntekter = parsedMap
+                grunnlag = row.getDouble("g_grunnlag"),
+                er6GBegrenset = row.getBoolean("g_er6g_begrenset"),
+                erGjennomsnitt = row.getBoolean("g_er_gjennomsnitt"),
+                inntekter = inntekter.associateBy { it.aar }.mapValues { it.value.inntekt },
             )
         return grunnlag11_19
     }
@@ -386,7 +383,8 @@ where br.referanse = ?
         beregningsGrunnlag: IBeregningsGrunnlag.Grunnlag_11_19
     ): Long {
         val sqlStatement =
-            "INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter) VALUES (?, ?,?, ?, ?::jsonb)"
+            """INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter, inntekter_foregaaende_aar)
+                    VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb)"""
 
         return connection.executeReturnKey(sqlStatement) {
             setParams {
@@ -395,6 +393,15 @@ where br.referanse = ?
                 setBoolean(3, beregningsGrunnlag.er6GBegrenset)
                 setBoolean(4, beregningsGrunnlag.erGjennomsnitt)
                 setString(5, ObjectMapper().writeValueAsString(beregningsGrunnlag.inntekter))
+                setString(
+                    6,
+                    DefaultJsonMapper.toJson(beregningsGrunnlag.inntekter.map {
+                        ÅrOgInntekt(
+                            it.key,
+                            it.value
+                        )
+                    })
+                )
             }
         }
     }
