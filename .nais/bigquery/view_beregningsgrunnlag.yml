@@ -17,62 +17,109 @@ spec:
   view:
     useLegacySql: false
     query: >-
-      SELECT s.saksnummer                     AS saksnummer,
-             br.referanse                     AS behandlingsreferanse,
-             pg.type                          as type,
-             (SELECT CASE pg.type
-                         WHEN '11_19' THEN g.grunnlag
-                         WHEN 'yrkesskade' THEN null -- gy.grunnlag
-                         WHEN 'uføre' THEN null -- gu.grunnlag
-                         END)                 AS grunnlaget,
-             g.inntekter                      AS inntekter,
-             g.er6g_begrenset as grunnlag_er_6g_begrenset,
-             g.er_gjennomsnitt as grunnlag_er_gjennomsnitt,
-             -- YRKESSKADE
-             --gy.yrkesskade_tidspunkt                        AS yrkesskade_tidspunkt,
-      --        gy.antatt_arlig_inntekt_yrkesskade_tidspunktet AS antatt_arlig_inntekt_yrkesskade_tidspunktet,
-      --        gy.andel_yrkesskade                            AS andel_yrkesskade,
-             -- UFØRE
-      --        gu.uforegrad                                   AS uforegrad,
-      --        gu.ufore_inntekter_fra_foregaende_ar           AS ufore_inntekter_fra_foregaende_ar,
-      --        gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    AS ufore_ytterligere_nedsatt_arbeidsevne_ar,
-             DATETIME(pg.opprettet_tidspunkt) AS reg_dato,
-             DATETIME(TIMESTAMP_MILLIS(GREATEST(COALESCE(b.datastream_metadata.source_timestamp, 0),
-                                                COALESCE(pg.datastream_metadata.source_timestamp, 0),
-                                                COALESCE(g.datastream_metadata.source_timestamp, 0),
-                                                --COALESCE(gy.datastream_metadata.source_timestamp, 0),
-                                                --COALESCE(gu.datastream_metadata.source_timestamp, 0),
-                                                COALESCE(s.datastream_metadata.source_timestamp, 0),
-                                                COALESCE(br.datastream_metadata.source_timestamp, 0))),
-                      'Europe/Oslo')          AS endret_tid,
-             concat(pg.id, '-', g.id,'-',
-                    --COALESCE(gy.id, 0), '-',
-                    --COALESCE(gu.id, 0), '-',
-                    b.id, '-',
-                    br.id, '-',
-                    s.id)                     as unik_id
+      SELECT
+        s.saksnummer AS saksnummer,
+        br.referanse AS behandlingsreferanse,
+        pg.type AS type,
+        (
+          SELECT
+            CASE pg.type
+              WHEN '11_19' THEN g.grunnlag
+              WHEN 'yrkesskade' THEN gy.grunnlag
+              WHEN 'uføre' THEN gu.grunnlag
+              END
+        ) AS grunnlaget,
+        inntekter_11_19.inntekter AS inntekter,
+        g.er6g_begrenset AS grunnlag_er_6g_begrenset,
+        g.er_gjennomsnitt AS grunnlag_er_gjennomsnitt,
+        pg.beregningsaar,
+        -- YRKESSKADE
+        gy.yrkesskade_tidspunkt AS yrkesskade_tidspunkt,
+        gy.antatt_arlig_inntekt_yrkesskade_tidspunktet
+          AS antatt_arlig_inntekt_yrkesskade_tidspunktet,
+        gy.andel_yrkesskade AS andel_yrkesskade,
+        -- UFØRE
+        gu.uforegrad AS uforegrad,
+        ufore_inntekter.inntekter AS ufore_inntekter_fra_foregaende_ar,
+        gu.ufore_ytterligere_nedsatt_arbeidsevne_ar
+          AS ufore_ytterligere_nedsatt_arbeidsevne_ar,
+        DATETIME(pg.opprettet_tidspunkt) AS reg_dato,
+        DATETIME(
+          TIMESTAMP_MILLIS(
+            GREATEST(
+              COALESCE(b.datastream_metadata.source_timestamp, 0),
+              COALESCE(pg.datastream_metadata.source_timestamp, 0),
+              COALESCE(g.datastream_metadata.source_timestamp, 0),
+              -- COALESCE(gy.datastream_metadata.source_timestamp, 0),
+              -- COALESCE(gu.datastream_metadata.source_timestamp, 0),
+              COALESCE(s.datastream_metadata.source_timestamp, 0),
+              COALESCE(br.datastream_metadata.source_timestamp, 0))),
+          'Europe/Oslo') AS endret_tid,
+        concat(
+          pg.id,
+          '-',
+          g.id,
+          '-',
+          -- COALESCE(gy.id, 0), '-',
+          -- COALESCE(gu.id, 0), '-',
+          b.id,
+          '-',
+          br.id,
+          '-',
+          s.id) AS unik_id
       FROM datastream_hendelser.public_grunnlag pg
-               LEFT OUTER JOIN
-           datastream_hendelser.public_grunnlag_11_19 AS g
-           ON
-               pg.id = g.grunnlag_id
-               --          LEFT OUTER JOIN
-      --      datastream_hendelser.public_grunnlag_yrkesskade AS gy
-      --      ON
-      --          g.id = gy.beregningsgrunnlag_id
-      --          LEFT OUTER JOIN
-      --      datastream_hendelser.public_grunnlag_ufore AS gu
-      --      ON
-      --          g.id = gu.grunnlag_11_19_id
-               join
-           datastream_hendelser.public_behandling AS b
-           ON
-               b.id = pg.behandling_id
-               join
-           datastream_hendelser.public_behandling_referanse br
-           ON
-               b.referanse_id = br.id
-               JOIN
-           datastream_hendelser.public_sak s
-           ON
-               s.id = b.sak_id
+      LEFT OUTER JOIN
+        datastream_hendelser.public_grunnlag_11_19 AS g
+        ON
+          pg.id = g.grunnlag_id
+      LEFT OUTER JOIN
+        datastream_hendelser.public_grunnlag_yrkesskade AS gy
+        ON
+          g.id
+          = gy.beregningsgrunnlag_id
+      LEFT OUTER JOIN
+        datastream_hendelser.public_grunnlag_ufore
+          AS gu
+        ON g.id = gu.grunnlag_11_19_id
+      JOIN
+        datastream_hendelser.public_behandling AS b
+        ON
+          b.id = pg.behandling_id
+      JOIN
+        datastream_hendelser.public_behandling_referanse br
+        ON
+          b.referanse_id = br.id
+      JOIN
+        datastream_hendelser.public_sak s
+        ON
+          s.id = b.sak_id
+      LEFT JOIN
+        (
+          SELECT
+            g1.grunnlag_id AS id,
+            ARRAY_AGG(
+              STRUCT(
+                JSON_VALUE(inntekter, '$.aar') AS aar,
+                CAST(JSON_VALUE(inntekter, '$.inntekt') AS FLOAT64) AS inntekt))
+              AS inntekter,
+          FROM
+            `datastream_hendelser.public_grunnlag_11_19` g1,
+            UNNEST(JSON_QUERY_ARRAY(g1.inntekter_foregaaende_aar)) AS inntekter
+          GROUP BY g1.grunnlag_id
+        ) inntekter_11_19
+        ON inntekter_11_19.id = g.id
+      LEFT JOIN
+        (
+          SELECT
+            gu.grunnlag_id AS id,
+            ARRAY_AGG(
+              STRUCT(
+                JSON_VALUE(inntekter, '$.aar') AS aar,
+                CAST(JSON_VALUE(inntekter, '$.inntekt') AS FLOAT64) AS inntekt))
+              AS inntekter,
+          FROM
+            `datastream_hendelser.public_grunnlag_ufore` gu,
+            UNNEST(JSON_QUERY_ARRAY(gu.ufore_inntekter)) AS inntekter
+          GROUP BY gu.grunnlag_id
+        ) ufore_inntekter
+        ON ufore_inntekter.id = gu.grunnlag_id
