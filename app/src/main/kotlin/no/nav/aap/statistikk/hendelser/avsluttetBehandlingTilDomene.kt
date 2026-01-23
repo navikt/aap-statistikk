@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
+import java.time.Year
 import java.util.*
 
 
@@ -101,7 +102,7 @@ fun tilDomene(grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO): IBeregningsGrunnlag
         benyttetAndelForYrkesskade = grunnlagYrkesskadeDTO.benyttetAndelForYrkesskade,
         andelSomIkkeSkyldesYrkesskade = grunnlagYrkesskadeDTO.andelSomIkkeSkyldesYrkesskade,
         antattÅrligInntektYrkesskadeTidspunktet = grunnlagYrkesskadeDTO.antattÅrligInntektYrkesskadeTidspunktet,
-        yrkesskadeTidspunkt = grunnlagYrkesskadeDTO.yrkesskadeTidspunkt,
+        yrkesskadeTidspunkt = Year.of(grunnlagYrkesskadeDTO.yrkesskadeTidspunkt),
         grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskadeDTO.grunnlagForBeregningAvYrkesskadeandel,
         yrkesskadeinntektIG = grunnlagYrkesskadeDTO.yrkesskadeinntektIG,
         grunnlagEtterYrkesskadeFordel = grunnlagYrkesskadeDTO.grunnlagEtterYrkesskadeFordel
@@ -158,7 +159,7 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
                 grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskade.grunnlagForBeregningAvYrkesskadeandel,
                 terskelverdiForYrkesskade = grunnlagYrkesskade.terskelverdiForYrkesskade,
                 yrkesskadeinntektIG = grunnlagYrkesskade.yrkesskadeinntektIG,
-                yrkesskadeTidspunkt = grunnlagYrkesskade.yrkesskadeTidspunkt,
+                yrkesskadeTidspunkt = Year.of(grunnlagYrkesskade.yrkesskadeTidspunkt),
             )
         }
 

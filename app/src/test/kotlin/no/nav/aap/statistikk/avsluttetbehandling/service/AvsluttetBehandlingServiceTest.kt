@@ -117,7 +117,7 @@ class AvsluttetBehandlingServiceTest {
                 benyttetAndelForYrkesskade = 20,
                 andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
                 antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
-                yrkesskadeTidspunkt = 2018,
+                yrkesskadeTidspunkt = Year.of(2018),
                 grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
@@ -286,7 +286,7 @@ class AvsluttetBehandlingServiceTest {
                 benyttetAndelForYrkesskade = 20,
                 andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
                 antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
-                yrkesskadeTidspunkt = 2018,
+                yrkesskadeTidspunkt = Year.of(2018),
                 grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
                 yrkesskadeinntektIG = BigDecimal(25000),
                 grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
