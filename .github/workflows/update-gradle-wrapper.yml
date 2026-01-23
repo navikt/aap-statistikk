@@ -26,6 +26,6 @@ jobs:
       - name: Update Gradle Wrapper
         uses: gradle-update/update-gradle-wrapper-action@v2
         env:
-          GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
+          GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
