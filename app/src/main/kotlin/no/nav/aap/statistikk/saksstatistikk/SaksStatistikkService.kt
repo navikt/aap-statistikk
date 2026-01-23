@@ -197,7 +197,7 @@ class SaksStatistikkService(
     /**
      * Må bevare mengden av endringTid-verdier pga krav fra saksstatistikk.
      */
-    fun flettBehandlingHendelser(
+    private fun flettBehandlingHendelser(
         originaleHendelser: List<BQBehandling>,
         nyeHendelser: List<BQBehandling>
     ): List<BQBehandling> {
@@ -285,18 +285,6 @@ class SaksStatistikkService(
         } else {
             false
         }
-    }
-
-    fun leggTilHvisIkkeDuplikat(
-        forrige: BQBehandling?,
-        kandidat: BQBehandling,
-        nyListe: MutableList<BQBehandling>
-    ): Boolean {
-        if ((forrige != null && !forrige.ansesSomDuplikat(kandidat)) || forrige == null) {
-            nyListe.add(kandidat)
-            return true
-        }
-        return false
     }
 
     /**
@@ -396,7 +384,7 @@ class SaksStatistikkService(
         return enhet
     }
 
-    fun behandlingStatus(behandling: Behandling, hendelse: BehandlingHendelse): String {
+    private fun behandlingStatus(behandling: Behandling, hendelse: BehandlingHendelse): String {
         val venteÅrsak = hendelse.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
         val returStatus = hendelse.avklaringsbehovStatus
             ?.takeIf { it.returnert() }

@@ -64,7 +64,6 @@ data class BQBehandling(
         }
     }
 
-    val ferdigBehandletTidTrunkert = ferdigbehandletTid?.truncatedTo(SECONDS)
     val vedtakTidTrunkert = vedtakTid?.truncatedTo(SECONDS)
 
     fun ansesSomDuplikat(other: BQBehandling): Boolean {
@@ -78,7 +77,7 @@ data class BQBehandling(
     }
 
     override fun compareTo(other: BQBehandling): Int {
-        if (endretTid == other.endretTid) return tekniskTid.compareTo(other.tekniskTid) else return endretTid.compareTo(
+        return if (endretTid == other.endretTid) tekniskTid.compareTo(other.tekniskTid) else endretTid.compareTo(
             other.endretTid
         )
     }

@@ -13,8 +13,10 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.util.*
 import kotlin.collections.orEmpty
 
@@ -165,6 +167,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         }
     }
 
+    private data class ÅrOgInntekt(val aar: Int, val inntekt: Double)
+
     private fun lagreGrunnlagUføre(
         connection: DBConnection,
         baseGrunnlagId: Long,
@@ -174,8 +178,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         val insertQuery =
             """INSERT INTO GRUNNLAG_UFORE(grunnlag_id, grunnlag, grunnlag_11_19_id, type,
                                uforegrad, ufore_inntekter_fra_foregaende_ar,
-                               ufore_ytterligere_nedsatt_arbeidsevne_ar)
-    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?)"""
+                               ufore_ytterligere_nedsatt_arbeidsevne_ar, ufore_inntekter)
+    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?::jsonb)"""
 
         val executeReturnKey = connection.executeReturnKey(insertQuery) {
             var c = 1
@@ -184,12 +188,24 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 setDouble(c++, beregningsGrunnlag.grunnlag)
                 setLong(c++, id)
                 setString(c++, beregningsGrunnlag.type.name)
-                setInt(c++, beregningsGrunnlag.uføregrad)
+                setInt(
+                    c++,
+                    beregningsGrunnlag.uføregrader.entries.maxByOrNull { it.key }?.value ?: 0
+                )
                 setString(
                     c++,
                     ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr)
                 )
-                setInt(c, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
+                setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
+                setString(
+                    c++,
+                    ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr.entries.map {
+                        ÅrOgInntekt(
+                            it.key,
+                            it.value
+                        )
+                    })
+                )
             }
         }
 
@@ -243,6 +259,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         from grunnlag_uforegrader
         where grunnlag_ufore_id = gu.id)              as gu_uforegrader,
        gu.ufore_inntekter_fra_foregaende_ar           as gu_ufore_inntekter_fra_foregaende_ar,
+       gu.ufore_inntekter                             as gu_ufore_inntekter,
        gu.ufore_ytterligere_nedsatt_arbeidsevne_ar    as gu_ufore_ytterligere_nedsatt_arbeidsevne_ar,
        br.referanse                                   as b_referanse
 from grunnlag
@@ -315,19 +332,32 @@ where br.referanse = ?
     private data class UføregradOgDato(val uforegrad: Int, val virkningstidspunkt: LocalDate)
 
     private fun hentUtGrunnlagUføre(resultSet: Row): IBeregningsGrunnlag.GrunnlagUføre {
+        val uføreInntekterFraForegåendeÅr = DefaultJsonMapper.fromJson<List<ÅrOgInntekt>>(
+            resultSet.getString(
+                "gu_ufore_inntekter"
+            )
+        ).associateBy { it.aar }.mapValues { it.value.inntekt }
+
+        val hentUføregraderKompatibel: () -> Map<LocalDate, Int> = hentUføregraderGammel@{
+            val uføregrader = resultSet.getStringOrNull("gu_uforegrader")
+                ?.let { DefaultJsonMapper.fromJson<List<UføregradOgDato>>(it) }.orEmpty()
+                .associate { it.virkningstidspunkt to it.uforegrad }
+
+            val gammelUføregrad =
+                resultSet.getIntOrNull("gu_uforegrad") ?: return@hentUføregraderGammel uføregrader
+
+            val fallbackBeregningsÅrUføre =
+                Year.of(uføreInntekterFraForegåendeÅr.keys.max() + 1).atDay(1)
+
+            uføregrader.ifEmpty { return@hentUføregraderGammel mapOf(fallbackBeregningsÅrUføre to gammelUføregrad) }
+        }
+
         return IBeregningsGrunnlag.GrunnlagUføre(
             grunnlag = resultSet.getDouble("gu_grunnlag"),
             grunnlag11_19 = hentGrunnlag11_19(resultSet),
             type = UføreType.valueOf(resultSet.getString("gu_type")),
-            uføregrad = resultSet.getInt("gu_uforegrad"),
-            uføregrader = resultSet.getStringOrNull("gu_uforegrader")
-                ?.let { DefaultJsonMapper.fromJson<List<UføregradOgDato>>(it) }.orEmpty()
-                .associate { it.virkningstidspunkt to it.uforegrad },
-            uføreInntekterFraForegåendeÅr = ObjectMapper().readValue(
-                resultSet.getString(
-                    "gu_ufore_inntekter_fra_foregaende_ar"
-                )
-            ),
+            uføregrader = hentUføregraderKompatibel(),
+            uføreInntekterFraForegåendeÅr = uføreInntekterFraForegåendeÅr,
             uføreYtterligereNedsattArbeidsevneÅr = resultSet.getInt("gu_ufore_ytterligere_nedsatt_arbeidsevne_ar"),
         )
     }

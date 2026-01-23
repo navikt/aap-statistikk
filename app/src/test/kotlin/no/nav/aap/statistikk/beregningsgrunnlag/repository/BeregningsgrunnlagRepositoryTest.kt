@@ -120,7 +120,6 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
-                uføregrad = 50,
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
                     LocalDate.of(2021, 1, 1) to 60
@@ -186,7 +185,6 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
-                uføregrad = 50,
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
                     LocalDate.of(2021, 1, 1) to 60
@@ -246,7 +244,6 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
-                uføregrad = 50,
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
                     LocalDate.of(2021, 1, 1) to 60
@@ -280,7 +277,6 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
                 ),
-                uføregrad = 50,
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
                     LocalDate.of(2021, 1, 1) to 60
@@ -330,9 +326,8 @@ class BeregningsgrunnlagRepositoryTest {
         }
 
         assertThat(uthentet2).hasSize(1)
-        assertThat(uthentet2.map { it.value }).containsOnly(
-            grunnlagYrkesskade,
-        )
+        assertThat(uthentet2.map { it.value }).usingRecursiveComparison()
+            .isEqualTo(listOf(grunnlagYrkesskade))
     }
 
     @Test
@@ -403,7 +398,6 @@ fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre {
     return IBeregningsGrunnlag.GrunnlagUføre(
         grunnlag = (10000..50000).random().toDouble(),
         grunnlag11_19 = genererTilfeldig1119Grunnlag(),
-        uføregrad = (0..100).random(),
         uføregrader = mapOf(
             LocalDate.of(2015, 1, 1) to (0..100).random(),
             LocalDate.of(2022, 1, 1) to (0..100).random(),
