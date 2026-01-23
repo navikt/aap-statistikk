@@ -1,13 +1,11 @@
 package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.komponenter.repository.RepositoryFactory
-import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
@@ -45,7 +43,7 @@ class BeregningsgrunnlagRepository(
         val baseGrunnlagId =
             lagreBaseGrunnlag(
                 dbConnection,
-                beregningsGrunnlagVerdi.type(),
+                beregningsGrunnlagVerdi,
                 behandlingsReferanseId
             )
 
@@ -86,16 +84,17 @@ WHERE br.referanse = ?"""
 
     private fun lagreBaseGrunnlag(
         connection: DBConnection,
-        type: GrunnlagType,
+        grunnlag: IBeregningsGrunnlag,
         behandlingId: BehandlingId
     ): Long {
-        val sql = "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt) VALUES (?, ?, ?) "
+        val sql = "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar) VALUES (?, ?, ?, ?) "
 
         return connection.executeReturnKey(sql) {
             setParams {
-                setString(1, type.toString())
+                setString(1, grunnlag.type().toString())
                 setLong(2, behandlingId.id)
                 setLocalDateTime(3, LocalDateTime.now())
+                setInt(4, grunnlag.beregningsår().value)
             }
         }
     }
@@ -154,7 +153,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     c++,
                     beregningsGrunnlag.antattÅrligInntektYrkesskadeTidspunktet
                 )
-                setInt(c++, beregningsGrunnlag.yrkesskadeTidspunkt)
+                setInt(c++, beregningsGrunnlag.yrkesskadeTidspunkt.value)
                 setBigDecimal(
                     c++,
                     beregningsGrunnlag.grunnlagForBeregningAvYrkesskadeandel
@@ -319,7 +318,7 @@ where br.referanse = ?
             antattÅrligInntektYrkesskadeTidspunktet = resultSet.getBigDecimal(
                 "gy_antatt_arlig_inntekt_yrkesskade_tidspunktet"
             ),
-            yrkesskadeTidspunkt = resultSet.getInt("gy_yrkesskade_tidspunkt"),
+            yrkesskadeTidspunkt = Year.of(resultSet.getInt("gy_yrkesskade_tidspunkt")),
             grunnlagForBeregningAvYrkesskadeandel = resultSet.getBigDecimal(
                 "gy_grunnlag_for_beregning_av_yrkesskadeandel"
             ),

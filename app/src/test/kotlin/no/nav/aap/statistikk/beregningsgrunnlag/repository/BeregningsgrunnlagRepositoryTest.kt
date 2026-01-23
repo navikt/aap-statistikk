@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.Year
 import java.util.*
 import javax.sql.DataSource
 
@@ -51,7 +52,6 @@ class BeregningsgrunnlagRepositoryTest {
                 behandlingsReferanse = behandlingsReferanse
             )
         )
-
     }
 
     @Test
@@ -73,7 +73,7 @@ class BeregningsgrunnlagRepositoryTest {
             benyttetAndelForYrkesskade = 20,
             andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
             antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
-            yrkesskadeTidspunkt = 2018,
+            yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
@@ -138,7 +138,7 @@ class BeregningsgrunnlagRepositoryTest {
             benyttetAndelForYrkesskade = 20,
             andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
             antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
-            yrkesskadeTidspunkt = 2018,
+            yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
@@ -262,7 +262,7 @@ class BeregningsgrunnlagRepositoryTest {
             benyttetAndelForYrkesskade = 20,
             andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
             antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
-            yrkesskadeTidspunkt = 2018,
+            yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
             grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
@@ -423,7 +423,7 @@ fun genererTilfeldigYrkesskadeGrunnlag(): IBeregningsGrunnlag.GrunnlagYrkesskade
         benyttetAndelForYrkesskade = (10..50).random(),
         andelSomIkkeSkyldesYrkesskade = BigDecimal((10..90).random()),
         antattÅrligInntektYrkesskadeTidspunktet = BigDecimal((20000..60000).random()),
-        yrkesskadeTidspunkt = (2018..2022).random(),
+        yrkesskadeTidspunkt = (2018..2022).random().let(Year::of),
         grunnlagForBeregningAvYrkesskadeandel = BigDecimal((20000..60000).random()),
         yrkesskadeinntektIG = BigDecimal((20000..60000).random()),
         grunnlagEtterYrkesskadeFordel = BigDecimal((20000..60000).random())

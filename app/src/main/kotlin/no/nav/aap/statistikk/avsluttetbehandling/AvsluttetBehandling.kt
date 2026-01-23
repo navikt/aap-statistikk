@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.util.*
 
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk.avsluttetbehandling")
@@ -98,6 +99,8 @@ sealed interface IBeregningsGrunnlag {
 
     fun type(): GrunnlagType
 
+    fun beregningsår(): Year
+
     @Suppress("ClassName")
     data class Grunnlag_11_19(
         val grunnlag: Double,
@@ -111,6 +114,10 @@ sealed interface IBeregningsGrunnlag {
 
         override fun type(): GrunnlagType {
             return GrunnlagType.Grunnlag11_19
+        }
+
+        override fun beregningsår(): Year {
+            return Year.of(inntekter.keys.max() + 1)
         }
     }
 
@@ -129,19 +136,25 @@ sealed interface IBeregningsGrunnlag {
         override fun type(): GrunnlagType {
             return GrunnlagType.Grunnlag_Ufore
         }
+
+        override fun beregningsår(): Year {
+            return when (type) {
+                UføreType.STANDARD -> grunnlag11_19.beregningsår()
+                UføreType.YTTERLIGERE_NEDSATT -> Year.of(uføreInntekterFraForegåendeÅr.keys.max() + 1)
+            }
+        }
     }
 
     data class GrunnlagYrkesskade(
         val grunnlaget: Double,
         val beregningsgrunnlag: IBeregningsGrunnlag,
-        // Denne er hardkodet til 70% i behandlingsflyt?
         val terskelverdiForYrkesskade: Int,
         val andelSomSkyldesYrkesskade: BigDecimal,
         val andelYrkesskade: Int,
         val benyttetAndelForYrkesskade: Int,
         val andelSomIkkeSkyldesYrkesskade: BigDecimal,
         val antattÅrligInntektYrkesskadeTidspunktet: BigDecimal,
-        val yrkesskadeTidspunkt: Int,
+        val yrkesskadeTidspunkt: Year,
         val grunnlagForBeregningAvYrkesskadeandel: BigDecimal,
         val yrkesskadeinntektIG: BigDecimal,
         val grunnlagEtterYrkesskadeFordel: BigDecimal,
@@ -152,6 +165,11 @@ sealed interface IBeregningsGrunnlag {
 
         override fun type(): GrunnlagType {
             return GrunnlagType.GrunnlagYrkesskade
+        }
+
+        override fun beregningsår(): Year {
+            return if (benyttetAndelForYrkesskade == 100) yrkesskadeTidspunkt else
+                beregningsgrunnlag.beregningsår()
         }
     }
 }
