@@ -58,7 +58,7 @@ spec:
         concat(
           pg.id,
           '-',
-          g.id,
+          COALESCE(g.id, 0), '-',
           '-',
           COALESCE(gy.id, 0), '-',
           COALESCE(gu.id, 0), '-',
