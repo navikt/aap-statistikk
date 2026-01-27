@@ -16,7 +16,7 @@ import javax.sql.DataSource
 
 class TilkjentYtelseRepositoryTest {
     @Test
-    fun `kun én lagret tilkjent ytelse per behandlingsreferanse`(@Postgres dataSource: DataSource) {
+    fun `kun én lagret tilkjent ytelse per behandlingsreferanse - skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
         val behandlingsReferanse = UUID.randomUUID()
         opprettTestHendelse(dataSource, behandlingsReferanse, "123456789".tilSaksnummer())
 
@@ -24,20 +24,50 @@ class TilkjentYtelseRepositoryTest {
             TilkjentYtelseEntity(
                 saksnummer = "ABCDE".tilSaksnummer(),
                 behandlingsReferanse = behandlingsReferanse,
-                perioder = listOf()
+                perioder = listOf(
+                    TilkjentYtelsePeriodeEntity(
+                        fraDato = LocalDate.now(),
+                        tilDato = LocalDate.now().plusDays(1),
+                        dagsats = 1000.0,
+                        gradering = 100.0,
+                        redusertDagsats = 1000.0,
+                        utbetalingsdato = LocalDate.now(),
+                        antallBarn = 0,
+                        barnetilleggSats = 0.0,
+                        barnetillegg = 0.0
+                    )
+                )
             )
 
         dataSource.transaction { conn ->
             TilkjentYtelseRepository(conn).lagreTilkjentYtelse(tilkjentYtelse)
         }
 
-        dataSource.transaction { conn ->
-            assertThrows<Exception> {
-                TilkjentYtelseRepository(conn).lagreTilkjentYtelse(
-                    tilkjentYtelse
+        val nyttTilkjentYtelse = tilkjentYtelse.copy(
+            perioder = listOf(
+                TilkjentYtelsePeriodeEntity(
+                    fraDato = LocalDate.now(),
+                    tilDato = LocalDate.now().plusDays(1),
+                    dagsats = 2000.0,
+                    gradering = 100.0,
+                    redusertDagsats = 2000.0,
+                    utbetalingsdato = LocalDate.now(),
+                    antallBarn = 0,
+                    barnetilleggSats = 0.0,
+                    barnetillegg = 0.0
                 )
-            }
+            )
+        )
+
+        dataSource.transaction { conn ->
+            TilkjentYtelseRepository(conn).lagreTilkjentYtelse(nyttTilkjentYtelse)
         }
+
+        val hentetUt = dataSource.transaction { conn ->
+            TilkjentYtelseRepository(conn).hentForBehandling(behandlingsReferanse)
+        }
+
+        assertThat(hentetUt?.perioder?.first()?.dagsats).isEqualTo(2000.0)
     }
 
     @Test

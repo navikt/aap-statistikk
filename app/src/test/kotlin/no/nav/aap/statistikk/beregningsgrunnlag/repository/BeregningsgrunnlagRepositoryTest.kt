@@ -334,34 +334,324 @@ class BeregningsgrunnlagRepositoryTest {
     @Test
     fun `sette inn mange beregningsgrunnlag`(@Postgres dataSource: DataSource) {
         val referanser = List(100) { UUID.randomUUID() }
-            .associateWith { genererTilfeldigGrunnlag() }
+            .associateWith { Pair(genererTilfeldigGrunnlag(), genererTilfeldigGrunnlag()) }
 
         referanser.forEach { (ref, grunnlag) ->
             opprettTestHendelse(dataSource, ref, Saksnummer("ABCDE-${ref.toString().takeLast(4)}"))
 
+            val (grunnlag1, grunnlag2) = grunnlag
             dataSource.transaction { conn ->
                 val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn)
 
                 beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                     MedBehandlingsreferanse(
-                        value = grunnlag,
+                        value = grunnlag1,
+                        behandlingsReferanse = ref
+                    )
+                )
+                beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
+                    MedBehandlingsreferanse(
+                        value = grunnlag2,
                         behandlingsReferanse = ref
                     )
                 )
             }
         }
 
+        var c = 0
         referanser.forEach { (ref, grunnlag) ->
             val hentet = dataSource.transaction {
                 BeregningsgrunnlagRepository(
                     it
                 ).hentBeregningsGrunnlag(ref)
             }
-
+            println(c)
             assertThat(hentet).hasSize(1)
             assertThat(hentet.first().behandlingsReferanse).isEqualTo(ref)
-            assertThat(hentet.first().value).isEqualTo(grunnlag)
+            assertThat(hentet.first().value).isEqualTo(grunnlag.second)
+            c++
         }
+    }
+
+    @Test
+    fun `lagre beregningsgrunnlag skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
+
+        val grunnlag1 = IBeregningsGrunnlag.Grunnlag_11_19(
+            grunnlag = 20000.0,
+            er6GBegrenset = false,
+            erGjennomsnitt = true,
+            inntekter = mapOf(2019 to 25000.0)
+        )
+
+        val grunnlag2 = IBeregningsGrunnlag.Grunnlag_11_19(
+            grunnlag = 30000.0,
+            er6GBegrenset = true,
+            erGjennomsnitt = false,
+            inntekter = mapOf(2020 to 35000.0)
+        )
+
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(MedBehandlingsreferanse(behandlingsReferanse, grunnlag1))
+        }
+
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(MedBehandlingsreferanse(behandlingsReferanse, grunnlag2))
+        }
+
+        val hentet = dataSource.transaction {
+            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(behandlingsReferanse)
+        }
+
+        assertThat(hentet).hasSize(1)
+        assertThat(hentet.first().value).isEqualTo(grunnlag2)
+    }
+
+    @Test
+    fun `lagre beregningsgrunnlag yrkesskade med ufore skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
+
+        val grunnlagYrkesskadeUfore = IBeregningsGrunnlag.GrunnlagYrkesskade(
+            grunnlaget = 25000.0,
+            beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagUføre(
+                grunnlag = 30000.0,
+                grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
+                    grunnlag = 25000.0,
+                    er6GBegrenset = false,
+                    erGjennomsnitt = true,
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                ),
+                uføregrader = mapOf(
+                    LocalDate.of(2020, 1, 1) to 50,
+                ),
+                type = UføreType.YTTERLIGERE_NEDSATT,
+                uføreInntekterFraForegåendeÅr = mapOf(
+                    2019 to 27500.0,
+                ),
+                uføreYtterligereNedsattArbeidsevneÅr = 2020
+            ),
+            terskelverdiForYrkesskade = 70,
+            andelSomSkyldesYrkesskade = BigDecimal(30),
+            andelYrkesskade = 25,
+            benyttetAndelForYrkesskade = 20,
+            andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
+            antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
+            yrkesskadeTidspunkt = Year.of(2018),
+            grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
+            yrkesskadeinntektIG = BigDecimal(25000),
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+        )
+
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse,
+                    grunnlagYrkesskadeUfore
+                )
+            )
+        }
+
+        // Lagre igjen for å teste overskriving
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse,
+                    grunnlagYrkesskadeUfore
+                )
+            )
+        }
+
+        val hentet = dataSource.transaction {
+            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(behandlingsReferanse)
+        }
+
+        assertThat(hentet).hasSize(1)
+        assertThat(hentet.first().value).usingRecursiveComparison()
+            .isEqualTo(grunnlagYrkesskadeUfore)
+    }
+
+    @Test
+    fun `lagre beregningsgrunnlag yrkesskade med normal skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
+
+        val grunnlagYrkesskadeNormal = IBeregningsGrunnlag.GrunnlagYrkesskade(
+            grunnlaget = 25000.0,
+            beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
+                grunnlag = 20000.0,
+                er6GBegrenset = false,
+                erGjennomsnitt = true,
+                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+            ),
+            terskelverdiForYrkesskade = 70,
+            andelSomSkyldesYrkesskade = BigDecimal(30),
+            andelYrkesskade = 25,
+            benyttetAndelForYrkesskade = 20,
+            andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
+            antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
+            yrkesskadeTidspunkt = Year.of(2018),
+            grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
+            yrkesskadeinntektIG = BigDecimal(25000),
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+        )
+
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse,
+                    grunnlagYrkesskadeNormal
+                )
+            )
+        }
+
+        // Lagre igjen for å overskrive
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse,
+                    grunnlagYrkesskadeNormal
+                )
+            )
+        }
+
+        val hentet = dataSource.transaction {
+            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(behandlingsReferanse)
+        }
+
+        assertThat(hentet).hasSize(1)
+        assertThat(hentet.first().value).usingRecursiveComparison()
+            .isEqualTo(grunnlagYrkesskadeNormal)
+    }
+
+    @Test
+    fun `lagre yrkesskade skal ikke etterlate foreldreløse rader ved overskriving`(@Postgres dataSource: DataSource) {
+        val behandlingsReferanse = UUID.randomUUID()
+        opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
+
+        val grunnlagYrkesskade = IBeregningsGrunnlag.GrunnlagYrkesskade(
+            grunnlaget = 25000.0,
+            beregningsgrunnlag = IBeregningsGrunnlag.Grunnlag_11_19(
+                grunnlag = 20000.0,
+                er6GBegrenset = false,
+                erGjennomsnitt = true,
+                inntekter = mapOf(2019 to 25000.0)
+            ),
+            terskelverdiForYrkesskade = 70,
+            andelSomSkyldesYrkesskade = BigDecimal(30),
+            andelYrkesskade = 25,
+            benyttetAndelForYrkesskade = 20,
+            andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
+            antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
+            yrkesskadeTidspunkt = Year.of(2018),
+            grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
+            yrkesskadeinntektIG = BigDecimal(25000),
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+        )
+
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse,
+                    grunnlagYrkesskade
+                )
+            )
+        }
+
+        // Lagre igjen for å overskrive
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            repo.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    behandlingsReferanse,
+                    grunnlagYrkesskade
+                )
+            )
+        }
+
+        val antallRader = dataSource.transaction {
+            it.queryFirst("SELECT count(*) as antall FROM GRUNNLAG_YRKESSKADE") {
+                setRowMapper { row -> row.getLong("antall") }
+            }
+        }
+
+        // Med den gamle koden ville dette vært 2, fordi GRUNNLAG_YRKESSKADE ikke ble slettet
+        assertThat(antallRader).isEqualTo(1)
+    }
+
+    @Test
+    fun `hent yrkesskade med ufore skal fungere selv om id-er er forskjellige`(@Postgres dataSource: DataSource) {
+        val ref1 = UUID.randomUUID()
+        val ref2 = UUID.randomUUID()
+        opprettTestHendelse(dataSource, ref1, Saksnummer("REF01"))
+        opprettTestHendelse(dataSource, ref2, Saksnummer("REF02"))
+
+        dataSource.transaction {
+            val repo = BeregningsgrunnlagRepository(it)
+            // Lagre noe for ref1 først for å dytte GRUNNLAG-sekvensen fremover
+            repo.lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    ref1, IBeregningsGrunnlag.Grunnlag_11_19(
+                        grunnlag = 10000.0,
+                        er6GBegrenset = false,
+                        erGjennomsnitt = false,
+                        inntekter = mapOf(2023 to 10000.0)
+                    )
+                )
+            )
+        }
+
+        val grunnlagYrkesskadeUfore = IBeregningsGrunnlag.GrunnlagYrkesskade(
+            grunnlaget = 25000.0,
+            beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagUføre(
+                grunnlag = 30000.0,
+                grunnlag11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
+                    grunnlag = 25000.0,
+                    er6GBegrenset = false,
+                    erGjennomsnitt = true,
+                    inntekter = mapOf(2019 to 25000.0)
+                ),
+                uføregrader = mapOf(LocalDate.of(2020, 1, 1) to 50),
+                type = UføreType.YTTERLIGERE_NEDSATT,
+                uføreInntekterFraForegåendeÅr = mapOf(2019 to 27500.0),
+                uføreYtterligereNedsattArbeidsevneÅr = 2020
+            ),
+            terskelverdiForYrkesskade = 70,
+            andelSomSkyldesYrkesskade = BigDecimal(30),
+            andelYrkesskade = 25,
+            benyttetAndelForYrkesskade = 20,
+            andelSomIkkeSkyldesYrkesskade = BigDecimal(40),
+            antattÅrligInntektYrkesskadeTidspunktet = BigDecimal(25000),
+            yrkesskadeTidspunkt = Year.of(2018),
+            grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
+            yrkesskadeinntektIG = BigDecimal(25000),
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+        )
+
+        dataSource.transaction {
+            BeregningsgrunnlagRepository(it).lagreBeregningsGrunnlag(
+                MedBehandlingsreferanse(
+                    ref2,
+                    grunnlagYrkesskadeUfore
+                )
+            )
+        }
+
+        val hentet = dataSource.transaction {
+            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(ref2)
+        }
+
+        assertThat(hentet).hasSize(1)
+        assertThat(hentet.first().value).usingRecursiveComparison()
+            .isEqualTo(grunnlagYrkesskadeUfore)
     }
 }
 
