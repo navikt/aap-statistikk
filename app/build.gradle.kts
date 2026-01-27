@@ -71,7 +71,7 @@ dependencies {
     testImplementation(libs.ktorServerTestHost)
     testImplementation("com.nimbusds:nimbus-jose-jwt:10.7")
     testImplementation("io.mockk:mockk:${mockkVersion}")
-    testImplementation("org.assertj:assertj-core:3.27.6")
+    testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation("org.testcontainers:testcontainers-postgresql:${testContainersVersion}")
     testImplementation("org.testcontainers:testcontainers-gcloud:${testContainersVersion}")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter:${testContainersVersion}")
