@@ -23,13 +23,31 @@ class VilkårsresultatRepository(
         vilkårsresultat: VilkårsResultatEntity,
         behandlingId: BehandlingId
     ): Long {
+        val deletePeriodeSql = """
+            DELETE
+            FROM VILKARSPERIODE
+            WHERE vilkar_id IN (SELECT v.id
+                                FROM VILKAR v
+                                         JOIN VILKARSRESULTAT vr ON v.vilkarresult_id = vr.id
+                                WHERE vr.behandling_id = ?)
+        """.trimIndent()
+        val deleteVilkarSql = """
+            DELETE FROM VILKAR WHERE vilkarresult_id IN (
+                SELECT id FROM VILKARSRESULTAT WHERE behandling_id = ?
+            )
+        """.trimIndent()
+        val deleteResultatSql = "DELETE FROM VILKARSRESULTAT WHERE behandling_id = ?"
+
+        dbConnection.execute(deletePeriodeSql) { setParams { setLong(1, behandlingId.id) } }
+        dbConnection.execute(deleteVilkarSql) { setParams { setLong(1, behandlingId.id) } }
+        dbConnection.execute(deleteResultatSql) { setParams { setLong(1, behandlingId.id) } }
+
         val sqlInsertResultat =
-            """INSERT INTO VILKARSRESULTAT (behandling_id, opprettet_tidspunkt) VALUES (?, ?)"""
+            """INSERT INTO VILKARSRESULTAT (behandling_id) VALUES (?)"""
 
         val uthentetId = dbConnection.executeReturnKey(sqlInsertResultat) {
             setParams {
                 setLong(1, behandlingId.id)
-                setLocalDateTime(2, LocalDateTime.now())
             }
         }
 
@@ -91,14 +109,14 @@ FROM VILKARSRESULTAT vr
 WHERE vr.id = ?;
             """
 
-        val xx = dbConnection.queryList(preparedSqlStatement) {
+        val vilkarsResultatList = dbConnection.queryList(preparedSqlStatement) {
             setParams { setLong(1, vilkårResultatId) }
             setRowMapper(mapVilkår())
         }
 
         return VilkårsResultatEntity(
-            id = xx.first().first.id,
-            vilkår = xx.mapNotNull { it.second },
+            id = vilkarsResultatList.first().first.id,
+            vilkår = vilkarsResultatList.mapNotNull { it.second },
         )
     }
 
@@ -118,14 +136,14 @@ FROM VILKARSRESULTAT vr
 WHERE br.referanse = ?;            
         """.trimIndent()
 
-        val xx = dbConnection.queryList(sql) {
+        val resultList = dbConnection.queryList(sql) {
             setParams { setUUID(1, behandlingsReferanse) }
             setRowMapper(mapVilkår())
         }
 
         return VilkårsResultatEntity(
-            id = xx.first().first.id,
-            vilkår = xx.mapNotNull { it.second },
+            id = resultList.first().first.id,
+            vilkår = resultList.mapNotNull { it.second },
         )
     }
 
