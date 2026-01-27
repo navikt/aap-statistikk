@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.beregningsgrunnlag.repository
 
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.avsluttetbehandling.GrunnlagType
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
@@ -332,13 +333,11 @@ class BeregningsgrunnlagRepositoryTest {
 
     @Test
     fun `sette inn mange beregningsgrunnlag`(@Postgres dataSource: DataSource) {
-        val referanser = List(50) { UUID.randomUUID() }
+        val referanser = List(100) { UUID.randomUUID() }
+            .associateWith { genererTilfeldigGrunnlag() }
 
-        referanser.forEach { ref ->
+        referanser.forEach { (ref, grunnlag) ->
             opprettTestHendelse(dataSource, ref, Saksnummer("ABCDE-${ref.toString().takeLast(4)}"))
-
-            val grunnlag = genererTilfeldigGrunnlag()
-
 
             dataSource.transaction { conn ->
                 val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn)
@@ -352,7 +351,7 @@ class BeregningsgrunnlagRepositoryTest {
             }
         }
 
-        referanser.forEach { ref ->
+        referanser.forEach { (ref, grunnlag) ->
             val hentet = dataSource.transaction {
                 BeregningsgrunnlagRepository(
                     it
@@ -361,23 +360,23 @@ class BeregningsgrunnlagRepositoryTest {
 
             assertThat(hentet).hasSize(1)
             assertThat(hentet.first().behandlingsReferanse).isEqualTo(ref)
+            assertThat(hentet.first().value).isEqualTo(grunnlag)
         }
     }
 }
 
 fun genererTilfeldigGrunnlag(
-    options: List<String> = listOf(
-        "11_19",
-        "ufore",
-        "yrkesskade"
+    options: List<GrunnlagType> = listOf(
+        GrunnlagType.GrunnlagYrkesskade,
+        GrunnlagType.Grunnlag_Ufore,
+        GrunnlagType.Grunnlag11_19
     )
 ): IBeregningsGrunnlag {
     options.random().let {
         return when (it) {
-            "11_19" -> genererTilfeldig1119Grunnlag()
-            "ufore" -> genererTilfeldigUforeGrunnlag()
-            "yrkesskade" -> genererTilfeldigYrkesskadeGrunnlag()
-            else -> throw IllegalArgumentException("Ukjent grunnlagstype: $it")
+            GrunnlagType.Grunnlag11_19 -> genererTilfeldig1119Grunnlag()
+            GrunnlagType.Grunnlag_Ufore -> genererTilfeldigUforeGrunnlag()
+            GrunnlagType.GrunnlagYrkesskade -> genererTilfeldigYrkesskadeGrunnlag()
         }
     }
 }
@@ -385,14 +384,16 @@ fun genererTilfeldigGrunnlag(
 fun genererTilfeldig1119Grunnlag(): IBeregningsGrunnlag.Grunnlag_11_19 {
     return IBeregningsGrunnlag.Grunnlag_11_19(
         grunnlag = (10000..50000).random().toDouble(),
-        er6GBegrenset = (0..1).random() == 1,
-        erGjennomsnitt = (0..1).random() == 1,
+        er6GBegrenset = randomBool(),
+        erGjennomsnitt = randomBool(),
         inntekter = mapOf(
             2019 to (20000..60000).random().toDouble(),
             2020 to (20000..60000).random().toDouble()
         )
     )
 }
+
+private fun randomBool(): Boolean = (0..1).random() == 1
 
 fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre {
     return IBeregningsGrunnlag.GrunnlagUføre(
@@ -416,7 +417,12 @@ fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre {
 fun genererTilfeldigYrkesskadeGrunnlag(): IBeregningsGrunnlag.GrunnlagYrkesskade {
     return IBeregningsGrunnlag.GrunnlagYrkesskade(
         grunnlaget = (10000..50000).random().toDouble(),
-        beregningsgrunnlag = genererTilfeldigGrunnlag(options = listOf("11_19", "ufore")),
+        beregningsgrunnlag = genererTilfeldigGrunnlag(
+            options = listOf(
+                GrunnlagType.Grunnlag11_19,
+                GrunnlagType.Grunnlag_Ufore
+            )
+        ),
         terskelverdiForYrkesskade = (50..100).random(),
         andelSomSkyldesYrkesskade = BigDecimal((10..90).random()),
         andelYrkesskade = (10..50).random(),
