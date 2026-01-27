@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
@@ -15,13 +14,6 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.util.*
 import kotlin.collections.orEmpty
-
-
-interface IBeregningsgrunnlagRepository : Repository {
-    fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long
-    fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>>
-}
-
 
 class BeregningsgrunnlagRepository(
     private val dbConnection: DBConnection
@@ -37,6 +29,8 @@ class BeregningsgrunnlagRepository(
             dbConnection,
             beregningsGrunnlag.behandlingsReferanse
         )
+
+        slettEksisterendeRader(behandlingsReferanseId)
 
         val beregningsGrunnlagVerdi = beregningsGrunnlag.value
 
@@ -60,6 +54,69 @@ class BeregningsgrunnlagRepository(
                 lagreGrunnlagUføre(dbConnection, baseGrunnlagId, beregningsGrunnlagVerdi)
         }
 
+    }
+
+    private fun slettEksisterendeRader(behandlingsReferanseId: BehandlingId) {
+        val deleteGrunnlagYrkesskadeSql = """
+                DELETE FROM GRUNNLAG_YRKESSKADE WHERE 
+                    beregningsgrunnlag_id IN (SELECT id FROM GRUNNLAG WHERE behandling_id = ?)
+            """.trimIndent()
+        val deleteGrunnlagUforegraderSql = """
+                DELETE FROM GRUNNLAG_UFOREGRADER WHERE grunnlag_ufore_id IN (
+                    SELECT id FROM GRUNNLAG_UFORE WHERE grunnlag_id IN (
+                        SELECT id FROM GRUNNLAG WHERE behandling_id = ?
+                    )
+                )
+            """.trimIndent()
+        val deleteGrunnlagUforeSql = """
+                DELETE FROM GRUNNLAG_UFORE WHERE grunnlag_id IN (
+                    SELECT id FROM GRUNNLAG WHERE behandling_id = ?
+                )
+            """.trimIndent()
+        val deleteGrunnlag11_19Sql = """
+                DELETE FROM GRUNNLAG_11_19 WHERE grunnlag_id IN (
+                    SELECT id FROM GRUNNLAG WHERE behandling_id = ?
+                )
+            """.trimIndent()
+        val deleteGrunnlagSql = "DELETE FROM GRUNNLAG WHERE behandling_id = ?"
+
+        dbConnection.execute(deleteGrunnlagYrkesskadeSql) {
+            setParams {
+                setLong(1, behandlingsReferanseId.id)
+            }
+        }
+        dbConnection.execute(deleteGrunnlagUforegraderSql) {
+            setParams {
+                setLong(
+                    1,
+                    behandlingsReferanseId.id
+                )
+            }
+        }
+        dbConnection.execute(deleteGrunnlagUforeSql) {
+            setParams {
+                setLong(
+                    1,
+                    behandlingsReferanseId.id
+                )
+            }
+        }
+        dbConnection.execute(deleteGrunnlag11_19Sql) {
+            setParams {
+                setLong(
+                    1,
+                    behandlingsReferanseId.id
+                )
+            }
+        }
+        dbConnection.execute(deleteGrunnlagSql) {
+            setParams {
+                setLong(
+                    1,
+                    behandlingsReferanseId.id
+                )
+            }
+        }
     }
 
     private fun hentBehandlingsReferanseId(
@@ -87,7 +144,8 @@ WHERE br.referanse = ?"""
         grunnlag: IBeregningsGrunnlag,
         behandlingId: BehandlingId
     ): Long {
-        val sql = "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar) VALUES (?, ?, ?, ?) "
+        val sql =
+            "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar) VALUES (?, ?, ?, ?) "
 
         return connection.executeReturnKey(sql) {
             setParams {
@@ -105,13 +163,13 @@ WHERE br.referanse = ?"""
         beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagYrkesskade
     ): Long {
         val grunnlagType: String
-        when (beregningsGrunnlag.beregningsgrunnlag) {
+        when (val bg = beregningsGrunnlag.beregningsgrunnlag) {
             is IBeregningsGrunnlag.Grunnlag_11_19 -> {
                 grunnlagType = "normal"
                 lagre11_19(
                     connection,
                     baseGrunnlagId,
-                    beregningsGrunnlag.beregningsgrunnlag
+                    bg
                 )
             }
 
@@ -119,7 +177,7 @@ WHERE br.referanse = ?"""
                 grunnlagType = "ufore"
                 lagreGrunnlagUføre(
                     connection, baseGrunnlagId,
-                    beregningsGrunnlag.beregningsgrunnlag
+                    bg
                 )
             }
 
@@ -262,8 +320,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
        br.referanse                                   as b_referanse
 from grunnlag
          left outer join grunnlag_11_19 as g on grunnlag.id = g.grunnlag_id
-         left outer join grunnlag_yrkesskade as gy on g.id = gy.beregningsgrunnlag_id
-         left outer join grunnlag_ufore as gu on g.id = gu.grunnlag_11_19_id
+         left outer join grunnlag_yrkesskade as gy on grunnlag.id = gy.beregningsgrunnlag_id
+         left outer join grunnlag_ufore as gu on grunnlag.id = gu.grunnlag_11_19_id
          left outer join behandling as b on b.id = grunnlag.behandling_id
          left outer join behandling_referanse br on b.referanse_id = br.id
 where br.referanse = ?

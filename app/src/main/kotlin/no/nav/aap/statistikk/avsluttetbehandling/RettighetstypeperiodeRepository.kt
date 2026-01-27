@@ -20,28 +20,36 @@ class RettighetstypeperiodeRepository(private val dbConnection: DBConnection) :
         behandlingReferanse: UUID,
         rettighetstypePeriode: List<RettighetstypePeriode>
     ) {
-        val eksistererAlleredeId = eksistererAllerede(behandlingReferanse)
-        val key = if (eksistererAlleredeId == null) {
-            val sql = """
+        val deletePerioderSql = """
+            DELETE FROM rettighetstypeperioder WHERE rettighetstype_id IN (
+                SELECT r.id FROM rettighetstype r
+                JOIN behandling b ON r.behandling_id = b.id
+                JOIN behandling_referanse br ON b.referanse_id = br.id
+                WHERE br.referanse = ?
+            )
+        """.trimIndent()
+        val deleteRettighetstypeSql = """
+            DELETE FROM rettighetstype WHERE behandling_id = (
+                SELECT b.id FROM behandling b
+                JOIN behandling_referanse br ON b.referanse_id = br.id
+                WHERE br.referanse = ?
+            )
+        """.trimIndent()
+
+        dbConnection.execute(deletePerioderSql) { setParams { setUUID(1, behandlingReferanse) } }
+        dbConnection.execute(deleteRettighetstypeSql) { setParams { setUUID(1, behandlingReferanse) } }
+
+        val sql = """
             INSERT INTO rettighetstype (behandling_id)
 VALUES ((SELECT b.id
          FROM behandling b
                   join behandling_referanse br on b.referanse_id = br.id
          WHERE br.referanse = ?));
         """.trimIndent()
-            dbConnection.executeReturnKey(sql) {
-                setParams {
-                    setUUID(1, behandlingReferanse)
-                }
+        val key = dbConnection.executeReturnKey(sql) {
+            setParams {
+                setUUID(1, behandlingReferanse)
             }
-        } else {
-            logger.info("Rettighetstypeperioder eksisterte allerede for behandling $behandlingReferanse")
-            dbConnection.execute("DELETE FROM rettighetstypeperioder WHERE id = ?") {
-                setParams {
-                    setLong(1, eksistererAlleredeId)
-                }
-            }
-            eksistererAlleredeId
         }
 
         val sql2 = """
@@ -56,21 +64,6 @@ VALUES ((SELECT b.id
                 setString(4, it.rettighetstype.name)
             }
 
-        }
-    }
-
-    private fun eksistererAllerede(behandlingReferanse: UUID): Long? {
-        val sql = """
-            SELECT id FROM rettighetstype WHERE behandling_id = (SELECT b.id FROM behandling b WHERE b.referanse_id = (SELECT br.id FROM behandling_referanse br WHERE br.referanse = ?));
-        """.trimIndent()
-
-        return dbConnection.queryFirstOrNull<Long>(sql) {
-            setParams {
-                setUUID(1, behandlingReferanse)
-            }
-            setRowMapper {
-                it.getLong("id")
-            }
         }
     }
 

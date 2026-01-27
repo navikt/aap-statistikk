@@ -23,11 +23,22 @@ class TilkjentYtelseRepository(
     }
 
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
+        val behandlingId = hentBehandlingId(tilkjentYtelse.behandlingsReferanse, dbConnection)
+
+        val deletePeriodeSql = """
+            DELETE FROM TILKJENT_YTELSE_PERIODE WHERE TILKJENT_YTELSE_ID IN (
+                SELECT ID FROM TILKJENT_YTELSE WHERE behandling_id = ?
+            )
+        """.trimIndent()
+        val deleteYtelseSql = "DELETE FROM TILKJENT_YTELSE WHERE behandling_id = ?"
+
+        dbConnection.execute(deletePeriodeSql) { setParams { setInt(1, behandlingId) } }
+        dbConnection.execute(deleteYtelseSql) { setParams { setInt(1, behandlingId) } }
 
         val nøkkel =
             dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt) VALUES (?, ?)") {
                 setParams {
-                    setInt(1, hentBehandlingId(tilkjentYtelse.behandlingsReferanse, dbConnection))
+                    setInt(1, behandlingId)
                     setLocalDateTime(2, LocalDateTime.now())
                 }
             }
