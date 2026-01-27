@@ -178,7 +178,7 @@ class VilkårsresultatRepositoryTest {
 
 
     @Test
-    fun `kun ett vilkårsresultat per behandling - skal få exception`(@Postgres dataSource: DataSource) {
+    fun `kun ett vilkårsresultat per behandling - skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
         val randomUUID = UUID.randomUUID()
         val saksnummer = "saksnummer".tilSaksnummer()
 
@@ -197,13 +197,23 @@ class VilkårsresultatRepositoryTest {
                             false,
                             null,
                             null
-                        ),
+                        )
+                    )
+                ),
+            )
+        )
+
+        val nyttVilkårsresultat = VilkårsResultatEntity(
+            id = null, listOf(
+                VilkårEntity(
+                    id = null,
+                    Vilkårtype.MEDLEMSKAP.toString(), listOf(
                         VilkårsPeriodeEntity(
                             id = null,
-                            LocalDate.now().minusDays(3),
+                            LocalDate.now().minusDays(10),
                             LocalDate.now(),
-                            "utfall2",
-                            false,
+                            "nytt utfall",
+                            true,
                             null,
                             null
                         )
@@ -217,13 +227,22 @@ class VilkårsresultatRepositoryTest {
             VilkårsresultatRepository(conn).lagreVilkårsResultat(vilkårsresultat, behandlingId)
         }
 
-        // Lagre én gang til skal kaste avbrudd
-        assertThrows<Exception> {
-            dataSource.transaction {
-                VilkårsresultatRepository(it).lagreVilkårsResultat(
-                    vilkårsresultat, behandlingId
-                )
-            }
+        // Lagre én gang til skal overskrive
+        dataSource.transaction { conn ->
+            VilkårsresultatRepository(conn).lagreVilkårsResultat(nyttVilkårsresultat, behandlingId)
         }
+
+        val hentetUt = dataSource.transaction { conn ->
+            VilkårsresultatRepository(conn).hentForBehandling(randomUUID)
+        }
+
+        val config =
+            RecursiveComparisonConfiguration.builder()
+                .withIgnoredFields("vilkår.id", "id", "vilkår.perioder.id").build()
+
+        assertThat(hentetUt)
+            .usingRecursiveComparison(config)
+            .ignoringCollectionOrder()
+            .isEqualTo(nyttVilkårsresultat)
     }
 }
