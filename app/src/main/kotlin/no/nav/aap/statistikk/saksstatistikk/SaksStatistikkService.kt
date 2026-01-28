@@ -53,7 +53,9 @@ class SaksStatistikkService(
 
     fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
         val behandling = behandlingRepository.hent(behandlingId)
-        require(behandling.typeBehandling !in listOf(TypeBehandling.Oppfølgingsbehandling)) {
+        require(
+            behandling.typeBehandling in Konstanter.interessanteBehandlingstyper
+        ) {
             "Denne jobben skal ikke kunne bli trigget av oppfølgingsbehandlinger. Behandling: ${behandling.referanse}"
         }
 

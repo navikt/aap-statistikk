@@ -43,8 +43,8 @@ class MotorJobbAppender(
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
-        if (behandling.typeBehandling in listOf(TypeBehandling.Oppfølgingsbehandling)) {
-            log.info("Prøver å legge til oppfølgingsbehandling til saksstatikk. Ignorerer. Behandling: $behandlingId. Referanse: ${behandling.referanse}")
+        if (behandling.typeBehandling !in Konstanter.interessanteBehandlingstyper) {
+            log.info("Prøver å legge til uinteressant behandling til saksstatikk. Ignorerer. Behandling: $behandlingId. Referanse: ${behandling.referanse}")
             return
         }
 
