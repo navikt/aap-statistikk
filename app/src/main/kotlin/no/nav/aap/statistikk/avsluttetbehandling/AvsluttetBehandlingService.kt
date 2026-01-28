@@ -24,6 +24,7 @@ class AvsluttetBehandlingService(
     private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val skjermingService: SkjermingService,
+    private val arbeidsopptrappingperioderRepository: ArbeidsopptrappingperioderRepository,
     private val opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
@@ -41,6 +42,7 @@ class AvsluttetBehandlingService(
             behandlingRepository = repositoryProvider.provide(),
             rettighetstypeperiodeRepository = repositoryProvider.provide(),
             skjermingService = SkjermingService.konstruer(gatewayProvider),
+            arbeidsopptrappingperioderRepository = repositoryProvider.provide(),
             opprettBigQueryLagringYtelseCallback = opprettBigQueryLagringYtelseCallback
         )
     }
@@ -80,6 +82,11 @@ class AvsluttetBehandlingService(
                 )
             )
         }
+
+        arbeidsopptrappingperioderRepository.lagre(
+            uthentetBehandling.id(),
+            avsluttetBehandling.perioderMedArbeidsopptrapping
+        )
 
         rettighetstypeperiodeRepository.lagre(
             avsluttetBehandling.behandlingsReferanse,

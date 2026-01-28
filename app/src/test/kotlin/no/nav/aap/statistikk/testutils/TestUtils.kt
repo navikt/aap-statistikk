@@ -23,6 +23,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.statistikk.avsluttetbehandling.*
@@ -598,6 +599,19 @@ class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {
     override fun hent(behandlingReferanse: UUID): List<RettighetstypePeriode> {
         return emptyList()
     }
+}
+
+class FakeArbeidsopptrappingRepository : ArbeidsopptrappingperioderRepository {
+    override fun lagre(
+        behandlingId: BehandlingId,
+        perioder: List<Periode>
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun hent(behandlingId: BehandlingId): List<Periode>? {
+        TODO("Not yet implemented")
+    }
 
 }
 
@@ -713,7 +727,7 @@ fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
 fun forberedDatabase(
     it: DBConnection,
     behandlingReferanse: UUID
-) {
+): BehandlingId {
     val ident = "214"
     val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
 
@@ -725,7 +739,7 @@ fun forberedDatabase(
     )
     val sakId = SakRepositoryImpl(it).settInnSak(sak)
 
-    BehandlingRepository(it).opprettBehandling(
+    return BehandlingRepository(it).opprettBehandling(
         Behandling(
             referanse = behandlingReferanse,
             sak = sak.copy(id = sakId),

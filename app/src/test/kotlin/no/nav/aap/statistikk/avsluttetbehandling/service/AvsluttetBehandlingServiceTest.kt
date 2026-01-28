@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
@@ -45,7 +46,7 @@ class AvsluttetBehandlingServiceTest {
         val saksnummer = Saksnummer("xxxx")
 
         val opprettetTidspunkt = LocalDateTime.now(clock)
-        opprettTestHendelse(
+        val (behandlingId, _) = opprettTestHendelse(
             dataSource,
             behandlingReferanse,
             saksnummer,
@@ -56,6 +57,7 @@ class AvsluttetBehandlingServiceTest {
         )
 
         val datoNå = LocalDate.now(clock)
+        val arbeidsopptrappingperiode = Periode(LocalDate.now(), LocalDate.now().plusDays(10))
         val avsluttetBehandling = AvsluttetBehandling(
             behandlingsReferanse = behandlingReferanse,
             tilkjentYtelse = TilkjentYtelse(
@@ -135,6 +137,7 @@ class AvsluttetBehandlingServiceTest {
                     rettighetstype = RettighetsType.BISTANDSBEHOV
                 )
             ),
+            perioderMedArbeidsopptrapping = listOf(arbeidsopptrappingperiode),
             vedtakstidspunkt = opprettetTidspunkt
         )
 
@@ -200,6 +203,11 @@ class AvsluttetBehandlingServiceTest {
                     vurderingsbehov = listOf(Vurderingsbehov.OVERGANG_UFORE.name),
                 )
             )
+
+        val uthentetArbeidsopptrapping =
+            dataSource.transaction { ArbeidsopptrappingperioderRepositoryImpl(it).hent(behandlingId) }
+
+        assertThat(uthentetArbeidsopptrapping).isEqualTo(listOf(arbeidsopptrappingperiode))
 
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
@@ -304,6 +312,7 @@ class AvsluttetBehandlingServiceTest {
                     rettighetstype = RettighetsType.BISTANDSBEHOV
                 )
             ),
+            perioderMedArbeidsopptrapping = emptyList(),
             vedtakstidspunkt = LocalDateTime.now()
         )
 
@@ -346,6 +355,9 @@ class AvsluttetBehandlingServiceTest {
                 behandlingRepository = behandlingRepository,
                 skjermingService = SkjermingService(FakePdlGateway(emptyMap())),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
+                arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
+                    dbConnection
+                ),
                 opprettBigQueryLagringYtelseCallback = {}
             )
         return Pair(bigQueryClient, service)
