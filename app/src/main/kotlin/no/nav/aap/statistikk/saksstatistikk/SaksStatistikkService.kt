@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
+import no.nav.aap.statistikk.sakDuplikat
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.årsakTilOpprettelseIkkeSatt
 import org.slf4j.LoggerFactory
@@ -92,6 +93,7 @@ class SaksStatistikkService(
             }
         } else {
             log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
+            PrometheusProvider.prometheus.sakDuplikat().increment()
         }
     }
 
@@ -161,7 +163,7 @@ class SaksStatistikkService(
             saksbehandler = saksbehandler,
             behandlingMetode = behandling.behandlingMetode().also {
                 if (it == BehandlingMetode.AUTOMATISK) log.info(
-                    "Behandling $behandlingReferanse er automatisk behandlet. Behandling $behandling"
+                    "Behandling $behandlingReferanse er automatisk behandlet. Behandling ${behandling.referanse}"
                 )
             },
             behandlingStatus = behandlingStatus(behandling, sisteHendelse),
