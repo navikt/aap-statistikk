@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.postgresRepositoryRegistry
+import no.nav.aap.statistikk.saksstatistikk.Konstanter
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import org.slf4j.LoggerFactory
