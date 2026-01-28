@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
@@ -39,6 +40,9 @@ fun AvsluttetBehandlingDTO.tilDomene(
                     RettighetsType.VURDERES_FOR_UFØRETRYGD -> no.nav.aap.statistikk.avsluttetbehandling.RettighetsType.VURDERES_FOR_UFØRETRYGD
                 }
             )
+        },
+        perioderMedArbeidsopptrapping = this.perioderMedArbeidsopptrapping.orEmpty().map {
+            Periode(it.fom, it.tom)
         },
     )
 }
@@ -145,7 +149,8 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
                 beregningsGrunnlag =
                     grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene()
             }
-            beregningsGrunnlag = requireNotNull(beregningsGrunnlag) { "Beregningsgrunnlag må være satt for yrkesskade" }
+            beregningsGrunnlag =
+                requireNotNull(beregningsGrunnlag) { "Beregningsgrunnlag må være satt for yrkesskade" }
 
             IBeregningsGrunnlag.GrunnlagYrkesskade(
                 grunnlaget = grunnlagYrkesskade.grunnlaget.toDouble(),
