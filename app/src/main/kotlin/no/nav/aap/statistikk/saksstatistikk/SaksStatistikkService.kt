@@ -136,6 +136,10 @@ class SaksStatistikkService(
         val saksbehandler =
             if (erSkjermet) "-5" else saksbehandlerIdent
 
+        if (behandling.mottattTid.isAfter(behandling.opprettetTid)) {
+            log.info("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
+        }
+
         return BQBehandling(
             sekvensNummer = sekvensNummer,
             behandlingUUID = behandlingReferanse,
