@@ -1,5 +1,5 @@
 [versions]
-ktor = "3.3.3"
+ktor = "3.4.0"
 komponenter = "1.0.933"
 tilgang = "1.0.178"
 behandlingsflyt = "0.0.539"
