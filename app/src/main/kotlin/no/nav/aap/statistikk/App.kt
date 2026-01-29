@@ -95,10 +95,10 @@ fun Application.startUp(
     val lagreAvsluttetBehandlingTilBigQueryJobb =
         LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
 
-    val motorJobbAppender =
-        MotorJobbAppender(lagreAvsluttetBehandlingTilBigQueryJobb)
+    val motorJobbAppender = MotorJobbAppender()
 
-    val lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(motorJobbAppender)
+    val lagreStoppetHendelseJobb =
+        LagreStoppetHendelseJobb(motorJobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb)
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(motorJobbAppender)
 
     val lagreOppgaveJobb = LagreOppgaveJobb()

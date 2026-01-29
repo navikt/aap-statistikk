@@ -15,9 +15,7 @@ import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
-class MotorJobbAppender(
-    private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
-) : JobbAppender {
+class MotorJobbAppender : JobbAppender {
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun leggTil(
@@ -60,7 +58,8 @@ class MotorJobbAppender(
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
         provider: RepositoryProvider,
-        behandlingId: BehandlingId
+        behandlingId: BehandlingId,
+        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
     ) {
         val behandling =
             provider.provide<IBehandlingRepository>()
@@ -90,3 +89,6 @@ class MotorJobbAppender(
                 .forSak(stringToNumber(saksnummer.value))
         )
     }
+}
+// rad endret og og behandling avsluttet-tid mangler i view
+// hvis fritak fra meldekort-status, dele tidslinjen

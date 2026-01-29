@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.oppgave
 
+import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.*
@@ -57,6 +58,7 @@ class LagreOppgaveJobbUtførerTest {
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
+                sakstatistikkService = mockk(), /// TODO
             ).utfør(
                 JobbInput(LagreOppgaveJobb()
                 ).medPayload(oppgaveId.toString())
@@ -328,7 +330,8 @@ class LagreOppgaveJobbUtførerTest {
                     oppgaveRepository = OppgaveRepositoryImpl(it),
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
-                )
+                ),
+                sakstatistikkService = mockk(), /// TODO
             ).utfør(
                 JobbInput(
                     LagreOppgaveJobb(

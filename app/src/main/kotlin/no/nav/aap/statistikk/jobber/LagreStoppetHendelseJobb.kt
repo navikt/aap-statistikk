@@ -5,11 +5,13 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
+import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 
 class LagreStoppetHendelseJobb(
-    private val jobbAppender: JobbAppender
+    private val jobbAppender: JobbAppender,
+    private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
 ) : ProvidersJobbSpesifikasjon {
     override fun konstruer(
         repositoryProvider: RepositoryProvider,
@@ -22,7 +24,8 @@ class LagreStoppetHendelseJobb(
                 opprettBigQueryLagringYtelseCallback = { behandlingId ->
                     jobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
                         repositoryProvider,
-                        behandlingId
+                        behandlingId,
+                        lagreAvsluttetBehandlingTilBigQueryJobb
                     )
                 }
             ),

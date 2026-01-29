@@ -152,8 +152,7 @@ fun konstruerTestJobber(
     val lagreAvsluttetBehandlingTilBigQueryJobb =
         LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
     val resendSakstatistikkJobb = ResendSakstatistikkJobb()
-    val motorJobbAppender = MotorJobbAppender(
-        lagreAvsluttetBehandlingTilBigQueryJobb)
+    val motorJobbAppender = MotorJobbAppender()
     return TestJobberSetup(
         lagreSakinfoTilBigQueryJobb,
         lagreAvsluttetBehandlingTilBigQueryJobb,
@@ -172,18 +171,20 @@ fun konstruerMotor(
     lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
 ): Motor {
     val lagreOppgaveJobb = LagreOppgaveJobb()
+    val lagreAvsluttetBehandlingTilBigQueryJobb =
+        LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
     return motor(
         dataSource = dataSource,
         gatewayProvider = defaultGatewayProvider { },
         jobber = listOf(
-            LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository),
+            lagreAvsluttetBehandlingTilBigQueryJobb,
             lagreOppgaveJobb,
             resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
             LagreOppgaveHendelseJobb(),
             lagreSakinfoTilBigQueryJobb,
-            LagreStoppetHendelseJobb(jobbAppender)
+            LagreStoppetHendelseJobb(jobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb)
         )
     )
 }
@@ -460,7 +461,8 @@ class MockJobbAppender : JobbAppender {
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
         provider: RepositoryProvider,
-        behandlingId: BehandlingId
+        behandlingId: BehandlingId,
+        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
     ) {
         TODO("Not yet implemented")
     }
