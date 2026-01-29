@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.api
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -65,7 +66,7 @@ class MottaStatistikkTest {
             noOpTransactionExecutor,
             motor,
             azureConfig,
-            LagreStoppetHendelseJobb(jobbAppender),
+            LagreStoppetHendelseJobb(jobbAppender, mockk()),
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
@@ -82,7 +83,7 @@ class MottaStatistikkTest {
 
     private fun ekteLagreStoppetHendelseJobb(
         jobbAppender: JobbAppender,
-    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender)
+    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, mockk())
 
     private val hendelse = StoppetBehandling(
         saksnummer = "4LFK2S0",
@@ -406,7 +407,7 @@ class MottaStatistikkTest {
             LagreAvsluttetBehandlingTilBigQueryJobb(FakeBQYtelseRepository())
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
-        val jobbAppender = MotorJobbAppender(lagreAvsluttetBehandlingTilBigQueryJobb)
+        val jobbAppender = MotorJobbAppender()
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(jobbAppender)
         val motor = motor(
             dataSource = dataSource,

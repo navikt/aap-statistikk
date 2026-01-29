@@ -1,15 +1,19 @@
 package no.nav.aap.statistikk.oppgave
 
+import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProviderJobbSpesifikasjon
+import no.nav.aap.motor.ProvidersJobbSpesifikasjon
+import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 
 
 class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
-    private val oppgaveHistorikkLagrer: OppgaveHistorikkLagrer
+    private val oppgaveHistorikkLagrer: OppgaveHistorikkLagrer,
+    private val sakstatistikkService: SaksStatistikkService,
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val hendelse = DefaultJsonMapper.fromJson<Long>(input.payload())
@@ -18,14 +22,20 @@ class LagreOppgaveJobbUtfører(
         val oppgave = hendelser.tilOppgave()
 
         oppgaveHistorikkLagrer.lagre(oppgave)
+
+//        sakstatistikkService.lagreBQBehandling()
     }
 }
 
-class LagreOppgaveJobb : ProviderJobbSpesifikasjon {
-    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
+class LagreOppgaveJobb : ProvidersJobbSpesifikasjon {
+    override fun konstruer(
+        repositoryProvider: RepositoryProvider,
+        gatewayProvider: GatewayProvider
+    ): JobbUtfører {
         return LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
-            OppgaveHistorikkLagrer.konstruer(repositoryProvider)
+            OppgaveHistorikkLagrer.konstruer(repositoryProvider),
+            SaksStatistikkService.konstruer(gatewayProvider, repositoryProvider)
         )
     }
 

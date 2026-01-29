@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk
 
+import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.post
@@ -28,7 +29,7 @@ class ApplicationTest {
             motor = motorMock(),
             jobbAppender = jobbAppender,
             azureConfig = azureConfig,
-            lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender)
+            lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, mockk())
         ) { url, client ->
             @Language("JSON") val body = """{
   "saksnummer": "123456789",
@@ -136,7 +137,7 @@ class ApplicationTest {
             noOpTransactionExecutor,
             motorMock(),
             azureConfig,
-            LagreStoppetHendelseJobb(jobbAppender),
+            LagreStoppetHendelseJobb(jobbAppender, mockk()),
             jobbAppender,
         ) { url, client ->
             client.post<StoppetBehandling, Any>(
