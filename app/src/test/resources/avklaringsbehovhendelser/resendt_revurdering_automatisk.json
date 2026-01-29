@@ -1,410 +1,474 @@
 {
-  "saksnummer" : "4SMQ2Eo",
-  "sakStatus" : "UTREDES",
-  "behandlingReferanse" : "31ab1d6d-37f5-461a-bfdf-5a03595a7984",
-  "relatertBehandling" : "2c8cfb6f-6b91-4bb4-8c5a-aae13fcb2554",
-  "behandlingOpprettetTidspunkt" : "2025-11-27T07:48:45.553",
-  "mottattTid" : "2025-11-27T07:48:45.553",
-  "behandlingStatus" : "AVSLUTTET",
-  "behandlingType" : "Revurdering",
-  "soknadsFormat" : "DIGITAL",
-  "ident" : "17488405519",
-  "versjon" : "9496562084de10e303aaa7d550e5ac779ba8b542",
-  "vurderingsbehov" : [ "EFFEKTUER_AKTIVITETSPLIKT" ],
+  "saksnummer": "4SMQ2Eo",
+  "sakStatus": "UTREDES",
+  "behandlingReferanse": "31ab1d6d-37f5-461a-bfdf-5a03595a7984",
+  "relatertBehandling": "2c8cfb6f-6b91-4bb4-8c5a-aae13fcb2554",
+  "behandlingOpprettetTidspunkt": "2025-11-27T07:48:45.553",
+  "mottattTid": "2025-11-27T07:48:45.553",
+  "behandlingStatus": "AVSLUTTET",
+  "behandlingType": "Revurdering",
+  "soknadsFormat": "DIGITAL",
+  "ident": "17488405519",
+  "versjon": "9496562084de10e303aaa7d550e5ac779ba8b542",
+  "vurderingsbehov": [
+    "EFFEKTUER_AKTIVITETSPLIKT"
+  ],
   "årsakTilOpprettelse": "AKTIVITETSPLIKT",
-  "avklaringsbehov" : [ ],
-  "hendelsesTidspunkt" : "2025-11-27T08:08:09.762148992",
-  "avsluttetBehandling" : {
-    "tilkjentYtelse" : {
-      "perioder" : [ {
-        "fraDato" : "2025-11-06",
-        "tilDato" : "2025-11-16",
-        "utbetalingsdato" : "2025-11-17",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2025-11-17",
-        "tilDato" : "2025-11-30",
-        "utbetalingsdato" : "2025-12-01",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2025-12-01",
-        "tilDato" : "2025-12-14",
-        "utbetalingsdato" : "2025-12-15",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2025-12-15",
-        "tilDato" : "2025-12-28",
-        "utbetalingsdato" : "2025-12-29",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2025-12-29",
-        "tilDato" : "2026-01-11",
-        "utbetalingsdato" : "2026-01-12",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-01-12",
-        "tilDato" : "2026-01-25",
-        "utbetalingsdato" : "2026-01-26",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-01-26",
-        "tilDato" : "2026-02-08",
-        "utbetalingsdato" : "2026-02-09",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-02-09",
-        "tilDato" : "2026-02-22",
-        "utbetalingsdato" : "2026-02-23",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-02-23",
-        "tilDato" : "2026-03-08",
-        "utbetalingsdato" : "2026-03-09",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-03-09",
-        "tilDato" : "2026-03-22",
-        "utbetalingsdato" : "2026-03-23",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-03-23",
-        "tilDato" : "2026-04-05",
-        "utbetalingsdato" : "2026-04-06",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-04-06",
-        "tilDato" : "2026-04-19",
-        "utbetalingsdato" : "2026-04-20",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-04-20",
-        "tilDato" : "2026-05-03",
-        "utbetalingsdato" : "2026-05-04",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-05-04",
-        "tilDato" : "2026-05-17",
-        "utbetalingsdato" : "2026-05-18",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-05-18",
-        "tilDato" : "2026-05-31",
-        "utbetalingsdato" : "2026-06-01",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-06-01",
-        "tilDato" : "2026-06-14",
-        "utbetalingsdato" : "2026-06-15",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-06-15",
-        "tilDato" : "2026-06-28",
-        "utbetalingsdato" : "2026-06-29",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-06-29",
-        "tilDato" : "2026-07-12",
-        "utbetalingsdato" : "2026-07-13",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-07-13",
-        "tilDato" : "2026-07-26",
-        "utbetalingsdato" : "2026-07-27",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-07-27",
-        "tilDato" : "2026-08-09",
-        "utbetalingsdato" : "2026-08-10",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-08-10",
-        "tilDato" : "2026-08-23",
-        "utbetalingsdato" : "2026-08-24",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-08-24",
-        "tilDato" : "2026-09-06",
-        "utbetalingsdato" : "2026-09-07",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-09-07",
-        "tilDato" : "2026-09-20",
-        "utbetalingsdato" : "2026-09-21",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-09-21",
-        "tilDato" : "2026-10-04",
-        "utbetalingsdato" : "2026-10-05",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-10-05",
-        "tilDato" : "2026-10-18",
-        "utbetalingsdato" : "2026-10-19",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-10-19",
-        "tilDato" : "2026-11-01",
-        "utbetalingsdato" : "2026-11-02",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      }, {
-        "fraDato" : "2026-11-02",
-        "tilDato" : "2026-11-05",
-        "utbetalingsdato" : "2026-11-06",
-        "dagsats" : 1032.0,
-        "gradering" : 0.0,
-        "redusertDagsats" : 0.0,
-        "antallBarn" : 1,
-        "barnetilleggSats" : 37.0,
-        "barnetillegg" : 37.0
-      } ]
-    },
-    "vilkårsResultat" : {
-      "typeBehandling" : "Revurdering",
-      "vilkår" : [ {
-        "vilkårType" : "ALDERSVILKÅRET",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "OPPFYLT",
-          "manuellVurdering" : false,
-          "innvilgelsesårsak" : "null",
-          "avslagsårsak" : "null"
-        } ]
-      }, {
-        "vilkårType" : "BISTANDSVILKÅRET",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "OPPFYLT",
-          "manuellVurdering" : true,
-          "innvilgelsesårsak" : "null",
-          "avslagsårsak" : "null"
-        } ]
-      }, {
-        "vilkårType" : "GRUNNLAGET",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "OPPFYLT",
-          "manuellVurdering" : false,
-          "innvilgelsesårsak" : "null",
-          "avslagsårsak" : "null"
-        } ]
-      }, {
-        "vilkårType" : "LOVVALG",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "OPPFYLT",
-          "manuellVurdering" : false,
-          "innvilgelsesårsak" : "null",
-          "avslagsårsak" : "null"
-        } ]
-      }, {
-        "vilkårType" : "MEDLEMSKAP",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "OPPFYLT",
-          "manuellVurdering" : false,
-          "innvilgelsesårsak" : "null",
-          "avslagsårsak" : "null"
-        } ]
-      }, {
-        "vilkårType" : "OVERGANGARBEIDVILKÅRET",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "IKKE_VURDERT",
-          "manuellVurdering" : false,
-          "innvilgelsesårsak" : "null",
-          "avslagsårsak" : "null"
-        } ]
-      }, {
-        "vilkårType" : "OVERGANGUFØREVILKÅRET",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "IKKE_VURDERT",
-          "manuellVurdering" : false,
-          "innvilgelsesårsak" : "null",
-          "avslagsårsak" : "null"
-        } ]
-      }, {
-        "vilkårType" : "SAMORDNING",
-        "perioder" : [ ]
-      }, {
-        "vilkårType" : "SYKDOMSVILKÅRET",
-        "perioder" : [ {
-          "fraDato" : "2025-11-06",
-          "tilDato" : "2026-11-05",
-          "utfall" : "OPPFYLT",
-          "manuellVurdering" : false,
-          "innvilgelsesårsak" : null,
-          "avslagsårsak" : null
-        } ]
-      } ]
-    },
-    "beregningsGrunnlag" : {
-      "grunnlag11_19dto" : {
-        "inntekter" : {
-          "2022" : 342764.0,
-          "2023" : 362918.0,
-          "2024" : 381607.0
+  "avklaringsbehov": [],
+  "hendelsesTidspunkt": "2025-11-27T08:08:09.762148992",
+  "avsluttetBehandling": {
+    "tilkjentYtelse": {
+      "perioder": [
+        {
+          "fraDato": "2025-11-06",
+          "tilDato": "2025-11-16",
+          "utbetalingsdato": "2025-11-17",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
         },
-        "grunnlaget" : 3.1221686657,
-        "er6GBegrenset" : false,
-        "erGjennomsnitt" : true
+        {
+          "fraDato": "2025-11-17",
+          "tilDato": "2025-11-30",
+          "utbetalingsdato": "2025-12-01",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-12-01",
+          "tilDato": "2025-12-14",
+          "utbetalingsdato": "2025-12-15",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-12-15",
+          "tilDato": "2025-12-28",
+          "utbetalingsdato": "2025-12-29",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2025-12-29",
+          "tilDato": "2026-01-11",
+          "utbetalingsdato": "2026-01-12",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-01-12",
+          "tilDato": "2026-01-25",
+          "utbetalingsdato": "2026-01-26",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-01-26",
+          "tilDato": "2026-02-08",
+          "utbetalingsdato": "2026-02-09",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-02-09",
+          "tilDato": "2026-02-22",
+          "utbetalingsdato": "2026-02-23",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-02-23",
+          "tilDato": "2026-03-08",
+          "utbetalingsdato": "2026-03-09",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-03-09",
+          "tilDato": "2026-03-22",
+          "utbetalingsdato": "2026-03-23",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-03-23",
+          "tilDato": "2026-04-05",
+          "utbetalingsdato": "2026-04-06",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-04-06",
+          "tilDato": "2026-04-19",
+          "utbetalingsdato": "2026-04-20",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-04-20",
+          "tilDato": "2026-05-03",
+          "utbetalingsdato": "2026-05-04",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-05-04",
+          "tilDato": "2026-05-17",
+          "utbetalingsdato": "2026-05-18",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-05-18",
+          "tilDato": "2026-05-31",
+          "utbetalingsdato": "2026-06-01",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-06-01",
+          "tilDato": "2026-06-14",
+          "utbetalingsdato": "2026-06-15",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-06-15",
+          "tilDato": "2026-06-28",
+          "utbetalingsdato": "2026-06-29",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-06-29",
+          "tilDato": "2026-07-12",
+          "utbetalingsdato": "2026-07-13",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-07-13",
+          "tilDato": "2026-07-26",
+          "utbetalingsdato": "2026-07-27",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-07-27",
+          "tilDato": "2026-08-09",
+          "utbetalingsdato": "2026-08-10",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-08-10",
+          "tilDato": "2026-08-23",
+          "utbetalingsdato": "2026-08-24",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-08-24",
+          "tilDato": "2026-09-06",
+          "utbetalingsdato": "2026-09-07",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-09-07",
+          "tilDato": "2026-09-20",
+          "utbetalingsdato": "2026-09-21",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-09-21",
+          "tilDato": "2026-10-04",
+          "utbetalingsdato": "2026-10-05",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-10-05",
+          "tilDato": "2026-10-18",
+          "utbetalingsdato": "2026-10-19",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-10-19",
+          "tilDato": "2026-11-01",
+          "utbetalingsdato": "2026-11-02",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        },
+        {
+          "fraDato": "2026-11-02",
+          "tilDato": "2026-11-05",
+          "utbetalingsdato": "2026-11-06",
+          "dagsats": 1032.0,
+          "gradering": 0.0,
+          "redusertDagsats": 0.0,
+          "antallBarn": 1,
+          "barnetilleggSats": 37.0,
+          "barnetillegg": 37.0
+        }
+      ]
+    },
+    "vilkårsResultat": {
+      "typeBehandling": "Revurdering",
+      "vilkår": [
+        {
+          "vilkårType": "ALDERSVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "null",
+              "avslagsårsak": "null"
+            }
+          ]
+        },
+        {
+          "vilkårType": "BISTANDSVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": true,
+              "innvilgelsesårsak": "null",
+              "avslagsårsak": "null"
+            }
+          ]
+        },
+        {
+          "vilkårType": "GRUNNLAGET",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "null",
+              "avslagsårsak": "null"
+            }
+          ]
+        },
+        {
+          "vilkårType": "LOVVALG",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "null",
+              "avslagsårsak": "null"
+            }
+          ]
+        },
+        {
+          "vilkårType": "MEDLEMSKAP",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "null",
+              "avslagsårsak": "null"
+            }
+          ]
+        },
+        {
+          "vilkårType": "OVERGANGARBEIDVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "IKKE_VURDERT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "null",
+              "avslagsårsak": "null"
+            }
+          ]
+        },
+        {
+          "vilkårType": "OVERGANGUFØREVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "IKKE_VURDERT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": "null",
+              "avslagsårsak": "null"
+            }
+          ]
+        },
+        {
+          "vilkårType": "SAMORDNING",
+          "perioder": []
+        },
+        {
+          "vilkårType": "SYKDOMSVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-11-06",
+              "tilDato": "2026-11-05",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        }
+      ]
+    },
+    "beregningsGrunnlag": {
+      "grunnlag11_19dto": {
+        "inntekter": {
+          "2022": 342764.0,
+          "2023": 362918.0,
+          "2024": 381607.0
+        },
+        "grunnlaget": 3.1221686657,
+        "er6GBegrenset": false,
+        "erGjennomsnitt": true
       },
-      "grunnlagYrkesskade" : null,
-      "grunnlagUføre" : null
+      "grunnlagYrkesskade": null,
+      "grunnlagUføre": null
     },
-    "diagnoser" : {
-      "kodeverk" : "ICPC2",
-      "diagnosekode" : "A02",
-      "bidiagnoser" : [ ]
+    "diagnoser": {
+      "kodeverk": "ICPC2",
+      "diagnosekode": "A02",
+      "bidiagnoser": []
     },
-    "rettighetstypePerioder" : [ {
-      "fraDato" : "2025-11-06",
-      "tilDato" : "2026-11-05",
-      "rettighetstype" : "BISTANDSBEHOV"
-    } ],
-    "resultat" : null
+    "rettighetstypePerioder": [
+      {
+        "fraDato": "2025-11-06",
+        "tilDato": "2026-11-05",
+        "rettighetstype": "BISTANDSBEHOV"
+      }
+    ],
+    "resultat": null,
+    "perioderMedArbeidsopptrapping": []
   },
-  "identerForSak" : [ "17488405519", "02432091956" ],
-  "opprettetAv" : null,
-  "nyeMeldekort" : [ ],
-  "søknadIder" : [ {
-    "identifikator" : "1762419401014"
-  } ]
+  "identerForSak": [
+    "17488405519",
+    "02432091956"
+  ],
+  "opprettetAv": null,
+  "nyeMeldekort": [],
+  "søknadIder": [
+    {
+      "identifikator": "1762419401014"
+    }
+  ]
 }

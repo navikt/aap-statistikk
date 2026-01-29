@@ -113,7 +113,7 @@ class SaksStatistikkService(
         }
     }
 
-    fun bqBehandlingForBehandling(
+    private fun bqBehandlingForBehandling(
         behandling: Behandling,
         erSkjermet: Boolean,
         sekvensNummer: Long?
