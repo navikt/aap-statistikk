@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.api
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -232,7 +231,8 @@ class MottaStatistikkTest {
             diagnoser = Diagnoser("SBC", "BC", emptyList()),
             rettighetstypePerioder = emptyList(),
             resultat = null,
-            vedtakstidspunkt = LocalDateTime.parse("2025-12-08T08:53:14.437000")
+            vedtakstidspunkt = LocalDateTime.parse("2025-12-08T08:53:14.437000"),
+            perioderMedArbeidsopptrapping = emptyList()
         )
     )
 

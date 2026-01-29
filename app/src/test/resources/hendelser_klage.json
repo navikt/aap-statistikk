@@ -1099,7 +1099,8 @@
     "diagnoser" : null,
     "rettighetstypePerioder" : [ ],
     "resultat" : "KLAGE_OPPRETTHOLDES",
-    "vedtakstidspunkt" : "2026-01-09T13:30:21.577"
+    "vedtakstidspunkt" : "2026-01-09T13:30:21.577",
+    "perioderMedArbeidsopptrapping" : [ ]
   },
   "identerForSak" : [ "01410035835" ],
   "opprettetAv" : null,
