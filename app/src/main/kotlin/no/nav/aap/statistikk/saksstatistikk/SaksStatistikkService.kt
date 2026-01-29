@@ -288,11 +288,7 @@ class SaksStatistikkService(
         nyTid: LocalDateTime
     ): Boolean {
         val duration = Duration.between(originalTid, nyTid)
-        return if (duration.abs().toMillis() <= 10) {
-            true
-        } else {
-            false
-        }
+        return duration.abs().toMillis() <= 10
     }
 
     /**

@@ -8,7 +8,6 @@ import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
@@ -18,7 +17,6 @@ import java.time.LocalDateTime
 
 class MotorJobbAppender(
     private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
-    private val resendSakstatistikkJobb: ResendSakstatistikkJobb,
 ) : JobbAppender {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -88,8 +86,7 @@ class MotorJobbAppender(
         val saksnummer = behandling.sak.saksnummer
         leggTil(
             repositoryProvider,
-            JobbInput(resendSakstatistikkJobb).medPayload(behandlingId)
+            JobbInput(ResendSakstatistikkJobb()).medPayload(behandlingId)
                 .forSak(stringToNumber(saksnummer.value))
         )
     }
-}

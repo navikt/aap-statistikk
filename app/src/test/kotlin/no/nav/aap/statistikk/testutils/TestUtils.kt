@@ -153,9 +153,7 @@ fun konstruerTestJobber(
         LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
     val resendSakstatistikkJobb = ResendSakstatistikkJobb()
     val motorJobbAppender = MotorJobbAppender(
-        lagreAvsluttetBehandlingTilBigQueryJobb,
-        resendSakstatistikkJobb,
-    )
+        lagreAvsluttetBehandlingTilBigQueryJobb)
     return TestJobberSetup(
         lagreSakinfoTilBigQueryJobb,
         lagreAvsluttetBehandlingTilBigQueryJobb,

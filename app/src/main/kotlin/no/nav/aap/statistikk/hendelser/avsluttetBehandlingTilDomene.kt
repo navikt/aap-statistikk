@@ -41,7 +41,7 @@ fun AvsluttetBehandlingDTO.tilDomene(
                 }
             )
         },
-        perioderMedArbeidsopptrapping = this.perioderMedArbeidsopptrapping.orEmpty().map {
+        perioderMedArbeidsopptrapping = this.perioderMedArbeidsopptrapping.map {
             Periode(it.fom, it.tom)
         },
     )
