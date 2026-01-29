@@ -406,10 +406,7 @@ class MottaStatistikkTest {
             LagreAvsluttetBehandlingTilBigQueryJobb(FakeBQYtelseRepository())
 
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
-        val jobbAppender = MotorJobbAppender(
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            resendSakstatistikkJobb,
-        )
+        val jobbAppender = MotorJobbAppender(lagreAvsluttetBehandlingTilBigQueryJobb)
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(jobbAppender)
         val motor = motor(
             dataSource = dataSource,
