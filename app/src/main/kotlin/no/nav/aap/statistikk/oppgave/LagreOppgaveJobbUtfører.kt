@@ -8,6 +8,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.saksstatistikk.Konstanter
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 
 
@@ -27,17 +28,18 @@ class LagreOppgaveJobbUtfører(
 
         if (oppgave.behandlingReferanse != null) {
             behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
-                sakstatistikkService.lagreSakInfoTilBigquery(it.id())
-
                 if (!Miljø.erProd()) {
-                    behandlingRepository.oppdaterBehandling(
-                        it.leggTilHendelse(
-                            it.hendelser.last().copy(
-                                tidspunkt = oppgave.sistEndret(),
-                                hendelsesTidspunkt = oppgave.sistEndret()
+                    if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
+                        sakstatistikkService.lagreSakInfoTilBigquery(it.id())
+                        behandlingRepository.oppdaterBehandling(
+                            it.leggTilHendelse(
+                                it.hendelser.last().copy(
+                                    tidspunkt = oppgave.sistEndret(),
+                                    hendelsesTidspunkt = oppgave.sistEndret()
+                                )
                             )
                         )
-                    )
+                    }
                 }
             }
         }

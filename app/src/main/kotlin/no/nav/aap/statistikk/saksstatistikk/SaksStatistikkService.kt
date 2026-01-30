@@ -10,7 +10,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.ferdigBehandletTid
 import no.nav.aap.statistikk.hendelser.returnert
-import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sakDuplikat
@@ -25,7 +24,7 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 
 class SaksStatistikkService(
-    private val behandlingRepository: IBehandlingRepository,
+    private val behandlingService: BehandlingService,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
     private val skjermingService: SkjermingService,
@@ -41,7 +40,7 @@ class SaksStatistikkService(
             repositoryProvider: RepositoryProvider,
         ): SaksStatistikkService {
             return SaksStatistikkService(
-                behandlingRepository = repositoryProvider.provide(),
+                behandlingService = BehandlingService(repositoryProvider.provide()),
                 rettighetstypeperiodeRepository = repositoryProvider.provide(),
                 bigQueryKvitteringRepository = repositoryProvider.provide(),
                 skjermingService = SkjermingService.konstruer(gatewayProvider),
@@ -52,7 +51,7 @@ class SaksStatistikkService(
     }
 
     fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
-        val behandling = behandlingRepository.hent(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
         require(
             behandling.typeBehandling in Konstanter.interessanteBehandlingstyper
         ) {
@@ -103,23 +102,13 @@ class SaksStatistikkService(
         return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
-    private fun hentRelatertBehandlingUUID(behandling: Behandling): String? {
-        val eksisterendeBehandling =
-            behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
-        return if (eksisterendeBehandling == null) {
-            behandling.relatertBehandlingReferanse
-        } else {
-            eksisterendeBehandling.toString()
-        }
-    }
-
     private fun bqBehandlingForBehandling(
         behandling: Behandling,
         erSkjermet: Boolean,
         sekvensNummer: Long?
     ): BQBehandling {
         val sak = behandling.sak
-        val relatertBehandlingUUID = hentRelatertBehandlingUUID(behandling)
+        val relatertBehandlingUUID = behandlingService.hentRelatertBehandlingUUID(behandling)
         val hendelser = behandling.hendelser
         val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
@@ -181,7 +170,7 @@ class SaksStatistikkService(
     fun alleHendelserPåBehandling(
         behandlingId: BehandlingId
     ): List<BQBehandling> {
-        val behandling = behandlingRepository.hent(behandlingId)
+        val behandling = behandlingService.hentBehandling(behandlingId)
 
         val erSkjermet = skjermingService.erSkjermet(behandling)
 

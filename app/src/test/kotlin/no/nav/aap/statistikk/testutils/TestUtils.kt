@@ -758,7 +758,7 @@ fun konstruerSakstatistikkService(
     connection: DBConnection
 ): SaksStatistikkService {
     return SaksStatistikkService(
-        behandlingRepository = BehandlingRepository(connection),
+        behandlingService = BehandlingService(BehandlingRepository(connection)),
         rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
         bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
         skjermingService = SkjermingService(FakePdlGateway()),
