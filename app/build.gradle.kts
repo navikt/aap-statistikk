@@ -16,7 +16,7 @@ tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
     jvmTarget.set("21")
 }
 
-val mockkVersion = "1.14.7"
+val mockkVersion = "1.14.9"
 val flywayVersion = "11.14.0"
 val testContainersVersion = "2.0.3"
 
@@ -65,7 +65,7 @@ dependencies {
     implementation(libs.postmottakKontrakt)
     implementation(libs.utbetalKontrakt)
 
-    implementation("com.google.cloud:google-cloud-bigquery:2.57.2")
+    implementation("com.google.cloud:google-cloud-bigquery:2.58.0")
 
     testImplementation(libs.motorTestUtils)
     testImplementation(libs.ktorServerTestHost)
