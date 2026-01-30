@@ -25,5 +25,5 @@ fun MeterRegistry.lagretPostmottakHendelse(): Counter =
 fun MeterRegistry.årsakTilOpprettelseIkkeSatt(): Counter =
     this.counter("statistikk_aarsak_til_opprettelse_ikke_satt_total")
 
-fun MeterRegistry.sakDuplikat(): Counter =
-    this.counter("statistikk_sak_duplikat_total")
+fun MeterRegistry.sakDuplikat(erDuplikat: Boolean): Counter =
+    this.counter("statistikk_sak_duplikat_total", listOf(Tag.of("duplikat", erDuplikat.toString())))
