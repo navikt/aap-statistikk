@@ -8,7 +8,7 @@ import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.hendelser.ferdigBehandletTid
+import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
@@ -401,4 +401,7 @@ class SaksStatistikkService(
         }
     }
 
+    fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
+        return this.firstOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
+    }
 }

@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
@@ -53,6 +54,7 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
                 if (it == null && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) dto.tidspunktSisteEndring else it
             }
 
+        val (sisteLøsteAvklaringsbehov, sisteSaksbehandler) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov() ?: Pair(null, null)
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
@@ -66,6 +68,8 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
             relaterteIdenter = dto.identerForSak,
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
+            sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov?.kode?.name,
+            sisteSaksbehandlerSomLøstebehov = sisteSaksbehandler,
             gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()?.kode?.name,
             gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
             søknadsformat = dto.soknadsFormat.tilDomene(),
@@ -97,4 +101,12 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
         }
         return relatertBehadling
     }
+
+    fun hentRelatertBehandlingUUID(behandling: Behandling): String? {
+        val eksisterendeBehandling =
+            behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
+        return eksisterendeBehandling?.toString() ?: behandling.relatertBehandlingReferanse
+    }
+
+    fun hentBehandling(behandlingId: BehandlingId) = behandlingRepository.hent(behandlingId)
 }

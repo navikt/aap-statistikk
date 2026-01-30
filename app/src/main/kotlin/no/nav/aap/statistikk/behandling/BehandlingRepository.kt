@@ -89,8 +89,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse,
+                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -114,6 +115,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setBoolean(c++, false)
                 setString(c++, behandling.utbetalingId())
                 setString(c++, behandling.relatertBehandlingReferanse)
+                setString(c++, behandling.sisteLøsteAvklaringsbehov)
+                setString(c++, behandling.sisteSaksbehandlerSomLøstebehov)
             }
         }
 
@@ -123,12 +126,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
     @Deprecated("Fjern denne når alle aktive behandlinger har dette feltet.")
     private fun oppdaterÅrsakTilOpprettelse(behandling: Behandling) {
         val behandlingId = behandling.id()
-        val oppdaterte = dbConnection.executeReturnUpdated("UPDATE behandling SET aarsak_til_opprettelse = ? WHERE id = ? AND aarsak_til_opprettelse IS NULL") {
-            setParams {
-                setString(1, behandling.årsakTilOpprettelse)
-                setLong(2, behandlingId.id)
+        val oppdaterte =
+            dbConnection.executeReturnUpdated("UPDATE behandling SET aarsak_til_opprettelse = ? WHERE id = ? AND aarsak_til_opprettelse IS NULL") {
+                setParams {
+                    setString(1, behandling.årsakTilOpprettelse)
+                    setLong(2, behandlingId.id)
+                }
             }
-        }
         log.info("Oppdaterte $oppdaterte rader med årsak til opprettelse.")
     }
 
@@ -216,8 +220,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                                   status, siste_saksbehandler, gjeldende_avklaringsbehov,
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse,
+                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) }
         ) {
             setParams { (hendelse, idx) ->
@@ -242,6 +247,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setBoolean(c++, false)
                 setString(c++, hendelse.utbetalingId())
                 setString(c++, hendelse.relatertBehandlingReferanse)
+                setString(c++, hendelse.sisteLøsteAvklaringsbehov)
+                setString(c++, hendelse.sisteSaksbehandlerSomLøstebehov)
             }
         }
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
@@ -249,39 +256,41 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
 
     @Language("PostgreSQL")
     private val hentQuery = """
-    SELECT b.id                                as b_id,
-           br.referanse                        as br_referanse,
-           b.type                              as b_type,
-           b.opprettet_tid                     as b_opprettet_tid,
-           b.forrige_behandling_id             as b_forrige_behandling_id,
-           b.aarsaker_til_behandling           as b_aarsaker_til_behandling,
-           b.aarsak_til_opprettelse            as b_aarsak_til_opprettelse,
-           b.opprettet_av                      as b_opprettet_av,
-           s.id                                as s_id,
-           s.saksnummer                        as s_saksnummer,
-           sh.oppdatert_tid                    as sh_oppdatert_tid,
-           sh.sak_status                       as sh_sak_status,
-           sh.id                               as sh_id,
-           p.ident                             as p_ident,
-           p.id                                as p_id,
-           bh.status                           as bh_status,
-           bh.versjon_id                       as bh_versjon_id,
-           bh.mottatt_tid                      as bh_mottatt_tid,
-           bh.hendelsestidspunkt               as bh_hendelsestidspunkt,
-           bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
-           bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
-           bh.siste_saksbehandler              as bh_siste_saksbehandler,
-           bh.venteaarsak                      as bh_venteaarsak,
-           bh.retur_aarsak                     as bh_retur_aarsak,
-           bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
-           bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
-           bh.relatert_behandling_referanse    as bh_relatert_behandling_referanse,
-           bh.resultat                         as bh_resultat,
-           bh.soknadsformat                    as bh_soknadsformat,
-           bh.steggruppe                       as bh_steggruppe,
-           bh.id                               as bh_id,
-           v.versjon                           as v_versjon,
-           rp.rp_ident                         as rp_ident
+    SELECT b.id                                        as b_id,
+           br.referanse                                as br_referanse,
+           b.type                                      as b_type,
+           b.opprettet_tid                             as b_opprettet_tid,
+           b.forrige_behandling_id                     as b_forrige_behandling_id,
+           b.aarsaker_til_behandling                   as b_aarsaker_til_behandling,
+           b.aarsak_til_opprettelse                    as b_aarsak_til_opprettelse,
+           b.opprettet_av                              as b_opprettet_av,
+           s.id                                        as s_id,
+           s.saksnummer                                as s_saksnummer,
+           sh.oppdatert_tid                            as sh_oppdatert_tid,
+           sh.sak_status                               as sh_sak_status,
+           sh.id                                       as sh_id,
+           p.ident                                     as p_ident,
+           p.id                                        as p_id,
+           bh.status                                   as bh_status,
+           bh.versjon_id                               as bh_versjon_id,
+           bh.mottatt_tid                              as bh_mottatt_tid,
+           bh.hendelsestidspunkt                       as bh_hendelsestidspunkt,
+           bh.vedtak_tidspunkt                         as bh_vedtak_tidspunkt,
+           bh.ansvarlig_beslutter                      as bh_ansvarlig_beslutter,
+           bh.siste_saksbehandler                      as bh_siste_saksbehandler,
+           bh.sist_loste_avklaringsbehov               as bh_sist_loste_avklaringsbehov,
+           bh.sist_loste_avklaringsbehov_saksbehandler as bh_sist_loste_avklaringsbehov_saksbehandler,
+           bh.venteaarsak                              as bh_venteaarsak,
+           bh.retur_aarsak                             as bh_retur_aarsak,
+           bh.gjeldende_avklaringsbehov                as bh_gjeldende_avklaringsbehov,
+           bh.gjeldende_avklaringsbehov_status         as bh_gjeldende_avklaringsbehov_status,
+           bh.relatert_behandling_referanse            as bh_relatert_behandling_referanse,
+           bh.resultat                                 as bh_resultat,
+           bh.soknadsformat                            as bh_soknadsformat,
+           bh.steggruppe                               as bh_steggruppe,
+           bh.id                                       as bh_id,
+           v.versjon                                   as v_versjon,
+           rp.rp_ident                                 as rp_ident
     FROM behandling b
              JOIN behandling_referanse br on b.referanse_id = br.id
              JOIN sak s on b.sak_id = s.id
@@ -338,26 +347,29 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
 
     private fun hentBehandlingHistorikk(behandling: Behandling): List<BehandlingHendelse> = run {
         val historikkSpørring = """
-       select bh.siste_saksbehandler              as bh_siste_saksbehandler,
-              bh.oppdatert_tid                    as bh_opprettet_tidspunkt,
-              bh.hendelsestidspunkt               as bh_hendelsestidspunkt,
-              bh.venteaarsak                      as bh_venteaarsak,
-              bh.retur_aarsak                     as bh_retur_aarsak,
-              bh.gjeldende_avklaringsbehov        as bh_gjeldende_avklaringsbehov,
-              bh.gjeldende_avklaringsbehov_status as bh_gjeldende_avklaringsbehov_status,
-              bh.steggruppe                       as bh_steggruppe,
-              bh.soknadsformat                    as bh_soknadsformat,
-              bh.resultat                         as bh_resultat,
-              bh.status                           as bh_status,
-              bh.ansvarlig_beslutter              as bh_ansvarlig_beslutter,
-              bh.vedtak_tidspunkt                 as bh_vedtak_tidspunkt,
-              bh.mottatt_tid                      as bh_mottatt_tid,
-              bh.versjon_id                       as bh_versjon_id,
-              bh.relatert_behandling_referanse    as bh_relatert_behandling_referanse,
-              v.versjon                           as bh_versjon
+       select bh.siste_saksbehandler                      as bh_siste_saksbehandler,
+              bh.oppdatert_tid                            as bh_opprettet_tidspunkt,
+              bh.hendelsestidspunkt                       as bh_hendelsestidspunkt,
+              bh.venteaarsak                              as bh_venteaarsak,
+              bh.retur_aarsak                             as bh_retur_aarsak,
+              bh.gjeldende_avklaringsbehov                as bh_gjeldende_avklaringsbehov,
+              bh.gjeldende_avklaringsbehov_status         as bh_gjeldende_avklaringsbehov_status,
+              bh.steggruppe                               as bh_steggruppe,
+              bh.soknadsformat                            as bh_soknadsformat,
+              bh.resultat                                 as bh_resultat,
+              bh.status                                   as bh_status,
+              bh.ansvarlig_beslutter                      as bh_ansvarlig_beslutter,
+              bh.vedtak_tidspunkt                         as bh_vedtak_tidspunkt,
+              bh.mottatt_tid                              as bh_mottatt_tid,
+              bh.versjon_id                               as bh_versjon_id,
+              bh.relatert_behandling_referanse            as bh_relatert_behandling_referanse,
+              bh.sist_loste_avklaringsbehov               as bh_sist_loste_avklaringsbehov,
+              bh.sist_loste_avklaringsbehov_saksbehandler as bh_sist_loste_avklaringsbehov_saksbehandler,
+              v.versjon                                   as bh_versjon
        from behandling_historikk bh
                 join versjon v on bh.versjon_id = v.id
-       where bh.behandling_id = ? and slettet = false
+       where bh.behandling_id = ?
+         and slettet = false
        order by bh.hendelsestidspunkt
                 """.trimIndent()
 
@@ -369,6 +381,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     hendelsesTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt"),
                     avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov"),
                     avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
+                    sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov"),
+                    sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler"),
                     steggruppe = it.getEnumOrNull("bh_steggruppe"),
                     venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
                     returÅrsak = it.getStringOrNull("bh_retur_aarsak"),
@@ -430,11 +444,16 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
         relaterteIdenter = it.getArray("rp_ident", String::class),
         relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id")?.let(::BehandlingId),
-        relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")?.ifBlank { null },
+        relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")
+            ?.ifBlank { null },
         snapShotId = it.getLong("bh_id"),
         gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
             ?.ifBlank { null },
         gjeldendeAvklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
+        sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")
+            ?.ifBlank { null },
+        sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler")
+            ?.ifBlank { null },
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
         returÅrsak = it.getStringOrNull("bh_retur_aarsak")?.ifBlank { null },
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),

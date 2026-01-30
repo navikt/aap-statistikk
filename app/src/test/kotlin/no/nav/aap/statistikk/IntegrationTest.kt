@@ -517,7 +517,8 @@ class IntegrationTest {
                 { t -> t !== null && t.isNotEmpty() })
 
             assertThat(sakRespons).hasSize(4)
-            assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
+            sakRespons!!.forEach { println(it) }
+            assertThat(sakRespons.first().saksbehandler).isEqualTo("VEILEDER")
             assertThat(sakRespons).anyMatch { it.vedtakTidTrunkert != null }
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
                 LocalDateTime.parse("2025-10-06T13:56:38")
