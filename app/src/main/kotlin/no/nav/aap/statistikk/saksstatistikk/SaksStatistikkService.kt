@@ -85,8 +85,10 @@ class SaksStatistikkService(
                         behandlingStatus = "OPPRETTET"
                     )
                 )
+                PrometheusProvider.prometheus.sakDuplikat(false).increment()
             }
             sakstatistikkRepository.lagre(bqSak)
+            PrometheusProvider.prometheus.sakDuplikat(false).increment()
             if (siste != null) {
                 if (!Miljø.erProd()) {
                     log.info("Ny hendelse med samme endretTid. Forrige: $siste. Ny: $bqSak.")
@@ -94,7 +96,7 @@ class SaksStatistikkService(
             }
         } else {
             log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
-            PrometheusProvider.prometheus.sakDuplikat().increment()
+            PrometheusProvider.prometheus.sakDuplikat(true).increment()
         }
     }
 
