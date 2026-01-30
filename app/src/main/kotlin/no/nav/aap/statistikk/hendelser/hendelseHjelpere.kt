@@ -136,7 +136,3 @@ fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): Lis
         }
         .filter { it.endringer.isNotEmpty() }
 }
-
-fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
-    return this.firstOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
-}

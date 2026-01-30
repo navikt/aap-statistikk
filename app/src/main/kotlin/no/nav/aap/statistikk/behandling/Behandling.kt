@@ -43,6 +43,8 @@ data class Behandling(
     val snapShotId: Long? = null,
     val gjeldendeAvklaringsBehov: String? = null,
     val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,
+    val sisteLøsteAvklaringsbehov: String? = null,
+    val sisteSaksbehandlerSomLøstebehov: String? = null,
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
     val gjeldendeStegGruppe: StegGruppe? = null,
@@ -57,6 +59,11 @@ data class Behandling(
         require(hendelser.sortedBy { it.hendelsesTidspunkt }
             .zipWithNext { a, b -> a.hendelsesTidspunkt <= b.hendelsesTidspunkt }
             .all { it }) { "Hendelser må være sortert." }
+
+        check(
+            (sisteLøsteAvklaringsbehov == null && sisteSaksbehandlerSomLøstebehov == null)
+                    || (sisteLøsteAvklaringsbehov != null && sisteSaksbehandlerSomLøstebehov != null)
+        )
     }
 
     fun id(): BehandlingId {
@@ -70,6 +77,8 @@ data class Behandling(
             versjon = hendelse.versjon,
             gjeldendeAvklaringsBehov = hendelse.avklaringsBehov,
             gjeldendeAvklaringsbehovStatus = hendelse.avklaringsbehovStatus,
+            sisteLøsteAvklaringsbehov = hendelse.sisteLøsteAvklaringsbehov,
+            sisteSaksbehandlerSomLøstebehov = hendelse.sisteSaksbehandlerSomLøstebehov,
             mottattTid = hendelse.mottattTid,
             vedtakstidspunkt = hendelse.vedtakstidspunkt,
             gjeldendeStegGruppe = hendelse.steggruppe,
@@ -110,7 +119,8 @@ data class Behandling(
     }
 
     fun avsluttetTid(): LocalDateTime {
-        return hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }.maxOf { it.hendelsesTidspunkt }
+        return hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }
+            .maxOf { it.hendelsesTidspunkt }
     }
 
     fun oppdatertTidspunkt(): LocalDateTime {
@@ -170,6 +180,8 @@ data class BehandlingHendelse(
     val tidspunkt: LocalDateTime?,
     val hendelsesTidspunkt: LocalDateTime,
     val avklaringsBehov: String? = null,
+    val sisteLøsteAvklaringsbehov: String? = null,
+    val sisteSaksbehandlerSomLøstebehov: String? = null,
     val steggruppe: StegGruppe? = null,
     val avklaringsbehovStatus: AvklaringsbehovStatus?,
     val venteÅrsak: String? = null,
@@ -214,45 +226,6 @@ enum class TypeBehandling(val kildeSystem: KildeSystem) {
 
     @Suppress("EnumEntryName")
     Aktivitetsplikt11_9(kildeSystem = KildeSystem.Behandlingsflyt),
-}
-
-enum class Vurderingsbehov(val sortering: Int) {
-    SØKNAD(0), HELHETLIG_VURDERING(1), AKTIVITETSMELDING(1), MELDEKORT(1), FRITAK_MELDEPLIKT(2), LEGEERKLÆRING(
-        1
-    ),
-    AVVIST_LEGEERKLÆRING(1), DIALOGMELDING(1), G_REGULERING(1), REVURDER_MEDLEMSSKAP(1), REVURDER_YRKESSKADE(
-        1
-    ),
-    REVURDER_BEREGNING(1), REVURDER_LOVVALG(1), REVURDER_MELDEPLIKT_RIMELIG_GRUNN(1), KLAGE(0), REVURDER_SAMORDNING(
-        1
-    ),
-    LOVVALG_OG_MEDLEMSKAP(1), FORUTGAENDE_MEDLEMSKAP(1), SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND(1), BARNETILLEGG(
-        1
-    ),
-    INSTITUSJONSOPPHOLD(1), SAMORDNING_OG_AVREGNING(1), REFUSJONSKRAV(1), UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT(
-        1
-    ),
-    VURDER_RETTIGHETSPERIODE(1), SØKNAD_TRUKKET(0), REVURDER_MANUELL_INNTEKT(1), KLAGE_TRUKKET(1), MOTTATT_KABAL_HENDELSE(
-        1
-    ),
-    OPPFØLGINGSOPPGAVE(0), AKTIVITETSPLIKT_11_7(1), AKTIVITETSPLIKT_11_9(1), EFFEKTUER_AKTIVITETSPLIKT(
-        1
-    ),
-    EFFEKTUER_AKTIVITETSPLIKT_11_9(1), OVERGANG_UFORE(1), OVERGANG_ARBEID(1), DØDSFALL_BRUKER(1), DØDSFALL_BARN(
-        1
-    ),
-    REVURDERING_AVBRUTT(
-        0
-    ),
-    OPPHOLDSKRAV(1), REVURDER_STUDENT(1), REVURDER_SAMORDNING_ANDRE_FOLKETRYGDYTELSER(1), REVURDER_SAMORDNING_UFØRE(
-        1
-    ),
-    REVURDER_SAMORDNING_ANDRE_STATLIGE_YTELSER(1), REVURDER_SAMORDNING_ARBEIDSGIVER(1), REVURDER_SAMORDNING_TJENESTEPENSJON(
-        1
-    ),
-    REVURDER_SYKEPENGEERSTATNING(1), BARNETILLEGG_SATS_REGULERING(0), UTVID_VEDTAKSLENGDE(1), REVURDER_SYKESTIPEND(1), MIGRER_RETTIGHETSPERIODE(
-        1
-    );
 }
 
 @Deprecated("Når aarsak_til_opprettelse finnes for alle nye behandlinger, slett denne.")

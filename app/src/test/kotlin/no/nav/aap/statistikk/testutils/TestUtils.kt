@@ -33,6 +33,7 @@ import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
+import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
