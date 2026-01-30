@@ -949,7 +949,7 @@
           "status": "AVSLUTTET",
           "tidsstempel": "2025-04-15T13:10:18.747",
           "frist": null,
-          "endretAv": "Z994573",
+          "endretAv": "BESLUTTER",
           "årsakTilSattPåVent": null,
           "årsakTilRetur": [],
           "begrunnelse": ""
@@ -967,7 +967,7 @@
           "status": "AVSLUTTET",
           "tidsstempel": "2025-04-15T13:26:02.952",
           "frist": null,
-          "endretAv": "Z994573",
+          "endretAv": "BESLUTTER",
           "årsakTilSattPåVent": null,
           "årsakTilRetur": [],
           "begrunnelse": ""
@@ -985,7 +985,7 @@
           "status": "AVSLUTTET",
           "tidsstempel": "2025-04-15T13:26:59.775",
           "frist": null,
-          "endretAv": "Z994573",
+          "endretAv": "BESLUTTER",
           "årsakTilSattPåVent": null,
           "årsakTilRetur": [],
           "begrunnelse": ""
@@ -1003,7 +1003,7 @@
           "status": "AVSLUTTET",
           "tidsstempel": "2025-04-15T13:27:58.401",
           "frist": null,
-          "endretAv": "Z994573",
+          "endretAv": "BESLUTTER",
           "årsakTilSattPåVent": null,
           "årsakTilRetur": [],
           "begrunnelse": ""

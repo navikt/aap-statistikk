@@ -28,6 +28,10 @@ data class Oppgave(
     fun sistEndret(): LocalDateTime {
         return hendelser.lastOrNull()?.endretTidspunkt ?: opprettetTidspunkt
     }
+
+    fun reservertAv(): Saksbehandler? {
+        return reservasjon?.reservertAv
+    }
 }
 
 data class BehandlingReferanse(val id: Long? = null, val referanse: UUID)
@@ -133,6 +137,3 @@ private fun reservasjon(hendelse: OppgaveHendelse) =
         )
     } else null
 
-data class Saksbehandler(val id: Long? = null, val ident: String) {
-    constructor(ident: String) : this(ident = ident, id = null)
-}

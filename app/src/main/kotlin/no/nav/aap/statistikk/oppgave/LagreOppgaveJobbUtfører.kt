@@ -35,7 +35,8 @@ class LagreOppgaveJobbUtfører(
                             it.leggTilHendelse(
                                 it.hendelser.last().copy(
                                     tidspunkt = oppgave.sistEndret(),
-                                    hendelsesTidspunkt = oppgave.sistEndret()
+                                    hendelsesTidspunkt = oppgave.sistEndret(),
+                                    saksbehandler = oppgave.reservertAv()
                                 )
                             )
                         )
