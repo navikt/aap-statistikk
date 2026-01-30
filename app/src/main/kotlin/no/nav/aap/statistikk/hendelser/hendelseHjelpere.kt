@@ -41,7 +41,6 @@ fun List<AvklaringsbehovHendelseDto>.utledAnsvarligBeslutter(): String? {
 
     if (finnesÅpneBehov) return null
 
-
     return this.filter { it.avklaringsbehovDefinisjon == Definisjon.FATTE_VEDTAK && it.status == Status.AVSLUTTET }
         .onlyOrNull()?.endringer?.sortedBy { it.tidsstempel }
         ?.lastOrNull { it.status == Status.AVSLUTTET }?.endretAv
@@ -99,10 +98,10 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsbehov(): Definisjon
         ?.avklaringsbehovDefinisjon
 }
 
-fun List<AvklaringsbehovHendelseDto>.utledForrigeLøsteAvklaringsbehov(): Definisjon? {
+fun List<AvklaringsbehovHendelseDto>.utledForrigeLøsteAvklaringsbehov(): Pair<Definisjon, String>? {
     return this.lastOrNull {
         it.status.erAvsluttet() && !it.avklaringsbehovDefinisjon.erVentebehov()
-    }?.avklaringsbehovDefinisjon
+    }?.let { Pair(it.avklaringsbehovDefinisjon, it.endringer.last().endretAv) }
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {

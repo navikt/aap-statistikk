@@ -27,14 +27,14 @@ class HendelseHjelpereKtTest {
         softly.apply {
             assertThat(hendelser).isNotEmpty()
             assertThat(hendelser.utledAnsvarligBeslutter()).isNull()
-            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("KVALITETSSIKRER")
             assertThat(hendelser.utledVedtakTid()).isNull()
             assertThat(hendelser.årsakTilRetur()).isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 FASTSETT_BEREGNINGSTIDSPUNKT
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(KVALITETSSIKRING)
+            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(KVALITETSSIKRING to "KVALITETSSIKRER")
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.FASTSETT_BEREGNINGSTIDSPUNKT)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -59,7 +59,7 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 AVKLAR_SYKDOM
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK)
+            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK to "VEILEDER")
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.AVKLAR_SYKDOM)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -82,7 +82,7 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 SKRIV_VEDTAKSBREV
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK)
+            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK to "VEILEDER")
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -105,7 +105,7 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 null
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(SKRIV_VEDTAKSBREV)
+            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(SKRIV_VEDTAKSBREV to "BESLUTTER")
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isNull()
             assertThat(hendelser.utledGjeldendeStegType()).isNull()
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -120,15 +120,15 @@ class HendelseHjelpereKtTest {
 
         softly.apply {
             assertThat(hendelser).isNotEmpty()
-            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("Z994573")
-            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("Z994573")
+            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("BESLUTTER")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("BESLUTTER")
             assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-04-15T13:27:58.401"))
             assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.IVERKSETTES)
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 SKRIV_VEDTAKSBREV
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK)
+            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK to "BESLUTTER")
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.OPPRETTET)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
