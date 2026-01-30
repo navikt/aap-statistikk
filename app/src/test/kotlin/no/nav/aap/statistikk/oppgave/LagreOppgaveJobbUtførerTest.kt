@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.testutils.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -59,6 +60,7 @@ class LagreOppgaveJobbUtførerTest {
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
                 sakstatistikkService = mockk(), /// TODO
+                behandlingRepository = FakeBehandlingRepository()
             ).utfør(
                 JobbInput(LagreOppgaveJobb()
                 ).medPayload(oppgaveId.toString())
@@ -332,6 +334,7 @@ class LagreOppgaveJobbUtførerTest {
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
                 sakstatistikkService = mockk(), /// TODO
+                behandlingRepository = FakeBehandlingRepository()
             ).utfør(
                 JobbInput(
                     LagreOppgaveJobb(

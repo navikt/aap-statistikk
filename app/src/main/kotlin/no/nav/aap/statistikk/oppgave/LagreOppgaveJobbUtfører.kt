@@ -2,11 +2,12 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.motor.ProviderJobbSpesifikasjon
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 
 
@@ -14,6 +15,7 @@ class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val oppgaveHistorikkLagrer: OppgaveHistorikkLagrer,
     private val sakstatistikkService: SaksStatistikkService,
+    private val behandlingRepository: IBehandlingRepository,
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val hendelse = DefaultJsonMapper.fromJson<Long>(input.payload())
@@ -23,7 +25,22 @@ class LagreOppgaveJobbUtfører(
 
         oppgaveHistorikkLagrer.lagre(oppgave)
 
-//        sakstatistikkService.lagreBQBehandling()
+        if (oppgave.behandlingReferanse != null) {
+            behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
+                sakstatistikkService.lagreSakInfoTilBigquery(it.id())
+
+                if (!Miljø.erProd()) {
+                    behandlingRepository.oppdaterBehandling(
+                        it.leggTilHendelse(
+                            it.hendelser.last().copy(
+                                tidspunkt = oppgave.sistEndret(),
+                                hendelsesTidspunkt = oppgave.sistEndret()
+                            )
+                        )
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -35,7 +52,8 @@ class LagreOppgaveJobb : ProvidersJobbSpesifikasjon {
         return LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
             OppgaveHistorikkLagrer.konstruer(repositoryProvider),
-            SaksStatistikkService.konstruer(gatewayProvider, repositoryProvider)
+            SaksStatistikkService.konstruer(gatewayProvider, repositoryProvider),
+            repositoryProvider.provide()
         )
     }
 

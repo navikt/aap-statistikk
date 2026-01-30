@@ -24,7 +24,11 @@ data class Oppgave(
     val behandlingReferanse: BehandlingReferanse? = null,
     val harHasteMarkering: Boolean? = false,
     val hendelser: List<OppgaveHendelse>
-)
+) {
+    fun sistEndret(): LocalDateTime {
+        return hendelser.lastOrNull()?.endretTidspunkt ?: opprettetTidspunkt
+    }
+}
 
 data class BehandlingReferanse(val id: Long? = null, val referanse: UUID)
 

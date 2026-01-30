@@ -139,5 +139,5 @@ fun List<AvklaringsbehovHendelseDto>.påTidspunkt(tidspunkt: LocalDateTime): Lis
 }
 
 fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
-    return this.lastOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
+    return this.firstOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
 }

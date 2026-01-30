@@ -142,7 +142,15 @@ class IntegrationTest {
         // Sekvensnummer økes med 1 med ny info på sak
         val bqSaker2 = hentSakstatistikkHendelser(dataSource, referanse, minSize = 2)
 //        assertThat(bqSaker2!!).hasSize(hendelserFraDBDump.size)
-        assertThat(bqSaker2!!.map { it.ansvarligEnhetKode }).contains("4491", "5701", "5700")
+        assertThat(bqSaker2!!.map { it.ansvarligEnhetKode }).contains(
+            "4491",
+            "5701",
+            "5700",
+            "4491",
+            "5701",
+            "5700",
+            "5701"
+        )
         assertThat(bqSaker2.map { it.behandlingStatus }).containsSubsequence(
             "UNDER_BEHANDLING",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
@@ -158,8 +166,12 @@ class IntegrationTest {
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
         )
-        assertThat(bqSaker2.filter { it.behandlingStatus == "AVSLUTTET" }
-            .onlyOrNull()?.vedtakTid).isNotNull
+        val avsluttede = bqSaker2.filter { it.behandlingStatus == "AVSLUTTET" }
+            .groupBy { it.endretTid }
+            .mapValues { it.value.last() }
+            .values.sortedBy { it.endretTid }
+        assertThat(avsluttede).hasSize(1)
+        assertThat(avsluttede.onlyOrNull()?.vedtakTid).isNotNull
         assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).isNotEmpty
         assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).allSatisfy {
             assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
@@ -414,6 +426,7 @@ class IntegrationTest {
                             reservertTidspunkt = midtI,
                             opprettetAv = "Kelvin",
                             opprettetTidspunkt = midtI,
+                            endretTidspunkt = midtI
                         )
                     )
                 )
@@ -442,10 +455,10 @@ class IntegrationTest {
 
             testUtil.ventPåSvar()
             val bqSaker = hentSakstatistikkHendelserMedEksaktAntall(
-                dataSource, behandling!!.referanse, expectedSize = 3
+                dataSource, behandling!!.referanse, expectedSize = 4
             )
             assertThat(bqSaker).isNotNull
-            assertThat(bqSaker).hasSize(3)
+            assertThat(bqSaker).hasSize(4)
             assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
 
             postBehandlingsflytHendelse(
@@ -458,8 +471,10 @@ class IntegrationTest {
             testUtil.ventPåSvar()
 
             // Sekvensnummer økes med 1 med ny info på sak
-            val bqSaker2 = hentSakstatistikkHendelser(dataSource, behandling.referanse, minSize = 2)
-            assertThat(bqSaker2!!).hasSize(3)
+            val bqSaker2 = dataSource.transaction {
+                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
+            }
+            assertThat(bqSaker2).hasSize(4)
             assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
 
             val vilkårRespons = ventPåSvar(
@@ -501,8 +516,9 @@ class IntegrationTest {
                 },
                 { t -> t !== null && t.isNotEmpty() })
 
-            assertThat(sakRespons).hasSize(3)
+            assertThat(sakRespons).hasSize(4)
             assertThat(sakRespons!!.first().saksbehandler).isEqualTo("VEILEDER")
+            assertThat(sakRespons).anyMatch { it.vedtakTidTrunkert != null }
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
                 LocalDateTime.parse("2025-10-06T13:56:38")
             )
