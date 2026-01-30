@@ -100,7 +100,7 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsbehov(): Definisjon
 
 fun List<AvklaringsbehovHendelseDto>.utledForrigeLøsteAvklaringsbehov(): Pair<Definisjon, String>? {
     return this.lastOrNull {
-        it.status.erAvsluttet() && !it.avklaringsbehovDefinisjon.erVentebehov()
+        it.status.erAvsluttet() && it.status != Status.AVBRUTT && !it.avklaringsbehovDefinisjon.erVentebehov()
     }?.let { Pair(it.avklaringsbehovDefinisjon, it.endringer.last().endretAv) }
 }
 
