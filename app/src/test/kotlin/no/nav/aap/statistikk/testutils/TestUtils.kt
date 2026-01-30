@@ -111,7 +111,7 @@ fun <E> testKlient(
     System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
     System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
 
-    System.setProperty("nais.cluster.name", "DEV")
+    System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
 
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
@@ -236,6 +236,9 @@ fun <E> testKlientNoInjection(
     System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
     System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
+
+    System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+
 
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
