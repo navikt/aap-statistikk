@@ -111,6 +111,8 @@ fun <E> testKlient(
     System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
     System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
 
+    System.setProperty("nais.cluster.name", "DEV")
+
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
         tokenProvider = ClientCredentialsTokenProvider,
