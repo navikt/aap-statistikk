@@ -51,10 +51,10 @@ spec:
        d.bidiagnoser AS bidiagnoser_kode,
        rettighetstyper.perioder AS rettighetstype,
        ARRAY(
-           SELECT fra_dato
+           SELECT STRUCT(fra_dato, til_dato)
            FROM `datastream_hendelser.public_arbeidsopptrappingperioder`
            WHERE behandling_id = b.id
-           GROUP BY fra_dato
+           GROUP BY fra_dato, til_dato
          ) AS perioder_med_arbeidsopptrapping,
        DATETIME(
            timestamp_millis(
