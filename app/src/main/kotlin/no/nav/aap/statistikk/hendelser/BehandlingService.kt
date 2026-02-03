@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
@@ -11,11 +12,23 @@ import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.skjerming.SkjermingService
+import java.util.UUID
 
-class BehandlingService(private val behandlingRepository: IBehandlingRepository) {
-    constructor(repositoryProvider: RepositoryProvider) : this(repositoryProvider.provide())
+class BehandlingService(
+    private val behandlingRepository: IBehandlingRepository,
+    private val skjermingService: SkjermingService
+) {
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
+        repositoryProvider.provide(),
+        SkjermingService.konstruer(gatewayProvider)
+    )
 
     private val logger = org.slf4j.LoggerFactory.getLogger(javaClass)
+
+    fun erSkjermet(behandling: Behandling): Boolean {
+        return skjermingService.erSkjermet(behandling)
+    }
 
     fun hentEllerLagreBehandling(
         dto: StoppetBehandling,
@@ -54,7 +67,8 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
                 if (it == null && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) dto.tidspunktSisteEndring else it
             }
 
-        val (sisteLøsteAvklaringsbehov, sisteSaksbehandler) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov() ?: Pair(null, null)
+        val (sisteLøsteAvklaringsbehov, sisteSaksbehandler) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
+            ?: Pair(null, null)
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
@@ -109,4 +123,6 @@ class BehandlingService(private val behandlingRepository: IBehandlingRepository)
     }
 
     fun hentBehandling(behandlingId: BehandlingId) = behandlingRepository.hent(behandlingId)
+
+    fun hentBehandling(behandlingReferanse: UUID) = behandlingRepository.hent(behandlingReferanse)
 }

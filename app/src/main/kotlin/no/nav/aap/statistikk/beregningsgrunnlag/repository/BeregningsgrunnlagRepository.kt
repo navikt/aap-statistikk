@@ -73,7 +73,7 @@ class BeregningsgrunnlagRepository(
                     SELECT id FROM GRUNNLAG WHERE behandling_id = ?
                 )
             """.trimIndent()
-        val deleteGrunnlag11_19Sql = """
+        @Suppress("LocalVariableName") val deleteGrunnlag11_19Sql = """
                 DELETE FROM GRUNNLAG_11_19 WHERE grunnlag_id IN (
                     SELECT id FROM GRUNNLAG WHERE behandling_id = ?
                 )

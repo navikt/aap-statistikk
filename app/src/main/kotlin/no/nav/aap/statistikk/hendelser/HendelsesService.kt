@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
@@ -29,13 +30,14 @@ class HendelsesService(
         fun konstruer(
             avsluttetBehandlingService: AvsluttetBehandlingService,
             jobbAppender: JobbAppender,
-            repositoryProvider: RepositoryProvider
+            repositoryProvider: RepositoryProvider,
+            gatewayProvider: GatewayProvider
         ): HendelsesService {
             return HendelsesService(
                 sakService = SakService(repositoryProvider),
                 personService = PersonService(repositoryProvider),
                 avsluttetBehandlingService = avsluttetBehandlingService,
-                behandlingService = BehandlingService(repositoryProvider.provide()),
+                behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
                 meldekortRepository = repositoryProvider.provide(),
                 opprettBigQueryLagringSakStatistikkCallback = {
                     LoggerFactory.getLogger(HendelsesService::class.java)

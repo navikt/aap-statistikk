@@ -30,7 +30,8 @@ class LagreStoppetHendelseJobb(
                 }
             ),
             jobbAppender = jobbAppender,
-            repositoryProvider = repositoryProvider
+            repositoryProvider = repositoryProvider,
+            gatewayProvider = gatewayProvider
         )
         return LagreStoppetHendelseJobbUtfører(hendelsesService)
     }
