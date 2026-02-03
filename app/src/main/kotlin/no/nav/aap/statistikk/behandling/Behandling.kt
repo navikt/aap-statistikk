@@ -63,7 +63,9 @@ data class Behandling(
         check(
             (sisteLøsteAvklaringsbehov == null && sisteSaksbehandlerSomLøstebehov == null)
                     || (sisteLøsteAvklaringsbehov != null && sisteSaksbehandlerSomLøstebehov != null)
-        )
+        ) {
+            "Siste løste avklaringsbehov og siste saksbehandler som løste behov må enten begge være null eller begge være ikke-null: $sisteLøsteAvklaringsbehov og $sisteSaksbehandlerSomLøstebehov"
+        }
     }
 
     fun id(): BehandlingId {
@@ -94,7 +96,8 @@ data class Behandling(
     }
 
     fun hendelsesHistorikk(): List<Behandling> {
-        return (1..<this.hendelser.size + 1).map { this.hendelser.subList(0, it) }
+        return (1..<this.hendelser.size + 1)
+            .map { this.hendelser.subList(0, it) }
             .scan(this.copy(hendelser = emptyList())) { acc, hendelser ->
                 acc.leggTilHendelse(hendelser.last())
             }.drop(1)
