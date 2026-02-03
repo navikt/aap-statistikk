@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.gateway.GatewayProvider
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
@@ -192,7 +193,8 @@ class BQBehandlingMapper(
         erSkjermet: Boolean,
     ): String? {
         val sisteHendelse = behandling.hendelser.last()
-        val sisteHendelsevklaringsbehov = sisteHendelse.avklaringsBehov
+        val sisteHendelsevklaringsbehov =
+            if (Miljø.erProd()) sisteHendelse.avklaringsBehov else sisteHendelse.sisteLøsteAvklaringsbehov
         val enhet = sisteHendelsevklaringsbehov?.let {
             oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
                 behandlingReferanse,
@@ -204,6 +206,20 @@ class BQBehandlingMapper(
                 sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
             )
         }?.enhet
+
+        val enhetMedSisteLøsteAvklaringsbehov = sisteHendelsevklaringsbehov?.let {
+            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
+                behandlingReferanse,
+                it
+            )
+        }?.lastOrNull {
+            // I tilfelle enhet har flyttet seg på samme avklaringsbehov
+            it.tidspunkt.isBefore(
+                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
+            )
+        }?.enhet
+
+        log.info("Enhet gammel: $enhet. Enhet ny $enhetMedSisteLøsteAvklaringsbehov. Behandling: $behandlingReferanse.")
 
         if (enhet == null) {
             log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
@@ -229,5 +245,4 @@ class BQBehandlingMapper(
     fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
         return this.firstOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
     }
-
 }

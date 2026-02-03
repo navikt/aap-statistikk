@@ -13,6 +13,8 @@ class ReberegnHistorikk {
         dto: StoppetBehandling, behandling: Behandling
     ): Behandling {
         val avklaringsbehov = dto.avklaringsbehov
+        val (forrigeLøste, forrigeLøsteAvHvem) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
+            ?: Pair(null, null)
         val inngangshendelse = BehandlingHendelse(
             tidspunkt = dto.mottattTid,
             hendelsesTidspunkt = dto.mottattTid,
@@ -30,6 +32,8 @@ class ReberegnHistorikk {
             mottattTid = dto.mottattTid,
             søknadsformat = dto.soknadsFormat.tilDomene(),
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+            sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
+            sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem
         )
 
         if (avklaringsbehov.isEmpty() && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
@@ -55,6 +59,8 @@ class ReberegnHistorikk {
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                         relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+                        sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
+                        sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem
                     )
                 )
         }
@@ -82,6 +88,10 @@ class ReberegnHistorikk {
             )
 
         return avklaringsbehovHistorikk.fold(behandlingMedEllerUtenInngangshendelse) { acc, curr ->
+            val (forrigeLøste, forrigeløstAvHvem) = curr.utledForrigeLøsteAvklaringsbehov() ?: Pair(
+                null,
+                null
+            )
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
@@ -101,6 +111,9 @@ class ReberegnHistorikk {
                     mottattTid = dto.mottattTid,
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                     relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+                    sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
+                    sisteSaksbehandlerSomLøstebehov = forrigeløstAvHvem
+
                 )
             )
         }.let {
@@ -126,6 +139,9 @@ class ReberegnHistorikk {
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                         relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+                        sisteLøsteAvklaringsbehov = forrigeLøste?.name,
+                        sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem
+
                     )
                 )
             } else it

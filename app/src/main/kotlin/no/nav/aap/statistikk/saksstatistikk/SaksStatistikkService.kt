@@ -107,16 +107,14 @@ class SaksStatistikkService(
         val originaleHendelser =
             sakstatistikkRepository.hentAlleHendelserPåBehandling(behandling.referanse)
 
-        val alleHendelser =
-            (1..<behandling.hendelser.size + 1)
-                .map { behandling.hendelser.subList(0, it) }
-                .map { hendelser ->
-                    bqBehandlingMapper.bqBehandlingForBehandling(
-                        behandling = behandling.copy(hendelser = hendelser),
-                        erSkjermet = erSkjermet,
-                        sekvensNummer = null,
-                    )
-                }
+        val alleHendelser = behandling.hendelsesHistorikk()
+            .map { behandling ->
+                bqBehandlingMapper.bqBehandlingForBehandling(
+                    behandling = behandling,
+                    erSkjermet = erSkjermet,
+                    sekvensNummer = null,
+                )
+            }
 
         return flettBehandlingHendelser(originaleHendelser, alleHendelser)
     }
