@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
-import org.slf4j.LoggerFactory
 import java.util.*
 
 class RettighetstypeperiodeRepository(private val dbConnection: DBConnection) :
@@ -13,8 +12,6 @@ class RettighetstypeperiodeRepository(private val dbConnection: DBConnection) :
             return RettighetstypeperiodeRepository(connection)
         }
     }
-
-    private val logger = LoggerFactory.getLogger(RettighetstypeperiodeRepository::class.java)
 
     override fun lagre(
         behandlingReferanse: UUID,

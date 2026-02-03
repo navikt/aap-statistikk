@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRep
 import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
+import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
@@ -352,13 +353,15 @@ class AvsluttetBehandlingServiceTest {
                 BeregningsgrunnlagRepository(dbConnection),
                 VilkårsresultatRepository(dbConnection),
                 diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
-                behandlingRepository = behandlingRepository,
-                skjermingService = SkjermingService(FakePdlGateway(emptyMap())),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection
                 ),
-                opprettBigQueryLagringYtelseCallback = {}
+                opprettBigQueryLagringYtelseCallback = {},
+                behandlingService = BehandlingService(
+                    behandlingRepository,
+                    SkjermingService(FakePdlGateway(emptyMap()))
+                )
             )
         return Pair(bigQueryClient, service)
     }

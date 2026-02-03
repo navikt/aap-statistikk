@@ -146,6 +146,7 @@ class HendelsesServiceTest {
         val vilkårsresultatRepository = FakeVilkårsResultatRepository()
         val tilkjentYtelseRepository = FakeTilkjentYtelseRepository()
         val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
+        val behandlingService = BehandlingService(behandlingRepository, skjermingService)
         return HendelsesService(
             sakService = SakService(sakRepository),
             avsluttetBehandlingService = AvsluttetBehandlingService(
@@ -153,15 +154,14 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepository = beregningsgrunnlagRepository,
                 vilkårsResultatRepository = vilkårsresultatRepository,
                 diagnoseRepository = diagnoseRepository,
-                behandlingRepository = behandlingRepository,
-                skjermingService = skjermingService,
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
                 arbeidsopptrappingperioderRepository = FakeArbeidsopptrappingRepository(),
                 opprettBigQueryLagringYtelseCallback = { TODO() },
+                behandlingService = behandlingService,
             ),
             personService = PersonService(FakePersonRepository()),
             opprettBigQueryLagringSakStatistikkCallback = opprettBigQueryLagringCallback,
-            behandlingService = BehandlingService(behandlingRepository),
+            behandlingService = behandlingService,
             meldekortRepository = meldekortRepository
         )
     }

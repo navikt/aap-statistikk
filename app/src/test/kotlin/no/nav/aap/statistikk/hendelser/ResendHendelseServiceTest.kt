@@ -5,7 +5,9 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeBehandlingRepository
+import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.FakePersonRepository
 import no.nav.aap.statistikk.testutils.FakeSakRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -24,7 +26,7 @@ class ResendHendelseServiceTest {
             SakService(sakRepository),
             PersonService(FakePersonRepository()),
             behandlingRepository,
-            BehandlingService(behandlingRepository),
+            BehandlingService(behandlingRepository, SkjermingService(FakePdlGateway(emptyMap()))),
             opprettBigQueryLagringCallback
         )
 

@@ -20,6 +20,8 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import no.nav.aap.verdityper.dokument.Kanal
@@ -87,7 +89,10 @@ class SaksStatistikkServiceTest {
                     personService = PersonService(PersonRepository(it)),
                     meldekortRepository = MeldekortRepository(it),
                     opprettBigQueryLagringSakStatistikkCallback = {},
-                    behandlingService = BehandlingService(BehandlingRepository(it)),
+                    behandlingService = BehandlingService(
+                        BehandlingRepository(it),
+                        SkjermingService(FakePdlGateway(emptyMap()))
+                    ),
                 )
 
                 OppgaveHendelseRepositoryImpl(it).lagreHendelse(

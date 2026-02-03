@@ -101,16 +101,20 @@ class ProduksjonsstyringRepositoryTest {
         åpen: Boolean = true
     ) =
         dataSource.transaction { conn ->
+            val gatewayProvider = defaultGatewayProvider { }
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
-                    gatewayProvider = defaultGatewayProvider { },
+                    gatewayProvider = gatewayProvider,
                     postgresRepositoryRegistry.provider(conn)
                 ) {},
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
                 opprettBigQueryLagringSakStatistikkCallback = { },
-                behandlingService = BehandlingService(postgresRepositoryRegistry.provider(conn)),
+                behandlingService = BehandlingService(
+                    postgresRepositoryRegistry.provider(conn),
+                    gatewayProvider
+                ),
             )
 
             val hendelse = behandlingHendelse(

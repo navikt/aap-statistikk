@@ -7,6 +7,7 @@ import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 
+// TODO; oppdater dette
 class ReberegnHistorikk {
     fun avklaringsbehovTilHistorikk(
         dto: StoppetBehandling, behandling: Behandling

@@ -7,9 +7,8 @@ import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
@@ -21,9 +20,8 @@ class AvsluttetBehandlingService(
     private val beregningsgrunnlagRepository: IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepository: IVilkårsresultatRepository,
     private val diagnoseRepository: DiagnoseRepository,
-    private val behandlingRepository: IBehandlingRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
-    private val skjermingService: SkjermingService,
+    private val behandlingService: BehandlingService,
     private val arbeidsopptrappingperioderRepository: ArbeidsopptrappingperioderRepository,
     private val opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
 ) {
@@ -39,9 +37,8 @@ class AvsluttetBehandlingService(
             beregningsgrunnlagRepository = repositoryProvider.provide(),
             vilkårsResultatRepository = repositoryProvider.provide(),
             diagnoseRepository = repositoryProvider.provide(),
-            behandlingRepository = repositoryProvider.provide(),
+            behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
             rettighetstypeperiodeRepository = repositoryProvider.provide(),
-            skjermingService = SkjermingService.konstruer(gatewayProvider),
             arbeidsopptrappingperioderRepository = repositoryProvider.provide(),
             opprettBigQueryLagringYtelseCallback = opprettBigQueryLagringYtelseCallback
         )
@@ -50,8 +47,9 @@ class AvsluttetBehandlingService(
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
         lagreDiagnose(avsluttetBehandling)
 
+
         val uthentetBehandling =
-            behandlingRepository.hent(avsluttetBehandling.behandlingsReferanse)
+            behandlingService.hentBehandling(avsluttetBehandling.behandlingsReferanse)
 
         if (uthentetBehandling != null) {
             vilkårsResultatRepository
@@ -93,7 +91,7 @@ class AvsluttetBehandlingService(
             avsluttetBehandling.rettighetstypeperioder
         )
 
-        if (!skjermingService.erSkjermet(uthentetBehandling)) {
+        if (!behandlingService.erSkjermet(uthentetBehandling)) {
             opprettBigQueryLagringYtelseCallback(uthentetBehandling.id())
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")

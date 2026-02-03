@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -19,12 +20,14 @@ class ResendHendelseService(
 ) {
     companion object {
         fun konstruer(
-            repositoryProvider: RepositoryProvider, jobbAppender: JobbAppender,
+            repositoryProvider: RepositoryProvider,
+            gatewayProvider: GatewayProvider,
+            jobbAppender: JobbAppender,
         ) = ResendHendelseService(
             sakService = SakService(repositoryProvider),
             personService = PersonService(repositoryProvider),
             behandlingRepository = repositoryProvider.provide(),
-            behandlingService = BehandlingService(repositoryProvider),
+            behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
             opprettRekjørSakstatistikkCallback = { behandlingId ->
                 LoggerFactory.getLogger(HendelsesService::class.java)
                     .info("Starter resending-jobb. BehandlingId: $behandlingId")
