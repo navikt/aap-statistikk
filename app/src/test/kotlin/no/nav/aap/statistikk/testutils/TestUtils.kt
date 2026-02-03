@@ -26,13 +26,13 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
-import no.nav.aap.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
@@ -43,8 +43,11 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
+import no.nav.aap.statistikk.module
+import no.nav.aap.statistikk.motor
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -53,6 +56,7 @@ import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.sak.*
 import no.nav.aap.statistikk.saksstatistikk.*
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
@@ -756,17 +760,18 @@ fun forberedDatabase(
 fun konstruerSakstatistikkService(
     connection: DBConnection
 ): SaksStatistikkService {
+    val behandlingService = BehandlingService(
+        BehandlingRepository(connection),
+        SkjermingService(FakePdlGateway())
+    )
     return SaksStatistikkService(
-        behandlingService = BehandlingService(
-            BehandlingRepository(connection),
-            SkjermingService(FakePdlGateway())
-        ),
+        behandlingService = behandlingService,
         bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
-        bqBehandlingMapper = BQBehandlingMapper.konstruer(
-            postgresRepositoryRegistry.provider(
-                connection
-            ), defaultGatewayProvider { }),
+        bqBehandlingMapper = BQBehandlingMapper(
+            behandlingService, RettighetstypeperiodeRepository(connection),
+            OppgaveHendelseRepositoryImpl(connection)
+        )
     )
 }
 

@@ -4,8 +4,8 @@ import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
+import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.returnert
@@ -20,7 +20,7 @@ import java.util.*
 
 class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
-    private val rettighetstypeperiodeRepository: RettighetstypeperiodeRepository,
+    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val clock: Clock = systemDefaultZone()
 ) {
