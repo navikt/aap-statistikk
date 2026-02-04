@@ -17,6 +17,7 @@ import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
@@ -52,21 +53,15 @@ class BQBehandlingMapper(
         val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
 
-        val ansvarligEnhet = ansvarligEnhet(behandling, erSkjermet)
-        val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
-
-        if (saksbehandlerIdent == null) {
-            log.info("Fant ikke siste saksbehandler for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
-        }
+        val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling)
+        val saksbehandler =
+            if (erSkjermet) "-5" else utledSaksbehandler(sisteHendelse, behandlingReferanse)
 
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         if (årsakTilOpprettelse == null) {
             log.info("Årsak til opprettelse er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}.")
             PrometheusProvider.prometheus.årsakTilOpprettelseIkkeSatt().increment()
         }
-
-        val saksbehandler =
-            if (erSkjermet) "-5" else saksbehandlerIdent
 
         if (behandling.mottattTid.isAfter(behandling.opprettetTid)) {
             log.info("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
@@ -104,6 +99,19 @@ class BQBehandlingMapper(
             sakYtelse = "AAP",
             erResending = false
         )
+    }
+
+    private fun utledSaksbehandler(
+        sisteHendelse: BehandlingHendelse,
+        behandlingReferanse: UUID,
+    ): String? {
+        val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
+
+        if (saksbehandlerIdent == null) {
+            log.info("Fant ikke siste saksbehandler for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
+        }
+
+        return saksbehandlerIdent
     }
 
     /**
@@ -188,7 +196,6 @@ class BQBehandlingMapper(
 
     private fun ansvarligEnhet(
         behandling: Behandling,
-        erSkjermet: Boolean,
     ): String? {
         val behandlingReferanse = behandling.referanse
         val sisteHendelse = behandling.hendelser.last()
@@ -233,9 +240,6 @@ class BQBehandlingMapper(
             } else {
                 log.info("Fant ingen enhet eller fallbackenhet. Referanse: $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}.")
             }
-        }
-        if (erSkjermet) {
-            return "-5"
         }
         return enhet
     }
