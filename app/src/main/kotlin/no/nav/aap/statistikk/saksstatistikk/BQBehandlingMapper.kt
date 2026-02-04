@@ -17,7 +17,6 @@ import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
@@ -53,7 +52,7 @@ class BQBehandlingMapper(
         val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
 
-        val ansvarligEnhet = ansvarligEnhet(behandlingReferanse, behandling, erSkjermet)
+        val ansvarligEnhet = ansvarligEnhet(behandling, erSkjermet)
         val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
 
         if (saksbehandlerIdent == null) {
@@ -188,10 +187,10 @@ class BQBehandlingMapper(
     }
 
     private fun ansvarligEnhet(
-        behandlingReferanse: UUID,
         behandling: Behandling,
         erSkjermet: Boolean,
     ): String? {
+        val behandlingReferanse = behandling.referanse
         val sisteHendelse = behandling.hendelser.last()
         val sisteHendelsevklaringsbehov =
             if (Miljø.erProd()) sisteHendelse.avklaringsBehov else sisteHendelse.sisteLøsteAvklaringsbehov
@@ -219,7 +218,7 @@ class BQBehandlingMapper(
             )
         }?.enhet
 
-        log.info("Enhet gammel: $enhet. Enhet ny $enhetMedSisteLøsteAvklaringsbehov. Behandling: $behandlingReferanse.")
+        log.info("Enhet gammel: $enhet. Enhet ny $enhetMedSisteLøsteAvklaringsbehov. Behandling: $behandlingReferanse. Behandlingtype: ${behandling.typeBehandling}")
 
         if (enhet == null) {
             log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
