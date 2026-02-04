@@ -30,7 +30,6 @@ class LagreOppgaveJobbUtfører(
             behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
                 if (!Miljø.erProd()) {
                     if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
-                        sakstatistikkService.lagreSakInfoTilBigquery(it.id())
                         behandlingRepository.oppdaterBehandling(
                             it.leggTilHendelse(
                                 it.hendelser.last().copy(
@@ -40,6 +39,7 @@ class LagreOppgaveJobbUtfører(
                                 )
                             )
                         )
+                        sakstatistikkService.lagreSakInfoTilBigquery(it.id())
                     }
                 }
             }
