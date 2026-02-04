@@ -206,7 +206,7 @@ class BQBehandlingMapper(
             )
         }?.enhet
 
-        val enhetMedSisteLøsteAvklaringsbehov = sisteHendelsevklaringsbehov?.let {
+        val enhetMedSisteLøsteAvklaringsbehov = sisteHendelse.sisteLøsteAvklaringsbehov?.let {
             oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
                 behandlingReferanse,
                 it
