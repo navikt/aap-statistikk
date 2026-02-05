@@ -23,6 +23,7 @@ data class Oppgave(
     val reservasjon: Reservasjon? = null,
     val behandlingReferanse: BehandlingReferanse? = null,
     val harHasteMarkering: Boolean? = false,
+    val sisteHendelse: HendelseType? = HendelseType.OPPRETTET,
     val hendelser: List<OppgaveHendelse>
 ) {
     fun sistEndret(): LocalDateTime {
@@ -104,7 +105,8 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     reservasjon = reservasjon,
                     identifikator = hendelse.oppgaveId,
                     avklaringsbehov = hendelse.avklaringsbehovKode,
-                    harHasteMarkering = hendelse.harHasteMarkering
+                    harHasteMarkering = hendelse.harHasteMarkering,
+                    sisteHendelse = hendelse.hendelse
                 )
             } else {
                 if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident) {
@@ -123,7 +125,8 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     enhet = Enhet(kode = hendelse.enhet),
                     status = hendelse.status,
                     reservasjon = reservasjon(hendelse),
-                    harHasteMarkering = hendelse.harHasteMarkering
+                    harHasteMarkering = hendelse.harHasteMarkering,
+                    sisteHendelse = hendelse.hendelse
                 )
             }
         }!!

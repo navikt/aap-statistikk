@@ -72,14 +72,15 @@ class OppgaveHendelseRepositoryTest {
         }
 
         val uthentet = dataSource.transaction {
-            OppgaveHendelseRepositoryImpl(it).hentEnhetForAvklaringsbehov(behandlingRef, "5053")
+            OppgaveHendelseRepositoryImpl(it).hentEnhetOgReservasjonForAvklaringsbehov(behandlingRef, "5053")
         }
 
         assertThat(uthentet).isEqualTo(
             listOf(
-                EnhetOgTidspunkt(
+                EnhetReservasjonOgTidspunkt(
                     enhet = "0417",
-                    tidspunkt = LocalDateTime.parse("2025-08-20T12:35:06.260915")
+                    reservertAv = null,
+                    tidspunkt = LocalDateTime.parse("2025-08-20T12:35:06.260915"),
                 )
             )
         )

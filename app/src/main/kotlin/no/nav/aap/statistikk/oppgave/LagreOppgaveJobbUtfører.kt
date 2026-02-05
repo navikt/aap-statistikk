@@ -28,19 +28,18 @@ class LagreOppgaveJobbUtfører(
 
         if (oppgave.behandlingReferanse != null) {
             behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
-                if (!Miljø.erProd()) {
-                    if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
-                        behandlingRepository.oppdaterBehandling(
-                            it.leggTilHendelse(
-                                it.hendelser.last().copy(
-                                    tidspunkt = oppgave.sistEndret(),
-                                    hendelsesTidspunkt = oppgave.sistEndret(),
-                                    saksbehandler = oppgave.reservertAv()
-                                )
+                if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
+                    // TODO: dette bør sikkert modelleres bedre
+                    behandlingRepository.oppdaterBehandling(
+                        it.leggTilHendelse(
+                            it.hendelser.last().copy(
+                                tidspunkt = oppgave.sistEndret(),
+                                hendelsesTidspunkt = oppgave.sistEndret(),
+                                saksbehandler = oppgave.reservertAv()
                             )
                         )
-                        sakstatistikkService.lagreSakInfoTilBigquery(it.id())
-                    }
+                    )
+                    sakstatistikkService.lagreSakInfoTilBigquery(it.id())
                 }
             }
         }

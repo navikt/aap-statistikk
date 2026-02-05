@@ -7,12 +7,16 @@ import java.util.*
 interface OppgaveHendelseRepository : Repository {
     fun lagreHendelse(hendelse: OppgaveHendelse): Long
     fun hentHendelserForId(id: Long): List<OppgaveHendelse>
-    fun hentEnhetForAvklaringsbehov(
+    fun hentEnhetOgReservasjonForAvklaringsbehov(
         behandlingReferanse: UUID,
         avklaringsbehovKode: String
-    ): List<EnhetOgTidspunkt>
+    ): List<EnhetReservasjonOgTidspunkt>
 
-    fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID): Pair<EnhetOgTidspunkt, String>?
+    fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID): Pair<EnhetReservasjonOgTidspunkt, String>?
 }
 
-data class EnhetOgTidspunkt(val enhet: String, val tidspunkt: LocalDateTime)
+data class EnhetReservasjonOgTidspunkt(
+    val enhet: String,
+    val tidspunkt: LocalDateTime,
+    val reservertAv: String?
+)
