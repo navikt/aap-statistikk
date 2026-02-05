@@ -95,12 +95,12 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
 
     }
 
-    override fun hentEnhetForAvklaringsbehov(
+    override fun hentEnhetOgReservasjonForAvklaringsbehov(
         behandlingReferanse: UUID,
         avklaringsbehovKode: String
-    ): List<EnhetOgTidspunkt> {
+    ): List<EnhetReservasjonOgTidspunkt> {
         val sql = """
-            select enhet, mottatt_tidspunkt
+            select enhet, reservert_av, mottatt_tidspunkt
             from oppgave_hendelser
             where behandling_referanse = ?
               and avklaringsbehov_kode = ?
@@ -113,17 +113,18 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 setString(2, avklaringsbehovKode)
             }
             setRowMapper {
-                EnhetOgTidspunkt(
+                EnhetReservasjonOgTidspunkt(
                     enhet = it.getString("enhet"),
+                    reservertAv = it.getStringOrNull("reservert_av"),
                     tidspunkt = it.getLocalDateTime("mottatt_tidspunkt")
                 )
             }
         }
     }
 
-    override fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID): Pair<EnhetOgTidspunkt, String>? {
+    override fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID): Pair<EnhetReservasjonOgTidspunkt, String>? {
         val sql = """
-            select enhet, mottatt_tidspunkt, avklaringsbehov_kode
+            select enhet, mottatt_tidspunkt, avklaringsbehov_kode, reservert_av
             from oppgave_hendelser
             where behandling_referanse = ?
             order by mottatt_tidspunkt desc limit 1
@@ -134,9 +135,10 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 setUUID(1, behandlingReferanse)
             }
             setRowMapper {
-                EnhetOgTidspunkt(
+                EnhetReservasjonOgTidspunkt(
                     enhet = it.getString("enhet"),
-                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt")
+                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt"),
+                    reservertAv = it.getStringOrNull("reservert_av")
                 ) to it.getString("avklaringsbehov_kode")
             }
         }

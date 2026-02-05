@@ -94,8 +94,7 @@ class IntegrationTest {
     ) {
         // hent på nytt slik: select payload, opprettet_tid, type from jobb where sak_id = 783332 order by opprettet_tid
         // og lagre output som json
-        val lines = object {}.javaClass.getResource("/hendelser_public_jobb.json")?.readText()
-        assertThat(lines).isNotNull
+        val lines = object {}.javaClass.getResource("/hendelser_public_jobb.json")!!.readText()
 
         val value = """
             {"jobb": $lines}
@@ -119,9 +118,7 @@ class IntegrationTest {
         val avsluttetBehandlingHendelser =
             hendelserFraDBDump.filterIsInstance<BehandlingHendelseData>()
                 .filter { it.data.avsluttetBehandling != null }
-        assertThat(
-            avsluttetBehandlingHendelser
-        ).hasSize(1)
+        assertThat(avsluttetBehandlingHendelser).hasSize(1)
 
         val testUtil = setupTestEnvironment(dataSource)
         lateinit var referanse: UUID
@@ -135,25 +132,40 @@ class IntegrationTest {
         }
 
         // Sekvensnummer økes med 1 med ny info på sak
-        val bqSaker2 = hentSakstatistikkHendelser(dataSource, referanse, minSize = 2)
-//        assertThat(bqSaker2!!).hasSize(hendelserFraDBDump.size)
-        assertThat(bqSaker2!!.map { it.ansvarligEnhetKode }).contains(
-            "4491",
-            "5701",
-            "5700",
-            "4491",
-            "5701",
-            "5700",
-            "5701"
+        val bqSaker = hentSakstatistikkHendelser(dataSource, referanse, minSize = 2)!!
+
+        assertThat(bqSaker).extracting(
+            "ansvarligEnhetKode",
+            "behandlingMetode",
+            "behandlingStatus",
+            "behandlingResultat"
         )
-        assertThat(bqSaker2.map { it.behandlingStatus }).containsSubsequence(
+            .containsSubsequence(
+                tuple(null, BehandlingMetode.MANUELL, "OPPRETTET", null),
+                tuple("4491", BehandlingMetode.MANUELL, "UNDER_BEHANDLING", null),
+                tuple("5701", BehandlingMetode.MANUELL, "UNDER_BEHANDLING", null),
+                tuple("5700", BehandlingMetode.KVALITETSSIKRING, "UNDER_BEHANDLING", null),
+                tuple("4491", BehandlingMetode.MANUELL, "UNDER_BEHANDLING", null),
+                tuple("4491", BehandlingMetode.FATTE_VEDTAK, "UNDER_BEHANDLING", null),
+                tuple("4491", BehandlingMetode.MANUELL, "AVSLUTTET", "AAP_BISTANDSBEHOV"),
+            )
+        assertThat(bqSaker.map { it.ansvarligEnhetKode }).containsSubsequence(
+            "4491",
+            "5701",
+            "5700",
+            "5701",
+            "5700",
+            "5701",
+            "4491"
+        )
+        assertThat(bqSaker.map { it.behandlingStatus }).containsSubsequence(
             "UNDER_BEHANDLING",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
             "IVERKSETTES",
             "AVSLUTTET"
         )
-        assertThat(bqSaker2.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
+        assertThat(bqSaker.map { it.behandlingStatus }.toSet()).containsExactlyInAnyOrder(
             "OPPRETTET",
             "UNDER_BEHANDLING",
             "IVERKSETTES",
@@ -161,18 +173,18 @@ class IntegrationTest {
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
         )
-        val avsluttede = bqSaker2.filter { it.behandlingStatus == "AVSLUTTET" }
+        val avsluttede = bqSaker.filter { it.behandlingStatus == "AVSLUTTET" }
             .groupBy { it.endretTid }
             .mapValues { it.value.last() }
             .values.sortedBy { it.endretTid }
         assertThat(avsluttede).hasSize(1)
         assertThat(avsluttede.onlyOrNull()?.vedtakTid).isNotNull
-        assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).isNotEmpty
-        assertThat(bqSaker2.filter { it.resultatBegrunnelse != null }).allSatisfy {
+        assertThat(bqSaker.filter { it.resultatBegrunnelse != null }).isNotEmpty
+        assertThat(bqSaker.filter { it.resultatBegrunnelse != null }).allSatisfy {
             assertThat(it.behandlingStatus).contains("SENDT_TILBAKE")
         }
 
-        assertThat(bqSaker2.map { it.behandlingMetode.name }).containsSubsequence(
+        assertThat(bqSaker.map { it.behandlingMetode.name }).containsSubsequence(
             "MANUELL",
             "KVALITETSSIKRING",
             "MANUELL",
@@ -203,9 +215,7 @@ class IntegrationTest {
         }
 
         dataSource.transaction {
-            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                referanse
-            )
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
         }.let {
             val avsluttede = it.filter { it.behandlingStatus == "AVSLUTTET" }
             println("...")
@@ -437,12 +447,11 @@ class IntegrationTest {
         testKlientNoInjection(dbConfig, azureConfig = azureConfig) {
             postBehandlingsflytHendelse(initialBehandlingHendelse)
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL)
-                )
+            val førsteHendelser = listOf(
+                Triple(null, null, BehandlingMetode.MANUELL),
+                Triple(null, null, BehandlingMetode.MANUELL)
             )
+            verifiserHendelseRekkefølge(førsteHendelser)
 
             // Oppgave for sykdom opprettes
             postOppgaveData(
@@ -457,13 +466,8 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL)
-                )
-            )
+            val andreHendelser = førsteHendelser + Triple("0401", null, BehandlingMetode.MANUELL)
+            verifiserHendelseRekkefølge(andreHendelser)
 
             // Oppgave reserveres av saksbehandler
             postOppgaveData(
@@ -480,14 +484,9 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL)
-                )
-            )
+            val tredjeHendelser =
+                andreHendelser + Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL)
+            verifiserHendelseRekkefølge(tredjeHendelser)
 
             // Sykdomsbehov løses og går til kvalitetssikring
             val hendelseMedKvalitetssikring = initialBehandlingHendelse.nyHendelse().copy(
@@ -497,15 +496,10 @@ class IntegrationTest {
             )
             postBehandlingsflytHendelse(hendelseMedKvalitetssikring)
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING)
-                )
-            )
+            val fjerdeHendelser = tredjeHendelser +
+                    // Vet ikke kontor ennå
+                    Triple(null, "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING)
+            verifiserHendelseRekkefølge(fjerdeHendelser)
 
             // Sykdomsoppgave lukkes
             postOppgaveData(
@@ -522,15 +516,14 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING)
-                )
-            )
+            val femteHendelser = fjerdeHendelser
+//            + Triple(
+//                null,
+//                "Kompanjong Korrodheid",
+//                BehandlingMetode.KVALITETSSIKRING
+//            ) // feil saksbehandler, bør være null
+
+            verifiserHendelseRekkefølge(femteHendelser)
 
             // Oppgave for kvalitetssikring opprettes
             postOppgaveData(
@@ -545,16 +538,10 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING) // FEIL, bør være 0400
-                )
-            )
+            val sjetteHendelser = femteHendelser +
+                    Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
+
+            verifiserHendelseRekkefølge(sjetteHendelser)
 
             // Kvalitetssikrers oppgave reserveres
             postOppgaveData(
@@ -571,21 +558,9 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING), // FEIL, bør være 0400
-                    Triple(
-                        "0401",
-                        "Kvaliguy",
-                        BehandlingMetode.KVALITETSSIKRING
-                    ) // FEIL, bør være 0400
-                )
-            )
+            val åttendeHendelser =
+                sjetteHendelser + Triple("0400", "Kvaliguy", BehandlingMetode.KVALITETSSIKRING)
+            verifiserHendelseRekkefølge(åttendeHendelser)
 
             // Kvalitetssikring fullføres og går til beslutter
             val hendelseMedBeslutter = hendelseMedKvalitetssikring.nyHendelse().copy(
@@ -595,26 +570,11 @@ class IntegrationTest {
             )
             postBehandlingsflytHendelse(hendelseMedBeslutter)
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING), // FEIL, bør være 0400
-                    Triple(
-                        "0401",
-                        "Kvaliguy",
-                        BehandlingMetode.KVALITETSSIKRING
-                    ), // FEIL, bør være 0400
-                    Triple(
-                        "0400",
-                        "Kvaliguy",
-                        BehandlingMetode.FATTE_VEDTAK
-                    )  // FEIL, bør være null
-                )
-            )
+            val niendeHendelser =
+                // Saksbehandler bør være null her
+                åttendeHendelser + Triple(null, "Kvaliguy", BehandlingMetode.FATTE_VEDTAK)
+
+            verifiserHendelseRekkefølge(niendeHendelser)
 
             // Beslutteroppgave opprettes
             postOppgaveData(
@@ -629,27 +589,10 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING), // FEIL, bør være 0400
-                    Triple(
-                        "0401",
-                        "Kvaliguy",
-                        BehandlingMetode.KVALITETSSIKRING
-                    ), // FEIL, bør være 0400
-                    Triple(
-                        "0400",
-                        "Kvaliguy",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være null
-                    Triple("0400", null, BehandlingMetode.FATTE_VEDTAK)  // FEIL, bør være 4491
-                )
-            )
+            val tiendeHendelser =
+                niendeHendelser + Triple("4491", null, BehandlingMetode.FATTE_VEDTAK)
+
+            verifiserHendelseRekkefølge(tiendeHendelser)
 
             // Beslutteroppgave reserveres
             postOppgaveData(
@@ -666,32 +609,10 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING), // FEIL, bør være 0400
-                    Triple(
-                        "0401",
-                        "Kvaliguy",
-                        BehandlingMetode.KVALITETSSIKRING
-                    ), // FEIL, bør være 0400
-                    Triple(
-                        "0400",
-                        "Kvaliguy",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være null
-                    Triple("0400", null, BehandlingMetode.FATTE_VEDTAK),  // FEIL, bør være 4491
-                    Triple(
-                        "0400",
-                        "Besluttersen",
-                        BehandlingMetode.FATTE_VEDTAK
-                    )  // FEIL, bør være 4491
-                )
-            )
+            val ellevteHendelser =
+                tiendeHendelser + Triple("4491", "Besluttersen", BehandlingMetode.FATTE_VEDTAK)
+
+            verifiserHendelseRekkefølge(ellevteHendelser)
 
             // Vedtak fattes og behandling går til iverksettelse
             val hendelseIverksettes = hendelseMedBeslutter
@@ -702,37 +623,10 @@ class IntegrationTest {
                 )
             postBehandlingsflytHendelse(hendelseIverksettes)
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING), // FEIL, bør være 0400
-                    Triple(
-                        "0401",
-                        "Kvaliguy",
-                        BehandlingMetode.KVALITETSSIKRING
-                    ), // FEIL, bør være 0400
-                    Triple(
-                        "0400",
-                        "Kvaliguy",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være null
-                    Triple("0400", null, BehandlingMetode.FATTE_VEDTAK),  // FEIL, bør være 4491
-                    Triple(
-                        "0400",
-                        "Besluttersen",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være 4491
-                    Triple(
-                        "4491",
-                        "Besluttersen",
-                        BehandlingMetode.MANUELL
-                    ) // bør være 4491 - null, MANUELL
-                )
-            )
+            val tolvteHendelser =
+                ellevteHendelser + Triple(null, "Besluttersen", BehandlingMetode.MANUELL)
+
+            verifiserHendelseRekkefølge(tolvteHendelser)
 
             // Beslutteroppgave lukkes
             postOppgaveData(
@@ -748,38 +642,9 @@ class IntegrationTest {
                 )
             )
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING), // FEIL, bør være 0400
-                    Triple(
-                        "0401",
-                        "Kvaliguy",
-                        BehandlingMetode.KVALITETSSIKRING
-                    ), // FEIL, bør være 0400
-                    Triple(
-                        "0400",
-                        "Kvaliguy",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være null
-                    Triple("0400", null, BehandlingMetode.FATTE_VEDTAK),  // FEIL, bør være 4491
-                    Triple(
-                        "0400",
-                        "Besluttersen",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være 4491
-                    Triple(
-                        "4491",
-                        "Besluttersen",
-                        BehandlingMetode.MANUELL
-                    ), // bør være 4491 - null, MANUELL
-                    Triple("4491", null, BehandlingMetode.MANUELL) // bør være 4491 - null, MANUELL
-                )
-            )
+            val trettendeHendelser = tolvteHendelser + Triple(null, null, BehandlingMetode.MANUELL)
+
+            verifiserHendelseRekkefølge(trettendeHendelser)
 
             // Vedtaksbrev sendes og behandling avsluttes
             val hendelseAvsluttet = hendelseIverksettes
@@ -791,39 +656,10 @@ class IntegrationTest {
                 )
             postBehandlingsflytHendelse(hendelseAvsluttet)
 
-            verifiserHendelseRekkefølge(
-                listOf(
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple(null, null, BehandlingMetode.MANUELL),
-                    Triple("0401", null, BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL),
-                    Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.KVALITETSSIKRING),
-                    Triple("0401", null, BehandlingMetode.KVALITETSSIKRING), // FEIL, bør være 0400
-                    Triple(
-                        "0401",
-                        "Kvaliguy",
-                        BehandlingMetode.KVALITETSSIKRING
-                    ), // FEIL, bør være 0400
-                    Triple(
-                        "0400",
-                        "Kvaliguy",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være null
-                    Triple("0400", null, BehandlingMetode.FATTE_VEDTAK),  // FEIL, bør være 4491
-                    Triple(
-                        "0400",
-                        "Besluttersen",
-                        BehandlingMetode.FATTE_VEDTAK
-                    ),  // FEIL, bør være 4491
-                    Triple(
-                        "4491",
-                        "Besluttersen",
-                        BehandlingMetode.MANUELL
-                    ), // bør være 4491 - null, MANUELL
-                    Triple("4491", null, BehandlingMetode.MANUELL), // bør være 4491 - null, MANUELL
-                    Triple("4491", null, BehandlingMetode.MANUELL) // bør være 4491 - null, MANUELL
-                )
-            )
+            val fjortendeHendelser =
+                trettendeHendelser + Triple(null, null, BehandlingMetode.MANUELL)
+
+            verifiserHendelseRekkefølge(fjortendeHendelser)
         }
     }
 
@@ -954,7 +790,7 @@ class IntegrationTest {
                 { it != null })
             assertThat(behandling).isNotNull
             val enhet = dataSource.transaction {
-                OppgaveHendelseRepositoryImpl(it).hentEnhetForAvklaringsbehov(
+                OppgaveHendelseRepositoryImpl(it).hentEnhetOgReservasjonForAvklaringsbehov(
                     behandling!!.referanse,
                     gjeldendeAVklaringsbehov.kode.name,
                 ).last()

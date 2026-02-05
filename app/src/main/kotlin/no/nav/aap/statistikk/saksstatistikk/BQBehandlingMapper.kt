@@ -107,11 +107,17 @@ class BQBehandlingMapper(
     ): String? {
         val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
 
+//        val ident = sisteHendelse.avklaringsBehov?.let {
+//            oppgaveHendelseRepository.hentEnhetOgReservasjonForAvklaringsbehov(
+//                behandlingReferanse, sisteHendelse.avklaringsBehov
+//            )
+//        }?.lastOrNull { it.reservertAv != null }?.reservertAv
+
         if (saksbehandlerIdent == null) {
             log.info("Fant ikke siste saksbehandler for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
         }
 
-        return saksbehandlerIdent
+        return  saksbehandlerIdent
     }
 
     /**
@@ -201,8 +207,8 @@ class BQBehandlingMapper(
         val sisteHendelse = behandling.hendelser.last()
         val sisteHendelsevklaringsbehov =
             if (Miljø.erProd()) sisteHendelse.avklaringsBehov else sisteHendelse.sisteLøsteAvklaringsbehov
-        val enhet = sisteHendelsevklaringsbehov?.let {
-            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
+        val enhet = sisteHendelse.avklaringsBehov?.let {
+            oppgaveHendelseRepository.hentEnhetOgReservasjonForAvklaringsbehov(
                 behandlingReferanse,
                 it
             )
@@ -214,7 +220,7 @@ class BQBehandlingMapper(
         }?.enhet
 
         val enhetMedSisteLøsteAvklaringsbehov = sisteHendelse.sisteLøsteAvklaringsbehov?.let {
-            oppgaveHendelseRepository.hentEnhetForAvklaringsbehov(
+            oppgaveHendelseRepository.hentEnhetOgReservasjonForAvklaringsbehov(
                 behandlingReferanse,
                 it
             )
@@ -227,7 +233,7 @@ class BQBehandlingMapper(
 
         log.info("Enhet gammel: $enhet. Enhet ny $enhetMedSisteLøsteAvklaringsbehov. Behandling: $behandlingReferanse. Behandlingtype: ${behandling.typeBehandling}")
 
-        if (enhet == null) {
+        if (enhet == null && behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET) {
             log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
             val fallbackEnhet =
                 oppgaveHendelseRepository.hentSisteEnhetPåBehandling(behandlingReferanse)
