@@ -47,7 +47,8 @@ enum class Vilkårtype {
     OPPHOLDSKRAV,
     INNTEKTSBORTFALL,
     SAMORDNING_ANNEN_LOVGIVNING,
-    STUDENT
+    STUDENT,
+    ORDINÆR_KVOTE,
 }
 
 enum class Utfall {
