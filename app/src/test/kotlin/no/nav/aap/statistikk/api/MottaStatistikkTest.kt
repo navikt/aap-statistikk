@@ -186,7 +186,7 @@ class MottaStatistikkTest {
             testJobber.motorJobbAppender,
         ) {
 
-            postBehandlingsflytHendelse(hendelse)
+            oppdatertBehandlingHendelse(hendelse)
 
             TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
 
