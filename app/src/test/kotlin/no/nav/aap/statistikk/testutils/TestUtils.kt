@@ -20,12 +20,15 @@ import no.nav.aap.komponenter.gateway.Factory
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
+import no.nav.aap.komponenter.httpklient.httpclient.post
+import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
+import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -217,6 +220,51 @@ fun opprettTestStoppetBehandling(
         årsakTilOpprettelse = "SØKNAD"
     )
 
+object FakeBigQueryClient : IBigQueryClient {
+    override fun <E> create(table: BQTable<E>): Boolean {
+        return true
+    }
+
+    override fun <E> insert(table: BQTable<E>, value: E) {
+    }
+
+    override fun <E> read(table: BQTable<E>): List<E> {
+        return emptyList()
+    }
+
+    override fun <E> read(
+        table: BQTable<E>,
+        whereClause: String
+    ): List<E> {
+        return emptyList()
+    }
+
+    override fun <E> insertMany(
+        table: BQTable<E>,
+        values: List<E>
+    ) {
+
+    }
+}
+
+class TestClient(private val client: RestClient<InputStream>, private val url: String) {
+    fun postBehandlingsflytHendelse(
+        hendelse: StoppetBehandling
+    ) {
+        client.post<StoppetBehandling, Any>(
+            URI.create("$url/stoppetBehandling"), PostRequest(hendelse)
+        )
+    }
+
+    fun postOppgaveData(
+        oppgaveHendelse: OppgaveHendelse
+    ) {
+        client.post<OppgaveHendelse, Any>(
+            URI.create("$url/oppgave"), PostRequest(oppgaveHendelse)
+        )
+    }
+}
+
 fun <E> testKlientNoInjection(
     dbConfig: DbConfig,
     azureConfig: AzureConfig = AzureConfig(
@@ -224,8 +272,8 @@ fun <E> testKlientNoInjection(
         jwksUri = "http://localhost:8081/jwks",
         issuer = "tilgang"
     ),
-    bigQueryClient: BigQueryClient,
-    test: (url: String, client: RestClient<InputStream>) -> E,
+    bigQueryClient: IBigQueryClient = FakeBigQueryClient,
+    test: TestClient.() -> E,
 ): E {
     var res: E
 
@@ -255,9 +303,9 @@ fun <E> testKlientNoInjection(
 
     val port = runBlocking { server.engine.resolvedConnectors().first().port }
 
-    res = test("http://localhost:$port", restClient)
+    res = TestClient(restClient, "http://localhost:$port").test()
 
-    server.stop(500L, 10_000L)
+    server.stop(1000L, 10_000L)
 
     return res
 }
