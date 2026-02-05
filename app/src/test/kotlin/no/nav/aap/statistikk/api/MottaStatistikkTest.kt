@@ -263,7 +263,7 @@ class MottaStatistikkTest {
 
             testUtil.ventPåSvar()
 
-            postBehandlingsflytHendelse(meldekorthendelse)
+            oppdatertBehandlingHendelse(meldekorthendelse)
 
             testUtil.ventPåSvar()
 
