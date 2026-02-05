@@ -63,5 +63,6 @@ private fun no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.tilDomene
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.SAMORDNING_ANNEN_LOVGIVNING -> Vilkårtype.SAMORDNING_ANNEN_LOVGIVNING
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.STUDENT -> Vilkårtype.STUDENT
         no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.ORDINÆR_KVOTE -> Vilkårtype.ORDINÆR_KVOTE
+        no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.SYKEPENGEERSTATNING_KVOTE -> Vilkårtype.SYKEPENGEERSTATNING_KVOTE
     }
 }
