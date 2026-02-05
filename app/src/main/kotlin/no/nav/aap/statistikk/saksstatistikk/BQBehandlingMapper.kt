@@ -154,7 +154,7 @@ class BQBehandlingMapper(
                         }
                         // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
                         val førsteRettighetstype =
-                            rettighetstyper.first().rettighetstype.name.lowercase()
+                            rettighetstyper.first().rettighetstype.name.uppercase()
                         "AAP_$førsteRettighetstype"
                     }
 
