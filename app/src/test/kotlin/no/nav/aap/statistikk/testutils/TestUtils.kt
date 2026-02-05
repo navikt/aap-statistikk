@@ -256,6 +256,12 @@ class TestClient(private val client: RestClient<InputStream>, private val url: S
         )
     }
 
+    fun oppdatertBehandlingHendelse(hendelse: StoppetBehandling) {
+        client.post<StoppetBehandling, Any>(
+            URI.create("$url/oppdatertBehandling"), PostRequest(hendelse)
+        )
+    }
+
     fun postOppgaveData(
         oppgaveHendelse: OppgaveHendelse
     ) {

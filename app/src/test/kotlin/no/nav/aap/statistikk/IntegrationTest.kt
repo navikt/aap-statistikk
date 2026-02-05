@@ -226,7 +226,7 @@ class IntegrationTest {
             dbConfig,
             azureConfig = azureConfig,
         ) {
-            postBehandlingsflytHendelse(avsluttetBehandlingHendelser.last().data)
+            oppdatertBehandlingHendelse(avsluttetBehandlingHendelser.last().data)
             testUtil.ventPåSvar()
         }
 
