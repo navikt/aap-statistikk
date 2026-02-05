@@ -132,7 +132,7 @@ class IntegrationTest {
         }
 
         // Sekvensnummer økes med 1 med ny info på sak
-        val bqSaker = hentSakstatistikkHendelser(dataSource, referanse, minSize = 2)!!
+        val bqSaker = hentSakstatistikkHendelser(dataSource, referanse)!!
 
         assertThat(bqSaker).extracting(
             "ansvarligEnhetKode",
@@ -335,7 +335,7 @@ class IntegrationTest {
         }
 
         // Sekvensnummer økes med 1 med ny info på sak
-        val bqSaker2 = hentSakstatistikkHendelser(dataSource, referanse, minSize = 2)
+        val bqSaker2 = hentSakstatistikkHendelser(dataSource, referanse)
 
         assertThat(bqSaker2!!.map { it.behandlingStatus }).containsSubsequence(
             "OPPRETTET",
@@ -813,7 +813,7 @@ class IntegrationTest {
 
             testUtil.ventPåSvar()
             val bqSaker = hentSakstatistikkHendelserMedEksaktAntall(
-                dataSource, behandling!!.referanse, expectedSize = 4
+                dataSource, behandling!!.referanse
             )
             assertThat(bqSaker).isNotNull
             assertThat(bqSaker).hasSize(4)
@@ -930,28 +930,26 @@ class IntegrationTest {
 
     private fun hentSakstatistikkHendelser(
         dataSource: DataSource,
-        referanse: UUID,
-        minSize: Int = 0
+        referanse: UUID
     ) = ventPåSvar(
         {
             dataSource.transaction {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
             }
         },
-        { t -> t !== null && t.isNotEmpty() && t.size > minSize }
+        { t -> t !== null && t.isNotEmpty() }
     )
 
     private fun hentSakstatistikkHendelserMedEksaktAntall(
         dataSource: DataSource,
-        referanse: UUID,
-        expectedSize: Int
+        referanse: UUID
     ) = ventPåSvar(
         {
             dataSource.transaction {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
             }
         },
-        { t -> t !== null && t.isNotEmpty() && t.size == expectedSize }
+        { t -> t !== null && t.isNotEmpty() }
     )
 
 

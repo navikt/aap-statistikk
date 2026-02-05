@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.oppgave
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
@@ -45,7 +44,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 setLocalDateTime(c++, hendelse.endretTidspunkt)
                 setBoolean(c++, hendelse.harHasteMarkering)
                 setLong(c++, hendelse.versjon)
-                setLocalDateTime(c++, hendelse.sendtTid ?: LocalDateTime.now())
+                setLocalDateTime(c++, hendelse.sendtTid)
             }
         }.also { log.info("Lagret oppgavehendelse med id $it.") }
     }

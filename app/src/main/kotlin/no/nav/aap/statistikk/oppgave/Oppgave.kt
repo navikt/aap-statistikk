@@ -60,7 +60,7 @@ data class OppgaveHendelse(
     val hendelse: HendelseType,
     val oppgaveId: Long,
     val mottattTidspunkt: LocalDateTime,
-    val sendtTid: LocalDateTime?,
+    val sendtTid: LocalDateTime,
     val personIdent: String? = null,
     val saksnummer: String? = null,
     val behandlingRef: UUID? = null,
