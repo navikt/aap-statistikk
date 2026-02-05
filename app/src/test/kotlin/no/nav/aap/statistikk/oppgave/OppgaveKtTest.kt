@@ -12,6 +12,7 @@ class OppgaveKtTest {
         val hendelser = listOf(
             OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = 123L,
                 mottattTidspunkt = LocalDateTime.now(),
                 personIdent = "12345678901",
                 saksnummer = "S12345",
@@ -25,7 +26,8 @@ class OppgaveKtTest {
                 opprettetTidspunkt = LocalDateTime.now(),
                 endretAv = "SaksbehandlerEndret123",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = 123L
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 12L,
             )
         )
 

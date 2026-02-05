@@ -16,6 +16,7 @@ class OppgaveHendelseRepositoryTest {
         val oppgaveId = 123L
         val hendelse = OppgaveHendelse(
             hendelse = HendelseType.OPPRETTET,
+            oppgaveId = oppgaveId,
             mottattTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
             personIdent = "12345678901",
             saksnummer = "S12345",
@@ -29,7 +30,8 @@ class OppgaveHendelseRepositoryTest {
             opprettetTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
             endretAv = "SaksbehandlerEndret123",
             endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
-            oppgaveId = oppgaveId
+            sendtTid = LocalDateTime.now().minusSeconds(1).truncatedTo(ChronoUnit.MILLIS),
+            versjon = 1L,
         )
         dataSource.transaction {
             OppgaveHendelseRepositoryImpl(it).lagreHendelse(
@@ -50,20 +52,19 @@ class OppgaveHendelseRepositoryTest {
         val behandlingRef = UUID.randomUUID()
         val hendelse = OppgaveHendelse(
             hendelse = HendelseType.LUKKET,
+            oppgaveId = oppgaveId,
             mottattTidspunkt = LocalDateTime.parse("2025-08-20T12:35:06.260915"),
             personIdent = "02499243246",
             saksnummer = "4o2WNB4",
             behandlingRef = behandlingRef,
-            journalpostId = null,
             enhet = "0417",
             avklaringsbehovKode = "5053",
             status = Oppgavestatus.AVSLUTTET,
-            reservertAv = null,
-            reservertTidspunkt = null,
             opprettetTidspunkt = LocalDateTime.parse("2025-08-20T12:34:58.428000"),
             endretAv = "Kelvin",
             endretTidspunkt = LocalDateTime.parse("2025-08-20T12:35:05.590000"),
-            oppgaveId = oppgaveId
+            sendtTid = LocalDateTime.now().minusSeconds(1),
+            versjon = 12L,
         )
         dataSource.transaction {
             OppgaveHendelseRepositoryImpl(it).lagreHendelse(
@@ -72,7 +73,10 @@ class OppgaveHendelseRepositoryTest {
         }
 
         val uthentet = dataSource.transaction {
-            OppgaveHendelseRepositoryImpl(it).hentEnhetOgReservasjonForAvklaringsbehov(behandlingRef, "5053")
+            OppgaveHendelseRepositoryImpl(it).hentEnhetOgReservasjonForAvklaringsbehov(
+                behandlingRef,
+                "5053"
+            )
         }
 
         assertThat(uthentet).isEqualTo(

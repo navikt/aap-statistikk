@@ -110,7 +110,9 @@ class SaksStatistikkServiceTest {
                         reservertTidspunkt = LocalDateTime.now(),
                         opprettetTidspunkt = LocalDateTime.now(),
                         endretAv = "123456789",
-                        endretTidspunkt = LocalDateTime.now()
+                        endretTidspunkt = LocalDateTime.now(),
+                        sendtTid = LocalDateTime.now().minusSeconds(1),
+                        versjon = 1L,
                     )
                 )
 

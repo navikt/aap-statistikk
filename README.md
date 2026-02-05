@@ -29,6 +29,28 @@ For å oppdatere Gradle wrapper:
 
 Commit genererte endringer og push.
 
+## Oppdatere testdata
+
+Når datamodellen endres (f.eks. nye obligatoriske felter legges til), kan testdataene bli utdaterte. Bruk `UpdateHendelserPublicJobbJson.kt` for å automatisk oppdatere testdata-filene:
+
+```bash
+./gradlew test --tests "no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJson.update_hendelser_public_jobb_fixture_with_utbetalingsdato"
+```
+
+Dette scriptet oppdaterer følgende testfiler:
+- `app/src/test/resources/hendelser_public_jobb.json`
+- `app/src/test/resources/hendelser_klage.json`
+- Filer under `app/src/test/resources/avklaringsbehovhendelser/`
+
+Scriptet legger til manglende felter som:
+- `årsakTilOpprettelse`
+- `perioderMedArbeidsopptrapping`
+- `sendtTid` (for oppgave-hendelser, konvertert til ISO-format)
+- `utbetalingsdato` (beregnet som tilDato + 1 dag)
+- `vedtakstidspunkt`
+
+Commit endringene etter kjøring.
+
  ## Database Modell - Beregningsgrunnlag Tabeller
 
     ### Oversikt

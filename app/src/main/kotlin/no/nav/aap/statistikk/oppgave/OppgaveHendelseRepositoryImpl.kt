@@ -21,8 +21,8 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                                            behandling_referanse,
                                            journalpost_id, enhet, avklaringsbehov_kode, status, reservert_av,
                                            reservert_tidspunkt, opprettet_tidspunkt, endret_av,
-                                           endret_tidspunkt, har_hastemarkering)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                           endret_tidspunkt, har_hastemarkering, versjon, sendt_tid)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
         return dbConnection.executeReturnKey(sql) {
             var c = 1
@@ -42,7 +42,9 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 setLocalDateTime(c++, hendelse.opprettetTidspunkt)
                 setString(c++, hendelse.endretAv)
                 setLocalDateTime(c++, hendelse.endretTidspunkt)
-                setBoolean(c, hendelse.harHasteMarkering)
+                setBoolean(c++, hendelse.harHasteMarkering)
+                setLong(c++, hendelse.versjon)
+                setLocalDateTime(c++, hendelse.sendtTid)
             }
         }.also { log.info("Lagret oppgavehendelse med id $it.") }
     }
@@ -64,7 +66,9 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                    opprettet_tidspunkt,
                    endret_av,
                    endret_tidspunkt,
-                   har_hastemarkering
+                   har_hastemarkering,
+                   versjon,
+                   sendt_tid
             FROM oppgave_hendelser
             WHERE identifikator = ?
         """.trimIndent()
@@ -74,6 +78,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
             setRowMapper {
                 OppgaveHendelse(
                     hendelse = it.getEnum("type"),
+                    oppgaveId = it.getLong("identifikator"),
                     mottattTidspunkt = it.getLocalDateTime("mottatt_tidspunkt"),
                     personIdent = it.getStringOrNull("person_ident"),
                     saksnummer = it.getStringOrNull("saksnummer"),
@@ -87,8 +92,9 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                     opprettetTidspunkt = it.getLocalDateTime("opprettet_tidspunkt"),
                     endretAv = it.getStringOrNull("endret_av"),
                     endretTidspunkt = it.getLocalDateTimeOrNull("endret_tidspunkt"),
-                    oppgaveId = it.getLong("identifikator"),
-                    harHasteMarkering = it.getBooleanOrNull("har_hastemarkering")
+                    harHasteMarkering = it.getBooleanOrNull("har_hastemarkering"),
+                    sendtTid = it.getLocalDateTime("sendt_tid"),
+                    versjon = it.getLongOrNull("versjon") ?: 0L
                 )
             }
         }
