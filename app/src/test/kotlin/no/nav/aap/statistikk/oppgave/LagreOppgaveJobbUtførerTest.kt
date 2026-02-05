@@ -32,6 +32,7 @@ class LagreOppgaveJobbUtførerTest {
             OppgaveHendelseRepositoryImpl(it).lagreHendelse(
                 OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = oppgaveId,
                     mottattTidspunkt = LocalDateTime.now(),
                     personIdent = "12345678901",
                     saksnummer = "S12345",
@@ -45,7 +46,8 @@ class LagreOppgaveJobbUtførerTest {
                     opprettetTidspunkt = LocalDateTime.now(),
                     endretAv = "SaksbehandlerEndret123",
                     endretTidspunkt = LocalDateTime.now(),
-                    oppgaveId = oppgaveId
+                    sendtTid = LocalDateTime.now().minusSeconds(1),
+                    versjon = 12L
                 )
             )
         }
@@ -88,6 +90,7 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 personIdent = "12345678901",
                 saksnummer = "S12345",
@@ -99,7 +102,8 @@ class LagreOppgaveJobbUtførerTest {
                 opprettetTidspunkt = LocalDateTime.now(),
                 endretAv = "SaksbehandlerEndret123",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 11L
             )
         )
 
@@ -113,17 +117,19 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 journalpostId = 123,
                 enhet = "NAVKontor123",
                 avklaringsbehovKode = "POST_MOTTAK_NOE",
                 status = Oppgavestatus.OPPRETTET,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
                 opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId,
-                reservertAv = "Saksbehandler123",
-                reservertTidspunkt = LocalDateTime.now(),
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 12L
             )
         )
 
@@ -131,6 +137,7 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 journalpostId = 123,
                 enhet = "NAVKontor123",
@@ -139,7 +146,8 @@ class LagreOppgaveJobbUtførerTest {
                 opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId,
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 13L,
             )
         )
 
@@ -158,6 +166,7 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 personIdent = "12345678901",
                 saksnummer = "S12345",
@@ -169,7 +178,8 @@ class LagreOppgaveJobbUtførerTest {
                 opprettetTidspunkt = LocalDateTime.now(),
                 endretAv = "SaksbehandlerEndret123",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 123L
             )
         )
 
@@ -184,18 +194,20 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 journalpostId = 123,
                 enhet = "NAVKontor123",
                 avklaringsbehovKode = "POST_MOTTAK_NOE",
                 status = Oppgavestatus.OPPRETTET,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
                 opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId,
-                reservertAv = "Saksbehandler123",
-                reservertTidspunkt = LocalDateTime.now(),
-                harHasteMarkering = true
+                harHasteMarkering = true,
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 124L
             )
         )
 
@@ -208,17 +220,19 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 journalpostId = 123,
                 enhet = "NAVKontor123",
                 avklaringsbehovKode = "POST_MOTTAK_NOE",
                 status = Oppgavestatus.OPPRETTET,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
                 opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId,
-                reservertAv = "Saksbehandler123",
-                reservertTidspunkt = LocalDateTime.now(),
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 125L,
             )
         )
 
@@ -236,6 +250,7 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 personIdent = "12345678901",
                 saksnummer = "S12345",
@@ -244,12 +259,13 @@ class LagreOppgaveJobbUtførerTest {
                 enhet = "NAVKontor123",
                 avklaringsbehovKode = "Kode123",
                 status = Oppgavestatus.OPPRETTET,
+                reservertAv = "MEGET_VIKTIG_PERSON",
+                reservertTidspunkt = LocalDateTime.now(),
                 opprettetTidspunkt = LocalDateTime.now(),
                 endretAv = "SaksbehandlerEndret123",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId,
-                reservertAv = "MEGET_VIKTIG_PERSON",
-                reservertTidspunkt = LocalDateTime.now(),
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 314L,
             )
         )
 
@@ -263,17 +279,19 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 journalpostId = 123,
                 enhet = "NAVKontor123",
                 avklaringsbehovKode = "POST_MOTTAK_NOE",
                 status = Oppgavestatus.OPPRETTET,
+                reservertAv = "Saksbehandler123",
+                reservertTidspunkt = LocalDateTime.now(),
                 opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId,
-                reservertAv = "Saksbehandler123",
-                reservertTidspunkt = LocalDateTime.now(),
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 315L,
             )
         )
 
@@ -292,6 +310,7 @@ class LagreOppgaveJobbUtførerTest {
         settInnOppgaveHendelseOgUtførerJobb(
             dataSource, oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
+                oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
                 journalpostId = 123,
                 enhet = enhet,
@@ -300,7 +319,8 @@ class LagreOppgaveJobbUtførerTest {
                 opprettetTidspunkt = LocalDateTime.now().minusSeconds(10),
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
-                oppgaveId = oppgaveId
+                sendtTid = LocalDateTime.now().minusSeconds(1),
+                versjon = 123L
             )
         )
 

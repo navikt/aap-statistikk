@@ -457,6 +457,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 123L,
                         enhet = "0401",
@@ -473,6 +474,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.RESERVERT,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 123L,
                         enhet = "0401",
@@ -505,6 +507,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.LUKKET,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 123L,
                         enhet = "0401",
@@ -529,6 +532,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 124L,
                         enhet = "0400",
@@ -547,6 +551,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.RESERVERT,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 124L,
                         enhet = "0400",
@@ -580,6 +585,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 127L,
                         enhet = "4491",
@@ -598,6 +604,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.RESERVERT,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 127L,
                         enhet = "4491",
@@ -632,6 +639,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.LUKKET,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
                         oppgaveId = 127L,
                         enhet = "4491",
@@ -759,6 +767,7 @@ class IntegrationTest {
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
+                    sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = OppgaveTilStatistikkDto(
                         id = 1,
                         personIdent = hendelse.ident,

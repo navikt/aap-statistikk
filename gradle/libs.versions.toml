@@ -3,7 +3,7 @@ ktor = "3.3.3"
 komponenter = "1.0.935"
 tilgang = "1.0.178"
 behandlingsflyt = "0.0.543"
-oppgave = "0.0.141"
+oppgave = "0.0.142"
 utbetaling = "0.0.74"
 postmottak = "6.0.4"
 

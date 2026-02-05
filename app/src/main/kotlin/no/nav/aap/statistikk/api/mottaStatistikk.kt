@@ -179,6 +179,8 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
         endretAv = nyOppgaveDto.endretAv,
         endretTidspunkt = nyOppgaveDto.endretTidspunkt,
         harHasteMarkering = nyOppgaveDto.harHasteMarkering,
+        sendtTid = this.sendtTidspunkt,
+        versjon = nyOppgaveDto.versjon
     )
 }
 

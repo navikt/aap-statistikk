@@ -60,6 +60,7 @@ data class OppgaveHendelse(
     val hendelse: HendelseType,
     val oppgaveId: Long,
     val mottattTidspunkt: LocalDateTime,
+    val sendtTid: LocalDateTime,
     val personIdent: String? = null,
     val saksnummer: String? = null,
     val behandlingRef: UUID? = null,
@@ -73,6 +74,7 @@ data class OppgaveHendelse(
     val endretAv: String? = null,
     val endretTidspunkt: LocalDateTime? = null,
     val harHasteMarkering: Boolean? = false,
+    val versjon: Long,
 ) {
     init {
         require(if (reservertAv != null) reservertTidspunkt != null else true)
