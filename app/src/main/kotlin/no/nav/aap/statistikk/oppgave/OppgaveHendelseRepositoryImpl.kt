@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.oppgave
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.*
 
 class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
@@ -44,9 +45,20 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 setLocalDateTime(c++, hendelse.endretTidspunkt)
                 setBoolean(c++, hendelse.harHasteMarkering)
                 setLong(c++, hendelse.versjon)
-                setLocalDateTime(c++, hendelse.sendtTid)
+                setLocalDateTime(c++, hendelse.sendtTid ?: LocalDateTime.now())
             }
         }.also { log.info("Lagret oppgavehendelse med id $it.") }
+    }
+
+    override fun sisteVersjonForId(id: Long): Long? {
+        val sql = """
+            select max(versjon) from oppgave_hendelser where identifikator = ?
+        """.trimIndent()
+
+        return dbConnection.queryFirstOrNull(sql) {
+            setParams { setLong(1, id) }
+            setRowMapper { it.getLongOrNull("max") }
+        }
     }
 
     override fun hentHendelserForId(id: Long): List<OppgaveHendelse> {

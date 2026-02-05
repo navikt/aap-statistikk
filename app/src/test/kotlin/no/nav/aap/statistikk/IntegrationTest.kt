@@ -423,7 +423,8 @@ class IntegrationTest {
             avklaringsbehovKode: Definisjon,
             status: Status,
             reservertAv: String? = null,
-            endretAv: String? = null
+            endretAv: String? = null,
+            versjon: Int = 1
         ) = OppgaveTilStatistikkDto(
             id = oppgaveId,
             personIdent = personIdent,
@@ -440,7 +441,7 @@ class IntegrationTest {
             opprettetTidspunkt = LocalDateTime.now(),
             endretAv = endretAv,
             endretTidspunkt = if (endretAv != null) LocalDateTime.now() else null,
-            versjon = if (reservertAv != null) 2 else 1,
+            versjon = versjon.toLong(),
             harHasteMarkering = false
         )
 
@@ -481,7 +482,8 @@ class IntegrationTest {
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM,
                         status = Status.OPPRETTET,
                         reservertAv = "Kompanjong Korrodheid",
-                        endretAv = "Kompanjong Korrodheid"
+                        endretAv = "Kompanjong Korrodheid",
+                        versjon = 2
                     )
                 )
             )
@@ -514,7 +516,8 @@ class IntegrationTest {
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM,
                         status = Status.AVSLUTTET,
                         reservertAv = "Kompanjong Korrodheid",
-                        endretAv = "Kompanjong Korrodheid"
+                        endretAv = "Kompanjong Korrodheid",
+                        versjon = 3
                     )
                 )
             )
@@ -558,7 +561,8 @@ class IntegrationTest {
                         avklaringsbehovKode = Definisjon.KVALITETSSIKRING,
                         status = Status.OPPRETTET,
                         reservertAv = "Kvaliguy",
-                        endretAv = "Kelvin"
+                        endretAv = "Kelvin",
+                        versjon = 2
                     )
                 )
             )
@@ -611,7 +615,8 @@ class IntegrationTest {
                         avklaringsbehovKode = Definisjon.FATTE_VEDTAK,
                         status = Status.OPPRETTET,
                         reservertAv = "Besluttersen",
-                        endretAv = "Besluttersen"
+                        endretAv = "Besluttersen",
+                        versjon = 2
                     )
                 )
             )
@@ -646,7 +651,7 @@ class IntegrationTest {
                         avklaringsbehovKode = Definisjon.FATTE_VEDTAK,
                         status = Status.AVSLUTTET,
                         endretAv = "Kelvin"
-                    ).copy(versjon = 2, reservertAv = null, reservertTidspunkt = null)
+                    ).copy(versjon = 3, reservertAv = null, reservertTidspunkt = null)
                 )
             )
 
