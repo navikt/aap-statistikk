@@ -1,11 +1,6 @@
 package no.nav.aap.statistikk
 
 import io.mockk.mockk
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.komponenter.httpklient.httpclient.Header
-import no.nav.aap.komponenter.httpklient.httpclient.post
-import no.nav.aap.komponenter.httpklient.httpclient.request.ContentType
-import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
@@ -13,7 +8,6 @@ import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.net.URI
 
 @Fakes
 class ApplicationTest {
@@ -30,7 +24,7 @@ class ApplicationTest {
             jobbAppender = jobbAppender,
             azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, mockk())
-        ) { url, client ->
+        ) {
             @Language("JSON") val body = """{
   "saksnummer": "123456789",
   "sakStatus": "OPPRETTET",
@@ -72,13 +66,7 @@ class ApplicationTest {
     343319000
   ]
 }"""
-
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(
-                    DefaultJsonMapper.fromJson(body), contentType = ContentType.APPLICATION_JSON
-                )
-            )
-
+            postBehandlingsflytHendelse(DefaultJsonMapper.fromJson(body))
         }
 
         assertThat(jobbAppender.jobber).hasSize(1)
@@ -139,16 +127,8 @@ class ApplicationTest {
             azureConfig,
             LagreStoppetHendelseJobb(jobbAppender, mockk()),
             jobbAppender,
-        ) { url, client ->
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(
-                    DefaultJsonMapper.fromJson<StoppetBehandling>(payload),
-                    additionalHeaders = listOf(
-                        Header("Accept", "application/json"),
-                        Header("Content-Type", "application/json")
-                    )
-                )
-            )
+        ) {
+            postBehandlingsflytHendelse(DefaultJsonMapper.fromJson(payload))
         }
     }
 }

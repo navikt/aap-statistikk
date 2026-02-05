@@ -29,6 +29,7 @@ import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
+import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -98,7 +99,7 @@ fun <E> testKlient(
     ),
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     jobbAppender: JobbAppender,
-    test: (url: String, client: RestClient<InputStream>) -> E?,
+    test: TestClient.() -> E,
 ): E? {
     val res: E?
 
@@ -133,7 +134,7 @@ fun <E> testKlient(
 
     val port = runBlocking { server.engine.resolvedConnectors().first().port }
 
-    res = test("http://localhost:$port", restClient)
+    res = TestClient(restClient, "http://localhost:$port").test()
 
     motor.stop()
     server.stop(500L, 10_000L)
@@ -267,6 +268,12 @@ class TestClient(private val client: RestClient<InputStream>, private val url: S
     ) {
         client.post<OppgaveHendelse, Any>(
             URI.create("$url/oppgave"), PostRequest(oppgaveHendelse)
+        )
+    }
+
+    fun postPostmottakHendelse(hendelse: DokumentflytStoppetHendelse) {
+        client.post<DokumentflytStoppetHendelse, Any>(
+            URI.create("$url/postmottak"), PostRequest(hendelse)
         )
     }
 }

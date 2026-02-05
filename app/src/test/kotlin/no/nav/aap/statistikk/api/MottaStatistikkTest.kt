@@ -9,8 +9,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.httpklient.httpclient.post
-import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.testutil.TestUtil
@@ -37,7 +35,6 @@ import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
 import no.nav.aap.statistikk.testutils.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.net.URI
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -68,10 +65,8 @@ class MottaStatistikkTest {
             azureConfig,
             LagreStoppetHendelseJobb(jobbAppender, mockk()),
             jobbAppender,
-        ) { url, client ->
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(testHendelse)
-            )
+        ) {
+            postBehandlingsflytHendelse(testHendelse)
         }
 
         assertThat(jobbAppender.jobber.first().payload()).isEqualTo(
@@ -189,12 +184,9 @@ class MottaStatistikkTest {
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
-        ) { url, client ->
+        ) {
 
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/oppdatertBehandling"), PostRequest(hendelse)
-            )
-
+            postBehandlingsflytHendelse(hendelse)
 
             TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
 
@@ -257,6 +249,7 @@ class MottaStatistikkTest {
             lagrePostmottakHendelseJobb,
             testJobber.lagreSakinfoTilBigQueryJobb
         )
+        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
 
         testKlient(
             transactionExecutor,
@@ -264,23 +257,15 @@ class MottaStatistikkTest {
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
-        ) { url, client ->
+        ) {
 
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(meldekorthendelse)
-            )
+            postBehandlingsflytHendelse(meldekorthendelse)
 
-            TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
+            testUtil.ventPåSvar()
 
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/oppdatertBehandling"),
-                PostRequest(
-                    meldekorthendelse
-                )
-            )
+            postBehandlingsflytHendelse(meldekorthendelse)
 
-
-            TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
+            testUtil.ventPåSvar()
 
             val bqBehandlinger = dataSource.transaction {
                 val behandling =
@@ -334,11 +319,9 @@ class MottaStatistikkTest {
             azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
-        ) { url, client ->
+        ) {
 
-            client.post<StoppetBehandling, Any>(
-                URI.create("$url/stoppetBehandling"), PostRequest(hendelse)
-            )
+            postBehandlingsflytHendelse(hendelse)
 
             dataSource.transaction(readOnly = true) {
                 ventPåSvar({
@@ -430,11 +413,8 @@ class MottaStatistikkTest {
             azureConfig,
             lagreStoppetHendelseJobb,
             jobbAppender,
-        ) { url, client ->
-
-            client.post<DokumentflytStoppetHendelse, Any>(
-                URI.create("$url/postmottak"), PostRequest(hendelse)
-            )
+        ) {
+            postPostmottakHendelse(hendelse)
 
             dataSource.transaction(readOnly = true) {
                 ventPåSvar({
