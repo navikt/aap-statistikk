@@ -6,6 +6,7 @@ import java.util.*
 
 interface OppgaveHendelseRepository : Repository {
     fun lagreHendelse(hendelse: OppgaveHendelse): Long
+    fun sisteVersjonForId(id: Long): Long?
     fun hentHendelserForId(id: Long): List<OppgaveHendelse>
     fun hentEnhetOgReservasjonForAvklaringsbehov(
         behandlingReferanse: UUID,

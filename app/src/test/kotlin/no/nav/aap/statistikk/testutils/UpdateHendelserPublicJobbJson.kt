@@ -13,12 +13,15 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Test-only helper that updates the test fixture hendelser_public_jobb.json by
- * inserting "utbetalingsdato" for every period under
- * avsluttetBehandling.tilkjentYtelse.perioder. The value is set to one day
- * after the period's "tilDato".
- *
- * Run this test once to rewrite the file, then commit the changes.
+ * Test-only helper that updates test fixture files to ensure they have all required fields.
+ * 
+ * Run this test to update test data files when the data model changes:
+ * ./gradlew test --tests "no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJson.update_hendelser_public_jobb_fixture_with_utbetalingsdato"
+ * 
+ * The script automatically:
+ * - Adds missing required fields with default values
+ * - Fixes date/time format issues
+ * - Adds calculated fields (e.g., utbetalingsdato from tilDato)
  */
 class UpdateHendelserPublicJobbJson {
     private val mapper: ObjectMapper = jacksonObjectMapper()
@@ -26,177 +29,178 @@ class UpdateHendelserPublicJobbJson {
 
     @Test
     fun update_hendelser_public_jobb_fixture_with_utbetalingsdato() {
-        val candidates = listOf(
-            Path.of("app/src/test/resources/hendelser_public_jobb.json"),
-            Path.of("src/test/resources/hendelser_public_jobb.json"),
-            Path.of("app/src/test/resources/hendelser_klage.json"),
-            Path.of("src/test/resources/hendelser_klage.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/grunnlag_steg.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/er_pa_brev_steget.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/meldekort_behandling.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/skal_være_iverksettes.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/avbrutt_revurdering.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/resendt_hendelse.json"),
-            Path.of("app/src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json")
-        )
+        val testDataFiles = listOf(
+            "app/src/test/resources/hendelser_public_jobb.json",
+            "src/test/resources/hendelser_public_jobb.json",
+            "app/src/test/resources/hendelser_klage.json",
+            "src/test/resources/hendelser_klage.json",
+            "app/src/test/resources/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json",
+            "app/src/test/resources/avklaringsbehovhendelser/grunnlag_steg.json",
+            "app/src/test/resources/avklaringsbehovhendelser/er_pa_brev_steget.json",
+            "app/src/test/resources/avklaringsbehovhendelser/meldekort_behandling.json",
+            "app/src/test/resources/avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json",
+            "app/src/test/resources/avklaringsbehovhendelser/skal_være_iverksettes.json",
+            "app/src/test/resources/avklaringsbehovhendelser/avbrutt_revurdering.json",
+            "app/src/test/resources/avklaringsbehovhendelser/resendt_hendelse.json",
+            "app/src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json"
+        ).map { Path.of(it) }
 
-        candidates.filter { Files.exists(it) }.forEach { rootPath ->
-            val original = Files.readString(rootPath)
-            val jsonNode = mapper.readTree(original)
-
+        testDataFiles.filter { Files.exists(it) }.forEach { filePath ->
+            val jsonNode = mapper.readTree(Files.readString(filePath))
             var modified = false
 
-            if (jsonNode is ArrayNode) {
-                // Logic for hendelser_public_jobb.json (Array of {type, payload}) 
-                // OR hendelser_klage.json if it was an array of objects but here it seems to be handled differently?
-                // Wait, hendelser_klage.json is List<StoppetBehandling> according to IntegrationTest.
-                // If it is List<StoppetBehandling>, then jsonNode is ArrayNode and elements are StoppetBehandling objects.
-
-                // Let's re-evaluate. 
-                // hendelser_public_jobb.json: Array of {type: "...", payload: "escaped_json"}
-                // hendelser_klage.json: Array of StoppetBehandling (raw JSON objects)
-
-                for (elem in jsonNode) {
-                    if (elem !is ObjectNode) continue
-
-                    // Check if it's the wrapped format (public_jobb)
-                    val payloadText = elem.get("payload")?.asText()
-                    if (payloadText != null) {
-                        // Wrapped format
-                        val payloadNode = try {
-                            mapper.readTree(payloadText)
-                        } catch (_: Exception) {
-                            null
-                        }
-
-                        if (payloadNode is ObjectNode) {
-                            var innerModified = false
-                            
-                            // Add sendtTid for oppgave hendelser
-                            if (elem.get("type")?.asText() == "statistikk.lagreOppgaveHendelseJobb") {
-                                val existingSendtTid = payloadNode.get("sendtTid")?.asText()
-                                val opprettetTidText = elem.get("opprettet_tid")?.asText()
-                                
-                                // Update if missing or in wrong format
-                                if (opprettetTidText != null && 
-                                    (existingSendtTid == null || existingSendtTid.contains(" "))) {
-                                    try {
-                                        val opprettetTid = LocalDateTime.parse(opprettetTidText, opprettetTidFormatter)
-                                        payloadNode.put("sendtTid", opprettetTid.toString())
-                                        innerModified = true
-                                    } catch (_: Exception) {
-                                        // Skip if parsing fails
-                                    }
-                                }
-                            }
-                            
-                            if (!payloadNode.has("årsakTilOpprettelse")) {
-                                payloadNode.put("årsakTilOpprettelse", "SØKNAD")
-                                innerModified = true
-                            }
-
-                            // Existing utbetalingsdato logic
-                            val tilkjentYtelsePerioder = payloadNode
-                                .path("avsluttetBehandling")
-                                .path("tilkjentYtelse")
-                                .path("perioder")
-
-                            if (tilkjentYtelsePerioder is ArrayNode && tilkjentYtelsePerioder.size() > 0) {
-                                for (periodeNode in tilkjentYtelsePerioder) {
-                                    if (periodeNode is ObjectNode) {
-                                        val tilDatoText = periodeNode.get("tilDato")?.asText()
-                                        val hasUtbetalingsdato = periodeNode.has("utbetalingsdato")
-                                        if (!tilDatoText.isNullOrBlank() && !hasUtbetalingsdato) {
-                                            val utbetalingsdato = try {
-                                                LocalDate.parse(tilDatoText).plusDays(1).toString()
-                                            } catch (_: Exception) {
-                                                null
-                                            }
-                                            if (utbetalingsdato != null) {
-                                                periodeNode.put("utbetalingsdato", utbetalingsdato)
-                                                innerModified = true
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Add perioderMedArbeidsopptrapping if missing
-                            val avsluttetBehandlingNode = payloadNode.path("avsluttetBehandling")
-                            if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
-                                avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
-                                innerModified = true
-                            }
-
-                            if (innerModified) {
-                                val updatedPayloadText =
-                                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode)
-                                elem.put("payload", updatedPayloadText)
-                                modified = true
-                            }
-                        }
-                    } else {
-                        // Raw StoppetBehandling format (klage)
-                        if (!elem.has("årsakTilOpprettelse")) {
-                            elem.put("årsakTilOpprettelse", "SØKNAD")
-                            modified = true
-                        }
-                        
-                        // Add perioderMedArbeidsopptrapping if missing in raw format
-                        val avsluttetBehandlingNode = elem.path("avsluttetBehandling")
-                        if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
-                            avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
-                            modified = true
-                        }
-                    }
-                }
-
-                // Add vedtakstidspunkt to the last statistikk.lagreHendelse payload if missing (for public_jobb)
-                if (rootPath.fileName.toString() == "hendelser_public_jobb.json") {
-                    var lastLagreHendelseIndex = -1
-                    for ((idx, elem) in jsonNode.withIndex()) {
-                        if (elem is ObjectNode && elem.get("type")?.asText() == "statistikk.lagreHendelse") {
-                            lastLagreHendelseIndex = idx
-                        }
-                    }
-                    if (lastLagreHendelseIndex >= 0) {
-                        val lastElem = jsonNode.get(lastLagreHendelseIndex) as? ObjectNode
-                        val pText = lastElem?.get("payload")?.asText()
-                        if (!pText.isNullOrBlank()) {
-                            val pNode = try { mapper.readTree(pText) } catch (_: Exception) { null }
-                            if (pNode is ObjectNode && !pNode.has("vedtakstidspunkt")) {
-                                val candidate = pNode.get("hendelsesTidspunkt")?.asText()
-                                if (!candidate.isNullOrBlank()) {
-                                    pNode.put("vedtakstidspunkt", candidate)
-                                    val updatedPText = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(pNode)
-                                    lastElem.put("payload", updatedPText)
-                                    modified = true
-                                }
-                            }
-                        }
-                    }
-                }
-            } else if (jsonNode is ObjectNode) {
-                // Single StoppetBehandling object (avklaringsbehovhendelser files)
-                if (!jsonNode.has("årsakTilOpprettelse")) {
-                    jsonNode.put("årsakTilOpprettelse", "SØKNAD")
-                    modified = true
-                }
-                
-                // Add perioderMedArbeidsopptrapping if missing
-                val avsluttetBehandlingNode = jsonNode.path("avsluttetBehandling")
-                if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
-                    avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
-                    modified = true
-                }
+            when (jsonNode) {
+                is ArrayNode -> modified = processArrayNode(jsonNode, filePath)
+                is ObjectNode -> modified = processObjectNode(jsonNode)
             }
 
             if (modified) {
-                val updated = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode)
-                Files.writeString(rootPath, updated)
+                Files.writeString(filePath, mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode))
             }
         }
+    }
+
+    private fun processArrayNode(jsonNode: ArrayNode, filePath: Path): Boolean {
+        var modified = false
+        
+        for (elem in jsonNode) {
+            if (elem !is ObjectNode) continue
+
+            val payloadText = elem.get("payload")?.asText()
+            if (payloadText != null) {
+                // Wrapped format: {type: "...", payload: "escaped_json", opprettet_tid: "..."}
+                modified = processWrappedFormat(elem, payloadText) || modified
+            } else {
+                // Raw format: direct StoppetBehandling object
+                modified = applyCommonBehandlingUpdates(elem) || modified
+            }
+        }
+
+        // Special handling for hendelser_public_jobb.json
+        if (filePath.fileName.toString() == "hendelser_public_jobb.json") {
+            modified = addVedtakstidspunktToLastLagreHendelse(jsonNode) || modified
+        }
+
+        return modified
+    }
+
+    private fun processWrappedFormat(elem: ObjectNode, payloadText: String): Boolean {
+        val payloadNode = try {
+            mapper.readTree(payloadText) as? ObjectNode
+        } catch (_: Exception) {
+            null
+        } ?: return false
+
+        var innerModified = false
+
+        // Update oppgave hendelser
+        if (elem.get("type")?.asText() == "statistikk.lagreOppgaveHendelseJobb") {
+            innerModified = updateOppgaveHendelse(payloadNode, elem) || innerModified
+        }
+
+        // Update behandling hendelser
+        innerModified = applyCommonBehandlingUpdates(payloadNode) || innerModified
+        innerModified = addUtbetalingsdatoToPerioder(payloadNode) || innerModified
+
+        if (innerModified) {
+            elem.put("payload", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode))
+            return true
+        }
+
+        return false
+    }
+
+    private fun updateOppgaveHendelse(payloadNode: ObjectNode, wrapperElem: ObjectNode): Boolean {
+        val existingSendtTid = payloadNode.get("sendtTid")?.asText()
+        val opprettetTidText = wrapperElem.get("opprettet_tid")?.asText()
+
+        if (opprettetTidText != null && (existingSendtTid == null || existingSendtTid.contains(" "))) {
+            try {
+                val sendtTidIso = LocalDateTime.parse(opprettetTidText, opprettetTidFormatter).toString()
+                payloadNode.put("sendtTid", sendtTidIso)
+                return true
+            } catch (_: Exception) {
+                // Skip if parsing fails
+            }
+        }
+
+        return false
+    }
+
+    private fun applyCommonBehandlingUpdates(node: ObjectNode): Boolean {
+        var modified = false
+
+        if (!node.has("årsakTilOpprettelse")) {
+            node.put("årsakTilOpprettelse", "SØKNAD")
+            modified = true
+        }
+
+        val avsluttetBehandlingNode = node.path("avsluttetBehandling")
+        if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
+            avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
+            modified = true
+        }
+
+        return modified
+    }
+
+    private fun addUtbetalingsdatoToPerioder(payloadNode: ObjectNode): Boolean {
+        val tilkjentYtelsePerioder = payloadNode
+            .path("avsluttetBehandling")
+            .path("tilkjentYtelse")
+            .path("perioder")
+
+        if (tilkjentYtelsePerioder !is ArrayNode || tilkjentYtelsePerioder.isEmpty) {
+            return false
+        }
+
+        var modified = false
+        for (periodeNode in tilkjentYtelsePerioder) {
+            if (periodeNode !is ObjectNode) continue
+            
+            val tilDatoText = periodeNode.get("tilDato")?.asText()
+            if (!tilDatoText.isNullOrBlank() && !periodeNode.has("utbetalingsdato")) {
+                try {
+                    val utbetalingsdato = LocalDate.parse(tilDatoText).plusDays(1).toString()
+                    periodeNode.put("utbetalingsdato", utbetalingsdato)
+                    modified = true
+                } catch (_: Exception) {
+                    // Skip if date parsing fails
+                }
+            }
+        }
+
+        return modified
+    }
+
+    private fun addVedtakstidspunktToLastLagreHendelse(jsonNode: ArrayNode): Boolean {
+        val lastLagreHendelseIndex = jsonNode.indexOfLast { elem ->
+            elem is ObjectNode && elem.get("type")?.asText() == "statistikk.lagreHendelse"
+        }
+
+        if (lastLagreHendelseIndex < 0) return false
+
+        val lastElem = jsonNode.get(lastLagreHendelseIndex) as? ObjectNode ?: return false
+        val payloadText = lastElem.get("payload")?.asText() ?: return false
+        
+        val payloadNode = try {
+            mapper.readTree(payloadText) as? ObjectNode
+        } catch (_: Exception) {
+            null
+        } ?: return false
+
+        if (payloadNode.has("vedtakstidspunkt")) return false
+
+        val hendelsesTidspunkt = payloadNode.get("hendelsesTidspunkt")?.asText()
+        if (hendelsesTidspunkt.isNullOrBlank()) return false
+
+        payloadNode.put("vedtakstidspunkt", hendelsesTidspunkt)
+        lastElem.put("payload", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode))
+        
+        return true
+    }
+
+    private fun processObjectNode(jsonNode: ObjectNode): Boolean {
+        return applyCommonBehandlingUpdates(jsonNode)
     }
 }
