@@ -31,6 +31,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
+import no.nav.aap.statistikk.bigquery.IBigQueryClient
 import no.nav.aap.statistikk.bigquery.schemaRegistryYtelseStatistikk
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
@@ -80,7 +81,7 @@ fun main() {
 fun Application.startUp(
     dbConfig: DbConfig,
     azureConfig: AzureConfig,
-    bigQueryClientYtelse: BigQueryClient,
+    bigQueryClientYtelse: IBigQueryClient,
     gatewayProvider: GatewayProvider
 ) {
     log.info("Starter.")

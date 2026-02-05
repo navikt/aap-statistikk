@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 private val logger = LoggerFactory.getLogger(BQYtelseRepository::class.java)
 
 class BQYtelseRepository(
-    private val client: BigQueryClient
+    private val client: IBigQueryClient
 ) : IBQYtelsesstatistikkRepository {
     private val behandlingTabell = BehandlingTabell()
 
