@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
@@ -10,7 +9,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.returnert
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
+import no.nav.aap.statistikk.oppgave.OppgaveRepository
 import no.nav.aap.statistikk.årsakTilOpprettelseIkkeSatt
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -22,7 +21,8 @@ import java.util.*
 class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
-    private val oppgaveHendelseRepository: OppgaveHendelseRepository,
+    private val oppgaveRepository: OppgaveRepository,
+    private val sakstatistikkEventSourcing: SakstatistikkEventSourcing,
     private val clock: Clock = systemDefaultZone()
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -36,7 +36,8 @@ class BQBehandlingMapper(
             return BQBehandlingMapper(
                 behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
                 rettighetstypeperiodeRepository = repositoryProvider.provide(),
-                oppgaveHendelseRepository = repositoryProvider.provide(),
+                oppgaveRepository = repositoryProvider.provide(),
+                sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
                 clock = clock
             )
         }
@@ -46,16 +47,16 @@ class BQBehandlingMapper(
         behandling: Behandling,
         erSkjermet: Boolean,
         sekvensNummer: Long?
-    ): BQBehandling {
+    ): List<BQBehandling> {
         val sak = behandling.sak
-        val relatertBehandlingUUID = behandlingService.hentRelatertBehandlingUUID(behandling)
+        val relatertBehandlingUUID =
+            behandlingService.hentRelatertBehandlingUUID(behandling)
         val hendelser = behandling.hendelser
         val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
 
         val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling)
-        val saksbehandler =
-            if (erSkjermet) "-5" else utledSaksbehandler(sisteHendelse, behandlingReferanse)
+        val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling)
 
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         if (årsakTilOpprettelse == null) {
@@ -66,6 +67,37 @@ class BQBehandlingMapper(
         if (behandling.mottattTid.isAfter(behandling.opprettetTid)) {
             log.info("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
         }
+
+        return listOf(
+            byggBQBehandling(
+                behandling = behandling,
+                relatertBehandlingUUID = relatertBehandlingUUID,
+                hendelser = hendelser,
+                sisteHendelse = sisteHendelse,
+                behandlingReferanse = behandlingReferanse,
+                erSkjermet = erSkjermet,
+                ansvarligEnhet = ansvarligEnhet,
+                saksbehandler = saksbehandler,
+                sekvensNummer = sekvensNummer,
+                endretTid = behandling.oppdatertTidspunkt()
+            )
+        )
+    }
+
+    private fun byggBQBehandling(
+        behandling: Behandling,
+        relatertBehandlingUUID: String?,
+        hendelser: List<BehandlingHendelse>,
+        sisteHendelse: BehandlingHendelse,
+        behandlingReferanse: UUID,
+        erSkjermet: Boolean,
+        ansvarligEnhet: String?,
+        saksbehandler: String?,
+        sekvensNummer: Long?,
+        endretTid: LocalDateTime
+    ): BQBehandling {
+        val årsakTilOpprettelse = behandling.årsakTilOpprettelse
+        val sak = behandling.sak
 
         return BQBehandling(
             sekvensNummer = sekvensNummer,
@@ -78,7 +110,7 @@ class BQBehandlingMapper(
             saksnummer = sak.saksnummer.value,
             tekniskTid = LocalDateTime.now(clock),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
-            endretTid = behandling.oppdatertTidspunkt(),
+            endretTid = endretTid,
             versjon = sisteHendelse.versjon.verdi,
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             opprettetAv = behandling.opprettetAv ?: KELVIN,
@@ -102,22 +134,28 @@ class BQBehandlingMapper(
     }
 
     private fun utledSaksbehandler(
-        sisteHendelse: BehandlingHendelse,
-        behandlingReferanse: UUID,
+        behandling: Behandling,
     ): String? {
-        val saksbehandlerIdent = sisteHendelse.saksbehandler?.ident
+        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
-//        val ident = sisteHendelse.avklaringsBehov?.let {
-//            oppgaveHendelseRepository.hentEnhetOgReservasjonForAvklaringsbehov(
-//                behandlingReferanse, sisteHendelse.avklaringsBehov
-//            )
-//        }?.lastOrNull { it.reservertAv != null }?.reservertAv
+        val saksbehandler = snapshots.lastOrNull()?.saksbehandler
 
-        if (saksbehandlerIdent == null) {
-            log.info("Fant ikke siste saksbehandler for behandling $behandlingReferanse. Avklaringsbehov: ${sisteHendelse.avklaringsBehov}.")
+        // Fallback: bruk sisteSaksbehandler fra behandlingsflyt hvis:
+        // - Ingen saksbehandler fra oppgave-events OG
+        // - Det finnes oppgave-data (dvs. systemet tracker oppgaver) OG
+        // - Ingen oppgave for gjeldende avklaringsbehov
+        if (saksbehandler == null && oppgaver.isNotEmpty()) {
+            val gjeldendeAvklaringsbehov = behandling.gjeldendeAvklaringsBehov
+            val harOppgaveForGjeldendeAvklaringsbehov =
+                oppgaver.any { it.avklaringsbehov == gjeldendeAvklaringsbehov }
+
+            if (!harOppgaveForGjeldendeAvklaringsbehov) {
+                return saksbehandler
+            }
         }
 
-        return  saksbehandlerIdent
+        return saksbehandler
     }
 
     /**
@@ -203,50 +241,13 @@ class BQBehandlingMapper(
     private fun ansvarligEnhet(
         behandling: Behandling,
     ): String? {
-        val behandlingReferanse = behandling.referanse
-        val sisteHendelse = behandling.hendelser.last()
-        val sisteHendelsevklaringsbehov =
-            if (Miljø.erProd()) sisteHendelse.avklaringsBehov else sisteHendelse.sisteLøsteAvklaringsbehov
-        val enhet = sisteHendelse.avklaringsBehov?.let {
-            oppgaveHendelseRepository.hentEnhetOgReservasjonForAvklaringsbehov(
-                behandlingReferanse,
-                it
-            )
-        }?.lastOrNull {
-            // I tilfelle enhet har flyttet seg på samme avklaringsbehov
-            it.tidspunkt.isBefore(
-                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
-            )
-        }?.enhet
+        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
-        val enhetMedSisteLøsteAvklaringsbehov = sisteHendelse.sisteLøsteAvklaringsbehov?.let {
-            oppgaveHendelseRepository.hentEnhetOgReservasjonForAvklaringsbehov(
-                behandlingReferanse,
-                it
-            )
-        }?.lastOrNull {
-            // I tilfelle enhet har flyttet seg på samme avklaringsbehov
-            it.tidspunkt.isBefore(
-                sisteHendelse.hendelsesTidspunkt.plusDays(1) // STYGT
-            )
-        }?.enhet
+        val enhet = snapshots.lastOrNull()?.enhet
 
-        log.info("Enhet gammel: $enhet. Enhet ny $enhetMedSisteLøsteAvklaringsbehov. Behandling: $behandlingReferanse. Behandlingtype: ${behandling.typeBehandling}")
-
-        if (enhet == null && behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET) {
-            log.info("Fant ikke enhet for behandling $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
-            val fallbackEnhet =
-                oppgaveHendelseRepository.hentSisteEnhetPåBehandling(behandlingReferanse)
-
-            if (fallbackEnhet != null) {
-                val (enhetOgTidspunkt, avklaringsBehov) = fallbackEnhet
-                val fallbackEnhet = enhetOgTidspunkt.enhet
-                log.info("Fallback-enhet: $fallbackEnhet for avklaringsbehov ${avklaringsBehov}. Originalt behov: $sisteHendelsevklaringsbehov. Referanse: $behandlingReferanse. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}")
-                return fallbackEnhet
-            } else {
-                log.info("Fant ingen enhet eller fallbackenhet. Referanse: $behandlingReferanse. Avklaringsbehov: $sisteHendelsevklaringsbehov. Typebehandling: ${behandling.typeBehandling}. Årsak til opprettelse: ${behandling.årsakTilOpprettelse}.")
-            }
-        }
+        // Fallback: hvis ingen enhet fra oppgave-events, kan vi ikke utlede noe
+        // (enhet fra behandlingsflyt finnes ikke, så vi må returnere null)
         return enhet
     }
 
