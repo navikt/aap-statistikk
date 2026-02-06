@@ -23,8 +23,8 @@ class LagreOppgaveHendelseJobbUtfører(
         val hendelse = DefaultJsonMapper.fromJson<OppgaveHendelse>(input.payload())
 
         val forrigeHendelseVersjon = oppgaveHendelseRepository.sisteVersjonForId(hendelse.oppgaveId)
-        if (forrigeHendelseVersjon != null && forrigeHendelseVersjon >= hendelse.versjon) {
-            log.info("Mottok oppgave med lavere versjon enn forrige hendelse.")
+        if (forrigeHendelseVersjon != null && forrigeHendelseVersjon > hendelse.versjon) {
+            log.info("Mottok oppgave med lavere versjon enn forrige hendelse. (forrige: $forrigeHendelseVersjon, ny: ${hendelse.versjon})")
             PrometheusProvider.prometheus.oppgaveHendelseMottatt(false).increment()
         } else {
             oppgaveHendelseRepository.lagreHendelse(hendelse)
