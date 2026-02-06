@@ -365,7 +365,6 @@ class BeregningsgrunnlagRepositoryTest {
                     it
                 ).hentBeregningsGrunnlag(ref)
             }
-            println(c)
             assertThat(hentet).hasSize(1)
             assertThat(hentet.first().behandlingsReferanse).isEqualTo(ref)
             assertThat(hentet.first().value).isEqualTo(grunnlag.second)

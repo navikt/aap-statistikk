@@ -51,7 +51,7 @@ import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.motor
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
+import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
@@ -830,8 +830,10 @@ fun konstruerSakstatistikkService(
         bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
         bqBehandlingMapper = BQBehandlingMapper(
-            behandlingService, RettighetstypeperiodeRepository(connection),
-            OppgaveHendelseRepositoryImpl(connection)
+            behandlingService,
+            RettighetstypeperiodeRepository(connection),
+            OppgaveRepositoryImpl(connection),
+            SakstatistikkEventSourcing()
         )
     )
 }

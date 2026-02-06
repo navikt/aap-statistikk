@@ -199,7 +199,7 @@ class MottaStatistikkTest {
                 )
             }
             assertThat(behandling.hendelser.sortedBy { it.hendelsesTidspunkt }).hasSize(5)
-            assertThat(bqBehandlinger).hasSize(6)
+            assertThat(bqBehandlinger).hasSize(5)
         }
     }
 

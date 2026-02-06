@@ -90,8 +90,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
                                   hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse,
-                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler,
+                                  sist_loste_avklaringsbehov_tidspunkt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 var c = 1
@@ -117,6 +118,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.relatertBehandlingReferanse)
                 setString(c++, behandling.sisteLøsteAvklaringsbehov)
                 setString(c++, behandling.sisteSaksbehandlerSomLøstebehov)
+                setLocalDateTime(c++, behandling.sistLøsteAvklaringsbehovTidspunkt)
             }
         }
 
@@ -221,8 +223,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                                   gjeldende_avklaringsbehov_status,
                                   soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
                                   hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse,
-                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler,
+                                  sist_loste_avklaringsbehov_tidspunkt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) }
         ) {
             setParams { (hendelse, idx) ->
@@ -249,6 +252,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, hendelse.relatertBehandlingReferanse)
                 setString(c++, hendelse.sisteLøsteAvklaringsbehov)
                 setString(c++, hendelse.sisteSaksbehandlerSomLøstebehov)
+                setLocalDateTime(c++, hendelse.sistLøsteAvklaringsbehovTidspunkt)
             }
         }
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
@@ -280,6 +284,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
            bh.siste_saksbehandler                      as bh_siste_saksbehandler,
            bh.sist_loste_avklaringsbehov               as bh_sist_loste_avklaringsbehov,
            bh.sist_loste_avklaringsbehov_saksbehandler as bh_sist_loste_avklaringsbehov_saksbehandler,
+           bh.sist_loste_avklaringsbehov_tidspunkt     as bh_sist_loste_avklaringsbehov_tidspunkt,
            bh.venteaarsak                              as bh_venteaarsak,
            bh.retur_aarsak                             as bh_retur_aarsak,
            bh.gjeldende_avklaringsbehov                as bh_gjeldende_avklaringsbehov,
@@ -365,6 +370,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
               bh.relatert_behandling_referanse            as bh_relatert_behandling_referanse,
               bh.sist_loste_avklaringsbehov               as bh_sist_loste_avklaringsbehov,
               bh.sist_loste_avklaringsbehov_saksbehandler as bh_sist_loste_avklaringsbehov_saksbehandler,
+              bh.sist_loste_avklaringsbehov_tidspunkt     as bh_sist_loste_avklaringsbehov_tidspunkt,
               v.versjon                                   as bh_versjon
        from behandling_historikk bh
                 join versjon v on bh.versjon_id = v.id
@@ -383,6 +389,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
                     sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov"),
                     sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler"),
+                    sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
                     steggruppe = it.getEnumOrNull("bh_steggruppe"),
                     venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
                     returÅrsak = it.getStringOrNull("bh_retur_aarsak"),
@@ -454,6 +461,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             ?.ifBlank { null },
         sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler")
             ?.ifBlank { null },
+        sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
         returÅrsak = it.getStringOrNull("bh_retur_aarsak")?.ifBlank { null },
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),

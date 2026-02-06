@@ -14,6 +14,10 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
         }
     }
 
+    private val oppgaveHendelseRepository: OppgaveHendelseRepository by lazy {
+        OppgaveHendelseRepositoryImpl(dbConnection)
+    }
+
     override fun lagreOppgave(oppgave: Oppgave): Long {
         requireNotNull(oppgave.enhet.id) { "Enhet-ID må være satt på enhet-objektet i oppgave. Oppgave-ID: ${oppgave.identifikator}" }
 
@@ -211,7 +215,7 @@ where id = ?"""
         },
         identifikator = it.getLong("o_identifikator"),
         avklaringsbehov = it.getString("o_avklaringsbehov"),
-        hendelser = listOf(), // TODO
+        hendelser = oppgaveHendelseRepository.hentHendelserForId(it.getLong("o_identifikator")),
         harHasteMarkering = it.getBooleanOrNull("o_har_hastemarkering"),
     )
 

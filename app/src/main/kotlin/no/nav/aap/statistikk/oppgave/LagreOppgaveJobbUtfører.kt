@@ -28,17 +28,7 @@ class LagreOppgaveJobbUtfører(
         if (oppgave.behandlingReferanse != null) {
             behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
                 if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
-                    // TODO: dette bør sikkert modelleres bedre
-                    behandlingRepository.oppdaterBehandling(
-                        it.leggTilHendelse(
-                            it.hendelser.last().copy(
-                                tidspunkt = oppgave.sistEndret(),
-                                hendelsesTidspunkt = oppgave.sistEndret(),
-                                saksbehandler = oppgave.reservertAv()
-                            )
-                        )
-                    )
-                    sakstatistikkService.lagreSakInfoTilBigquery(it.id())
+                    sakstatistikkService.lagreSakInfoTilBigqueryFraOppgave(it.id())
                 }
             }
         }
