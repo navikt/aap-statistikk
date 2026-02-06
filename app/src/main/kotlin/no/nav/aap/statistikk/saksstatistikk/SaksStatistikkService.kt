@@ -54,10 +54,12 @@ class SaksStatistikkService(
 
         val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
 
-        val bqSak =
+        val bqSaker =
             bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet, sekvensNummer)
 
-        lagreBQBehandling(bqSak)
+        bqSaker.forEach { bqSak ->
+            lagreBQBehandling(bqSak)
+        }
     }
 
     fun lagreBQBehandling(bqSak: BQBehandling) {
@@ -97,6 +99,11 @@ class SaksStatistikkService(
         return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
+    fun lagreSakInfoTilBigqueryFraOppgave(behandlingId: BehandlingId) {
+
+        lagreSakInfoTilBigquery(behandlingId)
+    }
+
     fun alleHendelserPåBehandling(
         behandlingId: BehandlingId
     ): List<BQBehandling> {
@@ -108,7 +115,7 @@ class SaksStatistikkService(
             sakstatistikkRepository.hentAlleHendelserPåBehandling(behandling.referanse)
 
         val alleHendelser = behandling.hendelsesHistorikk()
-            .map { behandling ->
+            .flatMap { behandling ->
                 bqBehandlingMapper.bqBehandlingForBehandling(
                     behandling = behandling,
                     erSkjermet = erSkjermet,

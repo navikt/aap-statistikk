@@ -13,8 +13,8 @@ class ReberegnHistorikk {
         dto: StoppetBehandling, behandling: Behandling
     ): Behandling {
         val avklaringsbehov = dto.avklaringsbehov
-        val (forrigeLøste, forrigeLøsteAvHvem) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
-            ?: Pair(null, null)
+        val (forrigeLøste, forrigeLøsteAvHvem, forrigeLøsteTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
+            ?: Triple(null, null, null)
         val inngangshendelse = BehandlingHendelse(
             tidspunkt = dto.mottattTid,
             hendelsesTidspunkt = dto.mottattTid,
@@ -33,7 +33,8 @@ class ReberegnHistorikk {
             søknadsformat = dto.soknadsFormat.tilDomene(),
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
             sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
-            sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem
+            sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem,
+            sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
         )
 
         if (avklaringsbehov.isEmpty() && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
@@ -60,7 +61,8 @@ class ReberegnHistorikk {
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                         relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                         sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
-                        sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem
+                        sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem,
+                        sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
                     )
                 )
         }
@@ -88,7 +90,8 @@ class ReberegnHistorikk {
             )
 
         return avklaringsbehovHistorikk.fold(behandlingMedEllerUtenInngangshendelse) { acc, curr ->
-            val (forrigeLøste, forrigeløstAvHvem) = curr.utledForrigeLøsteAvklaringsbehov() ?: Pair(
+            val (forrigeLøste, forrigeløstAvHvem, forrigeLøsteTidspunkt) = curr.utledForrigeLøsteAvklaringsbehov() ?: Triple(
+                null,
                 null,
                 null
             )
@@ -112,7 +115,8 @@ class ReberegnHistorikk {
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                     relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                     sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
-                    sisteSaksbehandlerSomLøstebehov = forrigeløstAvHvem
+                    sisteSaksbehandlerSomLøstebehov = forrigeløstAvHvem,
+                    sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
 
                 )
             )

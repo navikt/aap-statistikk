@@ -5,7 +5,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
-import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.isBeforeOrEqual
 import no.nav.aap.statistikk.onlyOrNull
@@ -98,10 +97,13 @@ fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsbehov(): Definisjon
         ?.avklaringsbehovDefinisjon
 }
 
-fun List<AvklaringsbehovHendelseDto>.utledForrigeLøsteAvklaringsbehov(): Pair<Definisjon, String>? {
+fun List<AvklaringsbehovHendelseDto>.utledForrigeLøsteAvklaringsbehov(): Triple<Definisjon, String, LocalDateTime>? {
     return this.lastOrNull {
         it.status.erAvsluttet() && it.status != Status.AVBRUTT && !it.avklaringsbehovDefinisjon.erVentebehov()
-    }?.let { Pair(it.avklaringsbehovDefinisjon, it.endringer.last().endretAv) }
+    }?.let {
+        val sisteEndring = it.endringer.last()
+        Triple(it.avklaringsbehovDefinisjon, sisteEndring.endretAv, sisteEndring.tidsstempel)
+    }
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {

@@ -67,8 +67,8 @@ class BehandlingService(
                 if (it == null && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) dto.tidspunktSisteEndring else it
             }
 
-        val (sisteLøsteAvklaringsbehov, sisteSaksbehandler) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
-            ?: Pair(null, null)
+        val (sisteLøsteAvklaringsbehov, sisteSaksbehandler, sistLøsteTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
+            ?: Triple(null, null, null)
         val behandling = Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
