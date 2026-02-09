@@ -36,66 +36,100 @@ class SakstatistikkEventSourcing {
     private fun konverterOppgaveHendelser(oppgaver: List<Oppgave>): List<SakstatistikkHendelse> {
         return oppgaver.flatMap { oppgave ->
             oppgave.hendelser.mapNotNull { hendelse ->
-                when (hendelse.hendelse) {
-                    HendelseType.OPPRETTET -> {
-                        oppgave.behandlingReferanse?.let {
-                            OppgaveOpprettetHendelse(
-                                behandlingReferanse = it.referanse,
-                                tidspunkt = hendelse.opprettetTidspunkt,
-                                avklaringsbehovKode = oppgave.avklaringsbehov,
-                                enhet = hendelse.enhet,
-                                reservertAv = hendelse.reservertAv
-                            )
-                        }
-                    }
-
-                    HendelseType.RESERVERT -> {
-                        oppgave.behandlingReferanse?.let {
-                            OppgaveReservertHendelse(
-                                behandlingReferanse = it.referanse,
-                                tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
-                                avklaringsbehovKode = oppgave.avklaringsbehov,
-                                reservertAv = hendelse.reservertAv.orEmpty(),
-                                enhet = hendelse.enhet
-                            )
-                        }
-                    }
-
-                    HendelseType.LUKKET -> {
-                        oppgave.behandlingReferanse?.let {
-                            OppgaveLukketHendelse(
-                                behandlingReferanse = it.referanse,
-                                tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
-                                avklaringsbehovKode = oppgave.avklaringsbehov
-                            )
-                        }
-                    }
-
-                    HendelseType.AVRESERVERT -> {
-                        oppgave.behandlingReferanse?.let {
-                            OppgaveAvreservertHendelse(
-                                behandlingReferanse = it.referanse,
-                                tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
-                                avklaringsbehovKode = oppgave.avklaringsbehov,
-                            )
-                        }
-                    }
-
-                    HendelseType.OPPDATERT -> {
-                        oppgave.behandlingReferanse?.let {
-                            OppgaveOppdatertHendelse(
-                                behandlingReferanse = it.referanse,
-                                tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
-                                avklaringsbehovKode = oppgave.avklaringsbehov,
-                                reservertAv = hendelse.reservertAv,
-                                enhet = hendelse.enhet
-                            )
-                        }
-                    }
-                }
+                konverterOppgaveHendelse(oppgave, hendelse)
             }
         }
     }
+
+    private fun konverterOppgaveHendelse(
+        oppgave: Oppgave,
+        hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse
+    ): SakstatistikkHendelse? {
+        val behandlingReferanse = oppgave.behandlingReferanse ?: return null
+
+        return when (hendelse.hendelse) {
+            HendelseType.OPPRETTET -> opprettetHendelse(
+                behandlingReferanse.referanse,
+                hendelse,
+                oppgave
+            )
+
+            HendelseType.RESERVERT -> reservertHendelse(
+                behandlingReferanse.referanse,
+                hendelse,
+                oppgave
+            )
+
+            HendelseType.LUKKET -> lukketHendelse(behandlingReferanse.referanse, hendelse, oppgave)
+            HendelseType.AVRESERVERT -> avreservertHendelse(
+                behandlingReferanse.referanse,
+                hendelse,
+                oppgave
+            )
+
+            HendelseType.OPPDATERT -> oppdatertHendelse(
+                behandlingReferanse.referanse,
+                hendelse,
+                oppgave
+            )
+        }
+    }
+
+    private fun opprettetHendelse(
+        behandlingReferanse: UUID,
+        hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse,
+        oppgave: Oppgave
+    ) = OppgaveOpprettetHendelse(
+        behandlingReferanse = behandlingReferanse,
+        tidspunkt = hendelse.opprettetTidspunkt,
+        avklaringsbehovKode = oppgave.avklaringsbehov,
+        enhet = hendelse.enhet,
+        reservertAv = hendelse.reservertAv
+    )
+
+    private fun reservertHendelse(
+        behandlingReferanse: UUID,
+        hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse,
+        oppgave: Oppgave
+    ) = OppgaveReservertHendelse(
+        behandlingReferanse = behandlingReferanse,
+        tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
+        avklaringsbehovKode = oppgave.avklaringsbehov,
+        reservertAv = hendelse.reservertAv.orEmpty(),
+        enhet = hendelse.enhet
+    )
+
+    private fun lukketHendelse(
+        behandlingReferanse: UUID,
+        hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse,
+        oppgave: Oppgave
+    ) = OppgaveLukketHendelse(
+        behandlingReferanse = behandlingReferanse,
+        tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
+        avklaringsbehovKode = oppgave.avklaringsbehov
+    )
+
+    private fun avreservertHendelse(
+        behandlingReferanse: UUID,
+        hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse,
+        oppgave: Oppgave
+    ) = OppgaveAvreservertHendelse(
+        behandlingReferanse = behandlingReferanse,
+        tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
+        avklaringsbehovKode = oppgave.avklaringsbehov,
+    )
+
+    private fun oppdatertHendelse(
+        behandlingReferanse: UUID,
+        hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse,
+        oppgave: Oppgave
+    ) = OppgaveOppdatertHendelse(
+        behandlingReferanse = behandlingReferanse,
+        tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
+        avklaringsbehovKode = oppgave.avklaringsbehov,
+        reservertAv = hendelse.reservertAv,
+        enhet = hendelse.enhet
+    )
 
     private fun byggSnapshots(hendelser: List<SakstatistikkHendelse>): List<SakstatistikkSnapshot> {
         val snapshots = mutableListOf<SakstatistikkSnapshot>()
@@ -136,81 +170,67 @@ data class SakstatistikkState(
 ) {
     fun applyHendelse(hendelse: SakstatistikkHendelse): SakstatistikkState {
         return when (hendelse) {
-            is BehandlingsflytHendelse -> {
-                val nySaksbehandler = if (hendelse.avklaringsbehov == avklaringsbehov) {
-                    // Samme avklaringsbehov: bruk sisteSaksbehandler
-                    hendelse.sisteSaksbehandlerPåBehandling
-                } else if (avklaringsbehov == null && hendelse.sisteLøsteAvklaringsbehov == null) {
-                    // Første avklaringsbehov (ingen tidligere løst): bruk sisteSaksbehandler som fallback
-                    hendelse.sisteSaksbehandlerPåBehandling
-                } else {
-                    // Nytt avklaringsbehov (overgang fra tidligere): nullstill
-                    null
-                }
-                val nyEnhet = if (hendelse.avklaringsbehov == avklaringsbehov) {
-                    enhet
-                } else {
-                    null
-                }
-                copy(
-                    status = hendelse.status,
-                    avklaringsbehov = hendelse.avklaringsbehov,
-                    saksbehandler = nySaksbehandler,
-                    enhet = nyEnhet
-                )
-            }
+            is BehandlingsflytHendelse -> applyBehandlingsflytHendelse(hendelse)
+            is OppgaveOpprettetHendelse -> applyOppgaveOpprettetHendelse(hendelse)
+            is OppgaveReservertHendelse -> applyOppgaveReservertHendelse(hendelse)
+            is OppgaveLukketHendelse -> applyOppgaveLukketHendelse(hendelse)
+            is OppgaveAvreservertHendelse -> applyOppgaveAvreservertHendelse(hendelse)
+            is OppgaveOppdatertHendelse -> applyOppgaveOppdatertHendelse(hendelse)
+        }
+    }
 
-            is OppgaveOpprettetHendelse -> {
-                if (hendelse.avklaringsbehovKode == avklaringsbehov) {
-                    copy(
-                        enhet = hendelse.enhet,
-                        saksbehandler = hendelse.reservertAv
-                    )
-                } else {
-                    this
-                }
-            }
+    private fun applyBehandlingsflytHendelse(hendelse: BehandlingsflytHendelse): SakstatistikkState {
+        val nySaksbehandler = when {
+            hendelse.avklaringsbehov == avklaringsbehov -> hendelse.sisteSaksbehandlerPåBehandling
+            avklaringsbehov == null && hendelse.sisteLøsteAvklaringsbehov == null -> hendelse.sisteSaksbehandlerPåBehandling
+            else -> null
+        }
+        val nyEnhet = if (hendelse.avklaringsbehov == avklaringsbehov) enhet else null
+        return copy(
+            status = hendelse.status,
+            avklaringsbehov = hendelse.avklaringsbehov,
+            saksbehandler = nySaksbehandler,
+            enhet = nyEnhet
+        )
+    }
 
-            is OppgaveReservertHendelse -> {
-                if (hendelse.avklaringsbehovKode == avklaringsbehov) {
-                    copy(
-                        saksbehandler = hendelse.reservertAv,
-                        enhet = hendelse.enhet
-                    )
-                } else {
-                    this
-                }
-            }
+    private fun applyOppgaveOpprettetHendelse(hendelse: OppgaveOpprettetHendelse): SakstatistikkState {
+        return if (hendelse.avklaringsbehovKode == avklaringsbehov) {
+            copy(enhet = hendelse.enhet, saksbehandler = hendelse.reservertAv)
+        } else {
+            this
+        }
+    }
 
-            is OppgaveLukketHendelse -> {
-                if (hendelse.avklaringsbehovKode == avklaringsbehov) {
-                    copy(
-                        saksbehandler = null,
-                        enhet = null
-                    )
-                } else {
-                    this
-                }
-            }
+    private fun applyOppgaveReservertHendelse(hendelse: OppgaveReservertHendelse): SakstatistikkState {
+        return if (hendelse.avklaringsbehovKode == avklaringsbehov) {
+            copy(saksbehandler = hendelse.reservertAv, enhet = hendelse.enhet)
+        } else {
+            this
+        }
+    }
 
-            is OppgaveAvreservertHendelse -> {
-                if (hendelse.avklaringsbehovKode == avklaringsbehov) {
-                    copy(saksbehandler = null)
-                } else {
-                    this
-                }
-            }
+    private fun applyOppgaveLukketHendelse(hendelse: OppgaveLukketHendelse): SakstatistikkState {
+        return if (hendelse.avklaringsbehovKode == avklaringsbehov) {
+            copy(saksbehandler = null, enhet = null)
+        } else {
+            this
+        }
+    }
 
-            is OppgaveOppdatertHendelse -> {
-                if (hendelse.avklaringsbehovKode == avklaringsbehov) {
-                    copy(
-                        saksbehandler = hendelse.reservertAv,
-                        enhet = hendelse.enhet
-                    )
-                } else {
-                    this
-                }
-            }
+    private fun applyOppgaveAvreservertHendelse(hendelse: OppgaveAvreservertHendelse): SakstatistikkState {
+        return if (hendelse.avklaringsbehovKode == avklaringsbehov) {
+            copy(saksbehandler = null)
+        } else {
+            this
+        }
+    }
+
+    private fun applyOppgaveOppdatertHendelse(hendelse: OppgaveOppdatertHendelse): SakstatistikkState {
+        return if (hendelse.avklaringsbehovKode == avklaringsbehov) {
+            copy(saksbehandler = hendelse.reservertAv, enhet = hendelse.enhet)
+        } else {
+            this
         }
     }
 }
