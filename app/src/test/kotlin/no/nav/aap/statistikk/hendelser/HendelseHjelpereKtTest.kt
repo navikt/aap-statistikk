@@ -34,7 +34,11 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 FASTSETT_BEREGNINGSTIDSPUNKT
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(KVALITETSSIKRING to "KVALITETSSIKRER")
+            val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
+            assertThat(triple).isNotNull
+            assertThat(triple!!.first).isEqualTo(KVALITETSSIKRING)
+            assertThat(triple.second).isEqualTo("KVALITETSSIKRER")
+            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T12:39:00.211"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.FASTSETT_BEREGNINGSTIDSPUNKT)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -59,7 +63,11 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 AVKLAR_SYKDOM
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK to "VEILEDER")
+            val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
+            assertThat(triple).isNotNull
+            assertThat(triple!!.first).isEqualTo(FATTE_VEDTAK)
+            assertThat(triple.second).isEqualTo("VEILEDER")
+            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:41:38.441"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.AVKLAR_SYKDOM)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -82,7 +90,11 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 SKRIV_VEDTAKSBREV
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK to "VEILEDER")
+            val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
+            assertThat(triple).isNotNull
+            assertThat(triple!!.first).isEqualTo(FATTE_VEDTAK)
+            assertThat(triple.second).isEqualTo("VEILEDER")
+            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -105,7 +117,11 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 null
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(SKRIV_VEDTAKSBREV to "BESLUTTER")
+            val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
+            assertThat(triple).isNotNull
+            assertThat(triple!!.first).isEqualTo(SKRIV_VEDTAKSBREV)
+            assertThat(triple.second).isEqualTo("BESLUTTER")
+            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:56:38.567"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isNull()
             assertThat(hendelser.utledGjeldendeStegType()).isNull()
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
@@ -128,7 +144,11 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 SKRIV_VEDTAKSBREV
             )
-            assertThat(hendelser.utledForrigeLøsteAvklaringsbehov()).isEqualTo(FATTE_VEDTAK to "BESLUTTER")
+            val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
+            assertThat(triple).isNotNull
+            assertThat(triple!!.first).isEqualTo(FATTE_VEDTAK)
+            assertThat(triple.second).isEqualTo("BESLUTTER")
+            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-04-15T13:27:58.401"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.OPPRETTET)
             assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
