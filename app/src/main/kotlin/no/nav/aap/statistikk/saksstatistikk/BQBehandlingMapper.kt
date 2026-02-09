@@ -51,8 +51,6 @@ class BQBehandlingMapper(
         val sak = behandling.sak
         val relatertBehandlingUUID =
             behandlingService.hentRelatertBehandlingUUID(behandling)
-        val hendelser = behandling.hendelser
-        val sisteHendelse = hendelser.last()
         val behandlingReferanse = behandling.referanse
 
         val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling)
@@ -77,8 +75,6 @@ class BQBehandlingMapper(
             byggBQBehandling(
                 behandling = behandling,
                 relatertBehandlingUUID = relatertBehandlingUUID,
-                hendelser = hendelser,
-                sisteHendelse = sisteHendelse,
                 behandlingReferanse = behandlingReferanse,
                 erSkjermet = erSkjermet,
                 ansvarligEnhet = ansvarligEnhet,
@@ -92,8 +88,6 @@ class BQBehandlingMapper(
     private fun byggBQBehandling(
         behandling: Behandling,
         relatertBehandlingUUID: String?,
-        hendelser: List<BehandlingHendelse>,
-        sisteHendelse: BehandlingHendelse,
         behandlingReferanse: UUID,
         erSkjermet: Boolean,
         ansvarligEnhet: String?,
@@ -103,6 +97,9 @@ class BQBehandlingMapper(
     ): BQBehandling {
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         val sak = behandling.sak
+
+        val hendelser = behandling.hendelser
+        val sisteHendelse = hendelser.last()
 
         return BQBehandling(
             sekvensNummer = sekvensNummer,
@@ -273,10 +270,5 @@ class BQBehandlingMapper(
         // Fallback: hvis ingen enhet fra oppgave-events, kan vi ikke utlede noe
         // (enhet fra behandlingsflyt finnes ikke, så vi må returnere null)
         return enhet
-    }
-
-
-    fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
-        return this.firstOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
     }
 }
