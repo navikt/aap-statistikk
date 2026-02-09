@@ -82,6 +82,7 @@ data class Behandling(
             gjeldendeAvklaringsbehovStatus = hendelse.avklaringsbehovStatus,
             sisteLøsteAvklaringsbehov = hendelse.sisteLøsteAvklaringsbehov,
             sisteSaksbehandlerSomLøstebehov = hendelse.sisteSaksbehandlerSomLøstebehov,
+            sistLøsteAvklaringsbehovTidspunkt = hendelse.sistLøsteAvklaringsbehovTidspunkt,
             mottattTid = hendelse.mottattTid,
             vedtakstidspunkt = hendelse.vedtakstidspunkt,
             gjeldendeStegGruppe = hendelse.steggruppe,
