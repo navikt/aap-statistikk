@@ -143,7 +143,6 @@ data class Behandling(
 
     fun behandlingMetode(): BehandlingMetode {
         if (this.hendelser.isEmpty()) {
-            log.info("Behandling-hendelser var tom. Behandling: ${this.referanse}")
             return BehandlingMetode.AUTOMATISK
         }
         val sisteHendelse = this.hendelser.last()
@@ -160,10 +159,6 @@ data class Behandling(
 
         if (sisteDefinisjon == Definisjon.FATTE_VEDTAK) {
             return BehandlingMetode.FATTE_VEDTAK
-        }
-
-        if (!this.hendelser.erManuell()) {
-            log.info("Hendelser: $this")
         }
 
         return if (this.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
