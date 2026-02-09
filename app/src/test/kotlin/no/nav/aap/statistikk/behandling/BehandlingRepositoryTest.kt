@@ -70,6 +70,7 @@ class BehandlingRepositoryTest {
             gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
             sisteLøsteAvklaringsbehov = "0553",
             sisteSaksbehandlerSomLøstebehov = "Z123354",
+            sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
             venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
             returÅrsak = "MANGELFULL_BEGRUNNELSE",
             gjeldendeStegGruppe = StegGruppe.BREV,
@@ -199,6 +200,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.DIGITAL,
+                    sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(),
                 )
             )
         }
