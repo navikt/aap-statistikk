@@ -120,7 +120,7 @@ class BQBehandlingMapper(
             saksbehandler = saksbehandler,
             behandlingMetode = behandling.behandlingMetode().also {
                 if (it == BehandlingMetode.AUTOMATISK) log.info(
-                    "Behandling $behandlingReferanse er automatisk behandlet. Behandling ${behandling.referanse}"
+                    "Behandling $behandlingReferanse er automatisk behandlet. Behandlingtype ${behandling.typeBehandling}"
                 )
             },
             behandlingStatus = behandlingStatus(behandling, sisteHendelse),
