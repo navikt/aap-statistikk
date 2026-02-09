@@ -141,6 +141,14 @@ class BQBehandlingMapper(
 
         val saksbehandler = snapshots.lastOrNull()?.saksbehandler
 
+        // For avsluttede behandlinger: bruk sisteSaksbehandler som fallback
+        if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && saksbehandler == null) {
+            return behandling.sisteSaksbehandler ?: oppgaveRepository.hentOppgaverForBehandling(
+                behandling.id()
+            )
+                .maxByOrNull { it.sistEndret() }?.reservasjon?.reservertAv?.ident
+        }
+
         // Fallback: bruk sisteSaksbehandler fra behandlingsflyt hvis:
         // - Ingen saksbehandler fra oppgave-events OG
         // - Det finnes oppgave-data (dvs. systemet tracker oppgaver) OG
@@ -245,6 +253,11 @@ class BQBehandlingMapper(
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
         val enhet = snapshots.lastOrNull()?.enhet
+
+        if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && enhet == null) {
+            return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+                .maxByOrNull { it.sistEndret() }?.enhet?.kode
+        }
 
         // Fallback: hvis ingen enhet fra oppgave-events, kan vi ikke utlede noe
         // (enhet fra behandlingsflyt finnes ikke, så vi må returnere null)
