@@ -55,7 +55,7 @@ class SakstatistikkEventSourcing {
                                 behandlingReferanse = it.referanse,
                                 tidspunkt = hendelse.endretTidspunkt ?: hendelse.mottattTidspunkt,
                                 avklaringsbehovKode = oppgave.avklaringsbehov,
-                                reservertAv = hendelse.reservertAv ?: "",
+                                reservertAv = hendelse.reservertAv.orEmpty(),
                                 enhet = hendelse.enhet
                             )
                         }
