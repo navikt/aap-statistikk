@@ -97,7 +97,7 @@ spec:
        AND (bh.slettet IS FALSE
          OR bh.slettet IS NULL )
        AND bh.status = 'AVSLUTTET'
-       AND (bh.resultat NOT IN ('TRUKKET',
+       AND (bh.resultat NOT IN ('TRUKKET', 'AVBRUTT',
            'KLAGE_TRUKKET')
          OR bh.resultat IS NULL)
        AND b.type NOT IN ('Oppfølgingsbehandling')
