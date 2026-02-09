@@ -143,7 +143,8 @@ class BQBehandlingMapper(
 
         // For avsluttede behandlinger: bruk sisteSaksbehandler som fallback
         if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && saksbehandler == null) {
-            return behandling.sisteSaksbehandler ?: oppgaveRepository.hentOppgaverForBehandling(
+            return behandling.sisteSaksbehandler ?: behandling.sisteSaksbehandlerSomLøstebehov
+            ?: oppgaveRepository.hentOppgaverForBehandling(
                 behandling.id()
             )
                 .maxByOrNull { it.sistEndret() }?.reservasjon?.reservertAv?.ident
