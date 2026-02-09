@@ -56,6 +56,9 @@ class BQBehandlingMapper(
         val behandlingReferanse = behandling.referanse
 
         val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling)
+
+        if (ansvarligEnhet == null) log.info("Ansvarlig enhet er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}.")
+
         val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling)
 
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
@@ -250,6 +253,11 @@ class BQBehandlingMapper(
     private fun ansvarligEnhet(
         behandling: Behandling,
     ): String? {
+        if (behandling.behandlingMetode() == BehandlingMetode.AUTOMATISK) {
+            return "KELVIN_AUTOMATISK"
+        }
+
+
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
