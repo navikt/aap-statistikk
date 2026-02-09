@@ -234,3 +234,6 @@ fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov {
     return this.sortedBy { it.name }.minBy { it.sortering }
 }
 
+fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
+    return this.firstOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
+}
