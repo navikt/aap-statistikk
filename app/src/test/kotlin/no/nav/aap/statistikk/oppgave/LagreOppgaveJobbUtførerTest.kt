@@ -64,8 +64,7 @@ class LagreOppgaveJobbUtførerTest {
                 sakstatistikkService = mockk(), /// TODO
                 behandlingRepository = FakeBehandlingRepository()
             ).utfør(
-                JobbInput(LagreOppgaveJobb()
-                ).medPayload(oppgaveId.toString())
+                JobbInput(LagreOppgaveJobb()).medPayload(oppgaveId.toString())
             )
         }
 
@@ -367,9 +366,7 @@ class LagreOppgaveJobbUtførerTest {
 
     private fun settOppEksisterendeBehandling(dataSource: DataSource): Behandling {
         return dataSource.transaction {
-            val personUtenId = Person(
-                ident = "123"
-            )
+            val personUtenId = Person(ident = "123")
             val id = PersonRepository(it).lagrePerson(personUtenId)
             val sak = Sak(
                 saksnummer = Saksnummer("123"),
@@ -385,14 +382,10 @@ class LagreOppgaveJobbUtførerTest {
                 status = BehandlingStatus.UTREDES,
                 opprettetTid = LocalDateTime.now().minusSeconds(10),
                 mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-                versjon = Versjon(
-                    verdi = "..."
-                ),
+                versjon = Versjon(verdi = "..."),
                 søknadsformat = SøknadsFormat.DIGITAL,
             )
-            val behandlingId = BehandlingRepository(it).opprettBehandling(
-                behandling
-            )
+            val behandlingId = BehandlingRepository(it).opprettBehandling(behandling)
             behandling.copy(id = behandlingId)
         }
     }

@@ -261,33 +261,33 @@ where id = ?"""
 
     override fun hentOppgaverForBehandling(behandlingId: BehandlingId): List<Oppgave> {
         val sql = """
-            select o.id                      as o_id,
-                   o.identifikator           as o_identifikator,
-                   o.avklaringsbehov         as o_avklaringsbehov,
-                   o.person_id               as o_person_id,
-                   o.behandling_referanse_id as o_behandling_referanse_id,
-                   o.enhet_id                as o_enhet_id,
-                   o.status                  as o_status,
-                   o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
-                   o.reservasjon_id          as o_reservasjon_id,
-                   o.har_hastemarkering      as o_har_hastemarkering,
-                   br.referanse              as o_behandling_referanse,
-                   e.id                      as e_id,
-                   e.kode                    as e_kode,
-                   p.id                      as p_id,
-                   p.ident                   as p_ident,
-                   r.reservert_av            as r_reservert_av,
-                   r.opprettet_tid           as r_opprettet_tid,
-                   s.id                      as s_id,
-                   s.nav_ident               as s_nav_ident
-            from oppgave o
-                     join enhet e on o.enhet_id = e.id
-                     join person p on o.person_id = p.id
-                     join behandling b on b.id = o.behandling_referanse_id 
-                     left join behandling_referanse br on o.behandling_referanse_id = br.id
-                     left join reservasjon r on r.id = o.reservasjon_id
-                     left join saksbehandler s on s.id = r.reservert_av
-            where b.id = ?
+         select o.id                      as o_id,
+                o.identifikator           as o_identifikator,
+                o.avklaringsbehov         as o_avklaringsbehov,
+                o.person_id               as o_person_id,
+                o.behandling_referanse_id as o_behandling_referanse_id,
+                o.enhet_id                as o_enhet_id,
+                o.status                  as o_status,
+                o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
+                o.reservasjon_id          as o_reservasjon_id,
+                o.har_hastemarkering      as o_har_hastemarkering,
+                br.referanse              as o_behandling_referanse,
+                e.id                      as e_id,
+                e.kode                    as e_kode,
+                p.id                      as p_id,
+                p.ident                   as p_ident,
+                r.reservert_av            as r_reservert_av,
+                r.opprettet_tid           as r_opprettet_tid,
+                s.id                      as s_id,
+                s.nav_ident               as s_nav_ident
+         from oppgave o
+                  join enhet e on o.enhet_id = e.id
+                  join person p on o.person_id = p.id
+                  join behandling b on b.referanse_id = o.behandling_referanse_id
+                  join behandling_referanse br on o.behandling_referanse_id = br.id
+                  left join reservasjon r on r.id = o.reservasjon_id
+                  left join saksbehandler s on s.id = r.reservert_av
+         where b.id = ?
         """.trimIndent()
 
         return dbConnection.queryList(sql) {
