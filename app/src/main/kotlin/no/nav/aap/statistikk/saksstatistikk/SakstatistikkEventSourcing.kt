@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.Oppgave
+import java.time.LocalDateTime
 import java.util.*
 
 class SakstatistikkEventSourcing {
@@ -154,7 +155,7 @@ class SakstatistikkEventSourcing {
 }
 
 data class SakstatistikkSnapshot(
-    val tidspunkt: java.time.LocalDateTime,
+    val tidspunkt: LocalDateTime,
     val behandlingReferanse: UUID,
     val status: String?,
     val avklaringsbehov: String?,
