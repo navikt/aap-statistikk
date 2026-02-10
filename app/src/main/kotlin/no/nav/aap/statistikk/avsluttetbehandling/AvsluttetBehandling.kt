@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.komponenter.type.Periode
+import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårsresultat
 import org.slf4j.LoggerFactory
@@ -20,6 +21,7 @@ data class AvsluttetBehandling(
     val diagnoser: Diagnoser?,
     val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList(),
     val perioderMedArbeidsopptrapping: List<Periode>,
+    val fritaksvurderinger: List<Fritakvurdering> = emptyList(),
     val behandlingResultat: ResultatKode?,
     val vedtakstidspunkt: LocalDateTime?
 ) {

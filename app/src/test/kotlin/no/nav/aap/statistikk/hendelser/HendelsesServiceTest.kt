@@ -157,6 +157,7 @@ class HendelsesServiceTest {
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
                 arbeidsopptrappingperioderRepository = FakeArbeidsopptrappingRepository(),
                 opprettBigQueryLagringYtelseCallback = { TODO() },
+                fritaksvurderingRepository = FakeFritaksvurderingRepository(),
                 behandlingService = behandlingService,
             ),
             personService = PersonService(FakePersonRepository()),

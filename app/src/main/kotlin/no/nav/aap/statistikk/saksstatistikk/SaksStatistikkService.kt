@@ -100,7 +100,6 @@ class SaksStatistikkService(
     }
 
     fun lagreSakInfoTilBigqueryFraOppgave(behandlingId: BehandlingId) {
-
         lagreSakInfoTilBigquery(behandlingId)
     }
 

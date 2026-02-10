@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Fritakvurdering
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.MeldekortDTO
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
@@ -60,6 +61,17 @@ fun List<MeldekortDTO>.tilDomene(): List<Meldekort> {
                     timerArbeidet = it.timerArbeidet
                 )
             }
+        )
+    }
+}
+
+@JvmName("fritakvurderingListTilDomene")
+fun List<Fritakvurdering>.tilDomene(): List<no.nav.aap.statistikk.meldekort.Fritakvurdering> {
+    return this.map { fritak ->
+        no.nav.aap.statistikk.meldekort.Fritakvurdering(
+            harFritak = fritak.harFritak,
+            fraDato = fritak.fraDato,
+            tilDato = fritak.tilDato
         )
     }
 }
