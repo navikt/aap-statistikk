@@ -45,6 +45,8 @@ import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.meldekort.FritaksvurderingRepository
+import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.module
@@ -677,6 +679,16 @@ class FakeArbeidsopptrappingRepository : ArbeidsopptrappingperioderRepository {
         TODO("Not yet implemented")
     }
 
+}
+
+class FakeFritaksvurderingRepository : FritaksvurderingRepository {
+    override fun lagre(behandlingId: BehandlingId, vurderinger: List<Fritakvurdering>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun hentFritaksvurderinger(behandlingId: BehandlingId): List<Fritakvurdering> {
+        TODO("Not yet implemented")
+    }
 }
 
 class FakeDiagnoseRepository : DiagnoseRepository {

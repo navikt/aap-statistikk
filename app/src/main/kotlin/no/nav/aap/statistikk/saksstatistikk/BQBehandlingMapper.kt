@@ -53,11 +53,14 @@ class BQBehandlingMapper(
             behandlingService.hentRelatertBehandlingUUID(behandling)
         val behandlingReferanse = behandling.referanse
 
-        val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling)
+        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
+
+        val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling, snapshots)
 
         if (ansvarligEnhet == null) log.info("Ansvarlig enhet er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}")
 
-        val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling)
+        val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling, snapshots)
 
         if (saksbehandler == null) log.info("Saksbehandler er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}.")
 
@@ -80,7 +83,8 @@ class BQBehandlingMapper(
                 ansvarligEnhet = ansvarligEnhet,
                 saksbehandler = saksbehandler,
                 sekvensNummer = sekvensNummer,
-                endretTid = behandling.oppdatertTidspunkt()
+                endretTid = behandling.oppdatertTidspunkt(),
+                behandlingStatus = behandlingStatus(behandling, snapshots)
             )
         )
     }
@@ -93,14 +97,14 @@ class BQBehandlingMapper(
         ansvarligEnhet: String?,
         saksbehandler: String?,
         sekvensNummer: Long?,
-        endretTid: LocalDateTime
+        endretTid: LocalDateTime,
+        behandlingStatus: String
     ): BQBehandling {
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         val sak = behandling.sak
 
         val hendelser = behandling.hendelser
         val sisteHendelse = hendelser.last()
-
         return BQBehandling(
             sekvensNummer = sekvensNummer,
             behandlingUUID = behandlingReferanse,
@@ -125,7 +129,7 @@ class BQBehandlingMapper(
                     "Behandling $behandlingReferanse er automatisk behandlet. Behandlingtype ${behandling.typeBehandling}"
                 )
             },
-            behandlingStatus = behandlingStatus(behandling, sisteHendelse),
+            behandlingStatus = behandlingStatus,
             behandlingÅrsak = årsakTilOpprettelse ?: behandling.årsaker.prioriterÅrsaker().name,
             behandlingResultat = regnUtBehandlingResultat(behandling),
             resultatBegrunnelse = resultatBegrunnelse(hendelser),
@@ -137,10 +141,8 @@ class BQBehandlingMapper(
 
     private fun utledSaksbehandler(
         behandling: Behandling,
+        snapshots: List<SakstatistikkSnapshot>,
     ): String? {
-        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
-        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
-
         val saksbehandler = snapshots.lastOrNull()?.saksbehandler
 
         // For avsluttede behandlinger: bruk sisteSaksbehandler som fallback
@@ -150,20 +152,6 @@ class BQBehandlingMapper(
                 behandling.id()
             )
                 .maxByOrNull { it.sistEndret() }?.reservasjon?.reservertAv?.ident
-        }
-
-        // Fallback: bruk sisteSaksbehandler fra behandlingsflyt hvis:
-        // - Ingen saksbehandler fra oppgave-events OG
-        // - Det finnes oppgave-data (dvs. systemet tracker oppgaver) OG
-        // - Ingen oppgave for gjeldende avklaringsbehov
-        if (saksbehandler == null && oppgaver.isNotEmpty()) {
-            val gjeldendeAvklaringsbehov = behandling.gjeldendeAvklaringsBehov
-            val harOppgaveForGjeldendeAvklaringsbehov =
-                oppgaver.any { it.avklaringsbehov == gjeldendeAvklaringsbehov }
-
-            if (!harOppgaveForGjeldendeAvklaringsbehov) {
-                return saksbehandler
-            }
         }
 
         return saksbehandler
@@ -227,7 +215,8 @@ class BQBehandlingMapper(
         }
     }
 
-    private fun behandlingStatus(behandling: Behandling, hendelse: BehandlingHendelse): String {
+    private fun behandlingStatus(behandling: Behandling, snapshots: List<SakstatistikkSnapshot>): String {
+        val hendelse = behandling.hendelser.last()
         val venteÅrsak = hendelse.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
         val returStatus = hendelse.avklaringsbehovStatus
             ?.takeIf { it.returnert() }
@@ -251,14 +240,11 @@ class BQBehandlingMapper(
 
     private fun ansvarligEnhet(
         behandling: Behandling,
+        snapshots: List<SakstatistikkSnapshot>,
     ): String? {
         if (behandling.behandlingMetode() == BehandlingMetode.AUTOMATISK) {
             return "KELVIN_AUTOMATISK"
         }
-
-
-        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
-        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
         val enhet = snapshots.lastOrNull()?.enhet
 
