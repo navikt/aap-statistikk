@@ -33,7 +33,8 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                     antallBarn = 1,
                     barnetilleggSats = 37.0,
                     barnetillegg = 37.0,
-                    utbetalingsdato = LocalDate.now().minusDays(1)
+                    utbetalingsdato = LocalDate.now().minusDays(1),
+                    minsteSats = Minstesats.MINSTESATS_OVER_25
                 ),
                 TilkjentYtelsePeriodeDTO(
                     fraDato = LocalDate.now().minusYears(3),
@@ -44,7 +45,8 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                     antallBarn = 1,
                     barnetilleggSats = 37.0,
                     barnetillegg = 37.0,
-                    utbetalingsdato = LocalDate.now().minusYears(2)
+                    utbetalingsdato = LocalDate.now().minusYears(2),
+                    minsteSats = Minstesats.IKKE_MINSTESATS
                 )
             )
         ),

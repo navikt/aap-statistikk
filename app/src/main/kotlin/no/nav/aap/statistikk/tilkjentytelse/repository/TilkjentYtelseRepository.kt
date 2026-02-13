@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
@@ -45,8 +46,8 @@ class TilkjentYtelseRepository(
 
         val sql =
             """INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID,
-                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato, minstesats)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         tilkjentYtelse.perioder.forEach { periode ->
             dbConnection.execute(sql) {
                 setParams {
@@ -60,6 +61,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     setDouble(8, periode.barnetilleggSats)
                     setDouble(9, periode.barnetillegg)
                     setLocalDate(10, periode.utbetalingsdato)
+                    setEnumName(11, periode.minstesats)
                 }
             }
         }
@@ -149,6 +151,8 @@ WHERE br.referanse = ?"""
         // Fallback for gammel data.
         val utbetalingsdato = row.getLocalDateOrNull("utbetalingsdato") ?: tilDato.plusDays(1)
 
+        val minstesats = row.getEnum<Minstesats>("minstesats")
+
         Triple(
             TilkjentYtelsePeriode(
                 fraDato = fraDato,
@@ -159,7 +163,8 @@ WHERE br.referanse = ?"""
                 antallBarn = antallBarn,
                 barnetilleggSats = barnetilleggSats,
                 barnetillegg = barnetillegg,
-                utbetalingsdato = utbetalingsdato
+                utbetalingsdato = utbetalingsdato,
+                minsteSats = minstesats,
             ), row.getUUID("referanse"), row.getString("saksnummer")
         )
     }

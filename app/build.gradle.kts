@@ -16,10 +16,6 @@ tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
     jvmTarget.set("21")
 }
 
-val mockkVersion = "1.14.7"
-val flywayVersion = "11.14.0"
-val testContainersVersion = "2.0.3"
-
 application {
     mainClass.set("no.nav.aap.statistikk.AppKt")
 }
@@ -46,8 +42,8 @@ dependencies {
 
     implementation(libs.flyway)
     implementation(libs.flywayPostgres)
-    runtimeOnly("org.postgresql:postgresql:42.7.9")
-    implementation("com.zaxxer:HikariCP:7.0.2")
+    runtimeOnly(libs.postgresql)
+    implementation(libs.hikaricp)
 
     implementation(libs.motor)
     implementation(libs.motorApi)
@@ -65,18 +61,18 @@ dependencies {
     implementation(libs.postmottakKontrakt)
     implementation(libs.utbetalKontrakt)
 
-    implementation("com.google.cloud:google-cloud-bigquery:2.57.2")
+    implementation(libs.googleCloudBigquery)
 
     testImplementation(libs.motorTestUtils)
     testImplementation(libs.ktorServerTestHost)
-    testImplementation("com.nimbusds:nimbus-jose-jwt:10.7")
-    testImplementation("io.mockk:mockk:${mockkVersion}")
-    testImplementation("org.assertj:assertj-core:3.27.7")
-    testImplementation("org.testcontainers:testcontainers-postgresql:${testContainersVersion}")
-    testImplementation("org.testcontainers:testcontainers-gcloud:${testContainersVersion}")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter:${testContainersVersion}")
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.nimbusJoseJwt)
+    testImplementation(libs.mockk)
+    testImplementation(libs.assertj)
+    testImplementation(libs.testcontainersPostgresql)
+    testImplementation(libs.testcontainersGcloud)
+    testImplementation(libs.testcontainersJunit)
+    testImplementation(libs.junitJupiter)
+    testRuntimeOnly(libs.junitPlatformLauncher)
 }
 
 tasks {

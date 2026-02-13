@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.testutils
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -26,6 +25,13 @@ import java.time.format.DateTimeFormatter
 class UpdateHendelserPublicJobbJson {
     private val mapper: ObjectMapper = jacksonObjectMapper()
     private val opprettetTidFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+
+    // Pipeline av transformasjoner som skal kjøres på behandling-noder
+    private val behandlingTransforms: List<NodeTransform> = listOf(
+        ÅrsakTilOpprettelseTransform(),
+        PerioderMedArbeidsopptrappingTransform(),
+        TilkjentYtelseTransform()
+    )
 
     @Test
     fun update_hendelser_public_jobb_fixture_with_utbetalingsdato() {
@@ -100,7 +106,6 @@ class UpdateHendelserPublicJobbJson {
 
         // Update behandling hendelser
         innerModified = applyCommonBehandlingUpdates(payloadNode) || innerModified
-        innerModified = addUtbetalingsdatoToPerioder(payloadNode) || innerModified
 
         if (innerModified) {
             elem.put("payload", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode))
@@ -128,49 +133,76 @@ class UpdateHendelserPublicJobbJson {
     }
 
     private fun applyCommonBehandlingUpdates(node: ObjectNode): Boolean {
-        var modified = false
-
-        if (!node.has("årsakTilOpprettelse")) {
-            node.put("årsakTilOpprettelse", "SØKNAD")
-            modified = true
+        return behandlingTransforms.fold(false) { modified, transform ->
+            transform.apply(node, mapper) || modified
         }
-
-        val avsluttetBehandlingNode = node.path("avsluttetBehandling")
-        if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
-            avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
-            modified = true
-        }
-
-        return modified
     }
 
-    private fun addUtbetalingsdatoToPerioder(payloadNode: ObjectNode): Boolean {
-        val tilkjentYtelsePerioder = payloadNode
-            .path("avsluttetBehandling")
-            .path("tilkjentYtelse")
-            .path("perioder")
+    // Interface for transformasjoner - gjør det enkelt å legge til nye
+    private interface NodeTransform {
+        fun apply(node: ObjectNode, mapper: ObjectMapper): Boolean
+    }
 
-        if (tilkjentYtelsePerioder !is ArrayNode || tilkjentYtelsePerioder.isEmpty) {
+    // Legger til årsakTilOpprettelse hvis den mangler
+    private class ÅrsakTilOpprettelseTransform : NodeTransform {
+        override fun apply(node: ObjectNode, mapper: ObjectMapper): Boolean {
+            if (!node.has("årsakTilOpprettelse")) {
+                node.put("årsakTilOpprettelse", "SØKNAD")
+                return true
+            }
             return false
         }
+    }
 
-        var modified = false
-        for (periodeNode in tilkjentYtelsePerioder) {
-            if (periodeNode !is ObjectNode) continue
-            
-            val tilDatoText = periodeNode.get("tilDato")?.asText()
-            if (!tilDatoText.isNullOrBlank() && !periodeNode.has("utbetalingsdato")) {
-                try {
-                    val utbetalingsdato = LocalDate.parse(tilDatoText).plusDays(1).toString()
-                    periodeNode.put("utbetalingsdato", utbetalingsdato)
+    // Legger til tom perioderMedArbeidsopptrapping hvis den mangler
+    private class PerioderMedArbeidsopptrappingTransform : NodeTransform {
+        override fun apply(node: ObjectNode, mapper: ObjectMapper): Boolean {
+            val avsluttetBehandlingNode = node.path("avsluttetBehandling")
+            if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
+                avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
+                return true
+            }
+            return false
+        }
+    }
+
+    // Legger til manglende felter i tilkjentYtelse perioder
+    private class TilkjentYtelseTransform : NodeTransform {
+        override fun apply(node: ObjectNode, mapper: ObjectMapper): Boolean {
+            val tilkjentYtelsePerioder = node
+                .path("avsluttetBehandling")
+                .path("tilkjentYtelse")
+                .path("perioder")
+
+            if (tilkjentYtelsePerioder !is ArrayNode || tilkjentYtelsePerioder.isEmpty) {
+                return false
+            }
+
+            var modified = false
+            for (periodeNode in tilkjentYtelsePerioder) {
+                if (periodeNode !is ObjectNode) continue
+
+                // Legg til utbetalingsdato hvis den mangler
+                val tilDatoText = periodeNode.get("tilDato")?.asText()
+                if (!tilDatoText.isNullOrBlank() && !periodeNode.has("utbetalingsdato")) {
+                    try {
+                        val utbetalingsdato = LocalDate.parse(tilDatoText).plusDays(1).toString()
+                        periodeNode.put("utbetalingsdato", utbetalingsdato)
+                        modified = true
+                    } catch (_: Exception) {
+                        // Skip if date parsing fails
+                    }
+                }
+
+                // Legg til minsteSats hvis den mangler
+                if (!periodeNode.has("minsteSats")) {
+                    periodeNode.put("minsteSats", "IKKE_MINSTESATS")
                     modified = true
-                } catch (_: Exception) {
-                    // Skip if date parsing fails
                 }
             }
-        }
 
-        return modified
+            return modified
+        }
     }
 
     private fun addVedtakstidspunktToLastLagreHendelse(jsonNode: ArrayNode): Boolean {
@@ -201,6 +233,7 @@ class UpdateHendelserPublicJobbJson {
     }
 
     private fun processObjectNode(jsonNode: ObjectNode): Boolean {
+        // Disse filene er StoppetBehandling-objekter, ikke wrappede payloads
         return applyCommonBehandlingUpdates(jsonNode)
     }
 }
