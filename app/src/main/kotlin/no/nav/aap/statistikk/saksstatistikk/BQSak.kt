@@ -17,7 +17,7 @@ import java.util.UUID
  */
 data class BQBehandling(
     val fagsystemNavn: String = "Kelvin",
-    val sekvensNummer: Long?,
+    val sekvensNummer: Long? = null,
     val behandlingUUID: UUID,
     val relatertBehandlingUUID: String? = null,
     val relatertFagsystem: String? = null,
