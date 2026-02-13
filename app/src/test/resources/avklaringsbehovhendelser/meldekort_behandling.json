@@ -14,7 +14,7 @@
   "vurderingsbehov": [
     "MELDEKORT"
   ],
-  "årsakTilOpprettelse": "MELDEKORT",
+  "\u00e5rsakTilOpprettelse": "MELDEKORT",
   "avklaringsbehov": [],
   "hendelsesTidspunkt": "2025-12-10T10:56:01.939607662",
   "avsluttetBehandling": {
@@ -29,7 +29,8 @@
           "antallBarn": 0,
           "barnetilleggSats": 0.0,
           "barnetillegg": 0.0,
-          "utbetalingsdato": "2025-09-23"
+          "utbetalingsdato": "2025-09-23",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-09-15",
@@ -40,7 +41,8 @@
           "antallBarn": 0,
           "barnetilleggSats": 0.0,
           "barnetillegg": 0.0,
-          "utbetalingsdato": "2025-10-07"
+          "utbetalingsdato": "2025-10-07",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-09-29",
@@ -51,7 +53,8 @@
           "antallBarn": 0,
           "barnetilleggSats": 0.0,
           "barnetillegg": 0.0,
-          "utbetalingsdato": "2025-10-21"
+          "utbetalingsdato": "2025-10-21",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-10-13",
@@ -62,7 +65,8 @@
           "antallBarn": 0,
           "barnetilleggSats": 0.0,
           "barnetillegg": 0.0,
-          "utbetalingsdato": "2025-11-04"
+          "utbetalingsdato": "2025-11-04",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-10-27",
@@ -73,7 +77,8 @@
           "antallBarn": 0,
           "barnetilleggSats": 0.0,
           "barnetillegg": 0.0,
-          "utbetalingsdato": "2025-11-18"
+          "utbetalingsdato": "2025-11-18",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-11-10",
@@ -84,7 +89,8 @@
           "antallBarn": 0,
           "barnetilleggSats": 0.0,
           "barnetillegg": 0.0,
-          "utbetalingsdato": "2025-11-24"
+          "utbetalingsdato": "2025-11-24",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-11-17",
@@ -95,7 +101,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2025-11-24"
+          "utbetalingsdato": "2025-11-24",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-11-24",
@@ -106,7 +113,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2025-12-08"
+          "utbetalingsdato": "2025-12-08",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-12-08",
@@ -117,7 +125,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2025-12-30"
+          "utbetalingsdato": "2025-12-30",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2025-12-22",
@@ -128,7 +137,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-01-13"
+          "utbetalingsdato": "2026-01-13",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-01-05",
@@ -139,7 +149,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-01-27"
+          "utbetalingsdato": "2026-01-27",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-01-19",
@@ -150,7 +161,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-02-10"
+          "utbetalingsdato": "2026-02-10",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-02-02",
@@ -161,7 +173,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-02-24"
+          "utbetalingsdato": "2026-02-24",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-02-16",
@@ -172,7 +185,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-03-10"
+          "utbetalingsdato": "2026-03-10",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-03-02",
@@ -183,7 +197,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-03-24"
+          "utbetalingsdato": "2026-03-24",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-03-16",
@@ -194,7 +209,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-04-07"
+          "utbetalingsdato": "2026-04-07",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-03-30",
@@ -205,7 +221,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-04-21"
+          "utbetalingsdato": "2026-04-21",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-04-13",
@@ -216,7 +233,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-05-05"
+          "utbetalingsdato": "2026-05-05",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-04-27",
@@ -227,7 +245,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-05-19"
+          "utbetalingsdato": "2026-05-19",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-05-11",
@@ -238,7 +257,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-06-02"
+          "utbetalingsdato": "2026-06-02",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-05-25",
@@ -249,7 +269,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-06-16"
+          "utbetalingsdato": "2026-06-16",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-06-08",
@@ -260,7 +281,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-06-30"
+          "utbetalingsdato": "2026-06-30",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-06-22",
@@ -271,7 +293,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-07-14"
+          "utbetalingsdato": "2026-07-14",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-07-06",
@@ -282,7 +305,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-07-28"
+          "utbetalingsdato": "2026-07-28",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-07-20",
@@ -293,7 +317,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-08-11"
+          "utbetalingsdato": "2026-08-11",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-08-03",
@@ -304,7 +329,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-08-25"
+          "utbetalingsdato": "2026-08-25",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-08-17",
@@ -315,7 +341,8 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-09-08"
+          "utbetalingsdato": "2026-09-08",
+          "minsteSats": "IKKE_MINSTESATS"
         },
         {
           "fraDato": "2026-08-31",
@@ -326,105 +353,106 @@
           "antallBarn": 2,
           "barnetilleggSats": 37.0,
           "barnetillegg": 74.0,
-          "utbetalingsdato": "2026-09-22"
+          "utbetalingsdato": "2026-09-22",
+          "minsteSats": "IKKE_MINSTESATS"
         }
       ]
     },
-    "vilkårsResultat": {
+    "vilk\u00e5rsResultat": {
       "typeBehandling": "Revurdering",
-      "vilkår": [
+      "vilk\u00e5r": [
         {
-          "vilkårType": "ALDERSVILKÅRET",
+          "vilk\u00e5rType": "ALDERSVILK\u00c5RET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
+              "innvilgelses\u00e5rsak": null,
+              "avslags\u00e5rsak": null
             }
           ]
         },
         {
-          "vilkårType": "BISTANDSVILKÅRET",
+          "vilk\u00e5rType": "BISTANDSVILK\u00c5RET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": true,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
+              "innvilgelses\u00e5rsak": null,
+              "avslags\u00e5rsak": null
             }
           ]
         },
         {
-          "vilkårType": "GRUNNLAGET",
+          "vilk\u00e5rType": "GRUNNLAGET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
+              "innvilgelses\u00e5rsak": null,
+              "avslags\u00e5rsak": null
             }
           ]
         },
         {
-          "vilkårType": "LOVVALG",
+          "vilk\u00e5rType": "LOVVALG",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
+              "innvilgelses\u00e5rsak": null,
+              "avslags\u00e5rsak": null
             }
           ]
         },
         {
-          "vilkårType": "MEDLEMSKAP",
+          "vilk\u00e5rType": "MEDLEMSKAP",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
+              "innvilgelses\u00e5rsak": null,
+              "avslags\u00e5rsak": null
             }
           ]
         },
         {
-          "vilkårType": "OVERGANGUFØREVILKÅRET",
+          "vilk\u00e5rType": "OVERGANGUF\u00d8REVILK\u00c5RET",
           "perioder": []
         },
         {
-          "vilkårType": "SAMORDNING",
+          "vilk\u00e5rType": "SAMORDNING",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2025-11-16",
               "utfall": "IKKE_OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": "ANNEN_FULL_YTELSE"
+              "innvilgelses\u00e5rsak": null,
+              "avslags\u00e5rsak": "ANNEN_FULL_YTELSE"
             }
           ]
         },
         {
-          "vilkårType": "SYKDOMSVILKÅRET",
+          "vilk\u00e5rType": "SYKDOMSVILK\u00c5RET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
+              "innvilgelses\u00e5rsak": null,
+              "avslags\u00e5rsak": null
             }
           ]
         }
@@ -442,7 +470,7 @@
         "erGjennomsnitt": false
       },
       "grunnlagYrkesskade": null,
-      "grunnlagUføre": null
+      "grunnlagUf\u00f8re": null
     },
     "diagnoser": {
       "kodeverk": "ICPC2",
@@ -542,7 +570,7 @@
       ]
     }
   ],
-  "søknadIder": [
+  "s\u00f8knadIder": [
     {
       "identifikator": "1234567"
     }

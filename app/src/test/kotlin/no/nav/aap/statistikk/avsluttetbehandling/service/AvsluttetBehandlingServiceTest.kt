@@ -19,6 +19,7 @@ import no.nav.aap.statistikk.meldekort.FritaksvurderingRepositoryImpl
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -76,6 +77,7 @@ class AvsluttetBehandlingServiceTest {
                         antallBarn = 0,
                         barnetilleggSats = 37.0,
                         barnetillegg = 0.0,
+                        minsteSats = Minstesats.IKKE_MINSTESATS,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = datoNå.minusYears(3),
@@ -87,6 +89,7 @@ class AvsluttetBehandlingServiceTest {
                         antallBarn = 0,
                         barnetilleggSats = 37.0,
                         barnetillegg = 0.0,
+                        minsteSats = Minstesats.MINSTESATS_OVER_25,
                     )
                 )
             ),
@@ -261,6 +264,7 @@ class AvsluttetBehandlingServiceTest {
                         antallBarn = 0,
                         barnetilleggSats = 37.0,
                         barnetillegg = 0.0,
+                        minsteSats = Minstesats.MINSTESATS_OVER_25
                     )
                 )
             ),

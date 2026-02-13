@@ -310,6 +310,7 @@ class IntegrationTest {
         /**
          * Filen er lagd slik:
          *  - Inne i FakeServers i behandlingsflyt, legg til denne på endepunktet for statistikk:
+         *                 ```
          *                 val jsonFile = File("klage_hendelser.json")
          *                 if (!jsonFile.exists()) {
          *                     // Create if not exists
@@ -317,6 +318,7 @@ class IntegrationTest {
          *                 }
          *                 val jsonContent = DefaultJsonMapper.toJson(receive)
          *                 jsonFile.appendText(jsonContent)
+         *                 ```
          */
         val lines = object {}.javaClass.getResource("/hendelser_klage.json")?.readText()
         assertThat(lines).isNotNull

@@ -13,7 +13,8 @@ data class TilkjentYtelsePeriode(
     val antallBarn: Int = 0,
     val barnetilleggSats: Double,
     val barnetillegg: Double,
-    val utbetalingsdato: LocalDate
+    val utbetalingsdato: LocalDate,
+    val minsteSats: Minstesats
 )
 
 data class TilkjentYtelse(
@@ -25,3 +26,5 @@ data class TilkjentYtelse(
         return this.copy(perioder = perioder.filter { it.utbetalingsdato <= vedtaksdato })
     }
 }
+
+enum class Minstesats { IKKE_MINSTESATS, MINSTESATS_OVER_25, MINSTESATS_UNDER_25 }

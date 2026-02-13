@@ -1,13 +1,23 @@
 [versions]
+kotlin = "2.3.0"
 ktor = "3.3.3"
 komponenter = "1.0.937"
 tilgang = "1.0.178"
-behandlingsflyt = "0.0.547"
+behandlingsflyt = "0.0.548"
 oppgave = "0.0.145"
 utbetaling = "0.0.76"
 postmottak = "6.0.4"
 
 flyway = "11.20.2"
+detekt = "2.0.0-alpha.1"
+mockk = "1.14.7"
+testContainers = "2.0.3"
+postgresql = "42.7.9"
+hikaricp = "7.0.2"
+googleCloudBigquery = "2.57.2"
+nimbusJoseJwt = "10.7"
+assertj = "3.27.7"
+junitJupiter = "6.0.2"
 
 [libraries]
 ktorServerTestHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
@@ -31,6 +41,19 @@ logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encod
 flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway"}
 flywayPostgres = {module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway"}
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.3" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
+googleCloudBigquery = { module = "com.google.cloud:google-cloud-bigquery", version.ref = "googleCloudBigquery" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+nimbusJoseJwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbusJoseJwt" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+testcontainersPostgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testContainers" }
+testcontainersGcloud = { module = "org.testcontainers:testcontainers-gcloud", version.ref = "testContainers" }
+testcontainersJunit = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testContainers" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
+junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+detektGradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 
 [plugins]
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

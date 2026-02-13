@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.tilkjentytelse.repository
 
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import java.time.LocalDate
@@ -38,7 +39,8 @@ data class TilkjentYtelsePeriodeEntity(
     val antallBarn: Int = 0,
     val barnetilleggSats: Double,
     val barnetillegg: Double = 0.0,
-    val utbetalingsdato: LocalDate
+    val utbetalingsdato: LocalDate,
+    val minstesats: Minstesats,
 ) {
     companion object {
         fun fraDomene(tilkjentYtelsePeriode: TilkjentYtelsePeriode): TilkjentYtelsePeriodeEntity {
@@ -51,7 +53,8 @@ data class TilkjentYtelsePeriodeEntity(
                 antallBarn = tilkjentYtelsePeriode.antallBarn,
                 barnetilleggSats = tilkjentYtelsePeriode.barnetilleggSats,
                 barnetillegg = tilkjentYtelsePeriode.barnetillegg,
-                utbetalingsdato = tilkjentYtelsePeriode.utbetalingsdato
+                utbetalingsdato = tilkjentYtelsePeriode.utbetalingsdato,
+                minstesats = tilkjentYtelsePeriode.minsteSats
             )
         }
     }

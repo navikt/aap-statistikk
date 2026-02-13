@@ -4,12 +4,12 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.opprettTestHendelse
+import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.util.DoubleComparator
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
@@ -34,7 +34,8 @@ class TilkjentYtelseRepositoryTest {
                         utbetalingsdato = LocalDate.now(),
                         antallBarn = 0,
                         barnetilleggSats = 0.0,
-                        barnetillegg = 0.0
+                        barnetillegg = 0.0,
+                        minstesats = Minstesats.MINSTESATS_OVER_25
                     )
                 )
             )
@@ -54,7 +55,8 @@ class TilkjentYtelseRepositoryTest {
                     utbetalingsdato = LocalDate.now(),
                     antallBarn = 0,
                     barnetilleggSats = 0.0,
-                    barnetillegg = 0.0
+                    barnetillegg = 0.0,
+                    minstesats = Minstesats.MINSTESATS_OVER_25
                 )
             )
         )
@@ -90,6 +92,7 @@ class TilkjentYtelseRepositoryTest {
                         antallBarn = 0,
                         barnetilleggSats = 37.0,
                         barnetillegg = 0.0,
+                        minsteSats = Minstesats.MINSTESATS_OVER_25,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = LocalDate.now().minusYears(3),
@@ -101,6 +104,7 @@ class TilkjentYtelseRepositoryTest {
                         barnetillegg = 37.0,
                         barnetilleggSats = 37.0,
                         utbetalingsdato = LocalDate.now().minusDays(1),
+                        minsteSats = Minstesats.MINSTESATS_UNDER_25,
                     )
                 )
             )
