@@ -1,0 +1,1 @@
+DROP TABLE bigquery_kvittering;
