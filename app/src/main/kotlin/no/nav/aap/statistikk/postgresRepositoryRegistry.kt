@@ -17,7 +17,6 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepositoryImpl
-import no.nav.aap.statistikk.sak.BigQueryKvitteringRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
@@ -36,7 +35,6 @@ val postgresRepositoryRegistry = RepositoryRegistry()
     .register<EnhetRepositoryImpl>()
     .register<OppgaveRepositoryImpl>()
     .register<OppgaveHendelseRepositoryImpl>()
-    .register<BigQueryKvitteringRepository>()
     .register<SaksbehandlerRepositoryImpl>()
     .register<RettighetstypeperiodeRepository>()
     .register<VilkårsresultatRepository>()

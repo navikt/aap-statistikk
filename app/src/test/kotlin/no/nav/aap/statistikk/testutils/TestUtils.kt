@@ -839,7 +839,6 @@ fun konstruerSakstatistikkService(
     )
     return SaksStatistikkService(
         behandlingService = behandlingService,
-        bigQueryKvitteringRepository = BigQueryKvitteringRepository(connection),
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
         bqBehandlingMapper = BQBehandlingMapper(
             behandlingService,

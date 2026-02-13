@@ -171,7 +171,7 @@ class BQBehandlingMapperTest {
         )
 
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false, sekvensNummer = 1L).last()
+            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false).last()
 
         assertThat(result.saksbehandler)
             .describedAs("Saksbehandler should be null when no oppgave is reserved yet")
@@ -261,7 +261,7 @@ class BQBehandlingMapperTest {
         )
 
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false, sekvensNummer = 1L).last()
+            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false).last()
 
         assertThat(result.saksbehandler).isEqualTo("Kvaliguy")
         assertThat(result.ansvarligEnhetKode).isEqualTo("0400")
@@ -321,7 +321,7 @@ class BQBehandlingMapperTest {
         )
 
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false, sekvensNummer = 1L).last()
+            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false).last()
 
         assertThat(result.saksbehandler)
             .describedAs("Should not use saksbehandler from previous avklaringsbehov")
@@ -365,7 +365,7 @@ class BQBehandlingMapperTest {
 
         // Execute
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false, sekvensNummer = 1L).last()
+            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false).last()
 
         // Assert: Saksbehandler skal være null når det ikke finnes oppgave-data
         assertThat(result.saksbehandler)

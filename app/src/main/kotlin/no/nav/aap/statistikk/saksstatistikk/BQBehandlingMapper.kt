@@ -46,7 +46,6 @@ class BQBehandlingMapper(
     fun bqBehandlingForBehandling(
         behandling: Behandling,
         erSkjermet: Boolean,
-        sekvensNummer: Long?
     ): List<BQBehandling> {
         val sak = behandling.sak
         val relatertBehandlingUUID =
@@ -82,7 +81,6 @@ class BQBehandlingMapper(
                 erSkjermet = erSkjermet,
                 ansvarligEnhet = ansvarligEnhet,
                 saksbehandler = saksbehandler,
-                sekvensNummer = sekvensNummer,
                 endretTid = behandling.oppdatertTidspunkt(),
                 behandlingStatus = behandlingStatus(behandling, snapshots)
             )
@@ -96,7 +94,6 @@ class BQBehandlingMapper(
         erSkjermet: Boolean,
         ansvarligEnhet: String?,
         saksbehandler: String?,
-        sekvensNummer: Long?,
         endretTid: LocalDateTime,
         behandlingStatus: String
     ): BQBehandling {
@@ -106,7 +103,6 @@ class BQBehandlingMapper(
         val hendelser = behandling.hendelser
         val sisteHendelse = hendelser.last()
         return BQBehandling(
-            sekvensNummer = sekvensNummer,
             behandlingUUID = behandlingReferanse,
             relatertBehandlingUUID = relatertBehandlingUUID,
             relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
