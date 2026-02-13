@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.oppgave
 
-import io.mockk.mockk
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.*
@@ -9,6 +8,7 @@ import no.nav.aap.statistikk.enhet.SaksbehandlerRepositoryImpl
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
@@ -61,8 +61,9 @@ class LagreOppgaveJobbUtførerTest {
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
-                sakstatistikkService = mockk(), /// TODO
-                behandlingRepository = FakeBehandlingRepository()
+                /// TODO
+                behandlingRepository = FakeBehandlingRepository(),
+                repositoryProvider = postgresRepositoryRegistry.provider(it)
             ).utfør(
                 JobbInput(LagreOppgaveJobb()).medPayload(oppgaveId.toString())
             )
@@ -352,8 +353,9 @@ class LagreOppgaveJobbUtførerTest {
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
-                sakstatistikkService = mockk(), /// TODO
-                behandlingRepository = FakeBehandlingRepository()
+                /// TODO
+                behandlingRepository = FakeBehandlingRepository(),
+                repositoryProvider = postgresRepositoryRegistry.provider(it)
             ).utfør(
                 JobbInput(
                     LagreOppgaveJobb(

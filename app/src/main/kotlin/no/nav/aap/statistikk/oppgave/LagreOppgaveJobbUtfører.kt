@@ -7,15 +7,15 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
-import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 
 
 class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val oppgaveHistorikkLagrer: OppgaveHistorikkLagrer,
-    private val sakstatistikkService: SaksStatistikkService,
     private val behandlingRepository: IBehandlingRepository,
+    private val repositoryProvider: RepositoryProvider,
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val hendelse = DefaultJsonMapper.fromJson<Long>(input.payload())
@@ -28,7 +28,7 @@ class LagreOppgaveJobbUtfører(
         if (oppgave.behandlingReferanse != null) {
             behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
                 if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
-                    sakstatistikkService.lagreSakInfoTilBigqueryFraOppgave(it.id())
+                    MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(repositoryProvider, it.id())
                 }
             }
         }
@@ -43,8 +43,8 @@ class LagreOppgaveJobb : ProvidersJobbSpesifikasjon {
         return LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
             OppgaveHistorikkLagrer.konstruer(repositoryProvider),
-            SaksStatistikkService.konstruer(gatewayProvider, repositoryProvider),
-            repositoryProvider.provide()
+            repositoryProvider.provide(),
+            repositoryProvider,
         )
     }
 
