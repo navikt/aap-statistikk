@@ -28,6 +28,7 @@ spec:
         tp.barnetillegg,
         tp.barnetillegg_sats as barnetillegg_sats,
         tp.redusert_dagsats as redusert_dagsats,
+        tp.minstesats as minstesats,
         DATETIME(ty.opprettet_tidspunkt) AS reg_dato,
         DATETIME(TIMESTAMP_MILLIS(GREATEST(b.datastream_metadata.source_timestamp, tp.datastream_metadata.source_timestamp, ty.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endret_tid,
         concat(b.id, '-', tp.id, '-', ty.id, '-', br.id, '-', s.id) as unik_id
