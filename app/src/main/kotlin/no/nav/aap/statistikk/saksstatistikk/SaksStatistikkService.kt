@@ -6,7 +6,6 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelser.BehandlingService
-import no.nav.aap.statistikk.sak.IBigQueryKvitteringRepository
 import no.nav.aap.statistikk.sakDuplikat
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -17,7 +16,6 @@ import java.util.*
 
 class SaksStatistikkService(
     private val behandlingService: BehandlingService,
-    private val bigQueryKvitteringRepository: IBigQueryKvitteringRepository,
     private val sakstatistikkRepository: SakstatistikkRepository,
     private val bqBehandlingMapper: BQBehandlingMapper,
 ) {
@@ -31,7 +29,6 @@ class SaksStatistikkService(
         ): SaksStatistikkService {
             return SaksStatistikkService(
                 behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
-                bigQueryKvitteringRepository = repositoryProvider.provide(),
                 sakstatistikkRepository = repositoryProvider.provide(),
                 bqBehandlingMapper = BQBehandlingMapper.konstruer(
                     repositoryProvider,
@@ -52,10 +49,8 @@ class SaksStatistikkService(
 
         val erSkjermet = behandlingService.erSkjermet(behandling)
 
-        val sekvensNummer = bigQueryKvitteringRepository.lagreKvitteringForSak(behandling)
-
         val bqSaker =
-            bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet, sekvensNummer)
+            bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
 
         bqSaker.forEach { bqSak ->
             lagreBQBehandling(bqSak)
@@ -99,10 +94,6 @@ class SaksStatistikkService(
         return nærNokITid(bqBehandling.registrertTid, bqBehandling.endretTid)
     }
 
-    fun lagreSakInfoTilBigqueryFraOppgave(behandlingId: BehandlingId) {
-        lagreSakInfoTilBigquery(behandlingId)
-    }
-
     fun alleHendelserPåBehandling(
         behandlingId: BehandlingId
     ): List<BQBehandling> {
@@ -118,7 +109,6 @@ class SaksStatistikkService(
                 bqBehandlingMapper.bqBehandlingForBehandling(
                     behandling = behandling,
                     erSkjermet = erSkjermet,
-                    sekvensNummer = null,
                 )
             }
 

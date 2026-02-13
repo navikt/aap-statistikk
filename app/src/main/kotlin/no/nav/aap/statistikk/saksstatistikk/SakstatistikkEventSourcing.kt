@@ -133,12 +133,12 @@ class SakstatistikkEventSourcing {
     )
 
     private fun byggSnapshots(hendelser: List<SakstatistikkHendelse>): List<SakstatistikkSnapshot> {
-        val snapshots = mutableListOf<SakstatistikkSnapshot>()
-        var state = SakstatistikkState()
-
-        for (hendelse in hendelser) {
-            state = state.applyHendelse(hendelse)
-            snapshots.add(
+        return hendelser
+            .runningFold(SakstatistikkState()) { state, hendelse ->
+                state.applyHendelse(hendelse)
+            }
+            .drop(1)
+            .zip(hendelser) { state, hendelse ->
                 SakstatistikkSnapshot(
                     tidspunkt = hendelse.tidspunkt,
                     behandlingReferanse = hendelse.behandlingReferanse,
@@ -147,10 +147,7 @@ class SakstatistikkEventSourcing {
                     saksbehandler = state.saksbehandler,
                     enhet = state.enhet
                 )
-            )
-        }
-
-        return snapshots
+            }
     }
 }
 
