@@ -111,9 +111,7 @@ data class Behandling(
      */
     fun påTidspunkt(tidspunkt: LocalDateTime): Behandling {
         val filtrerteHendelser = hendelser.filter { it.hendelsesTidspunkt <= tidspunkt }
-        if (filtrerteHendelser.isEmpty()) {
-            return this.copy(hendelser = emptyList())
-        }
+
         return filtrerteHendelser.fold(this.copy(hendelser = emptyList())) { acc, hendelse ->
             acc.leggTilHendelse(hendelse)
         }

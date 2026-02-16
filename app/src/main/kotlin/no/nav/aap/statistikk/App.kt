@@ -140,7 +140,7 @@ fun Application.startUp(
         log.info("Ktor-hendelse: ApplicationStopping.")
         // ktor sine eventer kjøres synkront, så vi må kjøre dette asynkront for ikke å blokkere nedstengings-sekvensen
         env.launch(Dispatchers.IO) {
-            AppConfig.stansArbeidTimeout
+            motor.stop(AppConfig.stansArbeidTimeout)
         }
     }
 
@@ -159,8 +159,6 @@ fun Application.startUp(
     val motorApiCallback: NormalOpenAPIRoute.() -> Unit = {
         motorApi(dataSource)
     }
-
-    motor.start()
 
     module(
         transactionExecutor,
