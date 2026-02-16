@@ -68,10 +68,6 @@ class BQBehandlingMapper(
             log.info("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
         }
 
-        if (ansvarligEnhet == null && behandling.behandlingMetode() != BehandlingMetode.AUTOMATISK) {
-            log.warn("Fant ikke enhet for behandling $behandlingReferanse og sak: ${sak.saksnummer}. Avklaringsbehov: ${behandling.gjeldendeAvklaringsBehov}. Sist løst avklaringsbehov: ${behandling.sisteLøsteAvklaringsbehov}")
-        }
-
         return listOf(
             byggBQBehandling(
                 behandling = behandling,
@@ -80,7 +76,7 @@ class BQBehandlingMapper(
                 ansvarligEnhet = ansvarligEnhet,
                 saksbehandler = saksbehandler,
                 endretTid = behandling.oppdatertTidspunkt(),
-                behandlingStatus = behandlingStatus(behandling, snapshots)
+                behandlingStatus = behandlingStatus(behandling)
             )
         )
     }
@@ -211,8 +207,7 @@ class BQBehandlingMapper(
     }
 
     private fun behandlingStatus(
-        behandling: Behandling,
-        snapshots: List<SakstatistikkSnapshot>
+        behandling: Behandling
     ): String {
         val hendelse = behandling.hendelser.last()
         val venteÅrsak = hendelse.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
