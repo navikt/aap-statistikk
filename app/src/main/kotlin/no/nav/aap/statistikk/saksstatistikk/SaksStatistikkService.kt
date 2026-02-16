@@ -68,12 +68,12 @@ class SaksStatistikkService(
         }
 
         val manglerFortsattEnhet =
-            bqSaker.any { it.ansvarligEnhetKode == null && it.behandlingMetode == BehandlingMetode.AUTOMATISK }
+            bqSaker.any { it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK }
         if (manglerFortsattEnhet) {
             val referanse = behandling.referanse
             val saksnummer = behandling.sak.saksnummer
-            log.info("Ansvarlig enhet er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
-            log.info("Saksbehandler er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
+            log.warn("Ansvarlig enhet er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
+            log.warn("Saksbehandler er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
         }
 
         bqSaker.forEach { bqSak ->
