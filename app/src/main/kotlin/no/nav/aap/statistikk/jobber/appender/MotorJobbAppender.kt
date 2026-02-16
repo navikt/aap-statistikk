@@ -35,7 +35,9 @@ class MotorJobbAppender : JobbAppender {
     override fun leggTilLagreSakTilBigQueryJobb(
         repositoryProvider: RepositoryProvider,
         behandlingId: BehandlingId,
-        delayInSeconds: Long
+        delayInSeconds: Long,
+        enhetRetryCount: Int,
+        originalHendelsestid: LocalDateTime?
     ) {
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
@@ -46,14 +48,20 @@ class MotorJobbAppender : JobbAppender {
         }
 
         val saksnummer = behandling.sak.saksnummer
-        leggTil(
-            repositoryProvider,
-            // For sak = behandlingId. Husk at "sak" er funksjonalt bare en concurrency-key
-            JobbInput(LagreSakinfoTilBigQueryJobb())
-                .medPayload(behandlingId)
-                .medNesteKjøring(LocalDateTime.now().plusSeconds(delayInSeconds))
-                .forSak(stringToNumber(saksnummer.value))
-        )
+        val jobbInput = JobbInput(LagreSakinfoTilBigQueryJobb())
+            .medPayload(behandlingId)
+            .medNesteKjøring(LocalDateTime.now().plusSeconds(delayInSeconds))
+            .forSak(stringToNumber(saksnummer.value))
+
+        if (enhetRetryCount > 0) {
+            jobbInput.medParameter("enhetRetryCount", enhetRetryCount.toString())
+        }
+
+        if (originalHendelsestid != null) {
+            jobbInput.medParameter("originalHendelsestid", originalHendelsestid.toString())
+        }
+
+        leggTil(repositoryProvider, jobbInput)
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

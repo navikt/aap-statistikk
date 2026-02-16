@@ -105,5 +105,9 @@ spec:
       value: {{oppgave_azp}}
     - name: HACKY_DELAY
       value: "20"
+    - name: ENHET_RETRY_MAX_RETRIES
+      value: "3"
+    - name: ENHET_RETRY_DELAY_SECONDS
+      value: "60"
     - name: JDK_JAVA_OPTIONS
       value: "-XX:+UseParallelGC -XX:ActiveProcessorCount=4"

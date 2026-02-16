@@ -18,7 +18,7 @@ class SaksStatistikkService(
     private val behandlingService: BehandlingService,
     private val sakstatistikkRepository: SakstatistikkRepository,
     private val bqBehandlingMapper: BQBehandlingMapper,
-) {
+) : ISaksStatistikkService {
     private val log = LoggerFactory.getLogger(javaClass)
 
     companion object {
@@ -39,7 +39,10 @@ class SaksStatistikkService(
         }
     }
 
-    fun lagreSakInfoTilBigquery(behandlingId: BehandlingId) {
+    override fun lagreSakInfoTilBigquery(
+        behandlingId: BehandlingId,
+        lagreUtenEnhet: Boolean
+    ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
         require(
             behandling.typeBehandling in Konstanter.interessanteBehandlingstyper
@@ -52,9 +55,71 @@ class SaksStatistikkService(
         val bqSaker =
             bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
 
+        val manglerEnhet = !lagreUtenEnhet && bqSaker.any {
+            it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
+        }
+
+        if (manglerEnhet) {
+            return SakStatistikkResultat.ManglerEnhet(
+                behandlingId = behandling.id(),
+                avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
+                hendelsestid = behandling.oppdatertTidspunkt()
+            )
+        }
+
         bqSaker.forEach { bqSak ->
             lagreBQBehandling(bqSak)
         }
+
+        return SakStatistikkResultat.OK
+    }
+
+    override fun lagreMedOppgavedata(
+        behandlingId: BehandlingId,
+        originalHendelsestid: LocalDateTime,
+        lagreUtenEnhet: Boolean
+    ): SakStatistikkResultat {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        require(
+            behandling.typeBehandling in Konstanter.interessanteBehandlingstyper
+        ) {
+            "Denne jobben skal ikke kunne bli trigget av oppfølgingsbehandlinger. Behandling: ${behandling.referanse}"
+        }
+
+        // Bruk behandlingstilstanden slik den var ved opprinnelig hendelsestid
+        val snapshotBehandling = behandling.påTidspunkt(originalHendelsestid)
+        val erSkjermet = behandlingService.erSkjermet(behandling)
+
+        val bqSaker =
+            bqBehandlingMapper.bqBehandlingForBehandling(snapshotBehandling, erSkjermet)
+
+        // Re-resolv enhet og saksbehandler fra ferske oppgave-data
+        val (enhet, saksbehandler) = bqBehandlingMapper.hentEnhetOgSaksbehandler(behandling, erSkjermet)
+
+        val bqSakerMedOppgavedata = bqSaker.map {
+            it.copy(
+                ansvarligEnhetKode = it.ansvarligEnhetKode ?: enhet,
+                saksbehandler = it.saksbehandler ?: saksbehandler
+            )
+        }
+
+        val manglerEnhet = !lagreUtenEnhet && bqSakerMedOppgavedata.any {
+            it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
+        }
+
+        if (manglerEnhet) {
+            return SakStatistikkResultat.ManglerEnhet(
+                behandlingId = behandling.id(),
+                avklaringsbehovKode = snapshotBehandling.gjeldendeAvklaringsBehov,
+                hendelsestid = originalHendelsestid
+            )
+        }
+
+        bqSakerMedOppgavedata.forEach { bqSak ->
+            lagreBQBehandling(bqSak)
+        }
+
+        return SakStatistikkResultat.OK
     }
 
     fun lagreBQBehandling(bqSak: BQBehandling) {
