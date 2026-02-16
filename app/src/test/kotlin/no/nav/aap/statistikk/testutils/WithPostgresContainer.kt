@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.testutils
 
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.aap.statistikk.AppConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Migrering
 import org.junit.jupiter.api.extension.*
@@ -47,7 +48,8 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
             dbConfig = DbConfig(
                 jdbcUrl = postgresContainer.jdbcUrl,
                 userName = postgresContainer.username,
-                password = postgresContainer.password
+                password = postgresContainer.password,
+                poolSize = AppConfig.hikariMaxPoolSize
             )
             flyway = Migrering(dbConfig)
             dataSource = flyway.createAndMigrateDataSource()

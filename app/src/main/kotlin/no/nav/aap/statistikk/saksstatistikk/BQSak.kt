@@ -56,12 +56,6 @@ data class BQBehandling(
                 logger.warn("Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID")
             }
         }
-        if (ansvarligEnhetKode == null) {
-            logger.info("Fant ikke ansvarlig enhet for behandling $behandlingUUID med saksnummer $saksnummer.")
-        }
-        if (saksbehandler == null) {
-            logger.info("Fant ikke saksbehandler for behandling $behandlingUUID med saksnummer $saksnummer.")
-        }
     }
 
     val vedtakTidTrunkert = vedtakTid?.truncatedTo(SECONDS)
