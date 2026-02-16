@@ -304,7 +304,7 @@ fun <E> testKlientNoInjection(
 
     System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
 
-    System.setProperty("enhet.retry.max.retries", "3")
+    System.setProperty("enhet.retry.max.retries", "1")
     System.setProperty("enhet.retry.delay.seconds", "1")
 
 
