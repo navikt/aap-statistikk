@@ -16,6 +16,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepositoryImpl
+import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
@@ -61,6 +62,11 @@ class AvsluttetBehandlingServiceTest {
 
         val datoNå = LocalDate.now(clock)
         val arbeidsopptrappingperiode = Periode(LocalDate.now(), LocalDate.now().plusDays(10))
+        val fritaksvurdering = Fritakvurdering(
+            harFritak = true,
+            fraDato = LocalDate.now(),
+            tilDato = LocalDate.now().plusDays(11)
+        )
         val avsluttetBehandling = AvsluttetBehandling(
             behandlingsReferanse = behandlingReferanse,
             tilkjentYtelse = TilkjentYtelse(
@@ -142,6 +148,7 @@ class AvsluttetBehandlingServiceTest {
                     rettighetstype = RettighetsType.BISTANDSBEHOV
                 )
             ),
+            fritaksvurderinger = listOf(fritaksvurdering),
             perioderMedArbeidsopptrapping = listOf(arbeidsopptrappingperiode),
             vedtakstidspunkt = opprettetTidspunkt
         )
@@ -213,6 +220,10 @@ class AvsluttetBehandlingServiceTest {
             dataSource.transaction { ArbeidsopptrappingperioderRepositoryImpl(it).hent(behandlingId) }
 
         assertThat(uthentetArbeidsopptrapping).isEqualTo(listOf(arbeidsopptrappingperiode))
+
+        val uthentetFritaksvurdering =
+            dataSource.transaction { FritaksvurderingRepositoryImpl(it).hentFritaksvurderinger(behandlingId) }
+        assertThat(uthentetFritaksvurdering).isEqualTo(listOf(fritaksvurdering))
 
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
@@ -319,6 +330,7 @@ class AvsluttetBehandlingServiceTest {
                 )
             ),
             perioderMedArbeidsopptrapping = emptyList(),
+            fritaksvurderinger = emptyList(),
             vedtakstidspunkt = LocalDateTime.now()
         )
 
