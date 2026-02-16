@@ -240,6 +240,20 @@ class BQBehandlingMapper(
         }
     }
 
+    data class EnhetOgSaksbehandler(val enhet: String?, val saksbehandler: String?)
+
+    /**
+     * Resolver enhet og saksbehandler fra ferske oppgave-data for en gitt behandling.
+     * Brukes ved retry når den opprinnelige behandlingstilstanden ble snapshottet.
+     */
+    fun hentEnhetOgSaksbehandler(behandling: Behandling, erSkjermet: Boolean): EnhetOgSaksbehandler {
+        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
+        val enhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling, snapshots)
+        val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling, snapshots)
+        return EnhetOgSaksbehandler(enhet, saksbehandler)
+    }
+
     private fun ansvarligEnhet(
         behandling: Behandling,
         snapshots: List<SakstatistikkSnapshot>,

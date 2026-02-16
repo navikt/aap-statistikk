@@ -105,6 +105,18 @@ data class Behandling(
             }.drop(1)
     }
 
+    /**
+     * Returnerer behandlingen slik den var på gitt tidspunkt, ved å filtrere
+     * hendelser til kun de med hendelsesTidspunkt <= tidspunkt.
+     */
+    fun påTidspunkt(tidspunkt: LocalDateTime): Behandling {
+        val filtrerteHendelser = hendelser.filter { it.hendelsesTidspunkt <= tidspunkt }
+
+        return filtrerteHendelser.fold(this.copy(hendelser = emptyList())) { acc, hendelse ->
+            acc.leggTilHendelse(hendelse)
+        }
+    }
+
     fun utbetalingId(): String? {
         return when {
             this.resultat() in listOf(
