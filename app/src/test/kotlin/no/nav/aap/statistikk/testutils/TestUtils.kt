@@ -118,6 +118,9 @@ fun <E> testKlient(
 
     System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
 
+    System.setProperty("enhet.retry.max.retries", "3")
+    System.setProperty("enhet.retry.delay.seconds", "1")
+
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
         tokenProvider = ClientCredentialsTokenProvider,
@@ -300,6 +303,9 @@ fun <E> testKlientNoInjection(
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
 
     System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+
+    System.setProperty("enhet.retry.max.retries", "3")
+    System.setProperty("enhet.retry.delay.seconds", "1")
 
 
     val restClient = RestClient(
@@ -503,6 +509,9 @@ fun motorMock(): Motor {
 class MockJobbAppender : JobbAppender {
     var jobber = mutableListOf<JobbInput>()
     private var bigQueryJobber = mutableListOf<BehandlingId>()
+    var sisteEnhetRetryCount: Int = 0
+    var sisteDelayInSeconds: Long = 0
+    var sisteOriginalHendelsestid: LocalDateTime? = null
 
     override fun leggTil(
         connection: DBConnection,
@@ -515,16 +524,21 @@ class MockJobbAppender : JobbAppender {
         repositoryProvider: RepositoryProvider,
         jobb: JobbInput
     ) {
-        TODO("Not yet implemented")
+        jobber.add(jobb)
     }
 
     override fun leggTilLagreSakTilBigQueryJobb(
         repositoryProvider: RepositoryProvider,
         behandlingId: BehandlingId,
-        delayInSeconds: Long
+        delayInSeconds: Long,
+        enhetRetryCount: Int,
+        originalHendelsestid: LocalDateTime?
     ) {
-        logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId.")
+        logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
         bigQueryJobber.add(behandlingId)
+        sisteEnhetRetryCount = enhetRetryCount
+        sisteDelayInSeconds = delayInSeconds
+        sisteOriginalHendelsestid = originalHendelsestid
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
