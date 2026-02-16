@@ -67,6 +67,15 @@ class SaksStatistikkService(
             )
         }
 
+        val manglerFortsattEnhet =
+            bqSaker.any { it.ansvarligEnhetKode == null && it.behandlingMetode == BehandlingMetode.AUTOMATISK }
+        if (manglerFortsattEnhet) {
+            val referanse = behandling.referanse
+            val saksnummer = behandling.sak.saksnummer
+            log.info("Ansvarlig enhet er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
+            log.info("Saksbehandler er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
+        }
+
         bqSaker.forEach { bqSak ->
             lagreBQBehandling(bqSak)
         }
@@ -94,7 +103,10 @@ class SaksStatistikkService(
             bqBehandlingMapper.bqBehandlingForBehandling(snapshotBehandling, erSkjermet)
 
         // Re-resolv enhet og saksbehandler fra ferske oppgave-data
-        val (enhet, saksbehandler) = bqBehandlingMapper.hentEnhetOgSaksbehandler(behandling, erSkjermet)
+        val (enhet, saksbehandler) = bqBehandlingMapper.hentEnhetOgSaksbehandler(
+            behandling,
+            erSkjermet
+        )
 
         val bqSakerMedOppgavedata = bqSaker.map {
             it.copy(
