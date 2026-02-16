@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
+import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
@@ -41,6 +42,13 @@ fun AvsluttetBehandlingDTO.tilDomene(
                 }
             )
         },
+        fritaksvurderinger = this.fritaksvurderinger?.map {
+            Fritakvurdering(
+                harFritak = it.harFritak,
+                fraDato = it.fraDato,
+                tilDato = it.tilDato
+            )
+        }.orEmpty(),
         perioderMedArbeidsopptrapping = this.perioderMedArbeidsopptrapping.map {
             Periode(it.fom, it.tom)
         },

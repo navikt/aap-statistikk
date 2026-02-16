@@ -21,7 +21,7 @@ data class AvsluttetBehandling(
     val diagnoser: Diagnoser?,
     val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList(),
     val perioderMedArbeidsopptrapping: List<Periode>,
-    val fritaksvurderinger: List<Fritakvurdering> = emptyList(),
+    val fritaksvurderinger: List<Fritakvurdering>,
     val behandlingResultat: ResultatKode?,
     val vedtakstidspunkt: LocalDateTime?
 ) {
