@@ -59,7 +59,7 @@ class PdlGraphQLGateway :
     )
 
     override fun hentPersoner(identer: List<String>): List<Person> {
-        logger.info("Henter ${identer.size} personer fra PDL.")
+        logger.debug("Henter ${identer.size} personer fra PDL.")
 
         return pdlCache.get(identer.joinToString(",")) {
             val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
