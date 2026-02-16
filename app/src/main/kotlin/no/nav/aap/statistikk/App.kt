@@ -14,6 +14,8 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
@@ -28,11 +30,7 @@ import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.statistikk.api.*
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
-import no.nav.aap.statistikk.bigquery.BQYtelseRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
-import no.nav.aap.statistikk.bigquery.BigQueryConfigFromEnv
-import no.nav.aap.statistikk.bigquery.IBigQueryClient
-import no.nav.aap.statistikk.bigquery.schemaRegistryYtelseStatistikk
+import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.Migrering
@@ -60,7 +58,7 @@ fun main() {
     Thread.currentThread().setUncaughtExceptionHandler { _, e ->
         log.error("Uhåndtert feil av type ${e.javaClass}", e)
     }
-    val dbConfig = DbConfig.fraMiljøVariabler()
+    val dbConfig = DbConfig.fraMiljøVariabler(AppConfig)
     val bgConfigYtelse = BigQueryConfigFromEnv("ytelsestatistikk")
     val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistryYtelseStatistikk)
 
@@ -68,7 +66,19 @@ fun main() {
 
     val gatewayProvider = defaultGatewayProvider()
 
-    embeddedServer(Netty, port = 8080) {
+
+    embeddedServer(Netty, configure = {
+        connectionGroupSize = AppConfig.connectionGroupSize
+        workerGroupSize = AppConfig.workerGroupSize
+        callGroupSize = AppConfig.callGroupSize
+
+        shutdownGracePeriod =
+            AppConfig.shutdownGracePeriod.inWholeMilliseconds
+        shutdownTimeout = AppConfig.shutdownTimeout.inWholeMilliseconds
+
+        connector { port = 8080 }
+    }) {
+
         startUp(
             dbConfig,
             azureConfig,
@@ -122,11 +132,26 @@ fun Application.startUp(
         )
     )
 
-    monitor.subscribe(ApplicationStopPreparing) {
-        log.info("Received shutdown event. Closing Hikari connection pool.")
-        motor.stop()
-        dataSource.close()
-        monitor.unsubscribe(ApplicationStopPreparing) {}
+    monitor.subscribe(ApplicationStarted) {
+        log.info("Ktor-hendelse: ApplicationStarted.")
+        motor.start()
+    }
+    monitor.subscribe(ApplicationStopping) { env ->
+        log.info("Ktor-hendelse: ApplicationStopping.")
+        // ktor sine eventer kjøres synkront, så vi må kjøre dette asynkront for ikke å blokkere nedstengings-sekvensen
+        env.launch(Dispatchers.IO) {
+            AppConfig.stansArbeidTimeout
+        }
+    }
+
+    monitor.subscribe(ApplicationStopped) { environment ->
+        environment.log.info("Ktor-hendelsE: ApplicationStopped. Ktor har fullført nedstoppingen sin. Eventuelle requester og annet arbeid som ikke ble fullført innen timeout ble avbrutt.")
+        try {
+            // Helt til slutt, nå som vi har stanset Motor, etc. Lukk database-koblingen.
+            dataSource.close()
+        } catch (e: Exception) {
+            log.info("Exception etter ApplicationStopped: ${e.message}", e)
+        }
     }
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
@@ -152,7 +177,7 @@ fun motor(
     jobber: List<JobbSpesifikasjon>,
 ): Motor {
     return Motor(
-        dataSource = dataSource, antallKammer = 8,
+        dataSource = dataSource, antallKammer = AppConfig.ANTALL_WORKERS_FOR_MOTOR,
         logInfoProvider = object : JobbLogInfoProvider {
             override fun hentInformasjon(
                 connection: DBConnection, jobbInput: JobbInput

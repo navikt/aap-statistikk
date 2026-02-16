@@ -119,6 +119,18 @@ data class Behandling(
         }
     }
 
+    fun versjon(): String {
+        return this.hendelser.lastOrNull()?.versjon?.verdi ?: versjon.verdi
+    }
+
+    fun ansvarligBeslutter(): String? {
+        return this.hendelser.lastOrNull()?.ansvarligBeslutter ?: ansvarligBeslutter
+    }
+
+    fun vedtakstidspunkt(): LocalDateTime? {
+        return this.hendelser.lastOrNull()?.vedtakstidspunkt ?: vedtakstidspunkt
+    }
+
     fun behandlingStatus(): BehandlingStatus {
         return hendelser.lastOrNull()?.status ?: this.status
     }
@@ -166,7 +178,7 @@ data class Behandling(
 }
 
 @JvmName("erAutomatisk")
-fun List<BehandlingHendelse>.erManuell(): Boolean {
+private fun List<BehandlingHendelse>.erManuell(): Boolean {
     return this.filterNot { it.avklaringsBehov == null }.any {
         !Definisjon.forKode(requireNotNull(it.avklaringsBehov)).erAutomatisk()
     }

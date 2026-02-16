@@ -30,6 +30,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
+import no.nav.aap.statistikk.AppConfig
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -357,7 +358,8 @@ fun postgresTestConfig(): DbConfig {
     val dbConfig = DbConfig(
         jdbcUrl = postgres.jdbcUrl,
         userName = postgres.username,
-        password = postgres.password
+        password = postgres.password,
+        poolSize = AppConfig.hikariMaxPoolSize
     )
 
     return dbConfig

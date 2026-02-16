@@ -16,7 +16,6 @@ import java.time.Clock
 import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
@@ -73,11 +72,14 @@ class BQBehandlingMapper(
             log.info("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
         }
 
+        if (ansvarligEnhet == null && behandling.behandlingMetode() != BehandlingMetode.AUTOMATISK) {
+            log.warn("Fant ikke enhet for behandling $behandlingReferanse og sak: ${sak.saksnummer}. Avklaringsbehov: ${behandling.gjeldendeAvklaringsBehov}. Sist løst avklaringsbehov: ${behandling.sisteLøsteAvklaringsbehov}")
+        }
+
         return listOf(
             byggBQBehandling(
                 behandling = behandling,
                 relatertBehandlingUUID = relatertBehandlingUUID,
-                behandlingReferanse = behandlingReferanse,
                 erSkjermet = erSkjermet,
                 ansvarligEnhet = ansvarligEnhet,
                 saksbehandler = saksbehandler,
@@ -90,7 +92,6 @@ class BQBehandlingMapper(
     private fun byggBQBehandling(
         behandling: Behandling,
         relatertBehandlingUUID: String?,
-        behandlingReferanse: UUID,
         erSkjermet: Boolean,
         ansvarligEnhet: String?,
         saksbehandler: String?,
@@ -101,7 +102,9 @@ class BQBehandlingMapper(
         val sak = behandling.sak
 
         val hendelser = behandling.hendelser
-        val sisteHendelse = hendelser.last()
+        val ansvarligBeslutter = behandling.ansvarligBeslutter()
+        val behandlingReferanse = behandling.referanse
+
         return BQBehandling(
             behandlingUUID = behandlingReferanse,
             relatertBehandlingUUID = relatertBehandlingUUID,
@@ -113,11 +116,11 @@ class BQBehandlingMapper(
             tekniskTid = LocalDateTime.now(clock),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             endretTid = endretTid,
-            versjon = sisteHendelse.versjon.verdi,
+            versjon = behandling.versjon(),
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             opprettetAv = behandling.opprettetAv ?: KELVIN,
-            ansvarligBeslutter = if (erSkjermet && sisteHendelse.ansvarligBeslutter != null) "-5" else sisteHendelse.ansvarligBeslutter,
-            vedtakTid = sisteHendelse.vedtakstidspunkt,
+            ansvarligBeslutter = if (erSkjermet && ansvarligBeslutter != null) "-5" else ansvarligBeslutter,
+            vedtakTid = behandling.vedtakstidspunkt(),
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
             behandlingMetode = behandling.behandlingMetode().also {
@@ -211,7 +214,10 @@ class BQBehandlingMapper(
         }
     }
 
-    private fun behandlingStatus(behandling: Behandling, snapshots: List<SakstatistikkSnapshot>): String {
+    private fun behandlingStatus(
+        behandling: Behandling,
+        snapshots: List<SakstatistikkSnapshot>
+    ): String {
         val hendelse = behandling.hendelser.last()
         val venteÅrsak = hendelse.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
         val returStatus = hendelse.avklaringsbehovStatus
@@ -243,6 +249,12 @@ class BQBehandlingMapper(
         }
 
         val enhet = snapshots.lastOrNull()?.enhet
+
+//        if (behandling.behandlingStatus() == BehandlingStatus.IVERKSETTES && enhet == null) {
+//            // Fallback til siste enhet
+//            return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+//                .maxByOrNull { it.sistEndret() }?.enhet?.kode
+//        }
 
         if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && enhet == null) {
             return oppgaveRepository.hentOppgaverForBehandling(behandling.id())

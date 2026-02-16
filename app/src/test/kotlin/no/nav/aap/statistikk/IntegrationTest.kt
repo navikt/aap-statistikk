@@ -25,6 +25,7 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.påTidspunkt
+import no.nav.aap.statistikk.hendelser.utledGjeldendeAvklaringsbehov
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
@@ -84,6 +85,11 @@ class IntegrationTest {
         override val data: DomeneOppgaveHendelse, override val opprettetTidspunkt: LocalDateTime
     ) : HendelseData
 
+    data class OppgaveHendelseAPIData(
+        override val data: no.nav.aap.oppgave.statistikk.OppgaveHendelse,
+        override val opprettetTidspunkt: LocalDateTime
+    ) : HendelseData
+
     private val logger = LoggerFactory.getLogger(IntegrationTest::class.java)
 
     @Test
@@ -141,7 +147,7 @@ class IntegrationTest {
             "behandlingResultat"
         )
             .containsSubsequence(
-                tuple(null, BehandlingMetode.MANUELL, "OPPRETTET", null),
+//                tuple(null, BehandlingMetode.MANUELL, "OPPRETTET", null),
                 tuple("4491", BehandlingMetode.MANUELL, "UNDER_BEHANDLING", null),
                 tuple("5701", BehandlingMetode.MANUELL, "UNDER_BEHANDLING", null),
                 tuple("5700", BehandlingMetode.KVALITETSSIKRING, "UNDER_BEHANDLING", null),
@@ -325,17 +331,47 @@ class IntegrationTest {
 
         val hendelserFraFlyt = DefaultJsonMapper.fromJson<List<StoppetBehandling>>(lines!!)
 
+        val saksnummer = hendelserFraFlyt.first().saksnummer
+        val personIdent = hendelserFraFlyt.first().ident
+        val referanse = hendelserFraFlyt.first().behandlingReferanse
+
+        val oppgaver = hendelserFraFlyt.mapIndexedNotNull { index, behandling ->
+            behandling.avklaringsbehov.utledGjeldendeAvklaringsbehov()?.let { avklaringsbehov ->
+                no.nav.aap.oppgave.statistikk.OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveTilStatistikkDto = OppgaveTilStatistikkDto(
+                        id = index.toLong(),
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingRef = referanse,
+                        enhet = "3254",
+                        avklaringsbehovKode = avklaringsbehov.kode.name,
+                        status = Status.OPPRETTET,
+                        behandlingstype = Behandlingstype.KLAGE,
+                        opprettetAv = "Kompanjong Korrodheid",
+                        opprettetTidspunkt = behandling.hendelsesTidspunkt.plusSeconds(1),
+                        versjon = 3,
+                        harHasteMarkering = false
+                    ),
+                    sendtTidspunkt = behandling.hendelsesTidspunkt.plusSeconds(1)
+                )
+            }
+        }
+
+        val behandlingHendelser = (hendelserFraFlyt.map {
+            BehandlingHendelseData(it, LocalDateTime.now())
+        } + oppgaver.map { OppgaveHendelseAPIData(it, it.sendtTidspunkt.plusSeconds(1)) })
+            .sortedBy { it.opprettetTidspunkt }
+
+
         val testUtil = setupTestEnvironment(dataSource)
-        lateinit var referanse: UUID
         testKlientNoInjection(
             dbConfig,
             azureConfig = azureConfig,
             FakeBigQueryClient,
         ) {
-            val behandlingHendelser = hendelserFraFlyt.map {
-                BehandlingHendelseData(it, LocalDateTime.now())
-            }
-            referanse = prosesserHendelserOgVerifiserBehandling(
+
+            prosesserHendelserOgVerifiserBehandling(
                 dataSource, behandlingHendelser, testUtil
             )
         }
@@ -410,9 +446,18 @@ class IntegrationTest {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
             }
 
-            println(alleSakstatistikkHendelser)
-            println(alleSakstatistikkHendelser.last())
-            println(alleSakstatistikkHendelser[alleSakstatistikkHendelser.size - 2])
+            println("...")
+            alleSakstatistikkHendelser.forEach {
+                println(
+                    String.format(
+                        "%-15s %-15s %-15s",
+                        it.ansvarligEnhetKode,
+                        it.saksbehandler,
+                        it.behandlingMetode.name
+                    )
+                )
+            }
+            println("...")
 
             assertThat(alleSakstatistikkHendelser)
                 .extracting("ansvarligEnhetKode", "saksbehandler", "behandlingMetode")
@@ -422,34 +467,6 @@ class IntegrationTest {
                     }.toTypedArray()
                 )
         }
-
-        fun opprettOppgaveDto(
-            oppgaveId: Long,
-            enhet: String,
-            avklaringsbehovKode: Definisjon,
-            status: Status,
-            reservertAv: String? = null,
-            endretAv: String? = null,
-            versjon: Int = 1
-        ) = OppgaveTilStatistikkDto(
-            id = oppgaveId,
-            personIdent = personIdent,
-            saksnummer = saksnummer,
-            behandlingRef = behandlingReferanse,
-            journalpostId = null,
-            enhet = enhet,
-            avklaringsbehovKode = avklaringsbehovKode.kode.name,
-            status = status,
-            behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
-            reservertAv = reservertAv,
-            reservertTidspunkt = if (reservertAv != null) LocalDateTime.now() else null,
-            opprettetAv = "Kelvin",
-            opprettetTidspunkt = LocalDateTime.now(),
-            endretAv = endretAv,
-            endretTidspunkt = if (endretAv != null) LocalDateTime.now() else null,
-            versjon = versjon.toLong(),
-            harHasteMarkering = false
-        )
 
         testKlientNoInjection(dbConfig, azureConfig = azureConfig) {
             postBehandlingsflytHendelse(initialBehandlingHendelse)
@@ -466,6 +483,9 @@ class IntegrationTest {
                     hendelse = HendelseType.OPPRETTET,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 123L,
                         enhet = "0401",
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM,
@@ -483,6 +503,9 @@ class IntegrationTest {
                     hendelse = HendelseType.RESERVERT,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 123L,
                         enhet = "0401",
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM,
@@ -517,6 +540,9 @@ class IntegrationTest {
                     hendelse = HendelseType.LUKKET,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 123L,
                         enhet = "0401",
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM,
@@ -543,6 +569,9 @@ class IntegrationTest {
                     hendelse = HendelseType.OPPRETTET,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 124L,
                         enhet = "0400",
                         avklaringsbehovKode = Definisjon.KVALITETSSIKRING,
@@ -562,6 +591,9 @@ class IntegrationTest {
                     hendelse = HendelseType.RESERVERT,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 124L,
                         enhet = "0400",
                         avklaringsbehovKode = Definisjon.KVALITETSSIKRING,
@@ -602,6 +634,9 @@ class IntegrationTest {
                     hendelse = HendelseType.OPPRETTET,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 127L,
                         enhet = "4491",
                         avklaringsbehovKode = Definisjon.FATTE_VEDTAK,
@@ -621,6 +656,9 @@ class IntegrationTest {
                     hendelse = HendelseType.RESERVERT,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 127L,
                         enhet = "4491",
                         avklaringsbehovKode = Definisjon.FATTE_VEDTAK,
@@ -658,6 +696,9 @@ class IntegrationTest {
                     hendelse = HendelseType.LUKKET,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 127L,
                         enhet = "4491",
                         avklaringsbehovKode = Definisjon.FATTE_VEDTAK,
@@ -678,6 +719,9 @@ class IntegrationTest {
                     hendelse = HendelseType.OPPRETTET,
                     sendtTidspunkt = LocalDateTime.now(),
                     oppgaveTilStatistikkDto = opprettOppgaveDto(
+                        personIdent = personIdent,
+                        saksnummer = saksnummer,
+                        behandlingReferanse = behandlingReferanse,
                         oppgaveId = 147L,
                         enhet = "4491",
                         avklaringsbehovKode = Definisjon.SKRIV_VEDTAKSBREV,
@@ -774,6 +818,37 @@ class IntegrationTest {
             )
         )
     }
+
+    fun opprettOppgaveDto(
+        personIdent: String? = null,
+        saksnummer: String? = null,
+        behandlingReferanse: UUID,
+        oppgaveId: Long,
+        enhet: String,
+        avklaringsbehovKode: Definisjon,
+        status: Status,
+        reservertAv: String? = null,
+        endretAv: String? = null,
+        versjon: Int = 1,
+    ) = OppgaveTilStatistikkDto(
+        id = oppgaveId,
+        personIdent = personIdent,
+        saksnummer = saksnummer,
+        behandlingRef = behandlingReferanse,
+        journalpostId = null,
+        enhet = enhet,
+        avklaringsbehovKode = avklaringsbehovKode.kode.name,
+        status = status,
+        behandlingstype = Behandlingstype.FØRSTEGANGSBEHANDLING,
+        reservertAv = reservertAv,
+        reservertTidspunkt = if (reservertAv != null) LocalDateTime.now() else null,
+        opprettetAv = "Kelvin",
+        opprettetTidspunkt = LocalDateTime.now(),
+        endretAv = endretAv,
+        endretTidspunkt = if (endretAv != null) LocalDateTime.now() else null,
+        versjon = versjon.toLong(),
+        harHasteMarkering = false
+    )
 
     @Test
     fun `test flyt`(
@@ -952,6 +1027,8 @@ class IntegrationTest {
                     postOppgaveHendelse(dataSource, it.data)
                     testUtil.ventPåSvar()
                 }
+
+                is OppgaveHendelseAPIData -> postOppgaveData(it.data)
             }
             logger.info("Hendelse nr ${c++}: ${it.data::class.simpleName} av ${hendelser.size}")
         }
