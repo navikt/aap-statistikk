@@ -250,11 +250,12 @@ class BQBehandlingMapper(
 
         val enhet = snapshots.lastOrNull()?.enhet
 
-//        if (behandling.behandlingStatus() == BehandlingStatus.IVERKSETTES && enhet == null) {
-//            // Fallback til siste enhet
-//            return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
-//                .maxByOrNull { it.sistEndret() }?.enhet?.kode
-//        }
+        if (behandling.behandlingStatus() == BehandlingStatus.IVERKSETTES && enhet == null) {
+            log.info("Fant ikke oppgave for iverksettes-steg. Behandling: ${behandling.referanse}. Sak: ${behandling.sak.saksnummer}.")
+            // Fallback til siste enhet
+            return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+                .maxByOrNull { it.sistEndret() }?.enhet?.kode
+        }
 
         if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && enhet == null) {
             return oppgaveRepository.hentOppgaverForBehandling(behandling.id())

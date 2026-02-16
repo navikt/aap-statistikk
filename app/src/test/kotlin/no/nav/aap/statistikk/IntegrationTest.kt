@@ -686,7 +686,7 @@ class IntegrationTest {
 
             // Saksbehandler bør være null her
             val tolvteHendelser =
-                ellevteHendelser + Triple(null, null, BehandlingMetode.MANUELL)
+                ellevteHendelser + Triple("4491", null, BehandlingMetode.MANUELL)
 
             verifiserHendelseRekkefølge(tolvteHendelser)
 
