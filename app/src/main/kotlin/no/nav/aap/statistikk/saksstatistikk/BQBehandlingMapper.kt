@@ -56,11 +56,7 @@ class BQBehandlingMapper(
 
         val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling, snapshots)
 
-        if (ansvarligEnhet == null) log.info("Ansvarlig enhet er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}")
-
         val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling, snapshots)
-
-        if (saksbehandler == null) log.info("Saksbehandler er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}.")
 
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         if (årsakTilOpprettelse == null) {
