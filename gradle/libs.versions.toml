@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.3.0"
-ktor = "3.3.3"
+kotlin = "2.3.10"
+ktor = "3.4.0"
 komponenter = "1.0.937"
 tilgang = "1.0.178"
 behandlingsflyt = "0.0.549"
@@ -10,11 +10,11 @@ postmottak = "6.0.4"
 
 flyway = "11.20.2"
 detekt = "2.0.0-alpha.1"
-mockk = "1.14.7"
+mockk = "1.14.9"
 testContainers = "2.0.3"
-postgresql = "42.7.9"
+postgresql = "42.7.10"
 hikaricp = "7.0.2"
-googleCloudBigquery = "2.57.2"
+googleCloudBigquery = "2.59.0"
 nimbusJoseJwt = "10.7"
 assertj = "3.27.7"
 junitJupiter = "6.0.2"
@@ -36,7 +36,7 @@ behandlingsflytKontrakt = { module = "no.nav.aap.behandlingsflyt:kontrakt", vers
 utbetalKontrakt = { module = "no.nav.aap.utbetal:api-kontrakt", version.ref = "utbetaling" }
 oppgaveKontrakt = { module = "no.nav.aap.oppgave:api-kontrakt", version.ref = "oppgave" }
 postmottakKontrakt = { module = "no.nav.aap.postmottak:kontrakt", version.ref = "postmottak" }
-logback = { module = "ch.qos.logback:logback-classic", version = "1.5.25" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.5.29" }
 logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
 flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway"}
 flywayPostgres = {module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway"}
