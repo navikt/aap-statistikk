@@ -386,6 +386,7 @@ class LagreOppgaveJobbUtførerTest {
                 mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
                 versjon = Versjon(verdi = "..."),
                 søknadsformat = SøknadsFormat.DIGITAL,
+                oppdatertTidspunkt = LocalDateTime.now().minusSeconds(10)
             )
             val behandlingId = BehandlingRepository(it).opprettBehandling(behandling)
             behandling.copy(id = behandlingId)

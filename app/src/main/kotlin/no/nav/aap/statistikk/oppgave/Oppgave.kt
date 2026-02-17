@@ -24,7 +24,9 @@ data class Oppgave(
     val behandlingReferanse: BehandlingReferanse? = null,
     val harHasteMarkering: Boolean? = false,
     val sisteHendelse: HendelseType? = HendelseType.OPPRETTET,
-    val hendelser: List<OppgaveHendelse>
+    val hendelser: List<OppgaveHendelse>,
+    val opprettetRad: LocalDateTime? = null,
+    val oppdatertRad: LocalDateTime? = null,
 ) {
     fun sistEndret(): LocalDateTime {
         return hendelser.lastOrNull()?.endretTidspunkt ?: opprettetTidspunkt

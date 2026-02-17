@@ -6,6 +6,7 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.person.Person
+import java.time.LocalDateTime
 
 class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRepository {
     companion object : RepositoryFactory<OppgaveRepository> {
@@ -57,9 +58,12 @@ SELECT COALESCE(
 
         val sql = """
             insert into oppgave (person_id, behandling_referanse_id, enhet_id, status, opprettet_tidspunkt,
-                                 reservasjon_id, identifikator, avklaringsbehov, har_hastemarkering)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                 reservasjon_id, identifikator, avklaringsbehov, har_hastemarkering,
+                                 opprettet_rad, oppdatert_rad)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
+
+        val nå = LocalDateTime.now()
 
         return dbConnection.executeReturnKey(sql) {
             setParams {
@@ -72,6 +76,8 @@ SELECT COALESCE(
                 setLong(7, oppgave.identifikator)
                 setString(8, oppgave.avklaringsbehov)
                 setBoolean(9, oppgave.harHasteMarkering)
+                setLocalDateTime(10, nå)
+                setLocalDateTime(11, nå)
             }
         }
     }
@@ -117,14 +123,16 @@ where id = ?"""
             """update oppgave
                    set enhet_id           = ?,
                        status             = ?,
-                       har_hastemarkering = ?
+                       har_hastemarkering = ?,
+                       oppdatert_rad      = ?
                    where id = ?"""
         ) {
             setParams {
                 setLong(1, oppgave.enhet.id)
                 setEnumName(2, oppgave.status)
                 setBoolean(3, oppgave.harHasteMarkering)
-                setLong(4, oppgave.id)
+                setLocalDateTime(4, LocalDateTime.now())
+                setLong(5, oppgave.id)
             }
         }
     }
@@ -161,6 +169,8 @@ where id = ?"""
                    o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                    o.reservasjon_id          as o_reservasjon_id,
                    o.har_hastemarkering      as o_har_hastemarkering,
+                   o.opprettet_rad           as o_opprettet_rad,
+                   o.oppdatert_rad           as o_oppdatert_rad,
                    br.referanse              as o_behandling_referanse,
                    e.id                      as e_id,
                    e.kode                    as e_kode,
@@ -217,6 +227,8 @@ where id = ?"""
         avklaringsbehov = it.getString("o_avklaringsbehov"),
         hendelser = oppgaveHendelseRepository.hentHendelserForId(it.getLong("o_identifikator")),
         harHasteMarkering = it.getBooleanOrNull("o_har_hastemarkering"),
+        opprettetRad = it.getLocalDateTimeOrNull("o_opprettet_rad"),
+        oppdatertRad = it.getLocalDateTimeOrNull("o_oppdatert_rad"),
     )
 
     override fun hentOppgave(identifikator: Long): Oppgave? {
@@ -231,6 +243,8 @@ where id = ?"""
                    o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                    o.reservasjon_id          as o_reservasjon_id,
                    o.har_hastemarkering      as o_har_hastemarkering,
+                   o.opprettet_rad           as o_opprettet_rad,
+                   o.oppdatert_rad           as o_oppdatert_rad,
                    br.referanse              as o_behandling_referanse,
                    e.id                      as e_id,
                    e.kode                    as e_kode,
@@ -271,6 +285,8 @@ where id = ?"""
                 o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                 o.reservasjon_id          as o_reservasjon_id,
                 o.har_hastemarkering      as o_har_hastemarkering,
+                o.opprettet_rad           as o_opprettet_rad,
+                o.oppdatert_rad           as o_oppdatert_rad,
                 br.referanse              as o_behandling_referanse,
                 e.id                      as e_id,
                 e.kode                    as e_kode,
@@ -288,6 +304,7 @@ where id = ?"""
                   left join reservasjon r on r.id = o.reservasjon_id
                   left join saksbehandler s on s.id = r.reservert_av
          where b.id = ?
+         order by o_opprettet_tidspunkt
         """.trimIndent()
 
         return dbConnection.queryList(sql) {

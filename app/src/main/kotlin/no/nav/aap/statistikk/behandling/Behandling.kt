@@ -52,7 +52,7 @@ data class Behandling(
     val årsaker: List<Vurderingsbehov> = listOf(),
     val årsakTilOpprettelse: String? = null,
     val resultat: ResultatKode? = null,
-    private val oppdatertTidspunkt: LocalDateTime? = LocalDateTime.now(),
+    private val oppdatertTidspunkt: LocalDateTime? = null,
     val hendelser: List<BehandlingHendelse> = listOf(),
     val opprettetAv: String? = null,
 ) {

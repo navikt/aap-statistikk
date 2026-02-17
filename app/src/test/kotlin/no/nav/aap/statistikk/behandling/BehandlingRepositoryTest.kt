@@ -137,6 +137,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
@@ -154,6 +155,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
@@ -185,6 +187,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
@@ -201,6 +204,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.DIGITAL,
                     sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(),
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
@@ -229,6 +233,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
@@ -244,6 +249,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.PAPIR,
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
@@ -259,6 +265,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.DIGITAL,
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
@@ -299,6 +306,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
+                    oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
                 )
             )
         }
@@ -317,6 +325,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.DIGITAL,
+                    oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
                 )
             )
         }
