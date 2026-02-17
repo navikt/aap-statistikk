@@ -38,8 +38,8 @@ oppgaveKontrakt = { module = "no.nav.aap.oppgave:api-kontrakt", version.ref = "o
 postmottakKontrakt = { module = "no.nav.aap.postmottak:kontrakt", version.ref = "postmottak" }
 logback = { module = "ch.qos.logback:logback-classic", version = "1.5.29" }
 logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
-flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway"}
-flywayPostgres = {module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway"}
+flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flywayPostgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.3" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
@@ -52,8 +52,7 @@ testcontainersGcloud = { module = "org.testcontainers:testcontainers-gcloud", ve
 testcontainersJunit = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testContainers" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
 junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
-kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-detektGradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 
 [plugins]
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+detektGradlePlugin = { id = "dev.detekt", version.ref = "detekt" }
