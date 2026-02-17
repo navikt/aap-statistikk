@@ -4,7 +4,7 @@ plugins {
     id("aap.conventions")
     kotlin("jvm")
     alias(libs.plugins.ktor)
-    id("dev.detekt")
+    alias(libs.plugins.detektGradlePlugin)
     application
 }
 
