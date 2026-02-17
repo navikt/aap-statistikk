@@ -139,26 +139,4 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
             }
         }
     }
-
-    override fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID): Pair<EnhetReservasjonOgTidspunkt, String>? {
-        val sql = """
-            select enhet, mottatt_tidspunkt, avklaringsbehov_kode, reservert_av
-            from oppgave_hendelser
-            where behandling_referanse = ?
-            order by mottatt_tidspunkt desc limit 1
-        """.trimIndent()
-
-        return dbConnection.queryFirstOrNull(sql) {
-            setParams {
-                setUUID(1, behandlingReferanse)
-            }
-            setRowMapper {
-                EnhetReservasjonOgTidspunkt(
-                    enhet = it.getString("enhet"),
-                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt"),
-                    reservertAv = it.getStringOrNull("reservert_av")
-                ) to it.getString("avklaringsbehov_kode")
-            }
-        }
-    }
 }

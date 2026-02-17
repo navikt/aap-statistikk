@@ -12,8 +12,6 @@ interface OppgaveHendelseRepository : Repository {
         behandlingReferanse: UUID,
         avklaringsbehovKode: String
     ): List<EnhetReservasjonOgTidspunkt>
-
-    fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID): Pair<EnhetReservasjonOgTidspunkt, String>?
 }
 
 data class EnhetReservasjonOgTidspunkt(
