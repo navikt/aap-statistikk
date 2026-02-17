@@ -91,10 +91,10 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsbehov(): Definisjon? {
-    return this.firstOrNull {
-        !it.avklaringsbehovDefinisjon.erVentebehov()
-                && it.status.erÅpent()
-    }
+    return this.filter { it.status.erÅpent() }
+        // false sorteres først
+        .sortedBy { it.avklaringsbehovDefinisjon.erVentebehov() }
+        .firstOrNull()
         ?.avklaringsbehovDefinisjon
 }
 
@@ -112,16 +112,11 @@ fun List<EndringDTO>.løstAv(): String? {
 }
 
 fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
-    return this
-        .firstOrNull { it.status.erÅpent() && !it.avklaringsbehovDefinisjon.erVentebehov() }
+    return this.filter { it.status.erÅpent() }
+        // false sorteres først
+        .sortedBy { it.avklaringsbehovDefinisjon.erVentebehov() }
+        .firstOrNull()
         ?.status
-}
-
-fun List<AvklaringsbehovHendelseDto>.utledGjeldendeStegType(): StegType? {
-    return this.firstOrNull {
-        !it.avklaringsbehovDefinisjon.erVentebehov()
-                && it.status.erÅpent()
-    }?.avklaringsbehovDefinisjon?.løsesISteg
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {

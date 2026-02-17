@@ -90,7 +90,7 @@ class BehandlingService(
             venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
             returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
             resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-            gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeStegType()?.gruppe,
+            gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
             årsaker = dto.vurderingsbehov.map { it.tilDomene() },
             opprettetAv = dto.opprettetAv,
             årsakTilOpprettelse = dto.årsakTilOpprettelse,

@@ -101,7 +101,7 @@ class ReberegnHistorikk {
                     hendelsesTidspunkt = requireNotNull(curr.tidspunktSisteEndring()),
                     avklaringsBehov = curr.utledGjeldendeAvklaringsbehov()?.kode?.name,
                     avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
-                    steggruppe = curr.utledGjeldendeStegType()?.gruppe,
+                    steggruppe = curr.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
                     venteÅrsak = curr.utledÅrsakTilSattPåVent(),
                     returÅrsak = curr.årsakTilRetur()?.name,
                     saksbehandler = curr.sistePersonPåBehandling()?.let(::Saksbehandler),
