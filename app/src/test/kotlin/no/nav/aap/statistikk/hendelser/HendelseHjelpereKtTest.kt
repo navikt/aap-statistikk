@@ -40,8 +40,32 @@ class HendelseHjelpereKtTest {
             assertThat(triple.second).isEqualTo("KVALITETSSIKRER")
             assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T12:39:00.211"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
-            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.FASTSETT_BEREGNINGSTIDSPUNKT)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
+        }
+    }
+
+    @Test
+    fun `på vent pga lovvalg`(softly: SoftAssertions) {
+        val stoppetBehandling = hendelseFraFil("avklaringsbehovhendelser/paa_vent_lovvalg.json")
+        val hendelser = stoppetBehandling.avklaringsbehov
+
+        softly.apply {
+            assertThat(hendelser).isNotEmpty()
+            assertThat(hendelser.utledAnsvarligBeslutter()).isNull()
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("SAKSBEHANDLER")
+            assertThat(hendelser.utledVedtakTid()).isNull()
+            assertThat(hendelser.årsakTilRetur()).isNull()
+            assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
+            assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
+                VENTE_PÅ_UTENLANDSK_VIDEREFØRING_AVKLARING
+            )
+            val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
+            assertThat(triple).isNotNull
+            assertThat(triple!!.first).isEqualTo(AVKLAR_LOVVALG_MEDLEMSKAP)
+            assertThat(triple.second).isEqualTo("SAKSBEHANDLER")
+            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2026-01-26T08:49:42.561"))
+            assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
+            assertThat(hendelser.utledÅrsakTilSattPåVent()).isEqualTo("VENTER_PÅ_UTENLANDSK_VIDEREFORING_AVKLARING")
         }
     }
 
@@ -69,7 +93,6 @@ class HendelseHjelpereKtTest {
             assertThat(triple.second).isEqualTo("VEILEDER")
             assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:41:38.441"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER)
-            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.AVKLAR_SYKDOM)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
     }
@@ -96,7 +119,6 @@ class HendelseHjelpereKtTest {
             assertThat(triple.second).isEqualTo("VEILEDER")
             assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
-            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
     }
@@ -123,7 +145,6 @@ class HendelseHjelpereKtTest {
             assertThat(triple.second).isEqualTo("BESLUTTER")
             assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:56:38.567"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isNull()
-            assertThat(hendelser.utledGjeldendeStegType()).isNull()
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
     }
@@ -150,7 +171,6 @@ class HendelseHjelpereKtTest {
             assertThat(triple.second).isEqualTo("BESLUTTER")
             assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-04-15T13:27:58.401"))
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.OPPRETTET)
-            assertThat(hendelser.utledGjeldendeStegType()).isEqualTo(StegType.BREV)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
     }
@@ -193,7 +213,7 @@ class HendelseHjelpereKtTest {
 
     @Test
     fun `utled gjeldendde stegtype fra ekte data`() {
-        assertThat(ekte2.utledGjeldendeStegType()).isEqualTo(StegType.AVKLAR_SYKDOM)
+        assertThat(ekte2.utledGjeldendeAvklaringsbehov()?.løsesISteg).isEqualTo(StegType.AVKLAR_SYKDOM)
     }
 
     @Test
@@ -208,7 +228,7 @@ class HendelseHjelpereKtTest {
         assertThat(ekteEksempel.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE)
         assertThat(ekteEksempel.sisteAvklaringsbehovStatus()).isEqualTo(Status.SENDT_TILBAKE_FRA_BESLUTTER)
 
-        assertThat(ekteEksempel.utledGjeldendeStegType()).isEqualTo(StegType.VURDER_BISTANDSBEHOV)
+        assertThat(ekteEksempel.utledGjeldendeAvklaringsbehov()).isEqualTo(AVKLAR_BISTANDSBEHOV)
     }
 
     @Test
@@ -228,14 +248,6 @@ class HendelseHjelpereKtTest {
             )
         )
         assertThat(liste.sistePersonPåBehandling()).isNull()
-    }
-
-
-    @Test
-    fun `kan utlede gjeldende stegtype`() {
-        assertThat(ufullførtBehandlingEndringer.utledGjeldendeStegType()).isEqualTo(
-            StegType.FATTE_VEDTAK
-        )
     }
 
     @Test

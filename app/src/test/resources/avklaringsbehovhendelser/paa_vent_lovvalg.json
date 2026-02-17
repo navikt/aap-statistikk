@@ -1,0 +1,112 @@
+{
+  "saksnummer": "ABCDE",
+  "sakStatus": "UTREDES",
+  "behandlingReferanse": "9dc819a3-b492-43a0-adde-0df191e5927e",
+  "relatertBehandling": null,
+  "relatertFagsystem": "KELVIN",
+  "behandlingOpprettetTidspunkt": "2026-01-24T15:43:47.41",
+  "mottattTid": "2026-01-24T15:43:26",
+  "tidspunktSisteEndring": "2026-02-16T23:38:26.849",
+  "behandlingStatus": "UTREDES",
+  "behandlingType": "Førstegangsbehandling",
+  "soknadsFormat": "DIGITAL",
+  "ident": "8765432",
+  "versjon": "fa4aa44a0ba963da8935cbb9db9bd52bd00031234",
+  "vurderingsbehov": [
+    "MELDEKORT",
+    "LEGEERKLÆRING",
+    "SØKNAD"
+  ],
+  "årsakTilOpprettelse": "SØKNAD",
+  "avklaringsbehov": [
+    {
+      "id": 0,
+      "avklaringsbehovDefinisjon": {
+        "kode": "5017",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "VURDER_LOVVALG",
+        "kreverToTrinn": true,
+        "kvalitetssikres": false,
+        "løsesAv": [
+          "SAKSBEHANDLER_NASJONAL"
+        ]
+      },
+      "status": "AVSLUTTET",
+      "endringer": [
+        {
+          "status": "OPPRETTET",
+          "tidsstempel": "2026-01-24T15:43:48.303",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        },
+        {
+          "status": "OPPRETTET",
+          "tidsstempel": "2026-01-26T07:02:36.621",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        },
+        {
+          "status": "OPPRETTET",
+          "tidsstempel": "2026-01-26T08:31:51.078",
+          "frist": null,
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        },
+        {
+          "status": "AVSLUTTET",
+          "tidsstempel": "2026-01-26T08:49:42.561",
+          "frist": null,
+          "endretAv": "SAKSBEHANDLER",
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": "Vurdert lovvalg & medlemskap manuelt."
+        }
+      ]
+    },
+    {
+      "id": 66625,
+      "avklaringsbehovDefinisjon": {
+        "kode": "5019",
+        "type": "VENTEPUNKT",
+        "løsesISteg": "VURDER_LOVVALG",
+        "kreverToTrinn": false,
+        "kvalitetssikres": false,
+        "løsesAv": [
+          "SAKSBEHANDLER_NASJONAL"
+        ]
+      },
+      "status": "OPPRETTET",
+      "endringer": [
+        {
+          "status": "OPPRETTET",
+          "tidsstempel": "2026-01-26T08:49:42.802",
+          "frist": "2031-01-26",
+          "endretAv": "Kelvin",
+          "årsakTilSattPåVent": "VENTER_PÅ_UTENLANDSK_VIDEREFORING_AVKLARING",
+          "årsakTilRetur": [],
+          "begrunnelse": ""
+        }
+      ]
+    }
+  ],
+  "hendelsesTidspunkt": "2026-02-16T23:38:26.878084323",
+  "avsluttetBehandling": null,
+  "identerForSak": [
+    "8765432"
+  ],
+  "opprettetAv": null,
+  "nyeMeldekort": [],
+  "søknadIder": [
+    {
+      "identifikator": "123456"
+    }
+  ]
+}

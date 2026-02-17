@@ -17,6 +17,10 @@ import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
+private const val SKJERMET_ENHET = "-5"
+
+private const val AUTOMATISK_ENHET = "KELVIN_AUTOMATISK"
+
 class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
@@ -54,9 +58,11 @@ class BQBehandlingMapper(
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
-        val ansvarligEnhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling, snapshots)
+        val ansvarligEnhet =
+            if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots)
 
-        val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling, snapshots)
+        val saksbehandler =
+            if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots)
 
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         if (årsakTilOpprettelse == null) {
@@ -111,7 +117,7 @@ class BQBehandlingMapper(
             versjon = behandling.versjon(),
             mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             opprettetAv = behandling.opprettetAv ?: KELVIN,
-            ansvarligBeslutter = if (erSkjermet && ansvarligBeslutter != null) "-5" else ansvarligBeslutter,
+            ansvarligBeslutter = if (erSkjermet && ansvarligBeslutter != null) SKJERMET_ENHET else ansvarligBeslutter,
             vedtakTid = behandling.vedtakstidspunkt(),
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
@@ -237,11 +243,15 @@ class BQBehandlingMapper(
      * Resolver enhet og saksbehandler fra ferske oppgave-data for en gitt behandling.
      * Brukes ved retry når den opprinnelige behandlingstilstanden ble snapshottet.
      */
-    fun hentEnhetOgSaksbehandler(behandling: Behandling, erSkjermet: Boolean): EnhetOgSaksbehandler {
+    fun hentEnhetOgSaksbehandler(
+        behandling: Behandling,
+        erSkjermet: Boolean
+    ): EnhetOgSaksbehandler {
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
-        val enhet = if (erSkjermet) "-5" else ansvarligEnhet(behandling, snapshots)
-        val saksbehandler = if (erSkjermet) "-5" else utledSaksbehandler(behandling, snapshots)
+        val enhet = if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots)
+        val saksbehandler =
+            if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots)
         return EnhetOgSaksbehandler(enhet, saksbehandler)
     }
 
@@ -250,7 +260,7 @@ class BQBehandlingMapper(
         snapshots: List<SakstatistikkSnapshot>,
     ): String? {
         if (behandling.behandlingMetode() == BehandlingMetode.AUTOMATISK) {
-            return "KELVIN_AUTOMATISK"
+            return AUTOMATISK_ENHET
         }
 
         val enhet = snapshots.lastOrNull()?.enhet
@@ -267,8 +277,13 @@ class BQBehandlingMapper(
                 .maxByOrNull { it.sistEndret() }?.enhet?.kode
         }
 
-        // Fallback: hvis ingen enhet fra oppgave-events, kan vi ikke utlede noe
-        // (enhet fra behandlingsflyt finnes ikke, så vi må returnere null)
+        if (behandling.venteÅrsak != null && enhet == null) {
+            // Hvis ingen åpne, velg enheten som hadde forrige avklaringsbehov
+            return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+                .filter { it.avklaringsbehov == behandling.sisteLøsteAvklaringsbehov }
+                .maxByOrNull { it.sistEndret() }?.enhet?.kode
+        }
+
         return enhet
     }
 }
