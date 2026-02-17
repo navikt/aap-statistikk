@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.3.10"
 ktor = "3.4.0"
-komponenter = "1.0.937"
+komponenter = "2.0.0"
 tilgang = "1.0.178"
 behandlingsflyt = "0.0.549"
 oppgave = "0.0.145"
