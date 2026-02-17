@@ -53,6 +53,9 @@ class OppgaveRepositoryTest {
         assertThat(res.reservasjon).isNull()
         assertThat(res.behandlingReferanse!!.referanse).isEqualTo(oppgave.behandlingReferanse!!.referanse)
         assertThat(res.hendelser).isEqualTo(oppgave.hendelser)
+        assertThat(res.opprettetRad).isNotNull
+        assertThat(res.oppdatertRad).isNotNull
+        assertThat(res.opprettetRad).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
     }
 
     @Test

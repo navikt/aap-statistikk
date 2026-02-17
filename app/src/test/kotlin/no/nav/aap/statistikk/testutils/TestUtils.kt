@@ -841,6 +841,7 @@ fun forberedDatabase(
             mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
             versjon = Versjon("xxx"),
             søknadsformat = SøknadsFormat.DIGITAL,
+            oppdatertTidspunkt = LocalDateTime.now()
         )
     )
 }
