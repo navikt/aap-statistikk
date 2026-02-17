@@ -4,7 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
-import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
+import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -12,6 +12,7 @@ import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeBehandlingRepository
+import no.nav.aap.statistikk.testutils.FakeOppgaveHendelseRepository
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.FakeRettighetsTypeRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -30,32 +31,6 @@ class BQBehandlingMapperTest {
     )
 
     private val skjermingService = SkjermingService(FakePdlGateway())
-
-    private class FakeOppgaveHendelseRepository : OppgaveHendelseRepository {
-        private val enhetReservasjoner =
-            mutableMapOf<Pair<UUID, String>, List<EnhetReservasjonOgTidspunkt>>()
-
-        fun addEnhetReservasjon(
-            behandlingRef: UUID,
-            avklaringsbehovKode: String,
-            data: List<EnhetReservasjonOgTidspunkt>
-        ) {
-            enhetReservasjoner[behandlingRef to avklaringsbehovKode] = data
-        }
-
-        override fun hentEnhetOgReservasjonForAvklaringsbehov(
-            behandlingReferanse: UUID,
-            avklaringsbehovKode: String
-        ): List<EnhetReservasjonOgTidspunkt> {
-            return enhetReservasjoner[behandlingReferanse to avklaringsbehovKode] ?: emptyList()
-        }
-
-        override fun hentSisteEnhetPåBehandling(behandlingReferanse: UUID) = null
-        override fun lagreHendelse(hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse) = 0L
-        override fun sisteVersjonForId(id: Long) = null
-        override fun hentHendelserForId(id: Long) =
-            emptyList<no.nav.aap.statistikk.oppgave.OppgaveHendelse>()
-    }
 
     private class FakeOppgaveRepository : no.nav.aap.statistikk.oppgave.OppgaveRepository {
         private val oppgaver =
@@ -228,7 +203,7 @@ class BQBehandlingMapperTest {
                     referanse = behandlingRef
                 ),
                 hendelser = listOf(
-                    no.nav.aap.statistikk.oppgave.OppgaveHendelse(
+                    OppgaveHendelse(
                         hendelse = no.nav.aap.statistikk.oppgave.HendelseType.RESERVERT,
                         oppgaveId = 123L,
                         mottattTidspunkt = tidspunkt,

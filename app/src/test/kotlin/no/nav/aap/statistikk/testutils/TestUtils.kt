@@ -52,8 +52,10 @@ import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.motor
+import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
+import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
@@ -791,6 +793,31 @@ class FakePdlGateway(val identerHemmelig: Map<String, Boolean> = emptyMap()) : P
             )
         }
     }
+}
+
+class FakeOppgaveHendelseRepository : OppgaveHendelseRepository {
+    private val enhetReservasjoner =
+        mutableMapOf<Pair<UUID, String>, List<EnhetReservasjonOgTidspunkt>>()
+
+    fun addEnhetReservasjon(
+        behandlingRef: UUID,
+        avklaringsbehovKode: String,
+        data: List<EnhetReservasjonOgTidspunkt>
+    ) {
+        enhetReservasjoner[behandlingRef to avklaringsbehovKode] = data
+    }
+
+    override fun hentEnhetOgReservasjonForAvklaringsbehov(
+        behandlingReferanse: UUID,
+        avklaringsbehovKode: String
+    ): List<EnhetReservasjonOgTidspunkt> {
+        return enhetReservasjoner[behandlingReferanse to avklaringsbehovKode] ?: emptyList()
+    }
+
+    override fun lagreHendelse(hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse) = 0L
+    override fun sisteVersjonForId(id: Long) = null
+    override fun hentHendelserForId(id: Long) =
+        emptyList<no.nav.aap.statistikk.oppgave.OppgaveHendelse>()
 }
 
 fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
