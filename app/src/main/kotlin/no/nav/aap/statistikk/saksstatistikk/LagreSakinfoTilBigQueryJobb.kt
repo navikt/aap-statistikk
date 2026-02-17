@@ -61,7 +61,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
                                 "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Lagrer med null enhet."
+                                "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
                     )
                     if (originalHendelsestid != null) {
                         sakStatistikkService.lagreMedOppgavedata(
