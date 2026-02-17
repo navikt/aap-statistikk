@@ -13,7 +13,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
-import kotlin.test.assertEquals
 
 class MeldekortRepositoryTest {
 
@@ -116,7 +115,7 @@ class MeldekortRepositoryTest {
         }
 
         assertThat(meldekort.size).isEqualTo(uthentet.size)
-        assertEquals(uthentet[0].journalpostId, meldekort[0].journalpostId)
+        assertThat(uthentet[0].journalpostId).isEqualTo(meldekort[0].journalpostId)
         assertThat(uthentet).isEqualTo(meldekort)
     }
 }
