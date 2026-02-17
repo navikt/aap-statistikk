@@ -281,6 +281,7 @@ class BehandlingRepositoryTest {
                     mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.DIGITAL,
+                    oppdatertTidspunkt = LocalDateTime.now(),
                 )
             )
         }
