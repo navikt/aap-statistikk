@@ -1,11 +1,11 @@
 [versions]
 kotlin = "2.3.10"
 ktor = "3.4.0"
-komponenter = "2.0.0"
-tilgang = "1.0.178"
-behandlingsflyt = "0.0.550"
-oppgave = "0.0.147"
-utbetaling = "0.0.77"
+komponenter = "2.0.2"
+tilgang = "1.0.179"
+behandlingsflyt = "0.0.551"
+oppgave = "0.0.148"
+utbetaling = "0.0.78"
 postmottak = "6.0.4"
 
 flyway = "11.20.2"
