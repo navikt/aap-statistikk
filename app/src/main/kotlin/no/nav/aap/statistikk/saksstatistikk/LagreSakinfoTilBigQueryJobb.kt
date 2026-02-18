@@ -57,7 +57,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         originalHendelsestid = resultat.hendelsestid
                     )
                 } else {
-                    log.warn(
+                    log.error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
                                 "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
