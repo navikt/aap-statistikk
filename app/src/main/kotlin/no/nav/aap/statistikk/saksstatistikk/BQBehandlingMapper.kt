@@ -215,13 +215,13 @@ class BQBehandlingMapper(
     private fun behandlingStatus(
         behandling: Behandling
     ): String {
-        val hendelse = behandling.hendelser.last()
-        val venteÅrsak = hendelse.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
-        val returStatus = hendelse.avklaringsbehovStatus
+        val venteÅrsak = behandling.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
+        val returStatus = behandling.gjeldendeAvklaringsbehovStatus
             ?.takeIf { it.returnert() }
             ?.let { "_${it.name.uppercase()}" }.orEmpty()
 
-        return when (hendelse.status) {
+        val behandlingStatus = behandling.behandlingStatus()
+        return when (behandlingStatus) {
             BehandlingStatus.OPPRETTET -> "OPPRETTET"
             BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
             BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
