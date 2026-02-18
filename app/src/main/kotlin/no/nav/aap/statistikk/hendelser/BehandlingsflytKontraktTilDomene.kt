@@ -130,5 +130,6 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.UTVID_VEDTAKSLENGDE -> UTVID_VEDTAKSLENGDE
         Vurderingsbehov.REVURDER_SYKESTIPEND -> REVURDER_SYKESTIPEND
         Vurderingsbehov.MIGRER_RETTIGHETSPERIODE -> MIGRER_RETTIGHETSPERIODE
+        Vurderingsbehov.ETABLERING_EGEN_VIRKSOMHET -> ETABLERING_EGEN_VIRKSOMHET
     }
 }
