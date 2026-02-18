@@ -22,7 +22,7 @@ spec:
                row_number() over (partition by behandling_uuid, endretTid order by teknisk_tid desc) as siste_melding_for_hendelse
         from `saksstatistikk.view_saksstatistikk` s
       )
-      select saksbehandler, ansvarlig_enhet, behandling_status, *
+      select *
       from alle_meldinger
       where siste_melding_for_hendelse = 1
       order by behandling_uuid, endretTid
