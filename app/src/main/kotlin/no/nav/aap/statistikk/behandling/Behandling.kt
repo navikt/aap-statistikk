@@ -12,10 +12,8 @@ import java.time.LocalDateTime
 import java.util.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 
-data class Versjon(
-    val verdi: String,
-    val id: Long? = null,
-)
+@JvmInline
+value class Versjon(val verdi: String)
 
 private val log = LoggerFactory.getLogger(Behandling::class.java)
 

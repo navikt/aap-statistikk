@@ -672,7 +672,7 @@ class IntegrationTest {
                 )
             )
 
-            // LagreOppgaveJobbUtfører triggers a new BQBehandling with saksbehandler
+            // LagreOppgaveJobbUtfører trigger en ny BQBehandling med saksbehandler
             val ellevteHendelser =
                 tiendeHendelser + Triple("4491", "Besluttersen", BehandlingMetode.FATTE_VEDTAK)
             verifiserHendelseRekkefølge(ellevteHendelser)
@@ -744,18 +744,18 @@ class IntegrationTest {
             // Vedtaksbrev sendes og behandling avsluttes
             val hendelseAvsluttet = hendelseIverksettes
                 .nyHendelse(BStatus.AVSLUTTET).copy(
-                    avklaringsbehov = hendelseMedBeslutter.avklaringsbehov.løs(
-                        Definisjon.BESTILL_BREV,
+                    avklaringsbehov = hendelseIverksettes.avklaringsbehov.løs(
+                        Definisjon.SKRIV_VEDTAKSBREV,
                         "Brev-Besluttersen"
                     )
                 )
+
             postBehandlingsflytHendelse(hendelseAvsluttet)
 
             val femtendeHendelser =
                 fjortendeHendelser + Triple("4491", "Brev-Besluttersen", BehandlingMetode.MANUELL)
 
             verifiserHendelseRekkefølge(femtendeHendelser)
-
             println("ENDELIGE HENDELSER:")
             fjortendeHendelser.forEach {
                 println(it)

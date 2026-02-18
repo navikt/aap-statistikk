@@ -89,7 +89,7 @@ class BehandlingRepositoryTest {
         assertThat(uthentet)
             .usingRecursiveComparison()
             .ignoringCollectionOrder()
-            .ignoringFields("id", "hendelser", "snapShotId", "versjon.id", "sak.snapShotId")
+            .ignoringFields("id", "hendelser", "snapShotId", "sak.snapShotId")
             .withComparatorForType({ a, b ->
                 a.truncatedTo(ChronoUnit.SECONDS).compareTo(b.truncatedTo(ChronoUnit.SECONDS))
             }, LocalDateTime::class.java)

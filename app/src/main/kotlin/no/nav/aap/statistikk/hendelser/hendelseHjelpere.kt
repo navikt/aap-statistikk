@@ -16,7 +16,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandli
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk.hendelser.hendelseHjelpere")
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
-    log.info("Utledvedtaktid ble kalt. Antall hendelser: ${this.size}")
     // Hvis FATTE_VEDTAK er løst, men det fortsatt finnes åpne behov, så betyr at det
     // det har vært retur fra beslutter.
     val finnesÅpneBehov =

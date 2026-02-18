@@ -366,7 +366,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
               bh.ansvarlig_beslutter                      as bh_ansvarlig_beslutter,
               bh.vedtak_tidspunkt                         as bh_vedtak_tidspunkt,
               bh.mottatt_tid                              as bh_mottatt_tid,
-              bh.versjon_id                               as bh_versjon_id,
               bh.relatert_behandling_referanse            as bh_relatert_behandling_referanse,
               bh.sist_loste_avklaringsbehov               as bh_sist_loste_avklaringsbehov,
               bh.sist_loste_avklaringsbehov_saksbehandler as bh_sist_loste_avklaringsbehov_saksbehandler,
@@ -376,7 +375,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 join versjon v on bh.versjon_id = v.id
        where bh.behandling_id = ?
          and slettet = false
-       order by bh.hendelsestidspunkt
+       order by bh.hendelsestidspunkt, bh.oppdatert_tid
                 """.trimIndent()
 
         dbConnection.queryList(historikkSpørring) {
@@ -406,7 +405,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
                     søknadsformat = it.getEnum("bh_soknadsformat"),
                     versjon = Versjon(
-                        id = it.getLong("bh_versjon_id"), verdi = it.getString("bh_versjon")
+                        verdi = it.getString("bh_versjon")
                     ),
                     relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")
                 )
@@ -446,7 +445,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
         vedtakstidspunkt = it.getLocalDateTimeOrNull("bh_vedtak_tidspunkt"),
         ansvarligBeslutter = it.getStringOrNull("bh_ansvarlig_beslutter")?.ifBlank { null },
-        versjon = Versjon(verdi = it.getString("v_versjon"), id = it.getLong("bh_versjon_id")),
+        versjon = Versjon(verdi = it.getString("v_versjon")),
         søknadsformat = it.getEnum("bh_soknadsformat"),
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
         relaterteIdenter = it.getArray("rp_ident", String::class),
