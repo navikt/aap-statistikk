@@ -56,6 +56,10 @@ spec:
            WHERE behandling_id = b.id
            GROUP BY fra_dato, til_dato
          ) AS perioder_med_arbeidsopptrapping,
+       ARRAY(
+           SELECT STRUCT(fra_dato, til_dato, har_fritak)
+           FROM `datastream_hendelser.public_fritaksvurdering` f where f.behandling_id = b.id 
+         ) AS perioder_med_fritak_meldeplikt,
        DATETIME(
            timestamp_millis(
              greatest(
