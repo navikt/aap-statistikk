@@ -15,7 +15,7 @@ testContainers = "2.0.3"
 postgresql = "42.7.10"
 hikaricp = "7.0.2"
 googleCloudBigquery = "2.59.0"
-nimbusJoseJwt = "10.7"
+nimbusJoseJwt = "10.8"
 assertj = "3.27.7"
 junitJupiter = "6.0.3"
 
