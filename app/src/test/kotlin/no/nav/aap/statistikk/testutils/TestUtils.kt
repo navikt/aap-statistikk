@@ -12,6 +12,7 @@ import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
@@ -226,7 +227,7 @@ fun opprettTestStoppetBehandling(
         sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
         hendelsesTidspunkt = hendelsesTidspunkt,
         vurderingsbehov = listOf(no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov.SØKNAD),
-        årsakTilOpprettelse = "SØKNAD"
+        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
     )
 
 object FakeBigQueryClient : IBigQueryClient {

@@ -122,7 +122,7 @@ class BehandlingService(
                 gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
                 årsaker = dto.vurderingsbehov.map { it.tilDomene() },
                 opprettetAv = dto.opprettetAv,
-                årsakTilOpprettelse = dto.årsakTilOpprettelse,
+                årsakTilOpprettelse = dto.årsakTilOpprettelse.name,
                 oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
                     ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt
             )

@@ -14,13 +14,6 @@ dependencyResolutionManagement {
         maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/navikt/behandlingsflyt")
-            credentials {
-                username = "x-access-token"
-                password = (githubPassword
-                    ?: System.getenv("GITHUB_PASSWORD")
-                    ?: System.getenv("GITHUB_TOKEN")
-                    ?: error("GITHUB_TOKEN not set"))
-            }
         }
         mavenLocal()
     }

@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.saksstatistikk
 import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
@@ -117,7 +118,7 @@ class SaksStatistikkServiceTest {
                         ident = "1233456",
                         versjon = "1",
                         vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
-                        årsakTilOpprettelse = "SØKNAD",
+                        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
                         avklaringsbehov = listOf(
                             AvklaringsbehovHendelseDto(
                                 avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
@@ -151,7 +152,7 @@ class SaksStatistikkServiceTest {
                         ident = "1233456",
                         versjon = "1",
                         vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
-                        årsakTilOpprettelse = "SØKNAD",
+                        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
                         avklaringsbehov = listOf(
                             AvklaringsbehovHendelseDto(
                                 avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
