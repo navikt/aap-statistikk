@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
@@ -154,7 +155,7 @@ class MottaStatistikkTest {
         sakStatus = SakStatus.UTREDES,
         hendelsesTidspunkt = LocalDateTime.now(),
         vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-        årsakTilOpprettelse = "SØKNAD"
+        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
     )
 
     @Test
@@ -216,7 +217,7 @@ class MottaStatistikkTest {
         sakStatus = SakStatus.UTREDES,
         hendelsesTidspunkt = LocalDateTime.parse("2025-12-08T08:53:15.030000"),
         vurderingsbehov = listOf(Vurderingsbehov.MELDEKORT),
-        årsakTilOpprettelse = "MELDEKORT",
+        årsakTilOpprettelse = ÅrsakTilOpprettelse.MELDEKORT,
         avsluttetBehandling = AvsluttetBehandlingDTO(
             tilkjentYtelse = TilkjentYtelseDTO(emptyList()),
             vilkårsResultat = VilkårsResultatDTO(TypeBehandling.Revurdering, emptyList()),

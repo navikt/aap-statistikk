@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
@@ -415,7 +416,7 @@ class IntegrationTest {
             ident = personIdent,
             versjon = UUID.randomUUID().toString(),
             vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-            årsakTilOpprettelse = "SØKNAD",
+            årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
             avklaringsbehov = listOf(
                 AvklaringsbehovHendelseDto(
                     id = 0L,

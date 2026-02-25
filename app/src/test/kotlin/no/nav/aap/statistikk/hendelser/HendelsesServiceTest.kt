@@ -8,6 +8,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Revurdering
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
@@ -115,7 +116,7 @@ class HendelsesServiceTest {
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID,
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                årsakTilOpprettelse = "SØKNAD"
+                årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
             )
         )
 
@@ -214,7 +215,7 @@ class HendelsesServiceTest {
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                årsakTilOpprettelse = "SØKNAD"
+                årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
             )
         )
 

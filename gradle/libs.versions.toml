@@ -1,9 +1,8 @@
 [versions]
-kotlin = "2.3.10"
 ktor = "3.4.0"
 komponenter = "2.0.8"
 tilgang = "1.0.180"
-behandlingsflyt = "0.0.559"
+behandlingsflyt = "0.0.561"
 oppgave = "0.0.148"
 utbetaling = "0.0.80"
 postmottak = "6.0.4"

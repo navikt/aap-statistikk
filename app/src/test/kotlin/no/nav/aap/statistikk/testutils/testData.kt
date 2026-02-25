@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.testutils
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
@@ -169,6 +170,6 @@ fun behandlingHendelse(
         sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
         hendelsesTidspunkt = LocalDateTime.now(clock),
         vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-        årsakTilOpprettelse = "SØKNAD"
+        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
     )
 }
