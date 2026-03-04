@@ -39,5 +39,7 @@ enum class Vurderingsbehov(val sortering: Int) {
     ),
     MIGRER_RETTIGHETSPERIODE(
         1
-    ), ETABLERING_EGEN_VIRKSOMHET(1);
+    ),
+    REVURDER_SAMORDNING_BARNEPENSJON(1),
+    ETABLERING_EGEN_VIRKSOMHET(1);
 }
