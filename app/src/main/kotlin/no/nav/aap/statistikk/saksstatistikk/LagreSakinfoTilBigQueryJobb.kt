@@ -22,8 +22,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
     private val jobbAppender: JobbAppender,
     private val repositoryProvider: RepositoryProvider,
     private val enhetRetryConfig: EnhetRetryConfig = EnhetRetryConfig()
-) :
-    JobbUtfører {
+) : JobbUtfører {
 
     private val log = LoggerFactory.getLogger(javaClass)
 

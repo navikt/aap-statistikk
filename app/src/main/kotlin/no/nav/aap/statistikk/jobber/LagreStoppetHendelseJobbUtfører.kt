@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
+import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import org.slf4j.LoggerFactory
 
@@ -17,6 +18,8 @@ class LagreStoppetHendelseJobbUtfører(
 
         logger.info("StoppetBehandling mottatt. Behandlingsreferanse: ${dto.behandlingReferanse}.")
 
-        hendelsesService.prosesserNyHendelse(dto)
+        LoggingKontekst(dto.behandlingReferanse).use {
+            hendelsesService.prosesserNyHendelse(dto)
+        }
     }
 }
