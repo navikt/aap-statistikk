@@ -84,6 +84,7 @@ class AvsluttetBehandlingServiceTest {
                         barnetilleggSats = 37.0,
                         barnetillegg = 0.0,
                         minsteSats = Minstesats.IKKE_MINSTESATS,
+                        barnepensjonDagsats = 0.0,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = datoNå.minusYears(3),
@@ -96,6 +97,7 @@ class AvsluttetBehandlingServiceTest {
                         barnetilleggSats = 37.0,
                         barnetillegg = 0.0,
                         minsteSats = Minstesats.MINSTESATS_OVER_25,
+                        barnepensjonDagsats = 0.0,
                     )
                 )
             ),
@@ -275,7 +277,8 @@ class AvsluttetBehandlingServiceTest {
                         antallBarn = 0,
                         barnetilleggSats = 37.0,
                         barnetillegg = 0.0,
-                        minsteSats = Minstesats.MINSTESATS_OVER_25
+                        minsteSats = Minstesats.MINSTESATS_OVER_25,
+                        barnepensjonDagsats = 0.0,
                     )
                 )
             ),

@@ -90,6 +90,7 @@ fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
         antallBarn = antallBarn,
         barnetilleggSats = barnetilleggSats,
         barnetillegg = barnetillegg,
+        barnepensjonDagsats = barnepensjonDagsats,
         utbetalingsdato = this.utbetalingsdato,
         minsteSats = when (this.minsteSats) {
             Minstesats.IKKE_MINSTESATS -> no.nav.aap.statistikk.tilkjentytelse.Minstesats.IKKE_MINSTESATS
