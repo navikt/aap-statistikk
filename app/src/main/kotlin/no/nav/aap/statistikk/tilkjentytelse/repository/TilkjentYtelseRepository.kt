@@ -46,8 +46,8 @@ class TilkjentYtelseRepository(
 
         val sql =
             """INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID,
-                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato, minstesats)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato, minstesats, barnepensjon_dagsats)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         tilkjentYtelse.perioder.forEach { periode ->
             dbConnection.execute(sql) {
                 setParams {
@@ -62,6 +62,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     setDouble(9, periode.barnetillegg)
                     setLocalDate(10, periode.utbetalingsdato)
                     setEnumName(11, periode.minstesats)
+                    setDouble(12, periode.barnepensjonDagsats)
                 }
             }
         }
@@ -152,6 +153,7 @@ WHERE br.referanse = ?"""
         val utbetalingsdato = row.getLocalDateOrNull("utbetalingsdato") ?: tilDato.plusDays(1)
 
         val minstesats = row.getEnum<Minstesats>("minstesats")
+        val barnepensjonDagsats = row.getDouble("barnepensjon_dagsats")
 
         Triple(
             TilkjentYtelsePeriode(
@@ -165,6 +167,7 @@ WHERE br.referanse = ?"""
                 barnetillegg = barnetillegg,
                 utbetalingsdato = utbetalingsdato,
                 minsteSats = minstesats,
+                barnepensjonDagsats = barnepensjonDagsats
             ), row.getUUID("referanse"), row.getString("saksnummer")
         )
     }

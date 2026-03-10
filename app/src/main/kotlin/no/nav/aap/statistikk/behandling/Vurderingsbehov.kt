@@ -41,5 +41,6 @@ enum class Vurderingsbehov(val sortering: Int) {
         1
     ),
     REVURDER_SAMORDNING_BARNEPENSJON(1),
+    VEDTAKSLENGDE_MANUELT(1),
     ETABLERING_EGEN_VIRKSOMHET(1);
 }
