@@ -41,6 +41,7 @@ data class TilkjentYtelsePeriodeEntity(
     val barnetillegg: Double = 0.0,
     val utbetalingsdato: LocalDate,
     val minstesats: Minstesats,
+    val barnepensjonDagsats: Double = 0.0
 ) {
     companion object {
         fun fraDomene(tilkjentYtelsePeriode: TilkjentYtelsePeriode): TilkjentYtelsePeriodeEntity {
@@ -54,7 +55,8 @@ data class TilkjentYtelsePeriodeEntity(
                 barnetilleggSats = tilkjentYtelsePeriode.barnetilleggSats,
                 barnetillegg = tilkjentYtelsePeriode.barnetillegg,
                 utbetalingsdato = tilkjentYtelsePeriode.utbetalingsdato,
-                minstesats = tilkjentYtelsePeriode.minsteSats
+                minstesats = tilkjentYtelsePeriode.minsteSats,
+                barnepensjonDagsats = tilkjentYtelsePeriode.barnepensjonDagsats
             )
         }
     }
