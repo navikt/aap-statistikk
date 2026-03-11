@@ -6,7 +6,9 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
+import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import org.slf4j.LoggerFactory
@@ -42,26 +44,30 @@ class LagreSakinfoTilBigQueryJobbUtfører(
             SakStatistikkResultat.OK -> {}
             is SakStatistikkResultat.ManglerEnhet -> {
                 if (retryCount < enhetRetryConfig.maxRetries) {
+                    val delay = enhetRetryConfig.delaySeconds * (1L shl retryCount)
                     log.info(
                         "Enhet mangler for behandling ${resultat.behandlingId}, " +
                                 "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Reschedulerer om ${enhetRetryConfig.delaySeconds}s " +
+                                "Reschedulerer om ${delay}s " +
                                 "(forsøk ${retryCount + 1}/${enhetRetryConfig.maxRetries})."
                     )
                     jobbAppender.leggTilLagreSakTilBigQueryJobb(
                         repositoryProvider,
                         behandlingId,
-                        delayInSeconds = enhetRetryConfig.delaySeconds,
+                        delayInSeconds = delay,
                         enhetRetryCount = retryCount + 1,
                         originalHendelsestid = resultat.hendelsestid
                     )
                 } else {
-                    log.error(
-                        "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
-                                "for behandling ${resultat.behandlingId}, " +
-                                "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
-                    )
+                    val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
+                    LoggingKontekst(behandling.referanse).use {
+                        log.error(
+                            "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
+                                    "for behandling ${resultat.behandlingId}, " +
+                                    "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
+                                    "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
+                        )
+                    }
                     if (originalHendelsestid != null) {
                         sakStatistikkService.lagreMedOppgavedata(
                             behandlingId, originalHendelsestid, lagreUtenEnhet = true

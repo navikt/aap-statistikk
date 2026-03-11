@@ -1,13 +1,16 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.util.UUID
 
 class LagreSakinfoTilBigQueryJobbUtførerTest {
 
@@ -57,6 +60,39 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     }
 
     @Test
+    fun `delay er eksponentielt basert på retry-teller`() {
+        val behandlingId = BehandlingId(1)
+        val service = FakeSaksStatistikkService(
+            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
+        )
+        val jobbAppender = MockJobbAppender()
+
+        val utfører = lagUtfører(service, jobbAppender)
+
+        // retryCount=0 → delay = 60 * 2^0 = 60
+        utfører.utfør(JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(behandlingId))
+        assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(60L)
+
+        // retryCount=1 → delay = 60 * 2^1 = 120
+        utfører.utfør(
+            JobbInput(LagreSakinfoTilBigQueryJobb())
+                .medPayload(behandlingId)
+                .medParameter("enhetRetryCount", "1")
+                .medParameter("originalHendelsestid", testHendelsestid.toString())
+        )
+        assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(120L)
+
+        // retryCount=2 → delay = 60 * 2^2 = 240
+        utfører.utfør(
+            JobbInput(LagreSakinfoTilBigQueryJobb())
+                .medPayload(behandlingId)
+                .medParameter("enhetRetryCount", "2")
+                .medParameter("originalHendelsestid", testHendelsestid.toString())
+        )
+        assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(240L)
+    }
+
+    @Test
     fun `reschedulerer med økt retry-teller og bevarer originalHendelsestid`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
@@ -86,6 +122,10 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
         )
         val jobbAppender = MockJobbAppender()
+        val fakeBehandlingRepository = mockk<BehandlingRepository>(relaxed = true) {
+            every { hent(behandlingId) } returns mockk { every { referanse } returns UUID.randomUUID() }
+        }
+        every { fakeRepositoryProvider.provide<BehandlingRepository>() } returns fakeBehandlingRepository
 
         val utfører = lagUtfører(service, jobbAppender)
 
