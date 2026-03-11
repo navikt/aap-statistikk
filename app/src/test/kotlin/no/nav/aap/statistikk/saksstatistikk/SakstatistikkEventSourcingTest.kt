@@ -538,8 +538,51 @@ class SakstatistikkEventSourcingTest {
             .isEqualTo("Brev-Besluttersen")
     }
 
+    @Test
+    fun `opprettet-hendelse bruker mottattTidspunkt slik at enhet settes etter behandlingsflyt-hendelse`() {
+        // Gitt at opprettetTidspunkt er FØR BehandlingsflytHendelse (slik det skjer i produksjon),
+        // men mottattTidspunkt er ETTER. Uten fix vil oppgaven bli prosessert før avklaringsbehov
+        // er oppdatert av behandlingsflyten, og enhet vil bli null.
+        val tidligOpprettet = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
+        val behandlingsflytTidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0, 1)
+        val sendtTidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0, 2)
+
+        val behandling = lagBehandling(
+            hendelser = listOf(
+                lagBehandlingHendelse(
+                    tidspunkt = behandlingsflytTidspunkt,
+                    status = BehandlingStatus.UTREDES,
+                    avklaringsbehov = "5003"
+                )
+            )
+        )
+
+        val oppgaver = listOf(
+            lagOppgave(
+                avklaringsbehov = "5003",
+                hendelser = listOf(
+                    lagOppgaveHendelse(
+                        mottattTidspunkt = sendtTidspunkt,
+                        opprettetTidspunkt = tidligOpprettet,
+                        hendelseType = HendelseType.OPPRETTET,
+                        enhet = "0401",
+                        avklaringsbehov = "5003"
+                    )
+                )
+            )
+        )
+
+        val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
+
+        assertThat(snapshots.last().enhet)
+            .describedAs("Enhet skal være satt selv om opprettetTidspunkt er før behandlingsflyt-hendelse")
+            .isEqualTo("0401")
+    }
+
     private fun lagOppgaveHendelse(
-        tidspunkt: LocalDateTime,
+        tidspunkt: LocalDateTime? = null,
+        mottattTidspunkt: LocalDateTime = tidspunkt!!,
+        opprettetTidspunkt: LocalDateTime = tidspunkt ?: mottattTidspunkt,
         hendelseType: HendelseType,
         reservertAv: String? = null,
         enhet: String,
@@ -547,16 +590,16 @@ class SakstatistikkEventSourcingTest {
     ) = OppgaveHendelse(
         hendelse = hendelseType,
         oppgaveId = 123L,
-        mottattTidspunkt = tidspunkt,
-        sendtTid = tidspunkt,
+        mottattTidspunkt = mottattTidspunkt,
+        sendtTid = mottattTidspunkt,
         enhet = enhet,
         avklaringsbehovKode = avklaringsbehov,
         status = Oppgavestatus.OPPRETTET,
         reservertAv = reservertAv,
-        reservertTidspunkt = if (reservertAv != null) tidspunkt else null,
-        opprettetTidspunkt = tidspunkt,
+        reservertTidspunkt = if (reservertAv != null) mottattTidspunkt else null,
+        opprettetTidspunkt = opprettetTidspunkt,
         endretAv = reservertAv,
-        endretTidspunkt = tidspunkt,
+        endretTidspunkt = if (hendelseType != HendelseType.OPPRETTET) mottattTidspunkt else null,
         versjon = 1L
     )
 }

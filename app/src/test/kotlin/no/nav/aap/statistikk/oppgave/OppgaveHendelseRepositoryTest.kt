@@ -47,6 +47,67 @@ class OppgaveHendelseRepositoryTest {
     }
 
     @Test
+    fun `hendelser for id returneres sortert etter mottatt_tidspunkt - opprettet-hendelse uten endret_tidspunkt skal komme forst`(
+        @Postgres dataSource: DataSource
+    ) {
+        val oppgaveId = 456L
+        val tidlig = LocalDateTime.of(2025, 1, 1, 10, 0, 0)
+        val sent = LocalDateTime.of(2025, 1, 1, 11, 0, 0)
+
+        // OPPRETTET-hendelse har alltid null endret_tidspunkt
+        val opprettetHendelse = OppgaveHendelse(
+            hendelse = HendelseType.OPPRETTET,
+            oppgaveId = oppgaveId,
+            mottattTidspunkt = tidlig,
+            personIdent = null,
+            saksnummer = null,
+            behandlingRef = null,
+            journalpostId = null,
+            enhet = "4491",
+            avklaringsbehovKode = "5003",
+            status = Oppgavestatus.OPPRETTET,
+            opprettetTidspunkt = tidlig,
+            endretTidspunkt = null,
+            sendtTid = tidlig,
+            versjon = 1L,
+        )
+
+        // LUKKET-hendelse har endret_tidspunkt satt
+        val lukketHendelse = OppgaveHendelse(
+            hendelse = HendelseType.LUKKET,
+            oppgaveId = oppgaveId,
+            mottattTidspunkt = sent,
+            personIdent = null,
+            saksnummer = null,
+            behandlingRef = null,
+            journalpostId = null,
+            enhet = "4491",
+            avklaringsbehovKode = "5003",
+            status = Oppgavestatus.AVSLUTTET,
+            opprettetTidspunkt = tidlig,
+            endretTidspunkt = sent.minusSeconds(1),
+            sendtTid = sent,
+            versjon = 2L,
+        )
+
+        dataSource.transaction {
+            val repo = OppgaveHendelseRepositoryImpl(it)
+            repo.lagreHendelse(opprettetHendelse)
+            repo.lagreHendelse(lukketHendelse)
+        }
+
+        val hendelser = dataSource.transaction {
+            OppgaveHendelseRepositoryImpl(it).hentHendelserForId(oppgaveId)
+        }
+
+        assertThat(hendelser).hasSize(2)
+        assertThat(hendelser.first().hendelse)
+            .describedAs("OPPRETTET-hendelse skal komme forst, selv om endret_tidspunkt er null")
+            .isEqualTo(HendelseType.OPPRETTET)
+        assertThat(hendelser.last().hendelse).isEqualTo(HendelseType.LUKKET)
+    }
+
+    @Test
     fun `hent ut enhet for avklaringsbehov`(@Postgres dataSource: DataSource) {
         val oppgaveId = 40611L
         val behandlingRef = UUID.randomUUID()

@@ -83,7 +83,7 @@ class SakstatistikkEventSourcing {
         oppgave: Oppgave
     ) = OppgaveOpprettetHendelse(
         behandlingReferanse = behandlingReferanse,
-        tidspunkt = hendelse.opprettetTidspunkt,
+        tidspunkt = hendelse.mottattTidspunkt,
         avklaringsbehovKode = oppgave.avklaringsbehov,
         enhet = hendelse.enhet,
         reservertAv = hendelse.reservertAv

@@ -82,7 +82,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                    sendt_tid
             FROM oppgave_hendelser
             WHERE identifikator = ?
-            order by endret_tidspunkt, mottatt_tidspunkt
+            order by mottatt_tidspunkt
         """.trimIndent()
 
         return dbConnection.queryList(sql) {
