@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.10")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
 }
 
 kotlin {
