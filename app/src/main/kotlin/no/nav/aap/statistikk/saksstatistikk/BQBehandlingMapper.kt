@@ -81,7 +81,7 @@ class BQBehandlingMapper(
                 erSkjermet = erSkjermet,
                 ansvarligEnhet = ansvarligEnhet,
                 saksbehandler = saksbehandler,
-                endretTid = behandling.oppdatertTidspunkt(),
+                endretTid = snapshots.last().tidspunkt,
                 behandlingStatus = behandlingStatus(behandling)
             )
         )
