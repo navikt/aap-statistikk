@@ -156,7 +156,7 @@ class SaksStatistikkService(
             }
             sakstatistikkRepository.lagre(bqSak)
             PrometheusProvider.prometheus.sakDuplikat(false).increment()
-            if (siste != null) {
+            if (siste != null && siste.endretTid == bqSak.endretTid) {
                 log.info("Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. Ny: ${bqSak.tekniskTid}.")
             }
         } else {
