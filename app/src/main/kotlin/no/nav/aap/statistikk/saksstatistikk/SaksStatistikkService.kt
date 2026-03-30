@@ -157,9 +157,7 @@ class SaksStatistikkService(
             sakstatistikkRepository.lagre(bqSak)
             PrometheusProvider.prometheus.sakDuplikat(false).increment()
             if (siste != null) {
-                if (!Miljø.erProd()) {
-                    log.info("Ny hendelse med samme endretTid. Forrige: $siste. Ny: $bqSak.")
-                }
+                log.info("Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. Ny: ${bqSak.tekniskTid}.")
             }
         } else {
             log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
