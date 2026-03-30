@@ -48,7 +48,7 @@ spec:
        bh.utbetaling_id AS utbetaling_id,
        d.kodeverk AS diagnose_kodeverk,
        d.diagnosekode AS diagnose_kode,
-       d.bidiagnoser AS bidiagnoser_kode,
+       coalesce(d.bidiagnoser, json '[]') AS bidiagnoser_kode,
        rettighetstyper.perioder AS rettighetstype,
        ARRAY(
            SELECT STRUCT(fra_dato, til_dato)
