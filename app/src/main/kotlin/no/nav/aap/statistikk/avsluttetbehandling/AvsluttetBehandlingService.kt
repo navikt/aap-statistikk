@@ -88,7 +88,10 @@ class AvsluttetBehandlingService(
             avsluttetBehandling.perioderMedArbeidsopptrapping
         )
 
-        fritaksvurderingRepository.lagre(uthentetBehandling.id(), avsluttetBehandling.fritaksvurderinger)
+        fritaksvurderingRepository.lagre(
+            uthentetBehandling.id(),
+            avsluttetBehandling.fritaksvurderinger
+        )
 
         rettighetstypeperiodeRepository.lagre(
             avsluttetBehandling.behandlingsReferanse,
@@ -107,7 +110,7 @@ class AvsluttetBehandlingService(
         if (avsluttetBehandling.diagnoser != null) {
             diagnoseRepository.lagre(
                 DiagnoseEntity.fraDomene(
-                    avsluttetBehandling.diagnoser,
+                    avsluttetBehandling.diagnoser.copy(bidiagnoser = avsluttetBehandling.diagnoser.bidiagnoser.filter { it != "INGEN_DIAGNOSE" }),
                     avsluttetBehandling.behandlingsReferanse
                 )
             )
