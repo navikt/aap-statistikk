@@ -30,6 +30,17 @@ class LagreSakinfoTilBigQueryJobbUtfører(
 
     override fun utfør(input: JobbInput) {
         val behandlingId = input.payload<BehandlingId>()
+
+        val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
+
+        LoggingKontekst(behandling.referanse).use {
+            utførJobb(behandlingId, input)
+        }
+    }
+
+    private fun utførJobb(
+        behandlingId: BehandlingId, input: JobbInput
+    ) {
         val retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0
         val originalHendelsestid = input.optionalParameter("originalHendelsestid")
             ?.let { LocalDateTime.parse(it) }
@@ -59,15 +70,12 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         originalHendelsestid = resultat.hendelsestid
                     )
                 } else {
-                    val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
-                    LoggingKontekst(behandling.referanse).use {
-                        log.error(
-                            "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
-                                    "for behandling ${resultat.behandlingId}, " +
-                                    "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                    "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
-                        )
-                    }
+                    log.error(
+                        "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
+                                "for behandling ${resultat.behandlingId}, " +
+                                "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
+                                "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
+                    )
                     if (originalHendelsestid != null) {
                         sakStatistikkService.lagreMedOppgavedata(
                             behandlingId, originalHendelsestid, lagreUtenEnhet = true
