@@ -1,12 +1,12 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.sakDuplikat
+import no.nav.aap.statistikk.sammeEndretTid
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Clock.systemDefaultZone
@@ -158,6 +158,7 @@ class SaksStatistikkService(
             PrometheusProvider.prometheus.sakDuplikat(false).increment()
             if (siste != null && siste.endretTid == bqSak.endretTid) {
                 log.info("Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. ID: ${siste.sekvensNummer} og ${bqSak.sekvensNummer}.")
+                PrometheusProvider.prometheus.sammeEndretTid().increment()
             }
         } else {
             log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
