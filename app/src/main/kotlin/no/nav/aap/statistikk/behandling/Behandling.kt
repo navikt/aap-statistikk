@@ -7,15 +7,12 @@ import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import no.nav.aap.utbetaling.helved.toBase64
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 
 @JvmInline
 value class Versjon(val verdi: String)
-
-private val log = LoggerFactory.getLogger(Behandling::class.java)
 
 /**
  * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
