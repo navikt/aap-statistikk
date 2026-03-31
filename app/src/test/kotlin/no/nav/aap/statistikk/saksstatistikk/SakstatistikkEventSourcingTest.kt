@@ -356,7 +356,7 @@ class SakstatistikkEventSourcingTest {
 
     private fun lagOppgave(
         avklaringsbehov: String,
-        hendelser: List<OppgaveHendelse>
+        hendelser: List<no.nav.aap.statistikk.oppgave.OppgaveHendelse>
     ) = Oppgave(
         identifikator = 123L,
         avklaringsbehov = avklaringsbehov,
