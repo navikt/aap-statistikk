@@ -58,6 +58,8 @@ class BQBehandlingMapper(
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
+        log.info("Siste snapshot av type: ${snapshots.lastOrNull()?.kilde}")
+
         val ansvarligEnhet =
             if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots)
 
@@ -71,7 +73,7 @@ class BQBehandlingMapper(
         }
 
         if (behandling.mottattTid.isAfter(behandling.opprettetTid)) {
-            log.info("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
+            log.warn("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
         }
 
         return listOf(
