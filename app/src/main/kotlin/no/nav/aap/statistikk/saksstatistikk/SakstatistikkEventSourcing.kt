@@ -146,7 +146,8 @@ class SakstatistikkEventSourcing {
                     status = state.status,
                     avklaringsbehov = state.avklaringsbehov,
                     saksbehandler = state.saksbehandler,
-                    enhet = state.enhet
+                    enhet = state.enhet,
+                    kilde = hendelse.kilde
                 )
             }
     }
@@ -158,6 +159,7 @@ data class SakstatistikkSnapshot(
     val status: String?,
     val avklaringsbehov: String?,
     val saksbehandler: String?,
-    val enhet: String?
+    val enhet: String?,
+    val kilde: Kilde,
 )
 
