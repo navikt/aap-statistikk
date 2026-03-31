@@ -169,7 +169,6 @@ data class Behandling(
         }
         val sisteHendelse = this.hendelser.last()
         if (sisteHendelse.avklaringsBehov.isNullOrBlank()) {
-            log.info("Ingen avkl.funnet for siste hendelse. Behandling: ${this.referanse}. Antall hendelser: ${this.hendelser.size}")
             return this.copy(hendelser = this.hendelser.dropLast(1)).behandlingMetode()
         }
 
