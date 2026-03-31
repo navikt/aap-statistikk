@@ -84,6 +84,7 @@ class SakstatistikkEventSourcing {
     ) = OppgaveOpprettetHendelse(
         behandlingReferanse = behandlingReferanse,
         tidspunkt = hendelse.sendtTid,
+        mottattTidspunkt = hendelse.mottattTidspunkt,
         avklaringsbehovKode = oppgave.avklaringsbehov,
         enhet = hendelse.enhet,
         reservertAv = hendelse.reservertAv
@@ -96,6 +97,7 @@ class SakstatistikkEventSourcing {
     ) = OppgaveReservertHendelse(
         behandlingReferanse = behandlingReferanse,
         tidspunkt = hendelse.sendtTid,
+        mottattTidspunkt = hendelse.mottattTidspunkt,
         avklaringsbehovKode = oppgave.avklaringsbehov,
         reservertAv = hendelse.reservertAv.orEmpty(),
         enhet = hendelse.enhet
@@ -108,6 +110,7 @@ class SakstatistikkEventSourcing {
     ) = OppgaveLukketHendelse(
         behandlingReferanse = behandlingReferanse,
         tidspunkt = hendelse.sendtTid,
+        mottattTidspunkt = hendelse.mottattTidspunkt,
         avklaringsbehovKode = oppgave.avklaringsbehov
     )
 
@@ -118,6 +121,7 @@ class SakstatistikkEventSourcing {
     ) = OppgaveAvreservertHendelse(
         behandlingReferanse = behandlingReferanse,
         tidspunkt = hendelse.sendtTid,
+        mottattTidspunkt = hendelse.mottattTidspunkt,
         avklaringsbehovKode = oppgave.avklaringsbehov,
     )
 
@@ -128,6 +132,7 @@ class SakstatistikkEventSourcing {
     ) = OppgaveOppdatertHendelse(
         behandlingReferanse = behandlingReferanse,
         tidspunkt = hendelse.sendtTid,
+        mottattTidspunkt = hendelse.mottattTidspunkt,
         avklaringsbehovKode = oppgave.avklaringsbehov,
         reservertAv = hendelse.reservertAv,
         enhet = hendelse.enhet
