@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
@@ -17,6 +18,11 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     private val testConfig = EnhetRetryConfig(maxRetries = 3, delaySeconds = 60)
     private val fakeRepositoryProvider = mockk<RepositoryProvider>()
     private val testHendelsestid = LocalDateTime.of(2024, 1, 1, 10, 0)
+
+    @BeforeEach
+    fun settOppStandardMocks() {
+        every { fakeRepositoryProvider.provide<BehandlingRepository>() } returns mockk(relaxed = true)
+    }
 
     private fun lagUtfører(
         service: ISaksStatistikkService,
