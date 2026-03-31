@@ -27,3 +27,6 @@ fun MeterRegistry.årsakTilOpprettelseIkkeSatt(): Counter =
 
 fun MeterRegistry.sakDuplikat(erDuplikat: Boolean): Counter =
     this.counter("statistikk_sak_duplikat_total", listOf(Tag.of("duplikat", erDuplikat.toString())))
+
+fun MeterRegistry.sammeEndretTid(): Counter =
+    this.counter("statistikk_samme_endret_tid", listOf(Tag.of("kilde", kilde.name)))
