@@ -11,9 +11,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.BehandlingReferanse
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -63,6 +65,7 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
+import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import no.nav.aap.statistikk.sak.*
 import no.nav.aap.statistikk.saksstatistikk.*
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -197,7 +200,8 @@ fun konstruerMotor(
             lagrePostmottakHendelseJobb,
             LagreOppgaveHendelseJobb(),
             lagreSakinfoTilBigQueryJobb,
-            LagreStoppetHendelseJobb(jobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb)
+            LagreStoppetHendelseJobb(jobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb),
+            LagreTilbakekrevingHendelseJobb()
         )
     )
 }
@@ -283,6 +287,12 @@ class TestClient(private val client: RestClient<InputStream>, private val url: S
     fun postPostmottakHendelse(hendelse: DokumentflytStoppetHendelse) {
         client.post<DokumentflytStoppetHendelse, Any>(
             URI.create("$url/postmottak"), PostRequest(hendelse)
+        )
+    }
+
+    fun postTilbakekrevingshendelse(hendelse: TilbakekrevingsbehandlingOppdatertHendelse) {
+        client.post<TilbakekrevingsbehandlingOppdatertHendelse, Any>(
+            URI.create("$url/tilbakekrevingshendelse"), PostRequest(hendelse)
         )
     }
 }
