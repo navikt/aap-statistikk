@@ -20,6 +20,7 @@ import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepositoryImpl
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
+import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelseRepositoryImpl
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 
 
@@ -42,5 +43,6 @@ val postgresRepositoryRegistry = RepositoryRegistry()
     .register<MeldekortRepository>()
     .register<ArbeidsopptrappingperioderRepositoryImpl>()
     .register<FritaksvurderingRepositoryImpl>()
+    .register<TilbakekrevingHendelseRepositoryImpl>()
 
 fun DBConnection.provider(): RepositoryProvider = postgresRepositoryRegistry.provider(this)
