@@ -148,8 +148,9 @@ fun Application.startUp(
 
     monitor.subscribe(ApplicationStopped) { environment ->
         environment.log.info("Ktor-hendelsE: ApplicationStopped. Ktor har fullført nedstoppingen sin. Eventuelle requester og annet arbeid som ikke ble fullført innen timeout ble avbrutt.")
+        // Helt til slutt, nå som vi har stanset Motor, etc. Lukk database-koblingen.
+        @Suppress("TooGenericExceptionCaught")
         try {
-            // Helt til slutt, nå som vi har stanset Motor, etc. Lukk database-koblingen.
             dataSource.close()
         } catch (e: Exception) {
             log.info("Exception etter ApplicationStopped: ${e.message}", e)

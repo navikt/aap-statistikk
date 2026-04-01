@@ -41,7 +41,7 @@ class BQBehandlingMapperTest {
         }
 
         override fun lagreOppgave(oppgave: no.nav.aap.statistikk.oppgave.Oppgave) = 0L
-        override fun oppdaterOppgave(oppgave: no.nav.aap.statistikk.oppgave.Oppgave) {}
+        override fun oppdaterOppgave(oppgave: no.nav.aap.statistikk.oppgave.Oppgave) = Unit
         override fun hentOppgaverForEnhet(enhet: no.nav.aap.statistikk.enhet.Enhet) =
             emptyList<no.nav.aap.statistikk.oppgave.Oppgave>()
 
