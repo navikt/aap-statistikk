@@ -24,17 +24,18 @@ class SkjermingService(
             hentPersoner
                 .flatMap { it.adressebeskyttelse }
                 .any { it.gradering.erHemmelig() }
-        } catch (e: Exception) {
-            when (e) {
-                is HttpConnectTimeoutException, is java.net.ConnectException -> {
-                    logger.error(
-                        "Feilet kall til PDL (${e.javaClass.simpleName}). Returnerer false for skjerming. Se stackTrace.",
-                        e
-                    )
-                    false
-                }
-                else -> throw e
-            }
+        } catch (e: HttpConnectTimeoutException) {
+            logger.error(
+                "Feilet kall til PDL (HttpConnectTimeoutException). Returnerer false for skjerming. Se stackTrace.",
+                e
+            )
+            false
+        } catch (e: java.net.ConnectException) {
+            logger.error(
+                "Feilet kall til PDL (ConnectException). Returnerer false for skjerming. Se stackTrace.",
+                e
+            )
+            false
         }
     }
 }

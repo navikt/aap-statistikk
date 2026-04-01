@@ -239,8 +239,7 @@ object FakeBigQueryClient : IBigQueryClient {
         return true
     }
 
-    override fun <E> insert(table: BQTable<E>, value: E) {
-    }
+    override fun <E> insert(table: BQTable<E>, value: E) = Unit
 
     override fun <E> read(table: BQTable<E>): List<E> {
         return emptyList()
@@ -256,9 +255,7 @@ object FakeBigQueryClient : IBigQueryClient {
     override fun <E> insertMany(
         table: BQTable<E>,
         values: List<E>
-    ) {
-
-    }
+    ) = Unit
 }
 
 class TestClient(private val client: RestClient<InputStream>, private val url: String) {
