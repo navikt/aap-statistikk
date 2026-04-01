@@ -3,11 +3,14 @@ package no.nav.aap.statistikk.api
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
+import no.nav.aap.behandlingsflyt.kontrakt.behandling.BehandlingReferanse
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.TilbakekrevingBehandlingsstatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
@@ -34,8 +37,12 @@ import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
 import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingBehandlingStatus
+import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelse
+import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelseRepositoryImpl
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -431,6 +438,87 @@ class MottaStatistikkTest {
             assertThat(stoppetHendelseLagretCounter.count()).isEqualTo(0.0)
             assertThat(meterRegistry.lagretPostmottakHendelse().count()).isEqualTo(1.0)
         }
+
+        motor.stop()
+    }
+
+    @Test
+    fun `kan motta tilbakekrevingshendelse, og hendelse blir lagret`(
+        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
+    ) {
+        val behandlingRef = UUID.randomUUID()
+        val saksnummer = "123"
+        val stoppetBehandling = opprettTestStoppetBehandling(
+            behandlingReferanse = behandlingRef,
+            behandlingOpprettetTidspunkt = LocalDateTime.now(),
+            hendelsesTidspunkt = LocalDateTime.now(),
+            mottattTid = LocalDateTime.now(),
+            saksnummer = saksnummer,
+        )
+        val tilbakekrevingshendelse = TilbakekrevingsbehandlingOppdatertHendelse(
+            personIdent = "12345678901",
+            saksnummer = no.nav.aap.behandlingsflyt.kontrakt.sak.Saksnummer(saksnummer),
+            behandlingref = BehandlingReferanse(behandlingRef),
+            behandlingStatus = TilbakekrevingBehandlingsstatus.OPPRETTET,
+            sakOpprettet = LocalDateTime.of(2025, 1, 1, 10, 0, 0),
+            totaltFeilutbetaltBeløp = BigDecimal("12345.67"),
+            saksbehandlingURL = "https://tilbakekreving.nav.no/behandling/$behandlingRef",
+        )
+
+        val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
+        val testJobber = konstruerTestJobber()
+        val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
+        val lagreAvklaringsbehovHendelseJobb =
+            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
+        val lagreStoppetHendelseJobb =
+            LagreStoppetHendelseJobb(testJobber.motorJobbAppender, testJobber.lagreAvsluttetBehandlingTilBigQueryJobb)
+
+        val motor = konstruerMotor(
+            dataSource,
+            testJobber.motorJobbAppender,
+            FakeBQYtelseRepository(),
+            testJobber.resendSakstatistikkJobb,
+            lagreAvklaringsbehovHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            testJobber.lagreSakinfoTilBigQueryJobb
+        )
+
+        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
+
+        testKlient(
+            transactionExecutor,
+            motor,
+            azureConfig,
+            lagreStoppetHendelseJobb,
+            testJobber.motorJobbAppender,
+        ) {
+            // Opprett behandling først slik at tilbakekrevingshendelsen kan referere til den
+            postBehandlingsflytHendelse(stoppetBehandling)
+            testUtil.ventPåSvar()
+
+            postTilbakekrevingshendelse(tilbakekrevingshendelse)
+            testUtil.ventPåSvar()
+        }
+
+        val lagretHendelse = dataSource.transaction {
+            TilbakekrevingHendelseRepositoryImpl(it).hent(behandlingRef.toString())
+        }
+
+        assertThat(lagretHendelse)
+            .isNotNull()
+            .usingRecursiveComparison()
+            .ignoringFields("opprettetTid")
+            .isEqualTo(
+                TilbakekrevingHendelse(
+                    saksnummer = Saksnummer(saksnummer),
+                    behandlingRef = behandlingRef.toString(),
+                    behandlingStatus = TilbakekrevingBehandlingStatus.OPPRETTET,
+                    sakOpprettet = LocalDateTime.of(2025, 1, 1, 10, 0, 0),
+                    totaltFeilutbetaltBeløp = BigDecimal("12345.67"),
+                    saksbehandlingURL = "https://tilbakekreving.nav.no/behandling/$behandlingRef",
+                    opprettetTid = LocalDateTime.now(),
+                )
+            )
 
         motor.stop()
     }
