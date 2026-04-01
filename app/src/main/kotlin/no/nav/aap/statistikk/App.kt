@@ -46,6 +46,7 @@ import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
+import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
@@ -128,7 +129,8 @@ fun Application.startUp(
             lagreSakinfoTilBigQueryJobb,
             lagreAvsluttetBehandlingTilBigQueryJobb,
             lagreOppgaveJobb,
-            resendSakstatistikkJobb
+            resendSakstatistikkJobb,
+            LagreTilbakekrevingHendelseJobb()
         )
     )
 
@@ -230,6 +232,7 @@ fun Application.module(
                     transactionExecutor,
                     jobbAppender,
                 )
+                mottaTilbakekrevingshendelse(transactionExecutor, jobbAppender)
                 hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()
             }

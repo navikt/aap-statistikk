@@ -6,7 +6,13 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.route
 import com.papsign.ktor.openapigen.route.status
 import io.ktor.http.*
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.TilbakekrevingBehandlingsstatus
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
+import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingBehandlingStatus
+import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelse
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.oppgave.statistikk.HendelseType
@@ -59,6 +65,38 @@ fun NormalOpenAPIRoute.mottaStoppetBehandling(
         }
     }
 }
+
+fun NormalOpenAPIRoute.mottaTilbakekrevingshendelse(
+    transactionExecutor: TransactionExecutor,
+    jobbAppender: JobbAppender,
+) {
+    route("/tilbakekrevingshendelse").status(HttpStatusCode.Accepted) {
+        authorizedPost<Unit, String, TilbakekrevingsbehandlingOppdatertHendelse>(
+            modules = arrayOf(TagModule(listOf(Tags.MottaStatistikk))),
+            routeConfig = AuthorizationMachineToMachineConfig(
+                authorizedAzps = listOf(Azp.Behandlingsflyt.uuid)
+            )
+        ) { _, dto ->
+            transactionExecutor.withinTransaction { conn ->
+                val domene = dto.tilDomene()
+                val encodedSaksNummer = stringToNumber(dto.saksnummer.toString())
+
+                jobbAppender.leggTil(
+                    conn,
+                    JobbInput(LagreTilbakekrevingHendelseJobb())
+                        .medPayload(DefaultJsonMapper.toJson(domene))
+                        .medCallId()
+                        .forSak(encodedSaksNummer)
+                )
+            }
+
+            responder.respond(
+                HttpStatusCode.Accepted, "{}", pipeline
+            )
+        }
+    }
+}
+
 
 fun NormalOpenAPIRoute.mottaOppdatertBehandling(
     transactionExecutor: TransactionExecutor,
@@ -188,4 +226,27 @@ fun stringToNumber(string: String): Long {
     return IntStream.range(0, string.length)
         .mapToObj() { 10.0.pow(it.toDouble()) * string[it].code }
         .reduce { acc, curr -> acc + curr }.orElse(0.0).mod(1_000_000.0).roundToLong()
+}
+
+private fun TilbakekrevingsbehandlingOppdatertHendelse.tilDomene(): TilbakekrevingHendelse {
+    return TilbakekrevingHendelse(
+        saksnummer = Saksnummer(saksnummer.toString()),
+        behandlingRef = behandlingref.referanse.toString(),
+        behandlingStatus = behandlingStatus.tilDomene(),
+        sakOpprettet = sakOpprettet,
+        totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
+        saksbehandlingURL = saksbehandlingURL,
+        opprettetTid = LocalDateTime.now(),
+    )
+}
+
+private fun TilbakekrevingBehandlingsstatus.tilDomene(): TilbakekrevingBehandlingStatus {
+    return when (this) {
+        TilbakekrevingBehandlingsstatus.OPPRETTET -> TilbakekrevingBehandlingStatus.OPPRETTET
+        TilbakekrevingBehandlingsstatus.TIL_BEHANDLING -> TilbakekrevingBehandlingStatus.TIL_BEHANDLING
+        TilbakekrevingBehandlingsstatus.TIL_GODKJENNING -> TilbakekrevingBehandlingStatus.TIL_GODKJENNING
+        TilbakekrevingBehandlingsstatus.TIL_BESLUTTER -> TilbakekrevingBehandlingStatus.TIL_BESLUTTER
+        TilbakekrevingBehandlingsstatus.RETUR_FRA_BESLUTTER -> TilbakekrevingBehandlingStatus.RETUR_FRA_BESLUTTER
+        TilbakekrevingBehandlingsstatus.AVSLUTTET -> TilbakekrevingBehandlingStatus.AVSLUTTET
+    }
 }
