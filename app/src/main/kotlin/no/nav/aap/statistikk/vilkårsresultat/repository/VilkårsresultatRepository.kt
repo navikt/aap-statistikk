@@ -81,7 +81,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
                 }
             }
         }
-        log.info("Satte inn vilkårsresulat med db ID: $uthentetId")
+        log.info("Satte inn vilkårsresultat med db ID: $uthentetId")
 
         return uthentetId
     }
