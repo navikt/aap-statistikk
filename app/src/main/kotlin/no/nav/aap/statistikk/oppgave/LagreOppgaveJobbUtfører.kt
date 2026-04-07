@@ -6,6 +6,7 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
+import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
@@ -23,12 +24,19 @@ class LagreOppgaveJobbUtfører(
 
         val oppgave = hendelser.tilOppgave()
 
-        oppgaveHistorikkLagrer.lagre(oppgave)
+        val behandlingReferanse = oppgave.behandlingReferanse?.referanse
 
-        if (oppgave.behandlingReferanse != null) {
-            behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
-                if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
-                    MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(repositoryProvider, it.id())
+        LoggingKontekst(behandlingReferanse).use {
+            oppgaveHistorikkLagrer.lagre(oppgave)
+
+            if (oppgave.behandlingReferanse != null) {
+                behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
+                    if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
+                        MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
+                            repositoryProvider,
+                            it.id()
+                        )
+                    }
                 }
             }
         }
