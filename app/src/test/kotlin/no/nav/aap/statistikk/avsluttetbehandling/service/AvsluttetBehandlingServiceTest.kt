@@ -377,7 +377,7 @@ class AvsluttetBehandlingServiceTest {
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection
                 ),
-                opprettBigQueryLagringYtelseCallback = {},
+                hendelsePublisher = FakeHendelsePublisher(),
                 fritaksvurderingRepository = FritaksvurderingRepositoryImpl(dbConnection),
                 behandlingService = BehandlingService(
                     behandlingRepository,
