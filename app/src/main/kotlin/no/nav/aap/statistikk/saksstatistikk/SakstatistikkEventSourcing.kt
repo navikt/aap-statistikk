@@ -17,7 +17,7 @@ class SakstatistikkEventSourcing {
             konverterBehandlingHendelser(behandling) +
                     konverterOppgaveHendelser(oppgaver)
 
-        val sorterteHendelser = alleSakstatistikkHendelser.sortedBy { it.tidspunkt }
+        val sorterteHendelser = alleSakstatistikkHendelser.sorted()
 
         return byggSnapshots(sorterteHendelser)
     }
