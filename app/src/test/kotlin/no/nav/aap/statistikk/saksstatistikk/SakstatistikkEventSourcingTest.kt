@@ -582,6 +582,7 @@ class SakstatistikkEventSourcingTest {
     private fun lagOppgaveHendelse(
         tidspunkt: LocalDateTime? = null,
         mottattTidspunkt: LocalDateTime = tidspunkt!!,
+        sendtTid: LocalDateTime = mottattTidspunkt,
         opprettetTidspunkt: LocalDateTime = tidspunkt ?: mottattTidspunkt,
         hendelseType: HendelseType,
         reservertAv: String? = null,
@@ -591,7 +592,7 @@ class SakstatistikkEventSourcingTest {
         hendelse = hendelseType,
         oppgaveId = 123L,
         mottattTidspunkt = mottattTidspunkt,
-        sendtTid = mottattTidspunkt,
+        sendtTid = sendtTid,
         enhet = enhet,
         avklaringsbehovKode = avklaringsbehov,
         status = Oppgavestatus.OPPRETTET,

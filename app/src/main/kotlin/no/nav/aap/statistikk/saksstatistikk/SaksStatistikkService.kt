@@ -111,7 +111,9 @@ class SaksStatistikkService(
         val bqSakerMedOppgavedata = bqSaker.map {
             it.copy(
                 ansvarligEnhetKode = it.ansvarligEnhetKode ?: enhet,
-                saksbehandler = it.saksbehandler ?: saksbehandler
+                saksbehandler = it.saksbehandler ?: saksbehandler,
+                // Oppgave-hendelser etter originalHendelsestid skal ikke drive endretTid for dette snapshot-et
+                endretTid = minOf(it.endretTid, originalHendelsestid)
             )
         }
 
