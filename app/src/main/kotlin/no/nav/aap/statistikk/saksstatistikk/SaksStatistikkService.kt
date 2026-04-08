@@ -54,6 +54,9 @@ class SaksStatistikkService(
 
         val bqSaker =
             bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
+                // Oppgave-hendelser med sendtTid etter behandlingens siste hendelse skal ikke
+                // drive endretTid over behandlingens eget oppdatertTidspunkt.
+                .map { it.copy(endretTid = minOf(it.endretTid, behandling.oppdatertTidspunkt())) }
 
         val manglerEnhet = !lagreUtenEnhet && bqSaker.any {
             it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK

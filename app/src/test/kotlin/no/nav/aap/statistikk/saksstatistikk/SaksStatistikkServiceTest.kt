@@ -195,6 +195,109 @@ class SaksStatistikkServiceTest {
         }
     }
 
+    @Test
+    fun `lagreSakInfoTilBigquery skal ikke la oppgave-hendelse etter behandlingens oppdatertTidspunkt drive endretTid`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingsflytTid = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
+        val oppgaveSendtTid = behandlingsflytTid.plusSeconds(1) // oppgave ankommer ETTER behandling
+
+        dataSource.transaction { conn ->
+            val hendelsesService = HendelsesService(
+                sakService = SakService(SakRepositoryImpl(conn)),
+                avsluttetBehandlingService = mockk(relaxed = true),
+                personService = PersonService(PersonRepository(conn)),
+                meldekortRepository = MeldekortRepository(conn),
+                opprettBigQueryLagringSakStatistikkCallback = {},
+                behandlingService = BehandlingService(
+                    BehandlingRepository(conn),
+                    SkjermingService(FakePdlGateway(emptyMap()))
+                ),
+            )
+
+            hendelsesService.prosesserNyHendelse(
+                StoppetBehandling(
+                    saksnummer = "CCCC",
+                    sakStatus = SakStatus.UTREDES,
+                    behandlingReferanse = behandlingReferanse,
+                    relatertBehandling = null,
+                    behandlingOpprettetTidspunkt = behandlingsflytTid,
+                    mottattTid = behandlingsflytTid,
+                    behandlingStatus = BehandlingStatus.UTREDES,
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    soknadsFormat = Kanal.DIGITAL,
+                    ident = "1234567891",
+                    versjon = "1",
+                    vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                    årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+                    avklaringsbehov = listOf(
+                        AvklaringsbehovHendelseDto(
+                            avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                            status = AvklaringsbehovStatus.OPPRETTET,
+                            endringer = listOf(
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.OPPRETTET,
+                                    tidsstempel = behandlingsflytTid,
+                                    endretAv = "system",
+                                )
+                            ),
+                        )
+                    ),
+                    hendelsesTidspunkt = behandlingsflytTid,
+                    avsluttetBehandling = null,
+                    identerForSak = listOf("1234567891")
+                )
+            )
+
+            // Oppgave ankommer ETTER behandlingsflyt-hendelsen
+            val oppgaveIdentifikator = 99L
+            val person = PersonRepository(conn).hentPerson("1234567891")!!
+            val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
+            OppgaveRepositoryImpl(conn).lagreOppgave(
+                Oppgave(
+                    identifikator = oppgaveIdentifikator,
+                    avklaringsbehov = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    enhet = Enhet(enhetId, "4491"),
+                    person = person,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
+                    hendelser = emptyList(),
+                )
+            )
+            OppgaveHendelseRepositoryImpl(conn).lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = oppgaveIdentifikator,
+                    mottattTidspunkt = oppgaveSendtTid,
+                    personIdent = "1234567891",
+                    saksnummer = "CCCC",
+                    behandlingRef = behandlingReferanse,
+                    enhet = "4491",
+                    avklaringsbehovKode = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    status = Oppgavestatus.OPPRETTET,
+                    reservertAv = null,
+                    reservertTidspunkt = null,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    endretAv = null,
+                    endretTidspunkt = null,
+                    sendtTid = oppgaveSendtTid,
+                    versjon = 1L,
+                )
+            )
+
+            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+
+            konstruerSakstatistikkService(conn).lagreSakInfoTilBigquery(behandlingId)
+
+            val lagret = SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse)
+            assertThat(lagret.map { it.endretTid })
+                .describedAs("endretTid skal ikke overstige behandlingens oppdatertTidspunkt selv om oppgave ankommer senere")
+                .allSatisfy { assertThat(it).isBeforeOrEqualTo(behandlingsflytTid) }
+        }
+    }
+
     companion object {
 
         fun lagreHendelser(dataSource: DataSource): UUID {
