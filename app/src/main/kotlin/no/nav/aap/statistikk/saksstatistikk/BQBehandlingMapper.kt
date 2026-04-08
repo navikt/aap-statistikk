@@ -59,11 +59,18 @@ class BQBehandlingMapper(
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
         val sisteSnapshot = snapshots.lastOrNull()
+        val oppgaveDriverEndretTid = sisteSnapshot?.kilde == Kilde.Oppgave
         log.info(
             "Siste snapshot av type: ${sisteSnapshot?.kilde}, tidspunkt: ${sisteSnapshot?.tidspunkt}. " +
                     "behandling.oppdatertTidspunkt: ${behandling.oppdatertTidspunkt()}. " +
                     "Antall oppgaver: ${oppgaver.size}."
         )
+        if (oppgaveDriverEndretTid) {
+            val alleSnapshots = snapshots.joinToString(" | ") {
+                "${it.kilde}@${it.tidspunkt}(status=${it.status}, avkl=${it.avklaringsbehov}, enhet=${it.enhet})"
+            }
+            log.info("Oppgave driver endretTid. Alle snapshots: $alleSnapshots")
+        }
 
         val ansvarligEnhet =
             if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots)

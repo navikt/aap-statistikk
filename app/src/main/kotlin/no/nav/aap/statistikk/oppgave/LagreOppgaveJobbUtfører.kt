@@ -34,7 +34,8 @@ class LagreOppgaveJobbUtfører(
                     if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
                         MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
                             repositoryProvider,
-                            it.id()
+                            it.id(),
+                            triggerKilde = "oppgave"
                         )
                     }
                 }
