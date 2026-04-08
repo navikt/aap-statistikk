@@ -30,6 +30,7 @@ class LagreOppgaveHendelseJobbUtfører(
             oppgaveHendelseRepository.lagreHendelse(hendelse)
             flytJobbRepository.leggTil(
                 JobbInput(LagreOppgaveJobb()).medPayload(hendelse.oppgaveId.toString())
+                    .medParameter("oppgaveSendtTid", hendelse.sendtTid.toString())
                     .forSak(hendelse.saksnummer?.let(::stringToNumber) ?: hendelse.oppgaveId)
             )
             PrometheusProvider.prometheus.oppgaveHendelseMottatt(true).increment()

@@ -15,7 +15,8 @@ interface JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long = 0,
         enhetRetryCount: Int = 0,
-        originalHendelsestid: LocalDateTime? = null
+        originalHendelsestid: LocalDateTime? = null,
+        oppgaveSendtTid: LocalDateTime? = null
     )
 
     fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

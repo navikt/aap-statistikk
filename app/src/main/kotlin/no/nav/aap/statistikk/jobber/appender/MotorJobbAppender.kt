@@ -37,7 +37,8 @@ class MotorJobbAppender : JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long,
         enhetRetryCount: Int,
-        originalHendelsestid: LocalDateTime?
+        originalHendelsestid: LocalDateTime?,
+        oppgaveSendtTid: LocalDateTime?
     ) {
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
@@ -59,6 +60,10 @@ class MotorJobbAppender : JobbAppender {
 
         if (originalHendelsestid != null) {
             jobbInput.medParameter("originalHendelsestid", originalHendelsestid.toString())
+        }
+
+        if (oppgaveSendtTid != null) {
+            jobbInput.medParameter("oppgaveSendtTid", oppgaveSendtTid.toString())
         }
 
         leggTil(repositoryProvider, jobbInput)

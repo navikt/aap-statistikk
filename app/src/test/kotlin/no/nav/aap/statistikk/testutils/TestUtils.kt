@@ -542,7 +542,8 @@ class MockJobbAppender : JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long,
         enhetRetryCount: Int,
-        originalHendelsestid: LocalDateTime?
+        originalHendelsestid: LocalDateTime?,
+        oppgaveSendtTid: LocalDateTime?
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
         bigQueryJobber.add(behandlingId)
