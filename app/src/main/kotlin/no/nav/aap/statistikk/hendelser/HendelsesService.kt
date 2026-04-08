@@ -47,7 +47,8 @@ class HendelsesService(
                         it,
                         // Veldig hacky! Dette er for at jobben som kjører etter melding fra
                         // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
-                        delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L
+                        delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L,
+                        triggerKilde = "behandling"
                     )
                 }
             )
