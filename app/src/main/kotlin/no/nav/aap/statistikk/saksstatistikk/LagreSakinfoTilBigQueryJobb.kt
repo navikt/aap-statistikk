@@ -44,6 +44,12 @@ class LagreSakinfoTilBigQueryJobbUtfører(
         val retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0
         val originalHendelsestid = input.optionalParameter("originalHendelsestid")
             ?.let { LocalDateTime.parse(it) }
+        val triggerKilde = input.optionalParameter("triggerKilde") ?: "ukjent"
+
+        log.info(
+            "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount, " +
+                    "originalHendelsestid=$originalHendelsestid."
+        )
 
         val resultat = if (originalHendelsestid != null) {
             sakStatistikkService.lagreMedOppgavedata(behandlingId, originalHendelsestid)
@@ -67,7 +73,8 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         behandlingId,
                         delayInSeconds = delay,
                         enhetRetryCount = retryCount + 1,
-                        originalHendelsestid = resultat.hendelsestid
+                        originalHendelsestid = resultat.hendelsestid,
+                        triggerKilde = "retry($triggerKilde)"
                     )
                 } else {
                     log.error(
