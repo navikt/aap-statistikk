@@ -17,9 +17,9 @@ import kotlin.collections.orEmpty
 
 class BeregningsgrunnlagRepositoryImpl(
     private val dbConnection: DBConnection
-) : IBeregningsgrunnlagRepository {
-    companion object : RepositoryFactory<IBeregningsgrunnlagRepository> {
-        override fun konstruer(connection: DBConnection): IBeregningsgrunnlagRepository {
+) : BeregningsgrunnlagRepository {
+    companion object : RepositoryFactory<BeregningsgrunnlagRepository> {
+        override fun konstruer(connection: DBConnection): BeregningsgrunnlagRepository {
             return BeregningsgrunnlagRepositoryImpl(connection)
         }
     }

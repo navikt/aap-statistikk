@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.statistikk.behandling.BehandlingId
 import java.time.LocalDateTime
 
-interface ISaksStatistikkService {
+interface SaksStatistikkService {
     fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
         lagreUtenEnhet: Boolean = false

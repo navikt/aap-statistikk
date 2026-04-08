@@ -4,7 +4,7 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProviderJobbSpesifikasjon
-import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
+import no.nav.aap.statistikk.bigquery.BQYtelsesstatistikkRepository
 import java.util.*
 
 class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(private val ytelsesStatistikkTilBigQuery: YtelsesStatistikkTilBigQuery) :
@@ -16,7 +16,7 @@ class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(private val ytelsesStatist
 }
 
 class LagreAvsluttetBehandlingTilBigQueryJobb(
-    private val bqYtelseRepository: IBQYtelsesstatistikkRepository,
+    private val bqYtelseRepository: BQYtelsesstatistikkRepository,
 ) : ProviderJobbSpesifikasjon {
 
     override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {

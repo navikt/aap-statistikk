@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.meldekort
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.statistikk.behandling.BehandlingId
 
-interface IMeldekortRepository: Repository {
+interface MeldekortRepository: Repository {
     fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>)
     fun hentMeldekort(behandlingId: BehandlingId): List<Meldekort>
 }
