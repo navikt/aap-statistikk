@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
+private val log = LoggerFactory.getLogger(VilkårsresultatRepositoryImpl::class.java)
 
-class VilkårsresultatRepository(
+class VilkårsresultatRepositoryImpl(
     private val dbConnection: DBConnection
 ) : IVilkårsresultatRepository {
     companion object : RepositoryFactory<IVilkårsresultatRepository> {
         override fun konstruer(connection: DBConnection): IVilkårsresultatRepository {
-            return VilkårsresultatRepository(connection)
+            return VilkårsresultatRepositoryImpl(connection)
         }
     }
 

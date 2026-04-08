@@ -16,13 +16,13 @@ import java.util.*
 @JvmInline
 value class BehandlingId(val id: Long)
 
-class BehandlingRepository(
+class BehandlingRepositoryImpl(
     private val dbConnection: DBConnection, private val clock: Clock = Clock.systemDefaultZone()
 ) : IBehandlingRepository {
 
     companion object : RepositoryFactory<IBehandlingRepository> {
         override fun konstruer(connection: DBConnection): IBehandlingRepository {
-            return BehandlingRepository(connection)
+            return BehandlingRepositoryImpl(connection)
         }
     }
 

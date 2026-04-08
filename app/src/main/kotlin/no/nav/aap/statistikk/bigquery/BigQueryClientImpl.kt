@@ -5,9 +5,9 @@ import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
 
 
-private val log = LoggerFactory.getLogger(BigQueryClient::class.java)
+private val log = LoggerFactory.getLogger(BigQueryClientImpl::class.java)
 
-class BigQueryClient(options: BigQueryConfig, private val schemaRegistry: SchemaRegistry) :
+class BigQueryClientImpl(options: BigQueryConfig, private val schemaRegistry: SchemaRegistry) :
     IBigQueryClient {
     private val bigQuery: BigQuery = options.bigQueryOptions().service
     private val dataset = options.dataset

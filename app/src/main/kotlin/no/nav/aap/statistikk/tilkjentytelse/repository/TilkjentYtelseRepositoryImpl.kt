@@ -12,14 +12,14 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 
-private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.java)
+private val logger = LoggerFactory.getLogger(TilkjentYtelseRepositoryImpl::class.java)
 
-class TilkjentYtelseRepository(
+class TilkjentYtelseRepositoryImpl(
     private val dbConnection: DBConnection
 ) : ITilkjentYtelseRepository {
     companion object : RepositoryFactory<ITilkjentYtelseRepository> {
         override fun konstruer(connection: DBConnection): ITilkjentYtelseRepository {
-            return TilkjentYtelseRepository(connection)
+            return TilkjentYtelseRepositoryImpl(connection)
         }
     }
 

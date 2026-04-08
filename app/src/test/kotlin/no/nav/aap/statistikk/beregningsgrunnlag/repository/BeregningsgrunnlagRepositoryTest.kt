@@ -30,7 +30,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepositoryImpl(it)
 
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
@@ -41,7 +41,7 @@ class BeregningsgrunnlagRepositoryTest {
         }
 
         val hentBeregningsGrunnlag = dataSource.transaction {
-            BeregningsgrunnlagRepository(
+            BeregningsgrunnlagRepositoryImpl(
                 it
             ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
@@ -81,7 +81,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepositoryImpl(it)
 
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
@@ -93,7 +93,7 @@ class BeregningsgrunnlagRepositoryTest {
 
         val hentBeregningsGrunnlag =
             dataSource.transaction {
-                BeregningsgrunnlagRepository(
+                BeregningsgrunnlagRepositoryImpl(
                     it
                 ).hentBeregningsGrunnlag(behandlingsReferanse)
             }
@@ -146,7 +146,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepositoryImpl(it)
 
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
@@ -157,7 +157,7 @@ class BeregningsgrunnlagRepositoryTest {
         }
 
         val hentBeregningsGrunnlag = dataSource.transaction {
-            BeregningsgrunnlagRepository(
+            BeregningsgrunnlagRepositoryImpl(
                 it
             ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
@@ -200,7 +200,7 @@ class BeregningsgrunnlagRepositoryTest {
             )
 
         dataSource.transaction {
-            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepositoryImpl(it)
 
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
@@ -211,7 +211,7 @@ class BeregningsgrunnlagRepositoryTest {
         }
 
         val uthentet = dataSource.transaction {
-            BeregningsgrunnlagRepository(
+            BeregningsgrunnlagRepositoryImpl(
                 it
             ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
@@ -292,7 +292,7 @@ class BeregningsgrunnlagRepositoryTest {
             )
 
         dataSource.transaction {
-            val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(it)
+            val beregningsgrunnlagRepository = BeregningsgrunnlagRepositoryImpl(it)
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse = behandlingsReferanse,
@@ -310,7 +310,7 @@ class BeregningsgrunnlagRepositoryTest {
 
         val uthentet =
             dataSource.transaction {
-                BeregningsgrunnlagRepository(
+                BeregningsgrunnlagRepositoryImpl(
                     it
                 ).hentBeregningsGrunnlag(behandlingsReferanse)
             }
@@ -321,7 +321,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         val uthentet2 = dataSource.transaction {
-            BeregningsgrunnlagRepository(
+            BeregningsgrunnlagRepositoryImpl(
                 it
             ).hentBeregningsGrunnlag(behandlingsReferanse2)
         }
@@ -341,7 +341,7 @@ class BeregningsgrunnlagRepositoryTest {
 
             val (grunnlag1, grunnlag2) = grunnlag
             dataSource.transaction { conn ->
-                val beregningsgrunnlagRepository = BeregningsgrunnlagRepository(conn)
+                val beregningsgrunnlagRepository = BeregningsgrunnlagRepositoryImpl(conn)
 
                 beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                     MedBehandlingsreferanse(
@@ -361,7 +361,7 @@ class BeregningsgrunnlagRepositoryTest {
         var c = 0
         referanser.forEach { (ref, grunnlag) ->
             val hentet = dataSource.transaction {
-                BeregningsgrunnlagRepository(
+                BeregningsgrunnlagRepositoryImpl(
                     it
                 ).hentBeregningsGrunnlag(ref)
             }
@@ -392,17 +392,17 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(MedBehandlingsreferanse(behandlingsReferanse, grunnlag1))
         }
 
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(MedBehandlingsreferanse(behandlingsReferanse, grunnlag2))
         }
 
         val hentet = dataSource.transaction {
-            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(behandlingsReferanse)
+            BeregningsgrunnlagRepositoryImpl(it).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
         assertThat(hentet).hasSize(1)
@@ -446,7 +446,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
@@ -457,7 +457,7 @@ class BeregningsgrunnlagRepositoryTest {
 
         // Lagre igjen for å teste overskriving
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
@@ -467,7 +467,7 @@ class BeregningsgrunnlagRepositoryTest {
         }
 
         val hentet = dataSource.transaction {
-            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(behandlingsReferanse)
+            BeregningsgrunnlagRepositoryImpl(it).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
         assertThat(hentet).hasSize(1)
@@ -501,7 +501,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
@@ -512,7 +512,7 @@ class BeregningsgrunnlagRepositoryTest {
 
         // Lagre igjen for å overskrive
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
@@ -522,7 +522,7 @@ class BeregningsgrunnlagRepositoryTest {
         }
 
         val hentet = dataSource.transaction {
-            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(behandlingsReferanse)
+            BeregningsgrunnlagRepositoryImpl(it).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
         assertThat(hentet).hasSize(1)
@@ -556,7 +556,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
@@ -567,7 +567,7 @@ class BeregningsgrunnlagRepositoryTest {
 
         // Lagre igjen for å overskrive
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
@@ -594,7 +594,7 @@ class BeregningsgrunnlagRepositoryTest {
         opprettTestHendelse(dataSource, ref2, Saksnummer("REF02"))
 
         dataSource.transaction {
-            val repo = BeregningsgrunnlagRepository(it)
+            val repo = BeregningsgrunnlagRepositoryImpl(it)
             // Lagre noe for ref1 først for å dytte GRUNNLAG-sekvensen fremover
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
@@ -636,7 +636,7 @@ class BeregningsgrunnlagRepositoryTest {
         )
 
         dataSource.transaction {
-            BeregningsgrunnlagRepository(it).lagreBeregningsGrunnlag(
+            BeregningsgrunnlagRepositoryImpl(it).lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     ref2,
                     grunnlagYrkesskadeUfore
@@ -645,7 +645,7 @@ class BeregningsgrunnlagRepositoryTest {
         }
 
         val hentet = dataSource.transaction {
-            BeregningsgrunnlagRepository(it).hentBeregningsGrunnlag(ref2)
+            BeregningsgrunnlagRepositoryImpl(it).hentBeregningsGrunnlag(ref2)
         }
 
         assertThat(hentet).hasSize(1)

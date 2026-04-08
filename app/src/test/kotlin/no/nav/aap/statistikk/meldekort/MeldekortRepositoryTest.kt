@@ -47,7 +47,7 @@ class MeldekortRepositoryTest {
 
         assertDoesNotThrow {
             dataSource.transaction {
-                MeldekortRepository(it).lagre(
+                MeldekortRepositoryImpl(it).lagre(
                     behandlingId = behandling.id(),
                     meldekort = meldekort
                 )
@@ -55,7 +55,7 @@ class MeldekortRepositoryTest {
         }
 
         val uthentet = dataSource.transaction {
-            MeldekortRepository(it).hentMeldekort(
+            MeldekortRepositoryImpl(it).hentMeldekort(
                 behandlingId = behandling.id()
             )
         }
@@ -102,14 +102,14 @@ class MeldekortRepositoryTest {
 
 
         dataSource.transaction {
-            MeldekortRepository(it).lagre(
+            MeldekortRepositoryImpl(it).lagre(
                 behandlingId = behandling.id(),
                 meldekort = meldekort
             )
         }
 
         val uthentet = dataSource.transaction {
-            MeldekortRepository(it).hentMeldekort(
+            MeldekortRepositoryImpl(it).hentMeldekort(
                 behandlingId = behandling.id()
             )
         }

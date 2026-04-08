@@ -20,7 +20,7 @@ import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.*
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
-import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepositoryImpl
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
@@ -199,7 +199,7 @@ class MottaStatistikkTest {
             TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
 
             val (behandling, bqBehandlinger) = dataSource.transaction {
-                val behandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!
+                val behandling = BehandlingRepositoryImpl(it).hent(hendelse.behandlingReferanse)!!
                 Pair(
                     behandling,
                     it.provider().provide<SakstatistikkRepository>()
@@ -277,7 +277,7 @@ class MottaStatistikkTest {
 
             val bqBehandlinger = dataSource.transaction {
                 val behandling =
-                    BehandlingRepository(it).hent(meldekorthendelse.behandlingReferanse)!!
+                    BehandlingRepositoryImpl(it).hent(meldekorthendelse.behandlingReferanse)!!
 
                 it.provider().provide<SakstatistikkRepository>()
                     .hentAlleHendelserPåBehandling(behandling.referanse)
@@ -345,7 +345,7 @@ class MottaStatistikkTest {
                 it
             )
             val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer.let(::Saksnummer))
-            val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
+            val uthentetBehandling = BehandlingRepositoryImpl(it).hent(hendelse.behandlingReferanse)
             Pair(uthentetSak, uthentetBehandling)
         }
 

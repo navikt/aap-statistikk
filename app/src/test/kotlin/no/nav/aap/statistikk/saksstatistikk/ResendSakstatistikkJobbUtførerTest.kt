@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
-import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepositoryImpl
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
 import org.assertj.core.api.Assertions.assertThat
@@ -14,7 +14,7 @@ class ResendSakstatistikkJobbUtførerTest {
     @Test
     fun `start jobb`(@Postgres dataSource: DataSource) {
         val ref = SaksStatistikkServiceTest.lagreHendelser(dataSource)
-        val behandlingId = dataSource.transaction { BehandlingRepository(it).hent(ref) }?.id!!
+        val behandlingId = dataSource.transaction { BehandlingRepositoryImpl(it).hent(ref) }?.id!!
 
         val input = JobbInput(
             jobb = ResendSakstatistikkJobb()

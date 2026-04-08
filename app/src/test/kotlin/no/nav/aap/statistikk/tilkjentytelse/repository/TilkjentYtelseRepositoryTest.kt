@@ -42,7 +42,7 @@ class TilkjentYtelseRepositoryTest {
             )
 
         dataSource.transaction { conn ->
-            TilkjentYtelseRepository(conn).lagreTilkjentYtelse(tilkjentYtelse)
+            TilkjentYtelseRepositoryImpl(conn).lagreTilkjentYtelse(tilkjentYtelse)
         }
 
         val nyttTilkjentYtelse = tilkjentYtelse.copy(
@@ -64,11 +64,11 @@ class TilkjentYtelseRepositoryTest {
         )
 
         dataSource.transaction { conn ->
-            TilkjentYtelseRepository(conn).lagreTilkjentYtelse(nyttTilkjentYtelse)
+            TilkjentYtelseRepositoryImpl(conn).lagreTilkjentYtelse(nyttTilkjentYtelse)
         }
 
         val hentetUt = dataSource.transaction { conn ->
-            TilkjentYtelseRepository(conn).hentForBehandling(behandlingsReferanse)
+            TilkjentYtelseRepositoryImpl(conn).hentForBehandling(behandlingsReferanse)
         }
 
         assertThat(hentetUt?.perioder?.first()?.dagsats).isEqualTo(2000.0)
@@ -117,7 +117,7 @@ class TilkjentYtelseRepositoryTest {
         opprettTestHendelse(dataSource, behandlingsReferanse, saksnummer)
 
         val id = dataSource.transaction { conn ->
-            val tilkjentYtelseRepository = TilkjentYtelseRepository(conn)
+            val tilkjentYtelseRepository = TilkjentYtelseRepositoryImpl(conn)
 
 
             tilkjentYtelseRepository.lagreTilkjentYtelse(
@@ -128,7 +128,7 @@ class TilkjentYtelseRepositoryTest {
         }
 
         val uthentet = dataSource.transaction { conn ->
-            val tilkjentYtelseRepository = TilkjentYtelseRepository(conn)
+            val tilkjentYtelseRepository = TilkjentYtelseRepositoryImpl(conn)
             tilkjentYtelseRepository.hentTilkjentYtelse(id.toInt())
         }
 
