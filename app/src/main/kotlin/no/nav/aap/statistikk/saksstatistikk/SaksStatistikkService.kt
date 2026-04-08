@@ -54,9 +54,15 @@ class SaksStatistikkService(
 
         val bqSaker =
             bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
-                // Oppgave-hendelser med sendtTid etter behandlingens siste hendelse skal ikke
-                // drive endretTid over behandlingens eget oppdatertTidspunkt.
-                .map { it.copy(endretTid = minOf(it.endretTid, behandling.oppdatertTidspunkt())) }
+
+        bqSaker.forEach {
+            log.info(
+                "lagreSakInfoTilBigquery: endretTid=${it.endretTid}, " +
+                        "behandling.oppdatertTidspunkt=${behandling.oppdatertTidspunkt()}, " +
+                        "oppgaveDrivenEndretTid=${it.endretTid.isAfter(behandling.oppdatertTidspunkt())}, " +
+                        "status=${it.behandlingStatus}."
+            )
+        }
 
         val manglerEnhet = !lagreUtenEnhet && bqSaker.any {
             it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
@@ -120,6 +126,15 @@ class SaksStatistikkService(
             )
         }
 
+        bqSakerMedOppgavedata.forEach {
+            log.info(
+                "lagreMedOppgavedata: endretTid=${it.endretTid}, " +
+                        "originalHendelsestid=$originalHendelsestid, " +
+                        "oppgaveDrivenEndretTid=${it.endretTid == originalHendelsestid && bqSaker.any { bq -> bq.endretTid.isAfter(originalHendelsestid) }}, " +
+                        "status=${it.behandlingStatus}."
+            )
+        }
+
         val manglerEnhet = !lagreUtenEnhet && bqSakerMedOppgavedata.any {
             it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
         }
@@ -162,7 +177,17 @@ class SaksStatistikkService(
             sakstatistikkRepository.lagre(bqSak)
             PrometheusProvider.prometheus.sakDuplikat(false).increment()
             if (siste != null && siste.endretTid == bqSak.endretTid) {
-                log.info("Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. ID: ${siste.sekvensNummer} og ${bqSak.sekvensNummer}.")
+                log.info(
+                    "Ny hendelse med samme endretTid. " +
+                            "Forrige teknisk tid: ${siste.tekniskTid}. " +
+                            "Ny: ${bqSak.tekniskTid}. " +
+                            "Referanse: ${bqSak.behandlingUUID}. " +
+                            "ID: ${siste.sekvensNummer} og ${bqSak.sekvensNummer}. " +
+                            "EndretTid: ${bqSak.endretTid}. " +
+                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
+                            "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                            "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+                )
                 PrometheusProvider.prometheus.sammeEndretTid().increment()
             }
         } else {

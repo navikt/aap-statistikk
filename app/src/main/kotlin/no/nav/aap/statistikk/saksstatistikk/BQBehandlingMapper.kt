@@ -58,7 +58,12 @@ class BQBehandlingMapper(
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
-        log.info("Siste snapshot av type: ${snapshots.lastOrNull()?.kilde}")
+        val sisteSnapshot = snapshots.lastOrNull()
+        log.info(
+            "Siste snapshot av type: ${sisteSnapshot?.kilde}, tidspunkt: ${sisteSnapshot?.tidspunkt}. " +
+                    "behandling.oppdatertTidspunkt: ${behandling.oppdatertTidspunkt()}. " +
+                    "Antall oppgaver: ${oppgaver.size}."
+        )
 
         val ansvarligEnhet =
             if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots)
