@@ -4,7 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 class ResendHendelseService(
     private val sakService: SakService,
     private val personService: PersonService,
-    private val behandlingRepository: IBehandlingRepository,
+    private val behandlingRepository: BehandlingRepository,
     private val behandlingService: BehandlingService,
     private val opprettRekjørSakstatistikkCallback: (BehandlingId) -> Unit,
 ) {

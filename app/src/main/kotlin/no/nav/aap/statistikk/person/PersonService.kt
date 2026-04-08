@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.person
 
 import no.nav.aap.komponenter.repository.RepositoryProvider
 
-class PersonService(private val personRepository: IPersonRepository) {
+class PersonService(private val personRepository: PersonRepository) {
     constructor(repositoryProvider: RepositoryProvider) : this(repositoryProvider.provide())
 
     fun hentEllerLagrePerson(ident: String): Person {

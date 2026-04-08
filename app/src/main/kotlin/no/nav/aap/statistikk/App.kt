@@ -92,7 +92,7 @@ fun main() {
 fun Application.startUp(
     dbConfig: DbConfig,
     azureConfig: AzureConfig,
-    bigQueryClientYtelse: IBigQueryClient,
+    bigQueryClientYtelse: BigQueryClient,
     gatewayProvider: GatewayProvider
 ) {
     log.info("Starter.")

@@ -4,7 +4,7 @@ import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.statistikk.behandling.BehandlingId
 import java.util.*
 
-interface IVilkårsresultatRepository : Repository {
+interface VilkårsresultatRepository : Repository {
     fun lagreVilkårsResultat(
         vilkårsresultat: VilkårsResultatEntity,
         behandlingId: BehandlingId

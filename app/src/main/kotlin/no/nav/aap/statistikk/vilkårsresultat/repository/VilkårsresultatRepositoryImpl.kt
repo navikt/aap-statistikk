@@ -12,9 +12,9 @@ private val log = LoggerFactory.getLogger(VilkårsresultatRepositoryImpl::class.
 
 class VilkårsresultatRepositoryImpl(
     private val dbConnection: DBConnection
-) : IVilkårsresultatRepository {
-    companion object : RepositoryFactory<IVilkårsresultatRepository> {
-        override fun konstruer(connection: DBConnection): IVilkårsresultatRepository {
+) : VilkårsresultatRepository {
+    companion object : RepositoryFactory<VilkårsresultatRepository> {
+        override fun konstruer(connection: DBConnection): VilkårsresultatRepository {
             return VilkårsresultatRepositoryImpl(connection)
         }
     }

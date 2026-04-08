@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 private val log = LoggerFactory.getLogger(BigQueryClientImpl::class.java)
 
 class BigQueryClientImpl(options: BigQueryConfig, private val schemaRegistry: SchemaRegistry) :
-    IBigQueryClient {
+    BigQueryClient {
     private val bigQuery: BigQuery = options.bigQueryOptions().service
     private val dataset = options.dataset
 

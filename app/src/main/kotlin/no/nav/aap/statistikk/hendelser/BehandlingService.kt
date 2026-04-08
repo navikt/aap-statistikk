@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class BehandlingService(
-    private val behandlingRepository: IBehandlingRepository,
+    private val behandlingRepository: BehandlingRepository,
     private val skjermingService: SkjermingService
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(

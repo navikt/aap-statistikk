@@ -17,7 +17,7 @@ import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
-import no.nav.aap.statistikk.meldekort.IMeldekortRepository
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
@@ -139,7 +139,7 @@ class HendelsesServiceTest {
         sakRepository: FakeSakRepository,
         diagnoseRepository: FakeDiagnoseRepository,
         behandlingRepository: FakeBehandlingRepository,
-        meldekortRepository: IMeldekortRepository,
+        meldekortRepository: MeldekortRepository,
         skjermingService: SkjermingService,
         rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
         opprettBigQueryLagringCallback: (BehandlingId) -> Unit

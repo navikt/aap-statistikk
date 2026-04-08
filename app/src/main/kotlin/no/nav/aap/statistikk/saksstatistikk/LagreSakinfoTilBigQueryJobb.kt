@@ -20,7 +20,7 @@ data class EnhetRetryConfig(
 )
 
 class LagreSakinfoTilBigQueryJobbUtfører(
-    private val sakStatistikkService: ISaksStatistikkService,
+    private val sakStatistikkService: SaksStatistikkService,
     private val jobbAppender: JobbAppender,
     private val repositoryProvider: RepositoryProvider,
     private val enhetRetryConfig: EnhetRetryConfig = EnhetRetryConfig()

@@ -7,7 +7,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.LoggingKontekst
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
 
@@ -15,7 +15,7 @@ import no.nav.aap.statistikk.saksstatistikk.Konstanter
 class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val oppgaveHistorikkLagrer: OppgaveHistorikkLagrer,
-    private val behandlingRepository: IBehandlingRepository,
+    private val behandlingRepository: BehandlingRepository,
     private val repositoryProvider: RepositoryProvider,
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {

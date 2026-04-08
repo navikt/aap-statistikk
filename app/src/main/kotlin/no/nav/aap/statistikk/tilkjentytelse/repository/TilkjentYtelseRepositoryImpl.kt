@@ -16,9 +16,9 @@ private val logger = LoggerFactory.getLogger(TilkjentYtelseRepositoryImpl::class
 
 class TilkjentYtelseRepositoryImpl(
     private val dbConnection: DBConnection
-) : ITilkjentYtelseRepository {
-    companion object : RepositoryFactory<ITilkjentYtelseRepository> {
-        override fun konstruer(connection: DBConnection): ITilkjentYtelseRepository {
+) : TilkjentYtelseRepository {
+    companion object : RepositoryFactory<TilkjentYtelseRepository> {
+        override fun konstruer(connection: DBConnection): TilkjentYtelseRepository {
             return TilkjentYtelseRepositoryImpl(connection)
         }
     }

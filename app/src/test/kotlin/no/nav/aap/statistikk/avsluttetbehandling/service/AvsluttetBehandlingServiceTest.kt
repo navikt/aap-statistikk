@@ -13,7 +13,7 @@ import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepositoryImpl
 import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClientImpl
-import no.nav.aap.statistikk.bigquery.IBigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepositoryImpl
@@ -364,7 +364,7 @@ class AvsluttetBehandlingServiceTest {
         dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig,
         clock: Clock = Clock.systemUTC()
-    ): Pair<IBigQueryClient, AvsluttetBehandlingService> {
+    ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClientImpl(bigQueryConfig, schemaRegistry)
 
         val behandlingRepository = BehandlingRepositoryImpl(dbConnection, clock)

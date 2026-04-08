@@ -7,7 +7,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
@@ -41,7 +41,7 @@ class MotorJobbAppender : JobbAppender {
         triggerKilde: String
     ) {
         val behandling =
-            repositoryProvider.provide<IBehandlingRepository>()
+            repositoryProvider.provide<BehandlingRepository>()
                 .hent(behandlingId)
         if (behandling.typeBehandling !in Konstanter.interessanteBehandlingstyper) {
             log.info("Prøver å legge til uinteressant behandling til saksstatikk. Ignorerer. Behandling: $behandlingId. Referanse: ${behandling.referanse}")
@@ -73,7 +73,7 @@ class MotorJobbAppender : JobbAppender {
         lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
     ) {
         val behandling =
-            provider.provide<IBehandlingRepository>()
+            provider.provide<BehandlingRepository>()
                 .hent(behandlingId)
         val saksnummer = behandling.sak.saksnummer
         leggTil(
@@ -91,7 +91,7 @@ class MotorJobbAppender : JobbAppender {
     ) {
         log.info("Starter resending-jobb. BehandlingId: $behandlingId")
         val behandling =
-            repositoryProvider.provide<IBehandlingRepository>()
+            repositoryProvider.provide<BehandlingRepository>()
                 .hent(behandlingId)
         val saksnummer = behandling.sak.saksnummer
         leggTil(

@@ -9,7 +9,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
-import no.nav.aap.statistikk.meldekort.IMeldekortRepository
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -21,7 +21,7 @@ class HendelsesService(
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
     private val personService: PersonService,
     private val behandlingService: BehandlingService,
-    private val meldekortRepository: IMeldekortRepository,
+    private val meldekortRepository: MeldekortRepository,
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)

@@ -25,7 +25,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     }
 
     private fun lagUtfører(
-        service: ISaksStatistikkService,
+        service: SaksStatistikkService,
         jobbAppender: MockJobbAppender,
         config: EnhetRetryConfig = testConfig
     ) = LagreSakinfoTilBigQueryJobbUtfører(service, jobbAppender, fakeRepositoryProvider, config)
@@ -198,7 +198,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
 
 private class FakeSaksStatistikkService(
     private val resultat: SakStatistikkResultat
-) : ISaksStatistikkService {
+) : SaksStatistikkService {
     var kallteller = 0
     var sisteKallLagreUtenEnhet = false
     var sisteKallOriginalHendelsestid: LocalDateTime? = null
