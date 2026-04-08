@@ -14,7 +14,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 
-class SaksStatistikkService(
+class SaksStatistikkServiceImpl(
     private val behandlingService: BehandlingService,
     private val sakstatistikkRepository: SakstatistikkRepository,
     private val bqBehandlingMapper: BQBehandlingMapper,
@@ -26,8 +26,8 @@ class SaksStatistikkService(
             gatewayProvider: GatewayProvider,
             repositoryProvider: RepositoryProvider,
             clock: Clock = systemDefaultZone()
-        ): SaksStatistikkService {
-            return SaksStatistikkService(
+        ): SaksStatistikkServiceImpl {
+            return SaksStatistikkServiceImpl(
                 behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
                 sakstatistikkRepository = repositoryProvider.provide(),
                 bqBehandlingMapper = BQBehandlingMapper.konstruer(

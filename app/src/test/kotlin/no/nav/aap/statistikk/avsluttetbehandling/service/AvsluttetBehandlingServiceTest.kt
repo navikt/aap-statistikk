@@ -10,9 +10,10 @@ import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepositoryImpl
 import no.nav.aap.statistikk.bigquery.BQYtelseRepository
-import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryClientImpl
+import no.nav.aap.statistikk.bigquery.IBigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepositoryImpl
@@ -23,9 +24,9 @@ import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepositoryImpl
 import no.nav.aap.statistikk.vilkårsresultat.*
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepositoryImpl
 import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.util.DoubleComparator
@@ -176,8 +177,8 @@ class AvsluttetBehandlingServiceTest {
             LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
                 ytelsesStatistikkTilBigQuery = YtelsesStatistikkTilBigQuery(
                     bqRepository = bqYtelseRepository,
-                    behandlingRepository = BehandlingRepository(it),
-                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
+                    behandlingRepository = BehandlingRepositoryImpl(it),
+                    rettighetstypeperiodeRepository = RettighetstypeperiodeRepositoryImpl(it),
                     diagnoseRepository = DiagnoseRepositoryImpl(it),
                     clock = clock
                 )
@@ -228,7 +229,7 @@ class AvsluttetBehandlingServiceTest {
         assertThat(uthentetFritaksvurdering).isEqualTo(listOf(fritaksvurdering))
 
         val uthentetTilkjentYtelse =
-            dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
+            dataSource.transaction { TilkjentYtelseRepositoryImpl(it).hentTilkjentYtelse(1) }
         assertThat(uthentetTilkjentYtelse).isNotNull()
         assertThat(uthentetTilkjentYtelse.perioder).hasSize(2)
         assertThat(uthentetTilkjentYtelse.perioder).usingRecursiveComparison()
@@ -345,7 +346,7 @@ class AvsluttetBehandlingServiceTest {
             service.lagre(avsluttetBehandling)
         }
         val uthentet = dataSource.transaction {
-            dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
+            dataSource.transaction { TilkjentYtelseRepositoryImpl(it).hentTilkjentYtelse(1) }
         }
 
         assertThat(uthentet.perioder).usingRecursiveComparison()
@@ -363,17 +364,17 @@ class AvsluttetBehandlingServiceTest {
         dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig,
         clock: Clock = Clock.systemUTC()
-    ): Pair<BigQueryClient, AvsluttetBehandlingService> {
-        val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
+    ): Pair<IBigQueryClient, AvsluttetBehandlingService> {
+        val bigQueryClient = BigQueryClientImpl(bigQueryConfig, schemaRegistry)
 
-        val behandlingRepository = BehandlingRepository(dbConnection, clock)
+        val behandlingRepository = BehandlingRepositoryImpl(dbConnection, clock)
         val service =
             AvsluttetBehandlingService(
-                TilkjentYtelseRepository(dbConnection),
-                BeregningsgrunnlagRepository(dbConnection),
-                VilkårsresultatRepository(dbConnection),
+                TilkjentYtelseRepositoryImpl(dbConnection),
+                BeregningsgrunnlagRepositoryImpl(dbConnection),
+                VilkårsresultatRepositoryImpl(dbConnection),
                 diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
-                rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
+                rettighetstypeperiodeRepository = RettighetstypeperiodeRepositoryImpl(dbConnection),
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection
                 ),

@@ -6,7 +6,7 @@ import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepositoryImpl
 import no.nav.aap.statistikk.person.Person
-import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonRepositoryImpl
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.Sak
@@ -56,7 +56,7 @@ class LagreOppgaveJobbUtførerTest {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
-                    personService = PersonService(PersonRepository(it)),
+                    personService = PersonService(PersonRepositoryImpl(it)),
                     oppgaveRepository = OppgaveRepositoryImpl(it),
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
@@ -348,7 +348,7 @@ class LagreOppgaveJobbUtførerTest {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
-                    personService = PersonService(PersonRepository(it)),
+                    personService = PersonService(PersonRepositoryImpl(it)),
                     oppgaveRepository = OppgaveRepositoryImpl(it),
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
@@ -369,7 +369,7 @@ class LagreOppgaveJobbUtførerTest {
     private fun settOppEksisterendeBehandling(dataSource: DataSource): Behandling {
         return dataSource.transaction {
             val personUtenId = Person(ident = "123")
-            val id = PersonRepository(it).lagrePerson(personUtenId)
+            val id = PersonRepositoryImpl(it).lagrePerson(personUtenId)
             val sak = Sak(
                 saksnummer = Saksnummer("123"),
                 person = personUtenId.medId(id),
@@ -388,7 +388,7 @@ class LagreOppgaveJobbUtførerTest {
                 søknadsformat = SøknadsFormat.DIGITAL,
                 oppdatertTidspunkt = LocalDateTime.now().minusSeconds(10)
             )
-            val behandlingId = BehandlingRepository(it).opprettBehandling(behandling)
+            val behandlingId = BehandlingRepositoryImpl(it).opprettBehandling(behandling)
             behandling.copy(id = behandlingId)
         }
     }

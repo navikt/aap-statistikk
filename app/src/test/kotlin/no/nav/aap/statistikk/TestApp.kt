@@ -3,7 +3,7 @@ package no.nav.aap.statistikk
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryClientImpl
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.bigQueryContainer
@@ -42,7 +42,7 @@ fun main() {
     logger.info("Postgres Config: $pgConfig")
     val bqConfig: BigQueryConfig = bigQueryContainer()
 
-    val bigQueryClient = BigQueryClient(bqConfig, schemaRegistry)
+    val bigQueryClient = BigQueryClientImpl(bqConfig, schemaRegistry)
     // Hack fordi emulator ikke støtter migrering
     schemaRegistry.forEach { (_, schema) ->
         bigQueryClient.create(schema)

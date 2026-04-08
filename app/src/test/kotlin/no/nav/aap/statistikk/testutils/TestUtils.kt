@@ -62,7 +62,7 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
-import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonRepositoryImpl
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
@@ -447,7 +447,7 @@ fun opprettTestHendelse(
 
 fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     return dataSource.transaction { conn ->
-        val personRepository = PersonRepository(conn)
+        val personRepository = PersonRepositoryImpl(conn)
         PersonService(personRepository).hentEllerLagrePerson(ident)
     }
 }
@@ -488,13 +488,13 @@ fun opprettTestBehandling(
         søknadsformat = SøknadsFormat.PAPIR,
     )
     return dataSource.transaction {
-        val repo = BehandlingRepository(it, clock = clock)
+        val repo = BehandlingRepositoryImpl(it, clock = clock)
         val uthentet = repo.hent(referanse)
         val id = if (uthentet != null) {
             repo.oppdaterBehandling(behandling.copy(id = uthentet.id))
             uthentet.id
         } else {
-            BehandlingRepository(it, clock).opprettBehandling(
+            BehandlingRepositoryImpl(it, clock).opprettBehandling(
                 behandling
             )
         }
@@ -857,7 +857,7 @@ fun forberedDatabase(
     behandlingReferanse: UUID
 ): BehandlingId {
     val ident = "214"
-    val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+    val person = PersonService(PersonRepositoryImpl(it)).hentEllerLagrePerson(ident)
 
     val sak = Sak(
         saksnummer = "ABCDE".tilSaksnummer(),
@@ -867,7 +867,7 @@ fun forberedDatabase(
     )
     val sakId = SakRepositoryImpl(it).settInnSak(sak)
 
-    return BehandlingRepository(it).opprettBehandling(
+    return BehandlingRepositoryImpl(it).opprettBehandling(
         Behandling(
             referanse = behandlingReferanse,
             sak = sak.copy(id = sakId),
@@ -885,17 +885,17 @@ fun forberedDatabase(
 
 fun konstruerSakstatistikkService(
     connection: DBConnection
-): SaksStatistikkService {
+): SaksStatistikkServiceImpl {
     val behandlingService = BehandlingService(
-        BehandlingRepository(connection),
+        BehandlingRepositoryImpl(connection),
         SkjermingService(FakePdlGateway())
     )
-    return SaksStatistikkService(
+    return SaksStatistikkServiceImpl(
         behandlingService = behandlingService,
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
         bqBehandlingMapper = BQBehandlingMapper(
             behandlingService,
-            RettighetstypeperiodeRepository(connection),
+            RettighetstypeperiodeRepositoryImpl(connection),
             OppgaveRepositoryImpl(connection),
             SakstatistikkEventSourcing()
         )

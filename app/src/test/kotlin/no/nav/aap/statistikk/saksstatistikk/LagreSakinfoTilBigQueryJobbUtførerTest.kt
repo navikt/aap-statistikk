@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepositoryImpl
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -21,7 +21,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
 
     @BeforeEach
     fun settOppStandardMocks() {
-        every { fakeRepositoryProvider.provide<BehandlingRepository>() } returns mockk(relaxed = true)
+        every { fakeRepositoryProvider.provide<BehandlingRepositoryImpl>() } returns mockk(relaxed = true)
     }
 
     private fun lagUtfører(
@@ -128,10 +128,10 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
         )
         val jobbAppender = MockJobbAppender()
-        val fakeBehandlingRepository = mockk<BehandlingRepository>(relaxed = true) {
+        val fakeBehandlingRepository = mockk<BehandlingRepositoryImpl>(relaxed = true) {
             every { hent(behandlingId) } returns mockk { every { referanse } returns UUID.randomUUID() }
         }
-        every { fakeRepositoryProvider.provide<BehandlingRepository>() } returns fakeBehandlingRepository
+        every { fakeRepositoryProvider.provide<BehandlingRepositoryImpl>() } returns fakeBehandlingRepository
 
         val utfører = lagUtfører(service, jobbAppender)
 

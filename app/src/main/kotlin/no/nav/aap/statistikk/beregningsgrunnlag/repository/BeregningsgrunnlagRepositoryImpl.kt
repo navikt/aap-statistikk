@@ -15,12 +15,12 @@ import java.time.Year
 import java.util.*
 import kotlin.collections.orEmpty
 
-class BeregningsgrunnlagRepository(
+class BeregningsgrunnlagRepositoryImpl(
     private val dbConnection: DBConnection
 ) : IBeregningsgrunnlagRepository {
     companion object : RepositoryFactory<IBeregningsgrunnlagRepository> {
         override fun konstruer(connection: DBConnection): IBeregningsgrunnlagRepository {
-            return BeregningsgrunnlagRepository(connection)
+            return BeregningsgrunnlagRepositoryImpl(connection)
         }
     }
 

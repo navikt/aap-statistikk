@@ -9,10 +9,10 @@ interface IPersonRepository : Repository{
     fun hentPerson(ident: String): Person?
 }
 
-class PersonRepository(private val dbConnection: DBConnection) : IPersonRepository {
+class PersonRepositoryImpl(private val dbConnection: DBConnection) : IPersonRepository {
     companion object : RepositoryFactory<IPersonRepository> {
         override fun konstruer(connection: DBConnection): IPersonRepository {
-            return PersonRepository(connection)
+            return PersonRepositoryImpl(connection)
         }
     }
 

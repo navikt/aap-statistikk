@@ -9,7 +9,7 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
 
 class ResendSakstatistikkJobbUtfører(
-    val sakStatikkService: SaksStatistikkService
+    val sakStatikkService: SaksStatistikkServiceImpl
 ) : JobbUtfører {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -35,7 +35,7 @@ class ResendSakstatistikkJobb : ProvidersJobbSpesifikasjon {
         gatewayProvider: GatewayProvider
     ): JobbUtfører {
         val sakStatistikkService =
-            SaksStatistikkService.konstruer(
+            SaksStatistikkServiceImpl.konstruer(
                 gatewayProvider,
                 repositoryProvider
             )

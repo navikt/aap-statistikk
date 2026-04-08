@@ -2,7 +2,7 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
-import no.nav.aap.statistikk.bigquery.BigQueryClient
+import no.nav.aap.statistikk.bigquery.BigQueryClientImpl
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.BigQuery
@@ -20,7 +20,7 @@ import java.util.function.Consumer
 class BehandlingTabellTest {
     @Test
     fun `sette inn og ta ut`(@BigQuery bigQuery: BigQueryConfig) {
-        val client = BigQueryClient(bigQuery, schemaRegistry)
+        val client = BigQueryClientImpl(bigQuery, schemaRegistry)
 
         val tabell = BehandlingTabell()
 

@@ -81,10 +81,10 @@ class BehandlingRepositoryTest {
             opprettetAv = "Saksbehandler"
         )
         dataSource.transaction {
-            BehandlingRepository(it, clock = clock).opprettBehandling(behandling)
+            BehandlingRepositoryImpl(it, clock = clock).opprettBehandling(behandling)
         }
 
-        val uthentet = dataSource.transaction { BehandlingRepository(it).hent(referanse) }
+        val uthentet = dataSource.transaction { BehandlingRepositoryImpl(it).hent(referanse) }
 
         assertThat(uthentet)
             .usingRecursiveComparison()
@@ -96,20 +96,20 @@ class BehandlingRepositoryTest {
             .isEqualTo(behandling)
 
         dataSource.transaction {
-            BehandlingRepository(it).oppdaterBehandling(
+            BehandlingRepositoryImpl(it).oppdaterBehandling(
                 uthentet!!.copy(
                     venteÅrsak = "XXX"
                 )
             )
 
-            BehandlingRepository(it).oppdaterBehandling(
+            BehandlingRepositoryImpl(it).oppdaterBehandling(
                 uthentet.copy(
                     venteÅrsak = "ABC"
                 )
             )
         }
 
-        val uthentet2 = dataSource.transaction { BehandlingRepository(it).hent(uthentet!!.referanse) }
+        val uthentet2 = dataSource.transaction { BehandlingRepositoryImpl(it).hent(uthentet!!.referanse) }
 
         assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 ->
             c1.hendelsesTidspunkt.compareTo(
@@ -126,7 +126,7 @@ class BehandlingRepositoryTest {
 
         val referanse = UUID.randomUUID()
         dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
+            BehandlingRepositoryImpl(it).opprettBehandling(
                 Behandling(
                     referanse = referanse,
                     sak = sak,
@@ -144,7 +144,7 @@ class BehandlingRepositoryTest {
 
         val referanse2 = UUID.randomUUID()
         dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
+            BehandlingRepositoryImpl(it).opprettBehandling(
                 Behandling(
                     referanse = referanse2,
                     sak = sak,
@@ -161,9 +161,9 @@ class BehandlingRepositoryTest {
         }
 
         dataSource.transaction {
-            val førsteUthentet = BehandlingRepository(it).hent(referanse)
+            val førsteUthentet = BehandlingRepositoryImpl(it).hent(referanse)
             assertThat(førsteUthentet).isNotNull()
-            val andreUthentet = BehandlingRepository(it).hent(referanse2)
+            val andreUthentet = BehandlingRepositoryImpl(it).hent(referanse2)
             assertThat(andreUthentet).isNotNull()
             assertThat(førsteUthentet?.versjon).isEqualTo(andreUthentet?.versjon)
         }
@@ -177,7 +177,7 @@ class BehandlingRepositoryTest {
         val referanse = UUID.randomUUID()
 
         val behandlingId = dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
+            BehandlingRepositoryImpl(it).opprettBehandling(
                 Behandling(
                     referanse = referanse,
                     sak = sak,
@@ -192,7 +192,7 @@ class BehandlingRepositoryTest {
             )
         }
         dataSource.transaction {
-            BehandlingRepository(it).oppdaterBehandling(
+            BehandlingRepositoryImpl(it).oppdaterBehandling(
                 Behandling(
                     id = behandlingId,
                     referanse = referanse,
@@ -210,7 +210,7 @@ class BehandlingRepositoryTest {
         }
 
         dataSource.transaction {
-            assertThat(BehandlingRepository(it).hent(referanse)).isNotNull()
+            assertThat(BehandlingRepositoryImpl(it).hent(referanse)).isNotNull()
         }
     }
 
@@ -223,7 +223,7 @@ class BehandlingRepositoryTest {
         val referanse2 = UUID.randomUUID()
 
         val behandlingId = dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
+            BehandlingRepositoryImpl(it).opprettBehandling(
                 Behandling(
                     referanse = referanse,
                     sak = sak,
@@ -238,7 +238,7 @@ class BehandlingRepositoryTest {
             )
         }
         dataSource.transaction {
-            BehandlingRepository(it).oppdaterBehandling(
+            BehandlingRepositoryImpl(it).oppdaterBehandling(
                 Behandling(
                     id = behandlingId,
                     referanse = referanse,
@@ -255,7 +255,7 @@ class BehandlingRepositoryTest {
         }
 
         val behandlingId2 = dataSource.transaction {
-            BehandlingRepository(it).opprettBehandling(
+            BehandlingRepositoryImpl(it).opprettBehandling(
                 Behandling(
                     referanse = referanse2,
                     sak = sak,
@@ -270,7 +270,7 @@ class BehandlingRepositoryTest {
             )
         }
         dataSource.transaction {
-            BehandlingRepository(it).oppdaterBehandling(
+            BehandlingRepositoryImpl(it).oppdaterBehandling(
                 Behandling(
                     id = behandlingId2,
                     referanse = referanse2,
@@ -297,7 +297,7 @@ class BehandlingRepositoryTest {
         val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
 
         val behandlingId = dataSource.transaction {
-            BehandlingRepository(it, clock).opprettBehandling(
+            BehandlingRepositoryImpl(it, clock).opprettBehandling(
                 Behandling(
                     referanse = referanse,
                     sak = sak,
@@ -315,7 +315,7 @@ class BehandlingRepositoryTest {
         val littSenereClock = Clock.offset(clock, Duration.ofDays(1))
 
         dataSource.transaction {
-            BehandlingRepository(it, littSenereClock).oppdaterBehandling(
+            BehandlingRepositoryImpl(it, littSenereClock).oppdaterBehandling(
                 Behandling(
                     id = behandlingId,
                     referanse = referanse,
@@ -332,14 +332,14 @@ class BehandlingRepositoryTest {
         }
 
         val uthentet =
-            dataSource.transaction { BehandlingRepository(it, littSenereClock).hent(behandlingId) }
+            dataSource.transaction { BehandlingRepositoryImpl(it, littSenereClock).hent(behandlingId) }
 
         dataSource.transaction {
-            BehandlingRepository(it, littSenereClock).invaliderOgLagreNyHistorikk(uthentet)
+            BehandlingRepositoryImpl(it, littSenereClock).invaliderOgLagreNyHistorikk(uthentet)
         }
 
         val uthentet2 =
-            dataSource.transaction { BehandlingRepository(it, littSenereClock).hent(behandlingId) }
+            dataSource.transaction { BehandlingRepositoryImpl(it, littSenereClock).hent(behandlingId) }
 
         assertThat(uthentet2)
             .usingRecursiveComparison()

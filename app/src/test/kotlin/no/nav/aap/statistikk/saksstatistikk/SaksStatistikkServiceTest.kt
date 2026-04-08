@@ -9,10 +9,10 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepositoryImpl
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
-import no.nav.aap.statistikk.meldekort.MeldekortRepository
+import no.nav.aap.statistikk.meldekort.MeldekortRepositoryImpl
 import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.oppgave.BehandlingReferanse
@@ -22,7 +22,7 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
-import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.PersonRepositoryImpl
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
@@ -50,7 +50,7 @@ class SaksStatistikkServiceTest {
 
         val referanse = lagreHendelser(dataSource)
         val behandlingId =
-            dataSource.transaction { BehandlingRepository(it).hent(referanse)!!.id!! }
+            dataSource.transaction { BehandlingRepositoryImpl(it).hent(referanse)!!.id!! }
 
         val alleHendelser = dataSource.transaction {
             val sakStatikkService = konstruerSakstatistikkService(it)
@@ -98,11 +98,11 @@ class SaksStatistikkServiceTest {
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
-                meldekortRepository = MeldekortRepository(conn),
+                personService = PersonService(PersonRepositoryImpl(conn)),
+                meldekortRepository = MeldekortRepositoryImpl(conn),
                 opprettBigQueryLagringSakStatistikkCallback = {},
                 behandlingService = BehandlingService(
-                    BehandlingRepository(conn),
+                    BehandlingRepositoryImpl(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
                 ),
             )
@@ -144,7 +144,7 @@ class SaksStatistikkServiceTest {
             // Oppgave ankommer ETTER behandlingsflyt-hendelsen
             // Identifikator er oppgave-ID fra oppgave-appen (ekstern ID, ikke DB-rad-ID)
             val oppgaveIdentifikator = 42L
-            val person = PersonRepository(conn).hentPerson("1234567890")!!
+            val person = PersonRepositoryImpl(conn).hentPerson("1234567890")!!
             val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
             OppgaveRepositoryImpl(conn).lagreOppgave(
                 Oppgave(
@@ -180,7 +180,7 @@ class SaksStatistikkServiceTest {
             )
 
             val behandlingId =
-                BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+                BehandlingRepositoryImpl(conn).hent(behandlingReferanse)!!.id()
 
             konstruerSakstatistikkService(conn).lagreMedOppgavedata(
                 behandlingId,
@@ -208,11 +208,11 @@ class SaksStatistikkServiceTest {
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
-                meldekortRepository = MeldekortRepository(conn),
+                personService = PersonService(PersonRepositoryImpl(conn)),
+                meldekortRepository = MeldekortRepositoryImpl(conn),
                 opprettBigQueryLagringSakStatistikkCallback = {},
                 behandlingService = BehandlingService(
-                    BehandlingRepository(conn),
+                    BehandlingRepositoryImpl(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
                 ),
             )
@@ -253,7 +253,7 @@ class SaksStatistikkServiceTest {
 
             // Oppgave ankommer ETTER behandlingsflyt-hendelsen
             val oppgaveIdentifikator = 99L
-            val person = PersonRepository(conn).hentPerson("1234567891")!!
+            val person = PersonRepositoryImpl(conn).hentPerson("1234567891")!!
             val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
             OppgaveRepositoryImpl(conn).lagreOppgave(
                 Oppgave(
@@ -288,7 +288,7 @@ class SaksStatistikkServiceTest {
                 )
             )
 
-            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val behandlingId = BehandlingRepositoryImpl(conn).hent(behandlingReferanse)!!.id()
 
             konstruerSakstatistikkService(conn).lagreSakInfoTilBigquery(behandlingId)
 
@@ -313,11 +313,11 @@ class SaksStatistikkServiceTest {
                     sakService = SakService(SakRepositoryImpl(it)),
                     // mockk fordi irrelevant for denne testen
                     avsluttetBehandlingService = mockk(relaxed = true),
-                    personService = PersonService(PersonRepository(it)),
-                    meldekortRepository = MeldekortRepository(it),
+                    personService = PersonService(PersonRepositoryImpl(it)),
+                    meldekortRepository = MeldekortRepositoryImpl(it),
                     opprettBigQueryLagringSakStatistikkCallback = {},
                     behandlingService = BehandlingService(
-                        BehandlingRepository(it),
+                        BehandlingRepositoryImpl(it),
                         SkjermingService(FakePdlGateway(emptyMap()))
                     ),
                 )

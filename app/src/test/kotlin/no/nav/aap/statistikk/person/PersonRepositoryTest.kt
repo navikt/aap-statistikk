@@ -11,14 +11,14 @@ class PersonRepositoryTest {
     fun `sett inn og hent ut person`(@Postgres dataSource: DataSource) {
         val ident = "13021913"
         dataSource.transaction {
-            PersonRepository(it).lagrePerson(
+            PersonRepositoryImpl(it).lagrePerson(
                 Person(
                     ident = ident,
                 )
             )
         }
 
-        val uthentet = dataSource.transaction { PersonRepository(it).hentPerson(ident = ident) }
+        val uthentet = dataSource.transaction { PersonRepositoryImpl(it).hentPerson(ident = ident) }
 
         assertThat(uthentet?.ident).isEqualTo(
             ident
