@@ -5,7 +5,6 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
@@ -86,7 +85,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
         return uthentetId
     }
 
-    data class EkstraInfo(
+    private data class EkstraInfo(
         val id: Long,
         val saksnummer: String,
         val type: String,

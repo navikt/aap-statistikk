@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
+import java.time.LocalDateTime
 
 
 class LagreOppgaveJobbUtfører(
@@ -30,11 +31,15 @@ class LagreOppgaveJobbUtfører(
             oppgaveHistorikkLagrer.lagre(oppgave)
 
             if (oppgave.behandlingReferanse != null) {
+                val oppgaveSendtTid = input.optionalParameter("oppgaveSendtTid")
+                    ?.let { LocalDateTime.parse(it) }
+
                 behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
                     if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
                         MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
                             repositoryProvider,
-                            it.id()
+                            it.id(),
+                            oppgaveSendtTid = oppgaveSendtTid
                         )
                     }
                 }

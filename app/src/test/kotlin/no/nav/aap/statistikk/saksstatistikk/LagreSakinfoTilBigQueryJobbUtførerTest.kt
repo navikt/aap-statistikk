@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.testutils.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -59,7 +60,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
         assertThat(jobbAppender.sisteEnhetRetryCount).isEqualTo(1)
         assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(testConfig.delaySeconds)
         assertThat(jobbAppender.sisteOriginalHendelsestid).isEqualTo(testHendelsestid)
@@ -115,14 +115,13 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
         assertThat(service.sisteKallOriginalHendelsestid).isEqualTo(testHendelsestid)
         assertThat(jobbAppender.sisteEnhetRetryCount).isEqualTo(2)
         assertThat(jobbAppender.sisteOriginalHendelsestid).isEqualTo(testHendelsestid)
     }
 
     @Test
-    fun `lagrer med null enhet etter maks antall forsøk`() {
+    fun `kaster exception etter maks antall forsøk`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
             SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
@@ -139,12 +138,12 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             .medPayload(behandlingId)
             .medParameter("enhetRetryCount", testConfig.maxRetries.toString())
             .medParameter("originalHendelsestid", testHendelsestid.toString())
-        utfører.utfør(input)
 
-        // Første kall returnerer ManglerEnhet, andre kall med lagreUtenEnhet=true
-        assertThat(service.kallteller).isEqualTo(2)
-        assertThat(service.sisteKallLagreUtenEnhet).isTrue()
-        assertThat(service.sisteKallOriginalHendelsestid).isEqualTo(testHendelsestid)
+        // Etter maks antall forsøk kastes exception — lagres IKKE med null enhet
+        assertThrows<IllegalStateException> {
+            utfører.utfør(input)
+        }
+        assertThat(service.kallteller).isEqualTo(1)
     }
 
     @Test
@@ -194,33 +193,57 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         assertThat(service.kallteller).isEqualTo(1)
         assertThat(service.sisteKallOriginalHendelsestid).isEqualTo(testHendelsestid)
     }
+
+    @Test
+    fun `ved oppgave-trigget jobb brukes lagreSakInfoMedOppgaveTidspunkt`() {
+        val behandlingId = BehandlingId(1)
+        val service = FakeSaksStatistikkService(SakStatistikkResultat.OK)
+        val jobbAppender = MockJobbAppender()
+        val oppgaveSendtTid = LocalDateTime.of(2024, 1, 1, 9, 55)
+
+        val utfører = lagUtfører(service, jobbAppender)
+
+        val input = JobbInput(LagreSakinfoTilBigQueryJobb())
+            .medPayload(behandlingId)
+            .medParameter("oppgaveSendtTid", oppgaveSendtTid.toString())
+        utfører.utfør(input)
+
+        assertThat(service.kallteller).isEqualTo(1)
+        assertThat(service.sisteKallOppgaveSendtTid).isEqualTo(oppgaveSendtTid)
+        assertThat(service.sisteKallOriginalHendelsestid).isNull()
+    }
 }
 
 private class FakeSaksStatistikkService(
     private val resultat: SakStatistikkResultat
 ) : ISaksStatistikkService {
     var kallteller = 0
-    var sisteKallLagreUtenEnhet = false
     var sisteKallOriginalHendelsestid: LocalDateTime? = null
+    var sisteKallOppgaveSendtTid: LocalDateTime? = null
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
-        lagreUtenEnhet: Boolean
     ): SakStatistikkResultat {
         kallteller++
-        sisteKallLagreUtenEnhet = lagreUtenEnhet
         sisteKallOriginalHendelsestid = null
-        return if (lagreUtenEnhet) SakStatistikkResultat.OK else resultat
+        return resultat
     }
 
     override fun lagreMedOppgavedata(
         behandlingId: BehandlingId,
         originalHendelsestid: LocalDateTime,
-        lagreUtenEnhet: Boolean
     ): SakStatistikkResultat {
         kallteller++
-        sisteKallLagreUtenEnhet = lagreUtenEnhet
         sisteKallOriginalHendelsestid = originalHendelsestid
-        return if (lagreUtenEnhet) SakStatistikkResultat.OK else resultat
+        return resultat
+    }
+
+    override fun lagreSakInfoMedOppgaveTidspunkt(
+        behandlingId: BehandlingId,
+        oppgaveSendtTid: LocalDateTime,
+    ): SakStatistikkResultat {
+        kallteller++
+        sisteKallOppgaveSendtTid = oppgaveSendtTid
+        return resultat
     }
 }

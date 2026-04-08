@@ -44,11 +44,16 @@ class LagreSakinfoTilBigQueryJobbUtfører(
         val retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0
         val originalHendelsestid = input.optionalParameter("originalHendelsestid")
             ?.let { LocalDateTime.parse(it) }
+        val oppgaveSendtTid = input.optionalParameter("oppgaveSendtTid")
+            ?.let { LocalDateTime.parse(it) }
 
-        val resultat = if (originalHendelsestid != null) {
-            sakStatistikkService.lagreMedOppgavedata(behandlingId, originalHendelsestid)
-        } else {
-            sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
+        val resultat = when {
+            oppgaveSendtTid != null ->
+                sakStatistikkService.lagreSakInfoMedOppgaveTidspunkt(behandlingId, oppgaveSendtTid)
+            originalHendelsestid != null ->
+                sakStatistikkService.lagreMedOppgavedata(behandlingId, originalHendelsestid)
+            else ->
+                sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
         }
 
         when (resultat) {
@@ -70,21 +75,12 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         originalHendelsestid = resultat.hendelsestid
                     )
                 } else {
-                    log.error(
+                    error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
                                 "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
+                                "Original hendelsestid: $originalHendelsestid."
                     )
-                    if (originalHendelsestid != null) {
-                        sakStatistikkService.lagreMedOppgavedata(
-                            behandlingId, originalHendelsestid, lagreUtenEnhet = true
-                        )
-                    } else {
-                        sakStatistikkService.lagreSakInfoTilBigquery(
-                            behandlingId, lagreUtenEnhet = true
-                        )
-                    }
                 }
             }
         }

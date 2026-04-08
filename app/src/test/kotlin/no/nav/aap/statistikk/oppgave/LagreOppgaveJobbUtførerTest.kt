@@ -61,9 +61,8 @@ class LagreOppgaveJobbUtførerTest {
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
-                /// TODO
                 behandlingRepository = FakeBehandlingRepository(),
-                repositoryProvider = postgresRepositoryRegistry.provider(it)
+                repositoryProvider = postgresRepositoryRegistry.provider(it),
             ).utfør(
                 JobbInput(LagreOppgaveJobb()).medPayload(oppgaveId.toString())
             )
@@ -353,14 +352,10 @@ class LagreOppgaveJobbUtførerTest {
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
-                /// TODO
                 behandlingRepository = FakeBehandlingRepository(),
-                repositoryProvider = postgresRepositoryRegistry.provider(it)
+                repositoryProvider = postgresRepositoryRegistry.provider(it),
             ).utfør(
-                JobbInput(
-                    LagreOppgaveJobb(
-                    )
-                ).medPayload(oppgaveHendelse.oppgaveId.toString())
+                JobbInput(LagreOppgaveJobb()).medPayload(oppgaveHendelse.oppgaveId.toString())
             )
         }
     }

@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 interface ISaksStatistikkService {
     fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
-        lagreUtenEnhet: Boolean = false
     ): SakStatistikkResultat
 
     /**
@@ -16,6 +15,15 @@ interface ISaksStatistikkService {
     fun lagreMedOppgavedata(
         behandlingId: BehandlingId,
         originalHendelsestid: LocalDateTime,
-        lagreUtenEnhet: Boolean = false
+    ): SakStatistikkResultat
+
+    /**
+     * Lagrer sakinfo trigget av en spesifikk oppgavehendelse.
+     * Bruker [oppgaveSendtTid] som endretTid for å gi hver oppgavehendelse en unik nøkkel,
+     * selv om sendtTid er eldre enn siste behandlingsflyt-tidspunkt.
+     */
+    fun lagreSakInfoMedOppgaveTidspunkt(
+        behandlingId: BehandlingId,
+        oppgaveSendtTid: LocalDateTime,
     ): SakStatistikkResultat
 }

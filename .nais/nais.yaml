@@ -106,7 +106,7 @@ spec:
     - name: HACKY_DELAY
       value: "20"
     - name: ENHET_RETRY_MAX_RETRIES
-      value: "3"
+      value: "5"
     - name: ENHET_RETRY_DELAY_SECONDS
       value: "60"
     - name: JDK_JAVA_OPTIONS

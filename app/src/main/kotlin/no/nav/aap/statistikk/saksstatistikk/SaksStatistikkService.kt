@@ -41,7 +41,6 @@ class SaksStatistikkService(
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
-        lagreUtenEnhet: Boolean
     ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
         require(
@@ -55,7 +54,7 @@ class SaksStatistikkService(
         val bqSaker =
             bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
 
-        val manglerEnhet = !lagreUtenEnhet && bqSaker.any {
+        val manglerEnhet = bqSaker.any {
             it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
         }
 
@@ -83,10 +82,32 @@ class SaksStatistikkService(
         return SakStatistikkResultat.OK
     }
 
+    override fun lagreSakInfoMedOppgaveTidspunkt(
+        behandlingId: BehandlingId,
+        oppgaveSendtTid: LocalDateTime,
+    ): SakStatistikkResultat {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        require(
+            behandling.typeBehandling in Konstanter.interessanteBehandlingstyper
+        ) {
+            "Denne jobben skal ikke kunne bli trigget av oppfølgingsbehandlinger. Behandling: ${behandling.referanse}"
+        }
+
+        val erSkjermet = behandlingService.erSkjermet(behandling)
+
+        val bqSaker = bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
+            .map { it.copy(endretTid = oppgaveSendtTid) }
+
+        bqSaker.forEach { bqSak ->
+            lagreBQBehandling(bqSak)
+        }
+
+        return SakStatistikkResultat.OK
+    }
+
     override fun lagreMedOppgavedata(
         behandlingId: BehandlingId,
         originalHendelsestid: LocalDateTime,
-        lagreUtenEnhet: Boolean
     ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
         require(
@@ -115,7 +136,7 @@ class SaksStatistikkService(
             )
         }
 
-        val manglerEnhet = !lagreUtenEnhet && bqSakerMedOppgavedata.any {
+        val manglerEnhet = bqSakerMedOppgavedata.any {
             it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
         }
 
