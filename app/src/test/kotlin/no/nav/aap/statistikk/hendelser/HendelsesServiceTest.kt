@@ -187,7 +187,7 @@ class HendelsesServiceTest {
             FakeMeldekortRepository(),
             skjermingService,
             rettighetstypeperiodeRepository
-        ) {}
+        ) { _ -> }
 
         hendelsesService.prosesserNyHendelse(
             StoppetBehandling(
