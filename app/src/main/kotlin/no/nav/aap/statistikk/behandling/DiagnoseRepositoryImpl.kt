@@ -42,7 +42,11 @@ VALUES ((SELECT b.id
          WHERE br.referanse = ?),
         ?,
         ?,
-        ?);
+        ?)
+ON CONFLICT (behandling_id) DO UPDATE SET
+    kodeverk = EXCLUDED.kodeverk,
+    diagnosekode = EXCLUDED.diagnosekode,
+    bidiagnoser = EXCLUDED.bidiagnoser;
 
         """.trimIndent()
 
