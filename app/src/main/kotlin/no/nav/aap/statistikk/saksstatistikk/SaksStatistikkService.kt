@@ -197,8 +197,10 @@ class SaksStatistikkService(
                                 "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
                     )
                 }
+                val diffNanos = java.time.Duration.between(bqSak.endretTid, justert.endretTid).toNanos()
                 log.info(
                     "Justerte endretTid fra ${bqSak.endretTid} til ${justert.endretTid} " +
+                            "(diff: ${diffNanos}ns) " +
                             "for å sikre monoton rekkefølge. Referanse: ${bqSak.behandlingUUID}. " +
                             "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
                 )
