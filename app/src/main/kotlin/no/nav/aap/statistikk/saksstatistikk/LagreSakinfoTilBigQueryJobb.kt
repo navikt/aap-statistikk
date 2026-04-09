@@ -9,6 +9,7 @@ import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import org.slf4j.LoggerFactory
@@ -104,9 +105,16 @@ class LagreSakinfoTilBigQueryJobb : ProvidersJobbSpesifikasjon {
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider
     ): JobbUtfører {
-        val sakStatistikkService = SaksStatistikkService.konstruer(
-            gatewayProvider,
-            repositoryProvider,
+        val behandlingService = BehandlingService(repositoryProvider, gatewayProvider)
+        val sakStatistikkService = SaksStatistikkService(
+            behandlingService = behandlingService,
+            sakstatistikkRepository = repositoryProvider.provide(),
+            bqBehandlingMapper = BQBehandlingMapper(
+                behandlingService = behandlingService,
+                rettighetstypeperiodeRepository = repositoryProvider.provide(),
+                oppgaveRepository = repositoryProvider.provide(),
+                sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
+            ),
         )
         return LagreSakinfoTilBigQueryJobbUtfører(
             sakStatistikkService,

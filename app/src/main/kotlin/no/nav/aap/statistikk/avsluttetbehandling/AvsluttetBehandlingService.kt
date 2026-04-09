@@ -1,7 +1,5 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingId
@@ -28,24 +26,6 @@ class AvsluttetBehandlingService(
     private val opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
-
-    companion object {
-        fun konstruer(
-            gatewayProvider: GatewayProvider,
-            repositoryProvider: RepositoryProvider,
-            opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
-        ) = AvsluttetBehandlingService(
-            tilkjentYtelseRepository = repositoryProvider.provide(),
-            beregningsgrunnlagRepository = repositoryProvider.provide(),
-            vilkårsResultatRepository = repositoryProvider.provide(),
-            diagnoseRepository = repositoryProvider.provide(),
-            behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
-            rettighetstypeperiodeRepository = repositoryProvider.provide(),
-            arbeidsopptrappingperioderRepository = repositoryProvider.provide(),
-            fritaksvurderingRepository = repositoryProvider.provide(),
-            opprettBigQueryLagringYtelseCallback = opprettBigQueryLagringYtelseCallback
-        )
-    }
 
     fun lagre(avsluttetBehandling: AvsluttetBehandling) {
         lagreDiagnose(avsluttetBehandling)

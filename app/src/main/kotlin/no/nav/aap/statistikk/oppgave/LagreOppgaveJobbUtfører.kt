@@ -9,6 +9,7 @@ import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
+import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
 
 
@@ -51,8 +52,13 @@ class LagreOppgaveJobb : ProvidersJobbSpesifikasjon {
     ): JobbUtfører {
         return LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
-            OppgaveHistorikkLagrer.konstruer(repositoryProvider),
-            repositoryProvider.provide(),
+            OppgaveHistorikkLagrer(
+                personService = PersonService(repositoryProvider),
+                oppgaveRepository = repositoryProvider.provide(),
+                enhetRepository = repositoryProvider.provide(),
+                saksbehandlerRepository = repositoryProvider.provide(),
+            ),
+            repositoryProvider.provide<IBehandlingRepository>(),
             repositoryProvider,
         )
     }
