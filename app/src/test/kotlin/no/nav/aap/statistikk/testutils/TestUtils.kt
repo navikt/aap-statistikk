@@ -36,7 +36,7 @@ import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.AppConfig
 import no.nav.aap.statistikk.avsluttetbehandling.*
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
@@ -51,7 +51,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepository
 import no.nav.aap.statistikk.meldekort.Fritakvurdering
-import no.nav.aap.statistikk.meldekort.IMeldekortRepository
+import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.motor
@@ -60,9 +60,9 @@ import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
-import no.nav.aap.statistikk.person.IPersonRepository
-import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.person.PersonRepositoryImpl
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
@@ -71,9 +71,9 @@ import no.nav.aap.statistikk.saksstatistikk.*
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.startUp
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
-import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
-import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
@@ -162,7 +162,7 @@ data class TestJobberSetup(
 )
 
 fun konstruerTestJobber(
-    bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository()
+    bqYtelseRepository: BQYtelsesstatistikkRepository = FakeBQYtelseRepository()
 ): TestJobberSetup {
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
     val lagreAvsluttetBehandlingTilBigQueryJobb =
@@ -180,7 +180,7 @@ fun konstruerTestJobber(
 fun konstruerMotor(
     dataSource: DataSource,
     jobbAppender: MotorJobbAppender,
-    bqYtelseRepository: IBQYtelsesstatistikkRepository,
+    bqYtelseRepository: BQYtelsesstatistikkRepository,
     resendSakstatistikkJobb: ResendSakstatistikkJobb,
     lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
@@ -234,7 +234,7 @@ fun opprettTestStoppetBehandling(
         årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
     )
 
-object FakeBigQueryClient : IBigQueryClient {
+object FakeBigQueryClient : BigQueryClient {
     override fun <E> create(table: BQTable<E>): Boolean {
         return true
     }
@@ -301,7 +301,7 @@ fun <E> testKlientNoInjection(
         jwksUri = "http://localhost:8081/jwks",
         issuer = "tilgang"
     ),
-    bigQueryClient: IBigQueryClient = FakeBigQueryClient,
+    bigQueryClient: BigQueryClient = FakeBigQueryClient,
     test: TestClient.() -> E,
 ): E {
     var res: E
@@ -447,7 +447,7 @@ fun opprettTestHendelse(
 
 fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     return dataSource.transaction { conn ->
-        val personRepository = PersonRepository(conn)
+        val personRepository = PersonRepositoryImpl(conn)
         PersonService(personRepository).hentEllerLagrePerson(ident)
     }
 }
@@ -488,13 +488,13 @@ fun opprettTestBehandling(
         søknadsformat = SøknadsFormat.PAPIR,
     )
     return dataSource.transaction {
-        val repo = BehandlingRepository(it, clock = clock)
+        val repo = BehandlingRepositoryImpl(it, clock = clock)
         val uthentet = repo.hent(referanse)
         val id = if (uthentet != null) {
             repo.oppdaterBehandling(behandling.copy(id = uthentet.id))
             uthentet.id
         } else {
-            BehandlingRepository(it, clock).opprettBehandling(
+            BehandlingRepositoryImpl(it, clock).opprettBehandling(
                 behandling
             )
         }
@@ -568,7 +568,7 @@ class MockJobbAppender : JobbAppender {
     }
 }
 
-class FakeMeldekortRepository : IMeldekortRepository {
+class FakeMeldekortRepository : MeldekortRepository {
     private val meldekort = mutableMapOf<Long, List<Meldekort>>()
     override fun lagre(
         behandlingId: BehandlingId,
@@ -613,7 +613,7 @@ class FakeSakRepository : SakRepository {
     }
 }
 
-class FakePersonRepository : IPersonRepository {
+class FakePersonRepository : PersonRepository {
     private val personer = mutableMapOf<Long, Person>()
     override fun lagrePerson(person: Person): Long {
         personer[personer.size.toLong()] = person
@@ -625,7 +625,7 @@ class FakePersonRepository : IPersonRepository {
     }
 }
 
-class FakeBehandlingRepository : IBehandlingRepository {
+class FakeBehandlingRepository : BehandlingRepository {
     private val behandlinger = mutableMapOf<Long, Behandling>()
     private var nextId = 0L
     override fun opprettBehandling(behandling: Behandling): BehandlingId {
@@ -681,7 +681,7 @@ class FakeBehandlingRepository : IBehandlingRepository {
     }
 }
 
-class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {
+class FakeRettighetsTypeRepository : RettighetstypeperiodeRepository {
     override fun lagre(
         behandlingReferanse: UUID,
         rettighetstypePeriode: List<RettighetstypePeriode>
@@ -728,7 +728,7 @@ class FakeDiagnoseRepository : DiagnoseRepository {
     }
 }
 
-class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
+class FakeBQYtelseRepository : BQYtelsesstatistikkRepository {
     val behandlinger = mutableListOf<BQYtelseBehandling>()
 
     override fun lagre(payload: BQYtelseBehandling) {
@@ -740,7 +740,7 @@ class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
     override fun start() = Unit
 }
 
-class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
+class FakeTilkjentYtelseRepository : TilkjentYtelseRepository {
     private val tilkjentYtelser = mutableMapOf<Int, TilkjentYtelseEntity>()
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
         tilkjentYtelser[tilkjentYtelser.size] = tilkjentYtelse
@@ -756,7 +756,7 @@ class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
     }
 }
 
-class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
+class FakeVilkårsResultatRepository : VilkårsresultatRepository {
     private val vilkår = mutableMapOf<Long, VilkårsResultatEntity>()
 
     override fun lagreVilkårsResultat(
@@ -776,7 +776,7 @@ class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
     }
 }
 
-class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
+class FakeBeregningsgrunnlagRepository : BeregningsgrunnlagRepository {
     val grunnlag = mutableListOf<MedBehandlingsreferanse<IBeregningsGrunnlag>>()
     override fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
         grunnlag.add(beregningsGrunnlag)
@@ -857,7 +857,7 @@ fun forberedDatabase(
     behandlingReferanse: UUID
 ): BehandlingId {
     val ident = "214"
-    val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+    val person = PersonService(PersonRepositoryImpl(it)).hentEllerLagrePerson(ident)
 
     val sak = Sak(
         saksnummer = "ABCDE".tilSaksnummer(),
@@ -867,7 +867,7 @@ fun forberedDatabase(
     )
     val sakId = SakRepositoryImpl(it).settInnSak(sak)
 
-    return BehandlingRepository(it).opprettBehandling(
+    return BehandlingRepositoryImpl(it).opprettBehandling(
         Behandling(
             referanse = behandlingReferanse,
             sak = sak.copy(id = sakId),
@@ -885,17 +885,17 @@ fun forberedDatabase(
 
 fun konstruerSakstatistikkService(
     connection: DBConnection
-): SaksStatistikkService {
+): SaksStatistikkServiceImpl {
     val behandlingService = BehandlingService(
-        BehandlingRepository(connection),
+        BehandlingRepositoryImpl(connection),
         SkjermingService(FakePdlGateway())
     )
-    return SaksStatistikkService(
+    return SaksStatistikkServiceImpl(
         behandlingService = behandlingService,
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
         bqBehandlingMapper = BQBehandlingMapper(
             behandlingService,
-            RettighetstypeperiodeRepository(connection),
+            RettighetstypeperiodeRepositoryImpl(connection),
             OppgaveRepositoryImpl(connection),
             SakstatistikkEventSourcing()
         )

@@ -10,7 +10,7 @@ import no.nav.aap.statistikk.testutils.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepositoryImpl
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration
 import org.junit.jupiter.api.RepeatedTest
@@ -80,14 +80,14 @@ class VilkårsresultatRepositoryTest {
         )
 
         val generertId = dataSource.transaction { conn ->
-            val repo = VilkårsresultatRepository(conn)
+            val repo = VilkårsresultatRepositoryImpl(conn)
             repo.lagreVilkårsResultat(vilkårsResultatEntity, behandlingId)
         }
 
         assertThat(generertId).isNotNull()
 
         val hentetUt = dataSource.transaction {
-            VilkårsresultatRepository(it).hentVilkårsResultat(generertId)
+            VilkårsresultatRepositoryImpl(it).hentVilkårsResultat(generertId)
         }
         assertThat(
             hentetUt.tilVilkårsResultat(
@@ -104,7 +104,7 @@ class VilkårsresultatRepositoryTest {
         )
 
         val hentUtMedReferanse =
-            dataSource.transaction { VilkårsresultatRepository(it).hentForBehandling(randomUUID) }
+            dataSource.transaction { VilkårsresultatRepositoryImpl(it).hentForBehandling(randomUUID) }
 
         assertThat(hentUtMedReferanse).isEqualTo(hentetUt)
     }
@@ -119,7 +119,7 @@ class VilkårsresultatRepositoryTest {
             val (behandlingId, _) = opprettTestHendelse(dataSource, referanse, saksnummer)
 
             dataSource.transaction { conn ->
-                VilkårsresultatRepository(conn).lagreVilkårsResultat(
+                VilkårsresultatRepositoryImpl(conn).lagreVilkårsResultat(
                     vilkårsResultat,
                     behandlingId
                 )
@@ -131,7 +131,7 @@ class VilkårsresultatRepositoryTest {
 
         referanser.mapValues { (ref, vilkårsResultat) ->
             val res = dataSource.transaction { conn ->
-                VilkårsresultatRepository(conn).hentForBehandling(ref)
+                VilkårsresultatRepositoryImpl(conn).hentForBehandling(ref)
             }
 
             assertThat(res)
@@ -224,16 +224,16 @@ class VilkårsresultatRepositoryTest {
 
         // Lagre én gang
         dataSource.transaction { conn ->
-            VilkårsresultatRepository(conn).lagreVilkårsResultat(vilkårsresultat, behandlingId)
+            VilkårsresultatRepositoryImpl(conn).lagreVilkårsResultat(vilkårsresultat, behandlingId)
         }
 
         // Lagre én gang til skal overskrive
         dataSource.transaction { conn ->
-            VilkårsresultatRepository(conn).lagreVilkårsResultat(nyttVilkårsresultat, behandlingId)
+            VilkårsresultatRepositoryImpl(conn).lagreVilkårsResultat(nyttVilkårsresultat, behandlingId)
         }
 
         val hentetUt = dataSource.transaction { conn ->
-            VilkårsresultatRepository(conn).hentForBehandling(randomUUID)
+            VilkårsresultatRepositoryImpl(conn).hentForBehandling(randomUUID)
         }
 
         val config =

@@ -22,7 +22,7 @@ import no.nav.aap.oppgave.statistikk.OppgaveTilStatistikkDto
 import no.nav.aap.oppgave.verdityper.Behandlingstype
 import no.nav.aap.oppgave.verdityper.Status
 import no.nav.aap.statistikk.api.stringToNumber
-import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepositoryImpl
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.hendelser.påTidspunkt
@@ -33,9 +33,9 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
-import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepositoryImpl
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
-import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepositoryImpl
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeAll
@@ -214,7 +214,7 @@ class IntegrationTest {
 
         // Sjekk tilkjent ytelse
         val tilkjentYtelse = ventPåSvar(
-            { dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse)?.perioder } },
+            { dataSource.transaction { TilkjentYtelseRepositoryImpl(it).hentForBehandling(referanse)?.perioder } },
             { t -> t !== null && t.isNotEmpty() })
 
         assertThat(tilkjentYtelse!!).allSatisfy {
@@ -885,7 +885,7 @@ class IntegrationTest {
             testUtil.ventPåSvar()
 
             val gjeldendeAVklaringsbehov =
-                dataSource.transaction { BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!.gjeldendeAvklaringsBehov }!!
+                dataSource.transaction { BehandlingRepositoryImpl(it).hent(hendelse.behandlingReferanse)!!.gjeldendeAvklaringsBehov }!!
                     .let { Definisjon.forKode(it) }
 
             postOppgaveData(
@@ -917,7 +917,7 @@ class IntegrationTest {
             val behandling = ventPåSvar(
                 {
                     dataSource.transaction {
-                        BehandlingRepository(it).hent(behandlingReferanse)
+                        BehandlingRepositoryImpl(it).hent(behandlingReferanse)
                     }
                 },
                 { it != null })
@@ -957,7 +957,7 @@ class IntegrationTest {
             val vilkårRespons = ventPåSvar(
                 {
                     dataSource.transaction {
-                        VilkårsresultatRepository(it).hentForBehandling(
+                        VilkårsresultatRepositoryImpl(it).hentForBehandling(
                             behandlingReferanse
                         )
                     }.vilkår
@@ -972,7 +972,7 @@ class IntegrationTest {
             val tilkjent = ventPåSvar(
                 {
                     dataSource.transaction {
-                        TilkjentYtelseRepository(it).hentForBehandling(
+                        TilkjentYtelseRepositoryImpl(it).hentForBehandling(
                             behandlingReferanse
                         )!!.perioder
                     }
@@ -1041,7 +1041,7 @@ class IntegrationTest {
         testUtil.ventPåSvar()
 
         val behandling = ventPåSvar(
-            { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
+            { dataSource.transaction { BehandlingRepositoryImpl(it).hent(referanse!!) } },
             { it != null }
         )
 

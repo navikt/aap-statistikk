@@ -61,7 +61,7 @@ fun main() {
     }
     val dbConfig = DbConfig.fraMiljøVariabler(AppConfig)
     val bgConfigYtelse = BigQueryConfigFromEnv("ytelsestatistikk")
-    val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistryYtelseStatistikk)
+    val bigQueryClientYtelse = BigQueryClientImpl(bgConfigYtelse, schemaRegistryYtelseStatistikk)
 
     val azureConfig = azureconfigFraMiljøVariabler()
 
@@ -92,7 +92,7 @@ fun main() {
 fun Application.startUp(
     dbConfig: DbConfig,
     azureConfig: AzureConfig,
-    bigQueryClientYtelse: IBigQueryClient,
+    bigQueryClientYtelse: BigQueryClient,
     gatewayProvider: GatewayProvider
 ) {
     log.info("Starter.")

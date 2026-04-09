@@ -1,0 +1,92 @@
+package no.nav.aap.statistikk.meldekort
+
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryFactory
+import no.nav.aap.komponenter.type.Periode
+import no.nav.aap.statistikk.behandling.BehandlingId
+
+class MeldekortRepositoryImpl(private val dbConnection: DBConnection) : MeldekortRepository {
+
+    companion object : RepositoryFactory<MeldekortRepository> {
+        override fun konstruer(connection: DBConnection): MeldekortRepository {
+            return MeldekortRepositoryImpl(connection)
+        }
+    }
+
+
+    override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
+        meldekort.forEach { enkeltMeldekort ->
+            lagreEnkeltMeldekort(
+                behandlingId,
+                enkeltMeldekort
+            )?.let { lagreArbeidIPeriode(it, enkeltMeldekort.arbeidIPeriodeDTO) }
+        }
+    }
+
+    private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: Meldekort): Long? {
+        return dbConnection.executeReturnKeys(
+            """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?) ON CONFLICT DO NOTHING""".trimIndent()
+        ) {
+            setParams {
+                setLong(1, behandlingId.id)
+                setString(2, meldekort.journalpostId)
+            }
+        }.firstOrNull()
+    }
+
+    private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<ArbeidIPerioder>) {
+        dbConnection.executeBatch(
+            """INSERT INTO arbeid_i_periode (meldekort_id, timerArbeidet, til_dato, fra_dato)
+VALUES (?, ?, ?, ?)""".trimIndent(),
+            arbeid
+        ) {
+            setParams {
+                setLong(1, meldekortId)
+                setBigDecimal(2, it.timerArbeidet)
+                setLocalDate(3, it.periodeTom)
+                setLocalDate(4, it.periodeFom)
+            }
+        }
+    }
+
+    override fun hentMeldekort(
+        behandlingId: BehandlingId
+    ): List<Meldekort> {
+        return dbConnection.queryList(
+            """SELECT * 
+               FROM meldekort
+               WHERE behandling_id = ?""".trimIndent()
+        ) {
+            setParams {
+                setLong(1, behandlingId.id)
+            }
+            setRowMapper {
+                Meldekort(
+                    journalpostId = it.getString("journalpost_id"),
+                    arbeidIPeriodeDTO = hentArbeidIPerioder(it.getLong("id"))
+                )
+            }
+        }
+    }
+
+    private fun hentArbeidIPerioder(
+        meldekortId: Long
+    ): List<ArbeidIPerioder> {
+        return dbConnection.queryList(
+            """SELECT fra_dato, til_dato, timerArbeidet 
+               FROM arbeid_i_periode
+               WHERE meldekort_id = ?""".trimIndent()
+        ) {
+            setParams {
+                setLong(1, meldekortId)
+            }
+            setRowMapper {
+                ArbeidIPerioder(
+                    periodeFom = it.getLocalDate("fra_dato"),
+                    periodeTom = it.getLocalDate("til_dato"),
+                    timerArbeidet = it.getBigDecimal("timerArbeidet")
+                )
+            }
+        }
+    }
+}

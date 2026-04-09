@@ -8,7 +8,7 @@ import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepositoryImpl
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ data class EnhetRetryConfig(
 )
 
 class LagreSakinfoTilBigQueryJobbUtfører(
-    private val sakStatistikkService: ISaksStatistikkService,
+    private val sakStatistikkService: SaksStatistikkService,
     private val jobbAppender: JobbAppender,
     private val repositoryProvider: RepositoryProvider,
     private val enhetRetryConfig: EnhetRetryConfig = EnhetRetryConfig()
@@ -31,7 +31,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
     override fun utfør(input: JobbInput) {
         val behandlingId = input.payload<BehandlingId>()
 
-        val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
+        val behandling = repositoryProvider.provide<BehandlingRepositoryImpl>().hent(behandlingId)
 
         LoggingKontekst(behandling.referanse).use {
             utførJobb(behandlingId, input)
@@ -103,7 +103,7 @@ class LagreSakinfoTilBigQueryJobb : ProvidersJobbSpesifikasjon {
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider
     ): JobbUtfører {
-        val sakStatistikkService = SaksStatistikkService.konstruer(
+        val sakStatistikkService = SaksStatistikkServiceImpl.konstruer(
             gatewayProvider,
             repositoryProvider,
         )

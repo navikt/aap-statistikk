@@ -29,14 +29,14 @@ class RettighetstypeperiodeRepositoryTest {
             )
         )
         dataSource.transaction {
-            RettighetstypeperiodeRepository(it).lagre(
+            RettighetstypeperiodeRepositoryImpl(it).lagre(
                 behandlingReferanse,
                 rettighetstypePerioder
             )
         }
 
         val res =
-            dataSource.transaction { RettighetstypeperiodeRepository(it).hent(behandlingReferanse) }
+            dataSource.transaction { RettighetstypeperiodeRepositoryImpl(it).hent(behandlingReferanse) }
 
         assertThat(res).hasSize(2)
         assertThat(res).isEqualTo(rettighetstypePerioder)
@@ -56,7 +56,7 @@ class RettighetstypeperiodeRepositoryTest {
             )
         )
         dataSource.transaction {
-            RettighetstypeperiodeRepository(it).lagre(
+            RettighetstypeperiodeRepositoryImpl(it).lagre(
                 behandlingReferanse,
                 initialPerioder
             )
@@ -75,14 +75,14 @@ class RettighetstypeperiodeRepositoryTest {
             )
         )
         dataSource.transaction {
-            RettighetstypeperiodeRepository(it).lagre(
+            RettighetstypeperiodeRepositoryImpl(it).lagre(
                 behandlingReferanse,
                 oppdatertedPerioder
             )
         }
 
         val res = dataSource.transaction {
-            RettighetstypeperiodeRepository(it).hent(behandlingReferanse)
+            RettighetstypeperiodeRepositoryImpl(it).hent(behandlingReferanse)
         }
 
         assertThat(res).hasSize(2)
@@ -96,11 +96,11 @@ class RettighetstypeperiodeRepositoryTest {
         dataSource.transaction { forberedDatabase(it, behandlingReferanse) }
 
         dataSource.transaction {
-            RettighetstypeperiodeRepository(it).lagre(behandlingReferanse, emptyList())
+            RettighetstypeperiodeRepositoryImpl(it).lagre(behandlingReferanse, emptyList())
         }
 
         val res =
-            dataSource.transaction { RettighetstypeperiodeRepository(it).hent(behandlingReferanse) }
+            dataSource.transaction { RettighetstypeperiodeRepositoryImpl(it).hent(behandlingReferanse) }
 
         assertThat(res).isEmpty()
     }

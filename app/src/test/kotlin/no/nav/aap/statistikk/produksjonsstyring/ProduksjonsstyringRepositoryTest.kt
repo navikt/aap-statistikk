@@ -7,8 +7,8 @@ import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
-import no.nav.aap.statistikk.meldekort.MeldekortRepository
-import no.nav.aap.statistikk.person.PersonRepository
+import no.nav.aap.statistikk.meldekort.MeldekortRepositoryImpl
+import no.nav.aap.statistikk.person.PersonRepositoryImpl
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
@@ -108,8 +108,8 @@ class ProduksjonsstyringRepositoryTest {
                     gatewayProvider = gatewayProvider,
                     postgresRepositoryRegistry.provider(conn)
                 ) {},
-                personService = PersonService(PersonRepository(conn)),
-                meldekortRepository = MeldekortRepository(conn),
+                personService = PersonService(PersonRepositoryImpl(conn)),
+                meldekortRepository = MeldekortRepositoryImpl(conn),
                 opprettBigQueryLagringSakStatistikkCallback = { },
                 behandlingService = BehandlingService(
                     postgresRepositoryRegistry.provider(conn),
