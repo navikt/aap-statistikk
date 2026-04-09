@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -13,19 +12,6 @@ class OppgaveHistorikkLagrer(
     private val saksbehandlerRepository: SaksbehandlerRepository,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
-
-    companion object {
-        fun konstruer(
-            repositoryProvider: RepositoryProvider
-        ): OppgaveHistorikkLagrer {
-            return OppgaveHistorikkLagrer(
-                personService = PersonService(repositoryProvider),
-                oppgaveRepository = repositoryProvider.provide(),
-                enhetRepository = repositoryProvider.provide(),
-                saksbehandlerRepository = repositoryProvider.provide()
-            )
-        }
-    }
 
     fun lagre(oppgave: Oppgave) {
         val saksbehandlerMedId = oppgave.reservasjon?.let {

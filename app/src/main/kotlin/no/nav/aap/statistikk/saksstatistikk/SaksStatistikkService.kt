@@ -1,7 +1,5 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelser.BehandlingService
@@ -9,7 +7,6 @@ import no.nav.aap.statistikk.sakDuplikat
 import no.nav.aap.statistikk.sammeEndretTid
 import org.slf4j.LoggerFactory
 import java.time.Clock
-import java.time.Clock.systemDefaultZone
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
@@ -20,24 +17,6 @@ class SaksStatistikkService(
     private val bqBehandlingMapper: BQBehandlingMapper,
 ) : ISaksStatistikkService {
     private val log = LoggerFactory.getLogger(javaClass)
-
-    companion object {
-        fun konstruer(
-            gatewayProvider: GatewayProvider,
-            repositoryProvider: RepositoryProvider,
-            clock: Clock = systemDefaultZone()
-        ): SaksStatistikkService {
-            return SaksStatistikkService(
-                behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
-                sakstatistikkRepository = repositoryProvider.provide(),
-                bqBehandlingMapper = BQBehandlingMapper.konstruer(
-                    repositoryProvider,
-                    gatewayProvider,
-                    clock
-                ),
-            )
-        }
-    }
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,

@@ -102,17 +102,25 @@ class ProduksjonsstyringRepositoryTest {
     ) =
         dataSource.transaction { conn ->
             val gatewayProvider = defaultGatewayProvider { }
+            val provider = postgresRepositoryRegistry.provider(conn)
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
-                avsluttetBehandlingService = AvsluttetBehandlingService.konstruer(
-                    gatewayProvider = gatewayProvider,
-                    postgresRepositoryRegistry.provider(conn)
-                ) {},
+                avsluttetBehandlingService = AvsluttetBehandlingService(
+                    tilkjentYtelseRepository = provider.provide(),
+                    beregningsgrunnlagRepository = provider.provide(),
+                    vilkårsResultatRepository = provider.provide(),
+                    diagnoseRepository = provider.provide(),
+                    rettighetstypeperiodeRepository = provider.provide(),
+                    arbeidsopptrappingperioderRepository = provider.provide(),
+                    fritaksvurderingRepository = provider.provide(),
+                    behandlingService = BehandlingService(provider, gatewayProvider),
+                    opprettBigQueryLagringYtelseCallback = {},
+                ),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
                 opprettBigQueryLagringSakStatistikkCallback = { _ -> },
                 behandlingService = BehandlingService(
-                    postgresRepositoryRegistry.provider(conn),
+                    provider,
                     gatewayProvider
                 ),
             )

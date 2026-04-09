@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
@@ -29,22 +28,6 @@ class BQBehandlingMapper(
     private val clock: Clock = systemDefaultZone()
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
-
-    companion object {
-        fun konstruer(
-            repositoryProvider: RepositoryProvider,
-            gatewayProvider: GatewayProvider,
-            clock: Clock = systemDefaultZone()
-        ): BQBehandlingMapper {
-            return BQBehandlingMapper(
-                behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
-                rettighetstypeperiodeRepository = repositoryProvider.provide(),
-                oppgaveRepository = repositoryProvider.provide(),
-                sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
-                clock = clock
-            )
-        }
-    }
 
     fun bqBehandlingForBehandling(
         behandling: Behandling,
