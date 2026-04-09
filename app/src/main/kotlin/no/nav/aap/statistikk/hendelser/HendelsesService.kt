@@ -39,16 +39,16 @@ class HendelsesService(
                 avsluttetBehandlingService = avsluttetBehandlingService,
                 behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
                 meldekortRepository = repositoryProvider.provide(),
-                opprettBigQueryLagringSakStatistikkCallback = {
+                opprettBigQueryLagringSakStatistikkCallback = { behandlingId ->
                     LoggerFactory.getLogger(HendelsesService::class.java)
-                        .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $it")
+                        .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $behandlingId")
                     jobbAppender.leggTilLagreSakTilBigQueryJobb(
                         repositoryProvider,
-                        it,
+                        behandlingId,
                         // Veldig hacky! Dette er for at jobben som kjører etter melding fra
                         // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
                         delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L,
-                        triggerKilde = "behandling"
+                        triggerKilde = "behandling",
                     )
                 }
             )
