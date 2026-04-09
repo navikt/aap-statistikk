@@ -299,7 +299,7 @@ class SaksStatistikkServiceTest {
             assertThat(utredesRad.endretTid).isEqualTo(oppgaveSendtTid)
 
             // Simuler behandling-trigget jobb: AVSLUTTET med samme beregnede endretTid
-            // (begge bruker oppgavens sendtTid) → skal bumpes til oppgaveSendtTid + 1ns
+            // (begge bruker oppgavens sendtTid) → skal bumpes til oppgaveSendtTid + 1000ns
             service.lagreBQBehandling(utredesRad.copy(behandlingStatus = "AVSLUTTET"))
 
             val alleRader = SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse)
