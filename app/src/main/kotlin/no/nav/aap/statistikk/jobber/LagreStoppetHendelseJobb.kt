@@ -1,9 +1,13 @@
 package no.nav.aap.statistikk.jobber
 
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.gateway.GatewayProvider
+import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
+import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.hendelser.BehandlingService
@@ -12,7 +16,6 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
-import no.nav.aap.statistikk.saksstatistikk.Konstanter
 import org.slf4j.LoggerFactory
 
 class LagreStoppetHendelseJobb(
@@ -73,4 +76,20 @@ class LagreStoppetHendelseJobb(
     override val navn = "lagreHendelse"
     override val beskrivelse = "beskrivelse"
 
+}
+
+private class LagreStoppetHendelseJobbUtfører(
+    private val hendelsesService: HendelsesService
+) : JobbUtfører {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    override fun utfør(input: JobbInput) {
+        val dto = DefaultJsonMapper.fromJson<StoppetBehandling>(input.payload())
+
+        logger.info("StoppetBehandling mottatt. Behandlingsreferanse: ${dto.behandlingReferanse}.")
+
+        LoggingKontekst(dto.behandlingReferanse).use {
+            hendelsesService.prosesserNyHendelse(dto)
+        }
+    }
 }
