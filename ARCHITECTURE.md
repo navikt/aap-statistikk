@@ -130,43 +130,7 @@ Hensikten med hva som publiseres er selvdokumenterende.
 
 ---
 
-## 4. Saml Jobb + JobbUtfører i samme fil
-
-**Problem:** Hvert jobbpar er to separate klasser i to separate filer. `JobbUtfører`-klassen er
-konsekvent en tynn dispatcher som bare deserialiserer JSON og kaller én service-metode:
-
-```kotlin
-// LagreStoppetHendelseJobbUtfører.kt — 20 linjer
-class LagreStoppetHendelseJobbUtfører(
-    private val hendelsesService: HendelsesService
-) : JobbUtfører {
-    override fun utfør(input: JobbInput) {
-        val dto = DefaultJsonMapper.fromJson<StoppetBehandling>(input.payload())
-        LoggingKontekst(dto.behandlingReferanse).use {
-            hendelsesService.prosesserNyHendelse(dto)
-        }
-    }
-}
-```
-
-`LagreAvklaringsbehovHendelseJobbUtfører`, `LagreSakinfoTilBigQueryJobbUtfører` og
-`ResendSakstatistikkJobbUtfører` følger samme mønster. Fire av jobbparene er allerede samlet
-i samme fil (`LagreOppgaveHendelseJobb`, `LagreSakinfoTilBigQueryJobb`, osv.) — de tre som
-fortsatt er splittet bør konsolideres:
-
-| Jobb-fil (separat)                       | Utfører-fil (separat)                        |
-| ---------------------------------------- | -------------------------------------------- |
-| `LagreStoppetHendelseJobb.kt`            | `LagreStoppetHendelseJobbUtfører.kt`         |
-| `LagreAvklaringsbehovHendelseJobb.kt`    | `LagreAvklaringsbehovHendelseJobbUtfører.kt` |
-
-**Forslag:** Flytt `Utfører`-klassen inn i samme fil som `Jobb`-klassen (gjerne som en privat
-inner class eller bare på slutten av filen).
-
-**Gevinst:** Halvert antall filer for jobs, enklere navigering, logikken leses i sammenheng.
-
----
-
-## 5. Duplikat oppbygging av SaksStatistikkService
+## 4. Dedupliser SaksStatistikkService-konstruksjon
 
 **Problem:** `LagreSakinfoTilBigQueryJobb.konstruer()` og `ResendSakstatistikkJobb.konstruer()`
 konstruerer `SaksStatistikkService` med nøyaktig samme kode:
@@ -214,7 +178,7 @@ private fun lagSaksStatistikkService(
 
 ---
 
-## 6. Injiser JobbAppender i LagreOppgaveJobbUtfører og LagreSakinfoTilBigQueryJobb
+## 5. Injiser JobbAppender i LagreOppgaveJobbUtfører og LagreSakinfoTilBigQueryJobb
 
 **Problem:** Begge klasser instansierer `MotorJobbAppender()` direkte inne i metoden:
 
@@ -233,7 +197,7 @@ gjør.
 
 ---
 
-## 7. Fjern inline-instansiering av LagreAvklaringsbehovHendelseJobb i route-handler
+## 6. Fjern inline-instansiering av LagreAvklaringsbehovHendelseJobb i route-handler
 
 **Problem:** `mottaOppdatertBehandling` instansierer `LagreAvklaringsbehovHendelseJobb` inline
 i stedet for å ta den som parameter:
@@ -258,7 +222,7 @@ fun NormalOpenAPIRoute.mottaOppdatertBehandling(
 
 ---
 
-## 8. Fjern SkjermingService.konstruer() companion
+## 7. Fjern SkjermingService.konstruer() companion (PR #755 — under review)
 
 **Problem:** `SkjermingService` har fortsatt en `companion object { fun konstruer(...) }` — det
 gamle mønsteret som PR #750 ryddet opp i for de andre klassene:
@@ -288,9 +252,8 @@ class SkjermingService(private val pdlGateway: PdlGateway) {
 | 1   | Fjern alle single-implementasjon interfaces (~21 stk)          | ~21 filer               | Middels           |
 | 2   | Fjern tynne wrapper-services (PersonService, SakService, Post) | 3 klasser               | Middels           |
 | 3   | Callbacks → HendelsePublisher (PR #746)                        | ~10 filer endres        | Middels           |
-| 4   | Saml Jobb + JobbUtfører i samme fil                            | 2 filer                 | Lav               |
-| 5   | Dedupliser SaksStatistikkService-konstruksjon                  | 2 steder → 1            | Lav               |
-| 6   | Injiser JobbAppender i oppgave- og saksinfo-jobber             | 2 filer                 | Lav               |
-| 7   | Fjern inline LagreAvklaringsbehovHendelseJobb i route-handler  | 2 filer                 | Lav               |
-| 8   | Fjern SkjermingService.konstruer() companion                   | 1 fil                   | Lav               |
+| 4   | Dedupliser SaksStatistikkService-konstruksjon                  | 2 steder → 1            | Lav               |
+| 5   | Injiser JobbAppender i oppgave- og saksinfo-jobber             | 2 filer                 | Lav               |
+| 6   | Fjern inline LagreAvklaringsbehovHendelseJobb i route-handler  | 2 filer                 | Lav               |
+| 7   | Fjern SkjermingService.konstruer() companion (PR #755)         | 1 fil                   | Lav               |
 
