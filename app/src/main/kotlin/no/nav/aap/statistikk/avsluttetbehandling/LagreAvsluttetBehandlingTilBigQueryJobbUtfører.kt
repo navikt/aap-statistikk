@@ -21,9 +21,11 @@ class LagreAvsluttetBehandlingTilBigQueryJobb(
 
     override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
         return LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
-            YtelsesStatistikkTilBigQuery.konstruer(
-                bqYtelseRepository,
-                repositoryProvider
+            YtelsesStatistikkTilBigQuery(
+                bqRepository = bqYtelseRepository,
+                behandlingRepository = repositoryProvider.provide(),
+                rettighetstypeperiodeRepository = repositoryProvider.provide(),
+                diagnoseRepository = repositoryProvider.provide(),
             )
         )
     }

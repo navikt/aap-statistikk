@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.avsluttetbehandling
 
-import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -16,20 +15,6 @@ class YtelsesStatistikkTilBigQuery(
     private val diagnoseRepository: DiagnoseRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) {
-
-    companion object {
-        fun konstruer(
-            bqRepository: IBQYtelsesstatistikkRepository,
-            repositoryProvider: RepositoryProvider
-        ): YtelsesStatistikkTilBigQuery {
-            return YtelsesStatistikkTilBigQuery(
-                bqRepository = bqRepository,
-                behandlingRepository = repositoryProvider.provide(),
-                rettighetstypeperiodeRepository = repositoryProvider.provide(),
-                diagnoseRepository = repositoryProvider.provide(),
-            )
-        }
-    }
 
     fun lagre(behandlingReferanse: UUID) {
         val behandling =
