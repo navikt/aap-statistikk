@@ -89,7 +89,8 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         )
                     } else {
                         sakStatistikkService.lagreSakInfoTilBigquery(
-                            behandlingId, lagreUtenEnhet = true
+                            behandlingId,
+                            lagreUtenEnhet = true,
                         )
                     }
                 }
