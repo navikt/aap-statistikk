@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.skjerming
 
-import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
@@ -11,12 +10,6 @@ private val logger = org.slf4j.LoggerFactory.getLogger("SkjermingService")
 class SkjermingService(
     private val pdlGateway: PdlGateway
 ) {
-    companion object {
-        fun konstruer(gatewayProvider: GatewayProvider): SkjermingService {
-            return SkjermingService(gatewayProvider.provide())
-        }
-    }
-
     fun erSkjermet(behandling: Behandling): Boolean {
         val identer = behandling.identerPåBehandling()
         return try {
