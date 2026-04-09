@@ -18,10 +18,10 @@ value class BehandlingId(val id: Long)
 
 class BehandlingRepositoryImpl(
     private val dbConnection: DBConnection, private val clock: Clock = Clock.systemDefaultZone()
-) : IBehandlingRepository {
+) : BehandlingRepository {
 
-    companion object : RepositoryFactory<IBehandlingRepository> {
-        override fun konstruer(connection: DBConnection): IBehandlingRepository {
+    companion object : RepositoryFactory<BehandlingRepository> {
+        override fun konstruer(connection: DBConnection): BehandlingRepository {
             return BehandlingRepositoryImpl(connection)
         }
     }

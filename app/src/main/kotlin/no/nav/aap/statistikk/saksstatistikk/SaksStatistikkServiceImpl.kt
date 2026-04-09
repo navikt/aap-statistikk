@@ -18,7 +18,7 @@ class SaksStatistikkServiceImpl(
     private val behandlingService: BehandlingService,
     private val sakstatistikkRepository: SakstatistikkRepository,
     private val bqBehandlingMapper: BQBehandlingMapper,
-) : ISaksStatistikkService {
+) : SaksStatistikkService {
     private val log = LoggerFactory.getLogger(javaClass)
 
     companion object {

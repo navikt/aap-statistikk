@@ -4,14 +4,14 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.komponenter.repository.RepositoryFactory
 
-interface IPersonRepository : Repository{
+interface PersonRepository : Repository{
     fun lagrePerson(person: Person): Long
     fun hentPerson(ident: String): Person?
 }
 
-class PersonRepositoryImpl(private val dbConnection: DBConnection) : IPersonRepository {
-    companion object : RepositoryFactory<IPersonRepository> {
-        override fun konstruer(connection: DBConnection): IPersonRepository {
+class PersonRepositoryImpl(private val dbConnection: DBConnection) : PersonRepository {
+    companion object : RepositoryFactory<PersonRepository> {
+        override fun konstruer(connection: DBConnection): PersonRepository {
             return PersonRepositoryImpl(connection)
         }
     }

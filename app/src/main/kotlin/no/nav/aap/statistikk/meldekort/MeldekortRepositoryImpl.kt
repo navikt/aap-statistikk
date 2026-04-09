@@ -5,10 +5,10 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
-class MeldekortRepositoryImpl(private val dbConnection: DBConnection) : IMeldekortRepository {
+class MeldekortRepositoryImpl(private val dbConnection: DBConnection) : MeldekortRepository {
 
-    companion object : RepositoryFactory<IMeldekortRepository> {
-        override fun konstruer(connection: DBConnection): IMeldekortRepository {
+    companion object : RepositoryFactory<MeldekortRepository> {
+        override fun konstruer(connection: DBConnection): MeldekortRepository {
             return MeldekortRepositoryImpl(connection)
         }
     }

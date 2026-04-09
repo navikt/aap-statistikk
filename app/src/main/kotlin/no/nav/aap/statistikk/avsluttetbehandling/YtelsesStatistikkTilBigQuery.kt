@@ -3,23 +3,23 @@ package no.nav.aap.statistikk.avsluttetbehandling
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
-import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
+import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.bigquery.BQYtelsesstatistikkRepository
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 
 class YtelsesStatistikkTilBigQuery(
-    private val bqRepository: IBQYtelsesstatistikkRepository,
-    private val behandlingRepository: IBehandlingRepository,
-    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
+    private val bqRepository: BQYtelsesstatistikkRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val rettighetstypeperiodeRepository: RettighetstypeperiodeRepository,
     private val diagnoseRepository: DiagnoseRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) {
 
     companion object {
         fun konstruer(
-            bqRepository: IBQYtelsesstatistikkRepository,
+            bqRepository: BQYtelsesstatistikkRepository,
             repositoryProvider: RepositoryProvider
         ): YtelsesStatistikkTilBigQuery {
             return YtelsesStatistikkTilBigQuery(

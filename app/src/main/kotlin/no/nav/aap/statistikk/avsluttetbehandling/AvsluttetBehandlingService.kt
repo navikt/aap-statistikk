@@ -7,21 +7,21 @@ import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
-import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
+import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepository
-import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
+import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
-import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
+import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
 
 class AvsluttetBehandlingService(
-    private val tilkjentYtelseRepository: ITilkjentYtelseRepository,
-    private val beregningsgrunnlagRepository: IBeregningsgrunnlagRepository,
-    private val vilkårsResultatRepository: IVilkårsresultatRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val beregningsgrunnlagRepository: BeregningsgrunnlagRepository,
+    private val vilkårsResultatRepository: VilkårsresultatRepository,
     private val diagnoseRepository: DiagnoseRepository,
-    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
+    private val rettighetstypeperiodeRepository: RettighetstypeperiodeRepository,
     private val fritaksvurderingRepository: FritaksvurderingRepository,
     private val behandlingService: BehandlingService,
     private val arbeidsopptrappingperioderRepository: ArbeidsopptrappingperioderRepository,

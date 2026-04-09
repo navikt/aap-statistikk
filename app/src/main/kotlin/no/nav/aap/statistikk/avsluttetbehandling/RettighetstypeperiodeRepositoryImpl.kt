@@ -5,10 +5,10 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import java.util.*
 
 class RettighetstypeperiodeRepositoryImpl(private val dbConnection: DBConnection) :
-    IRettighetstypeperiodeRepository {
+    RettighetstypeperiodeRepository {
 
-    companion object : RepositoryFactory<IRettighetstypeperiodeRepository> {
-        override fun konstruer(connection: DBConnection): IRettighetstypeperiodeRepository {
+    companion object : RepositoryFactory<RettighetstypeperiodeRepository> {
+        override fun konstruer(connection: DBConnection): RettighetstypeperiodeRepository {
             return RettighetstypeperiodeRepositoryImpl(connection)
         }
     }
