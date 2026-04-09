@@ -2,13 +2,10 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelseLagret
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
@@ -25,35 +22,6 @@ class HendelsesService(
     private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
-
-    companion object {
-        fun konstruer(
-            avsluttetBehandlingService: AvsluttetBehandlingService,
-            jobbAppender: JobbAppender,
-            repositoryProvider: RepositoryProvider,
-            gatewayProvider: GatewayProvider
-        ): HendelsesService {
-            return HendelsesService(
-                sakService = SakService(repositoryProvider),
-                personService = PersonService(repositoryProvider),
-                avsluttetBehandlingService = avsluttetBehandlingService,
-                behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
-                meldekortRepository = repositoryProvider.provide(),
-                opprettBigQueryLagringSakStatistikkCallback = { behandlingId ->
-                    LoggerFactory.getLogger(HendelsesService::class.java)
-                        .info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $behandlingId")
-                    jobbAppender.leggTilLagreSakTilBigQueryJobb(
-                        repositoryProvider,
-                        behandlingId,
-                        // Veldig hacky! Dette er for at jobben som kjører etter melding fra
-                        // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
-                        delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L,
-                        triggerKilde = "behandling",
-                    )
-                }
-            )
-        }
-    }
 
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
         val person = personService.hentEllerLagrePerson(hendelse.ident)
