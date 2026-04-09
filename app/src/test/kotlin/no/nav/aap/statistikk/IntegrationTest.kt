@@ -248,7 +248,7 @@ class IntegrationTest {
             azureConfig = azureConfig,
         ) {
             oppdatertBehandlingHendelse(avsluttetBehandlingHendelser.last().data)
-            testUtil.ventPåSvar()
+            ventPåSvarEllerFeil(dataSource)
         }
 
         val alleSakstatistikkHendelser = dataSource.transaction {
@@ -442,7 +442,7 @@ class IntegrationTest {
         fun verifiserHendelseRekkefølge(
             expectedValues: List<Triple<String?, String?, BehandlingMetode>>
         ) {
-            testUtil.ventPåSvar()
+            ventPåSvarEllerFeil(dataSource)
             val alleSakstatistikkHendelser = dataSource.transaction {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
             }
@@ -882,7 +882,7 @@ class IntegrationTest {
         ) {
             postBehandlingsflytHendelse(hendelsx)
 
-            testUtil.ventPåSvar()
+            ventPåSvarEllerFeil(dataSource)
 
             val gjeldendeAVklaringsbehov =
                 dataSource.transaction { BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!.gjeldendeAvklaringsBehov }!!
@@ -909,11 +909,11 @@ class IntegrationTest {
                     )
                 )
             )
-            testUtil.ventPåSvar()
+            ventPåSvarEllerFeil(dataSource)
 
             postBehandlingsflytHendelse(hendelse)
 
-            testUtil.ventPåSvar()
+            ventPåSvarEllerFeil(dataSource)
             val behandling = ventPåSvar(
                 {
                     dataSource.transaction {
@@ -930,7 +930,7 @@ class IntegrationTest {
             }
             assertThat(enhet.enhet).isEqualTo("0400")
 
-            testUtil.ventPåSvar()
+            ventPåSvarEllerFeil(dataSource)
             val bqSaker = hentSakstatistikkHendelserMedEksaktAntall(
                 dataSource, behandling!!.referanse
             )
@@ -945,7 +945,7 @@ class IntegrationTest {
                 )
             )
 
-            testUtil.ventPåSvar()
+            ventPåSvarEllerFeil(dataSource)
 
             // Sekvensnummer økes med 1 med ny info på sak
             val bqSaker2 = dataSource.transaction {
@@ -1023,12 +1023,12 @@ class IntegrationTest {
                 is BehandlingHendelseData -> {
                     postBehandlingsflytHendelse(it.data)
                     referanse = it.data.behandlingReferanse
-                    testUtil.ventPåSvar()
+                    ventPåSvarEllerFeil(dataSource)
                 }
 
                 is OppgaveHendelseData -> {
                     postOppgaveHendelse(dataSource, it.data)
-                    testUtil.ventPåSvar()
+                    ventPåSvarEllerFeil(dataSource)
                 }
 
                 is OppgaveHendelseAPIData -> postOppgaveData(it.data)
@@ -1038,7 +1038,7 @@ class IntegrationTest {
 
         val feilende = dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
         log.info("Feilende jobber: $feilende")
-        testUtil.ventPåSvar()
+        ventPåSvarEllerFeil(dataSource)
 
         val behandling = ventPåSvar(
             { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
