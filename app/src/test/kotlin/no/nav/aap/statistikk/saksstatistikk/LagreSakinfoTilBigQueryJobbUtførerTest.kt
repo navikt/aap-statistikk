@@ -10,14 +10,12 @@ import no.nav.aap.statistikk.testutils.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.UUID
 
 class LagreSakinfoTilBigQueryJobbUtførerTest {
 
     private val testConfig = EnhetRetryConfig(maxRetries = 3, delaySeconds = 60)
     private val fakeRepositoryProvider = mockk<RepositoryProvider>()
-    private val testHendelsestid = LocalDateTime.of(2024, 1, 1, 10, 0)
 
     @BeforeEach
     fun settOppStandardMocks() {
@@ -49,7 +47,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `reschedulerer når enhet mangler ved første forsøk`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM")
         )
         val jobbAppender = MockJobbAppender()
 
@@ -68,7 +66,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `delay er eksponentielt basert på retry-teller`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM")
         )
         val jobbAppender = MockJobbAppender()
 
@@ -99,7 +97,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `reschedulerer med økt retry-teller`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM")
         )
         val jobbAppender = MockJobbAppender()
 
@@ -119,7 +117,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `lagrer med null enhet etter maks antall forsøk`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM")
         )
         val jobbAppender = MockJobbAppender()
         val fakeBehandlingRepository = mockk<BehandlingRepository>(relaxed = true) {
@@ -143,7 +141,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `config kan overstyres i test`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM")
         )
         val jobbAppender = MockJobbAppender()
         val customConfig = EnhetRetryConfig(maxRetries = 1, delaySeconds = 10)
@@ -157,16 +155,13 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     }
 
     @Test
-    fun `ManglerEnhet inneholder avklaringsbehovkode og hendelsestid`() {
+    fun `ManglerEnhet inneholder avklaringsbehovkode`() {
         val behandlingId = BehandlingId(1)
         val avklaringsbehovKode = "AVKLAR_SYKDOM"
-        val resultat = SakStatistikkResultat.ManglerEnhet(
-            behandlingId, avklaringsbehovKode, testHendelsestid
-        )
+        val resultat = SakStatistikkResultat.ManglerEnhet(behandlingId, avklaringsbehovKode)
 
         assertThat(resultat.avklaringsbehovKode).isEqualTo(avklaringsbehovKode)
         assertThat(resultat.behandlingId).isEqualTo(behandlingId)
-        assertThat(resultat.hendelsestid).isEqualTo(testHendelsestid)
     }
 
     @Test
@@ -183,7 +178,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallVarLagreMedOppgavedata).isFalse()
     }
 }
 
@@ -192,7 +186,6 @@ private class FakeSaksStatistikkService(
 ) : ISaksStatistikkService {
     var kallteller = 0
     var sisteKallLagreUtenEnhet = false
-    var sisteKallVarLagreMedOppgavedata = false
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
@@ -200,7 +193,6 @@ private class FakeSaksStatistikkService(
     ): SakStatistikkResultat {
         kallteller++
         sisteKallLagreUtenEnhet = lagreUtenEnhet
-        sisteKallVarLagreMedOppgavedata = false
         return if (lagreUtenEnhet) SakStatistikkResultat.OK else resultat
     }
 }
