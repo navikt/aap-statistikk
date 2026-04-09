@@ -25,7 +25,7 @@ class LagreAvklaringsbehovHendelseJobb(
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider,
     ): JobbUtfører {
-        val hendelsePublisher = MotorHendelsePublisher(
+        val hendelsePublisher = MotorHendelsePublisher.utenYtelseJobb(
             jobbAppender = jobbAppender,
             repositoryProvider = repositoryProvider,
         )

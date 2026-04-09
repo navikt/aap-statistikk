@@ -29,7 +29,7 @@ class LagreStoppetHendelseJobb(
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider
     ): JobbUtfører {
-        val hendelsePublisher = MotorHendelsePublisher(
+        val hendelsePublisher = MotorHendelsePublisher.medYtelseJobb(
             jobbAppender = jobbAppender,
             repositoryProvider = repositoryProvider,
             lagreAvsluttetBehandlingTilBigQueryJobb = lagreAvsluttetBehandlingTilBigQueryJobb,

@@ -4,11 +4,24 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import org.slf4j.LoggerFactory
 
-class MotorHendelsePublisher(
+class MotorHendelsePublisher private constructor(
     private val jobbAppender: JobbAppender,
     private val repositoryProvider: RepositoryProvider,
-    private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb? = null,
+    private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb?,
 ) : HendelsePublisher {
+
+    companion object {
+        fun medYtelseJobb(
+            jobbAppender: JobbAppender,
+            repositoryProvider: RepositoryProvider,
+            lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
+        ) = MotorHendelsePublisher(jobbAppender, repositoryProvider, lagreAvsluttetBehandlingTilBigQueryJobb)
+
+        fun utenYtelseJobb(
+            jobbAppender: JobbAppender,
+            repositoryProvider: RepositoryProvider,
+        ) = MotorHendelsePublisher(jobbAppender, repositoryProvider, null)
+    }
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -27,9 +40,10 @@ class MotorHendelsePublisher(
             }
 
             is StatistikkHendelse.YtelsesstatistikkSkalLagres -> {
-                val jobb = checkNotNull(lagreAvsluttetBehandlingTilBigQueryJobb) {
-                    "lagreAvsluttetBehandlingTilBigQueryJobb må være satt for å publisere YtelsesstatistikkSkalLagres"
-                }
+                val jobb = lagreAvsluttetBehandlingTilBigQueryJobb
+                    ?: throw UnsupportedOperationException(
+                        "Denne publisher-instansen støtter ikke YtelsesstatistikkSkalLagres. Bruk medYtelseJobb() ved konstruksjon."
+                    )
                 jobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
                     repositoryProvider,
                     hendelse.behandlingId,

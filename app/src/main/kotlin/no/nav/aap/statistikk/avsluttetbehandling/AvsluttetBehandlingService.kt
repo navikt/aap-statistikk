@@ -83,7 +83,6 @@ class AvsluttetBehandlingService(
             hendelsePublisher.publiser(
                 StatistikkHendelse.YtelsesstatistikkSkalLagres(
                     behandlingId = uthentetBehandling.id(),
-                    behandlingReferanse = avsluttetBehandling.behandlingsReferanse
                 )
             )
         } else {

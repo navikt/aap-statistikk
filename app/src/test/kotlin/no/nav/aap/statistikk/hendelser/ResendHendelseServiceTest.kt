@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -34,6 +35,9 @@ class ResendHendelseServiceTest {
         val behandling = behandlingRepository.hent(hendelse.behandlingReferanse)!!
 
         assertThat(behandling.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(hendelsePublisher.hendelser).containsExactly(
+            StatistikkHendelse.SakstatistikkSkalResendes(behandling.id())
+        )
     }
 
 }
