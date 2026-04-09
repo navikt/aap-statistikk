@@ -31,6 +31,8 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
+import no.nav.aap.motor.retry.DriftJobbRepositoryExposed
+import no.nav.aap.motor.testutil.TestJobbRepository
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.AppConfig
@@ -850,6 +852,35 @@ fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
         logger.info("Ventet på svar, men svaret er null.")
     }
     return res
+}
+
+/**
+ * Venter til alle jobber er ferdige, men avbryter umiddelbart hvis noen jobber feiler.
+ * Forhindrer lang ventetid i integrasjonstester ved uventede jobbkrasj.
+ */
+fun ventPåSvarEllerFeil(
+    dataSource: DataSource,
+    cronJobberSomSkalIgnoreres: List<String> = listOf("oppgave.retryFeilede"),
+    maxTidSekunder: Long = 20,
+) {
+    val sluttTidspunkt = LocalDateTime.now().plusSeconds(maxTidSekunder)
+    while (LocalDateTime.now().isBefore(sluttTidspunkt)) {
+        val (feilende, harVentende) = dataSource.transaction(readOnly = true) { connection ->
+            val feilende = DriftJobbRepositoryExposed(connection).hentAlleFeilende()
+            val harVentende = TestJobbRepository(connection, cronJobberSomSkalIgnoreres).harJobb(null, null)
+            Pair(feilende, harVentende)
+        }
+
+        if (feilende.isNotEmpty()) {
+            val detaljer = feilende.joinToString("\n") { (jobb, melding) -> "  ${jobb.type()}: $melding" }
+            throw AssertionError("${feilende.size} jobber feilet:\n$detaljer")
+        }
+
+        if (!harVentende) return
+
+        Thread.sleep(50)
+    }
+    throw AssertionError("Timeout: jobber ikke ferdig etter $maxTidSekunder sekunder")
 }
 
 fun forberedDatabase(
