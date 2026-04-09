@@ -136,6 +136,8 @@ fun <E> testKlient(
     )
     motor.start()
 
+    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
+
     val server = embeddedServer(Netty, port = 0) {
         module(
             transactionExecutor,
@@ -143,6 +145,7 @@ fun <E> testKlient(
             azureConfig,
             {},
             lagreStoppetHendelseJobb,
+            lagreAvklaringsbehovHendelseJobb,
         )
     }.start()
 

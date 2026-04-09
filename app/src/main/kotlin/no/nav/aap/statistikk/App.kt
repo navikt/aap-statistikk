@@ -169,6 +169,7 @@ fun Application.startUp(
         azureConfig,
         motorApiCallback,
         lagreStoppetHendelseJobb,
+        lagreAvklaringsbehovHendelseJobb,
     )
 }
 
@@ -199,6 +200,7 @@ fun Application.module(
     azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
 ) {
     transactionExecutor.withinTransaction {
         RetryService(it).enable()
@@ -227,6 +229,7 @@ fun Application.module(
                 mottaOppdatertBehandling(
                     transactionExecutor,
                     jobbAppender,
+                    lagreAvklaringsbehovHendelseJobb,
                 )
                 mottaOppgaveOppdatering(transactionExecutor, jobbAppender)
                 mottaPostmottakOppdatering(

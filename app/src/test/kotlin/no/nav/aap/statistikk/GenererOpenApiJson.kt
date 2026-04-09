@@ -47,6 +47,7 @@ fun main() {
             azureConfig = azureConfig,
             motorApiCallback = { },
             lagreStoppetHendelseJobb = mockk(),
+            lagreAvklaringsbehovHendelseJobb = mockk(),
         )
     }.start()
 

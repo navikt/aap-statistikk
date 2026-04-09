@@ -101,13 +101,14 @@ fun NormalOpenAPIRoute.mottaTilbakekrevingshendelse(
 fun NormalOpenAPIRoute.mottaOppdatertBehandling(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
 ) {
     mottaHendelse<StoppetBehandling>(
         path = "/oppdatertBehandling",
         authorizedAzps = listOf(Azp.Behandlingsflyt.uuid),
         transactionExecutor = transactionExecutor,
         jobbAppender = jobbAppender,
-        jobbSpesifikasjon = LagreAvklaringsbehovHendelseJobb(jobbAppender),
+        jobbSpesifikasjon = lagreAvklaringsbehovHendelseJobb,
         saksnummer = { stringToNumber(it.saksnummer) },
     )
 }
