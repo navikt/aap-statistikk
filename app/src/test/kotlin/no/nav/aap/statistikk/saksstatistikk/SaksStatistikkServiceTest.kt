@@ -203,6 +203,116 @@ class SaksStatistikkServiceTest {
         }
     }
 
+    @Test
+    fun `retry etter ManglerEnhet ser allerede lagret rad som duplikat og lagrer ikke på nytt`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingsflytTid = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
+        val oppgaveSendtTid = behandlingsflytTid.plusSeconds(5)
+
+        dataSource.transaction { conn ->
+            val hendelsesService = HendelsesService(
+                sakService = SakService(SakRepositoryImpl(conn)),
+                avsluttetBehandlingService = mockk(relaxed = true),
+                personService = PersonService(PersonRepository(conn)),
+                meldekortRepository = MeldekortRepository(conn),
+                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                behandlingService = BehandlingService(
+                    BehandlingRepository(conn),
+                    SkjermingService(FakePdlGateway(emptyMap()))
+                ),
+            )
+
+            hendelsesService.prosesserNyHendelse(
+                StoppetBehandling(
+                    saksnummer = "DDDD",
+                    sakStatus = SakStatus.UTREDES,
+                    behandlingReferanse = behandlingReferanse,
+                    relatertBehandling = null,
+                    behandlingOpprettetTidspunkt = behandlingsflytTid,
+                    mottattTid = behandlingsflytTid,
+                    behandlingStatus = BehandlingStatus.UTREDES,
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    soknadsFormat = Kanal.DIGITAL,
+                    ident = "1234567892",
+                    versjon = "1",
+                    vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                    årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+                    avklaringsbehov = listOf(
+                        AvklaringsbehovHendelseDto(
+                            avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                            status = AvklaringsbehovStatus.OPPRETTET,
+                            endringer = listOf(
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.OPPRETTET,
+                                    tidsstempel = behandlingsflytTid,
+                                    endretAv = "system",
+                                )
+                            ),
+                        )
+                    ),
+                    hendelsesTidspunkt = behandlingsflytTid,
+                    avsluttetBehandling = null,
+                    identerForSak = listOf("1234567892")
+                )
+            )
+
+            val oppgaveIdentifikator = 77L
+            val person = PersonRepository(conn).hentPerson("1234567892")!!
+            val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
+            OppgaveRepositoryImpl(conn).lagreOppgave(
+                Oppgave(
+                    identifikator = oppgaveIdentifikator,
+                    avklaringsbehov = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    enhet = Enhet(enhetId, "4491"),
+                    person = person,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
+                    hendelser = emptyList(),
+                )
+            )
+            OppgaveHendelseRepositoryImpl(conn).lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = oppgaveIdentifikator,
+                    mottattTidspunkt = oppgaveSendtTid,
+                    personIdent = "1234567892",
+                    saksnummer = "DDDD",
+                    behandlingRef = behandlingReferanse,
+                    enhet = "4491",
+                    avklaringsbehovKode = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    status = Oppgavestatus.OPPRETTET,
+                    reservertAv = null,
+                    reservertTidspunkt = null,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    endretAv = null,
+                    endretTidspunkt = null,
+                    sendtTid = oppgaveSendtTid,
+                    versjon = 1L,
+                )
+            )
+
+            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val service = konstruerSakstatistikkService(conn)
+
+            // Oppgave-trigget jobb lagrer korrekt tilstand
+            service.lagreSakInfoTilBigquery(behandlingId)
+            val raderEtterFørsteKall =
+                SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse).size
+
+            // Retry (simulert) kaller lagreSakInfoTilBigquery igjen med nåværende tilstand
+            // → skal se raden som duplikat og ikke lagre på nytt
+            service.lagreSakInfoTilBigquery(behandlingId)
+
+            val alleRader = SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse)
+            assertThat(alleRader)
+                .describedAs("Retryen skal ikke lagre en ekstra rad")
+                .hasSize(raderEtterFørsteKall)
+        }
+    }
+
     companion object {
 
         fun lagreHendelser(dataSource: DataSource): UUID {

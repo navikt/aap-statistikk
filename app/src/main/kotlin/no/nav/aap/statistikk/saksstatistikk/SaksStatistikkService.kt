@@ -51,7 +51,6 @@ class SaksStatistikkService(
             return SakStatistikkResultat.ManglerEnhet(
                 behandlingId = behandling.id(),
                 avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
-                hendelsestid = behandling.oppdatertTidspunkt()
             )
         }
 
