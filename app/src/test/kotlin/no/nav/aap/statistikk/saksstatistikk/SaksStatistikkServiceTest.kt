@@ -30,6 +30,7 @@ import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
+import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.verdityper.dokument.Kanal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -100,7 +101,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = {},
+                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
@@ -196,8 +197,7 @@ class SaksStatistikkServiceTest {
     }
 
     @Test
-    @Disabled("Fix reverted - capping endretTid til oppdatertTidspunkt i lagreSakInfoTilBigquery forårsaker nye kollisjoner med gamle rader")
-    fun `lagreSakInfoTilBigquery skal ikke la oppgave-hendelse etter behandlingens oppdatertTidspunkt drive endretTid`(
+    fun `lagreBQBehandling skal bumpe endretTid slik at ny hendelse alltid har høyere endretTid enn forrige`(
         @Postgres dataSource: DataSource
     ) {
         val behandlingReferanse = UUID.randomUUID()
@@ -210,7 +210,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = {},
+                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
@@ -289,13 +289,26 @@ class SaksStatistikkServiceTest {
             )
 
             val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val service = konstruerSakstatistikkService(conn)
 
-            konstruerSakstatistikkService(conn).lagreSakInfoTilBigquery(behandlingId)
+            // Simuler oppgave-trigget jobb: lagrer UTREDES-tilstand med endretTid = oppgaveSendtTid
+            service.lagreSakInfoTilBigquery(behandlingId)
 
-            val lagret = SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse)
-            assertThat(lagret.map { it.endretTid })
-                .describedAs("endretTid skal ikke overstige behandlingens oppdatertTidspunkt selv om oppgave ankommer senere")
-                .allSatisfy { assertThat(it).isBeforeOrEqualTo(behandlingsflytTid) }
+            val utredesRad = SakstatistikkRepositoryImpl(conn)
+                .hentAlleHendelserPåBehandling(behandlingReferanse).last()
+            assertThat(utredesRad.endretTid).isEqualTo(oppgaveSendtTid)
+
+            // Simuler behandling-trigget jobb: AVSLUTTET med samme beregnede endretTid
+            // (begge bruker oppgavens sendtTid) → skal bumpes til oppgaveSendtTid + 1ns
+            service.lagreBQBehandling(utredesRad.copy(behandlingStatus = "AVSLUTTET"))
+
+            val alleRader = SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse)
+            assertThat(alleRader.last().behandlingStatus)
+                .describedAs("AVSLUTTET skal komme sist")
+                .isEqualTo("AVSLUTTET")
+            assertThat(alleRader.last().endretTid)
+                .describedAs("AVSLUTTET skal ha høyere endretTid enn UTREDES etter bump")
+                .isEqualTo(oppgaveSendtTid.plusNanos(1000))
         }
     }
 
@@ -315,7 +328,7 @@ class SaksStatistikkServiceTest {
                     avsluttetBehandlingService = mockk(relaxed = true),
                     personService = PersonService(PersonRepository(it)),
                     meldekortRepository = MeldekortRepository(it),
-                    opprettBigQueryLagringSakStatistikkCallback = {},
+                    opprettBigQueryLagringSakStatistikkCallback = { _ -> },
                     behandlingService = BehandlingService(
                         BehandlingRepository(it),
                         SkjermingService(FakePdlGateway(emptyMap()))

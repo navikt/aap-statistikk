@@ -110,7 +110,7 @@ class ProduksjonsstyringRepositoryTest {
                 ) {},
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = { },
+                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
                 behandlingService = BehandlingService(
                     postgresRepositoryRegistry.provider(conn),
                     gatewayProvider

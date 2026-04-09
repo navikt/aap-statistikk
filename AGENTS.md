@@ -17,9 +17,10 @@ Known terms: "bug" (not "bugg").
 
 ## Coding Guidelines
 
-- **Never store temporary files in /tmp**
-- Always create temporary files in the current project directory
-- Use filenames like `temp_output.txt`, `debug_log.txt` etc. in the project root
+- **Never store temporary files in /tmp** — this includes PR body files, debug output, scripts, etc.
+- Always create temporary files in the current project directory (the repo root)
+- Use filenames like `temp_output.txt`, `debug_log.txt`, `pr-body.txt` etc. in the project root
+- Delete temporary files when done
 
 ### Small, Incremental Changes
 - **Always make the smallest possible change** that moves toward the goal
