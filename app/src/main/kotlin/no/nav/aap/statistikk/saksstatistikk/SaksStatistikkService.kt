@@ -181,14 +181,22 @@ class SaksStatistikkService(
             // (oppgave er da siste snapshot for begge jobber), men jobbene ser ulike behandlingstilstander.
             val bqSakMedUnikEndretTid = if (siste != null && siste.endretTid >= bqSak.endretTid) {
                 val justert = bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
-                log.warn(
-                    "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
-                            "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
-                            "EndretTid: ${bqSak.endretTid}. " +
-                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
-                            "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
-                            "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
-                )
+                if (siste.endretTid == bqSak.endretTid) {
+                    log.warn(
+                        "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
+                                "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
+                                "EndretTid: ${bqSak.endretTid}. " +
+                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
+                                "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                                "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+                    )
+                } else {
+                    log.warn(
+                        "Ny hendelse har eldre endretTid enn forrige lagrede rad. Referanse: ${bqSak.behandlingUUID}. " +
+                                "Forrige endretTid: ${siste.endretTid}, ny: ${bqSak.endretTid}. " +
+                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
+                    )
+                }
                 log.info(
                     "Justerte endretTid fra ${bqSak.endretTid} til ${justert.endretTid} " +
                             "for å sikre monoton rekkefølge. Referanse: ${bqSak.behandlingUUID}. " +
