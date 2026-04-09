@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.api
 
+import com.papsign.ktor.openapigen.modules.RouteOpenAPIModule
 import com.papsign.ktor.openapigen.route.EndpointInfo
 import com.papsign.ktor.openapigen.route.TagModule
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
@@ -15,6 +16,7 @@ import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelse
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.JobbInput
+import no.nav.aap.motor.JobbSpesifikasjon
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
@@ -28,165 +30,117 @@ import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
 import java.time.LocalDateTime
+import java.util.UUID
 import java.util.stream.IntStream
 import kotlin.math.pow
 import kotlin.math.roundToLong
 
+/**
+ * Generisk hjelpefunksjon for alle route-handlers som mottar en statistikk-hendelse.
+ * Alle handlers gjør det samme: motta DTO → (valgfritt map) → serialiser → legg i kø → svar 202.
+ */
+inline fun <reified DTO : Any> NormalOpenAPIRoute.mottaHendelse(
+    path: String,
+    authorizedAzps: List<UUID>,
+    transactionExecutor: TransactionExecutor,
+    jobbAppender: JobbAppender,
+    jobbSpesifikasjon: JobbSpesifikasjon,
+    crossinline saksnummer: (DTO) -> Long?,
+    extraModules: List<RouteOpenAPIModule> = emptyList(),
+    crossinline mapPayload: (DTO) -> Any = { it },
+) {
+    val modules = (listOf(TagModule(listOf(Tags.MottaStatistikk))) + extraModules).toTypedArray()
+    route(path).status(HttpStatusCode.Accepted) {
+        authorizedPost<Unit, String, DTO>(
+            modules = modules,
+            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps)
+        ) { _, dto ->
+            transactionExecutor.withinTransaction { conn ->
+                val sak = saksnummer(dto)
+                var input = JobbInput(jobbSpesifikasjon)
+                    .medPayload(DefaultJsonMapper.toJson(mapPayload(dto)))
+                    .medCallId()
+                if (sak != null) input = input.forSak(sak)
+                jobbAppender.leggTil(conn, input)
+            }
+            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
+        }
+    }
+}
 
 fun NormalOpenAPIRoute.mottaStoppetBehandling(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
-    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb
+    lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
 ) {
-    route("/stoppetBehandling").status(HttpStatusCode.Accepted) {
-        authorizedPost<Unit, String, StoppetBehandling>(
-            modules = arrayOf(TagModule(listOf(Tags.MottaStatistikk))),
-            routeConfig = AuthorizationMachineToMachineConfig(
-                authorizedAzps = listOf(Azp.Behandlingsflyt.uuid)
-            )
-        ) { _, dto ->
-            transactionExecutor.withinTransaction { conn ->
-                val stringified = DefaultJsonMapper.toJson(dto)
-
-                val encodedSaksNummer = stringToNumber(dto.saksnummer)
-
-                jobbAppender.leggTil(
-                    conn,
-                    JobbInput(lagreStoppetHendelseJobb)
-                        .medPayload(stringified)
-                        .medCallId()
-                        .forSak(encodedSaksNummer)
-                )
-            }
-
-            responder.respond(
-                HttpStatusCode.Accepted, "{}", pipeline
-            )
-        }
-    }
+    mottaHendelse<StoppetBehandling>(
+        path = "/stoppetBehandling",
+        authorizedAzps = listOf(Azp.Behandlingsflyt.uuid),
+        transactionExecutor = transactionExecutor,
+        jobbAppender = jobbAppender,
+        jobbSpesifikasjon = lagreStoppetHendelseJobb,
+        saksnummer = { stringToNumber(it.saksnummer) },
+    )
 }
 
 fun NormalOpenAPIRoute.mottaTilbakekrevingshendelse(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
 ) {
-    route("/tilbakekrevingshendelse").status(HttpStatusCode.Accepted) {
-        authorizedPost<Unit, String, TilbakekrevingsbehandlingOppdatertHendelse>(
-            modules = arrayOf(TagModule(listOf(Tags.MottaStatistikk))),
-            routeConfig = AuthorizationMachineToMachineConfig(
-                authorizedAzps = listOf(Azp.Behandlingsflyt.uuid)
-            )
-        ) { _, dto ->
-            transactionExecutor.withinTransaction { conn ->
-                val domene = dto.tilDomene()
-                val encodedSaksNummer = stringToNumber(dto.saksnummer.toString())
-
-                jobbAppender.leggTil(
-                    conn,
-                    JobbInput(LagreTilbakekrevingHendelseJobb())
-                        .medPayload(DefaultJsonMapper.toJson(domene))
-                        .medCallId()
-                        .forSak(encodedSaksNummer)
-                )
-            }
-
-            responder.respond(
-                HttpStatusCode.Accepted, "{}", pipeline
-            )
-        }
-    }
+    mottaHendelse<TilbakekrevingsbehandlingOppdatertHendelse>(
+        path = "/tilbakekrevingshendelse",
+        authorizedAzps = listOf(Azp.Behandlingsflyt.uuid),
+        transactionExecutor = transactionExecutor,
+        jobbAppender = jobbAppender,
+        jobbSpesifikasjon = LagreTilbakekrevingHendelseJobb(),
+        saksnummer = { stringToNumber(it.saksnummer.toString()) },
+        mapPayload = { it.tilDomene() },
+    )
 }
-
 
 fun NormalOpenAPIRoute.mottaOppdatertBehandling(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
 ) {
-    route("/oppdatertBehandling").status(HttpStatusCode.Accepted) {
-        authorizedPost<Unit, String, StoppetBehandling>(
-            modules = arrayOf(TagModule(listOf(Tags.MottaStatistikk))),
-            routeConfig = AuthorizationMachineToMachineConfig(
-                authorizedAzps = listOf(Azp.Behandlingsflyt.uuid)
-            )
-        ) { _, dto ->
-            transactionExecutor.withinTransaction { conn ->
-                val stringified = DefaultJsonMapper.toJson(dto)
-                val encodedSaksNummer = stringToNumber(dto.saksnummer)
-
-                jobbAppender.leggTil(
-                    conn,
-                    JobbInput(LagreAvklaringsbehovHendelseJobb(jobbAppender))
-                        .medPayload(stringified)
-                        .medCallId()
-                        .forSak(encodedSaksNummer)
-                )
-            }
-            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
-        }
-    }
+    mottaHendelse<StoppetBehandling>(
+        path = "/oppdatertBehandling",
+        authorizedAzps = listOf(Azp.Behandlingsflyt.uuid),
+        transactionExecutor = transactionExecutor,
+        jobbAppender = jobbAppender,
+        jobbSpesifikasjon = LagreAvklaringsbehovHendelseJobb(jobbAppender),
+        saksnummer = { stringToNumber(it.saksnummer) },
+    )
 }
 
 fun NormalOpenAPIRoute.mottaOppgaveOppdatering(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
 ) {
-    route("/oppgave").status(HttpStatusCode.Accepted) {
-        authorizedPost<Unit, String, OppgaveHendelse>(
-            modules = arrayOf(
-                TagModule(listOf(Tags.MottaStatistikk)),
-                EndpointInfo("OppgaveHendelse")
-            ),
-            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = listOf(Azp.Oppgave.uuid)),
-
-            ) { _, dto ->
-            transactionExecutor.withinTransaction { conn ->
-                val saksnummer = dto.oppgaveTilStatistikkDto.saksnummer
-                val encodedSaksNummer = saksnummer?.let { stringToNumber(it) }
-
-                jobbAppender.leggTil(
-                    conn,
-                    JobbInput(LagreOppgaveHendelseJobb()).medPayload(
-                        DefaultJsonMapper.toJson(dto.tilDomene())
-                    ).let {
-                        if (encodedSaksNummer != null) {
-                            it.forSak(encodedSaksNummer)
-                        }
-                        it
-                    }.medCallId()
-                )
-            }
-
-            responder.respond(
-                HttpStatusCode.Accepted, "{}", pipeline
-            )
-        }
-    }
+    mottaHendelse<OppgaveHendelse>(
+        path = "/oppgave",
+        authorizedAzps = listOf(Azp.Oppgave.uuid),
+        transactionExecutor = transactionExecutor,
+        jobbAppender = jobbAppender,
+        jobbSpesifikasjon = LagreOppgaveHendelseJobb(),
+        saksnummer = { it.oppgaveTilStatistikkDto.saksnummer?.let { s -> stringToNumber(s) } },
+        extraModules = listOf(EndpointInfo("OppgaveHendelse")),
+        mapPayload = { it.tilDomene() },
+    )
 }
 
 fun NormalOpenAPIRoute.mottaPostmottakOppdatering(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
 ) {
-    route("/postmottak").status(HttpStatusCode.Accepted) {
-        authorizedPost<Unit, String, DokumentflytStoppetHendelse>(
-            modules = arrayOf(
-                TagModule(listOf(Tags.MottaStatistikk)),
-                EndpointInfo("DokumentflytStoppetHendelse")
-            ),
-            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = listOf(Azp.Postmottak.uuid))
-        ) { _, dto ->
-            transactionExecutor.withinTransaction { conn ->
-                jobbAppender.leggTil(
-                    conn,
-                    JobbInput(LagrePostmottakHendelseJobb()).medPayload(
-                        DefaultJsonMapper.toJson(dto)
-                    ).medCallId().forSak(dto.journalpostId.referanse)
-                )
-            }
-
-            responder.respond(HttpStatusCode.Accepted, "{}", pipeline)
-        }
-    }
+    mottaHendelse<DokumentflytStoppetHendelse>(
+        path = "/postmottak",
+        authorizedAzps = listOf(Azp.Postmottak.uuid),
+        transactionExecutor = transactionExecutor,
+        jobbAppender = jobbAppender,
+        jobbSpesifikasjon = LagrePostmottakHendelseJobb(),
+        saksnummer = { it.journalpostId.referanse },
+        extraModules = listOf(EndpointInfo("DokumentflytStoppetHendelse")),
+    )
 }
 
 private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHendelse {
