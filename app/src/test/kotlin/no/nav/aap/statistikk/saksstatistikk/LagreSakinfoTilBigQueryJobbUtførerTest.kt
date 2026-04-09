@@ -62,7 +62,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         assertThat(service.sisteKallLagreUtenEnhet).isFalse()
         assertThat(jobbAppender.sisteEnhetRetryCount).isEqualTo(1)
         assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(testConfig.delaySeconds)
-        assertThat(jobbAppender.sisteOriginalHendelsestid).isEqualTo(testHendelsestid)
     }
 
     @Test
@@ -84,7 +83,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             JobbInput(LagreSakinfoTilBigQueryJobb())
                 .medPayload(behandlingId)
                 .medParameter("enhetRetryCount", "1")
-                .medParameter("originalHendelsestid", testHendelsestid.toString())
         )
         assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(120L)
 
@@ -93,13 +91,12 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             JobbInput(LagreSakinfoTilBigQueryJobb())
                 .medPayload(behandlingId)
                 .medParameter("enhetRetryCount", "2")
-                .medParameter("originalHendelsestid", testHendelsestid.toString())
         )
         assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(240L)
     }
 
     @Test
-    fun `reschedulerer med økt retry-teller og bevarer originalHendelsestid`() {
+    fun `reschedulerer med økt retry-teller`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
             SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", testHendelsestid)
@@ -111,14 +108,11 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(behandlingId)
             .medParameter("enhetRetryCount", "1")
-            .medParameter("originalHendelsestid", testHendelsestid.toString())
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
         assertThat(service.sisteKallLagreUtenEnhet).isFalse()
-        assertThat(service.sisteKallOriginalHendelsestid).isEqualTo(testHendelsestid)
         assertThat(jobbAppender.sisteEnhetRetryCount).isEqualTo(2)
-        assertThat(jobbAppender.sisteOriginalHendelsestid).isEqualTo(testHendelsestid)
     }
 
     @Test
@@ -138,13 +132,11 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(behandlingId)
             .medParameter("enhetRetryCount", testConfig.maxRetries.toString())
-            .medParameter("originalHendelsestid", testHendelsestid.toString())
         utfører.utfør(input)
 
         // Første kall returnerer ManglerEnhet, andre kall med lagreUtenEnhet=true
         assertThat(service.kallteller).isEqualTo(2)
         assertThat(service.sisteKallLagreUtenEnhet).isTrue()
-        assertThat(service.sisteKallOriginalHendelsestid).isEqualTo(testHendelsestid)
     }
 
     @Test
@@ -178,7 +170,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     }
 
     @Test
-    fun `ved retry brukes lagreMedOppgavedata med originalHendelsestid`() {
+    fun `ved retry brukes lagreSakInfoTilBigquery`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(SakStatistikkResultat.OK)
         val jobbAppender = MockJobbAppender()
@@ -188,11 +180,10 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(behandlingId)
             .medParameter("enhetRetryCount", "1")
-            .medParameter("originalHendelsestid", testHendelsestid.toString())
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallOriginalHendelsestid).isEqualTo(testHendelsestid)
+        assertThat(service.sisteKallVarLagreMedOppgavedata).isFalse()
     }
 }
 
@@ -201,7 +192,7 @@ private class FakeSaksStatistikkService(
 ) : ISaksStatistikkService {
     var kallteller = 0
     var sisteKallLagreUtenEnhet = false
-    var sisteKallOriginalHendelsestid: LocalDateTime? = null
+    var sisteKallVarLagreMedOppgavedata = false
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
@@ -209,18 +200,7 @@ private class FakeSaksStatistikkService(
     ): SakStatistikkResultat {
         kallteller++
         sisteKallLagreUtenEnhet = lagreUtenEnhet
-        sisteKallOriginalHendelsestid = null
-        return if (lagreUtenEnhet) SakStatistikkResultat.OK else resultat
-    }
-
-    override fun lagreMedOppgavedata(
-        behandlingId: BehandlingId,
-        originalHendelsestid: LocalDateTime,
-        lagreUtenEnhet: Boolean
-    ): SakStatistikkResultat {
-        kallteller++
-        sisteKallLagreUtenEnhet = lagreUtenEnhet
-        sisteKallOriginalHendelsestid = originalHendelsestid
+        sisteKallVarLagreMedOppgavedata = false
         return if (lagreUtenEnhet) SakStatistikkResultat.OK else resultat
     }
 }

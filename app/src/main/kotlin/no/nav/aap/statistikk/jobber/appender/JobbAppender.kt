@@ -5,7 +5,6 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingId
-import java.time.LocalDateTime
 
 interface JobbAppender {
     fun leggTil(connection: DBConnection, jobb: JobbInput)
@@ -15,7 +14,6 @@ interface JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long = 0,
         enhetRetryCount: Int = 0,
-        originalHendelsestid: LocalDateTime? = null,
         triggerKilde: String = "ukjent"
     )
 

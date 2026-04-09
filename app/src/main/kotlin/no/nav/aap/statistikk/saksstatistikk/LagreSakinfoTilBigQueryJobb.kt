@@ -13,7 +13,6 @@ import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
 data class EnhetRetryConfig(
     val maxRetries: Int = requiredConfigForKey("enhet.retry.max.retries").toInt(),
@@ -43,20 +42,13 @@ class LagreSakinfoTilBigQueryJobbUtfører(
         behandlingId: BehandlingId, input: JobbInput
     ) {
         val retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0
-        val originalHendelsestid = input.optionalParameter("originalHendelsestid")
-            ?.let { LocalDateTime.parse(it) }
         val triggerKilde = input.optionalParameter("triggerKilde") ?: "ukjent"
 
         log.info(
-            "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount, " +
-                    "originalHendelsestid=$originalHendelsestid."
+            "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount."
         )
 
-        val resultat = if (originalHendelsestid != null) {
-            sakStatistikkService.lagreMedOppgavedata(behandlingId, originalHendelsestid)
-        } else {
-            sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
-        }
+        val resultat = sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
 
         when (resultat) {
             SakStatistikkResultat.OK -> {}
@@ -74,7 +66,6 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         behandlingId,
                         delayInSeconds = delay,
                         enhetRetryCount = retryCount + 1,
-                        originalHendelsestid = resultat.hendelsestid,
                         triggerKilde = "retry($triggerKilde)"
                     )
                 } else {
@@ -82,18 +73,12 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
                                 "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
+                                "Lagrer med null enhet."
                     )
-                    if (originalHendelsestid != null) {
-                        sakStatistikkService.lagreMedOppgavedata(
-                            behandlingId, originalHendelsestid, lagreUtenEnhet = true
-                        )
-                    } else {
-                        sakStatistikkService.lagreSakInfoTilBigquery(
-                            behandlingId,
-                            lagreUtenEnhet = true,
-                        )
-                    }
+                    sakStatistikkService.lagreSakInfoTilBigquery(
+                        behandlingId,
+                        lagreUtenEnhet = true,
+                    )
                 }
             }
         }
