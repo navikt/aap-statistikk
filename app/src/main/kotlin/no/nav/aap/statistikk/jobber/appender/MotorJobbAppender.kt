@@ -37,7 +37,6 @@ class MotorJobbAppender : JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long,
         enhetRetryCount: Int,
-        originalHendelsestid: LocalDateTime?,
         triggerKilde: String
     ) {
         val behandling =
@@ -56,10 +55,6 @@ class MotorJobbAppender : JobbAppender {
 
         if (enhetRetryCount > 0) {
             jobbInput.medParameter("enhetRetryCount", enhetRetryCount.toString())
-        }
-
-        if (originalHendelsestid != null) {
-            jobbInput.medParameter("originalHendelsestid", originalHendelsestid.toString())
         }
 
         jobbInput.medParameter("triggerKilde", triggerKilde)
