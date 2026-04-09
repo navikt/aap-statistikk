@@ -15,6 +15,7 @@ import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.hendelser.BehandlingService
+import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepositoryImpl
 import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -160,13 +161,18 @@ class AvsluttetBehandlingServiceTest {
         val counter = meterRegistry.avsluttetBehandlingLagret()
 
         val bigQueryClient = dataSource.transaction {
+            val fakeHendelsePublisher = FakeHendelsePublisher()
             val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 it,
                 bigQuery,
-                clock = clock
+                clock = clock,
+                hendelsePublisher = fakeHendelsePublisher,
             )
 
             avsluttetBehandlingService.lagre(avsluttetBehandling)
+
+            assertThat(fakeHendelsePublisher.hendelser).singleElement()
+                .isInstanceOf(StatistikkHendelse.YtelsesstatistikkSkalLagres::class.java)
 
             bigQueryClient
         }
@@ -362,7 +368,8 @@ class AvsluttetBehandlingServiceTest {
     private fun konstruerAvsluttetBehandlingService(
         dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig,
-        clock: Clock = Clock.systemUTC()
+        clock: Clock = Clock.systemUTC(),
+        hendelsePublisher: FakeHendelsePublisher = FakeHendelsePublisher(),
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
 
@@ -377,7 +384,7 @@ class AvsluttetBehandlingServiceTest {
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection
                 ),
-                hendelsePublisher = FakeHendelsePublisher(),
+                hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FritaksvurderingRepositoryImpl(dbConnection),
                 behandlingService = BehandlingService(
                     behandlingRepository,
