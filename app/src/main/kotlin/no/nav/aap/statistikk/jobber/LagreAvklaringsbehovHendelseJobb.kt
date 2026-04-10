@@ -15,6 +15,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorHendelsePublisher
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
+import org.slf4j.LoggerFactory
 
 class LagreAvklaringsbehovHendelseJobb(
     private val jobbAppender: JobbAppender,
