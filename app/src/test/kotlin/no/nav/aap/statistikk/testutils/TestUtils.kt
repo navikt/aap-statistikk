@@ -799,8 +799,14 @@ class FakeArbeidsopptrappingRepository : ArbeidsopptrappingperioderRepository {
 }
 
 class FakeVedtattStansOpphørRepository : VedtattStansOpphørRepository {
+    private val lagret = mutableMapOf<BehandlingId, List<StansEllerOpphør>>()
+
     override fun lagre(behandlingId: BehandlingId, vedtattStansOpphør: List<StansEllerOpphør>) {
+        lagret[behandlingId] = vedtattStansOpphør
     }
+
+    override fun hent(behandlingId: BehandlingId): List<StansEllerOpphør> =
+        lagret[behandlingId] ?: emptyList()
 }
 
 class FakeFritaksvurderingRepository : FritaksvurderingRepository {
