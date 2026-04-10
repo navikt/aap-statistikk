@@ -15,7 +15,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.motor.testutil.TestUtil
+import no.nav.aap.motor.testutil.ManuellMotorImpl
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.*
@@ -30,7 +30,6 @@ import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
-import no.nav.aap.statistikk.postmottak.PostmottakBehandlingRepositoryImpl
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
@@ -176,7 +175,7 @@ class MottaStatistikkTest {
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
 
-        val motor = konstruerMotor(
+        val motor = konstruerManuellMotor(
             dataSource,
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
@@ -196,7 +195,7 @@ class MottaStatistikkTest {
 
             oppdatertBehandlingHendelse(hendelse)
 
-            TestUtil(dataSource, listOf("oppgave.retryFeilede")).ventPåSvar()
+            motor.kjørJobber()
 
             val (behandling, bqBehandlinger) = dataSource.transaction {
                 val behandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!
@@ -248,7 +247,7 @@ class MottaStatistikkTest {
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
 
-        val motor = konstruerMotor(
+        val motor = konstruerManuellMotor(
             dataSource,
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
@@ -257,7 +256,6 @@ class MottaStatistikkTest {
             lagrePostmottakHendelseJobb,
             testJobber.lagreSakinfoTilBigQueryJobb
         )
-        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
 
         testKlient(
             transactionExecutor,
@@ -269,11 +267,11 @@ class MottaStatistikkTest {
 
             postBehandlingsflytHendelse(meldekorthendelse)
 
-            testUtil.ventPåSvar()
+            motor.kjørJobber()
 
             oppdatertBehandlingHendelse(meldekorthendelse)
 
-            testUtil.ventPåSvar()
+            motor.kjørJobber()
 
             val bqBehandlinger = dataSource.transaction {
                 val behandling =
@@ -311,7 +309,7 @@ class MottaStatistikkTest {
         val lagreAvklaringsbehovHendelseJobb =
             LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
 
-        val motor = konstruerMotor(
+        val motor = konstruerManuellMotor(
             dataSource,
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
@@ -331,13 +329,7 @@ class MottaStatistikkTest {
 
             postBehandlingsflytHendelse(hendelse)
 
-            dataSource.transaction(readOnly = true) {
-                ventPåSvar({
-                    SakRepositoryImpl(
-                        it
-                    ).tellSaker()
-                }, { it?.let { it > 0 } ?: false })
-            }
+            motor.kjørJobber()
         }
 
         val (uthentetSak, uthentetBehandling) = dataSource.transaction {
@@ -400,9 +392,8 @@ class MottaStatistikkTest {
         val resendSakstatistikkJobb = ResendSakstatistikkJobb()
         val jobbAppender = MotorJobbAppender()
         val lagreStoppetHendelseJobb = ekteLagreStoppetHendelseJobb(jobbAppender)
-        val motor = motor(
+        val motor = ManuellMotorImpl(
             dataSource = dataSource,
-            gatewayProvider = defaultGatewayProvider { },
             jobber = listOf(
                 resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,
@@ -412,7 +403,9 @@ class MottaStatistikkTest {
                 lagreOppgaveHendelseJobb,
                 lagreOppgaveJobb,
                 lagreStoppetHendelseJobb
-            )
+            ),
+            repositoryRegistry = postgresRepositoryRegistry,
+            gatewayProvider = defaultGatewayProvider { },
         )
 
         testKlient(
@@ -424,13 +417,7 @@ class MottaStatistikkTest {
         ) {
             postPostmottakHendelse(hendelse)
 
-            dataSource.transaction(readOnly = true) {
-                ventPåSvar({
-                    PostmottakBehandlingRepositoryImpl(
-                        it
-                    ).hentEksisterendeBehandling(referanse)
-                }, { it != null })
-            }
+            motor.kjørJobber()
         }
 
         dataSource.transaction {
@@ -473,7 +460,7 @@ class MottaStatistikkTest {
         val lagreStoppetHendelseJobb =
             LagreStoppetHendelseJobb(testJobber.motorJobbAppender, testJobber.lagreAvsluttetBehandlingTilBigQueryJobb)
 
-        val motor = konstruerMotor(
+        val motor = konstruerManuellMotor(
             dataSource,
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
@@ -482,8 +469,6 @@ class MottaStatistikkTest {
             lagrePostmottakHendelseJobb,
             testJobber.lagreSakinfoTilBigQueryJobb
         )
-
-        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
 
         testKlient(
             transactionExecutor,
@@ -494,10 +479,10 @@ class MottaStatistikkTest {
         ) {
             // Opprett behandling først slik at tilbakekrevingshendelsen kan referere til den
             postBehandlingsflytHendelse(stoppetBehandling)
-            testUtil.ventPåSvar()
+            motor.kjørJobber()
 
             postTilbakekrevingshendelse(tilbakekrevingshendelse)
-            testUtil.ventPåSvar()
+            motor.kjørJobber()
         }
 
         val lagretHendelse = dataSource.transaction {
