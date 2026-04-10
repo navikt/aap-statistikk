@@ -156,7 +156,7 @@ class SaksStatistikkService(
         }
         siste.endretTid > bqSak.endretTid -> {
             val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
-                bqSak.behandlingUUID, bqSak.endretTid
+                bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
             )
             if (eksisterende?.ansesSomDuplikat(bqSak) == true) {
                 log.info(

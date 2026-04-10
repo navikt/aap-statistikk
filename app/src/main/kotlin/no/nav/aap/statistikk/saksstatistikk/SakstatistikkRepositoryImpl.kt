@@ -114,15 +114,16 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         }
     }
 
-    override fun hentHendelseMedEndretTid(uuid: UUID, endretTid: LocalDateTime): BQBehandling? {
+    override fun hentHendelseMedEndretTid(uuid: UUID, endretTid: LocalDateTime, erResending: Boolean): BQBehandling? {
         val sql = """
-            select * from saksstatistikk where behandling_uuid = ? and endret_tid = ? limit 1
+            select * from saksstatistikk where behandling_uuid = ? and endret_tid = ? and er_relast = ? limit 1
         """.trimIndent()
 
         return dbConnection.queryFirstOrNull(sql) {
             setParams {
                 setUUID(1, uuid)
                 setLocalDateTime(2, endretTid)
+                setBoolean(3, erResending)
             }
             setRowMapper {
                 rowMapper(it)

@@ -10,7 +10,7 @@ interface SakstatistikkRepository : Repository {
 
     fun hentSisteHendelseForBehandling(uuid: UUID): BQBehandling?
 
-    fun hentHendelseMedEndretTid(uuid: UUID, endretTid: LocalDateTime): BQBehandling?
+    fun hentHendelseMedEndretTid(uuid: UUID, endretTid: LocalDateTime, erResending: Boolean): BQBehandling?
 
     fun hentAlleHendelserPåBehandling(referanse: UUID): List<BQBehandling>
 }
