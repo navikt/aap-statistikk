@@ -113,39 +113,9 @@ class SaksStatistikkService(
                 PrometheusProvider.prometheus.sakDuplikat(false).increment()
             }
 
-            // Sikrer monoton rekkefølge: ny rad må alltid ha høyere endretTid enn forrige rad.
-            // Kan skje at oppgave-trigget og behandling-trigget jobb beregner samme
-            // endretTid dersom oppgavens sendtTid er nyere enn behandlingens hendelsesTidspunkt
-            // (oppgave er da siste snapshot for begge jobber), men jobbene ser ulike behandlingstilstander.
-            val bqSakMedUnikEndretTid = if (siste != null && siste.endretTid >= bqSak.endretTid) {
-                val justert = bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
-                if (siste.endretTid == bqSak.endretTid) {
-                    log.info(
-                        "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
-                                "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
-                                "EndretTid: ${bqSak.endretTid}. " +
-                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
-                                "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
-                                "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
-                    )
-                } else {
-                    log.warn(
-                        "Ny hendelse har eldre endretTid enn forrige lagrede rad. Referanse: ${bqSak.behandlingUUID}. " +
-                                "Forrige endretTid: ${siste.endretTid}, ny: ${bqSak.endretTid}. " +
-                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
-                    )
-                }
-                val diffNanos = java.time.Duration.between(bqSak.endretTid, justert.endretTid).toNanos()
-                log.info(
-                    "Justerte endretTid fra ${bqSak.endretTid} til ${justert.endretTid} " +
-                            "(diff: ${diffNanos}ns) " +
-                            "for å sikre monoton rekkefølge. Referanse: ${bqSak.behandlingUUID}. " +
-                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
-                )
-                PrometheusProvider.prometheus.sammeEndretTid().increment()
-                justert
-            } else {
-                bqSak
+            val bqSakMedUnikEndretTid = tilpassEndretTid(bqSak, siste) ?: run {
+                PrometheusProvider.prometheus.sakDuplikat(true).increment()
+                return
             }
 
             sakstatistikkRepository.lagre(bqSakMedUnikEndretTid)
@@ -161,6 +131,50 @@ class SaksStatistikkService(
             log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
             PrometheusProvider.prometheus.sakDuplikat(true).increment()
         }
+    }
+
+    /**
+     * Justerer endretTid for å sikre korrekt rekkefølge og idempotens:
+     * - Samme endretTid som siste: bumpes med +1µs (to samtidige hendelser)
+     * - Eldre endretTid enn siste: lagres med opprinnelig tidsstempel på riktig historisk posisjon;
+     *   returnerer null dersom hendelsen allerede er lagret (idempotens ved gjentagende retries)
+     * - Nyere endretTid enn siste: returneres uendret
+     */
+    private fun tilpassEndretTid(bqSak: BQBehandling, siste: BQBehandling?): BQBehandling? = when {
+        siste == null -> bqSak
+        siste.endretTid == bqSak.endretTid -> {
+            log.info(
+                "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
+                        "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
+                        "EndretTid: ${bqSak.endretTid}. " +
+                        "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
+                        "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                        "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+            )
+            PrometheusProvider.prometheus.sammeEndretTid().increment()
+            bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
+        }
+        siste.endretTid > bqSak.endretTid -> {
+            val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
+                bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
+            )
+            if (eksisterende?.ansesSomDuplikat(bqSak) == true) {
+                log.info(
+                    "Forsinket hendelse allerede lagret med samme endretTid — hopper over. " +
+                            "Referanse: ${bqSak.behandlingUUID}. endretTid: ${bqSak.endretTid}."
+                )
+                null
+            } else {
+                log.warn(
+                    "Ny hendelse har eldre endretTid enn forrige lagrede rad — lagrer med opprinnelig tidsstempel. " +
+                            "Referanse: ${bqSak.behandlingUUID}. " +
+                            "Forrige endretTid: ${siste.endretTid}, ny: ${bqSak.endretTid}. " +
+                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
+                )
+                bqSak
+            }
+        }
+        else -> bqSak
     }
 
     private fun erInngangsHendelse(bqBehandling: BQBehandling): Boolean {
