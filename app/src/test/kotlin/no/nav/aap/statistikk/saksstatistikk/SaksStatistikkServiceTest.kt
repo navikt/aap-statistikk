@@ -327,6 +327,53 @@ class SaksStatistikkServiceTest {
     }
 
     @Test
+    fun `lagreBQBehandling er idempotent for forsinket hendelse som kjøres to ganger`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingUUID = UUID.randomUUID()
+        val t2 = LocalDateTime.of(2024, 1, 1, 10, 0, 10)
+        val t0 = t2.minusSeconds(8)  // stale: eldre enn t2
+
+        dataSource.transaction { conn ->
+            val service = konstruerSakstatistikkService(conn)
+            val repo = SakstatistikkRepositoryImpl(conn)
+
+            // T2: første hendelse (inngangshendelse — registrertTid == endretTid → ingen ekstra OPPRETTET-rad)
+            val nyesteHendelse = lagTestBQBehandling(
+                behandlingUUID = behandlingUUID,
+                endretTid = t2,
+                registrertTid = t2,
+                behandlingStatus = "UNDER_BEHANDLING",
+            )
+            service.lagreBQBehandling(nyesteHendelse)
+
+            // T0: forsinket retry-jobb med eldre endretTid og ulik status
+            val forsinketHendelse = lagTestBQBehandling(
+                behandlingUUID = behandlingUUID,
+                endretTid = t0,
+                registrertTid = t2,
+                behandlingStatus = "AVSLUTTET",
+            )
+            service.lagreBQBehandling(forsinketHendelse)  // første gang: lagres
+
+            val antallEtterFørsteRetry = repo.hentAlleHendelserPåBehandling(behandlingUUID).size
+
+            service.lagreBQBehandling(forsinketHendelse)  // andre gang: skal hoppes over
+
+            val alleRader = repo.hentAlleHendelserPåBehandling(behandlingUUID)
+            assertThat(alleRader)
+                .describedAs("Gjentagende retry skal ikke lagre dobbel rad")
+                .hasSize(antallEtterFørsteRetry)
+            assertThat(alleRader.any { it.endretTid == t0 && it.behandlingStatus == "AVSLUTTET" })
+                .describedAs("Forsinket hendelse skal ha blitt lagret med opprinnelig endretTid")
+                .isTrue()
+            assertThat(alleRader.maxBy { it.endretTid }.endretTid)
+                .describedAs("Gjeldende tilstand skal fortsatt være t2")
+                .isEqualTo(t2)
+        }
+    }
+
+    @Test
     fun `retry etter ManglerEnhet ser allerede lagret rad som duplikat og lagrer ikke på nytt`(
         @Postgres dataSource: DataSource
     ) {
@@ -568,5 +615,33 @@ class SaksStatistikkServiceTest {
 
             return behandlingReferanse
         }
+
+        fun lagTestBQBehandling(
+            behandlingUUID: UUID = UUID.randomUUID(),
+            endretTid: LocalDateTime = LocalDateTime.now(),
+            registrertTid: LocalDateTime = endretTid,
+            behandlingStatus: String = "UNDER_BEHANDLING",
+        ) = BQBehandling(
+            behandlingUUID = behandlingUUID,
+            behandlingType = "FØRSTEGANGSBEHANDLING",
+            aktorId = "12345678901",
+            saksnummer = "TESTSAKSNR",
+            tekniskTid = LocalDateTime.now(),
+            registrertTid = registrertTid,
+            endretTid = endretTid,
+            versjon = "v1",
+            mottattTid = registrertTid,
+            opprettetAv = "Kelvin",
+            ansvarligBeslutter = null,
+            søknadsFormat = SøknadsFormat.DIGITAL,
+            saksbehandler = null,
+            behandlingMetode = BehandlingMetode.MANUELL,
+            behandlingStatus = behandlingStatus,
+            behandlingÅrsak = "SØKNAD",
+            resultatBegrunnelse = null,
+            ansvarligEnhetKode = "4491",
+            sakYtelse = "AAP",
+            erResending = false,
+        )
     }
 }
