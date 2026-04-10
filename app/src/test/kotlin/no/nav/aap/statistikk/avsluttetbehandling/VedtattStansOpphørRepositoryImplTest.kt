@@ -11,9 +11,8 @@ import javax.sql.DataSource
 
 class VedtattStansOpphørRepositoryImplTest {
     @Test
-    fun `lagre to perioder og verifiser i databasen`(@Postgres dataSource: DataSource) {
-        val behandlingReferanse = UUID.randomUUID()
-        val behandlingId = dataSource.transaction { forberedDatabase(it, behandlingReferanse) }
+    fun `lagre og hent igjen`(@Postgres dataSource: DataSource) {
+        val behandlingId = dataSource.transaction { forberedDatabase(it, UUID.randomUUID()) }
 
         val stansOpphørListe = listOf(
             StansEllerOpphør(
@@ -31,37 +30,16 @@ class VedtattStansOpphørRepositoryImplTest {
             )
         )
 
-        dataSource.transaction {
-            VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, stansOpphørListe)
-        }
+        dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, stansOpphørListe) }
 
-        val antallPerioder = dataSource.transaction { conn ->
-            conn.queryFirst("SELECT COUNT(*) AS count FROM vedtatt_stans_opphor WHERE behandling_id = ?") {
-                setParams { setLong(1, behandlingId.id) }
-                setRowMapper { it.getInt("count") }
-            }
-        }
-        assertThat(antallPerioder).isEqualTo(2)
+        val resultat = dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).hent(behandlingId) }
 
-        val antallÅrsaker = dataSource.transaction { conn ->
-            conn.queryFirst(
-                """
-                SELECT COUNT(*) AS count FROM vedtatt_stans_opphor_aarsak a
-                JOIN vedtatt_stans_opphor s ON a.vedtatt_stans_opphor_id = s.id
-                WHERE s.behandling_id = ?
-                """.trimIndent()
-            ) {
-                setParams { setLong(1, behandlingId.id) }
-                setRowMapper { it.getInt("count") }
-            }
-        }
-        assertThat(antallÅrsaker).isEqualTo(3)
+        assertThat(resultat).usingRecursiveComparison().isEqualTo(stansOpphørListe)
     }
 
     @Test
     fun `tom liste sletter eksisterende data`(@Postgres dataSource: DataSource) {
-        val behandlingReferanse = UUID.randomUUID()
-        val behandlingId = dataSource.transaction { forberedDatabase(it, behandlingReferanse) }
+        val behandlingId = dataSource.transaction { forberedDatabase(it, UUID.randomUUID()) }
 
         dataSource.transaction {
             VedtattStansOpphørRepositoryImpl(it).lagre(
@@ -69,23 +47,16 @@ class VedtattStansOpphørRepositoryImplTest {
                 listOf(StansEllerOpphør(StansType.STANS, LocalDate.of(2024, 1, 1), setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)))
             )
         }
-        dataSource.transaction {
-            VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, emptyList())
-        }
+        dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, emptyList()) }
 
-        val antall = dataSource.transaction { conn ->
-            conn.queryFirst("SELECT COUNT(*) AS count FROM vedtatt_stans_opphor WHERE behandling_id = ?") {
-                setParams { setLong(1, behandlingId.id) }
-                setRowMapper { it.getInt("count") }
-            }
-        }
-        assertThat(antall).isEqualTo(0)
+        val resultat = dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).hent(behandlingId) }
+
+        assertThat(resultat).isEmpty()
     }
 
     @Test
     fun `overskriv eksisterende data ved ny lagring`(@Postgres dataSource: DataSource) {
-        val behandlingReferanse = UUID.randomUUID()
-        val behandlingId = dataSource.transaction { forberedDatabase(it, behandlingReferanse) }
+        val behandlingId = dataSource.transaction { forberedDatabase(it, UUID.randomUUID()) }
 
         dataSource.transaction {
             VedtattStansOpphørRepositoryImpl(it).lagre(
@@ -93,19 +64,14 @@ class VedtattStansOpphørRepositoryImplTest {
                 listOf(StansEllerOpphør(StansType.STANS, LocalDate.of(2024, 1, 1), setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)))
             )
         }
-        dataSource.transaction {
-            VedtattStansOpphørRepositoryImpl(it).lagre(
-                behandlingId,
-                listOf(StansEllerOpphør(StansType.OPPHØR, LocalDate.of(2024, 3, 1), setOf(Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP)))
-            )
-        }
 
-        val typer = dataSource.transaction { conn ->
-            conn.queryList("SELECT type FROM vedtatt_stans_opphor WHERE behandling_id = ?") {
-                setParams { setLong(1, behandlingId.id) }
-                setRowMapper { it.getString("type") }
-            }
-        }
-        assertThat(typer).containsExactly("OPPHØR")
+        val oppdatert = listOf(
+            StansEllerOpphør(StansType.OPPHØR, LocalDate.of(2024, 3, 1), setOf(Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP))
+        )
+        dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, oppdatert) }
+
+        val resultat = dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).hent(behandlingId) }
+
+        assertThat(resultat).usingRecursiveComparison().isEqualTo(oppdatert)
     }
 }

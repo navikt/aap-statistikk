@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.avsluttetbehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
+import java.time.LocalDate
 
 class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) :
     VedtattStansOpphørRepository {
@@ -59,5 +60,40 @@ class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) 
                 }
             }
         }
+    }
+
+    override fun hent(behandlingId: BehandlingId): List<StansEllerOpphør> {
+        data class Rad(val id: Long, val type: String, val fom: LocalDate, val aarsak: String?)
+
+        val rader = dbConnection.queryList(
+            """
+            SELECT s.id, s.type, s.fom, a.aarsak
+            FROM vedtatt_stans_opphor s
+            LEFT JOIN vedtatt_stans_opphor_aarsak a ON a.vedtatt_stans_opphor_id = s.id
+            WHERE s.behandling_id = ?
+            ORDER BY s.id
+            """.trimIndent()
+        ) {
+            setParams { setLong(1, behandlingId.id) }
+            setRowMapper {
+                Rad(
+                    id = it.getLong("id"),
+                    type = it.getString("type"),
+                    fom = it.getLocalDate("fom"),
+                    aarsak = it.getString("aarsak")
+                )
+            }
+        }
+
+        return rader
+            .groupBy { it.id }
+            .map { (_, raderForStans) ->
+                val første = raderForStans.first()
+                StansEllerOpphør(
+                    type = StansType.valueOf(første.type),
+                    fom = første.fom,
+                    årsaker = raderForStans.mapNotNull { it.aarsak }.map { Avslagsårsak.valueOf(it) }.toSet()
+                )
+            }
     }
 }
