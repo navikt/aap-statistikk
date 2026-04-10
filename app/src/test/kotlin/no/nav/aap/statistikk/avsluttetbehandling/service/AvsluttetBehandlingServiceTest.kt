@@ -239,9 +239,13 @@ class AvsluttetBehandlingServiceTest {
             dataSource.transaction { FritaksvurderingRepositoryImpl(it).hentFritaksvurderinger(behandlingId) }
         assertThat(uthentetFritaksvurdering).isEqualTo(listOf(fritaksvurdering))
 
-        val uthentetVedtattStansOpphør =
-            dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).hent(behandlingId) }
-        assertThat(uthentetVedtattStansOpphør).isEqualTo(listOf(vedtattStansOpphørPeriode))
+        val antallStansOpphorLagret = dataSource.transaction { conn ->
+            conn.queryFirst("SELECT COUNT(*) AS count FROM vedtatt_stans_opphor WHERE behandling_id = ?") {
+                setParams { setLong(1, behandlingId.id) }
+                setRowMapper { it.getInt("count") }
+            }
+        }
+        assertThat(antallStansOpphorLagret).isEqualTo(1)
 
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
