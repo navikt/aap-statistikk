@@ -15,6 +15,7 @@ import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.hendelser.BehandlingService
+import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepositoryImpl
 import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -62,6 +63,11 @@ class AvsluttetBehandlingServiceTest {
 
         val datoNå = LocalDate.now(clock)
         val arbeidsopptrappingperiode = Periode(LocalDate.now(), LocalDate.now().plusDays(10))
+        val vedtattStansOpphørPeriode = StansEllerOpphør(
+            type = StansType.STANS,
+            fom = LocalDate.now(),
+            årsaker = setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)
+        )
         val fritaksvurdering = Fritakvurdering(
             harFritak = true,
             fraDato = LocalDate.now(),
@@ -152,7 +158,8 @@ class AvsluttetBehandlingServiceTest {
             ),
             fritaksvurderinger = listOf(fritaksvurdering),
             perioderMedArbeidsopptrapping = listOf(arbeidsopptrappingperiode),
-            vedtakstidspunkt = opprettetTidspunkt
+            vedtakstidspunkt = opprettetTidspunkt,
+            vedtattStansOpphør = listOf(vedtattStansOpphørPeriode)
         )
 
         val meterRegistry = SimpleMeterRegistry()
@@ -160,13 +167,18 @@ class AvsluttetBehandlingServiceTest {
         val counter = meterRegistry.avsluttetBehandlingLagret()
 
         val bigQueryClient = dataSource.transaction {
+            val fakeHendelsePublisher = FakeHendelsePublisher()
             val (bigQueryClient, avsluttetBehandlingService) = konstruerAvsluttetBehandlingService(
                 it,
                 bigQuery,
-                clock = clock
+                clock = clock,
+                hendelsePublisher = fakeHendelsePublisher,
             )
 
             avsluttetBehandlingService.lagre(avsluttetBehandling)
+
+            assertThat(fakeHendelsePublisher.hendelser).singleElement()
+                .isInstanceOf(StatistikkHendelse.YtelsesstatistikkSkalLagres::class.java)
 
             bigQueryClient
         }
@@ -226,6 +238,14 @@ class AvsluttetBehandlingServiceTest {
         val uthentetFritaksvurdering =
             dataSource.transaction { FritaksvurderingRepositoryImpl(it).hentFritaksvurderinger(behandlingId) }
         assertThat(uthentetFritaksvurdering).isEqualTo(listOf(fritaksvurdering))
+
+        val antallStansOpphorLagret = dataSource.transaction { conn ->
+            conn.queryFirst("SELECT COUNT(*) AS count FROM vedtatt_stans_opphor WHERE behandling_id = ?") {
+                setParams { setLong(1, behandlingId.id) }
+                setRowMapper { it.getInt("count") }
+            }
+        }
+        assertThat(antallStansOpphorLagret).isEqualTo(1)
 
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
@@ -359,10 +379,64 @@ class AvsluttetBehandlingServiceTest {
         assertThat(counter.count()).isEqualTo(1.0)
     }
 
+    @Test
+    fun `skjermet behandling publiserer ikke ytelses-hendelse`(
+        @Postgres dataSource: DataSource,
+        @BigQuery bigQuery: BigQueryConfig
+    ) {
+        val behandlingReferanse = UUID.randomUUID()
+        val saksnummer = Saksnummer("xxxx")
+        val ident = "29021946"
+
+        opprettTestHendelse(
+            dataSource,
+            behandlingReferanse,
+            saksnummer,
+            status = BehandlingStatus.AVSLUTTET,
+        )
+
+        val avsluttetBehandling = AvsluttetBehandling(
+            behandlingsReferanse = behandlingReferanse,
+            tilkjentYtelse = TilkjentYtelse(
+                behandlingsReferanse = behandlingReferanse,
+                saksnummer = saksnummer,
+                perioder = emptyList()
+            ),
+            vilkårsresultat = Vilkårsresultat(
+                behandlingsReferanse = behandlingReferanse,
+                behandlingsType = TypeBehandling.Førstegangsbehandling,
+                saksnummer = saksnummer,
+                vilkår = emptyList()
+            ),
+            beregningsgrunnlag = null,
+            diagnoser = null,
+            behandlingResultat = ResultatKode.INNVILGET,
+            rettighetstypeperioder = emptyList(),
+            perioderMedArbeidsopptrapping = emptyList(),
+            fritaksvurderinger = emptyList(),
+            vedtakstidspunkt = LocalDateTime.now()
+        )
+
+        val fakeHendelsePublisher = FakeHendelsePublisher()
+        dataSource.transaction {
+            val (_, service) = konstruerAvsluttetBehandlingService(
+                it,
+                bigQuery,
+                skjermingService = SkjermingService(FakePdlGateway(mapOf(ident to true))),
+                hendelsePublisher = fakeHendelsePublisher,
+            )
+            service.lagre(avsluttetBehandling)
+        }
+
+        assertThat(fakeHendelsePublisher.hendelser).isEmpty()
+    }
+
     private fun konstruerAvsluttetBehandlingService(
         dbConnection: DBConnection,
         bigQueryConfig: BigQueryConfig,
-        clock: Clock = Clock.systemUTC()
+        clock: Clock = Clock.systemUTC(),
+        hendelsePublisher: FakeHendelsePublisher = FakeHendelsePublisher(),
+        skjermingService: SkjermingService = SkjermingService(FakePdlGateway(emptyMap())),
     ): Pair<BigQueryClient, AvsluttetBehandlingService> {
         val bigQueryClient = BigQueryClient(bigQueryConfig, schemaRegistry)
 
@@ -377,11 +451,12 @@ class AvsluttetBehandlingServiceTest {
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection
                 ),
-                opprettBigQueryLagringYtelseCallback = {},
+                vedtattStansOpphørRepository = VedtattStansOpphørRepositoryImpl(dbConnection),
+                hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FritaksvurderingRepositoryImpl(dbConnection),
                 behandlingService = BehandlingService(
                     behandlingRepository,
-                    SkjermingService(FakePdlGateway(emptyMap()))
+                    skjermingService
                 )
             )
         return Pair(bigQueryClient, service)

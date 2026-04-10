@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.jobber.appender.MotorHendelsePublisher
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
@@ -23,14 +24,16 @@ class LagreStoppetHendelseJobb(
     private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
 ) : ProvidersJobbSpesifikasjon {
 
-    private val log = LoggerFactory.getLogger(javaClass)
-
     override fun konstruer(
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider
     ): JobbUtfører {
+        val hendelsePublisher = MotorHendelsePublisher.medYtelseJobb(
+            jobbAppender = jobbAppender,
+            repositoryProvider = repositoryProvider,
+            lagreAvsluttetBehandlingTilBigQueryJobb = lagreAvsluttetBehandlingTilBigQueryJobb,
+        )
         val behandlingService = BehandlingService(repositoryProvider, gatewayProvider)
-
         val avsluttetBehandlingService = AvsluttetBehandlingService(
             tilkjentYtelseRepository = repositoryProvider.provide(),
             beregningsgrunnlagRepository = repositoryProvider.provide(),
@@ -40,34 +43,17 @@ class LagreStoppetHendelseJobb(
             arbeidsopptrappingperioderRepository = repositoryProvider.provide(),
             fritaksvurderingRepository = repositoryProvider.provide(),
             behandlingService = behandlingService,
-            opprettBigQueryLagringYtelseCallback = { behandlingId ->
-                jobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                    repositoryProvider,
-                    behandlingId,
-                    lagreAvsluttetBehandlingTilBigQueryJobb
-                )
-            }
+            hendelsePublisher = hendelsePublisher,
+            vedtattStansOpphørRepository = repositoryProvider.provide(),
         )
-
         val hendelsesService = HendelsesService(
             sakService = SakService(repositoryProvider),
             personService = PersonService(repositoryProvider),
             avsluttetBehandlingService = avsluttetBehandlingService,
             behandlingService = behandlingService,
             meldekortRepository = repositoryProvider.provide<IMeldekortRepository>(),
-            opprettBigQueryLagringSakStatistikkCallback = { behandlingId ->
-                log.info("Legger til lagretilsaksstatistikkjobb. BehandlingId: $behandlingId")
-                jobbAppender.leggTilLagreSakTilBigQueryJobb(
-                    repositoryProvider,
-                    behandlingId,
-                    // Veldig hacky! Dette er for at jobben som kjører etter melding fra
-                    // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
-                    delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L,
-                    triggerKilde = "behandling"
-                )
-            }
+            hendelsePublisher = hendelsePublisher,
         )
-
         return LagreStoppetHendelseJobbUtfører(hendelsesService)
     }
 

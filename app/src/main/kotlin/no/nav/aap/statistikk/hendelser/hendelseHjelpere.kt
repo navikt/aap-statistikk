@@ -9,11 +9,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.isBeforeOrEqual
 import no.nav.aap.statistikk.onlyOrNull
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as KontraktBehandlingStatus
-
-private val log = LoggerFactory.getLogger("no.nav.aap.statistikk.hendelser.hendelseHjelpere")
 
 fun List<AvklaringsbehovHendelseDto>.utledVedtakTid(): LocalDateTime? {
     // Hvis FATTE_VEDTAK er løst, men det fortsatt finnes åpne behov, så betyr at det

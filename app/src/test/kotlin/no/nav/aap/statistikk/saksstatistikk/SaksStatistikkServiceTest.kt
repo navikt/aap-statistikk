@@ -27,6 +27,7 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
@@ -101,7 +102,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
@@ -204,6 +205,176 @@ class SaksStatistikkServiceTest {
     }
 
     @Test
+    fun `lagreBQBehandling skal lagre hendelse med eldre endretTid på riktig historisk posisjon`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingsflytTid = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
+        val oppgaveSendtTid = behandlingsflytTid.plusSeconds(5)
+
+        dataSource.transaction { conn ->
+            val hendelsesService = HendelsesService(
+                sakService = SakService(SakRepositoryImpl(conn)),
+                avsluttetBehandlingService = mockk(relaxed = true),
+                personService = PersonService(PersonRepository(conn)),
+                meldekortRepository = MeldekortRepository(conn),
+                hendelsePublisher = FakeHendelsePublisher(),
+                behandlingService = BehandlingService(
+                    BehandlingRepository(conn),
+                    SkjermingService(FakePdlGateway(emptyMap()))
+                ),
+            )
+
+            hendelsesService.prosesserNyHendelse(
+                StoppetBehandling(
+                    saksnummer = "EEEE",
+                    sakStatus = SakStatus.UTREDES,
+                    behandlingReferanse = behandlingReferanse,
+                    relatertBehandling = null,
+                    behandlingOpprettetTidspunkt = behandlingsflytTid,
+                    mottattTid = behandlingsflytTid,
+                    behandlingStatus = BehandlingStatus.UTREDES,
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    soknadsFormat = Kanal.DIGITAL,
+                    ident = "1234567893",
+                    versjon = "1",
+                    vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                    årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+                    avklaringsbehov = listOf(
+                        AvklaringsbehovHendelseDto(
+                            avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                            status = AvklaringsbehovStatus.OPPRETTET,
+                            endringer = listOf(
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.OPPRETTET,
+                                    tidsstempel = behandlingsflytTid,
+                                    endretAv = "system",
+                                )
+                            ),
+                        )
+                    ),
+                    hendelsesTidspunkt = behandlingsflytTid,
+                    avsluttetBehandling = null,
+                    identerForSak = listOf("1234567893")
+                )
+            )
+
+            val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
+            OppgaveRepositoryImpl(conn).lagreOppgave(
+                Oppgave(
+                    identifikator = 88L,
+                    avklaringsbehov = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    enhet = Enhet(enhetId, "4491"),
+                    person = PersonRepository(conn).hentPerson("1234567893")!!,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
+                    hendelser = emptyList(),
+                )
+            )
+            OppgaveHendelseRepositoryImpl(conn).lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = 88L,
+                    mottattTidspunkt = oppgaveSendtTid,
+                    personIdent = "1234567893",
+                    saksnummer = "EEEE",
+                    behandlingRef = behandlingReferanse,
+                    enhet = "4491",
+                    avklaringsbehovKode = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    status = Oppgavestatus.OPPRETTET,
+                    reservertAv = null,
+                    reservertTidspunkt = null,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    endretAv = null,
+                    endretTidspunkt = null,
+                    sendtTid = oppgaveSendtTid,
+                    versjon = 1L,
+                )
+            )
+
+            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val service = konstruerSakstatistikkService(conn)
+
+            // Lagre hendelser for behandlingen (OPPRETTET + UNDER_BEHANDLING med endretTid = oppgaveSendtTid)
+            service.lagreSakInfoTilBigquery(behandlingId)
+
+            // Hent siste rad — dette er den "nyere" hendelsen vi vil bevare som gjeldende tilstand
+            val nyesteRad = SakstatistikkRepositoryImpl(conn)
+                .hentAlleHendelserPåBehandling(behandlingReferanse).last()
+
+            // Simuler forsinket retry-jobb: hendelse med eldre endretTid (mellom OPPRETTET og UNDER_BEHANDLING)
+            // og annen enhet (ikke duplikat av eksisterende rader).
+            val stalTidspunkt = behandlingsflytTid.plusSeconds(2)
+            val forsinketHendelse = nyesteRad.copy(
+                ansvarligEnhetKode = "ANNEN_ENHET",
+                endretTid = stalTidspunkt
+            )
+            service.lagreBQBehandling(forsinketHendelse)
+
+            val alleRaderSortert = SakstatistikkRepositoryImpl(conn)
+                .hentAlleHendelserPåBehandling(behandlingReferanse)
+                .sortedBy { it.endretTid }
+
+            // Forsinket hendelse skal lagres med sin opprinnelige endretTid
+            assertThat(alleRaderSortert.any { it.endretTid == stalTidspunkt && it.ansvarligEnhetKode == "ANNEN_ENHET" })
+                .describedAs("Forsinket hendelse skal være lagret med opprinnelig endretTid")
+                .isTrue()
+            // Gjeldende tilstand (høyeste endretTid) skal fortsatt være den nyeste hendelsen
+            assertThat(alleRaderSortert.last().endretTid)
+                .describedAs("Nyeste rad skal fortsatt ha oppgaveSendtTid som endretTid")
+                .isEqualTo(oppgaveSendtTid)
+        }
+    }
+
+    @Test
+    fun `lagreBQBehandling er idempotent for forsinket hendelse som kjøres to ganger`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingUUID = UUID.randomUUID()
+        val t2 = LocalDateTime.of(2024, 1, 1, 10, 0, 10)
+        val t0 = t2.minusSeconds(8)  // stale: eldre enn t2
+
+        dataSource.transaction { conn ->
+            val service = konstruerSakstatistikkService(conn)
+            val repo = SakstatistikkRepositoryImpl(conn)
+
+            // T2: første hendelse (inngangshendelse — registrertTid == endretTid → ingen ekstra OPPRETTET-rad)
+            val nyesteHendelse = lagTestBQBehandling(
+                behandlingUUID = behandlingUUID,
+                endretTid = t2,
+                registrertTid = t2,
+                behandlingStatus = "UNDER_BEHANDLING",
+            )
+            service.lagreBQBehandling(nyesteHendelse)
+
+            // T0: forsinket retry-jobb med eldre endretTid og ulik status
+            val forsinketHendelse = lagTestBQBehandling(
+                behandlingUUID = behandlingUUID,
+                endretTid = t0,
+                registrertTid = t2,
+                behandlingStatus = "AVSLUTTET",
+            )
+            service.lagreBQBehandling(forsinketHendelse)  // første gang: lagres
+
+            val antallEtterFørsteRetry = repo.hentAlleHendelserPåBehandling(behandlingUUID).size
+
+            service.lagreBQBehandling(forsinketHendelse)  // andre gang: skal hoppes over
+
+            val alleRader = repo.hentAlleHendelserPåBehandling(behandlingUUID)
+            assertThat(alleRader)
+                .describedAs("Gjentagende retry skal ikke lagre dobbel rad")
+                .hasSize(antallEtterFørsteRetry)
+            assertThat(alleRader.any { it.endretTid == t0 && it.behandlingStatus == "AVSLUTTET" })
+                .describedAs("Forsinket hendelse skal ha blitt lagret med opprinnelig endretTid")
+                .isTrue()
+            assertThat(alleRader.maxBy { it.endretTid }.endretTid)
+                .describedAs("Gjeldende tilstand skal fortsatt være t2")
+                .isEqualTo(t2)
+        }
+    }
+
+    @Test
     fun `retry etter ManglerEnhet ser allerede lagret rad som duplikat og lagrer ikke på nytt`(
         @Postgres dataSource: DataSource
     ) {
@@ -217,7 +388,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
@@ -329,7 +500,7 @@ class SaksStatistikkServiceTest {
                     avsluttetBehandlingService = mockk(relaxed = true),
                     personService = PersonService(PersonRepository(it)),
                     meldekortRepository = MeldekortRepository(it),
-                    opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                    hendelsePublisher = FakeHendelsePublisher(),
                     behandlingService = BehandlingService(
                         BehandlingRepository(it),
                         SkjermingService(FakePdlGateway(emptyMap()))
@@ -445,5 +616,33 @@ class SaksStatistikkServiceTest {
 
             return behandlingReferanse
         }
+
+        fun lagTestBQBehandling(
+            behandlingUUID: UUID = UUID.randomUUID(),
+            endretTid: LocalDateTime = LocalDateTime.now(),
+            registrertTid: LocalDateTime = endretTid,
+            behandlingStatus: String = "UNDER_BEHANDLING",
+        ) = BQBehandling(
+            behandlingUUID = behandlingUUID,
+            behandlingType = "FØRSTEGANGSBEHANDLING",
+            aktorId = "12345678901",
+            saksnummer = "TESTSAKSNR",
+            tekniskTid = LocalDateTime.now(),
+            registrertTid = registrertTid,
+            endretTid = endretTid,
+            versjon = "v1",
+            mottattTid = registrertTid,
+            opprettetAv = "Kelvin",
+            ansvarligBeslutter = null,
+            søknadsFormat = SøknadsFormat.DIGITAL,
+            saksbehandler = null,
+            behandlingMetode = BehandlingMetode.MANUELL,
+            behandlingStatus = behandlingStatus,
+            behandlingÅrsak = "SØKNAD",
+            resultatBegrunnelse = null,
+            ansvarligEnhetKode = "4491",
+            sakYtelse = "AAP",
+            erResending = false,
+        )
     }
 }

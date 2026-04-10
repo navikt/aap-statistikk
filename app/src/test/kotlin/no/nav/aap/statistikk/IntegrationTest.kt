@@ -775,7 +775,8 @@ class IntegrationTest {
             resultat = null,
             vedtakstidspunkt = null,
             fritaksvurderinger = null,
-            perioderMedArbeidsopptrapping = listOf()
+            perioderMedArbeidsopptrapping = listOf(),
+            vedtattStansOpphør = emptyList()
         ) else null,
         tidspunktSisteEndring = LocalDateTime.now(),
         behandlingStatus = behandlingStatus ?: this.behandlingStatus,

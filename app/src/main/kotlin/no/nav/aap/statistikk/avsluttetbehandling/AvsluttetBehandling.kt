@@ -11,6 +11,48 @@ import java.time.LocalDateTime
 import java.time.Year
 import java.util.*
 
+enum class StansType {
+    STANS,
+    OPPHØR,
+}
+
+enum class Avslagsårsak {
+    BRUKER_UNDER_18,
+    BRUKER_OVER_67,
+    MANGLENDE_DOKUMENTASJON,
+    IKKE_RETT_PA_SYKEPENGEERSTATNING,
+    IKKE_RETT_PA_STUDENT,
+    VARIGHET_OVERSKREDET_STUDENT,
+    IKKE_SYKDOM_AV_VISS_VARIGHET,
+    IKKE_SYKDOM_SKADE_LYTE_VESENTLIGDEL,
+    IKKE_NOK_REDUSERT_ARBEIDSEVNE,
+    IKKE_BEHOV_FOR_OPPFOLGING,
+    IKKE_MEDLEM_FORUTGÅENDE,
+    IKKE_MEDLEM,
+    IKKE_OPPFYLT_OPPHOLDSKRAV_EØS,
+    NORGE_IKKE_KOMPETENT_STAT,
+    ANNEN_FULL_YTELSE,
+    INNTEKTSTAP_DEKKES_ETTER_ANNEN_LOVGIVNING,
+    IKKE_RETT_PA_AAP_UNDER_BEHANDLING_AV_UFORE,
+    VARIGHET_OVERSKREDET_OVERGANG_UFORE,
+    VARIGHET_OVERSKREDET_ARBEIDSSØKER,
+    IKKE_RETT_PA_AAP_I_PERIODE_SOM_ARBEIDSSOKER,
+    IKKE_RETT_UNDER_STRAFFEGJENNOMFØRING,
+    BRUDD_PÅ_AKTIVITETSPLIKT_STANS,
+    BRUDD_PÅ_AKTIVITETSPLIKT_OPPHØR,
+    BRUDD_PÅ_OPPHOLDSKRAV_STANS,
+    BRUDD_PÅ_OPPHOLDSKRAV_OPPHØR,
+    HAR_RETT_TIL_FULLT_UTTAK_ALDERSPENSJON,
+    ORDINÆRKVOTE_BRUKT_OPP,
+    SYKEPENGEERSTATNINGKVOTE_BRUKT_OPP,
+}
+
+data class StansEllerOpphør(
+    val type: StansType,
+    val fom: LocalDate,
+    val årsaker: Set<Avslagsårsak>
+)
+
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk.avsluttetbehandling")
 
 data class AvsluttetBehandling(
@@ -23,7 +65,8 @@ data class AvsluttetBehandling(
     val perioderMedArbeidsopptrapping: List<Periode>,
     val fritaksvurderinger: List<Fritakvurdering>,
     val behandlingResultat: ResultatKode?,
-    val vedtakstidspunkt: LocalDateTime?
+    val vedtakstidspunkt: LocalDateTime?,
+    val vedtattStansOpphør: List<StansEllerOpphør> = emptyList()
 ) {
     init {
         if (behandlingResultat == null) {

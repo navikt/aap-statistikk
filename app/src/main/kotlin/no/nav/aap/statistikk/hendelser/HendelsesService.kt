@@ -4,8 +4,10 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
-import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.jobber.appender.HendelsePublisher
+import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
@@ -19,7 +21,7 @@ class HendelsesService(
     private val personService: PersonService,
     private val behandlingService: BehandlingService,
     private val meldekortRepository: IMeldekortRepository,
-    private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
+    private val hendelsePublisher: HendelsePublisher,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -43,8 +45,8 @@ class HendelsesService(
 
             // Oppfølgingsbehandling er ikke relatert til en ytelse, så dette kan ignoreres.
             if (hendelse.behandlingType.tilDomene() in listOf(
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Revurdering,
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling
+                    TypeBehandling.Revurdering,
+                    TypeBehandling.Førstegangsbehandling
                 )
             ) {
                 avsluttetBehandlingService.lagre(
@@ -57,7 +59,7 @@ class HendelsesService(
         }
 
         if (hendelse.behandlingType.tilDomene() in Konstanter.interessanteBehandlingstyper) {
-            opprettBigQueryLagringSakStatistikkCallback(behandlingId)
+            hendelsePublisher.publiser(StatistikkHendelse.SakstatistikkSkalLagres(behandlingId))
         }
 
         PrometheusProvider.prometheus.hendelseLagret().increment()
