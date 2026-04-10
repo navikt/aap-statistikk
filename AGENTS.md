@@ -53,8 +53,10 @@ For testing, prefer in-memory fakes over mocks. Fakes provide:
 ### Gradle Commands
 - **Never use --no-daemon** when running Gradle tests or builds - it's slower
 - The Gradle daemon improves build performance through caching and hot JVM
+- **Always run `./gradlew test` before committing** to ensure all tests pass
 - **Run `./gradlew detektMain` after significant code changes** to check code quality
 - Fix any Detekt violations before committing
+- Compiling alone is not sufficient — always run the full test suite
 
 ### Domain Classes vs. Kontrakt
 Never use kontrakt (e.g. `behandlingsflyt.kontrakt`) types directly in domain logic, repositories, or database storage. Always map to local domain classes first. This keeps the domain decoupled from external contracts.
