@@ -7,7 +7,6 @@ import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepositoryImpl
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
@@ -56,7 +55,7 @@ class LagreOppgaveJobbUtførerTest {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
-                    personService = PersonService(PersonRepository(it)),
+                    personRepository = PersonRepository(it),
                     oppgaveRepository = OppgaveRepositoryImpl(it),
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
@@ -348,7 +347,7 @@ class LagreOppgaveJobbUtførerTest {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
-                    personService = PersonService(PersonRepository(it)),
+                    personRepository = PersonRepository(it),
                     oppgaveRepository = OppgaveRepositoryImpl(it),
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
