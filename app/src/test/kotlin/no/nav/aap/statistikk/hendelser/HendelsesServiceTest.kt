@@ -47,7 +47,7 @@ class HendelsesServiceTest {
         val meldekortRepository = FakeMeldekortRepository()
         val skjermingService = SkjermingService(FakePdlGateway(emptyMap()))
 
-        val opprettBigQueryLagringPublisher = FakeHendelsePublisher()
+        val hendelsePublisher = FakeHendelsePublisher()
 
         val rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
         val diagnoseRepository = FakeDiagnoseRepository()
@@ -58,7 +58,7 @@ class HendelsesServiceTest {
             meldekortRepository,
             skjermingService,
             rettighetstypeperiodeRepository,
-            opprettBigQueryLagringPublisher
+            hendelsePublisher
         )
 
         val sak = Sak(
@@ -123,7 +123,7 @@ class HendelsesServiceTest {
         assertThat(uthentet?.årsakTilOpprettelse).isEqualTo("SØKNAD")
         assertThat(uthentet!!.relatertBehandlingId).isNotNull()
 
-        assertThat(opprettBigQueryLagringPublisher.hendelser)
+        assertThat(hendelsePublisher.hendelser)
             .hasSize(1)
             .containsExactly(StatistikkHendelse.SakstatistikkSkalLagres(uthentet.id!!))
 
