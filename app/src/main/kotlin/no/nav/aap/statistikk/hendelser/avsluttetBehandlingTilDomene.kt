@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Avslagstype
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
@@ -53,20 +52,51 @@ fun AvsluttetBehandlingDTO.tilDomene(
         perioderMedArbeidsopptrapping = this.perioderMedArbeidsopptrapping.map {
             Periode(it.fom, it.tom)
         },
-        vedtattStansOpphør = this.vedtattStansOpphør.map { stans ->
-            no.nav.aap.statistikk.avsluttetbehandling.StansEllerOpphør(
-                type = when (stans.type) {
-                    Avslagstype.STANS -> no.nav.aap.statistikk.avsluttetbehandling.StansType.STANS
-                    Avslagstype.OPPHØR -> no.nav.aap.statistikk.avsluttetbehandling.StansType.OPPHØR
-                },
-                fom = stans.fom,
-                årsaker = stans.årsaker.map { årsak ->
-                    no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.valueOf(årsak.name)
-                }.toSet()
-            )
-        },
+        vedtattStansOpphør = this.vedtattStansOpphør.map { it.tilDomene() },
     )
 }
+
+private fun StansEllerOpphør.tilDomene() =
+    no.nav.aap.statistikk.avsluttetbehandling.StansEllerOpphør(
+        type = when (type) {
+            Avslagstype.STANS -> no.nav.aap.statistikk.avsluttetbehandling.StansType.STANS
+            Avslagstype.OPPHØR -> no.nav.aap.statistikk.avsluttetbehandling.StansType.OPPHØR
+        },
+        fom = fom,
+        årsaker = årsaker.map { it.tilDomene() }.toSet()
+    )
+
+private fun Avslagsårsak.tilDomene(): no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak =
+    when (this) {
+        Avslagsårsak.BRUKER_UNDER_18 -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.BRUKER_UNDER_18
+        Avslagsårsak.BRUKER_OVER_67 -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.BRUKER_OVER_67
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.MANGLENDE_DOKUMENTASJON
+        Avslagsårsak.IKKE_RETT_PA_SYKEPENGEERSTATNING -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_RETT_PA_SYKEPENGEERSTATNING
+        Avslagsårsak.IKKE_RETT_PA_STUDENT -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_RETT_PA_STUDENT
+        Avslagsårsak.VARIGHET_OVERSKREDET_STUDENT -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.VARIGHET_OVERSKREDET_STUDENT
+        Avslagsårsak.IKKE_SYKDOM_AV_VISS_VARIGHET -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_SYKDOM_AV_VISS_VARIGHET
+        Avslagsårsak.IKKE_SYKDOM_SKADE_LYTE_VESENTLIGDEL -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_SYKDOM_SKADE_LYTE_VESENTLIGDEL
+        Avslagsårsak.IKKE_NOK_REDUSERT_ARBEIDSEVNE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_NOK_REDUSERT_ARBEIDSEVNE
+        Avslagsårsak.IKKE_BEHOV_FOR_OPPFOLGING -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_BEHOV_FOR_OPPFOLGING
+        Avslagsårsak.IKKE_MEDLEM_FORUTGÅENDE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_MEDLEM_FORUTGÅENDE
+        Avslagsårsak.IKKE_MEDLEM -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_MEDLEM
+        Avslagsårsak.IKKE_OPPFYLT_OPPHOLDSKRAV_EØS -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_OPPFYLT_OPPHOLDSKRAV_EØS
+        Avslagsårsak.NORGE_IKKE_KOMPETENT_STAT -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.NORGE_IKKE_KOMPETENT_STAT
+        Avslagsårsak.ANNEN_FULL_YTELSE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.ANNEN_FULL_YTELSE
+        Avslagsårsak.INNTEKTSTAP_DEKKES_ETTER_ANNEN_LOVGIVNING -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.INNTEKTSTAP_DEKKES_ETTER_ANNEN_LOVGIVNING
+        Avslagsårsak.IKKE_RETT_PA_AAP_UNDER_BEHANDLING_AV_UFORE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_RETT_PA_AAP_UNDER_BEHANDLING_AV_UFORE
+        Avslagsårsak.VARIGHET_OVERSKREDET_OVERGANG_UFORE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.VARIGHET_OVERSKREDET_OVERGANG_UFORE
+        Avslagsårsak.VARIGHET_OVERSKREDET_ARBEIDSSØKER -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.VARIGHET_OVERSKREDET_ARBEIDSSØKER
+        Avslagsårsak.IKKE_RETT_PA_AAP_I_PERIODE_SOM_ARBEIDSSOKER -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_RETT_PA_AAP_I_PERIODE_SOM_ARBEIDSSOKER
+        Avslagsårsak.IKKE_RETT_UNDER_STRAFFEGJENNOMFØRING -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_RETT_UNDER_STRAFFEGJENNOMFØRING
+        Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS
+        Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_OPPHØR -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_OPPHØR
+        Avslagsårsak.BRUDD_PÅ_OPPHOLDSKRAV_STANS -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.BRUDD_PÅ_OPPHOLDSKRAV_STANS
+        Avslagsårsak.BRUDD_PÅ_OPPHOLDSKRAV_OPPHØR -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.BRUDD_PÅ_OPPHOLDSKRAV_OPPHØR
+        Avslagsårsak.HAR_RETT_TIL_FULLT_UTTAK_ALDERSPENSJON -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.HAR_RETT_TIL_FULLT_UTTAK_ALDERSPENSJON
+        Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP
+        Avslagsårsak.SYKEPENGEERSTATNINGKVOTE_BRUKT_OPP -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.SYKEPENGEERSTATNINGKVOTE_BRUKT_OPP
+    }
 
 fun ResultatKode?.resultatTilDomene(): no.nav.aap.statistikk.avsluttetbehandling.ResultatKode? =
     when (this) {

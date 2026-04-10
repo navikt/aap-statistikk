@@ -5,5 +5,4 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 
 interface VedtattStansOpphørRepository : Repository {
     fun lagre(behandlingId: BehandlingId, vedtattStansOpphør: List<StansEllerOpphør>)
-    fun hent(behandlingId: BehandlingId): List<StansEllerOpphør>?
 }
