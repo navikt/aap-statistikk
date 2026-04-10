@@ -27,6 +27,7 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.konstruerSakstatistikkService
@@ -101,7 +102,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
@@ -217,7 +218,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
@@ -387,7 +388,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))
@@ -499,7 +500,7 @@ class SaksStatistikkServiceTest {
                     avsluttetBehandlingService = mockk(relaxed = true),
                     personService = PersonService(PersonRepository(it)),
                     meldekortRepository = MeldekortRepository(it),
-                    opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                    hendelsePublisher = FakeHendelsePublisher(),
                     behandlingService = BehandlingService(
                         BehandlingRepository(it),
                         SkjermingService(FakePdlGateway(emptyMap()))

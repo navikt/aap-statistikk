@@ -1,9 +1,6 @@
 package no.nav.aap.statistikk.hendelser
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import io.mockk.checkUnnecessaryStub
-import io.mockk.mockk
-import io.mockk.verify
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling
@@ -17,6 +14,7 @@ import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelseLagret
+import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
@@ -49,7 +47,7 @@ class HendelsesServiceTest {
         val meldekortRepository = FakeMeldekortRepository()
         val skjermingService = SkjermingService(FakePdlGateway(emptyMap()))
 
-        val opprettBigQueryLagringCallback = mockk<(BehandlingId) -> Unit>(relaxed = true)
+        val opprettBigQueryLagringPublisher = FakeHendelsePublisher()
 
         val rettighetstypeperiodeRepository = FakeRettighetsTypeRepository()
         val diagnoseRepository = FakeDiagnoseRepository()
@@ -60,7 +58,7 @@ class HendelsesServiceTest {
             meldekortRepository,
             skjermingService,
             rettighetstypeperiodeRepository,
-            opprettBigQueryLagringCallback
+            opprettBigQueryLagringPublisher
         )
 
         val sak = Sak(
@@ -125,14 +123,14 @@ class HendelsesServiceTest {
         assertThat(uthentet?.årsakTilOpprettelse).isEqualTo("SØKNAD")
         assertThat(uthentet!!.relatertBehandlingId).isNotNull()
 
-        verify { opprettBigQueryLagringCallback(uthentet.id!!) }
+        assertThat(opprettBigQueryLagringPublisher.hendelser)
+            .hasSize(1)
+            .containsExactly(StatistikkHendelse.SakstatistikkSkalLagres(uthentet.id!!))
 
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
         assertThat(
             simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
         ).isEqualTo(0.0) // Fordi behandlingen allerede eksisterer
-
-        checkUnnecessaryStub(opprettBigQueryLagringCallback)
     }
 
     private fun konstruerHendelsesService(
@@ -142,7 +140,7 @@ class HendelsesServiceTest {
         meldekortRepository: IMeldekortRepository,
         skjermingService: SkjermingService,
         rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
-        opprettBigQueryLagringCallback: (BehandlingId) -> Unit
+        hendelsePublisher: FakeHendelsePublisher = FakeHendelsePublisher()
     ): HendelsesService {
         val vilkårsresultatRepository = FakeVilkårsResultatRepository()
         val tilkjentYtelseRepository = FakeTilkjentYtelseRepository()
@@ -157,12 +155,12 @@ class HendelsesServiceTest {
                 diagnoseRepository = diagnoseRepository,
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
                 arbeidsopptrappingperioderRepository = FakeArbeidsopptrappingRepository(),
-                opprettBigQueryLagringYtelseCallback = { TODO() },
+                hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FakeFritaksvurderingRepository(),
                 behandlingService = behandlingService,
             ),
             personService = PersonService(FakePersonRepository()),
-            opprettBigQueryLagringSakStatistikkCallback = opprettBigQueryLagringCallback,
+            hendelsePublisher = hendelsePublisher,
             behandlingService = behandlingService,
             meldekortRepository = meldekortRepository
         )
@@ -187,7 +185,7 @@ class HendelsesServiceTest {
             FakeMeldekortRepository(),
             skjermingService,
             rettighetstypeperiodeRepository
-        ) { _ -> }
+        )
 
         hendelsesService.prosesserNyHendelse(
             StoppetBehandling(

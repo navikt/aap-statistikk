@@ -14,6 +14,7 @@ import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.tilSaksnummer
+import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.behandlingHendelse
@@ -102,6 +103,7 @@ class ProduksjonsstyringRepositoryTest {
     ) =
         dataSource.transaction { conn ->
             val gatewayProvider = defaultGatewayProvider { }
+            val fakeHendelsePublisher = FakeHendelsePublisher()
             val provider = postgresRepositoryRegistry.provider(conn)
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
@@ -114,11 +116,11 @@ class ProduksjonsstyringRepositoryTest {
                     arbeidsopptrappingperioderRepository = provider.provide(),
                     fritaksvurderingRepository = provider.provide(),
                     behandlingService = BehandlingService(provider, gatewayProvider),
-                    opprettBigQueryLagringYtelseCallback = {},
+                    hendelsePublisher = fakeHendelsePublisher,
                 ),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                hendelsePublisher = fakeHendelsePublisher,
                 behandlingService = BehandlingService(
                     provider,
                     gatewayProvider

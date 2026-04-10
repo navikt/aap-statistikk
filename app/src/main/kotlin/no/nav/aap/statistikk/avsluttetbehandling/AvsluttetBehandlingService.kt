@@ -2,11 +2,12 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
-import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.hendelser.BehandlingService
+import no.nav.aap.statistikk.jobber.appender.HendelsePublisher
+import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.ITilkjentYtelseRepository
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
@@ -23,7 +24,7 @@ class AvsluttetBehandlingService(
     private val fritaksvurderingRepository: FritaksvurderingRepository,
     private val behandlingService: BehandlingService,
     private val arbeidsopptrappingperioderRepository: ArbeidsopptrappingperioderRepository,
-    private val opprettBigQueryLagringYtelseCallback: (BehandlingId) -> Unit,
+    private val hendelsePublisher: HendelsePublisher,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
 
@@ -79,7 +80,11 @@ class AvsluttetBehandlingService(
         )
 
         if (!behandlingService.erSkjermet(uthentetBehandling)) {
-            opprettBigQueryLagringYtelseCallback(uthentetBehandling.id())
+            hendelsePublisher.publiser(
+                StatistikkHendelse.YtelsesstatistikkSkalLagres(
+                    behandlingId = uthentetBehandling.id(),
+                )
+            )
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }
