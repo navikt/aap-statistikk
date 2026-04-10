@@ -6,6 +6,7 @@ import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.motor.FlytJobbRepositoryImpl
 import no.nav.aap.statistikk.avsluttetbehandling.ArbeidsopptrappingperioderRepositoryImpl
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
+import no.nav.aap.statistikk.avsluttetbehandling.VedtattStansOpphørRepositoryImpl
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
@@ -43,6 +44,7 @@ val postgresRepositoryRegistry = RepositoryRegistry()
     .register<MeldekortRepository>()
     .register<ArbeidsopptrappingperioderRepositoryImpl>()
     .register<FritaksvurderingRepositoryImpl>()
+    .register<VedtattStansOpphørRepositoryImpl>()
     .register<TilbakekrevingHendelseRepositoryImpl>()
 
 fun DBConnection.provider(): RepositoryProvider = postgresRepositoryRegistry.provider(this)

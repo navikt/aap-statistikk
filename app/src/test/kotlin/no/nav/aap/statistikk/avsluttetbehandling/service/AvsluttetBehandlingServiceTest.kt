@@ -63,6 +63,11 @@ class AvsluttetBehandlingServiceTest {
 
         val datoNå = LocalDate.now(clock)
         val arbeidsopptrappingperiode = Periode(LocalDate.now(), LocalDate.now().plusDays(10))
+        val vedtattStansOpphørPeriode = StansEllerOpphør(
+            type = StansType.STANS,
+            fom = LocalDate.now(),
+            årsaker = setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)
+        )
         val fritaksvurdering = Fritakvurdering(
             harFritak = true,
             fraDato = LocalDate.now(),
@@ -153,7 +158,8 @@ class AvsluttetBehandlingServiceTest {
             ),
             fritaksvurderinger = listOf(fritaksvurdering),
             perioderMedArbeidsopptrapping = listOf(arbeidsopptrappingperiode),
-            vedtakstidspunkt = opprettetTidspunkt
+            vedtakstidspunkt = opprettetTidspunkt,
+            vedtattStansOpphør = listOf(vedtattStansOpphørPeriode)
         )
 
         val meterRegistry = SimpleMeterRegistry()
@@ -232,6 +238,10 @@ class AvsluttetBehandlingServiceTest {
         val uthentetFritaksvurdering =
             dataSource.transaction { FritaksvurderingRepositoryImpl(it).hentFritaksvurderinger(behandlingId) }
         assertThat(uthentetFritaksvurdering).isEqualTo(listOf(fritaksvurdering))
+
+        val uthentetVedtattStansOpphør =
+            dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).hent(behandlingId) }
+        assertThat(uthentetVedtattStansOpphør).isEqualTo(listOf(vedtattStansOpphørPeriode))
 
         val uthentetTilkjentYtelse =
             dataSource.transaction { TilkjentYtelseRepository(it).hentTilkjentYtelse(1) }
@@ -437,6 +447,7 @@ class AvsluttetBehandlingServiceTest {
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection
                 ),
+                vedtattStansOpphørRepository = VedtattStansOpphørRepositoryImpl(dbConnection),
                 hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FritaksvurderingRepositoryImpl(dbConnection),
                 behandlingService = BehandlingService(

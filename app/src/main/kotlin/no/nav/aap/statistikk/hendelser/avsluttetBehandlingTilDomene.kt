@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Avslagstype
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
@@ -51,6 +52,18 @@ fun AvsluttetBehandlingDTO.tilDomene(
         }.orEmpty(),
         perioderMedArbeidsopptrapping = this.perioderMedArbeidsopptrapping.map {
             Periode(it.fom, it.tom)
+        },
+        vedtattStansOpphør = this.vedtattStansOpphør.map { stans ->
+            no.nav.aap.statistikk.avsluttetbehandling.StansEllerOpphør(
+                type = when (stans.type) {
+                    Avslagstype.STANS -> no.nav.aap.statistikk.avsluttetbehandling.StansType.STANS
+                    Avslagstype.OPPHØR -> no.nav.aap.statistikk.avsluttetbehandling.StansType.OPPHØR
+                },
+                fom = stans.fom,
+                årsaker = stans.årsaker.map { årsak ->
+                    no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.valueOf(årsak.name)
+                }.toSet()
+            )
         },
     )
 }

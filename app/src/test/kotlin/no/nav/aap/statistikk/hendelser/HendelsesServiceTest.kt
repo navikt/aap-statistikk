@@ -158,6 +158,7 @@ class HendelsesServiceTest {
                 hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FakeFritaksvurderingRepository(),
                 behandlingService = behandlingService,
+                vedtattStansOpphørRepository = FakeVedtattStansOpphørRepository(),
             ),
             personService = PersonService(FakePersonRepository()),
             hendelsePublisher = hendelsePublisher,

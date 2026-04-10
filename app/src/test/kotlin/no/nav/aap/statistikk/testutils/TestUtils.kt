@@ -798,6 +798,15 @@ class FakeArbeidsopptrappingRepository : ArbeidsopptrappingperioderRepository {
 
 }
 
+class FakeVedtattStansOpphørRepository : VedtattStansOpphørRepository {
+    override fun lagre(behandlingId: BehandlingId, vedtattStansOpphør: List<StansEllerOpphør>) {
+    }
+
+    override fun hent(behandlingId: BehandlingId): List<StansEllerOpphør>? {
+        return emptyList()
+    }
+}
+
 class FakeFritaksvurderingRepository : FritaksvurderingRepository {
     override fun lagre(behandlingId: BehandlingId, vurderinger: List<Fritakvurdering>) {
         TODO("Not yet implemented")
