@@ -113,38 +113,35 @@ class SaksStatistikkService(
                 PrometheusProvider.prometheus.sakDuplikat(false).increment()
             }
 
-            // Sikrer monoton rekkefølge: ny rad må alltid ha høyere endretTid enn forrige rad.
+            // Sikrer unik endretTid: to samtidige hendelser kan beregne nøyaktig samme tidsstempel.
             // Kan skje at oppgave-trigget og behandling-trigget jobb beregner samme
             // endretTid dersom oppgavens sendtTid er nyere enn behandlingens hendelsesTidspunkt
             // (oppgave er da siste snapshot for begge jobber), men jobbene ser ulike behandlingstilstander.
-            val bqSakMedUnikEndretTid = if (siste != null && siste.endretTid >= bqSak.endretTid) {
+            //
+            // Dersom ny hendelse har eldre endretTid enn forrige lagrede rad (forsinket retry-jobb),
+            // lagres den med sin opprinnelige endretTid. Den havner da på riktig historisk posisjon,
+            // og gjeldende tilstand (høyeste endretTid i BigQuery) forblir korrekt.
+            val bqSakMedUnikEndretTid = if (siste != null && siste.endretTid == bqSak.endretTid) {
                 val justert = bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
-                if (siste.endretTid == bqSak.endretTid) {
-                    log.info(
-                        "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
-                                "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
-                                "EndretTid: ${bqSak.endretTid}. " +
-                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
-                                "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
-                                "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
-                    )
-                } else {
-                    log.warn(
-                        "Ny hendelse har eldre endretTid enn forrige lagrede rad. Referanse: ${bqSak.behandlingUUID}. " +
-                                "Forrige endretTid: ${siste.endretTid}, ny: ${bqSak.endretTid}. " +
-                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
-                    )
-                }
-                val diffNanos = java.time.Duration.between(bqSak.endretTid, justert.endretTid).toNanos()
                 log.info(
-                    "Justerte endretTid fra ${bqSak.endretTid} til ${justert.endretTid} " +
-                            "(diff: ${diffNanos}ns) " +
-                            "for å sikre monoton rekkefølge. Referanse: ${bqSak.behandlingUUID}. " +
-                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
+                    "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
+                            "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
+                            "EndretTid: ${bqSak.endretTid}. " +
+                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
+                            "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                            "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
                 )
                 PrometheusProvider.prometheus.sammeEndretTid().increment()
                 justert
             } else {
+                if (siste != null && siste.endretTid > bqSak.endretTid) {
+                    log.warn(
+                        "Ny hendelse har eldre endretTid enn forrige lagrede rad — lagrer med opprinnelig tidsstempel. " +
+                                "Referanse: ${bqSak.behandlingUUID}. " +
+                                "Forrige endretTid: ${siste.endretTid}, ny: ${bqSak.endretTid}. " +
+                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
+                    )
+                }
                 bqSak
             }
 

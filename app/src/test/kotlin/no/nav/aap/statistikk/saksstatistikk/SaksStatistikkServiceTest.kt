@@ -204,6 +204,129 @@ class SaksStatistikkServiceTest {
     }
 
     @Test
+    fun `lagreBQBehandling skal lagre hendelse med eldre endretTid på riktig historisk posisjon`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingsflytTid = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
+        val oppgaveSendtTid = behandlingsflytTid.plusSeconds(5)
+
+        dataSource.transaction { conn ->
+            val hendelsesService = HendelsesService(
+                sakService = SakService(SakRepositoryImpl(conn)),
+                avsluttetBehandlingService = mockk(relaxed = true),
+                personService = PersonService(PersonRepository(conn)),
+                meldekortRepository = MeldekortRepository(conn),
+                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
+                behandlingService = BehandlingService(
+                    BehandlingRepository(conn),
+                    SkjermingService(FakePdlGateway(emptyMap()))
+                ),
+            )
+
+            hendelsesService.prosesserNyHendelse(
+                StoppetBehandling(
+                    saksnummer = "EEEE",
+                    sakStatus = SakStatus.UTREDES,
+                    behandlingReferanse = behandlingReferanse,
+                    relatertBehandling = null,
+                    behandlingOpprettetTidspunkt = behandlingsflytTid,
+                    mottattTid = behandlingsflytTid,
+                    behandlingStatus = BehandlingStatus.UTREDES,
+                    behandlingType = TypeBehandling.Førstegangsbehandling,
+                    soknadsFormat = Kanal.DIGITAL,
+                    ident = "1234567893",
+                    versjon = "1",
+                    vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
+                    årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+                    avklaringsbehov = listOf(
+                        AvklaringsbehovHendelseDto(
+                            avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                            status = AvklaringsbehovStatus.OPPRETTET,
+                            endringer = listOf(
+                                EndringDTO(
+                                    status = AvklaringsbehovStatus.OPPRETTET,
+                                    tidsstempel = behandlingsflytTid,
+                                    endretAv = "system",
+                                )
+                            ),
+                        )
+                    ),
+                    hendelsesTidspunkt = behandlingsflytTid,
+                    avsluttetBehandling = null,
+                    identerForSak = listOf("1234567893")
+                )
+            )
+
+            val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
+            OppgaveRepositoryImpl(conn).lagreOppgave(
+                Oppgave(
+                    identifikator = 88L,
+                    avklaringsbehov = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    enhet = Enhet(enhetId, "4491"),
+                    person = PersonRepository(conn).hentPerson("1234567893")!!,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
+                    hendelser = emptyList(),
+                )
+            )
+            OppgaveHendelseRepositoryImpl(conn).lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = 88L,
+                    mottattTidspunkt = oppgaveSendtTid,
+                    personIdent = "1234567893",
+                    saksnummer = "EEEE",
+                    behandlingRef = behandlingReferanse,
+                    enhet = "4491",
+                    avklaringsbehovKode = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
+                    status = Oppgavestatus.OPPRETTET,
+                    reservertAv = null,
+                    reservertTidspunkt = null,
+                    opprettetTidspunkt = oppgaveSendtTid,
+                    endretAv = null,
+                    endretTidspunkt = null,
+                    sendtTid = oppgaveSendtTid,
+                    versjon = 1L,
+                )
+            )
+
+            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val service = konstruerSakstatistikkService(conn)
+
+            // Lagre hendelser for behandlingen (OPPRETTET + UNDER_BEHANDLING med endretTid = oppgaveSendtTid)
+            service.lagreSakInfoTilBigquery(behandlingId)
+
+            // Hent siste rad — dette er den "nyere" hendelsen vi vil bevare som gjeldende tilstand
+            val nyesteRad = SakstatistikkRepositoryImpl(conn)
+                .hentAlleHendelserPåBehandling(behandlingReferanse).last()
+
+            // Simuler forsinket retry-jobb: hendelse med eldre endretTid (mellom OPPRETTET og UNDER_BEHANDLING)
+            // og annen enhet (ikke duplikat av eksisterende rader).
+            val stalTidspunkt = behandlingsflytTid.plusSeconds(2)
+            val forsinketHendelse = nyesteRad.copy(
+                ansvarligEnhetKode = "ANNEN_ENHET",
+                endretTid = stalTidspunkt
+            )
+            service.lagreBQBehandling(forsinketHendelse)
+
+            val alleRaderSortert = SakstatistikkRepositoryImpl(conn)
+                .hentAlleHendelserPåBehandling(behandlingReferanse)
+                .sortedBy { it.endretTid }
+
+            // Forsinket hendelse skal lagres med sin opprinnelige endretTid
+            assertThat(alleRaderSortert.any { it.endretTid == stalTidspunkt && it.ansvarligEnhetKode == "ANNEN_ENHET" })
+                .describedAs("Forsinket hendelse skal være lagret med opprinnelig endretTid")
+                .isTrue()
+            // Gjeldende tilstand (høyeste endretTid) skal fortsatt være den nyeste hendelsen
+            assertThat(alleRaderSortert.last().endretTid)
+                .describedAs("Nyeste rad skal fortsatt ha oppgaveSendtTid som endretTid")
+                .isEqualTo(oppgaveSendtTid)
+        }
+    }
+
+    @Test
     fun `retry etter ManglerEnhet ser allerede lagret rad som duplikat og lagrer ikke på nytt`(
         @Postgres dataSource: DataSource
     ) {
