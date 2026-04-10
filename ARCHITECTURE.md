@@ -102,14 +102,7 @@ for DI-kobling. Når service-laget forsvinner, forsvinner disse også.
 
 ---
 
-## ~~3. Bytt ut callbacks med HendelsePublisher~~ ✅ FERDIG
-
-PR #746 ble merget. `HendelsesService` bruker nå `hendelsePublisher: HendelsePublisher` i stedet
-for `opprettBigQueryLagringSakStatistikkCallback`. Tester bruker `FakeHendelsePublisher`.
-
----
-
-## 4. Dedupliser SaksStatistikkService-konstruksjon
+## 3. Dedupliser SaksStatistikkService-konstruksjon
 
 **Problem:** `LagreSakinfoTilBigQueryJobb.konstruer()` og `ResendSakstatistikkJobb.konstruer()`
 konstruerer `SaksStatistikkService` med nøyaktig samme kode:
@@ -157,7 +150,7 @@ private fun lagSaksStatistikkService(
 
 ---
 
-## 5. Injiser JobbAppender i LagreOppgaveJobbUtfører og LagreSakinfoTilBigQueryJobb
+## 4. Injiser JobbAppender i LagreOppgaveJobbUtfører og LagreSakinfoTilBigQueryJobb
 
 **Problem:** Begge klasser instansierer `MotorJobbAppender()` direkte inne i metoden:
 
@@ -176,29 +169,12 @@ gjør.
 
 ---
 
-## ~~6. Fjern inline-instansiering av LagreAvklaringsbehovHendelseJobb i route-handler~~ ✅ FERDIG
-
-`mottaOppdatertBehandling` tar nå `LagreAvklaringsbehovHendelseJobb` som parameter, konsistent med
-øvrige route-handlers.
-
----
-
-## ~~7. Fjern SkjermingService.konstruer() companion~~ ✅ FERDIG
-
-`SkjermingService` har ikke lenger companion object med `konstruer()`. Klassen har én vanlig
-konstruktør og instansieres direkte.
-
----
-
 ## Oppsummering
 
-| #   | Tiltak                                                         | Filer fjernet/forenklet | Vanskelighetsgrad | Status     |
-| --- | -------------------------------------------------------------- | ----------------------- | ----------------- | ---------- |
-| 1   | Fjern alle single-implementasjon interfaces (~21 stk)          | ~21 filer               | Middels           | ⏳ Gjenstår |
-| 2   | Fjern tynne wrapper-services (PersonService, SakService, Post) | 3 klasser               | Middels           | ⏳ Gjenstår |
-| 3   | Callbacks → HendelsePublisher                                  | ~10 filer               | Middels           | ✅ Ferdig  |
-| 4   | Dedupliser SaksStatistikkService-konstruksjon                  | 2 steder → 1            | Lav               | ⏳ Gjenstår |
-| 5   | Injiser JobbAppender i oppgave- og saksinfo-jobber             | 2 filer                 | Lav               | ⏳ Gjenstår |
-| 6   | Fjern inline LagreAvklaringsbehovHendelseJobb i route-handler  | 2 filer                 | Lav               | ✅ Ferdig  |
-| 7   | Fjern SkjermingService.konstruer() companion                   | 1 fil                   | Lav               | ✅ Ferdig  |
+| #   | Tiltak                                                         | Filer fjernet/forenklet | Vanskelighetsgrad |
+| --- | -------------------------------------------------------------- | ----------------------- | ----------------- |
+| 1   | Fjern alle single-implementasjon interfaces (~21 stk)          | ~21 filer               | Middels           |
+| 2   | Fjern tynne wrapper-services (PersonService, SakService, Post) | 3 klasser               | Middels           |
+| 3   | Dedupliser SaksStatistikkService-konstruksjon                  | 2 steder → 1            | Lav               |
+| 4   | Injiser JobbAppender i oppgave- og saksinfo-jobber             | 2 filer                 | Lav               |
 
