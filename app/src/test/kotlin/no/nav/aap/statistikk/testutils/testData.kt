@@ -95,7 +95,8 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
         rettighetstypePerioder = listOf(),
         resultat = ResultatKode.AVSLAG,
         vedtakstidspunkt = null,
-        perioderMedArbeidsopptrapping = emptyList()
+        perioderMedArbeidsopptrapping = emptyList(),
+        vedtattStansOpphør = emptyList()
     )
 }
 
