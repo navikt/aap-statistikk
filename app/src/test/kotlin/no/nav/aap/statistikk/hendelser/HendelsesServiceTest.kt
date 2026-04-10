@@ -155,7 +155,7 @@ class HendelsesServiceTest {
                 diagnoseRepository = diagnoseRepository,
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
                 arbeidsopptrappingperioderRepository = FakeArbeidsopptrappingRepository(),
-                hendelsePublisher = FakeHendelsePublisher(),
+                hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FakeFritaksvurderingRepository(),
                 behandlingService = behandlingService,
             ),
