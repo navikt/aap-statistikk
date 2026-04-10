@@ -51,7 +51,7 @@ class SaksStatistikkService(
             return SakStatistikkResultat.ManglerEnhet(
                 behandlingId = behandling.id(),
                 avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
-                hendelsestid = behandling.oppdatertTidspunkt()
+                bqBehandling = bqSaker.single(),
             )
         }
 
@@ -71,65 +71,24 @@ class SaksStatistikkService(
         return SakStatistikkResultat.OK
     }
 
-    override fun lagreMedOppgavedata(
+    override fun lagreMedStoredBQBehandling(
         behandlingId: BehandlingId,
-        originalHendelsestid: LocalDateTime,
-        lagreUtenEnhet: Boolean
+        storedBQBehandling: BQBehandling,
+        avklaringsbehovKode: String?,
     ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
-        require(
-            behandling.typeBehandling in Konstanter.interessanteBehandlingstyper
-        ) {
-            "Denne jobben skal ikke kunne bli trigget av oppfølgingsbehandlinger. Behandling: ${behandling.referanse}"
-        }
-
-        // Bruk behandlingstilstanden slik den var ved opprinnelig hendelsestid
-        val snapshotBehandling = behandling.påTidspunkt(originalHendelsestid)
         val erSkjermet = behandlingService.erSkjermet(behandling)
-
-        val bqSaker =
-            bqBehandlingMapper.bqBehandlingForBehandling(snapshotBehandling, erSkjermet)
-
-        // Re-resolv enhet og saksbehandler fra ferske oppgave-data
         val (enhet, saksbehandler) = bqBehandlingMapper.hentEnhetOgSaksbehandler(
-            behandling,
-            erSkjermet
+            behandling, erSkjermet, avklaringsbehovKode
         )
-
-        val bqSakerMedOppgavedata = bqSaker.map {
-            it.copy(
-                ansvarligEnhetKode = it.ansvarligEnhetKode ?: enhet,
-                saksbehandler = it.saksbehandler ?: saksbehandler,
-                // Oppgave-hendelser etter originalHendelsestid skal ikke drive endretTid for dette snapshot-et
-                endretTid = minOf(it.endretTid, originalHendelsestid)
-            )
-        }
-
-        bqSakerMedOppgavedata.forEach {
-            log.info(
-                "lagreMedOppgavedata: endretTid=${it.endretTid}, " +
-                        "originalHendelsestid=$originalHendelsestid, " +
-                        "oppgaveDrivenEndretTid=${it.endretTid == originalHendelsestid && bqSaker.any { bq -> bq.endretTid.isAfter(originalHendelsestid) }}, " +
-                        "status=${it.behandlingStatus}."
-            )
-        }
-
-        val manglerEnhet = !lagreUtenEnhet && bqSakerMedOppgavedata.any {
-            it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
-        }
-
-        if (manglerEnhet) {
+        if (enhet == null) {
             return SakStatistikkResultat.ManglerEnhet(
-                behandlingId = behandling.id(),
-                avklaringsbehovKode = snapshotBehandling.gjeldendeAvklaringsBehov,
-                hendelsestid = originalHendelsestid
+                behandlingId = behandlingId,
+                avklaringsbehovKode = avklaringsbehovKode,
+                bqBehandling = storedBQBehandling,
             )
         }
-
-        bqSakerMedOppgavedata.forEach { bqSak ->
-            lagreBQBehandling(bqSak)
-        }
-
+        lagreBQBehandling(storedBQBehandling.copy(ansvarligEnhetKode = enhet, saksbehandler = saksbehandler))
         return SakStatistikkResultat.OK
     }
 

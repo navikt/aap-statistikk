@@ -523,7 +523,8 @@ class MockJobbAppender : JobbAppender {
     private var bigQueryJobber = mutableListOf<BehandlingId>()
     var sisteEnhetRetryCount: Int = 0
     var sisteDelayInSeconds: Long = 0
-    var sisteOriginalHendelsestid: LocalDateTime? = null
+    var sisteStoredBQBehandling: BQBehandling? = null
+    var sisteAvklaringsbehovKode: String? = null
 
     override fun leggTil(
         connection: DBConnection,
@@ -544,14 +545,16 @@ class MockJobbAppender : JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long,
         enhetRetryCount: Int,
-        originalHendelsestid: LocalDateTime?,
-        triggerKilde: String
+        triggerKilde: String,
+        storedBQBehandling: BQBehandling?,
+        avklaringsbehovKode: String?,
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
         bigQueryJobber.add(behandlingId)
         sisteEnhetRetryCount = enhetRetryCount
         sisteDelayInSeconds = delayInSeconds
-        sisteOriginalHendelsestid = originalHendelsestid
+        sisteStoredBQBehandling = storedBQBehandling
+        sisteAvklaringsbehovKode = avklaringsbehovKode
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

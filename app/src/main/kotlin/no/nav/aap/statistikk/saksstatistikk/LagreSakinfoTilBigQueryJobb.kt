@@ -2,6 +2,8 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.gateway.GatewayProvider
+import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.komponenter.json.DeserializationException
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
@@ -13,11 +15,18 @@ import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
 data class EnhetRetryConfig(
     val maxRetries: Int = requiredConfigForKey("enhet.retry.max.retries").toInt(),
     val delaySeconds: Long = requiredConfigForKey("enhet.retry.delay.seconds").toLong()
+)
+
+data class LagreSakinfoPayload(
+    val behandlingId: BehandlingId,
+    val storedBQBehandling: BQBehandling? = null,
+    val avklaringsbehovKode: String? = null,
+    val retryCount: Int = 0,
+    val triggerKilde: String = "ukjent",
 )
 
 class LagreSakinfoTilBigQueryJobbUtfører(
@@ -30,30 +39,53 @@ class LagreSakinfoTilBigQueryJobbUtfører(
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun utfør(input: JobbInput) {
-        val behandlingId = input.payload<BehandlingId>()
+        val payload = lesPayload(input)
+        val behandlingId = payload.behandlingId
 
         val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
 
         LoggingKontekst(behandling.referanse).use {
-            utførJobb(behandlingId, input)
+            utførJobb(payload)
         }
     }
 
-    private fun utførJobb(
-        behandlingId: BehandlingId, input: JobbInput
-    ) {
-        val retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0
-        val originalHendelsestid = input.optionalParameter("originalHendelsestid")
-            ?.let { LocalDateTime.parse(it) }
-        val triggerKilde = input.optionalParameter("triggerKilde") ?: "ukjent"
+    // TODO: Fjern bakoverkompatibilitet etter at alle gamle jobber er prosessert
+    private fun lesPayload(input: JobbInput): LagreSakinfoPayload {
+        return try {
+            input.payload<LagreSakinfoPayload>()
+        } catch (e: DeserializationException) {
+            log.info("Deserialisering som LagreSakinfoPayload feilet, prøver gammelt format (BehandlingId)")
+            val behandlingId = input.payload<BehandlingId>()
+            val storedBQBehandling = try {
+                input.optionalParameter("storedBQBehandling")
+                    ?.let { DefaultJsonMapper.fromJson<BQBehandling>(it) }
+            } catch (e: DeserializationException) {
+                log.warn("Klarte ikke deserialisere storedBQBehandling fra gammelt format, ignorerer")
+                null
+            }
+            LagreSakinfoPayload(
+                behandlingId = behandlingId,
+                storedBQBehandling = storedBQBehandling,
+                avklaringsbehovKode = input.optionalParameter("avklaringsbehovKode"),
+                retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0,
+                triggerKilde = input.optionalParameter("triggerKilde") ?: "ukjent",
+            )
+        }
+    }
+
+    private fun utførJobb(payload: LagreSakinfoPayload) {
+        val behandlingId = payload.behandlingId
+        val retryCount = payload.retryCount
+        val triggerKilde = payload.triggerKilde
 
         log.info(
-            "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount, " +
-                    "originalHendelsestid=$originalHendelsestid."
+            "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount."
         )
 
-        val resultat = if (originalHendelsestid != null) {
-            sakStatistikkService.lagreMedOppgavedata(behandlingId, originalHendelsestid)
+        val resultat = if (payload.storedBQBehandling != null) {
+            sakStatistikkService.lagreMedStoredBQBehandling(
+                behandlingId, payload.storedBQBehandling, payload.avklaringsbehovKode
+            )
         } else {
             sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
         }
@@ -73,27 +105,22 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         repositoryProvider,
                         behandlingId,
                         delayInSeconds = delay,
+                        storedBQBehandling = resultat.bqBehandling,
+                        avklaringsbehovKode = resultat.avklaringsbehovKode,
                         enhetRetryCount = retryCount + 1,
-                        originalHendelsestid = resultat.hendelsestid,
-                        triggerKilde = "retry($triggerKilde)"
+                        triggerKilde = "retry($triggerKilde)",
                     )
                 } else {
                     log.error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
                                 "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Lagrer med null enhet. Original hendelsestid: $originalHendelsestid."
+                                "Lagrer med null enhet."
                     )
-                    if (originalHendelsestid != null) {
-                        sakStatistikkService.lagreMedOppgavedata(
-                            behandlingId, originalHendelsestid, lagreUtenEnhet = true
-                        )
-                    } else {
-                        sakStatistikkService.lagreSakInfoTilBigquery(
-                            behandlingId,
-                            lagreUtenEnhet = true,
-                        )
-                    }
+                    sakStatistikkService.lagreSakInfoTilBigquery(
+                        behandlingId,
+                        lagreUtenEnhet = true,
+                    )
                 }
             }
         }
