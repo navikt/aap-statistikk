@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.sak
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.TemporalUnitLessThanOffset
@@ -22,7 +21,7 @@ class SakRepositoryImplTest {
 
         dataSource.transaction {
             val ident = "214"
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+            val person = PersonRepository(it).hentEllerLagre(ident)
             val sakRepositoryImpl = SakRepositoryImpl(it)
 
             sakRepositoryImpl.settInnSak(
@@ -69,7 +68,7 @@ class SakRepositoryImplTest {
         )
         val sak = dataSource.transaction {
             val ident = "214"
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+            val person = PersonRepository(it).hentEllerLagre(ident)
             val sakRepositoryImpl = SakRepositoryImpl(it)
 
             val sak = Sak(
