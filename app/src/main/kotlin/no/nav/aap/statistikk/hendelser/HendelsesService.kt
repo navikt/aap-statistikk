@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandlingService
+import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.HendelsePublisher
 import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
@@ -44,8 +45,8 @@ class HendelsesService(
 
             // Oppfølgingsbehandling er ikke relatert til en ytelse, så dette kan ignoreres.
             if (hendelse.behandlingType.tilDomene() in listOf(
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Revurdering,
-                    no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling
+                    TypeBehandling.Revurdering,
+                    TypeBehandling.Førstegangsbehandling
                 )
             ) {
                 avsluttetBehandlingService.lagre(

@@ -24,7 +24,6 @@ class LagreStoppetHendelseJobb(
     private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
 ) : ProvidersJobbSpesifikasjon {
 
-
     override fun konstruer(
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider

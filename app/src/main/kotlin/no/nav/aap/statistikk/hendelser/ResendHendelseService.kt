@@ -16,8 +16,6 @@ class ResendHendelseService(
     private val behandlingService: BehandlingService,
     private val hendelsePublisher: HendelsePublisher,
 ) {
-
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {

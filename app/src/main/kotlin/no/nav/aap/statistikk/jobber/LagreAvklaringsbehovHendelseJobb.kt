@@ -21,7 +21,6 @@ class LagreAvklaringsbehovHendelseJobb(
     private val jobbAppender: JobbAppender,
 ) : ProvidersJobbSpesifikasjon {
 
-
     override fun konstruer(
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider,
