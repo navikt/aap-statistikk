@@ -51,6 +51,7 @@ class SaksStatistikkService(
             return SakStatistikkResultat.ManglerEnhet(
                 behandlingId = behandling.id(),
                 avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
+                bqBehandling = bqSaker.single(),
             )
         }
 
@@ -67,6 +68,27 @@ class SaksStatistikkService(
             lagreBQBehandling(bqSak)
         }
 
+        return SakStatistikkResultat.OK
+    }
+
+    override fun lagreMedStoredBQBehandling(
+        behandlingId: BehandlingId,
+        storedBQBehandling: BQBehandling,
+        avklaringsbehovKode: String?,
+    ): SakStatistikkResultat {
+        val behandling = behandlingService.hentBehandling(behandlingId)
+        val erSkjermet = behandlingService.erSkjermet(behandling)
+        val (enhet, saksbehandler) = bqBehandlingMapper.hentEnhetOgSaksbehandler(
+            behandling, erSkjermet, avklaringsbehovKode
+        )
+        if (enhet == null) {
+            return SakStatistikkResultat.ManglerEnhet(
+                behandlingId = behandlingId,
+                avklaringsbehovKode = avklaringsbehovKode,
+                bqBehandling = storedBQBehandling,
+            )
+        }
+        lagreBQBehandling(storedBQBehandling.copy(ansvarligEnhetKode = enhet, saksbehandler = saksbehandler))
         return SakStatistikkResultat.OK
     }
 
