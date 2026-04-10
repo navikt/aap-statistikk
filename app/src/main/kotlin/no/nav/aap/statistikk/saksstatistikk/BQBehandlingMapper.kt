@@ -32,7 +32,7 @@ class BQBehandlingMapper(
     fun bqBehandlingForBehandling(
         behandling: Behandling,
         erSkjermet: Boolean,
-    ): BQBehandling {
+    ): List<BQBehandling> {
         val sak = behandling.sak
         val relatertBehandlingUUID =
             behandlingService.hentRelatertBehandlingUUID(behandling)
@@ -71,14 +71,16 @@ class BQBehandlingMapper(
             log.warn("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
         }
 
-        return byggBQBehandling(
-            behandling = behandling,
-            relatertBehandlingUUID = relatertBehandlingUUID,
-            erSkjermet = erSkjermet,
-            ansvarligEnhet = ansvarligEnhet,
-            saksbehandler = saksbehandler,
-            endretTid = snapshots.last().tidspunkt,
-            behandlingStatus = behandlingStatus(behandling)
+        return listOf(
+            byggBQBehandling(
+                behandling = behandling,
+                relatertBehandlingUUID = relatertBehandlingUUID,
+                erSkjermet = erSkjermet,
+                ansvarligEnhet = ansvarligEnhet,
+                saksbehandler = saksbehandler,
+                endretTid = snapshots.last().tidspunkt,
+                behandlingStatus = behandlingStatus(behandling)
+            )
         )
     }
 

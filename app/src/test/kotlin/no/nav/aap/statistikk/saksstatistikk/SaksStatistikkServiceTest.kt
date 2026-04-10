@@ -218,7 +218,7 @@ class SaksStatistikkServiceTest {
                 avsluttetBehandlingService = mockk(relaxed = true),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
-                hendelsePublisher = FakeHendelsePublisher(),
+                opprettBigQueryLagringSakStatistikkCallback = { _ -> },
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
                     SkjermingService(FakePdlGateway(emptyMap()))

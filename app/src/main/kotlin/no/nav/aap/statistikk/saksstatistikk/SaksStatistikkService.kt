@@ -31,29 +31,32 @@ class SaksStatistikkService(
 
         val erSkjermet = behandlingService.erSkjermet(behandling)
 
-        val bqSak =
+        val bqSaker =
             bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
 
-        log.info(
-            "lagreSakInfoTilBigquery: endretTid=${bqSak.endretTid}, " +
-                    "behandling.oppdatertTidspunkt=${behandling.oppdatertTidspunkt()}, " +
-                    "oppgaveDrivenEndretTid=${bqSak.endretTid.isAfter(behandling.oppdatertTidspunkt())}, " +
-                    "status=${bqSak.behandlingStatus}."
-        )
+        bqSaker.forEach {
+            log.info(
+                "lagreSakInfoTilBigquery: endretTid=${it.endretTid}, " +
+                        "behandling.oppdatertTidspunkt=${behandling.oppdatertTidspunkt()}, " +
+                        "oppgaveDrivenEndretTid=${it.endretTid.isAfter(behandling.oppdatertTidspunkt())}, " +
+                        "status=${it.behandlingStatus}."
+            )
+        }
 
-        val manglerEnhet = !lagreUtenEnhet &&
-                bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
+        val manglerEnhet = !lagreUtenEnhet && bqSaker.any {
+            it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK
+        }
 
         if (manglerEnhet) {
             return SakStatistikkResultat.ManglerEnhet(
                 behandlingId = behandling.id(),
                 avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
-                bqBehandling = bqSak,
+                bqBehandling = bqSaker.single(),
             )
         }
 
         val manglerFortsattEnhet =
-            bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
+            bqSaker.any { it.ansvarligEnhetKode == null && it.behandlingMetode != BehandlingMetode.AUTOMATISK }
         if (manglerFortsattEnhet) {
             val referanse = behandling.referanse
             val saksnummer = behandling.sak.saksnummer
@@ -61,7 +64,9 @@ class SaksStatistikkService(
             log.warn("Saksbehandler er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
         }
 
-        lagreBQBehandling(bqSak)
+        bqSaker.forEach { bqSak ->
+            lagreBQBehandling(bqSak)
+        }
 
         return SakStatistikkResultat.OK
     }
@@ -173,7 +178,7 @@ class SaksStatistikkService(
             sakstatistikkRepository.hentAlleHendelserPåBehandling(behandling.referanse)
 
         val alleHendelser = behandling.hendelsesHistorikk()
-            .map { behandling ->
+            .flatMap { behandling ->
                 bqBehandlingMapper.bqBehandlingForBehandling(
                     behandling = behandling,
                     erSkjermet = erSkjermet,
