@@ -8,16 +8,16 @@ import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.jobber.appender.HendelsePublisher
 import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
-import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.person.IPersonRepository
+import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
 import org.slf4j.LoggerFactory
 
 class HendelsesService(
-    private val sakService: SakService,
+    private val sakRepository: SakRepository,
     private val avsluttetBehandlingService: AvsluttetBehandlingService,
-    private val personService: PersonService,
+    private val personRepository: IPersonRepository,
     private val behandlingService: BehandlingService,
     private val meldekortRepository: IMeldekortRepository,
     private val hendelsePublisher: HendelsePublisher,
@@ -25,11 +25,11 @@ class HendelsesService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun prosesserNyHendelse(hendelse: StoppetBehandling) {
-        val person = personService.hentEllerLagrePerson(hendelse.ident)
+        val person = personRepository.hentEllerLagre(hendelse.ident)
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
 
         val sak =
-            sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
+            sakRepository.hentEllerSettInn(person, saksnummer, hendelse.sakStatus.tilDomene())
 
         val behandlingId = behandlingService.hentEllerLagreBehandling(hendelse, sak).id()
 

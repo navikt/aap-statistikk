@@ -15,8 +15,8 @@ import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorHendelsePublisher
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
-import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.person.IPersonRepository
+import no.nav.aap.statistikk.sak.SakRepository
 import org.slf4j.LoggerFactory
 
 class LagreStoppetHendelseJobb(
@@ -47,8 +47,8 @@ class LagreStoppetHendelseJobb(
             hendelsePublisher = hendelsePublisher,
         )
         val hendelsesService = HendelsesService(
-            sakService = SakService(repositoryProvider),
-            personService = PersonService(repositoryProvider),
+            sakRepository = repositoryProvider.provide<SakRepository>(),
+            personRepository = repositoryProvider.provide<IPersonRepository>(),
             avsluttetBehandlingService = avsluttetBehandlingService,
             behandlingService = behandlingService,
             meldekortRepository = repositoryProvider.provide<IMeldekortRepository>(),

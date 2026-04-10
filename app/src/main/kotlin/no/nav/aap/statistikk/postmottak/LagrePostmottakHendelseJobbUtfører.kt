@@ -11,12 +11,12 @@ import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.lagretPostmottakHendelse
 import no.nav.aap.statistikk.person.Person
-import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.person.IPersonRepository
 import org.slf4j.LoggerFactory
 
 class LagrePostmottakHendelseJobbUtfører(
-    private val postmottakBehandlingService: PostmottakBehandlingService,
-    private val personService: PersonService,
+    private val postmottakBehandlingRepository: PostmottakBehandlingRepository,
+    private val personRepository: IPersonRepository,
 ) : JobbUtfører {
     private val logger = LoggerFactory.getLogger(LagrePostmottakHendelseJobbUtfører::class.java)
 
@@ -24,11 +24,11 @@ class LagrePostmottakHendelseJobbUtfører(
 
         val hendelse = input.payload<DokumentflytStoppetHendelse>()
 
-        val person = personService.hentEllerLagrePerson(hendelse.ident)
+        val person = personRepository.hentEllerLagre(hendelse.ident)
 
         val domeneHendelse = hendelse.tilDomene(person)
         val oppdatertBehandling =
-            postmottakBehandlingService.oppdaterEllerOpprettBehandling(domeneHendelse)
+            postmottakBehandlingRepository.oppdaterEllerOpprett(domeneHendelse)
 
         PrometheusProvider.prometheus.lagretPostmottakHendelse().increment()
         logger.info("Fullført prosessering av postmottak-behandling med ID ${oppdatertBehandling.id()}.")
@@ -38,10 +38,8 @@ class LagrePostmottakHendelseJobbUtfører(
 class LagrePostmottakHendelseJobb : ProviderJobbSpesifikasjon {
     override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
         return LagrePostmottakHendelseJobbUtfører(
-            postmottakBehandlingService = PostmottakBehandlingService(
-                repositoryProvider.provide()
-            ),
-            personService = PersonService(repositoryProvider),
+            postmottakBehandlingRepository = repositoryProvider.provide(),
+            personRepository = repositoryProvider.provide(),
         )
     }
 

@@ -2,8 +2,7 @@ package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
-import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
@@ -23,8 +22,8 @@ class ResendHendelseServiceTest {
 
         val hendelsePublisher = FakeHendelsePublisher()
         val hendelsesService = ResendHendelseService(
-            SakService(sakRepository),
-            PersonService(FakePersonRepository()),
+            sakRepository,
+            FakePersonRepository(),
             behandlingRepository,
             BehandlingService(behandlingRepository, SkjermingService(FakePdlGateway(emptyMap()))),
             hendelsePublisher

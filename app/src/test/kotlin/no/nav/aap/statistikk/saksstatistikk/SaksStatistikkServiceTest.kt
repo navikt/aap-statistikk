@@ -23,9 +23,8 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
 import no.nav.aap.statistikk.testutils.FakePdlGateway
@@ -98,9 +97,9 @@ class SaksStatistikkServiceTest {
 
         dataSource.transaction { conn ->
             val hendelsesService = HendelsesService(
-                sakService = SakService(SakRepositoryImpl(conn)),
+                sakRepository = SakRepositoryImpl(conn),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
+                personRepository = PersonRepository(conn),
                 meldekortRepository = MeldekortRepository(conn),
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
@@ -214,9 +213,9 @@ class SaksStatistikkServiceTest {
 
         dataSource.transaction { conn ->
             val hendelsesService = HendelsesService(
-                sakService = SakService(SakRepositoryImpl(conn)),
+                sakRepository = SakRepositoryImpl(conn),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
+                personRepository = PersonRepository(conn),
                 meldekortRepository = MeldekortRepository(conn),
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
@@ -384,9 +383,9 @@ class SaksStatistikkServiceTest {
 
         dataSource.transaction { conn ->
             val hendelsesService = HendelsesService(
-                sakService = SakService(SakRepositoryImpl(conn)),
+                sakRepository = SakRepositoryImpl(conn),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
+                personRepository = PersonRepository(conn),
                 meldekortRepository = MeldekortRepository(conn),
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
@@ -495,10 +494,10 @@ class SaksStatistikkServiceTest {
 
             dataSource.transaction {
                 val hendelsesService = HendelsesService(
-                    sakService = SakService(SakRepositoryImpl(it)),
+                    sakRepository = SakRepositoryImpl(it),
                     // mockk fordi irrelevant for denne testen
                     avsluttetBehandlingService = mockk(relaxed = true),
-                    personService = PersonService(PersonRepository(it)),
+                    personRepository = PersonRepository(it),
                     meldekortRepository = MeldekortRepository(it),
                     hendelsePublisher = FakeHendelsePublisher(),
                     behandlingService = BehandlingService(

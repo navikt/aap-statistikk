@@ -67,7 +67,6 @@ import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import no.nav.aap.statistikk.sak.*
@@ -535,7 +534,7 @@ fun opprettTestHendelse(
 fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     return dataSource.transaction { conn ->
         val personRepository = PersonRepository(conn)
-        PersonService(personRepository).hentEllerLagrePerson(ident)
+        personRepository.hentEllerLagre(ident)
     }
 }
 
@@ -976,7 +975,7 @@ fun forberedDatabase(
     behandlingReferanse: UUID
 ): BehandlingId {
     val ident = "214"
-    val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+    val person = PersonRepository(it).hentEllerLagre(ident)
 
     val sak = Sak(
         saksnummer = "ABCDE".tilSaksnummer(),
