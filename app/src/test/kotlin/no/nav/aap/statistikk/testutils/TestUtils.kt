@@ -379,6 +379,56 @@ fun <E> testKlientNoInjection(
     return res
 }
 
+fun <E> testKlientNoInjectionManuell(
+    dbConfig: DbConfig,
+    azureConfig: AzureConfig = AzureConfig(
+        clientId = "tilgang",
+        jwksUri = "http://localhost:8081/jwks",
+        issuer = "tilgang"
+    ),
+    bigQueryClient: IBigQueryClient = FakeBigQueryClient,
+    test: TestClient.(ManuellMotorImpl) -> E,
+): E {
+    lateinit var motor: ManuellMotorImpl
+
+    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
+    System.setProperty("azure.app.client.id", azureConfig.clientId)
+    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
+    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
+    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
+
+    System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+
+    System.setProperty("enhet.retry.max.retries", "1")
+    System.setProperty("enhet.retry.delay.seconds", "0")
+
+    val restClient = RestClient(
+        config = ClientConfig(scope = "AAP_SCOPES"),
+        tokenProvider = ClientCredentialsTokenProvider,
+        responseHandler = DefaultResponseHandler()
+    )
+
+    val server = embeddedServer(Netty, port = 0) {
+        startUp(
+            dbConfig,
+            azureConfig,
+            bigQueryClient,
+            defaultGatewayProvider()
+        ) { ds, gp, jobber ->
+            ManuellMotorImpl(ds, jobber, postgresRepositoryRegistry, gp).also { motor = it }
+        }
+    }.start()
+
+    val port = runBlocking { server.engine.resolvedConnectors().first().port }
+
+    val res = TestClient(restClient, "http://localhost:$port").test(motor)
+
+    server.stop(1000L, 10_000L)
+
+    return res
+}
+
+
 fun postgresTestConfig(): DbConfig {
     val postgres = PostgreSQLContainer("postgres:16")
     // Get the current working directory
