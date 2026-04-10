@@ -102,31 +102,10 @@ for DI-kobling. Når service-laget forsvinner, forsvinner disse også.
 
 ---
 
-## 3. Bytt ut callbacks med HendelsePublisher (PR #746 — under review)
+## ~~3. Bytt ut callbacks med HendelsePublisher~~ ✅ FERDIG
 
-Se PR #746. `HendelsesService`, `AvsluttetBehandlingService` og `ResendHendelseService` bruker
-`(BehandlingId) -> Unit`-callbacks for å trigge oppfølgingsjobber. Disse erstattes med et
-`HendelsePublisher`-grensesnitt og en `StatistikkHendelse` sealed class.
-
-```kotlin
-// Før: callback-parameter
-class HendelsesService(
-    ...
-    private val opprettBigQueryLagringSakStatistikkCallback: (BehandlingId) -> Unit,
-)
-
-// Etter: eksplisitt publisher
-class HendelsesService(
-    ...
-    private val hendelsePublisher: HendelsePublisher,
-)
-```
-
-Review-kommentarer er adressert (private konstruktør i `MotorHendelsePublisher`, fjernet ubrukt
-felt, assertions lagt til i tester).
-
-**Gevinst:** Testene bruker `FakeHendelsePublisher` i stedet for `mockk`-callbacks.
-Hensikten med hva som publiseres er selvdokumenterende.
+PR #746 ble merget. `HendelsesService` bruker nå `hendelsePublisher: HendelsePublisher` i stedet
+for `opprettBigQueryLagringSakStatistikkCallback`. Tester bruker `FakeHendelsePublisher`.
 
 ---
 
@@ -197,63 +176,29 @@ gjør.
 
 ---
 
-## 6. Fjern inline-instansiering av LagreAvklaringsbehovHendelseJobb i route-handler
+## ~~6. Fjern inline-instansiering av LagreAvklaringsbehovHendelseJobb i route-handler~~ ✅ FERDIG
 
-**Problem:** `mottaOppdatertBehandling` instansierer `LagreAvklaringsbehovHendelseJobb` inline
-i stedet for å ta den som parameter:
-
-```kotlin
-jobbSpesifikasjon = LagreAvklaringsbehovHendelseJobb(jobbAppender),  // instansieres per route-setup
-```
-
-`App.kt` oppretter allerede `lagreAvklaringsbehovHendelseJobb` på linje 114, men sender den
-ikke inn til `mottaOppdatertBehandling`. Alle øvrige handlers tar spesifikasjonen som parameter.
-
-**Forslag:**
-```kotlin
-fun NormalOpenAPIRoute.mottaOppdatertBehandling(
-    transactionExecutor: TransactionExecutor,
-    jobbAppender: JobbAppender,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,  // parameter, ikke ny()
-)
-```
-
-**Gevinst:** Konsistens med øvrige route-handlers.
+`mottaOppdatertBehandling` tar nå `LagreAvklaringsbehovHendelseJobb` som parameter, konsistent med
+øvrige route-handlers.
 
 ---
 
-## 7. Fjern SkjermingService.konstruer() companion (PR #755 — under review)
+## ~~7. Fjern SkjermingService.konstruer() companion~~ ✅ FERDIG
 
-**Problem:** `SkjermingService` har fortsatt en `companion object { fun konstruer(...) }` — det
-gamle mønsteret som PR #750 ryddet opp i for de andre klassene:
-
-```kotlin
-class SkjermingService(private val pdlGateway: PdlGateway) {
-    companion object {
-        fun konstruer(gatewayProvider: GatewayProvider): SkjermingService {
-            return SkjermingService(gatewayProvider.provide())
-        }
-    }
-}
-```
-
-`BehandlingService` kaller `SkjermingService.konstruer(gatewayProvider)` i sin sekundærkonstruktør.
-
-**Forslag:** Slett companion-metoden og kall `SkjermingService(gatewayProvider.provide())` direkte.
-
-**Gevinst:** Konsistens — én konstruksjonsmåte gjennom hele kodebasen.
+`SkjermingService` har ikke lenger companion object med `konstruer()`. Klassen har én vanlig
+konstruktør og instansieres direkte.
 
 ---
 
 ## Oppsummering
 
-| #   | Tiltak                                                         | Filer fjernet/forenklet | Vanskelighetsgrad |
-| --- | -------------------------------------------------------------- | ----------------------- | ----------------- |
-| 1   | Fjern alle single-implementasjon interfaces (~21 stk)          | ~21 filer               | Middels           |
-| 2   | Fjern tynne wrapper-services (PersonService, SakService, Post) | 3 klasser               | Middels           |
-| 3   | Callbacks → HendelsePublisher (PR #746)                        | ~10 filer endres        | Middels           |
-| 4   | Dedupliser SaksStatistikkService-konstruksjon                  | 2 steder → 1            | Lav               |
-| 5   | Injiser JobbAppender i oppgave- og saksinfo-jobber             | 2 filer                 | Lav               |
-| 6   | Fjern inline LagreAvklaringsbehovHendelseJobb i route-handler  | 2 filer                 | Lav               |
-| 7   | Fjern SkjermingService.konstruer() companion (PR #755)         | 1 fil                   | Lav               |
+| #   | Tiltak                                                         | Filer fjernet/forenklet | Vanskelighetsgrad | Status     |
+| --- | -------------------------------------------------------------- | ----------------------- | ----------------- | ---------- |
+| 1   | Fjern alle single-implementasjon interfaces (~21 stk)          | ~21 filer               | Middels           | ⏳ Gjenstår |
+| 2   | Fjern tynne wrapper-services (PersonService, SakService, Post) | 3 klasser               | Middels           | ⏳ Gjenstår |
+| 3   | Callbacks → HendelsePublisher                                  | ~10 filer               | Middels           | ✅ Ferdig  |
+| 4   | Dedupliser SaksStatistikkService-konstruksjon                  | 2 steder → 1            | Lav               | ⏳ Gjenstår |
+| 5   | Injiser JobbAppender i oppgave- og saksinfo-jobber             | 2 filer                 | Lav               | ⏳ Gjenstår |
+| 6   | Fjern inline LagreAvklaringsbehovHendelseJobb i route-handler  | 2 filer                 | Lav               | ✅ Ferdig  |
+| 7   | Fjern SkjermingService.konstruer() companion                   | 1 fil                   | Lav               | ✅ Ferdig  |
 
