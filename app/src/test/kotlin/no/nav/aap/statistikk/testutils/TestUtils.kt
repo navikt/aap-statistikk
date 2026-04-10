@@ -32,6 +32,7 @@ import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.retry.DriftJobbRepositoryExposed
+import no.nav.aap.motor.testutil.ManuellMotorImpl
 import no.nav.aap.motor.testutil.TestJobbRepository
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
@@ -43,6 +44,7 @@ import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
+import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
@@ -211,6 +213,36 @@ fun konstruerMotor(
     )
 }
 
+fun konstruerManuellMotor(
+    dataSource: DataSource,
+    jobbAppender: MotorJobbAppender,
+    bqYtelseRepository: IBQYtelsesstatistikkRepository,
+    resendSakstatistikkJobb: ResendSakstatistikkJobb,
+    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
+    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
+): ManuellMotorImpl {
+    val lagreOppgaveJobb = LagreOppgaveJobb()
+    val lagreAvsluttetBehandlingTilBigQueryJobb =
+        LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
+    return ManuellMotorImpl(
+        dataSource = dataSource,
+        jobber = listOf(
+            lagreAvsluttetBehandlingTilBigQueryJobb,
+            lagreOppgaveJobb,
+            resendSakstatistikkJobb,
+            lagreAvklaringsbehovHendelseJobb,
+            lagrePostmottakHendelseJobb,
+            LagreOppgaveHendelseJobb(),
+            lagreSakinfoTilBigQueryJobb,
+            LagreStoppetHendelseJobb(jobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb),
+            LagreTilbakekrevingHendelseJobb()
+        ),
+        repositoryRegistry = postgresRepositoryRegistry,
+        gatewayProvider = defaultGatewayProvider { },
+    )
+}
+
 @JvmOverloads
 fun opprettTestStoppetBehandling(
     behandlingReferanse: UUID,
@@ -346,6 +378,56 @@ fun <E> testKlientNoInjection(
 
     return res
 }
+
+fun <E> testKlientNoInjectionManuell(
+    dbConfig: DbConfig,
+    azureConfig: AzureConfig = AzureConfig(
+        clientId = "tilgang",
+        jwksUri = "http://localhost:8081/jwks",
+        issuer = "tilgang"
+    ),
+    bigQueryClient: IBigQueryClient = FakeBigQueryClient,
+    test: TestClient.(ManuellMotorImpl) -> E,
+): E {
+    lateinit var motor: ManuellMotorImpl
+
+    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
+    System.setProperty("azure.app.client.id", azureConfig.clientId)
+    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
+    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
+    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
+
+    System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+
+    System.setProperty("enhet.retry.max.retries", "1")
+    System.setProperty("enhet.retry.delay.seconds", "0")
+
+    val restClient = RestClient(
+        config = ClientConfig(scope = "AAP_SCOPES"),
+        tokenProvider = ClientCredentialsTokenProvider,
+        responseHandler = DefaultResponseHandler()
+    )
+
+    val server = embeddedServer(Netty, port = 0) {
+        startUp(
+            dbConfig,
+            azureConfig,
+            bigQueryClient,
+            defaultGatewayProvider()
+        ) { ds, gp, jobber ->
+            ManuellMotorImpl(ds, jobber, postgresRepositoryRegistry, gp).also { motor = it }
+        }
+    }.start()
+
+    val port = runBlocking { server.engine.resolvedConnectors().first().port }
+
+    val res = TestClient(restClient, "http://localhost:$port").test(motor)
+
+    server.stop(1000L, 10_000L)
+
+    return res
+}
+
 
 fun postgresTestConfig(): DbConfig {
     val postgres = PostgreSQLContainer("postgres:16")
@@ -526,7 +608,8 @@ class MockJobbAppender : JobbAppender {
     private var bigQueryJobber = mutableListOf<BehandlingId>()
     var sisteEnhetRetryCount: Int = 0
     var sisteDelayInSeconds: Long = 0
-    var sisteOriginalHendelsestid: LocalDateTime? = null
+    var sisteStoredBQBehandling: BQBehandling? = null
+    var sisteAvklaringsbehovKode: String? = null
 
     override fun leggTil(
         connection: DBConnection,
@@ -547,14 +630,16 @@ class MockJobbAppender : JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long,
         enhetRetryCount: Int,
-        originalHendelsestid: LocalDateTime?,
-        triggerKilde: String
+        triggerKilde: String,
+        storedBQBehandling: BQBehandling?,
+        avklaringsbehovKode: String?,
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
         bigQueryJobber.add(behandlingId)
         sisteEnhetRetryCount = enhetRetryCount
         sisteDelayInSeconds = delayInSeconds
-        sisteOriginalHendelsestid = originalHendelsestid
+        sisteStoredBQBehandling = storedBQBehandling
+        sisteAvklaringsbehovKode = avklaringsbehovKode
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

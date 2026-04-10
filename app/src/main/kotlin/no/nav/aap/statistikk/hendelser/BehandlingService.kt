@@ -19,7 +19,7 @@ class BehandlingService(
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
         repositoryProvider.provide(),
-        SkjermingService.konstruer(gatewayProvider)
+        SkjermingService(gatewayProvider.provide())
     )
 
     private val logger = LoggerFactory.getLogger(javaClass)

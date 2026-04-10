@@ -93,7 +93,10 @@ fun Application.startUp(
     dbConfig: DbConfig,
     azureConfig: AzureConfig,
     bigQueryClientYtelse: IBigQueryClient,
-    gatewayProvider: GatewayProvider
+    gatewayProvider: GatewayProvider,
+    motorFactory: (DataSource, GatewayProvider, List<JobbSpesifikasjon>) -> Motor = { ds, gp, jobber ->
+        motor(ds, gp, jobber)
+    },
 ) {
     log.info("Starter.")
 
@@ -118,21 +121,19 @@ fun Application.startUp(
     val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
     val resendSakstatistikkJobb = ResendSakstatistikkJobb()
 
-    val motor = motor(
-        dataSource,
-        gatewayProvider,
-        listOf(
-            lagreStoppetHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
-            lagreOppgaveHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            lagreSakinfoTilBigQueryJobb,
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            lagreOppgaveJobb,
-            resendSakstatistikkJobb,
-            LagreTilbakekrevingHendelseJobb()
-        )
+    val jobberListe = listOf(
+        lagreStoppetHendelseJobb,
+        lagreAvklaringsbehovHendelseJobb,
+        lagreOppgaveHendelseJobb,
+        lagrePostmottakHendelseJobb,
+        lagreSakinfoTilBigQueryJobb,
+        lagreAvsluttetBehandlingTilBigQueryJobb,
+        lagreOppgaveJobb,
+        resendSakstatistikkJobb,
+        LagreTilbakekrevingHendelseJobb()
     )
+
+    val motor = motorFactory(dataSource, gatewayProvider, jobberListe)
 
     monitor.subscribe(ApplicationStarted) {
         log.info("Ktor-hendelse: ApplicationStarted.")

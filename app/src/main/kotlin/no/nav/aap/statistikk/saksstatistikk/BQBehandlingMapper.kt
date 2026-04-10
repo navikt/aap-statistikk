@@ -242,13 +242,27 @@ class BQBehandlingMapper(
      */
     fun hentEnhetOgSaksbehandler(
         behandling: Behandling,
-        erSkjermet: Boolean
+        erSkjermet: Boolean,
+        avklaringsbehovKode: String? = null,
     ): EnhetOgSaksbehandler {
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
-        val enhet = if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots)
-        val saksbehandler =
-            if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots)
+        val enhet = when {
+            erSkjermet -> SKJERMET_ENHET
+            avklaringsbehovKode != null ->
+                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode }
+                    .maxByOrNull { it.sistEndret() }?.enhet?.kode
+                    ?: ansvarligEnhet(behandling, snapshots)
+            else -> ansvarligEnhet(behandling, snapshots)
+        }
+        val saksbehandler = when {
+            erSkjermet -> SKJERMET_ENHET
+            avklaringsbehovKode != null ->
+                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode }
+                    .maxByOrNull { it.sistEndret() }?.reservertAv()?.ident
+                    ?: utledSaksbehandler(behandling, snapshots)
+            else -> utledSaksbehandler(behandling, snapshots)
+        }
         return EnhetOgSaksbehandler(enhet, saksbehandler)
     }
 

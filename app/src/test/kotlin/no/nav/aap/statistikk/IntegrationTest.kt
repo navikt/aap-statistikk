@@ -16,7 +16,7 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.retry.DriftJobbRepositoryExposed
-import no.nav.aap.motor.testutil.TestUtil
+import no.nav.aap.motor.testutil.ManuellMotorImpl
 import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveTilStatistikkDto
 import no.nav.aap.oppgave.verdityper.Behandlingstype
@@ -127,19 +127,18 @@ class IntegrationTest {
                 .filter { it.data.avsluttetBehandling != null }
         assertThat(avsluttetBehandlingHendelser).hasSize(1)
 
-        val testUtil = setupTestEnvironment(dataSource)
         lateinit var referanse: UUID
-        testKlientNoInjection(
+        testKlientNoInjectionManuell(
             dbConfig,
             azureConfig = azureConfig,
-        ) {
+        ) { motor ->
             referanse = prosesserHendelserOgVerifiserBehandling(
-                dataSource, hendelserFraDBDump, testUtil
+                dataSource, hendelserFraDBDump, motor
             )
         }
 
         // Sekvensnummer økes med 1 med ny info på sak
-        val bqSaker = hentSakstatistikkHendelser(dataSource, referanse)!!
+        val bqSaker = hentSakstatistikkHendelser(dataSource, referanse)
 
         assertThat(bqSaker).extracting(
             "ansvarligEnhetKode",
@@ -213,10 +212,10 @@ class IntegrationTest {
         )
 
         // Sjekk tilkjent ytelse
-        val tilkjentYtelse = ventPåSvar(
-            { dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse)?.perioder } },
-            { t -> t !== null && t.isNotEmpty() })
+        val tilkjentYtelse = dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse)?.perioder }
 
+        assertThat(tilkjentYtelse).isNotNull
+        assertThat(tilkjentYtelse).isNotEmpty
         assertThat(tilkjentYtelse!!).allSatisfy {
             assertThat(it.dagsats).isEqualTo(974.0)
             assertThat(it.antallBarn).isEqualTo(1)
@@ -243,12 +242,12 @@ class IntegrationTest {
 
         println("RESENDING")
         // DEL 2: test resending
-        testKlientNoInjection(
+        testKlientNoInjectionManuell(
             dbConfig,
             azureConfig = azureConfig,
-        ) {
+        ) { motor ->
             oppdatertBehandlingHendelse(avsluttetBehandlingHendelser.last().data)
-            ventPåSvarEllerFeil(dataSource)
+            motor.kjørJobber()
         }
 
         val alleSakstatistikkHendelser = dataSource.transaction {
@@ -365,22 +364,21 @@ class IntegrationTest {
             .sortedBy { it.opprettetTidspunkt }
 
 
-        val testUtil = setupTestEnvironment(dataSource)
-        testKlientNoInjection(
+        testKlientNoInjectionManuell(
             dbConfig,
             azureConfig = azureConfig,
             FakeBigQueryClient,
-        ) {
+        ) { motor ->
 
             prosesserHendelserOgVerifiserBehandling(
-                dataSource, behandlingHendelser, testUtil
+                dataSource, behandlingHendelser, motor
             )
         }
 
         // Sekvensnummer økes med 1 med ny info på sak
         val bqSaker2 = hentSakstatistikkHendelser(dataSource, referanse)
 
-        assertThat(bqSaker2!!.map { it.behandlingStatus }).containsSubsequence(
+        assertThat(bqSaker2.map { it.behandlingStatus }).containsSubsequence(
             "OPPRETTET",
             "UNDER_BEHANDLING",
             "IVERKSETTES",
@@ -394,8 +392,6 @@ class IntegrationTest {
         @Postgres dataSource: DataSource,
         @Fakes azureConfig: AzureConfig,
     ) {
-        val testUtil = setupTestEnvironment(dataSource)
-
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
         val personIdent = "2718281828"
         val saksnummer = "ABCDE"
@@ -439,37 +435,37 @@ class IntegrationTest {
             søknadIder = emptyList()
         )
 
-        fun verifiserHendelseRekkefølge(
-            expectedValues: List<Triple<String?, String?, BehandlingMetode>>
-        ) {
-            ventPåSvarEllerFeil(dataSource)
-            val alleSakstatistikkHendelser = dataSource.transaction {
-                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
-            }
+        testKlientNoInjectionManuell(dbConfig, azureConfig = azureConfig) { motor ->
+            fun verifiserHendelseRekkefølge(
+                expectedValues: List<Triple<String?, String?, BehandlingMetode>>
+            ) {
+                motor.kjørJobber()
+                val alleSakstatistikkHendelser = dataSource.transaction {
+                    SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
+                }
 
-            println("...")
-            alleSakstatistikkHendelser.forEach {
-                println(
-                    String.format(
-                        "%-15s %-15s %-15s",
-                        it.ansvarligEnhetKode,
-                        it.saksbehandler,
-                        it.behandlingMetode.name
+                println("...")
+                alleSakstatistikkHendelser.forEach {
+                    println(
+                        String.format(
+                            "%-15s %-15s %-15s",
+                            it.ansvarligEnhetKode,
+                            it.saksbehandler,
+                            it.behandlingMetode.name
+                        )
                     )
-                )
+                }
+                println("...")
+
+                assertThat(alleSakstatistikkHendelser)
+                    .extracting("ansvarligEnhetKode", "saksbehandler", "behandlingMetode")
+                    .containsExactly(
+                        *expectedValues.map { (enhet, saksbehandler, metode) ->
+                            tuple(enhet, saksbehandler, metode)
+                        }.toTypedArray()
+                    )
             }
-            println("...")
 
-            assertThat(alleSakstatistikkHendelser)
-                .extracting("ansvarligEnhetKode", "saksbehandler", "behandlingMetode")
-                .containsExactly(
-                    *expectedValues.map { (enhet, saksbehandler, metode) ->
-                        tuple(enhet, saksbehandler, metode)
-                    }.toTypedArray()
-                )
-        }
-
-        testKlientNoInjection(dbConfig, azureConfig = azureConfig) {
             postBehandlingsflytHendelse(initialBehandlingHendelse)
 
             val førsteHendelser = listOf(
@@ -875,14 +871,13 @@ class IntegrationTest {
             hendelsesTidspunkt = hendelse.hendelsesTidspunkt.minusMinutes(5)
         )
 
-        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
-        testKlientNoInjection(
+        testKlientNoInjectionManuell(
             dbConfig,
             azureConfig = azureConfig
-        ) {
+        ) { motor ->
             postBehandlingsflytHendelse(hendelsx)
 
-            ventPåSvarEllerFeil(dataSource)
+            motor.kjørJobber()
 
             val gjeldendeAVklaringsbehov =
                 dataSource.transaction { BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!.gjeldendeAvklaringsBehov }!!
@@ -909,18 +904,14 @@ class IntegrationTest {
                     )
                 )
             )
-            ventPåSvarEllerFeil(dataSource)
+            motor.kjørJobber()
 
             postBehandlingsflytHendelse(hendelse)
 
-            ventPåSvarEllerFeil(dataSource)
-            val behandling = ventPåSvar(
-                {
-                    dataSource.transaction {
-                        BehandlingRepository(it).hent(behandlingReferanse)
-                    }
-                },
-                { it != null })
+            motor.kjørJobber()
+            val behandling = dataSource.transaction {
+                BehandlingRepository(it).hent(behandlingReferanse)
+            }
             assertThat(behandling).isNotNull
             val enhet = dataSource.transaction {
                 OppgaveHendelseRepositoryImpl(it).hentEnhetOgReservasjonForAvklaringsbehov(
@@ -930,13 +921,12 @@ class IntegrationTest {
             }
             assertThat(enhet.enhet).isEqualTo("0400")
 
-            ventPåSvarEllerFeil(dataSource)
             val bqSaker = hentSakstatistikkHendelserMedEksaktAntall(
                 dataSource, behandling!!.referanse
             )
-            assertThat(bqSaker).isNotNull
+            assertThat(bqSaker).isNotEmpty
 //            assertThat(bqSaker).hasSize(5)  // Nå får vi også en retroaktiv oppdatering
-            assertThat(bqSaker!!.first().sekvensNummer).isEqualTo(1)
+            assertThat(bqSaker.first().sekvensNummer).isEqualTo(1)
 
             postBehandlingsflytHendelse(
                 hendelse.copy(
@@ -945,7 +935,7 @@ class IntegrationTest {
                 )
             )
 
-            ventPåSvarEllerFeil(dataSource)
+            motor.kjørJobber()
 
             // Sekvensnummer økes med 1 med ny info på sak
             val bqSaker2 = dataSource.transaction {
@@ -954,47 +944,29 @@ class IntegrationTest {
 //            assertThat(bqSaker2).hasSize(5)
             assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
 
-            val vilkårRespons = ventPåSvar(
-                {
-                    dataSource.transaction {
-                        VilkårsresultatRepository(it).hentForBehandling(
-                            behandlingReferanse
-                        )
-                    }.vilkår
-                },
-                { t -> t !== null && t.isNotEmpty() })
+            val vilkårRespons = dataSource.transaction {
+                VilkårsresultatRepository(it).hentForBehandling(behandlingReferanse)
+            }.vilkår
 
             assertThat(vilkårRespons).hasSize(9)
             val vilkårsVurderingRad = vilkårRespons!!.first()
 
             assertThat(vilkårsVurderingRad.vilkårType).isEqualTo(Vilkårtype.ALDERSVILKÅRET.name)
 
-            val tilkjent = ventPåSvar(
-                {
-                    dataSource.transaction {
-                        TilkjentYtelseRepository(it).hentForBehandling(
-                            behandlingReferanse
-                        )!!.perioder
-                    }
-                },
-                { t -> t !== null && t.isNotEmpty() })
+            val tilkjent = dataSource.transaction {
+                TilkjentYtelseRepository(it).hentForBehandling(behandlingReferanse)!!.perioder
+            }
 
-            assertThat(tilkjent!!).hasSize(1)
+            assertThat(tilkjent).hasSize(1)
             val tilkjentYtelse = tilkjent.first()
             assertThat(tilkjentYtelse.dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[0].dagsats)
 
-            val sakRespons = ventPåSvar(
-                {
-                    dataSource.transaction {
-                        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                            behandlingReferanse
-                        )
-                    }
-                },
-                { t -> t !== null && t.isNotEmpty() })
+            val sakRespons = dataSource.transaction {
+                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
+            }
 
 //            assertThat(sakRespons).hasSize(4)
-            sakRespons!!.forEach { println(it) }
+            sakRespons.forEach { println(it) }
 //            assertThat(sakRespons.first().saksbehandler).isEqualTo("VEILEDER")
             assertThat(sakRespons).anyMatch { it.vedtakTidTrunkert != null }
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
@@ -1003,17 +975,13 @@ class IntegrationTest {
         }
     }
 
-    private fun setupTestEnvironment(
-        dataSource: DataSource
-    ): TestUtil {
-        val testUtil = TestUtil(dataSource, listOf("oppgave.retryFeilede"))
-        return testUtil
+    private fun setupTestEnvironment(dataSource: DataSource) {
     }
 
     private fun TestClient.prosesserHendelserOgVerifiserBehandling(
         dataSource: DataSource,
         hendelser: List<HendelseData>,
-        testUtil: TestUtil,
+        motor: ManuellMotorImpl,
         expectedStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET
     ): UUID {
         var referanse: UUID? = null
@@ -1023,12 +991,12 @@ class IntegrationTest {
                 is BehandlingHendelseData -> {
                     postBehandlingsflytHendelse(it.data)
                     referanse = it.data.behandlingReferanse
-                    ventPåSvarEllerFeil(dataSource)
+                    motor.kjørJobber()
                 }
 
                 is OppgaveHendelseData -> {
                     postOppgaveHendelse(dataSource, it.data)
-                    ventPåSvarEllerFeil(dataSource)
+                    motor.kjørJobber()
                 }
 
                 is OppgaveHendelseAPIData -> postOppgaveData(it.data)
@@ -1038,12 +1006,9 @@ class IntegrationTest {
 
         val feilende = dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
         log.info("Feilende jobber: $feilende")
-        ventPåSvarEllerFeil(dataSource)
+        motor.kjørJobber()
 
-        val behandling = ventPåSvar(
-            { dataSource.transaction { BehandlingRepository(it).hent(referanse!!) } },
-            { it != null }
-        )
+        val behandling = dataSource.transaction { BehandlingRepository(it).hent(referanse!!) }
 
         assertThat(behandling!!.behandlingStatus()).isEqualTo(expectedStatus)
         return referanse!!
@@ -1052,26 +1017,16 @@ class IntegrationTest {
     private fun hentSakstatistikkHendelser(
         dataSource: DataSource,
         referanse: UUID
-    ) = ventPåSvar(
-        {
-            dataSource.transaction {
-                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
-            }
-        },
-        { t -> t !== null && t.isNotEmpty() }
-    )
+    ) = dataSource.transaction {
+        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
+    }
 
     private fun hentSakstatistikkHendelserMedEksaktAntall(
         dataSource: DataSource,
         referanse: UUID
-    ) = ventPåSvar(
-        {
-            dataSource.transaction {
-                SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
-            }
-        },
-        { t -> t !== null && t.isNotEmpty() }
-    )
+    ) = dataSource.transaction {
+        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
+    }
 
 
 }
