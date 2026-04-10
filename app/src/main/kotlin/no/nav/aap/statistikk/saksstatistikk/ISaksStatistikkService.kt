@@ -7,4 +7,10 @@ interface ISaksStatistikkService {
         behandlingId: BehandlingId,
         lagreUtenEnhet: Boolean = false
     ): SakStatistikkResultat
+
+    fun lagreMedStoredBQBehandling(
+        behandlingId: BehandlingId,
+        storedBQBehandling: BQBehandling,
+        avklaringsbehovKode: String?,
+    ): SakStatistikkResultat
 }

@@ -9,7 +9,9 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.postgresRepositoryRegistry
+import no.nav.aap.statistikk.saksstatistikk.BQBehandling
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
+import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoPayload
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import org.slf4j.LoggerFactory
@@ -37,7 +39,9 @@ class MotorJobbAppender : JobbAppender {
         behandlingId: BehandlingId,
         delayInSeconds: Long,
         enhetRetryCount: Int,
-        triggerKilde: String
+        triggerKilde: String,
+        storedBQBehandling: BQBehandling?,
+        avklaringsbehovKode: String?,
     ) {
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
@@ -48,16 +52,17 @@ class MotorJobbAppender : JobbAppender {
         }
 
         val saksnummer = behandling.sak.saksnummer
+        val payload = LagreSakinfoPayload(
+            behandlingId = behandlingId,
+            storedBQBehandling = storedBQBehandling,
+            avklaringsbehovKode = avklaringsbehovKode,
+            retryCount = enhetRetryCount,
+            triggerKilde = triggerKilde,
+        )
         val jobbInput = JobbInput(LagreSakinfoTilBigQueryJobb())
-            .medPayload(behandlingId)
+            .medPayload(payload)
             .medNesteKjøring(LocalDateTime.now().plusSeconds(delayInSeconds))
             .forSak(stringToNumber(saksnummer.value))
-
-        if (enhetRetryCount > 0) {
-            jobbInput.medParameter("enhetRetryCount", enhetRetryCount.toString())
-        }
-
-        jobbInput.medParameter("triggerKilde", triggerKilde)
 
         leggTil(repositoryProvider, jobbInput)
     }
