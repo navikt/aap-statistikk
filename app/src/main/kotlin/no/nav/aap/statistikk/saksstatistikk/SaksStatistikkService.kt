@@ -120,7 +120,7 @@ class SaksStatistikkService(
             val bqSakMedUnikEndretTid = if (siste != null && siste.endretTid >= bqSak.endretTid) {
                 val justert = bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
                 if (siste.endretTid == bqSak.endretTid) {
-                    log.warn(
+                    log.info(
                         "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
                                 "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
                                 "EndretTid: ${bqSak.endretTid}. " +
