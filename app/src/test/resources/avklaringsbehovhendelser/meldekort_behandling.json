@@ -486,7 +486,8 @@
     ],
     "resultat": null,
     "vedtakstidspunkt": "2025-12-08T09:53:14.437",
-    "perioderMedArbeidsopptrapping": []
+    "perioderMedArbeidsopptrapping": [],
+        "vedtattStansOpphør": []
   },
   "identerForSak": [
     "123345",

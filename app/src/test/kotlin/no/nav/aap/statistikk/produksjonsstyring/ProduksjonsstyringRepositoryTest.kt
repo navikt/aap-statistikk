@@ -117,6 +117,7 @@ class ProduksjonsstyringRepositoryTest {
                     fritaksvurderingRepository = provider.provide(),
                     behandlingService = BehandlingService(provider, gatewayProvider),
                     hendelsePublisher = fakeHendelsePublisher,
+                    vedtattStansOpphørRepository = provider.provide(),
                 ),
                 personService = PersonService(PersonRepository(conn)),
                 meldekortRepository = MeldekortRepository(conn),
