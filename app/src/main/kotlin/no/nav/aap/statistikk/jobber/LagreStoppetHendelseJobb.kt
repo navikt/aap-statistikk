@@ -44,6 +44,7 @@ class LagreStoppetHendelseJobb(
             fritaksvurderingRepository = repositoryProvider.provide(),
             behandlingService = behandlingService,
             hendelsePublisher = hendelsePublisher,
+            vedtattStansOpphørRepository = repositoryProvider.provide(),
         )
         val hendelsesService = HendelsesService(
             sakService = SakService(repositoryProvider),
