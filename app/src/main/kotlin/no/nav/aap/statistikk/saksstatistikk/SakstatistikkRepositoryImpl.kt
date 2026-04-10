@@ -6,6 +6,7 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.*
 
 class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
@@ -106,6 +107,23 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         return dbConnection.queryFirstOrNull(sql) {
             setParams {
                 setUUID(1, uuid)
+            }
+            setRowMapper {
+                rowMapper(it)
+            }
+        }
+    }
+
+    override fun hentHendelseMedEndretTid(uuid: UUID, endretTid: LocalDateTime, erResending: Boolean): BQBehandling? {
+        val sql = """
+            select * from saksstatistikk where behandling_uuid = ? and endret_tid = ? and er_relast = ? order by teknisk_tid desc limit 1
+        """.trimIndent()
+
+        return dbConnection.queryFirstOrNull(sql) {
+            setParams {
+                setUUID(1, uuid)
+                setLocalDateTime(2, endretTid)
+                setBoolean(3, erResending)
             }
             setRowMapper {
                 rowMapper(it)
