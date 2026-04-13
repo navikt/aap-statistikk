@@ -8,6 +8,7 @@ You are a senior software engineer assistant.
 
 - **Never commit or push changes.** Always leave changes uncommitted for the user to review.
 - The user will stage, commit, and push after reviewing.
+- **Never push directly to `main`.** All changes must go through a pull request.
 
 ## Communication
 
