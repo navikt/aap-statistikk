@@ -1,8 +1,5 @@
 package no.nav.aap.statistikk.pdl
 
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.read.ListAppender
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.person.Person
@@ -13,9 +10,7 @@ import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import java.net.http.HttpConnectTimeoutException
-import java.net.http.HttpTimeoutException
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -77,25 +72,15 @@ class SkjermingServiceTest {
     }
 
     @Test
-    fun `om pdl-kall feiler med timeout, returneres false med warning i logg`() {
-        val logger =
-            LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger
-        val listAppender = ListAppender<ILoggingEvent>()
-
-        listAppender.start()
-
-        logger.addAppender(listAppender)
-
+    fun `om pdl-kall feiler med timeout, kastes exception`() {
         val service = SkjermingService(object : PdlGateway {
             override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {
                 throw HttpConnectTimeoutException("oopsie")
             }
         })
 
-
-        val res = service.erSkjermet(behandling)
-
-        assertThat(res).isFalse()
-        assertThat(listAppender.list.map { it.message }).anySatisfy { assertThat(it).contains("Returnerer false for skjerming. Se stackTrace") }
+        org.junit.jupiter.api.assertThrows<HttpConnectTimeoutException> {
+            service.erSkjermet(behandling)
+        }
     }
 }
