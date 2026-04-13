@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.net.http.HttpConnectTimeoutException
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -79,7 +80,7 @@ class SkjermingServiceTest {
             }
         })
 
-        org.junit.jupiter.api.assertThrows<HttpConnectTimeoutException> {
+        assertThrows<HttpConnectTimeoutException> {
             service.erSkjermet(behandling)
         }
     }
