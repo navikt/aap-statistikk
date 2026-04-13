@@ -198,7 +198,7 @@ fun konstruerMotor(
         LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
     return motor(
         dataSource = dataSource,
-        gatewayProvider = defaultGatewayProvider { },
+        gatewayProvider = defaultGatewayProvider { register<FakePdlGateway>() },
         jobber = listOf(
             lagreAvsluttetBehandlingTilBigQueryJobb,
             lagreOppgaveJobb,
@@ -239,7 +239,7 @@ fun konstruerManuellMotor(
             LagreTilbakekrevingHendelseJobb()
         ),
         repositoryRegistry = postgresRepositoryRegistry,
-        gatewayProvider = defaultGatewayProvider { },
+        gatewayProvider = defaultGatewayProvider { register<FakePdlGateway>() },
     )
 }
 

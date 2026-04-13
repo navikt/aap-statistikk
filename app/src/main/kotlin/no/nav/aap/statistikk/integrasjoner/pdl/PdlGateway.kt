@@ -15,6 +15,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.Client
 import no.nav.aap.statistikk.PrometheusProvider
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.security.MessageDigest
 import java.time.Duration
 
 private val logger = LoggerFactory.getLogger(PdlGateway::class.java)
@@ -61,7 +62,8 @@ class PdlGraphQLGateway :
     override fun hentPersoner(identer: List<String>): List<Person> {
         logger.debug("Henter ${identer.size} personer fra PDL.")
 
-        return pdlCache.get(identer.joinToString(",")) {
+        val cacheNøkkel = sha256(identer.sorted().joinToString(","))
+        return pdlCache.get(cacheNøkkel) {
             val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
                 URI.create(requiredConfigForKey("integrasjon.pdl.url")),
                 PostRequest(body = PdlRequest.hentPersonBolk(identer))
@@ -70,7 +72,7 @@ class PdlGraphQLGateway :
             val graphQLdata =
                 requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
 
-            graphQLdata.hentPersonBolk.map { personBolk -> requireNotNull(personBolk.person) { "Fant ikke info om person ${personBolk.ident}" } }
+            graphQLdata.hentPersonBolk.map { personBolk -> requireNotNull(personBolk.person) { "Fant ikke info om person (ident maskert)" } }
         }
     }
 }
@@ -113,3 +115,8 @@ data class Adressebeskyttelse(
 enum class Gradering {
     FORTROLIG, STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, UGRADERT
 }
+
+private fun sha256(input: String): String =
+    MessageDigest.getInstance("SHA-256")
+        .digest(input.toByteArray())
+        .joinToString("") { "%02x".format(it) }
