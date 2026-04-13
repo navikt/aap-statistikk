@@ -32,6 +32,19 @@ spec:
        GROUP BY
          r.id,
          r.behandling_id)
+     , vedtatt_stans_opphor_agg AS (
+       SELECT
+         vso.behandling_id,
+         ARRAY_AGG(STRUCT(vso.type AS type, vso.fom AS fom, IFNULL(a.aarsaker, []) AS aarsaker)) AS perioder
+       FROM
+         `datastream_hendelser.public_vedtatt_stans_opphor` vso
+       LEFT JOIN (
+         SELECT vedtatt_stans_opphor_id, ARRAY_AGG(aarsak) AS aarsaker
+         FROM `datastream_hendelser.public_vedtatt_stans_opphor_aarsak`
+         GROUP BY vedtatt_stans_opphor_id
+       ) a ON a.vedtatt_stans_opphor_id = vso.id
+       GROUP BY
+         vso.behandling_id)
      SELECT
        s.saksnummer AS saksnummer,
        br.referanse AS behandlingsreferanse,
@@ -60,6 +73,7 @@ spec:
            SELECT STRUCT(fra_dato, til_dato, har_fritak)
            FROM `datastream_hendelser.public_fritaksvurdering` f where f.behandling_id = b.id 
          ) AS perioder_med_fritak_meldeplikt,
+       IFNULL(vso_agg.perioder, []) AS vedtatt_stans_opphor,
        DATETIME(
            timestamp_millis(
              greatest(
@@ -96,6 +110,10 @@ spec:
        rettighetstyper
      ON
        rettighetstyper.behandling_id = b.id
+     LEFT JOIN
+       vedtatt_stans_opphor_agg vso_agg
+     ON
+       vso_agg.behandling_id = b.id
      WHERE
        bh.gjeldende = TRUE
        AND (bh.slettet IS FALSE
