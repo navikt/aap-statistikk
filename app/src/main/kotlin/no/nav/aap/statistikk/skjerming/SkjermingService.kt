@@ -18,17 +18,11 @@ class SkjermingService(
                 .flatMap { it.adressebeskyttelse }
                 .any { it.gradering.erHemmelig() }
         } catch (e: HttpConnectTimeoutException) {
-            logger.error(
-                "Feilet kall til PDL (HttpConnectTimeoutException). Returnerer false for skjerming. Se stackTrace.",
-                e
-            )
-            false
+            logger.error("Feilet kall til PDL (HttpConnectTimeoutException). Kaster exception.", e)
+            throw e
         } catch (e: java.net.ConnectException) {
-            logger.error(
-                "Feilet kall til PDL (ConnectException). Returnerer false for skjerming. Se stackTrace.",
-                e
-            )
-            false
+            logger.error("Feilet kall til PDL (ConnectException). Kaster exception.", e)
+            throw e
         }
     }
 }
