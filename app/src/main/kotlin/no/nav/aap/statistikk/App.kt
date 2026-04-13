@@ -276,7 +276,7 @@ private fun Application.statusPages() {
                 "Noe gikk galt. Exception-type: ${cause.javaClass} Query string: ${call.request.queryString()}",
                 cause
             )
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+            call.respondText(text = "500: Internal Server Error", status = HttpStatusCode.InternalServerError)
         }
     }
 }
