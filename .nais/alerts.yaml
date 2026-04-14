@@ -1,0 +1,77 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: statistikk-alerts
+  namespace: aap
+  labels:
+    team: aap
+spec:
+  groups:
+    - name: statistikk-infrastruktur
+      rules:
+        - alert: AppNede
+          expr: kube_deployment_status_replicas_available{namespace="aap", deployment="statistikk"} == 0
+          for: 5m
+          annotations:
+            summary: "statistikk har ingen tilgjengelige pods"
+            consequence: "Tjenesten er nede og ingen hendelser blir prosessert."
+            action: "`kubectl describe pod <podname> -n aap` -> `kubectl logs <podname> -n aap`"
+          labels:
+            namespace: aap
+            severity: critical
+
+        - alert: HøyMinnebruk
+          expr: |
+            sum(jvm_memory_used_bytes{app="statistikk", area="heap"})
+            /
+            sum(jvm_memory_max_bytes{app="statistikk", area="heap"})
+            * 100 > 85
+          for: 10m
+          annotations:
+            summary: "Høy JVM heap-bruk i statistikk"
+            consequence: "Applikasjonen kan krasje med OutOfMemoryError."
+            action: "Vurder å øke minnegrensen i nais.yaml eller undersøk minnelekkasje."
+          labels:
+            namespace: aap
+            severity: warning
+
+    - name: statistikk-http
+      rules:
+        - alert: HøyHTTPFeilrate
+          expr: |
+            sum(rate(http_server_request_duration_seconds_count{app="statistikk", http_response_status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_server_request_duration_seconds_count{app="statistikk"}[5m]))
+            * 100 > 5
+          for: 5m
+          annotations:
+            summary: "Høy HTTP 5xx-feilrate i statistikk"
+            consequence: "Brukere og kallende systemer opplever feil."
+            action: "Sjekk logger med `kubectl logs -n aap -l app=statistikk --tail=100`"
+          labels:
+            namespace: aap
+            severity: warning
+
+    - name: statistikk-forretning
+      rules:
+        - alert: IngenNyeHendelser
+          expr: rate(statistikk_lagret_stoppet_hendelse_total{app="statistikk"}[30m]) == 0
+          for: 30m
+          annotations:
+            summary: "Ingen nye hendelser er lagret de siste 30 minuttene"
+            consequence: "Statistikkdata kan være utdatert. Oppstrøms systemer har muligens sluttet å sende hendelser."
+            action: "Sjekk at behandlingsflyt og andre oppstrøms systemer kjører og sender hendelser."
+          labels:
+            namespace: aap
+            severity: warning
+
+        - alert: ÅrsakTilOpprettelseIkkeSatt
+          expr: rate(statistikk_aarsak_til_opprettelse_ikke_satt_total{app="statistikk"}[10m]) > 0
+          for: 5m
+          annotations:
+            summary: "Behandlinger opprettes uten årsak til opprettelse"
+            consequence: "Datakvaliteten i statistikkgrunnlaget er redusert."
+            action: "Undersøk hvilke behandlinger som mangler årsak og sjekk oppstrøms kontrakt."
+          labels:
+            namespace: aap
+            severity: warning
