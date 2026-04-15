@@ -1,10 +1,10 @@
 [versions]
 ktor = "3.4.2"
-komponenter = "2.0.30"
+komponenter = "2.0.31"
 tilgang = "1.0.184"
-behandlingsflyt = "0.0.585"
+behandlingsflyt = "0.0.586"
 oppgave = "0.0.168"
-utbetaling = "0.0.94"
+utbetaling = "0.0.95"
 postmottak = "6.0.4"
 
 flyway = "12.3.0"
