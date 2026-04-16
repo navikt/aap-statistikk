@@ -13,8 +13,8 @@ import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.ResendHendelseService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorHendelsePublisher
-import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.person.IPersonRepository
+import no.nav.aap.statistikk.sak.SakRepository
 import org.slf4j.LoggerFactory
 
 class LagreAvklaringsbehovHendelseJobb(
@@ -31,8 +31,8 @@ class LagreAvklaringsbehovHendelseJobb(
         )
         return LagreAvklaringsbehovHendelseJobbUtfører(
             ResendHendelseService(
-                sakService = SakService(repositoryProvider),
-                personService = PersonService(repositoryProvider),
+                sakRepository = repositoryProvider.provide<SakRepository>(),
+                personRepository = repositoryProvider.provide<IPersonRepository>(),
                 behandlingRepository = repositoryProvider.provide(),
                 behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
                 hendelsePublisher = hendelsePublisher,

@@ -11,7 +11,6 @@ import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.EndringDTO
 import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -100,9 +99,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
         payload: DokumentflytStoppetHendelse
     ): (DBConnection) -> Unit = {
         LagrePostmottakHendelseJobbUtfører(
-            PostmottakBehandlingService(PostmottakBehandlingRepositoryImpl(it)), PersonService(
-                PersonRepository(it)
-            )
+            PostmottakBehandlingRepositoryImpl(it), PersonRepository(it)
         ).utfør(
             JobbInput(LagrePostmottakHendelseJobb()).medPayload(
                 payload

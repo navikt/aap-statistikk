@@ -18,9 +18,8 @@ import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Person
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -147,7 +146,7 @@ class HendelsesServiceTest {
         val beregningsgrunnlagRepository = FakeBeregningsgrunnlagRepository()
         val behandlingService = BehandlingService(behandlingRepository, skjermingService)
         return HendelsesService(
-            sakService = SakService(sakRepository),
+            sakRepository = sakRepository,
             avsluttetBehandlingService = AvsluttetBehandlingService(
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 beregningsgrunnlagRepository = beregningsgrunnlagRepository,
@@ -160,7 +159,7 @@ class HendelsesServiceTest {
                 behandlingService = behandlingService,
                 vedtattStansOpphørRepository = FakeVedtattStansOpphørRepository(),
             ),
-            personService = PersonService(FakePersonRepository()),
+            personRepository = FakePersonRepository(),
             hendelsePublisher = hendelsePublisher,
             behandlingService = behandlingService,
             meldekortRepository = meldekortRepository

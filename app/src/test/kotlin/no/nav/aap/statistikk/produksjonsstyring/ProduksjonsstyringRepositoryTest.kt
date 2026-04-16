@@ -9,10 +9,9 @@ import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.meldekort.MeldekortRepository
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
 import no.nav.aap.statistikk.testutils.Postgres
@@ -106,7 +105,7 @@ class ProduksjonsstyringRepositoryTest {
             val fakeHendelsePublisher = FakeHendelsePublisher()
             val provider = postgresRepositoryRegistry.provider(conn)
             val hendelsesService = HendelsesService(
-                sakService = SakService(SakRepositoryImpl(conn)),
+                sakRepository = SakRepositoryImpl(conn),
                 avsluttetBehandlingService = AvsluttetBehandlingService(
                     tilkjentYtelseRepository = provider.provide(),
                     beregningsgrunnlagRepository = provider.provide(),
@@ -119,7 +118,7 @@ class ProduksjonsstyringRepositoryTest {
                     hendelsePublisher = fakeHendelsePublisher,
                     vedtattStansOpphørRepository = provider.provide(),
                 ),
-                personService = PersonService(PersonRepository(conn)),
+                personRepository = PersonRepository(conn),
                 meldekortRepository = MeldekortRepository(conn),
                 hendelsePublisher = fakeHendelsePublisher,
                 behandlingService = BehandlingService(

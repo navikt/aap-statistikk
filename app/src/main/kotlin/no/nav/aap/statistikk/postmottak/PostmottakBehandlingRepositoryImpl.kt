@@ -12,6 +12,23 @@ interface PostmottakBehandlingRepository : Repository {
     fun opprettBehandling(behandling: PostmottakBehandling): Long
     fun hentEksisterendeBehandling(referanse: UUID): PostmottakBehandling?
     fun oppdaterBehandling(referanse: UUID, behandling: PostmottakOppdatering)
+
+    fun oppdaterEllerOpprett(innkommendeBehandling: PostmottakBehandling): PostmottakBehandling {
+        val eksisterendeBehandling = hentEksisterendeBehandling(innkommendeBehandling.referanse)
+
+        return if (eksisterendeBehandling == null) {
+            val id = opprettBehandling(behandling = innkommendeBehandling)
+            innkommendeBehandling.medId(id = id)
+        } else {
+            oppdaterBehandling(
+                innkommendeBehandling.referanse,
+                behandling = innkommendeBehandling.endringer().first()
+            )
+            requireNotNull(hentEksisterendeBehandling(innkommendeBehandling.referanse)) {
+                "Behandling med referanse ${innkommendeBehandling.referanse} forsvant etter oppdatering."
+            }
+        }
+    }
 }
 
 class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection) :

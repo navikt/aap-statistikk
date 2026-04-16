@@ -4,14 +4,14 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.HendelsePublisher
 import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
-import no.nav.aap.statistikk.person.PersonService
-import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.person.IPersonRepository
+import no.nav.aap.statistikk.sak.SakRepository
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.slf4j.LoggerFactory
 
 class ResendHendelseService(
-    private val sakService: SakService,
-    private val personService: PersonService,
+    private val sakRepository: SakRepository,
+    private val personRepository: IPersonRepository,
     private val behandlingRepository: IBehandlingRepository,
     private val behandlingService: BehandlingService,
     private val hendelsePublisher: HendelsePublisher,
@@ -19,11 +19,11 @@ class ResendHendelseService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {
-        val person = personService.hentEllerLagrePerson(hendelse.ident)
+        val person = personRepository.hentEllerLagre(hendelse.ident)
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
 
         val sak =
-            sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
+            sakRepository.hentEllerSettInn(person, saksnummer, hendelse.sakStatus.tilDomene())
         val behandling = behandlingService.konstruerBehandling(hendelse, sak)
 
         val behandlingMedHistorikk =
