@@ -91,6 +91,12 @@ class AvsluttetBehandlingServiceTest {
                         barnetillegg = 0.0,
                         minsteSats = Minstesats.IKKE_MINSTESATS,
                         barnepensjonDagsats = 0.0,
+                        samordningGradering = null,
+                        institusjonGradering = null,
+                        arbeidGradering = null,
+                        samordningUføregradering = null,
+                        samordningArbeidsgiverGradering = null,
+                        meldepliktGradering = null,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = datoNå.minusYears(3),
@@ -104,6 +110,12 @@ class AvsluttetBehandlingServiceTest {
                         barnetillegg = 0.0,
                         minsteSats = Minstesats.MINSTESATS_OVER_25,
                         barnepensjonDagsats = 0.0,
+                        samordningGradering = null,
+                        institusjonGradering = null,
+                        arbeidGradering = null,
+                        samordningUføregradering = null,
+                        samordningArbeidsgiverGradering = null,
+                        meldepliktGradering = null,
                     )
                 )
             ),
@@ -295,6 +307,12 @@ class AvsluttetBehandlingServiceTest {
                         barnetillegg = 0.0,
                         minsteSats = Minstesats.MINSTESATS_OVER_25,
                         barnepensjonDagsats = 0.0,
+                        samordningGradering = null,
+                        institusjonGradering = null,
+                        arbeidGradering = null,
+                        samordningUføregradering = null,
+                        samordningArbeidsgiverGradering = null,
+                        meldepliktGradering = null,
                     )
                 )
             ),
