@@ -139,7 +139,13 @@ fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
             Minstesats.IKKE_MINSTESATS -> no.nav.aap.statistikk.tilkjentytelse.Minstesats.IKKE_MINSTESATS
             Minstesats.MINSTESATS_OVER_25 -> no.nav.aap.statistikk.tilkjentytelse.Minstesats.MINSTESATS_OVER_25
             Minstesats.MINSTESATS_UNDER_25 -> no.nav.aap.statistikk.tilkjentytelse.Minstesats.MINSTESATS_UNDER_25
-        }
+        },
+        samordningGradering = samordningGradering,
+        institusjonGradering = institusjonGradering,
+        arbeidGradering = arbeidGradering,
+        samordningUføregradering = samordningUføregradering,
+        samordningArbeidsgiverGradering = samordningArbeidsgiverGradering,
+        meldepliktGradering = meldepliktGradering,
     )
 }
 

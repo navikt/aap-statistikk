@@ -15,7 +15,13 @@ data class TilkjentYtelsePeriode(
     val barnetillegg: Double,
     val utbetalingsdato: LocalDate,
     val minsteSats: Minstesats,
-    val barnepensjonDagsats: Double,
+    val barnepensjonDagsats: Double?,
+    val samordningGradering: Double?,
+    val institusjonGradering: Double?,
+    val arbeidGradering: Double?,
+    val samordningUføregradering: Double?,
+    val samordningArbeidsgiverGradering: Double?,
+    val meldepliktGradering: Double?,
 )
 
 data class TilkjentYtelse(
