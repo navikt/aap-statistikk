@@ -41,7 +41,13 @@ data class TilkjentYtelsePeriodeEntity(
     val barnetillegg: Double = 0.0,
     val utbetalingsdato: LocalDate,
     val minstesats: Minstesats,
-    val barnepensjonDagsats: Double = 0.0
+    val barnepensjonDagsats: Double? = null,
+    val samordningGradering: Double? = null,
+    val institusjonGradering: Double? = null,
+    val arbeidGradering: Double? = null,
+    val samordningUføregradering: Double? = null,
+    val samordningArbeidsgiverGradering: Double? = null,
+    val meldepliktGradering: Double? = null,
 ) {
     companion object {
         fun fraDomene(tilkjentYtelsePeriode: TilkjentYtelsePeriode): TilkjentYtelsePeriodeEntity {
@@ -56,7 +62,13 @@ data class TilkjentYtelsePeriodeEntity(
                 barnetillegg = tilkjentYtelsePeriode.barnetillegg,
                 utbetalingsdato = tilkjentYtelsePeriode.utbetalingsdato,
                 minstesats = tilkjentYtelsePeriode.minsteSats,
-                barnepensjonDagsats = tilkjentYtelsePeriode.barnepensjonDagsats
+                barnepensjonDagsats = tilkjentYtelsePeriode.barnepensjonDagsats,
+                samordningGradering = tilkjentYtelsePeriode.samordningGradering,
+                institusjonGradering = tilkjentYtelsePeriode.institusjonGradering,
+                arbeidGradering = tilkjentYtelsePeriode.arbeidGradering,
+                samordningUføregradering = tilkjentYtelsePeriode.samordningUføregradering,
+                samordningArbeidsgiverGradering = tilkjentYtelsePeriode.samordningArbeidsgiverGradering,
+                meldepliktGradering = tilkjentYtelsePeriode.meldepliktGradering,
             )
         }
     }
