@@ -21,7 +21,6 @@ Known terms: "bug" (not "bugg").
 - **Never store temporary files in /tmp** — this includes PR body files, debug output, scripts, etc.
 - Always create temporary files in the current project directory (the repo root)
 - Use filenames like `temp_output.txt`, `debug_log.txt`, `pr-body.txt` etc. in the project root
-- Delete temporary files when done
 
 ### Small, Incremental Changes
 
@@ -63,10 +62,11 @@ For testing, prefer in-memory fakes over mocks. Fakes provide:
 
 - **Never use --no-daemon** when running Gradle tests or builds - it's slower
 - The Gradle daemon improves build performance through caching and hot JVM
-- **Always run `./gradlew test` before committing** to ensure all tests pass
+- **Always run `./gradlew test` after making code changes** to ensure all tests pass. While working, run tests on relevant files to save time.
 - **Run `./gradlew detektMain` after significant code changes** to check code quality
 - Fix any Detekt violations before committing
 - Compiling alone is not sufficient — always run the full test suite
+- **Do not mark a task complete without having run and verified tests pass**
 
 ### Domain Classes vs. Kontrakt
 

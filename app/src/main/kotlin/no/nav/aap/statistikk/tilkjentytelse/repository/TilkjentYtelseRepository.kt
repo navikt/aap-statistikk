@@ -46,8 +46,9 @@ class TilkjentYtelseRepository(
 
         val sql =
             """INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID,
-                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato, minstesats, barnepensjon_dagsats)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                                     REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato, minstesats, barnepensjon_dagsats,
+                                     samordning_gradering, institusjon_gradering, arbeid_gradering, samordning_uforegradering, samordning_arbeidsgiver_gradering, meldeplikt_gradering)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         tilkjentYtelse.perioder.forEach { periode ->
             dbConnection.execute(sql) {
                 setParams {
@@ -63,6 +64,12 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     setLocalDate(10, periode.utbetalingsdato)
                     setEnumName(11, periode.minstesats)
                     setDouble(12, periode.barnepensjonDagsats)
+                    setDouble(13, periode.samordningGradering)
+                    setDouble(14, periode.institusjonGradering)
+                    setDouble(15, periode.arbeidGradering)
+                    setDouble(16, periode.samordningUføregradering)
+                    setDouble(17, periode.samordningArbeidsgiverGradering)
+                    setDouble(18, periode.meldepliktGradering)
                 }
             }
         }
@@ -153,7 +160,13 @@ WHERE br.referanse = ?"""
         val utbetalingsdato = row.getLocalDateOrNull("utbetalingsdato") ?: tilDato.plusDays(1)
 
         val minstesats = row.getEnum<Minstesats>("minstesats")
-        val barnepensjonDagsats = row.getDouble("barnepensjon_dagsats")
+        val barnepensjonDagsats = row.getDoubleOrNull("barnepensjon_dagsats")
+        val samordningGradering = row.getDoubleOrNull("samordning_gradering")
+        val institusjonGradering = row.getDoubleOrNull("institusjon_gradering")
+        val arbeidGradering = row.getDoubleOrNull("arbeid_gradering")
+        val samordningUføregradering = row.getDoubleOrNull("samordning_uforegradering")
+        val samordningArbeidsgiverGradering = row.getDoubleOrNull("samordning_arbeidsgiver_gradering")
+        val meldepliktGradering = row.getDoubleOrNull("meldeplikt_gradering")
 
         Triple(
             TilkjentYtelsePeriode(
@@ -167,7 +180,13 @@ WHERE br.referanse = ?"""
                 barnetillegg = barnetillegg,
                 utbetalingsdato = utbetalingsdato,
                 minsteSats = minstesats,
-                barnepensjonDagsats = barnepensjonDagsats
+                barnepensjonDagsats = barnepensjonDagsats,
+                samordningGradering = samordningGradering,
+                institusjonGradering = institusjonGradering,
+                arbeidGradering = arbeidGradering,
+                samordningUføregradering = samordningUføregradering,
+                samordningArbeidsgiverGradering = samordningArbeidsgiverGradering,
+                meldepliktGradering = meldepliktGradering,
             ), row.getUUID("referanse"), row.getString("saksnummer")
         )
     }
