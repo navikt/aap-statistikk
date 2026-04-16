@@ -81,3 +81,10 @@ Never use kontrakt (e.g. `behandlingsflyt.kontrakt`) types directly in domain lo
 - If two consecutive events differ ONLY in these ignored fields, the second one is NOT saved
 - This means if only `saksbehandler` or `ansvarligEnhetKode` changes, a new event IS created
 - But if saksbehandler stays the same across multiple behandling state changes, only the first is saved
+
+### BigQuery Views
+
+When adding a new BigQuery view under `.nais/bigquery/`:
+
+- **Always add the new view to `.github/workflows/deploy_bigquery.yml`** under the `RESOURCE` list.
+- Deployment order matters: views that are referenced by other views must appear **before** those views in the list.
