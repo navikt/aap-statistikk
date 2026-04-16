@@ -41,13 +41,13 @@ data class TilkjentYtelsePeriodeEntity(
     val barnetillegg: Double = 0.0,
     val utbetalingsdato: LocalDate,
     val minstesats: Minstesats,
-    val barnepensjonDagsats: Double? = null,
-    val samordningGradering: Double? = null,
-    val institusjonGradering: Double? = null,
-    val arbeidGradering: Double? = null,
-    val samordningUføregradering: Double? = null,
-    val samordningArbeidsgiverGradering: Double? = null,
-    val meldepliktGradering: Double? = null,
+    val barnepensjonDagsats: Double?,
+    val samordningGradering: Double?,
+    val institusjonGradering: Double?,
+    val arbeidGradering: Double?,
+    val samordningUføregradering: Double?,
+    val samordningArbeidsgiverGradering: Double?,
+    val meldepliktGradering: Double?,
 ) {
     companion object {
         fun fraDomene(tilkjentYtelsePeriode: TilkjentYtelsePeriode): TilkjentYtelsePeriodeEntity {
