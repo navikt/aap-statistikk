@@ -37,6 +37,12 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                     utbetalingsdato = LocalDate.now().minusDays(1),
                     minsteSats = Minstesats.MINSTESATS_OVER_25,
                     barnepensjonDagsats = 0.0,
+                    samordningGradering = 0.0,
+                    institusjonGradering = 0.0,
+                    arbeidGradering = 0.0,
+                    samordningUføregradering = 0.0,
+                    samordningArbeidsgiverGradering = 0.0,
+                    meldepliktGradering = 0.0,
                 ),
                 TilkjentYtelsePeriodeDTO(
                     fraDato = LocalDate.now().minusYears(3),
@@ -50,6 +56,12 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
                     utbetalingsdato = LocalDate.now().minusYears(2),
                     minsteSats = Minstesats.IKKE_MINSTESATS,
                     barnepensjonDagsats = 0.0,
+                    samordningGradering = 0.0,
+                    institusjonGradering = 0.0,
+                    arbeidGradering = 0.0,
+                    samordningUføregradering = 0.0,
+                    samordningArbeidsgiverGradering = 0.0,
+                    meldepliktGradering = 0.0,
                 )
             )
         ),

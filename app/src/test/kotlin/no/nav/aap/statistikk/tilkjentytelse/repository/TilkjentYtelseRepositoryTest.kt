@@ -36,7 +36,13 @@ class TilkjentYtelseRepositoryTest {
                         barnetilleggSats = 0.0,
                         barnetillegg = 0.0,
                         barnepensjonDagsats = 100.0,
-                        minstesats = Minstesats.MINSTESATS_OVER_25
+                        minstesats = Minstesats.MINSTESATS_OVER_25,
+                        samordningGradering = 50.0,
+                        institusjonGradering = 25.0,
+                        arbeidGradering = 75.0,
+                        samordningUføregradering = 10.0,
+                        samordningArbeidsgiverGradering = 20.0,
+                        meldepliktGradering = 30.0,
                     )
                 )
             )
@@ -58,7 +64,13 @@ class TilkjentYtelseRepositoryTest {
                     barnetilleggSats = 0.0,
                     barnetillegg = 0.0,
                     barnepensjonDagsats = 100.0,
-                    minstesats = Minstesats.MINSTESATS_OVER_25
+                    minstesats = Minstesats.MINSTESATS_OVER_25,
+                    samordningGradering = 50.0,
+                    institusjonGradering = 25.0,
+                    arbeidGradering = 75.0,
+                    samordningUføregradering = 10.0,
+                    samordningArbeidsgiverGradering = 20.0,
+                    meldepliktGradering = 30.0,
                 )
             )
         )
@@ -96,6 +108,12 @@ class TilkjentYtelseRepositoryTest {
                         barnetillegg = 0.0,
                         barnepensjonDagsats = 100.0,
                         minsteSats = Minstesats.MINSTESATS_OVER_25,
+                        samordningGradering = 50.0,
+                        institusjonGradering = 25.0,
+                        arbeidGradering = 75.0,
+                        samordningUføregradering = 10.0,
+                        samordningArbeidsgiverGradering = 20.0,
+                        meldepliktGradering = 30.0,
                     ),
                     TilkjentYtelsePeriode(
                         fraDato = LocalDate.now().minusYears(3),
@@ -108,8 +126,13 @@ class TilkjentYtelseRepositoryTest {
                         barnetilleggSats = 37.0,
                         utbetalingsdato = LocalDate.now().minusDays(1),
                         barnepensjonDagsats = 100.0,
-
                         minsteSats = Minstesats.MINSTESATS_UNDER_25,
+                        samordningGradering = 60.0,
+                        institusjonGradering = 35.0,
+                        arbeidGradering = 80.0,
+                        samordningUføregradering = 15.0,
+                        samordningArbeidsgiverGradering = 25.0,
+                        meldepliktGradering = 40.0,
                     )
                 )
             )
