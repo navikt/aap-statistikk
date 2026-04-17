@@ -145,7 +145,7 @@ WHERE br.referanse = ?"""
         behandlingId: BehandlingId
     ): Long {
         val sql =
-            "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar) VALUES (?, ?, ?, ?) "
+            "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar, nedsatt_arbeidsevne_dato, ytterligere_nedsatt_arbeidsevne_dato) VALUES (?, ?, ?, ?, ?, ?) "
 
         return connection.executeReturnKey(sql) {
             setParams {
@@ -153,6 +153,8 @@ WHERE br.referanse = ?"""
                 setLong(2, behandlingId.id)
                 setLocalDateTime(3, LocalDateTime.now())
                 setInt(4, grunnlag.beregningsår().value)
+                setLocalDate(5, grunnlag.nedsattArbeidsevneEllerStudieevneDato())
+                setLocalDate(6, grunnlag.ytterligereNedsattArbeidsevneDato())
             }
         }
     }
@@ -283,6 +285,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     override fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
         val sql = """select grunnlag.id                                    as gr_id,
        grunnlag.type                                  as gr_type,
+       grunnlag.nedsatt_arbeidsevne_dato              as gr_nedsatt_arbeidsevne_dato,
+       grunnlag.ytterligere_nedsatt_arbeidsevne_dato  as gr_ytterligere_nedsatt_arbeidsevne_dato,
        g.id                                           as g_id,
        g.grunnlag_id                                  as g_grunnlag_id,
        g.grunnlag                                     as g_grunnlag,
@@ -381,7 +385,9 @@ where br.referanse = ?
                 "gy_grunnlag_for_beregning_av_yrkesskadeandel"
             ),
             yrkesskadeinntektIG = resultSet.getBigDecimal("gy_yrkesskadeinntekt_ig"),
-            grunnlagEtterYrkesskadeFordel = resultSet.getBigDecimal("gy_grunnlag_etter_yrkesskade_fordel")
+            grunnlagEtterYrkesskadeFordel = resultSet.getBigDecimal("gy_grunnlag_etter_yrkesskade_fordel"),
+            nedsattArbeidsevneEllerStudieevneDato = resultSet.getLocalDate("gr_nedsatt_arbeidsevne_dato"),
+            ytterligereNedsattArbeidsevneDato = resultSet.getLocalDateOrNull("gr_ytterligere_nedsatt_arbeidsevne_dato"),
         )
     }
 
@@ -415,6 +421,8 @@ where br.referanse = ?
             uføregrader = hentUføregraderKompatibel(),
             uføreInntekterFraForegåendeÅr = uføreInntekterFraForegåendeÅr,
             uføreYtterligereNedsattArbeidsevneÅr = resultSet.getInt("gu_ufore_ytterligere_nedsatt_arbeidsevne_ar"),
+            nedsattArbeidsevneEllerStudieevneDato = resultSet.getLocalDate("gr_nedsatt_arbeidsevne_dato"),
+            ytterligereNedsattArbeidsevneDato = resultSet.getLocalDateOrNull("gr_ytterligere_nedsatt_arbeidsevne_dato"),
         )
     }
 
@@ -429,6 +437,8 @@ where br.referanse = ?
                 er6GBegrenset = row.getBoolean("g_er6g_begrenset"),
                 erGjennomsnitt = row.getBoolean("g_er_gjennomsnitt"),
                 inntekter = inntekter.associateBy { it.aar }.mapValues { it.value.inntekt },
+                nedsattArbeidsevneEllerStudieevneDato = row.getLocalDate("gr_nedsatt_arbeidsevne_dato"),
+                ytterligereNedsattArbeidsevneDato = row.getLocalDateOrNull("gr_ytterligere_nedsatt_arbeidsevne_dato"),
             )
         return grunnlag11_19
     }
