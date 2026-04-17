@@ -7,7 +7,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.opprettTestHendelse
+import no.nav.aap.statistikk.testutils.builders.opprettTestHendelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

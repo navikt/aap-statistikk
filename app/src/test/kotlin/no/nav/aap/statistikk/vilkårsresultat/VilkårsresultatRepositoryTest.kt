@@ -6,7 +6,7 @@ import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.opprettTestHendelse
+import no.nav.aap.statistikk.testutils.builders.opprettTestHendelse
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsPeriodeEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
@@ -15,7 +15,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.lang.Math.random
 import java.time.LocalDate
 import java.util.*

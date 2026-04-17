@@ -21,6 +21,9 @@ import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.testutils.builders.opprettTestHendelse
+import no.nav.aap.statistikk.testutils.client.schemaRegistry
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode

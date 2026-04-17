@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.testutils
+package no.nav.aap.statistikk.testutils.fakes
 
 import no.nav.aap.komponenter.gateway.Factory
 import no.nav.aap.komponenter.type.Periode
@@ -28,6 +28,7 @@ import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
+import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
@@ -335,8 +336,8 @@ class FakeOppgaveHendelseRepository : OppgaveHendelseRepository {
         return enhetReservasjoner[behandlingReferanse to avklaringsbehovKode] ?: emptyList()
     }
 
-    override fun lagreHendelse(hendelse: no.nav.aap.statistikk.oppgave.OppgaveHendelse) = 0L
+    override fun lagreHendelse(hendelse: OppgaveHendelse) = 0L
     override fun sisteVersjonForId(id: Long) = null
     override fun hentHendelserForId(id: Long) =
-        emptyList<no.nav.aap.statistikk.oppgave.OppgaveHendelse>()
+        emptyList<OppgaveHendelse>()
 }

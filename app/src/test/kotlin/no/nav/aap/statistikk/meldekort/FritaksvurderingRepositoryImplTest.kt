@@ -3,9 +3,9 @@ package no.nav.aap.statistikk.meldekort
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.opprettTestBehandling
-import no.nav.aap.statistikk.testutils.opprettTestPerson
-import no.nav.aap.statistikk.testutils.opprettTestSak
+import no.nav.aap.statistikk.testutils.builders.opprettTestBehandling
+import no.nav.aap.statistikk.testutils.builders.opprettTestPerson
+import no.nav.aap.statistikk.testutils.builders.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

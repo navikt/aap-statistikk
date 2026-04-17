@@ -33,6 +33,9 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepositoryImpl
 import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.testutils.client.TestClient
+import no.nav.aap.statistikk.testutils.client.testKlientNoInjectionManuell
+import no.nav.aap.statistikk.testutils.fakes.FakeBigQueryClient
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
@@ -441,7 +444,9 @@ class IntegrationTest {
             ) {
                 motor.kjørJobber()
                 val alleSakstatistikkHendelser = dataSource.transaction {
-                    SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
+                    SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
+                        behandlingReferanse
+                    )
                 }
 
                 println("...")
@@ -578,7 +583,7 @@ class IntegrationTest {
             )
 
             val sjetteHendelser = femteHendelser
-                  //  Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
+            //  Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
 
             verifiserHendelseRekkefølge(sjetteHendelser)
 

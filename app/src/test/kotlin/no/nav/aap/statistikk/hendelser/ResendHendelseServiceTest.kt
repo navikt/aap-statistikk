@@ -5,11 +5,11 @@ import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
-import no.nav.aap.statistikk.testutils.FakeBehandlingRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
-import no.nav.aap.statistikk.testutils.FakePdlGateway
-import no.nav.aap.statistikk.testutils.FakePersonRepository
-import no.nav.aap.statistikk.testutils.FakeSakRepository
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
+import no.nav.aap.statistikk.testutils.fakes.FakePersonRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeSakRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
