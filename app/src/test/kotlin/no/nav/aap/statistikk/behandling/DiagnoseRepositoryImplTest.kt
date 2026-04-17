@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.forberedDatabase
+import no.nav.aap.statistikk.testutils.builders.forberedDatabase
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.*
