@@ -26,6 +26,8 @@ import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
+import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource

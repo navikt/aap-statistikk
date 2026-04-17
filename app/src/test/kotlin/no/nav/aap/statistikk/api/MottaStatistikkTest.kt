@@ -36,6 +36,9 @@ import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
 import no.nav.aap.statistikk.testutils.*
+import no.nav.aap.statistikk.testutils.builders.opprettTestStoppetBehandling
+import no.nav.aap.statistikk.testutils.client.testKlient
+import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
 import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingBehandlingStatus
 import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelse
 import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelseRepositoryImpl

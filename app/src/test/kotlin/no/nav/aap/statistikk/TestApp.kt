@@ -6,9 +6,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.testutils.Fakes
-import no.nav.aap.statistikk.testutils.bigQueryContainer
-import no.nav.aap.statistikk.testutils.postgresTestConfig
-import no.nav.aap.statistikk.testutils.schemaRegistry
+import no.nav.aap.statistikk.testutils.client.bigQueryContainer
+import no.nav.aap.statistikk.testutils.client.postgresTestConfig
+import no.nav.aap.statistikk.testutils.client.schemaRegistry
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.*

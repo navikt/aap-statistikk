@@ -1,9 +1,8 @@
-package no.nav.aap.statistikk.testutils
+package no.nav.aap.statistikk.testutils.client
 
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
-import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
@@ -12,9 +11,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.motor.Motor
-import no.nav.aap.motor.retry.DriftJobbRepositoryExposed
 import no.nav.aap.motor.testutil.ManuellMotorImpl
-import no.nav.aap.motor.testutil.TestJobbRepository
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
@@ -37,6 +34,7 @@ import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
+import no.nav.aap.statistikk.testutils.fakes.FakeBigQueryClient
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import org.testcontainers.gcloud.BigQueryEmulatorContainer
@@ -46,11 +44,8 @@ import java.io.InputStream
 import java.net.URI
 import java.nio.file.Path
 import java.time.Duration
-import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import javax.sql.DataSource
-import kotlin.system.measureTimeMillis
 
 private val logger = LoggerFactory.getLogger("TestClientHelpers")
 
@@ -152,54 +147,6 @@ class TestClient(private val client: RestClient<InputStream>, private val url: S
             URI.create("$url/tilbakekrevingshendelse"), PostRequest(hendelse)
         )
     }
-}
-
-fun <E> testKlientNoInjection(
-    dbConfig: DbConfig,
-    azureConfig: AzureConfig = AzureConfig(
-        clientId = "tilgang",
-        jwksUri = "http://localhost:8081/jwks",
-        issuer = "tilgang"
-    ),
-    bigQueryClient: IBigQueryClient = FakeBigQueryClient,
-    test: TestClient.() -> E,
-): E {
-    var res: E
-
-    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
-    System.setProperty("azure.app.client.id", azureConfig.clientId)
-    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
-    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
-    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
-
-    System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
-
-    System.setProperty("enhet.retry.max.retries", "1")
-    System.setProperty("enhet.retry.delay.seconds", "1")
-
-
-    val restClient = RestClient(
-        config = ClientConfig(scope = "AAP_SCOPES"),
-        tokenProvider = ClientCredentialsTokenProvider,
-        responseHandler = DefaultResponseHandler()
-    )
-
-    val server = embeddedServer(Netty, port = 0) {
-        startUp(
-            dbConfig,
-            azureConfig,
-            bigQueryClient,
-            defaultGatewayProvider()
-        )
-    }.start()
-
-    val port = runBlocking { server.engine.resolvedConnectors().first().port }
-
-    res = TestClient(restClient, "http://localhost:$port").test()
-
-    server.stop(1000L, 10_000L)
-
-    return res
 }
 
 fun <E> testKlientNoInjectionManuell(
@@ -318,58 +265,6 @@ fun bigQueryContainer(): BigQueryConfig {
     bigQuery.create(datasetInfo)
 
     return config
-}
-
-fun <E> ventPåSvar(getter: () -> E?, predicate: (E?) -> Boolean): E? {
-    var res: E? = null
-    val timeInMillis = measureTimeMillis {
-        val maxTid = LocalDateTime.now().plusSeconds(10)
-        var suksess = false
-        while (maxTid.isAfter(LocalDateTime.now()) && !suksess) {
-            try {
-                res = getter()
-                if (res != null && predicate(res)) {
-                    suksess = true
-                }
-            } finally {
-                Thread.sleep(50L)
-            }
-        }
-    }
-    logger.info("Ventet på at prosessering skulle fullføre, det tok $timeInMillis millisekunder. Res null: ${res == null}")
-    if (res == null) {
-        logger.info("Ventet på svar, men svaret er null.")
-    }
-    return res
-}
-
-/**
- * Venter til alle jobber er ferdige, men avbryter umiddelbart hvis noen jobber feiler.
- * Forhindrer lang ventetid i integrasjonstester ved uventede jobbkrasj.
- */
-fun ventPåSvarEllerFeil(
-    dataSource: DataSource,
-    cronJobberSomSkalIgnoreres: List<String> = listOf("oppgave.retryFeilede"),
-    maxTidSekunder: Long = 20,
-) {
-    val sluttTidspunkt = LocalDateTime.now().plusSeconds(maxTidSekunder)
-    while (LocalDateTime.now().isBefore(sluttTidspunkt)) {
-        val (feilende, harVentende) = dataSource.transaction(readOnly = true) { connection ->
-            val feilende = DriftJobbRepositoryExposed(connection).hentAlleFeilende()
-            val harVentende = TestJobbRepository(connection, cronJobberSomSkalIgnoreres).harJobb(null, null)
-            Pair(feilende, harVentende)
-        }
-
-        if (feilende.isNotEmpty()) {
-            val detaljer = feilende.joinToString("\n") { (jobb, melding) -> "  ${jobb.type()}: $melding" }
-            throw AssertionError("${feilende.size} jobber feilet:\n$detaljer")
-        }
-
-        if (!harVentende) return
-
-        Thread.sleep(50)
-    }
-    throw AssertionError("Timeout: jobber ikke ferdig etter $maxTidSekunder sekunder")
 }
 
 val schemaRegistry: SchemaRegistry = schemaRegistryYtelseStatistikk

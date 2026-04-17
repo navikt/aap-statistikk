@@ -11,10 +11,10 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
-import no.nav.aap.statistikk.testutils.FakeBehandlingRepository
-import no.nav.aap.statistikk.testutils.FakeOppgaveHendelseRepository
-import no.nav.aap.statistikk.testutils.FakePdlGateway
-import no.nav.aap.statistikk.testutils.FakeRettighetsTypeRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeOppgaveHendelseRepository
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
+import no.nav.aap.statistikk.testutils.fakes.FakeRettighetsTypeRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock

@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.testutils
+package no.nav.aap.statistikk.testutils.builders
 
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
@@ -31,6 +31,7 @@ import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkEventSourcing
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
