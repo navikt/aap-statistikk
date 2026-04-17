@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.tilkjentytelse.repository
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
-import no.nav.aap.statistikk.testutils.opprettTestHendelse
+import no.nav.aap.statistikk.testutils.builders.opprettTestHendelse
 import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode

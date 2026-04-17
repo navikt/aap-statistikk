@@ -6,7 +6,7 @@ import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.BigQuery
-import no.nav.aap.statistikk.testutils.schemaRegistry
+import no.nav.aap.statistikk.testutils.client.schemaRegistry
 import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
