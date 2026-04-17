@@ -168,35 +168,25 @@ gjør. Se også punkt 6 om den skjulte avhengigheten til `postgresRepositoryRegi
 
 ---
 
-## 5. TestUtils.kt er en monolitt på 1035 linjer
+## 5. ~~TestUtils.kt er en monolitt på 1035 linjer~~ ✅ Gjennomført
 
-**Problem:** `testutils/TestUtils.kt` er en "alt mulig"-fil med:
+**Problem:** `testutils/TestUtils.kt` var en "alt mulig"-fil med 1035 linjer.
 
-- Fake-implementasjoner av 12+ repositories (`FakeSakRepository`, `FakePersonRepository`, `FakeBehandlingRepository`, `FakeBQYtelseRepository`, osv.)
-- Tre varianter av test-klient-oppsett (`testKlient`, `testKlientNoInjection`, `testKlientNoInjectionManuell`)
-- Motor-fabrikk-hjelpere (`konstruerMotor`, `konstruerManuellMotor`, `konstruerTestJobber`)
-- Test-datahjelpere (`opprettTestPerson`, `opprettTestSak`, `opprettTestBehandling`, `opprettTestHendelse`)
-- `MockJobbAppender`, `noOpTransactionExecutor`, `motorMock`
-- BigQuery-relatert testkode (duplisert av `WithBigQueryContainer.kt`)
-
-Alle tester i prosjektet har en transitiv kobling til én enkelt fil, noe som gjør det vanskelig å finne frem og øker risikoen for utilsiktede sideeffekter.
-
-**Forslag:** Del filen opp langs domene- og ansvarslinjer:
+**Løsning (PR #787):** Filen er slettet og erstattet med fire fokuserte filer:
 
 ```
 testutils/
   fakes/
-    FakeRepositories.kt       -- alle Fake*Repository-klasser
-    FakeSaksstatistikkService.kt
+    FakeRepositories.kt       -- alle Fake*Repository-klasser + FakeBigQueryClient
   builders/
     TestDataBuilders.kt       -- opprettTestPerson, opprettTestSak, osv.
   motor/
-    MotorTestHelpers.kt       -- konstruerMotor, motorMock, osv.
+    MotorTestHelpers.kt       -- konstruerMotor, motorMock, MockJobbAppender, osv.
   client/
     TestClientHelpers.kt      -- testKlient og varianter
 ```
 
-`FakeHendelsePublisher.kt` er allerede riktig isolert – den er et godt eksempel på riktig granularitet.
+Alle filer bruker samme pakke (`no.nav.aap.statistikk.testutils`) slik at ingen eksisterende importer trengte endring.
 
 ---
 
@@ -336,7 +326,7 @@ private fun lesPayload(input: JobbInput): LagreSakinfoPayload {
 | 2   | Fjern tynne wrapper-services (PersonService, SakService, Post) | Middels                  | Middels – kortere call-stacks  |
 | 3   | Dedupliser SaksStatistikkService-konstruksjon                  | Lav                      | Lav – ett sted å endre         |
 | 4   | Injiser JobbAppender i oppgave- og saksinfo-jobber             | Lav                      | Middels – testbarhet           |
-| 5   | TestUtils.kt monolitt (1035 linjer)                            | Middels                  | Høy – testlesbarhet            |
+| 5   | ~~TestUtils.kt monolitt (1035 linjer)~~ ✅                     | Middels                  | Høy – testlesbarhet            |
 | 6   | Deprecated `IBQYtelsesstatistikkRepository` i aktiv bruk       | Lav (avklar, slett)      | Middels – ryddigere kodebase   |
 | 7   | Skjult avhengighet til global `postgresRepositoryRegistry`     | Lav                      | Middels – testbarhet           |
 | 8   | Fat `JobbAppender`-interface                                   | Middels                  | Middels – utvidbarhet          |
