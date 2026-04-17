@@ -26,7 +26,9 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlag = 20000.0,
             er6GBegrenset = false,
             erGjennomsnitt = true,
-            inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+            inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null
         )
 
         dataSource.transaction {
@@ -66,7 +68,9 @@ class BeregningsgrunnlagRepositoryTest {
                 grunnlag = 20000.0,
                 er6GBegrenset = false,
                 erGjennomsnitt = true,
-                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -77,7 +81,9 @@ class BeregningsgrunnlagRepositoryTest {
             yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
-            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -119,7 +125,9 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
@@ -131,7 +139,9 @@ class BeregningsgrunnlagRepositoryTest {
                     2019 to 27500.0,
                     2020 to 28000.0
                 ),
-                uføreYtterligereNedsattArbeidsevneÅr = 2020
+                uføreYtterligereNedsattArbeidsevneÅr = 2020,
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -142,7 +152,9 @@ class BeregningsgrunnlagRepositoryTest {
             yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
-            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -184,7 +196,9 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
@@ -196,7 +210,9 @@ class BeregningsgrunnlagRepositoryTest {
                     2019 to 27500.0,
                     2020 to 28000.0,
                 ),
-                uføreYtterligereNedsattArbeidsevneÅr = 2020
+                uføreYtterligereNedsattArbeidsevneÅr = 2020,
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             )
 
         dataSource.transaction {
@@ -243,7 +259,9 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
@@ -255,7 +273,9 @@ class BeregningsgrunnlagRepositoryTest {
                     2019 to 27500.0,
                     2020 to 28000.0
                 ),
-                uføreYtterligereNedsattArbeidsevneÅr = 2020
+                uføreYtterligereNedsattArbeidsevneÅr = 2020,
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -266,7 +286,9 @@ class BeregningsgrunnlagRepositoryTest {
             yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
-            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         val grunnlagUfore: IBeregningsGrunnlag.GrunnlagUføre =
@@ -276,7 +298,9 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
@@ -288,7 +312,9 @@ class BeregningsgrunnlagRepositoryTest {
                     2019 to 27500.0,
                     2020 to 28000.0
                 ),
-                uføreYtterligereNedsattArbeidsevneÅr = 2020
+                uføreYtterligereNedsattArbeidsevneÅr = 2020,
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             )
 
         dataSource.transaction {
@@ -381,14 +407,18 @@ class BeregningsgrunnlagRepositoryTest {
             grunnlag = 20000.0,
             er6GBegrenset = false,
             erGjennomsnitt = true,
-            inntekter = mapOf(2019 to 25000.0)
+            inntekter = mapOf(2019 to 25000.0),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null
         )
 
         val grunnlag2 = IBeregningsGrunnlag.Grunnlag_11_19(
             grunnlag = 30000.0,
             er6GBegrenset = true,
             erGjennomsnitt = false,
-            inntekter = mapOf(2020 to 35000.0)
+            inntekter = mapOf(2020 to 35000.0),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null
         )
 
         dataSource.transaction {
@@ -422,7 +452,9 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
@@ -431,7 +463,9 @@ class BeregningsgrunnlagRepositoryTest {
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2019 to 27500.0,
                 ),
-                uføreYtterligereNedsattArbeidsevneÅr = 2020
+                uføreYtterligereNedsattArbeidsevneÅr = 2020,
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -442,7 +476,9 @@ class BeregningsgrunnlagRepositoryTest {
             yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
-            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -486,7 +522,9 @@ class BeregningsgrunnlagRepositoryTest {
                 grunnlag = 20000.0,
                 er6GBegrenset = false,
                 erGjennomsnitt = true,
-                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
+                inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -497,7 +535,9 @@ class BeregningsgrunnlagRepositoryTest {
             yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
-            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -541,7 +581,9 @@ class BeregningsgrunnlagRepositoryTest {
                 grunnlag = 20000.0,
                 er6GBegrenset = false,
                 erGjennomsnitt = true,
-                inntekter = mapOf(2019 to 25000.0)
+                inntekter = mapOf(2019 to 25000.0),
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -552,7 +594,9 @@ class BeregningsgrunnlagRepositoryTest {
             yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
-            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -602,7 +646,9 @@ class BeregningsgrunnlagRepositoryTest {
                         grunnlag = 10000.0,
                         er6GBegrenset = false,
                         erGjennomsnitt = false,
-                        inntekter = mapOf(2023 to 10000.0)
+                        inntekter = mapOf(2023 to 10000.0),
+                        nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                        ytterligereNedsattArbeidsevneDato = null
                     )
                 )
             )
@@ -616,12 +662,16 @@ class BeregningsgrunnlagRepositoryTest {
                     grunnlag = 25000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0)
+                    inntekter = mapOf(2019 to 25000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
                 ),
                 uføregrader = mapOf(LocalDate.of(2020, 1, 1) to 50),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(2019 to 27500.0),
-                uføreYtterligereNedsattArbeidsevneÅr = 2020
+                uføreYtterligereNedsattArbeidsevneÅr = 2020,
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -632,7 +682,9 @@ class BeregningsgrunnlagRepositoryTest {
             yrkesskadeTidspunkt = Year.of(2018),
             grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
             yrkesskadeinntektIG = BigDecimal(25000),
-            grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+            grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+            nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -678,7 +730,9 @@ fun genererTilfeldig1119Grunnlag(): IBeregningsGrunnlag.Grunnlag_11_19 {
         inntekter = mapOf(
             2019 to (20000..60000).random().toDouble(),
             2020 to (20000..60000).random().toDouble()
-        )
+        ),
+        nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+        ytterligereNedsattArbeidsevneDato = null
     )
 }
 
@@ -699,7 +753,9 @@ fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre {
             2019 to (20000..60000).random().toDouble(),
             2020 to (20000..60000).random().toDouble()
         ),
-        uføreYtterligereNedsattArbeidsevneÅr = (2018..2022).random()
+        uføreYtterligereNedsattArbeidsevneÅr = (2018..2022).random(),
+        nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+        ytterligereNedsattArbeidsevneDato = null
     )
 }
 
@@ -721,6 +777,8 @@ fun genererTilfeldigYrkesskadeGrunnlag(): IBeregningsGrunnlag.GrunnlagYrkesskade
         yrkesskadeTidspunkt = (2018..2022).random().let(Year::of),
         grunnlagForBeregningAvYrkesskadeandel = BigDecimal((20000..60000).random()),
         yrkesskadeinntektIG = BigDecimal((20000..60000).random()),
-        grunnlagEtterYrkesskadeFordel = BigDecimal((20000..60000).random())
+        grunnlagEtterYrkesskadeFordel = BigDecimal((20000..60000).random()),
+        nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+        ytterligereNedsattArbeidsevneDato = null
     )
 }
