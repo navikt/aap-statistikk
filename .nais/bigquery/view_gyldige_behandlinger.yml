@@ -11,7 +11,7 @@ metadata:
     cnrm.cloud.google.com/project-id: {{project}}
 spec:
   resourceID: view_gyldige_behandlinger
-  description: "Hjelperview som filtrerer frem gyldige behandlinger. Brukes av andre views for konsistent filtrering."
+  description: "View som filtrerer behandlinger til ytelsesstatistikk. Kun vedtatte innvilgede behandlinger er interessant. Brukes av andre views for konsistent filtrering."
   datasetRef:
     external: ytelsestatistikk
   view:
