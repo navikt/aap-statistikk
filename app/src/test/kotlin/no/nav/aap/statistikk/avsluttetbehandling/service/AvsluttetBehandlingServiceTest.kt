@@ -142,8 +142,10 @@ class AvsluttetBehandlingServiceTest {
                     grunnlag = 20000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
-                ),
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
+                    ),
                 terskelverdiForYrkesskade = 70,
                 andelSomSkyldesYrkesskade = BigDecimal(30),
                 andelYrkesskade = 25,
@@ -153,7 +155,9 @@ class AvsluttetBehandlingServiceTest {
                 yrkesskadeTidspunkt = Year.of(2018),
                 grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
                 yrkesskadeinntektIG = BigDecimal(25000),
-                grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+                grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             diagnoser = Diagnoser(
                 kodeverk = "KODEVERK",
@@ -340,8 +344,10 @@ class AvsluttetBehandlingServiceTest {
                     grunnlag = 20000.0,
                     er6GBegrenset = false,
                     erGjennomsnitt = true,
-                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0)
-                ),
+                    inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
+                    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                    ytterligereNedsattArbeidsevneDato = null
+                    ),
                 terskelverdiForYrkesskade = 70,
                 andelSomSkyldesYrkesskade = BigDecimal(30),
                 andelYrkesskade = 25,
@@ -351,7 +357,9 @@ class AvsluttetBehandlingServiceTest {
                 yrkesskadeTidspunkt = Year.of(2018),
                 grunnlagForBeregningAvYrkesskadeandel = BigDecimal(25000),
                 yrkesskadeinntektIG = BigDecimal(25000),
-                grunnlagEtterYrkesskadeFordel = BigDecimal(25000)
+                grunnlagEtterYrkesskadeFordel = BigDecimal(25000),
+                nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             diagnoser = Diagnoser(
                 kodeverk = "KODEVERK",

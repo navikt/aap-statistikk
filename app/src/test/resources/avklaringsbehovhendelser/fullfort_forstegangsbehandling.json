@@ -6,23 +6,23 @@
   "behandlingOpprettetTidspunkt": "2025-09-24T12:36:56.235",
   "mottattTid": "2025-09-24T00:00:00",
   "behandlingStatus": "AVSLUTTET",
-  "behandlingType": "F\u00f8rstegangsbehandling",
+  "behandlingType": "Førstegangsbehandling",
   "soknadsFormat": "DIGITAL",
   "ident": "01410022806",
   "versjon": "LATEST-TEST",
   "vurderingsbehov": [
-    "S\u00d8KNAD"
+    "SØKNAD"
   ],
-  "\u00e5rsakTilOpprettelse": "S\u00d8KNAD",
+  "årsakTilOpprettelse": "SØKNAD",
   "avklaringsbehov": [
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5003",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "AVKLAR_SYKDOM",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "AVKLAR_SYKDOM",
         "kreverToTrinn": true,
         "kvalitetssikres": true,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "SAKSBEHANDLER_OPPFOLGING"
         ]
       },
@@ -33,8 +33,8 @@
           "tidsstempel": "2025-09-24T12:36:56.584",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -42,17 +42,17 @@
           "tidsstempel": "2025-09-24T12:37:50.029",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
-          "begrunnelse": "Vurdering av \u00a7 11-5"
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": "Vurdering av § 11-5"
         },
         {
           "status": "KVALITETSSIKRET",
           "tidsstempel": "2025-09-24T12:39:00.206",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -60,10 +60,10 @@
           "tidsstempel": "2025-09-24T13:41:38.352",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [
             {
-              "\u00e5rsak": "MANGLENDE_UTREDNING"
+              "årsak": "MANGLENDE_UTREDNING"
             }
           ],
           "begrunnelse": "sdsasdasd"
@@ -73,17 +73,17 @@
           "tidsstempel": "2025-09-24T13:52:33.607",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
-          "begrunnelse": "Vurdering av \u00a7 11-5"
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": "Vurdering av § 11-5"
         },
         {
           "status": "TOTRINNS_VURDERT",
           "tidsstempel": "2025-09-24T13:53:01.359",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         }
       ]
@@ -91,11 +91,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5006",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "VURDER_BISTANDSBEHOV",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "VURDER_BISTANDSBEHOV",
         "kreverToTrinn": true,
         "kvalitetssikres": true,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "SAKSBEHANDLER_OPPFOLGING"
         ]
       },
@@ -106,8 +106,8 @@
           "tidsstempel": "2025-09-24T12:37:50.129",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -115,8 +115,8 @@
           "tidsstempel": "2025-09-24T12:38:30.831",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "asdasdasd"
         },
         {
@@ -124,8 +124,8 @@
           "tidsstempel": "2025-09-24T12:39:00.208",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -133,8 +133,8 @@
           "tidsstempel": "2025-09-24T13:41:38.366",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -142,8 +142,8 @@
           "tidsstempel": "2025-09-24T13:52:34.131",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -151,8 +151,8 @@
           "tidsstempel": "2025-09-24T13:53:01.362",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         }
       ]
@@ -160,11 +160,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5026",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "REFUSJON_KRAV",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "REFUSJON_KRAV",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "SAKSBEHANDLER_OPPFOLGING"
         ]
       },
@@ -175,8 +175,8 @@
           "tidsstempel": "2025-09-24T12:38:31.216",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -184,8 +184,8 @@
           "tidsstempel": "2025-09-24T12:38:46.704",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "Vurdert refusjonskrav"
         },
         {
@@ -193,8 +193,8 @@
           "tidsstempel": "2025-09-24T13:41:38.413",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -202,8 +202,8 @@
           "tidsstempel": "2025-09-24T13:52:40.535",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "Vurdert refusjonskrav"
         }
       ]
@@ -211,11 +211,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5053",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "SYKDOMSVURDERING_BREV",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "SYKDOMSVURDERING_BREV",
         "kreverToTrinn": false,
         "kvalitetssikres": true,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "SAKSBEHANDLER_OPPFOLGING"
         ]
       },
@@ -226,8 +226,8 @@
           "tidsstempel": "2025-09-24T12:38:46.818",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -235,8 +235,8 @@
           "tidsstempel": "2025-09-24T12:38:51.755",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "Skrevet sykdomsvurdering for brev"
         },
         {
@@ -244,8 +244,8 @@
           "tidsstempel": "2025-09-24T12:39:00.209",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -253,8 +253,8 @@
           "tidsstempel": "2025-09-24T13:41:38.425",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -262,8 +262,8 @@
           "tidsstempel": "2025-09-24T13:52:44.745",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "Skrevet sykdomsvurdering for brev"
         }
       ]
@@ -271,11 +271,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5097",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "KVALITETSSIKRING",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "KVALITETSSIKRING",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "KVALITETSSIKRER"
         ]
       },
@@ -286,8 +286,8 @@
           "tidsstempel": "2025-09-24T12:38:51.88",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -295,8 +295,8 @@
           "tidsstempel": "2025-09-24T12:39:00.211",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "\\n\\n"
         }
       ]
@@ -304,11 +304,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5008",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
         "kreverToTrinn": true,
         "kvalitetssikres": false,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "SAKSBEHANDLER_NASJONAL"
         ]
       },
@@ -319,8 +319,8 @@
           "tidsstempel": "2025-09-24T12:39:00.392",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -328,8 +328,8 @@
           "tidsstempel": "2025-09-24T13:40:57.797",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "asd"
         },
         {
@@ -337,8 +337,8 @@
           "tidsstempel": "2025-09-24T13:41:38.385",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -346,8 +346,8 @@
           "tidsstempel": "2025-09-24T13:52:49.028",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "asd"
         },
         {
@@ -355,8 +355,8 @@
           "tidsstempel": "2025-09-24T13:53:01.364",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         }
       ]
@@ -364,11 +364,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5020",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "VURDER_MEDLEMSKAP",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "VURDER_MEDLEMSKAP",
         "kreverToTrinn": true,
         "kvalitetssikres": false,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "SAKSBEHANDLER_NASJONAL"
         ]
       },
@@ -379,8 +379,8 @@
           "tidsstempel": "2025-09-24T13:40:59.052",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -388,17 +388,17 @@
           "tidsstempel": "2025-09-24T13:41:05.815",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
-          "begrunnelse": "Vurdert forutg\u00e5ende medlemskap manuelt."
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": "Vurdert forutgående medlemskap manuelt."
         },
         {
           "status": "OPPRETTET",
           "tidsstempel": "2025-09-24T13:41:38.399",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -406,17 +406,17 @@
           "tidsstempel": "2025-09-24T13:52:52.562",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
-          "begrunnelse": "Vurdert forutg\u00e5ende medlemskap manuelt."
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
+          "begrunnelse": "Vurdert forutgående medlemskap manuelt."
         },
         {
           "status": "TOTRINNS_VURDERT",
           "tidsstempel": "2025-09-24T13:53:01.366",
           "frist": null,
           "endretAv": "VEILEDER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         }
       ]
@@ -424,11 +424,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5098",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "FORESL\u00c5_VEDTAK",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "FORESLÅ_VEDTAK",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "SAKSBEHANDLER_NASJONAL"
         ]
       },
@@ -439,8 +439,8 @@
           "tidsstempel": "2025-09-24T13:41:07.9",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -448,8 +448,8 @@
           "tidsstempel": "2025-09-24T13:41:14.278",
           "frist": null,
           "endretAv": "SAKSBEHANDLER_NASJONAL",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -457,8 +457,8 @@
           "tidsstempel": "2025-09-24T13:41:38.889",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -466,8 +466,8 @@
           "tidsstempel": "2025-09-24T13:52:53.154",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -475,8 +475,8 @@
           "tidsstempel": "2025-09-24T13:52:56.082",
           "frist": null,
           "endretAv": "SAKSBEHANDLER_NASJONAL",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         }
       ]
@@ -484,11 +484,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5099",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "FATTE_VEDTAK",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "FATTE_VEDTAK",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "BESLUTTER"
         ]
       },
@@ -499,8 +499,8 @@
           "tidsstempel": "2025-09-24T13:41:14.558",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -508,8 +508,8 @@
           "tidsstempel": "2025-09-24T13:41:38.441",
           "frist": null,
           "endretAv": "BESLUTTER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "sdsasdasd\\n\\n\\n"
         },
         {
@@ -517,8 +517,8 @@
           "tidsstempel": "2025-09-24T13:52:56.19",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -526,8 +526,8 @@
           "tidsstempel": "2025-09-24T13:53:01.368",
           "frist": null,
           "endretAv": "BESLUTTER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "\\n\\n\\n"
         }
       ]
@@ -535,11 +535,11 @@
     {
       "avklaringsbehovDefinisjon": {
         "kode": "5051",
-        "type": "MANUELT_P\u00c5KREVD",
-        "l\u00f8sesISteg": "BREV",
+        "type": "MANUELT_PÅKREVD",
+        "løsesISteg": "BREV",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "l\u00f8sesAv": [
+        "løsesAv": [
           "BESLUTTER"
         ]
       },
@@ -550,8 +550,8 @@
           "tidsstempel": "2025-09-24T13:53:01.653",
           "frist": null,
           "endretAv": "Kelvin",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": ""
         },
         {
@@ -559,8 +559,8 @@
           "tidsstempel": "2025-09-24T13:56:38.567",
           "frist": null,
           "endretAv": "BESLUTTER",
-          "\u00e5rsakTilSattP\u00e5Vent": null,
-          "\u00e5rsakTilRetur": [],
+          "årsakTilSattPåVent": null,
+          "årsakTilRetur": [],
           "begrunnelse": "Brev ferdig"
         }
       ]
@@ -896,115 +896,115 @@
         }
       ]
     },
-    "vilk\u00e5rsResultat": {
-      "typeBehandling": "F\u00f8rstegangsbehandling",
-      "vilk\u00e5r": [
+    "vilkårsResultat": {
+      "typeBehandling": "Førstegangsbehandling",
+      "vilkår": [
         {
-          "vilk\u00e5rType": "ALDERSVILK\u00c5RET",
+          "vilkårType": "ALDERSVILKÅRET",
           "perioder": [
             {
               "fraDato": "2025-09-24",
               "tilDato": "2026-09-23",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "LOVVALG",
+          "vilkårType": "LOVVALG",
           "perioder": [
             {
               "fraDato": "2025-09-24",
               "tilDato": "2026-09-23",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "SYKDOMSVILK\u00c5RET",
+          "vilkårType": "SYKDOMSVILKÅRET",
           "perioder": [
             {
               "fraDato": "2025-09-24",
               "tilDato": "2026-09-23",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "BISTANDSVILK\u00c5RET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-24",
-              "tilDato": "2026-09-23",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": true,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
-            }
-          ]
-        },
-        {
-          "vilk\u00e5rType": "OVERGANGARBEIDVILK\u00c5RET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-24",
-              "tilDato": "2026-09-23",
-              "utfall": "IKKE_VURDERT",
-              "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
-            }
-          ]
-        },
-        {
-          "vilk\u00e5rType": "OVERGANGUF\u00d8REVILK\u00c5RET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-24",
-              "tilDato": "2026-09-23",
-              "utfall": "IKKE_VURDERT",
-              "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
-            }
-          ]
-        },
-        {
-          "vilk\u00e5rType": "MEDLEMSKAP",
+          "vilkårType": "BISTANDSVILKÅRET",
           "perioder": [
             {
               "fraDato": "2025-09-24",
               "tilDato": "2026-09-23",
               "utfall": "OPPFYLT",
               "manuellVurdering": true,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "GRUNNLAGET",
+          "vilkårType": "OVERGANGARBEIDVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-24",
+              "tilDato": "2026-09-23",
+              "utfall": "IKKE_VURDERT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "OVERGANGUFØREVILKÅRET",
+          "perioder": [
+            {
+              "fraDato": "2025-09-24",
+              "tilDato": "2026-09-23",
+              "utfall": "IKKE_VURDERT",
+              "manuellVurdering": false,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "MEDLEMSKAP",
+          "perioder": [
+            {
+              "fraDato": "2025-09-24",
+              "tilDato": "2026-09-23",
+              "utfall": "OPPFYLT",
+              "manuellVurdering": true,
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
+            }
+          ]
+        },
+        {
+          "vilkårType": "GRUNNLAGET",
           "perioder": [
             {
               "fraDato": "2025-09-24",
               "tilDato": "2026-09-23",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "SAMORDNING",
+          "vilkårType": "SAMORDNING",
           "perioder": []
         }
       ]
@@ -1021,7 +1021,9 @@
         "erGjennomsnitt": false
       },
       "grunnlagYrkesskade": null,
-      "grunnlagUf\u00f8re": null
+      "grunnlagUføre": null,
+      "nedsattArbeidsevneEllerStudieevneDato": "2020-01-01",
+      "ytterligereNedsattArbeidsevneDato": null
     },
     "diagnoser": {
       "kodeverk": "ICPC2",
@@ -1040,7 +1042,7 @@
     "resultat": "INNVILGET",
     "vedtakstidspunkt": "2025-10-06T13:56:38.901934",
     "perioderMedArbeidsopptrapping": [],
-        "vedtattStansOpphør": []
+    "vedtattStansOpphør": []
   },
   "identerForSak": [
     "01410022806"
