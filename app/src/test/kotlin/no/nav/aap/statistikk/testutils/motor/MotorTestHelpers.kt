@@ -129,7 +129,6 @@ fun motorMock(): Motor {
 
 class MockJobbAppender : JobbAppender {
     var jobber = mutableListOf<JobbInput>()
-    private var bigQueryJobber = mutableListOf<BehandlingId>()
     var sisteEnhetRetryCount: Int = 0
     var sisteDelayInSeconds: Long = 0
     var sisteStoredBQBehandling: BQBehandling? = null
@@ -159,7 +158,6 @@ class MockJobbAppender : JobbAppender {
         avklaringsbehovKode: String?,
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
-        bigQueryJobber.add(behandlingId)
         sisteEnhetRetryCount = enhetRetryCount
         sisteDelayInSeconds = delayInSeconds
         sisteStoredBQBehandling = storedBQBehandling
