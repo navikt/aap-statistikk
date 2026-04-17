@@ -976,9 +976,6 @@ class IntegrationTest {
         }
     }
 
-    private fun setupTestEnvironment(dataSource: DataSource) {
-    }
-
     private fun TestClient.prosesserHendelserOgVerifiserBehandling(
         dataSource: DataSource,
         hendelser: List<HendelseData>,
