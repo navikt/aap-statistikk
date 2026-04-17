@@ -6,7 +6,6 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.hendelser.BehandlingService
 import org.slf4j.LoggerFactory
 
 class ResendSakstatistikkJobbUtfører(
@@ -35,19 +34,8 @@ class ResendSakstatistikkJobb : ProvidersJobbSpesifikasjon {
         repositoryProvider: RepositoryProvider,
         gatewayProvider: GatewayProvider
     ): JobbUtfører {
-        val behandlingService = BehandlingService(repositoryProvider, gatewayProvider)
-        val sakStatistikkService = SaksStatistikkService(
-            behandlingService = behandlingService,
-            sakstatistikkRepository = repositoryProvider.provide(),
-            bqBehandlingMapper = BQBehandlingMapper(
-                behandlingService = behandlingService,
-                rettighetstypeperiodeRepository = repositoryProvider.provide(),
-                oppgaveRepository = repositoryProvider.provide(),
-                sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
-            ),
-        )
         return ResendSakstatistikkJobbUtfører(
-            sakStatikkService = sakStatistikkService,
+            sakStatikkService = lagSaksStatistikkService(repositoryProvider, gatewayProvider),
         )
     }
 
