@@ -14,7 +14,7 @@
   "vurderingsbehov": [
     "MELDEKORT"
   ],
-  "\u00e5rsakTilOpprettelse": "MELDEKORT",
+  "årsakTilOpprettelse": "MELDEKORT",
   "avklaringsbehov": [],
   "hendelsesTidspunkt": "2025-12-10T10:56:01.939607662",
   "avsluttetBehandling": {
@@ -358,101 +358,101 @@
         }
       ]
     },
-    "vilk\u00e5rsResultat": {
+    "vilkårsResultat": {
       "typeBehandling": "Revurdering",
-      "vilk\u00e5r": [
+      "vilkår": [
         {
-          "vilk\u00e5rType": "ALDERSVILK\u00c5RET",
+          "vilkårType": "ALDERSVILKÅRET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "BISTANDSVILK\u00c5RET",
+          "vilkårType": "BISTANDSVILKÅRET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": true,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "GRUNNLAGET",
+          "vilkårType": "GRUNNLAGET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "LOVVALG",
+          "vilkårType": "LOVVALG",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "MEDLEMSKAP",
+          "vilkårType": "MEDLEMSKAP",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         },
         {
-          "vilk\u00e5rType": "OVERGANGUF\u00d8REVILK\u00c5RET",
+          "vilkårType": "OVERGANGUFØREVILKÅRET",
           "perioder": []
         },
         {
-          "vilk\u00e5rType": "SAMORDNING",
+          "vilkårType": "SAMORDNING",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2025-11-16",
               "utfall": "IKKE_OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": "ANNEN_FULL_YTELSE"
+              "innvilgelsesårsak": null,
+              "avslagsårsak": "ANNEN_FULL_YTELSE"
             }
           ]
         },
         {
-          "vilk\u00e5rType": "SYKDOMSVILK\u00c5RET",
+          "vilkårType": "SYKDOMSVILKÅRET",
           "perioder": [
             {
               "fraDato": "2025-09-05",
               "tilDato": "2026-09-04",
               "utfall": "OPPFYLT",
               "manuellVurdering": false,
-              "innvilgelses\u00e5rsak": null,
-              "avslags\u00e5rsak": null
+              "innvilgelsesårsak": null,
+              "avslagsårsak": null
             }
           ]
         }
@@ -470,7 +470,9 @@
         "erGjennomsnitt": false
       },
       "grunnlagYrkesskade": null,
-      "grunnlagUf\u00f8re": null
+      "grunnlagUføre": null,
+      "nedsattArbeidsevneEllerStudieevneDato": "2020-01-01",
+      "ytterligereNedsattArbeidsevneDato": null
     },
     "diagnoser": {
       "kodeverk": "ICPC2",
@@ -487,7 +489,7 @@
     "resultat": null,
     "vedtakstidspunkt": "2025-12-08T09:53:14.437",
     "perioderMedArbeidsopptrapping": [],
-        "vedtattStansOpphør": []
+    "vedtattStansOpphør": []
   },
   "identerForSak": [
     "123345",
@@ -571,7 +573,7 @@
       ]
     }
   ],
-  "s\u00f8knadIder": [
+  "søknadIder": [
     {
       "identifikator": "1234567"
     }

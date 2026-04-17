@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
+import java.time.LocalDate
 import java.time.Year
 import java.util.*
 
@@ -150,16 +151,24 @@ fun TilkjentYtelsePeriodeDTO.tilDomene(): TilkjentYtelsePeriode {
 }
 
 fun Grunnlag11_19DTO.tilDomene(
+    nedsattArbeidsevneEllerStudieevneDato: LocalDate,
+    ytterligereNedsattArbeidsevneDato: LocalDate? = null,
 ): IBeregningsGrunnlag.Grunnlag_11_19 {
     return IBeregningsGrunnlag.Grunnlag_11_19(
         grunnlag = grunnlaget,
         er6GBegrenset = er6GBegrenset,
         erGjennomsnitt = erGjennomsnitt,
-        inntekter = inntekter.mapKeys { (k, _) -> k.toInt() }
+        inntekter = inntekter.mapKeys { (k, _) -> k.toInt() },
+        nedsattArbeidsevneEllerStudieevneDato = nedsattArbeidsevneEllerStudieevneDato,
+        ytterligereNedsattArbeidsevneDato = ytterligereNedsattArbeidsevneDato,
     )
 }
 
-fun tilDomene(grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO): IBeregningsGrunnlag.GrunnlagYrkesskade {
+fun tilDomene(
+    grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO,
+    nedsattArbeidsevneEllerStudieevneDato: LocalDate,
+    ytterligereNedsattArbeidsevneDato: LocalDate?
+): IBeregningsGrunnlag.GrunnlagYrkesskade {
     return IBeregningsGrunnlag.GrunnlagYrkesskade(
         grunnlaget = grunnlagYrkesskadeDTO.grunnlaget.toDouble(),
         beregningsgrunnlag = tilDomene(grunnlagYrkesskadeDTO.beregningsgrunnlag), // Assuming recursive structure handling
@@ -172,18 +181,29 @@ fun tilDomene(grunnlagYrkesskadeDTO: GrunnlagYrkesskadeDTO): IBeregningsGrunnlag
         yrkesskadeTidspunkt = Year.of(grunnlagYrkesskadeDTO.yrkesskadeTidspunkt),
         grunnlagForBeregningAvYrkesskadeandel = grunnlagYrkesskadeDTO.grunnlagForBeregningAvYrkesskadeandel,
         yrkesskadeinntektIG = grunnlagYrkesskadeDTO.yrkesskadeinntektIG,
-        grunnlagEtterYrkesskadeFordel = grunnlagYrkesskadeDTO.grunnlagEtterYrkesskadeFordel
+        grunnlagEtterYrkesskadeFordel = grunnlagYrkesskadeDTO.grunnlagEtterYrkesskadeFordel,
+        nedsattArbeidsevneEllerStudieevneDato = nedsattArbeidsevneEllerStudieevneDato,
+        ytterligereNedsattArbeidsevneDato = ytterligereNedsattArbeidsevneDato,
     )
 }
 
-fun tilDomene(grunnlagUføreDTO: GrunnlagUføreDTO): IBeregningsGrunnlag.GrunnlagUføre {
+fun tilDomene(
+    grunnlagUføreDTO: GrunnlagUføreDTO,
+    nedsattArbeidsevneEllerStudieevneDato: LocalDate,
+    ytterligereNedsattArbeidsevneDato: LocalDate?
+): IBeregningsGrunnlag.GrunnlagUføre {
     return IBeregningsGrunnlag.GrunnlagUføre(
         grunnlag = grunnlagUføreDTO.grunnlaget.toDouble(),
         type = grunnlagUføreDTO.type.tilDomene(),
-        grunnlag11_19 = grunnlagUføreDTO.grunnlag.tilDomene(),
+        grunnlag11_19 = grunnlagUføreDTO.grunnlag.tilDomene(
+            nedsattArbeidsevneEllerStudieevneDato,
+            ytterligereNedsattArbeidsevneDato
+        ),
         uføregrader = grunnlagUføreDTO.uføregrader.associate { it.virkningstidspunkt to it.grad },
         uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføreDTO.uføreYtterligereNedsattArbeidsevneÅr,
-        uføreInntekterFraForegåendeÅr = grunnlagUføreDTO.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() }
+        uføreInntekterFraForegåendeÅr = grunnlagUføreDTO.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() },
+        nedsattArbeidsevneEllerStudieevneDato = nedsattArbeidsevneEllerStudieevneDato,
+        ytterligereNedsattArbeidsevneDato = ytterligereNedsattArbeidsevneDato,
     )
 }
 
@@ -192,25 +212,44 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
     @Suppress("LocalVariableName", "VariableNaming") val grunnlag11_19dto =
         beregningsgrunnlagDTO.grunnlag11_19dto
     val grunnlagUføre = beregningsgrunnlagDTO.grunnlagUføre
+    val nedsattDato = beregningsgrunnlagDTO.nedsattArbeidsevneEllerStudieevneDato
+    val ytterligereDato = beregningsgrunnlagDTO.ytterligereNedsattArbeidsevneDato
     return when {
         grunnlag11_19dto != null -> IBeregningsGrunnlag.Grunnlag_11_19(
             grunnlag11_19dto.grunnlaget,
             grunnlag11_19dto.er6GBegrenset,
             grunnlag11_19dto.erGjennomsnitt,
-            grunnlag11_19dto.inntekter.mapKeys { (k, _) -> k.toInt() }
+            grunnlag11_19dto.inntekter.mapKeys { (k, _) -> k.toInt() },
+            nedsattArbeidsevneEllerStudieevneDato = nedsattDato,
+            ytterligereNedsattArbeidsevneDato = ytterligereDato,
         )
 
         grunnlagYrkesskade != null -> {
             var beregningsGrunnlag: IBeregningsGrunnlag? = null
             if (grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre != null) {
                 beregningsGrunnlag =
-                    grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre?.let { tilDomene(it) }
+                    grunnlagYrkesskade.beregningsgrunnlag.grunnlagUføre?.let {
+                        tilDomene(
+                            it,
+                            grunnlagYrkesskade.beregningsgrunnlag.nedsattArbeidsevneEllerStudieevneDato,
+                            grunnlagYrkesskade.beregningsgrunnlag.ytterligereNedsattArbeidsevneDato
+                        )
+                    }
             } else if (beregningsgrunnlagDTO.grunnlagYrkesskade?.beregningsgrunnlag?.grunnlagYrkesskade != null) {
                 beregningsGrunnlag =
-                    grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade?.let { tilDomene(it) }
+                    grunnlagYrkesskade.beregningsgrunnlag.grunnlagYrkesskade?.let {
+                        tilDomene(
+                            it,
+                            grunnlagYrkesskade.beregningsgrunnlag.nedsattArbeidsevneEllerStudieevneDato,
+                            grunnlagYrkesskade.beregningsgrunnlag.ytterligereNedsattArbeidsevneDato
+                        )
+                    }
             } else if (grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto != null) {
                 beregningsGrunnlag =
-                    grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene()
+                    grunnlagYrkesskade.beregningsgrunnlag.grunnlag11_19dto?.tilDomene(
+                        grunnlagYrkesskade.beregningsgrunnlag.nedsattArbeidsevneEllerStudieevneDato,
+                        grunnlagYrkesskade.beregningsgrunnlag.ytterligereNedsattArbeidsevneDato,
+                    )
             }
             beregningsGrunnlag =
                 requireNotNull(beregningsGrunnlag) { "Beregningsgrunnlag må være satt for yrkesskade" }
@@ -228,16 +267,20 @@ fun tilDomene(beregningsgrunnlagDTO: BeregningsgrunnlagDTO): IBeregningsGrunnlag
                 terskelverdiForYrkesskade = grunnlagYrkesskade.terskelverdiForYrkesskade,
                 yrkesskadeinntektIG = grunnlagYrkesskade.yrkesskadeinntektIG,
                 yrkesskadeTidspunkt = Year.of(grunnlagYrkesskade.yrkesskadeTidspunkt),
+                nedsattArbeidsevneEllerStudieevneDato = nedsattDato,
+                ytterligereNedsattArbeidsevneDato = ytterligereDato,
             )
         }
 
         grunnlagUføre != null -> IBeregningsGrunnlag.GrunnlagUføre(
-            grunnlag11_19 = grunnlagUføre.grunnlag.tilDomene(),
+            grunnlag11_19 = grunnlagUføre.grunnlag.tilDomene(nedsattDato, ytterligereDato),
             uføreInntekterFraForegåendeÅr = grunnlagUføre.uføreInntekterFraForegåendeÅr.mapKeys { (k, _) -> k.toInt() },
             uføreYtterligereNedsattArbeidsevneÅr = grunnlagUføre.uføreYtterligereNedsattArbeidsevneÅr,
             uføregrader = grunnlagUføre.uføregrader.associate { it.virkningstidspunkt to it.grad },
             grunnlag = grunnlagUføre.grunnlaget.toDouble(),
-            type = grunnlagUføre.type.tilDomene()
+            type = grunnlagUføre.type.tilDomene(),
+            nedsattArbeidsevneEllerStudieevneDato = nedsattDato,
+            ytterligereNedsattArbeidsevneDato = ytterligereDato,
         )
 
         else -> error("Ugyldig tilstand.")

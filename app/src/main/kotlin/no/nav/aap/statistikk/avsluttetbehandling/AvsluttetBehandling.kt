@@ -143,17 +143,22 @@ sealed interface IBeregningsGrunnlag {
      */
     fun grunnlaget(): Double
 
-
     fun type(): GrunnlagType
 
     fun beregningsår(): Year
+
+    fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate
+
+    fun ytterligereNedsattArbeidsevneDato(): LocalDate?
 
     @Suppress("ClassName")
     data class Grunnlag_11_19(
         val grunnlag: Double,
         val er6GBegrenset: Boolean,
         val erGjennomsnitt: Boolean,
-        val inntekter: Map<Int, Double>
+        val inntekter: Map<Int, Double>,
+        val nedsattArbeidsevneEllerStudieevneDato: LocalDate,
+        val ytterligereNedsattArbeidsevneDato: LocalDate? = null,
     ) : IBeregningsGrunnlag {
         override fun grunnlaget(): Double {
             return grunnlag
@@ -166,6 +171,12 @@ sealed interface IBeregningsGrunnlag {
         override fun beregningsår(): Year {
             return Year.of(inntekter.keys.max() + 1)
         }
+
+        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate =
+            nedsattArbeidsevneEllerStudieevneDato
+
+        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? =
+            ytterligereNedsattArbeidsevneDato
     }
 
     data class GrunnlagUføre(
@@ -175,6 +186,8 @@ sealed interface IBeregningsGrunnlag {
         val uføregrader: Map<LocalDate, Int>,
         val uføreInntekterFraForegåendeÅr: Map<Int, Double>,
         val uføreYtterligereNedsattArbeidsevneÅr: Int,
+        val nedsattArbeidsevneEllerStudieevneDato: LocalDate,
+        val ytterligereNedsattArbeidsevneDato: LocalDate? = null,
     ) : IBeregningsGrunnlag {
         override fun grunnlaget(): Double {
             return grunnlag
@@ -190,6 +203,12 @@ sealed interface IBeregningsGrunnlag {
                 UføreType.YTTERLIGERE_NEDSATT -> Year.of(uføreInntekterFraForegåendeÅr.keys.max() + 1)
             }
         }
+
+        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate =
+            nedsattArbeidsevneEllerStudieevneDato
+
+        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? =
+            ytterligereNedsattArbeidsevneDato
     }
 
     data class GrunnlagYrkesskade(
@@ -205,6 +224,8 @@ sealed interface IBeregningsGrunnlag {
         val grunnlagForBeregningAvYrkesskadeandel: BigDecimal,
         val yrkesskadeinntektIG: BigDecimal,
         val grunnlagEtterYrkesskadeFordel: BigDecimal,
+        val nedsattArbeidsevneEllerStudieevneDato: LocalDate,
+        val ytterligereNedsattArbeidsevneDato: LocalDate? = null,
     ) : IBeregningsGrunnlag {
         override fun grunnlaget(): Double {
             return grunnlaget
@@ -218,5 +239,11 @@ sealed interface IBeregningsGrunnlag {
             return if (benyttetAndelForYrkesskade == 100) yrkesskadeTidspunkt else
                 beregningsgrunnlag.beregningsår()
         }
+
+        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate =
+            nedsattArbeidsevneEllerStudieevneDato
+
+        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? =
+            ytterligereNedsattArbeidsevneDato
     }
 }
