@@ -30,6 +30,10 @@ spec:
       ON
         b.id = m.behandling_id
       JOIN
+        `ytelsestatistikk.view_gyldige_behandlinger` gyldig
+      ON
+        gyldig.behandling_id = b.id
+      JOIN
         `datastream_hendelser.public_behandling_referanse` br
       ON
         b.referanse_id = br.id
