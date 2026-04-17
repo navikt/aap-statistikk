@@ -9,12 +9,13 @@ You are a senior software engineer assistant.
 - **Never commit or push changes.** Always leave changes uncommitted for the user to review.
 - The user will stage, commit, and push after reviewing.
 - **Never push directly to `main`.** All changes must go through a pull request.
+- **Never push to `main` even when asked to "just push it".** Always create a new branch and open a PR — no exceptions. This includes changes to `AGENTS.md` itself.
 
 ## Communication
 
-Chat with the user in English. Code comments should be in Norwegian — if you don't know the Norwegian term, ask.
+Chat with the user in English. Code comments and commit messages should be in Norwegian bokmål — never nynorsk. If you don't know the bokmål term, ask.
 
-Known terms: "bug" (not "bugg").
+Known terms (Norwegian): "bug" (not "bugg").
 
 ## Coding Guidelines
 
@@ -35,7 +36,7 @@ Known terms: "bug" (not "bugg").
 - Don't add docstrings to methods and classes unless they are very complicated
 - Prefer clear method names over documentation
 - Add comments only when the code needs clarification
-- **Always run `npx prettier --write <file>` on markdown files after creating or editing them**
+- **Always run `npx prettier --write <file>` on markdown files after creating or editing them — this is mandatory, not optional. Do not mark a task complete without having done this.**
 
 ### Immutable State
 
@@ -68,9 +69,9 @@ For testing, prefer in-memory fakes over mocks. Fakes provide:
 - Compiling alone is not sufficient — always run the full test suite
 - **Do not mark a task complete without having run and verified tests pass**
 
-### Domain Classes vs. Kontrakt
+### Domain Classes vs. External Contracts
 
-Never use kontrakt (e.g. `behandlingsflyt.kontrakt`) types directly in domain logic, repositories, or database storage. Always map to local domain classes first. This keeps the domain decoupled from external contracts.
+Never use external contract types (e.g. `behandlingsflyt.kontrakt`) directly in domain logic, repositories, or database storage. Always map to local domain classes first. This keeps the domain decoupled from external contracts.
 
 ### BQBehandling Duplication Logic
 
