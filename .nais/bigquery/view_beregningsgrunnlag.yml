@@ -30,6 +30,8 @@ spec:
               END
         ) AS grunnlaget,
         inntekter_11_19.inntekter AS inntekter,
+        pg.nedsatt_arbeidsevne_dato as nedsatt_arbeidsevne_dato,
+        pg.ytterligere_nedsatt_arbeidsevne_dato as ytterligere_nedsatt_arbeidsevne_dato,
         g.er6g_begrenset AS grunnlag_er_6g_begrenset,
         g.er_gjennomsnitt AS grunnlag_er_gjennomsnitt,
         pg.beregningsaar,
