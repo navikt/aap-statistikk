@@ -171,15 +171,11 @@ data class Behandling(
 
         val sisteDefinisjon = Definisjon.forKode(sisteHendelse.avklaringsBehov)
 
-        if (sisteDefinisjon == Definisjon.KVALITETSSIKRING) {
-            return BehandlingMetode.KVALITETSSIKRING
+        return when (sisteDefinisjon.tilBehandlingMetode()) {
+            BehandlingMetode.KVALITETSSIKRING -> BehandlingMetode.KVALITETSSIKRING
+            BehandlingMetode.FATTE_VEDTAK -> BehandlingMetode.FATTE_VEDTAK
+            else -> if (this.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
         }
-
-        if (sisteDefinisjon == Definisjon.FATTE_VEDTAK) {
-            return BehandlingMetode.FATTE_VEDTAK
-        }
-
-        return if (this.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
     }
 }
 
@@ -188,6 +184,13 @@ private fun List<BehandlingHendelse>.erManuell(): Boolean {
     return this.filterNot { it.avklaringsBehov == null }.any {
         !Definisjon.forKode(requireNotNull(it.avklaringsBehov)).erAutomatisk()
     }
+}
+
+fun Definisjon.tilBehandlingMetode(): BehandlingMetode = when {
+    this == Definisjon.KVALITETSSIKRING -> BehandlingMetode.KVALITETSSIKRING
+    this == Definisjon.FATTE_VEDTAK -> BehandlingMetode.FATTE_VEDTAK
+    this.erAutomatisk() -> BehandlingMetode.AUTOMATISK
+    else -> BehandlingMetode.MANUELL
 }
 
 /**
