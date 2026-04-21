@@ -1,0 +1,19 @@
+{
+  "description": "Lag en pull request med gjeldende endringer — oppretter branch, committer, pusher og åpner PR",
+  "domain": "git",
+  "tags": ["git", "github", "pull-request", "workflow"],
+  "examples": [
+    {
+      "prompt": "Lag en PR med endringene jeg har gjort",
+      "scenario": "Oppretter PR fra ucommittede endringer"
+    },
+    {
+      "prompt": "Push og lag PR",
+      "scenario": "Committer, pusher og oppretter PR"
+    },
+    {
+      "prompt": "Lag en pull request",
+      "scenario": "Full PR-flyt fra scratch"
+    }
+  ]
+}
