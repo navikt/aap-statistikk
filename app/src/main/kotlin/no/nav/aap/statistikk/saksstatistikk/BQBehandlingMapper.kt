@@ -67,8 +67,8 @@ class BQBehandlingMapper(
         if (!erSkjermet && saksbehandler != null) {
             val tidligereBehandlingMetoderForSaksbehandler = snapshots
                 .dropLast(1)
-                .filter { it.saksbehandler == saksbehandler && it.avklaringsbehov != null }
-                .map { avklaringsbehovTilBehandlingMetode(it.avklaringsbehov!!) }
+                .filter { it.saksbehandler == saksbehandler }
+                .mapNotNull { snapshot -> snapshot.avklaringsbehov?.let { avklaringsbehovTilBehandlingMetode(it) } }
                 .filter { it != behandlingMetode }
                 .toSet()
 
