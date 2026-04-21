@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.Oppgave
@@ -24,15 +25,27 @@ class SakstatistikkEventSourcing {
 
     private fun konverterBehandlingHendelser(behandling: Behandling): List<SakstatistikkHendelse> {
         return behandling.hendelser.map { hendelse ->
+            val rolleEndret = rolleEndretMellom(hendelse.sisteLøsteAvklaringsbehov, hendelse.avklaringsBehov)
             BehandlingsflytHendelse(
                 behandlingReferanse = behandling.referanse,
                 tidspunkt = hendelse.hendelsesTidspunkt,
                 status = hendelse.status.name,
                 avklaringsbehov = hendelse.avklaringsBehov,
                 sisteLøsteAvklaringsbehov = hendelse.sisteLøsteAvklaringsbehov,
-                sisteSaksbehandlerPåBehandling = hendelse.sisteSaksbehandlerSomLøstebehov
+                sisteSaksbehandlerPåBehandling = if (rolleEndret) null else hendelse.sisteSaksbehandlerSomLøstebehov
             )
         }
+    }
+
+    /**
+     * Returnerer true dersom avklaringsbehovene løses av ulike roller, slik at saksbehandler-fallback
+     * ikke skal bæres over fra ett steg til et annet.
+     */
+    private fun rolleEndretMellom(forrigeAvklaringsbehov: String?, nyttAvklaringsbehov: String?): Boolean {
+        if (forrigeAvklaringsbehov == null || nyttAvklaringsbehov == null) return false
+        val forrigeRoller = Definisjon.forKode(forrigeAvklaringsbehov).løsesAv.toSet()
+        val nyeRoller = Definisjon.forKode(nyttAvklaringsbehov).løsesAv.toSet()
+        return forrigeRoller.intersect(nyeRoller).isEmpty()
     }
 
     private fun konverterOppgaveHendelser(oppgaver: List<Oppgave>): List<SakstatistikkHendelse> {
