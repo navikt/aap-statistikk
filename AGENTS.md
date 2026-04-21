@@ -17,8 +17,6 @@ Chat with the user in English. Code comments and commit messages should be in No
 
 Known terms (Norwegian): "bug" (not "bugg").
 
-Known terms (Norwegian): "bug" (not "bugg").
-
 ## Coding Guidelines
 
 - **Never store temporary files in /tmp** — this includes PR body files, debug output, scripts, etc.
@@ -66,8 +64,8 @@ For testing, prefer in-memory fakes over mocks. Fakes provide:
 - **Never use --no-daemon** when running Gradle tests or builds - it's slower
 - The Gradle daemon improves build performance through caching and hot JVM
 - **Always run `./gradlew test` after making code changes** to ensure all tests pass. While working, run tests on relevant files to save time.
-- **Run `./gradlew detektMain` after significant code changes** to check code quality
-- Fix any Detekt violations before committing
+- **Run `./gradlew test` when done with a task** — do not consider a task complete without verified passing tests.
+- **Run `./gradlew detektMain` after significant code changes** to check code quality. Fix any new violations introduced by your changes before committing — pre-existing violations can be left as-is.
 - Compiling alone is not sufficient — always run the full test suite
 - **Do not mark a task complete without having run and verified tests pass**
 

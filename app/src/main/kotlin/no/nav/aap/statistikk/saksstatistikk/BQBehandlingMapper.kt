@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
@@ -61,6 +62,25 @@ class BQBehandlingMapper(
         val saksbehandler =
             if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots)
 
+        // Advarsel: samme saksbehandler har hatt en annen behandlingmetode tidligere i denne behandlingen
+        val behandlingMetode = behandling.behandlingMetode()
+        if (!erSkjermet && saksbehandler != null) {
+            val tidligereBehandlingMetoderForSaksbehandler = snapshots
+                .dropLast(1)
+                .filter { it.saksbehandler == saksbehandler }
+                .mapNotNull { snapshot -> snapshot.avklaringsbehov?.let { avklaringsbehovTilBehandlingMetode(it) } }
+                .filter { it != behandlingMetode }
+                .toSet()
+
+            if (tidligereBehandlingMetoderForSaksbehandler.isNotEmpty()) {
+                log.warn(
+                    "Saksbehandler $saksbehandler har hatt behandlingmetode $behandlingMetode, " +
+                            "men hadde tidligere $tidligereBehandlingMetoderForSaksbehandler for behandling $behandlingReferanse. " +
+                            "Mulig feil i saksbehandler-utledning."
+                )
+            }
+        }
+
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         if (årsakTilOpprettelse == null) {
             log.info("Årsak til opprettelse er ikke satt. Behandling: $behandlingReferanse. Sak: ${sak.saksnummer}.")
@@ -78,7 +98,8 @@ class BQBehandlingMapper(
             ansvarligEnhet = ansvarligEnhet,
             saksbehandler = saksbehandler,
             endretTid = snapshots.last().tidspunkt,
-            behandlingStatus = behandlingStatus(behandling)
+            behandlingStatus = behandlingStatus(behandling),
+            behandlingMetode = behandlingMetode,
         )
     }
 
@@ -89,7 +110,8 @@ class BQBehandlingMapper(
         ansvarligEnhet: String?,
         saksbehandler: String?,
         endretTid: LocalDateTime,
-        behandlingStatus: String
+        behandlingStatus: String,
+        behandlingMetode: BehandlingMetode,
     ): BQBehandling {
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         val sak = behandling.sak
@@ -116,7 +138,7 @@ class BQBehandlingMapper(
             vedtakTid = behandling.vedtakstidspunkt(),
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
-            behandlingMetode = behandling.behandlingMetode().also {
+            behandlingMetode = behandlingMetode.also {
                 if (it == BehandlingMetode.AUTOMATISK) log.info(
                     "Behandling $behandlingReferanse er automatisk behandlet. Behandlingtype ${behandling.typeBehandling}"
                 )
@@ -231,6 +253,9 @@ class BQBehandlingMapper(
             }
         }
     }
+
+    private fun avklaringsbehovTilBehandlingMetode(avklaringsbehov: String): BehandlingMetode =
+        Definisjon.forKode(avklaringsbehov).tilBehandlingMetode()
 
     data class EnhetOgSaksbehandler(val enhet: String?, val saksbehandler: String?)
 
