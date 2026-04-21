@@ -19,7 +19,9 @@ data class SakstatistikkState(
 
     private fun applyBehandlingsflytHendelse(hendelse: BehandlingsflytHendelse): SakstatistikkState {
         val nySaksbehandler = when {
-            hendelse.avklaringsbehov == avklaringsbehov -> hendelse.sisteSaksbehandlerPåBehandling
+            // Avklaringsbehovet er uendret: behold eksisterende reservasjon fra oppgave.
+            // Faller tilbake på sisteSaksbehandlerPåBehandling kun hvis ingen oppgave har reservert ennå.
+            hendelse.avklaringsbehov == avklaringsbehov -> saksbehandler ?: hendelse.sisteSaksbehandlerPåBehandling
             avklaringsbehov == null && hendelse.sisteLøsteAvklaringsbehov == null -> hendelse.sisteSaksbehandlerPåBehandling
             else -> null
         }
