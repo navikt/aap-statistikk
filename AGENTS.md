@@ -17,6 +17,8 @@ Chat with the user in English. Code comments and commit messages should be in No
 
 Known terms (Norwegian): "bug" (not "bugg").
 
+Known terms (Norwegian): "bug" (not "bugg").
+
 ## Coding Guidelines
 
 - **Never store temporary files in /tmp** — this includes PR body files, debug output, scripts, etc.

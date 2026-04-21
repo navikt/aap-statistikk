@@ -239,7 +239,8 @@ class SakstatistikkEventSourcingTest {
     }
 
     @Test
-    fun `ny behandlingshendelse med samme avklaringsbehov bruker sisteSaksbehandler fra behandlingsflyt`() {
+    fun `ny behandlingshendelse med samme avklaringsbehov beholder oppgave-reservasjonen`() {
+        // Oppgaven er allerede reservert — behandlingshendelsen skal ikke overskrive med sisteSaksbehandlerSomLøstebehov
         val behandling = lagBehandling(
             hendelser = listOf(
                 lagBehandlingHendelse(
@@ -275,9 +276,56 @@ class SakstatistikkEventSourcingTest {
         assertThat(snapshots).hasSize(3)
         assertThat(snapshots[1].saksbehandler).isEqualTo("Kompanjong")
         assertThat(snapshots[2].saksbehandler)
-            .describedAs("Should use sisteSaksbehandlerSomLøstebehov when avklaringsbehov matches")
-            .isEqualTo("Kvaliguy")
+            .describedAs("Skal beholde oppgave-reservasjonen selv om behandlingshendelse med samme avklaringsbehov ankommer")
+            .isEqualTo("Kompanjong")
         assertThat(snapshots[2].avklaringsbehov).isEqualTo("5003")
+    }
+
+    @Test
+    fun `behandlingshendelse med samme avklaringsbehov overskriver ikke oppgave-reservasjon fra kvalitetssikrer`() {
+        // Reproduserer produksjonsbug: oppgave for KVALITETSSIKRING (5097) ble reservert av M132487,
+        // men etterfølgende behandlingshendelse med samme avklaringsbehov overskrev med B144259
+        // (sisteSaksbehandlerSomLøstebehov fra forrige steg)
+        val behandling = lagBehandling(
+            hendelser = listOf(
+                lagBehandlingHendelse(
+                    tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
+                    status = BehandlingStatus.UTREDES,
+                    avklaringsbehov = "5097",
+                    sisteSaksbehandlerPåBehandling = "B144259"
+                ),
+                // Ny behandlingshendelse med samme avklaringsbehov, ankommer etter reservasjonen
+                lagBehandlingHendelse(
+                    tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 30),
+                    status = BehandlingStatus.UTREDES,
+                    avklaringsbehov = "5097",
+                    sisteSaksbehandlerPåBehandling = "B144259"
+                )
+            )
+        )
+
+        val oppgaver = listOf(
+            lagOppgave(
+                avklaringsbehov = "5097",
+                hendelser = listOf(
+                    lagOppgaveHendelse(
+                        tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 20),
+                        hendelseType = HendelseType.RESERVERT,
+                        reservertAv = "M132487",
+                        enhet = "0300",
+                        avklaringsbehov = "5097"
+                    )
+                )
+            )
+        )
+
+        val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
+
+        val sisteSnapshot = snapshots.last()
+        assertThat(sisteSnapshot.avklaringsbehov).isEqualTo("5097")
+        assertThat(sisteSnapshot.saksbehandler)
+            .describedAs("Skal beholde kvalitetssikreren M132487 — ikke overskrive med B144259 fra forrige steg")
+            .isEqualTo("M132487")
     }
 
     @Test
