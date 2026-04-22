@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.postmottak
 
+import no.nav.aap.statistikk.only
+
 class PostmottakBehandlingService(private val postmottakBehandlingRepository: PostmottakBehandlingRepository) {
     fun oppdaterEllerOpprettBehandling(innkommendeBehandling: PostmottakBehandling): PostmottakBehandling {
         val eksisterendeBehandling =
@@ -12,7 +14,7 @@ class PostmottakBehandlingService(private val postmottakBehandlingRepository: Po
         } else {
             postmottakBehandlingRepository.oppdaterBehandling(
                 innkommendeBehandling.referanse,
-                behandling = innkommendeBehandling.endringer().first() // "Only"
+                behandling = innkommendeBehandling.endringer().only()
             )
             requireNotNull(postmottakBehandlingRepository.hentEksisterendeBehandling(innkommendeBehandling.referanse)) {
                 "Behandling med referanse ${innkommendeBehandling.referanse} forsvant etter oppdatering."
