@@ -10,3 +10,5 @@ fun <T> List<T>.onlyOrNull(): T? {
     }
     return this.firstOrNull()
 }
+
+fun <T> List<T>.only(): T = requireNotNull(onlyOrNull()) { "Listen er tom." }
