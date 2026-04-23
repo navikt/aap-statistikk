@@ -110,15 +110,10 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         triggerKilde = "retry($triggerKilde)",
                     )
                 } else {
-                    log.error(
+                    error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
-                                "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Lagrer med null enhet."
-                    )
-                    sakStatistikkService.lagreSakInfoTilBigquery(
-                        behandlingId,
-                        lagreUtenEnhet = true,
+                                "avklaringsbehov=${resultat.avklaringsbehovKode}."
                     )
                 }
             }

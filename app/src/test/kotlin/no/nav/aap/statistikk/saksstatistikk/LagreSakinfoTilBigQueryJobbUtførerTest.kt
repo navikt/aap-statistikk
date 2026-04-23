@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.testutils.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -113,7 +114,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     }
 
     @Test
-    fun `lagrer med null enhet etter maks antall forsøk`() {
+    fun `kaster exception etter maks antall forsøk når enhet mangler`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
             SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", lagFakeBQBehandling())
@@ -128,11 +129,10 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
 
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(LagreSakinfoPayload(behandlingId, retryCount = testConfig.maxRetries))
-        utfører.utfør(input)
 
-        // Første kall returnerer ManglerEnhet, andre kall med lagreUtenEnhet=true
-        assertThat(service.kallteller).isEqualTo(2)
-        assertThat(service.sisteKallLagreUtenEnhet).isTrue()
+        assertThrows<IllegalStateException> {
+            utfører.utfør(input)
+        }
     }
 
     @Test
