@@ -473,13 +473,7 @@ class IntegrationTest {
 
             postBehandlingsflytHendelse(initialBehandlingHendelse)
 
-            val førsteHendelser = listOf(
-                Triple(null, null, BehandlingMetode.MANUELL),
-                Triple(null, null, BehandlingMetode.MANUELL)
-            )
-            verifiserHendelseRekkefølge(førsteHendelser)
-
-            // Oppgave for sykdom opprettes
+            // Oppgave for sykdom opprettes — må postes før kjørJobber slik at enhet er tilgjengelig
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
@@ -496,8 +490,11 @@ class IntegrationTest {
                 )
             )
 
-            val andreHendelser = førsteHendelser + Triple("0401", null, BehandlingMetode.MANUELL)
-            verifiserHendelseRekkefølge(andreHendelser)
+            val førsteHendelser = listOf(
+                Triple("0401", null, BehandlingMetode.MANUELL),
+                Triple("0401", null, BehandlingMetode.MANUELL)
+            )
+            verifiserHendelseRekkefølge(førsteHendelser)
 
             // Oppgave reserveres av saksbehandler
             postOppgaveData(
@@ -520,7 +517,7 @@ class IntegrationTest {
             )
 
             val tredjeHendelser =
-                andreHendelser + Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL)
+                førsteHendelser + Triple("0401", "Kompanjong Korrodheid", BehandlingMetode.MANUELL)
             verifiserHendelseRekkefølge(tredjeHendelser)
 
             // Sykdomsbehov løses og går til kvalitetssikring
@@ -530,11 +527,6 @@ class IntegrationTest {
                     .leggTilBehov(Definisjon.KVALITETSSIKRING)
             )
             postBehandlingsflytHendelse(hendelseMedKvalitetssikring)
-
-            val fjerdeHendelser = tredjeHendelser +
-                    // Vet ikke kontor ennå. Saksbehandler skal være null fordi ingen har reservert oppgaven ennå
-                    // Men om vi ikke verifiserer her, finnes den senere pga retries
-                    Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
 
             // Sykdomsoppgave lukkes
             postOppgaveData(
@@ -556,16 +548,7 @@ class IntegrationTest {
                 )
             )
 
-            val femteHendelser = fjerdeHendelser
-//            + Triple(
-//                null,
-//                "Kompanjong Korrodheid",
-//                BehandlingMetode.KVALITETSSIKRING
-//            ) // feil saksbehandler, bør være null
-
-//            verifiserHendelseRekkefølge(femteHendelser)
-
-            // Oppgave for kvalitetssikring opprettes
+            // Oppgave for kvalitetssikring opprettes — må postes før kjørJobber
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
                     hendelse = HendelseType.OPPRETTET,
@@ -582,10 +565,10 @@ class IntegrationTest {
                 )
             )
 
-            val sjetteHendelser = femteHendelser
-            //  Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
+            val fjerdeHendelser = tredjeHendelser +
+                    Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
 
-            verifiserHendelseRekkefølge(sjetteHendelser)
+            verifiserHendelseRekkefølge(fjerdeHendelser)
 
             // Kvalitetssikrers oppgave reserveres
             postOppgaveData(
@@ -608,9 +591,9 @@ class IntegrationTest {
             )
 
             // LagreOppgaveJobbUtfører triggers a new BQBehandling with saksbehandler
-            val åttendeHendelser =
-                sjetteHendelser + Triple("0400", "Kvaliguy", BehandlingMetode.KVALITETSSIKRING)
-            verifiserHendelseRekkefølge(åttendeHendelser)
+            val femteHendelser =
+                fjerdeHendelser + Triple("0400", "Kvaliguy", BehandlingMetode.KVALITETSSIKRING)
+            verifiserHendelseRekkefølge(femteHendelser)
 
             // Kvalitetssikring fullføres og går til beslutter
             val hendelseMedBeslutter = hendelseMedKvalitetssikring.nyHendelse().copy(
@@ -620,17 +603,9 @@ class IntegrationTest {
             )
             postBehandlingsflytHendelse(hendelseMedBeslutter)
 
-            val niendeHendelser =
+            val sjetteHendelser =
                 // Saksbehandler skal være null fordi ingen har reservert beslutteroppgaven ennå
-                åttendeHendelser
-//            + Triple(
-//                    null,
-//                    null,
-//                    BehandlingMetode.FATTE_VEDTAK
-//                )
-
-            // Men om vi ikke verifiserer, rekker den å bli satt pga retries
-//            verifiserHendelseRekkefølge(niendeHendelser)
+                femteHendelser
 
             // Beslutteroppgave opprettes
             postOppgaveData(
@@ -649,10 +624,10 @@ class IntegrationTest {
                 )
             )
 
-            val tiendeHendelser =
-                niendeHendelser + Triple("4491", null, BehandlingMetode.FATTE_VEDTAK)
+            val syvendeHendelser =
+                sjetteHendelser + Triple("4491", null, BehandlingMetode.FATTE_VEDTAK)
 
-            verifiserHendelseRekkefølge(tiendeHendelser)
+            verifiserHendelseRekkefølge(syvendeHendelser)
 
             // Beslutteroppgave reserveres
             postOppgaveData(
@@ -675,9 +650,9 @@ class IntegrationTest {
             )
 
             // LagreOppgaveJobbUtfører trigger en ny BQBehandling med saksbehandler
-            val ellevteHendelser =
-                tiendeHendelser + Triple("4491", "Besluttersen", BehandlingMetode.FATTE_VEDTAK)
-            verifiserHendelseRekkefølge(ellevteHendelser)
+            val åttendeHendelser =
+                syvendeHendelser + Triple("4491", "Besluttersen", BehandlingMetode.FATTE_VEDTAK)
+            verifiserHendelseRekkefølge(åttendeHendelser)
 
             // Vedtak fattes og behandling går til iverksettelse
             val hendelseIverksettes = hendelseMedBeslutter
@@ -689,10 +664,10 @@ class IntegrationTest {
             postBehandlingsflytHendelse(hendelseIverksettes)
 
             // Saksbehandler bør være null her
-            val tolvteHendelser =
-                ellevteHendelser + Triple("4491", null, BehandlingMetode.MANUELL)
+            val niendeHendelser =
+                åttendeHendelser + Triple("4491", null, BehandlingMetode.MANUELL)
 
-            verifiserHendelseRekkefølge(tolvteHendelser)
+            verifiserHendelseRekkefølge(niendeHendelser)
 
             // Beslutteroppgave lukkes
             postOppgaveData(
@@ -713,9 +688,9 @@ class IntegrationTest {
             )
 
             // Ingen endring
-            val trettendeHendelser = tolvteHendelser
+            val tiendeHendelser = niendeHendelser
 
-            verifiserHendelseRekkefølge(trettendeHendelser)
+            verifiserHendelseRekkefølge(tiendeHendelser)
 
             // Brevoppgave opprettes
             postOppgaveData(
@@ -739,9 +714,9 @@ class IntegrationTest {
                 )
             )
 
-            val fjortendeHendelser =
-                trettendeHendelser + Triple("4491", "Brev-Besluttersen", BehandlingMetode.MANUELL)
-            verifiserHendelseRekkefølge(fjortendeHendelser)
+            val ellevteHendelser =
+                tiendeHendelser + Triple("4491", "Brev-Besluttersen", BehandlingMetode.MANUELL)
+            verifiserHendelseRekkefølge(ellevteHendelser)
 
             // Vedtaksbrev sendes og behandling avsluttes
             val hendelseAvsluttet = hendelseIverksettes
@@ -754,12 +729,12 @@ class IntegrationTest {
 
             postBehandlingsflytHendelse(hendelseAvsluttet)
 
-            val femtendeHendelser =
-                fjortendeHendelser + Triple("4491", "Brev-Besluttersen", BehandlingMetode.MANUELL)
+            val tolvteHendelser =
+                ellevteHendelser + Triple("4491", "Brev-Besluttersen", BehandlingMetode.MANUELL)
 
-            verifiserHendelseRekkefølge(femtendeHendelser)
+            verifiserHendelseRekkefølge(tolvteHendelser)
             println("ENDELIGE HENDELSER:")
-            fjortendeHendelser.forEach {
+            ellevteHendelser.forEach {
                 println(it)
             }
         }
@@ -881,13 +856,10 @@ class IntegrationTest {
             dbConfig,
             azureConfig = azureConfig
         ) { motor ->
-            postBehandlingsflytHendelse(hendelsx)
-
-            motor.kjørJobber()
-
             val gjeldendeAVklaringsbehov =
-                dataSource.transaction { BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!.gjeldendeAvklaringsBehov }!!
-                    .let { Definisjon.forKode(it) }
+                hendelsx.avklaringsbehov.utledGjeldendeAvklaringsbehov()!!
+
+            postBehandlingsflytHendelse(hendelsx)
 
             postOppgaveData(
                 no.nav.aap.oppgave.statistikk.OppgaveHendelse(
@@ -955,7 +927,7 @@ class IntegrationTest {
             }.vilkår
 
             assertThat(vilkårRespons).hasSize(9)
-            val vilkårsVurderingRad = vilkårRespons!!.first()
+            val vilkårsVurderingRad = vilkårRespons.first()
 
             assertThat(vilkårsVurderingRad.vilkårType).isEqualTo(Vilkårtype.ALDERSVILKÅRET.name)
 
@@ -989,11 +961,20 @@ class IntegrationTest {
     ): UUID {
         var referanse: UUID? = null
         var c = 1
-        hendelser.forEach {
+        var i = 0
+        while (i < hendelser.size) {
+            val it = hendelser[i]
             when (it) {
                 is BehandlingHendelseData -> {
                     postBehandlingsflytHendelse(it.data)
                     referanse = it.data.behandlingReferanse
+                    // Post eventuelle påfølgende oppgavehendelser før vi kjører jobber
+                    while (i + 1 < hendelser.size && hendelser[i + 1] is OppgaveHendelseData) {
+                        i++
+                        val oppgave = hendelser[i] as OppgaveHendelseData
+                        postOppgaveHendelse(dataSource, oppgave.data)
+                        logger.info("Hendelse nr ${c++}: ${oppgave.data::class.simpleName} av ${hendelser.size}")
+                    }
                     motor.kjørJobber()
                 }
 
@@ -1005,6 +986,7 @@ class IntegrationTest {
                 is OppgaveHendelseAPIData -> postOppgaveData(it.data)
             }
             logger.info("Hendelse nr ${c++}: ${it.data::class.simpleName} av ${hendelser.size}")
+            i++
         }
 
         val feilende = dataSource.transaction { DriftJobbRepositoryExposed(it).hentAlleFeilende() }
