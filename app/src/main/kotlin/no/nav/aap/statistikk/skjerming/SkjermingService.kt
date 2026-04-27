@@ -18,7 +18,7 @@ class SkjermingService(
                 .flatMap { it.adressebeskyttelse }
                 .any { it.gradering.erHemmelig() }
         } catch (e: HttpConnectTimeoutException) {
-            logger.error("Feilet kall til PDL (HttpConnectTimeoutException). Kaster exception.", e)
+            logger.warn("Feilet kall til PDL (HttpConnectTimeoutException). Kaster exception.", e)
             throw e
         } catch (e: java.net.ConnectException) {
             logger.error("Feilet kall til PDL (ConnectException). Kaster exception.", e)
