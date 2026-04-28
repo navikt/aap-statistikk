@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
-import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
@@ -64,11 +63,17 @@ class BQBehandlingMapper(
 
         // Advarsel: samme saksbehandler har hatt en annen behandlingmetode tidligere i denne behandlingen
         val behandlingMetode = behandling.behandlingMetode()
-        if (!erSkjermet && saksbehandler != null) {
+        if (!erSkjermet && saksbehandler != null && behandlingMetode == BehandlingMetode.KVALITETSSIKRING) {
             val tidligereBehandlingMetoderForSaksbehandler = snapshots
                 .dropLast(1)
                 .filter { it.saksbehandler == saksbehandler }
-                .mapNotNull { snapshot -> snapshot.avklaringsbehov?.let { avklaringsbehovTilBehandlingMetode(it) } }
+                .mapNotNull { snapshot ->
+                    snapshot.avklaringsbehov?.let {
+                        avklaringsbehovTilBehandlingMetode(
+                            it
+                        )
+                    }
+                }
                 .filter { it != behandlingMetode }
                 .toSet()
 
@@ -276,6 +281,7 @@ class BQBehandlingMapper(
                 oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode.kode.name }
                     .maxByOrNull { it.sistEndret() }?.enhet?.kode
                     ?: ansvarligEnhet(behandling, snapshots)
+
             else -> ansvarligEnhet(behandling, snapshots)
         }
         val saksbehandler = when {
@@ -284,6 +290,7 @@ class BQBehandlingMapper(
                 oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode.kode.name }
                     .maxByOrNull { it.sistEndret() }?.reservertAv()?.ident
                     ?: utledSaksbehandler(behandling, snapshots)
+
             else -> utledSaksbehandler(behandling, snapshots)
         }
         return EnhetOgSaksbehandler(enhet, saksbehandler)
