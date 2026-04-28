@@ -8,7 +8,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
@@ -35,6 +35,7 @@ fun main() {
     System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
     System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
     System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
+    System.setProperty("nais.token.endpoint", azureConfig.tokenEndpoint.toString())
     val randomUUID = UUID.randomUUID()
     System.setProperty("integrasjon.postmottak.azp", randomUUID.toString())
     System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
@@ -53,7 +54,7 @@ fun main() {
 
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
-        tokenProvider = ClientCredentialsTokenProvider,
+        tokenProvider = AzureM2MTokenProvider,
         responseHandler = DefaultResponseHandler()
     )
 
