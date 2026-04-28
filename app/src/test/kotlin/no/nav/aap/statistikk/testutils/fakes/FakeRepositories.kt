@@ -58,13 +58,6 @@ object FakeBigQueryClient : IBigQueryClient {
         return emptyList()
     }
 
-    override fun <E> read(
-        table: BQTable<E>,
-        whereClause: String
-    ): List<E> {
-        return emptyList()
-    }
-
     override fun <E> insertMany(
         table: BQTable<E>,
         values: List<E>

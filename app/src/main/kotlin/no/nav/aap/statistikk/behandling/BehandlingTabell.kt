@@ -40,7 +40,6 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
     }
 
     override val tableName: String = TABLE_NAME
-    override val version: Int = 0
     override val schema: Schema
         get() {
             val saksnummer = Field.newBuilder("saksnummer", StandardSQLTypeName.STRING)
