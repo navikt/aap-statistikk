@@ -49,8 +49,13 @@ fun List<AvklaringsbehovHendelseDto>.tidspunktSisteEndring(): LocalDateTime? =
     this.maxByOrNull { it.tidspunktSisteEndring() }?.tidspunktSisteEndring()
 
 fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
-    return this.filter { it.status.returnert() }
-        .minByOrNull { it.tidspunktSisteEndring() }?.endringer?.maxByOrNull { it.tidsstempel }?.årsakTilRetur?.firstOrNull()?.årsak
+    val årsaker = this.filter { it.status.returnert() }
+        .minByOrNull { it.tidspunktSisteEndring() }
+        ?.endringer?.maxByOrNull { it.tidsstempel }
+        ?.årsakTilRetur ?: return null
+
+    return årsaker.sortedByDescending { it.årsak == ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE }
+        .firstOrNull()?.årsak
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {

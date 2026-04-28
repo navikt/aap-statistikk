@@ -32,7 +32,7 @@ class ReberegnHistorikk {
             mottattTid = dto.mottattTid,
             søknadsformat = dto.soknadsFormat.tilDomene(),
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-            sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
+            sisteLøsteAvklaringsbehov = forrigeLøste,
             sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem,
             sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
         )
@@ -60,7 +60,7 @@ class ReberegnHistorikk {
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                         relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-                        sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
+                        sisteLøsteAvklaringsbehov = forrigeLøste,
                         sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem,
                         sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
                     )
@@ -99,7 +99,7 @@ class ReberegnHistorikk {
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
                     hendelsesTidspunkt = requireNotNull(curr.tidspunktSisteEndring()),
-                    avklaringsBehov = curr.utledGjeldendeAvklaringsbehov()?.kode?.name,
+                    avklaringsBehov = curr.utledGjeldendeAvklaringsbehov(),
                     avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
                     steggruppe = curr.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
                     venteÅrsak = curr.utledÅrsakTilSattPåVent(),
@@ -114,7 +114,7 @@ class ReberegnHistorikk {
                     mottattTid = dto.mottattTid,
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                     relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-                    sisteLøsteAvklaringsbehov = forrigeLøste?.kode?.name,
+                    sisteLøsteAvklaringsbehov = forrigeLøste,
                     sisteSaksbehandlerSomLøstebehov = forrigeløstAvHvem,
                     sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
 
@@ -143,7 +143,7 @@ class ReberegnHistorikk {
                         mottattTid = dto.mottattTid,
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                         relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-                        sisteLøsteAvklaringsbehov = forrigeLøste?.name,
+                        sisteLøsteAvklaringsbehov = forrigeLøste,
                         sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem
 
                     )

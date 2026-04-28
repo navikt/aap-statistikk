@@ -52,8 +52,8 @@ class BQBehandlingMapperTest {
 
     private fun lagBehandling(
         referanse: UUID = UUID.randomUUID(),
-        gjeldendeAvklaringsbehov: String? = null,
-        sisteLøsteAvklaringsbehov: String? = null,
+        gjeldendeAvklaringsbehov: Definisjon? = null,
+        sisteLøsteAvklaringsbehov: Definisjon? = null,
         sisteSaksbehandlerSomLøstebehov: String? = null,
         hendelser: List<BehandlingHendelse>
     ): Behandling {
@@ -87,8 +87,8 @@ class BQBehandlingMapperTest {
     private fun lagBehandlingHendelse(
         tidspunkt: LocalDateTime = LocalDateTime.of(2024, 1, 1, 10, 0),
         hendelsesTidspunkt: LocalDateTime = tidspunkt,
-        avklaringsBehov: String? = null,
-        sisteLøsteAvklaringsbehov: String? = null,
+        avklaringsBehov: Definisjon? = null,
+        sisteLøsteAvklaringsbehov: Definisjon? = null,
         sisteSaksbehandlerSomLøstebehov: String? = null,
         saksbehandler: Saksbehandler? = null,
         avklaringsbehovStatus: AvklaringsbehovStatus? = null
@@ -119,15 +119,15 @@ class BQBehandlingMapperTest {
     fun `saksbehandler skal være null når oppgave ikke er reservert ennå`() {
         val behandlingRef = UUID.randomUUID()
         val hendelse = lagBehandlingHendelse(
-            avklaringsBehov = Definisjon.KVALITETSSIKRING.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+            avklaringsBehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid"
         )
 
         val behandling = lagBehandling(
             referanse = behandlingRef,
-            gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+            gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
             hendelser = listOf(hendelse)
         )
@@ -162,15 +162,15 @@ class BQBehandlingMapperTest {
         val hendelse = lagBehandlingHendelse(
             tidspunkt = tidspunkt,
             hendelsesTidspunkt = tidspunkt,
-            avklaringsBehov = Definisjon.KVALITETSSIKRING.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+            avklaringsBehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid"
         )
 
         val behandling = lagBehandling(
             referanse = behandlingRef,
-            gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+            gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
             hendelser = listOf(hendelse)
         )
@@ -249,22 +249,22 @@ class BQBehandlingMapperTest {
 
         val hendelse1 = lagBehandlingHendelse(
             tidspunkt = tidspunkt.minusHours(2),
-            avklaringsBehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+            avklaringsBehov = Definisjon.AVKLAR_SYKDOM,
             saksbehandler = Saksbehandler("Kompanjong Korrodheid")
         )
 
         val hendelse2 = lagBehandlingHendelse(
             tidspunkt = tidspunkt,
-            avklaringsBehov = Definisjon.KVALITETSSIKRING.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+            avklaringsBehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
             saksbehandler = Saksbehandler("Kompanjong Korrodheid")
         )
 
         val behandling = lagBehandling(
             referanse = behandlingRef,
-            gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+            gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
             hendelser = listOf(hendelse1, hendelse2)
         )
@@ -311,16 +311,16 @@ class BQBehandlingMapperTest {
         val hendelse = lagBehandlingHendelse(
             tidspunkt = tidspunkt,
             hendelsesTidspunkt = tidspunkt,
-            avklaringsBehov = Definisjon.FATTE_VEDTAK.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
+            avklaringsBehov = Definisjon.FATTE_VEDTAK,
+            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteSaksbehandlerSomLøstebehov = "Kvaliguy",
             avklaringsbehovStatus = AvklaringsbehovStatus.OPPRETTET
         )
 
         val behandling = lagBehandling(
             referanse = behandlingRef,
-            gjeldendeAvklaringsbehov = Definisjon.FATTE_VEDTAK.kode.name,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
+            gjeldendeAvklaringsbehov = Definisjon.FATTE_VEDTAK,
+            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteSaksbehandlerSomLøstebehov = "Kvaliguy",
             hendelser = listOf(hendelse)
         )

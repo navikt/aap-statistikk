@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -66,9 +67,9 @@ class BehandlingRepositoryTest {
             søknadsformat = SøknadsFormat.PAPIR,
             sisteSaksbehandler = "Joark Jorgensen",
             relaterteIdenter = listOf("123", "456", "123456789"),
-            gjeldendeAvklaringsBehov = "0559",
+            gjeldendeAvklaringsBehov = Definisjon.AVKLAR_OVERGANG_ARBEID,
             gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
-            sisteLøsteAvklaringsbehov = "0553",
+            sisteLøsteAvklaringsbehov = Definisjon.ARBEIDSOPPTRAPPING,
             sisteSaksbehandlerSomLøstebehov = "Z123354",
             sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
             venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",

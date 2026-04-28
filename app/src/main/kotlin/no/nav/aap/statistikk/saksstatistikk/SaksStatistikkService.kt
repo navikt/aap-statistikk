@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelser.BehandlingService
@@ -69,7 +70,7 @@ class SaksStatistikkService(
     override fun lagreMedStoredBQBehandling(
         behandlingId: BehandlingId,
         storedBQBehandling: BQBehandling,
-        avklaringsbehovKode: String?,
+        avklaringsbehovKode: Definisjon?,
     ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
         val erSkjermet = behandlingService.erSkjermet(behandling)
