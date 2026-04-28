@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
@@ -134,7 +135,7 @@ class MockJobbAppender : JobbAppender {
     var sisteEnhetRetryCount: Int = 0
     var sisteDelayInSeconds: Long = 0
     var sisteStoredBQBehandling: BQBehandling? = null
-    var sisteAvklaringsbehovKode: String? = null
+    var sisteAvklaringsbehovKode: Definisjon? = null
 
     override fun leggTil(
         connection: DBConnection,
@@ -157,7 +158,7 @@ class MockJobbAppender : JobbAppender {
         enhetRetryCount: Int,
         triggerKilde: String,
         storedBQBehandling: BQBehandling?,
-        avklaringsbehovKode: String?,
+        avklaringsbehovKode: Definisjon?,
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
         sisteEnhetRetryCount = enhetRetryCount

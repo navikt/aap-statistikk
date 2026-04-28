@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingId
@@ -39,7 +40,8 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
 
         val utfører = lagUtfører(service, jobbAppender)
 
-        val input = JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId))
+        val input =
+            JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId))
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
@@ -50,13 +52,18 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `reschedulerer når enhet mangler ved første forsøk`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(
+                behandlingId,
+                Definisjon.AVKLAR_SYKDOM,
+                lagFakeBQBehandling()
+            )
         )
         val jobbAppender = MockJobbAppender()
 
         val utfører = lagUtfører(service, jobbAppender)
 
-        val input = JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId))
+        val input =
+            JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId))
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
@@ -69,14 +76,24 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `delay er eksponentielt basert på retry-teller`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(
+                behandlingId,
+                Definisjon.AVKLAR_SYKDOM,
+                lagFakeBQBehandling()
+            )
         )
         val jobbAppender = MockJobbAppender()
 
         val utfører = lagUtfører(service, jobbAppender)
 
         // retryCount=0 → delay = 60 * 2^0 = 60
-        utfører.utfør(JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId)))
+        utfører.utfør(
+            JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(
+                LagreSakinfoPayload(
+                    behandlingId
+                )
+            )
+        )
         assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(60L)
 
         // retryCount=1 → delay = 60 * 2^1 = 120
@@ -98,7 +115,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `reschedulerer med økt retry-teller`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, lagFakeBQBehandling())
         )
         val jobbAppender = MockJobbAppender()
 
@@ -117,7 +134,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `kaster exception etter maks antall forsøk når enhet mangler`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, lagFakeBQBehandling())
         )
         val jobbAppender = MockJobbAppender()
         val fakeBehandlingRepository = mockk<BehandlingRepository>(relaxed = true) {
@@ -139,14 +156,15 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `config kan overstyres i test`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, lagFakeBQBehandling())
         )
         val jobbAppender = MockJobbAppender()
         val customConfig = EnhetRetryConfig(maxRetries = 1, delaySeconds = 10)
 
         val utfører = lagUtfører(service, jobbAppender, config = customConfig)
 
-        val input = JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId))
+        val input =
+            JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId))
         utfører.utfør(input)
 
         assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(10)
@@ -155,8 +173,12 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     @Test
     fun `ManglerEnhet inneholder avklaringsbehovkode`() {
         val behandlingId = BehandlingId(1)
-        val avklaringsbehovKode = "AVKLAR_SYKDOM"
-        val resultat = SakStatistikkResultat.ManglerEnhet(behandlingId, avklaringsbehovKode, lagFakeBQBehandling())
+        val avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM
+        val resultat = SakStatistikkResultat.ManglerEnhet(
+            behandlingId,
+            avklaringsbehovKode,
+            lagFakeBQBehandling()
+        )
 
         assertThat(resultat.avklaringsbehovKode).isEqualTo(avklaringsbehovKode)
         assertThat(resultat.behandlingId).isEqualTo(behandlingId)
@@ -188,7 +210,14 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         val utfører = lagUtfører(service, jobbAppender)
 
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
-            .medPayload(LagreSakinfoPayload(behandlingId, retryCount = 1, storedBQBehandling = fakeBQBehandling, avklaringsbehovKode = "AVKLAR_SYKDOM"))
+            .medPayload(
+                LagreSakinfoPayload(
+                    behandlingId,
+                    retryCount = 1,
+                    storedBQBehandling = fakeBQBehandling,
+                    avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name
+                )
+            )
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
@@ -201,16 +230,22 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         val behandlingId = BehandlingId(1)
         val fakeBQBehandling = lagFakeBQBehandling()
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, "AVKLAR_SYKDOM", fakeBQBehandling)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, fakeBQBehandling)
         )
         val jobbAppender = MockJobbAppender()
 
         val utfører = lagUtfører(service, jobbAppender)
-        utfører.utfør(JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(LagreSakinfoPayload(behandlingId)))
+        utfører.utfør(
+            JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(
+                LagreSakinfoPayload(
+                    behandlingId
+                )
+            )
+        )
 
         assertThat(jobbAppender.sisteStoredBQBehandling).isNotNull()
         assertThat(jobbAppender.sisteStoredBQBehandling!!.behandlingUUID).isEqualTo(fakeBQBehandling.behandlingUUID)
-        assertThat(jobbAppender.sisteAvklaringsbehovKode).isEqualTo("AVKLAR_SYKDOM")
+        assertThat(jobbAppender.sisteAvklaringsbehovKode).isEqualTo(Definisjon.AVKLAR_SYKDOM)
     }
 }
 
@@ -258,7 +293,7 @@ private class FakeSaksStatistikkService(
     override fun lagreMedStoredBQBehandling(
         behandlingId: BehandlingId,
         storedBQBehandling: BQBehandling,
-        avklaringsbehovKode: String?,
+        avklaringsbehovKode: Definisjon?,
     ): SakStatistikkResultat {
         kallteller++
         sisteKallVarMedStoredBQBehandling = true

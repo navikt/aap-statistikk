@@ -206,6 +206,30 @@ class HendelseHjelpereKtTest {
     }
 
     @Test
+    fun `mangelfull begrunnelse har høyest prioritet blant årsaker til retur`() {
+        val hendelser = listOf(
+            AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
+                status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                endringer = listOf(
+                    EndringDTO(
+                        status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                        årsakTilRetur = listOf(
+                            ÅrsakTilRetur(ÅrsakTilReturKode.MANGLENDE_UTREDNING),
+                            ÅrsakTilRetur(ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE),
+                            ÅrsakTilRetur(ÅrsakTilReturKode.ANNET),
+                        ),
+                        tidsstempel = LocalDateTime.parse("2024-10-18T10:53:45.371"),
+                        endretAv = "Z994573"
+                    )
+                )
+            )
+        )
+
+        assertThat(hendelser.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE)
+    }
+
+    @Test
     fun `ekte data, verifiser`() {
         assertThat(ekte2.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.ANNET)
         assertThat(ekte2.sisteAvklaringsbehovStatus()).isEqualTo(Status.SENDT_TILBAKE_FRA_BESLUTTER)
