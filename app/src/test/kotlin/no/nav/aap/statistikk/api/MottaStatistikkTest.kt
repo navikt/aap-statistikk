@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.api
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.BehandlingReferanse
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status
@@ -346,7 +347,7 @@ class MottaStatistikkTest {
         }
 
         assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
-        assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo("5051")
+        assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo(SKRIV_VEDTAKSBREV)
         assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
         assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
         assertThat(uthentetBehandling.opprettetTid).isEqualTo(

@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.json.DefaultJsonMapper
@@ -52,14 +53,17 @@ class LagreSakinfoTilBigQueryJobbUtfører(
     private fun lesPayload(input: JobbInput): LagreSakinfoPayload {
         return try {
             input.payload<LagreSakinfoPayload>()
-        } catch (e: DeserializationException) {
+        } catch (_: DeserializationException) {
             log.info("Deserialisering som LagreSakinfoPayload feilet, prøver gammelt format (BehandlingId)")
             val behandlingId = input.payload<BehandlingId>()
             val storedBQBehandling = try {
                 input.optionalParameter("storedBQBehandling")
                     ?.let { DefaultJsonMapper.fromJson<BQBehandling>(it) }
             } catch (e: DeserializationException) {
-                log.warn("Klarte ikke deserialisere storedBQBehandling fra gammelt format, ignorerer")
+                log.warn(
+                    "Klarte ikke deserialisere storedBQBehandling fra gammelt format, ignorerer",
+                    e
+                )
                 null
             }
             LagreSakinfoPayload(
@@ -83,7 +87,9 @@ class LagreSakinfoTilBigQueryJobbUtfører(
 
         val resultat = if (payload.storedBQBehandling != null) {
             sakStatistikkService.lagreMedStoredBQBehandling(
-                behandlingId, payload.storedBQBehandling, payload.avklaringsbehovKode
+                behandlingId, payload.storedBQBehandling, payload.avklaringsbehovKode?.let(
+                    Definisjon::forKode
+                )
             )
         } else {
             sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)

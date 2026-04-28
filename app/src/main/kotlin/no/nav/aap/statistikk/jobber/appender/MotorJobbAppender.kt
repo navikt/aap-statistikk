@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.jobber.appender
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.FlytJobbRepository
@@ -41,7 +42,7 @@ class MotorJobbAppender : JobbAppender {
         enhetRetryCount: Int,
         triggerKilde: String,
         storedBQBehandling: BQBehandling?,
-        avklaringsbehovKode: String?,
+        avklaringsbehovKode: Definisjon?,
     ) {
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
@@ -55,7 +56,7 @@ class MotorJobbAppender : JobbAppender {
         val payload = LagreSakinfoPayload(
             behandlingId = behandlingId,
             storedBQBehandling = storedBQBehandling,
-            avklaringsbehovKode = avklaringsbehovKode,
+            avklaringsbehovKode = avklaringsbehovKode?.kode?.name,
             retryCount = enhetRetryCount,
             triggerKilde = triggerKilde,
         )

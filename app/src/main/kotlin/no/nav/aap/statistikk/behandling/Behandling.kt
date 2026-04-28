@@ -36,9 +36,9 @@ data class Behandling(
     val relatertBehandlingId: BehandlingId? = null,
     val relatertBehandlingReferanse: String? = null,
     val snapShotId: Long? = null,
-    val gjeldendeAvklaringsBehov: String? = null,
+    val gjeldendeAvklaringsBehov: Definisjon? = null,
     val gjeldendeAvklaringsbehovStatus: AvklaringsbehovStatus? = null,
-    val sisteLøsteAvklaringsbehov: String? = null,
+    val sisteLøsteAvklaringsbehov: Definisjon? = null,
     val sisteSaksbehandlerSomLøstebehov: String? = null,
     val sistLøsteAvklaringsbehovTidspunkt: LocalDateTime? = null,
     val venteÅrsak: String? = null,
@@ -165,11 +165,11 @@ data class Behandling(
             return BehandlingMetode.AUTOMATISK
         }
         val sisteHendelse = this.hendelser.last()
-        if (sisteHendelse.avklaringsBehov.isNullOrBlank()) {
+        if (sisteHendelse.avklaringsBehov == null) {
             return this.copy(hendelser = this.hendelser.dropLast(1)).behandlingMetode()
         }
 
-        val sisteDefinisjon = Definisjon.forKode(sisteHendelse.avklaringsBehov)
+        val sisteDefinisjon = sisteHendelse.avklaringsBehov
 
         return when (sisteDefinisjon.tilBehandlingMetode()) {
             BehandlingMetode.KVALITETSSIKRING -> BehandlingMetode.KVALITETSSIKRING
@@ -182,7 +182,7 @@ data class Behandling(
 @JvmName("erAutomatisk")
 private fun List<BehandlingHendelse>.erManuell(): Boolean {
     return this.filterNot { it.avklaringsBehov == null }.any {
-        !Definisjon.forKode(requireNotNull(it.avklaringsBehov)).erAutomatisk()
+        !requireNotNull(it.avklaringsBehov).erAutomatisk()
     }
 }
 
@@ -200,8 +200,8 @@ fun Definisjon.tilBehandlingMetode(): BehandlingMetode = when {
 data class BehandlingHendelse(
     val tidspunkt: LocalDateTime?,
     val hendelsesTidspunkt: LocalDateTime,
-    val avklaringsBehov: String? = null,
-    val sisteLøsteAvklaringsbehov: String? = null,
+    val avklaringsBehov: Definisjon? = null,
+    val sisteLøsteAvklaringsbehov: Definisjon? = null,
     val sisteSaksbehandlerSomLøstebehov: String? = null,
     val sistLøsteAvklaringsbehovTidspunkt: LocalDateTime? = null,
     val steggruppe: StegGruppe? = null,

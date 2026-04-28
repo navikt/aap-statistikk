@@ -41,10 +41,10 @@ class SakstatistikkEventSourcing {
      * Returnerer true dersom avklaringsbehovene løses av ulike roller, slik at saksbehandler-fallback
      * ikke skal bæres over fra ett steg til et annet.
      */
-    private fun rolleEndretMellom(forrigeAvklaringsbehov: String?, nyttAvklaringsbehov: String?): Boolean {
+    private fun rolleEndretMellom(forrigeAvklaringsbehov: Definisjon?, nyttAvklaringsbehov: Definisjon?): Boolean {
         if (forrigeAvklaringsbehov == null || nyttAvklaringsbehov == null) return false
-        val forrigeRoller = Definisjon.forKode(forrigeAvklaringsbehov).løsesAv.toSet()
-        val nyeRoller = Definisjon.forKode(nyttAvklaringsbehov).løsesAv.toSet()
+        val forrigeRoller = forrigeAvklaringsbehov.løsesAv.toSet()
+        val nyeRoller = nyttAvklaringsbehov.løsesAv.toSet()
         return forrigeRoller.intersect(nyeRoller).isEmpty()
     }
 
@@ -162,7 +162,7 @@ class SakstatistikkEventSourcing {
                     tidspunkt = hendelse.tidspunkt,
                     behandlingReferanse = hendelse.behandlingReferanse,
                     status = state.status,
-                    avklaringsbehov = state.avklaringsbehov,
+                    avklaringsbehov = state.avklaringsbehov?.kode?.name,
                     saksbehandler = state.saksbehandler,
                     enhet = state.enhet,
                     kilde = hendelse.kilde
