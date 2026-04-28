@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.behandling
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
@@ -105,7 +106,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, behandling.ansvarligBeslutter)
                 setString(c++, behandling.behandlingStatus().name)
                 setString(c++, behandling.sisteSaksbehandler)
-                setString(c++, behandling.gjeldendeAvklaringsBehov)
+                setString(c++, behandling.gjeldendeAvklaringsBehov?.kode?.name)
                 setString(c++, behandling.gjeldendeAvklaringsbehovStatus?.name)
                 setEnumName(c++, behandling.søknadsformat)
                 setString(c++, behandling.venteÅrsak)
@@ -116,7 +117,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setBoolean(c++, false)
                 setString(c++, behandling.utbetalingId())
                 setString(c++, behandling.relatertBehandlingReferanse)
-                setString(c++, behandling.sisteLøsteAvklaringsbehov)
+                setString(c++, behandling.sisteLøsteAvklaringsbehov?.kode?.name)
                 setString(c++, behandling.sisteSaksbehandlerSomLøstebehov)
                 setLocalDateTime(c++, behandling.sistLøsteAvklaringsbehovTidspunkt)
             }
@@ -239,7 +240,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setString(c++, hendelse.ansvarligBeslutter)
                 setString(c++, hendelse.behandlingStatus().name)
                 setString(c++, hendelse.sisteSaksbehandler)
-                setString(c++, hendelse.gjeldendeAvklaringsBehov)
+                setString(c++, hendelse.gjeldendeAvklaringsBehov?.kode?.name)
                 setString(c++, hendelse.gjeldendeAvklaringsbehovStatus?.name)
                 setEnumName(c++, hendelse.søknadsformat)
                 setString(c++, hendelse.venteÅrsak)
@@ -250,7 +251,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setBoolean(c++, false)
                 setString(c++, hendelse.utbetalingId())
                 setString(c++, hendelse.relatertBehandlingReferanse)
-                setString(c++, hendelse.sisteLøsteAvklaringsbehov)
+                setString(c++, hendelse.sisteLøsteAvklaringsbehov?.kode?.name)
                 setString(c++, hendelse.sisteSaksbehandlerSomLøstebehov)
                 setLocalDateTime(c++, hendelse.sistLøsteAvklaringsbehovTidspunkt)
             }
@@ -384,9 +385,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 BehandlingHendelse(
                     tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),
                     hendelsesTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt"),
-                    avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov"),
+                    avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")?.let(Definisjon::forKode),
                     avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
-                    sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov"),
+                    sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")?.let(Definisjon::forKode),
                     sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler"),
                     sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
                     steggruppe = it.getEnumOrNull("bh_steggruppe"),
@@ -453,11 +454,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")
             ?.ifBlank { null },
         snapShotId = it.getLong("bh_id"),
-        gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")
-            ?.ifBlank { null },
+        gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")?.let(Definisjon::forKode),
         gjeldendeAvklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
-        sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")
-            ?.ifBlank { null },
+        sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")?.let(Definisjon::forKode),
         sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler")
             ?.ifBlank { null },
         sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),

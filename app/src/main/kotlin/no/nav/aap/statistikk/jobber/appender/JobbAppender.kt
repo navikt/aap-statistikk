@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.jobber.appender
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
@@ -17,7 +18,7 @@ interface JobbAppender {
         enhetRetryCount: Int = 0,
         triggerKilde: String = "ukjent",
         storedBQBehandling: BQBehandling? = null,
-        avklaringsbehovKode: String? = null,
+        avklaringsbehovKode: Definisjon? = null,
     )
 
     fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

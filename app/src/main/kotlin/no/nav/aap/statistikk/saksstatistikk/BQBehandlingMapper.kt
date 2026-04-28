@@ -266,14 +266,14 @@ class BQBehandlingMapper(
     fun hentEnhetOgSaksbehandler(
         behandling: Behandling,
         erSkjermet: Boolean,
-        avklaringsbehovKode: String? = null,
+        avklaringsbehovKode: Definisjon? = null,
     ): EnhetOgSaksbehandler {
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
         val enhet = when {
             erSkjermet -> SKJERMET_ENHET
             avklaringsbehovKode != null ->
-                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode }
+                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode.kode.name }
                     .maxByOrNull { it.sistEndret() }?.enhet?.kode
                     ?: ansvarligEnhet(behandling, snapshots)
             else -> ansvarligEnhet(behandling, snapshots)
@@ -281,7 +281,7 @@ class BQBehandlingMapper(
         val saksbehandler = when {
             erSkjermet -> SKJERMET_ENHET
             avklaringsbehovKode != null ->
-                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode }
+                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode.kode.name }
                     .maxByOrNull { it.sistEndret() }?.reservertAv()?.ident
                     ?: utledSaksbehandler(behandling, snapshots)
             else -> utledSaksbehandler(behandling, snapshots)
@@ -314,7 +314,7 @@ class BQBehandlingMapper(
         if (behandling.venteÅrsak != null && enhet == null) {
             // Hvis ingen åpne, velg enheten som hadde forrige avklaringsbehov
             return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
-                .filter { it.avklaringsbehov == behandling.sisteLøsteAvklaringsbehov }
+                .filter { it.avklaringsbehov == behandling.sisteLøsteAvklaringsbehov?.kode?.name }
                 .maxByOrNull { it.sistEndret() }?.enhet?.kode
         }
 
