@@ -114,6 +114,7 @@ class ProduksjonsstyringRepositoryTest {
                     diagnoseRepository = provider.provide(),
                     rettighetstypeperiodeRepository = provider.provide(),
                     arbeidsopptrappingperioderRepository = provider.provide(),
+                    institusjonsoppholdRepository = provider.provide(),
                     fritaksvurderingRepository = provider.provide(),
                     behandlingService = BehandlingService(provider, gatewayProvider),
                     hendelsePublisher = fakeHendelsePublisher,

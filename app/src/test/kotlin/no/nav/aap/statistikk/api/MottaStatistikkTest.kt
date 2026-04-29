@@ -237,7 +237,8 @@ class MottaStatistikkTest {
             resultat = null,
             vedtakstidspunkt = LocalDateTime.parse("2025-12-08T08:53:14.437000"),
             perioderMedArbeidsopptrapping = emptyList(),
-            vedtattStansOpphør = emptyList()
+            vedtattStansOpphør = emptyList(),
+            institusjonsopphold = emptyList()
         )
     )
 
