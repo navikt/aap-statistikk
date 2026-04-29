@@ -41,6 +41,7 @@ class LagreStoppetHendelseJobb(
             diagnoseRepository = repositoryProvider.provide(),
             rettighetstypeperiodeRepository = repositoryProvider.provide(),
             arbeidsopptrappingperioderRepository = repositoryProvider.provide(),
+            institusjonsoppholdRepository = repositoryProvider.provide(),
             fritaksvurderingRepository = repositoryProvider.provide(),
             behandlingService = behandlingService,
             hendelsePublisher = hendelsePublisher,

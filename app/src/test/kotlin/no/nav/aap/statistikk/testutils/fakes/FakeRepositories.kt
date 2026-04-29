@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.gateway.Factory
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.avsluttetbehandling.ArbeidsopptrappingperioderRepository
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
+import no.nav.aap.statistikk.avsluttetbehandling.InstitusjonsoppholdRepository
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.avsluttetbehandling.StansEllerOpphør
 import no.nav.aap.statistikk.avsluttetbehandling.VedtattStansOpphørRepository
@@ -191,6 +192,19 @@ class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {
 }
 
 class FakeArbeidsopptrappingRepository : ArbeidsopptrappingperioderRepository {
+    override fun lagre(
+        behandlingId: BehandlingId,
+        perioder: List<Periode>
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun hent(behandlingId: BehandlingId): List<Periode>? {
+        TODO("Not yet implemented")
+    }
+}
+
+class FakeInstitusjonsoppholdRepository : InstitusjonsoppholdRepository {
     override fun lagre(
         behandlingId: BehandlingId,
         perioder: List<Periode>

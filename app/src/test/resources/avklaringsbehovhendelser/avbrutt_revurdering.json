@@ -11,10 +11,7 @@
   "soknadsFormat": "DIGITAL",
   "ident": "18458534108",
   "versjon": "fb8f6ecb26758ccbe4504b7e0b75aa0e2e04c945",
-  "vurderingsbehov": [
-    "REVURDERING_AVBRUTT",
-    "REVURDER_BEREGNING"
-  ],
+  "vurderingsbehov": ["REVURDERING_AVBRUTT", "REVURDER_BEREGNING"],
   "årsakTilOpprettelse": "MANUELL_OPPRETTELSE",
   "avklaringsbehov": [
     {
@@ -24,9 +21,7 @@
         "løsesISteg": "AVBRYT_REVURDERING",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "BESLUTTER"
-        ]
+        "løsesAv": ["BESLUTTER"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -57,9 +52,7 @@
         "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
         "kreverToTrinn": true,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_NASJONAL"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
       },
       "status": "AVBRUTT",
       "endringer": [
@@ -90,9 +83,7 @@
         "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
         "kreverToTrinn": true,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_NASJONAL"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
       },
       "status": "AVBRUTT",
       "endringer": [
@@ -628,9 +619,7 @@
     "diagnoser": {
       "kodeverk": "ICPC2",
       "diagnosekode": "L74",
-      "bidiagnoser": [
-        "A09"
-      ]
+      "bidiagnoser": ["A09"]
     },
     "rettighetstypePerioder": [
       {
@@ -652,12 +641,10 @@
     "resultat": "AVBRUTT",
     "vedtakstidspunkt": "2025-12-02T14:27:26.019",
     "perioderMedArbeidsopptrapping": [],
-    "vedtattStansOpphør": []
+    "vedtattStansOpphør": [],
+    "institusjonsopphold": []
   },
-  "identerForSak": [
-    "18458534108",
-    "27452590307"
-  ],
+  "identerForSak": ["18458534108", "27452590307"],
   "opprettetAv": null,
   "nyeMeldekort": [],
   "søknadIder": [

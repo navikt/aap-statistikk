@@ -476,6 +476,7 @@ class AvsluttetBehandlingServiceTest {
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection
                 ),
+                institusjonsoppholdRepository = InstitusjonsoppholdRepositoryImpl(dbConnection),
                 vedtattStansOpphørRepository = VedtattStansOpphørRepositoryImpl(dbConnection),
                 hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FritaksvurderingRepositoryImpl(dbConnection),

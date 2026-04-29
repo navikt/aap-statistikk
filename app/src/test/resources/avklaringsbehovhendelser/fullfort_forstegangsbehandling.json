@@ -10,9 +10,7 @@
   "soknadsFormat": "DIGITAL",
   "ident": "01410022806",
   "versjon": "LATEST-TEST",
-  "vurderingsbehov": [
-    "SØKNAD"
-  ],
+  "vurderingsbehov": ["SØKNAD"],
   "årsakTilOpprettelse": "SØKNAD",
   "avklaringsbehov": [
     {
@@ -22,9 +20,7 @@
         "løsesISteg": "AVKLAR_SYKDOM",
         "kreverToTrinn": true,
         "kvalitetssikres": true,
-        "løsesAv": [
-          "SAKSBEHANDLER_OPPFOLGING"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_OPPFOLGING"]
       },
       "status": "TOTRINNS_VURDERT",
       "endringer": [
@@ -95,9 +91,7 @@
         "løsesISteg": "VURDER_BISTANDSBEHOV",
         "kreverToTrinn": true,
         "kvalitetssikres": true,
-        "løsesAv": [
-          "SAKSBEHANDLER_OPPFOLGING"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_OPPFOLGING"]
       },
       "status": "TOTRINNS_VURDERT",
       "endringer": [
@@ -164,9 +158,7 @@
         "løsesISteg": "REFUSJON_KRAV",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_OPPFOLGING"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_OPPFOLGING"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -215,9 +207,7 @@
         "løsesISteg": "SYKDOMSVURDERING_BREV",
         "kreverToTrinn": false,
         "kvalitetssikres": true,
-        "løsesAv": [
-          "SAKSBEHANDLER_OPPFOLGING"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_OPPFOLGING"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -275,9 +265,7 @@
         "løsesISteg": "KVALITETSSIKRING",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "KVALITETSSIKRER"
-        ]
+        "løsesAv": ["KVALITETSSIKRER"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -308,9 +296,7 @@
         "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
         "kreverToTrinn": true,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_NASJONAL"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
       },
       "status": "TOTRINNS_VURDERT",
       "endringer": [
@@ -368,9 +354,7 @@
         "løsesISteg": "VURDER_MEDLEMSKAP",
         "kreverToTrinn": true,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_NASJONAL"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
       },
       "status": "TOTRINNS_VURDERT",
       "endringer": [
@@ -428,9 +412,7 @@
         "løsesISteg": "FORESLÅ_VEDTAK",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_NASJONAL"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -488,9 +470,7 @@
         "løsesISteg": "FATTE_VEDTAK",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "BESLUTTER"
-        ]
+        "løsesAv": ["BESLUTTER"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -539,9 +519,7 @@
         "løsesISteg": "BREV",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "BESLUTTER"
-        ]
+        "løsesAv": ["BESLUTTER"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -1028,9 +1006,7 @@
     "diagnoser": {
       "kodeverk": "ICPC2",
       "diagnosekode": "A01",
-      "bidiagnoser": [
-        "A04"
-      ]
+      "bidiagnoser": ["A04"]
     },
     "rettighetstypePerioder": [
       {
@@ -1042,9 +1018,8 @@
     "resultat": "INNVILGET",
     "vedtakstidspunkt": "2025-10-06T13:56:38.901934",
     "perioderMedArbeidsopptrapping": [],
-    "vedtattStansOpphør": []
+    "vedtattStansOpphør": [],
+    "institusjonsopphold": []
   },
-  "identerForSak": [
-    "01410022806"
-  ]
+  "identerForSak": ["01410022806"]
 }
