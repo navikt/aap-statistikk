@@ -10,7 +10,7 @@ metadata:
     cnrm.cloud.google.com/state-into-spec: absent
     cnrm.cloud.google.com/project-id: {{project}}
 spec:
-  resourceID: view_behandlinger
+  resourceID: view_behandlinger_test
   description: "Test-view som viser behandlingsdata. Inneholder samme data som view_behandlinger, men til bruk for å teste endringer for Team Spenn."
   datasetRef:
     external: ytelsestatistikk
