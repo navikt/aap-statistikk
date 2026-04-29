@@ -1,0 +1,158 @@
+apiVersion: bigquery.cnrm.cloud.google.com/v1beta1
+kind: BigQueryTable
+metadata:
+  name: view-behandlinger-test
+  namespace: aap
+  labels:
+    team: aap
+  annotations:
+    cnrm.cloud.google.com/management-conflict-prevention-policy: none
+    cnrm.cloud.google.com/state-into-spec: absent
+    cnrm.cloud.google.com/project-id: {{project}}
+spec:
+  resourceID: view_behandlinger
+  description: "Test-view som viser behandlingsdata. Inneholder samme data som view_behandlinger, men til bruk for å teste endringer for Team Spenn."
+  datasetRef:
+    external: ytelsestatistikk
+  view:
+    useLegacySql: false
+    query: >-
+      WITH
+        rettighetstyper AS (
+          SELECT
+            r.id,
+            r.behandling_id,
+            ARRAY(
+              SELECT STRUCT(rp.fra_dato, rp.til_dato, rp.rettighetstype)
+              FROM `datastream_hendelser.public_rettighetstypeperioder` rp
+              WHERE rp.rettighetstype_id = r.id
+            ) AS perioder
+          FROM
+            `datastream_hendelser.public_rettighetstype` r
+        ),
+        gyldige_behandlinger AS (
+          SELECT
+            b.id AS behandling_id,
+            bh.id AS bh_id
+          FROM
+            `datastream_hendelser.public_behandling` b
+          JOIN
+            `datastream_hendelser.public_behandling_historikk` bh
+            ON
+              bh.behandling_id = b.id
+          WHERE
+            bh.gjeldende = TRUE
+            AND (
+              bh.slettet IS FALSE
+              OR bh.slettet IS NULL)
+            AND bh.status = 'AVSLUTTET'
+            AND (
+              bh.resultat NOT IN ('TRUKKET', 'AVBRUTT', 'KLAGE_TRUKKET')
+              OR bh.resultat IS NULL)
+            AND b.type IN ('Førstegangsbehandling', 'Revurdering')
+        ),
+        vedtatt_stans_opphor_agg AS (
+          SELECT
+            vso.behandling_id,
+            ARRAY_AGG(
+              STRUCT(
+                vso.type AS type, vso.fom AS fom, IFNULL(a.aarsaker, []) AS aarsaker))
+              AS perioder
+          FROM
+            `datastream_hendelser.public_vedtatt_stans_opphor` vso
+          LEFT JOIN
+            (
+              SELECT vedtatt_stans_opphor_id, ARRAY_AGG(aarsak) AS aarsaker
+              FROM `datastream_hendelser.public_vedtatt_stans_opphor_aarsak`
+              GROUP BY vedtatt_stans_opphor_id
+            ) a
+            ON a.vedtatt_stans_opphor_id = vso.id
+          GROUP BY
+            vso.behandling_id
+        )
+      SELECT
+        s.saksnummer AS saksnummer,
+        br.referanse AS behandlingsreferanse,
+        b.type AS behandlingsType,
+        b.opprettet_tid AS behandling_opprettet_tid,
+        ARRAY_TO_STRING(
+          ARRAY(
+            SELECT
+              JSON_VALUE(value)
+            FROM
+              UNNEST(JSON_EXTRACT_ARRAY(b.aarsaker_til_behandling)) AS value
+          ),
+          ', ') AS behandling_aarsak,
+        p.ident AS brukerFnr,
+        bh.resultat AS behandlingsresultat,
+        bh.vedtak_tidspunkt AS vedtak_tidspunkt,
+        bh.utbetaling_id AS utbetaling_id,
+        d.kodeverk AS diagnose_kodeverk,
+        d.diagnosekode AS diagnose_kode,
+        coalesce(d.bidiagnoser, json '[]') AS bidiagnoser_kode,
+        rettighetstyper.perioder AS rettighetstype,
+        ARRAY(
+          SELECT STRUCT(fra_dato, til_dato)
+          FROM `datastream_hendelser.public_arbeidsopptrappingperioder`
+          WHERE behandling_id = b.id
+          GROUP BY fra_dato, til_dato
+        ) AS perioder_med_arbeidsopptrapping,
+        ARRAY(
+          SELECT STRUCT(fra_dato, til_dato, har_fritak)
+          FROM `datastream_hendelser.public_fritaksvurdering` f
+          WHERE f.behandling_id = b.id
+        ) AS perioder_med_fritak_meldeplikt,
+        IFNULL(vso_agg.perioder, []) AS vedtatt_stans_opphor,
+        DATETIME(
+          timestamp_millis(
+            greatest(
+              b.datastream_metadata.source_timestamp,
+              bh.datastream_metadata.source_timestamp,
+              br.datastream_metadata.source_timestamp,
+              s.datastream_metadata.source_timestamp,
+              ifnull(d.datastream_metadata.source_timestamp, 0))),
+          'Europe/Oslo') AS rad_endret_tid,
+        concat(
+          b.id,
+          '-',
+          bh.id,
+          '-',
+          br.id,
+          '-',
+          s.id,
+          '-',
+          ifnull(CAST(d.id AS string), '')) AS unik_id
+      FROM
+        `datastream_hendelser.public_behandling` b
+      JOIN
+        `datastream_hendelser.public_sak` s
+        ON
+          b.sak_id = s.id
+      JOIN
+        `datastream_hendelser.public_behandling_referanse` br
+        ON
+          b.referanse_id = br.id
+      JOIN
+        gyldige_behandlinger gyldig
+        ON
+          gyldig.behandling_id = b.id
+      JOIN
+        `datastream_hendelser.public_behandling_historikk` bh
+        ON
+          bh.id = gyldig.bh_id
+      JOIN
+        `datastream_hendelser.public_person` p
+        ON
+          p.id = s.person_id
+      LEFT JOIN
+        `datastream_hendelser.public_diagnose` d
+        ON
+          d.behandling_id = b.id
+      LEFT JOIN
+        rettighetstyper
+        ON
+          rettighetstyper.behandling_id = b.id
+      LEFT JOIN
+        vedtatt_stans_opphor_agg vso_agg
+        ON
+          vso_agg.behandling_id = b.id
