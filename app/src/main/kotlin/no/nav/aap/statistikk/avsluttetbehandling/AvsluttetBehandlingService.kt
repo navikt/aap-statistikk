@@ -24,6 +24,7 @@ class AvsluttetBehandlingService(
     private val fritaksvurderingRepository: FritaksvurderingRepository,
     private val behandlingService: BehandlingService,
     private val arbeidsopptrappingperioderRepository: ArbeidsopptrappingperioderRepository,
+    private val institusjonsoppholdRepository: InstitusjonsoppholdRepository,
     private val vedtattStansOpphørRepository: VedtattStansOpphørRepository,
     private val hendelsePublisher: HendelsePublisher,
 ) {
@@ -70,6 +71,11 @@ class AvsluttetBehandlingService(
             avsluttetBehandling.perioderMedArbeidsopptrapping
         )
 
+        institusjonsoppholdRepository.lagre(
+            uthentetBehandling.id(),
+            avsluttetBehandling.institusjonsopphold
+        )
+
         vedtattStansOpphørRepository.lagre(
             uthentetBehandling.id(),
             avsluttetBehandling.vedtattStansOpphør
@@ -105,8 +111,6 @@ class AvsluttetBehandlingService(
                     avsluttetBehandling.behandlingsReferanse
                 )
             )
-        } else {
-            logger.info("Ingen diagnose på behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
         }
     }
 

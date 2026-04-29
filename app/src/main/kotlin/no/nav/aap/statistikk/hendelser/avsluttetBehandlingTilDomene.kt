@@ -53,6 +53,9 @@ fun AvsluttetBehandlingDTO.tilDomene(
         perioderMedArbeidsopptrapping = this.perioderMedArbeidsopptrapping.map {
             Periode(it.fom, it.tom)
         },
+        institusjonsopphold = this.institusjonsopphold.map {
+            Periode(it.fom, it.tom)
+        },
         vedtattStansOpphør = this.vedtattStansOpphør.map { it.tilDomene() },
     )
 }

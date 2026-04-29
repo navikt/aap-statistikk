@@ -36,7 +36,7 @@ Known terms (Norwegian): "bug" (not "bugg").
 - Don't add docstrings to methods and classes unless they are very complicated
 - Prefer clear method names over documentation
 - Add comments only when the code needs clarification
-- **Always run `npx prettier --write <file>` on markdown files after creating or editing them — this is mandatory, not optional. Do not mark a task complete without having done this.**
+- **Always run `npx prettier --write <file>` on markdown and JSON files after creating or editing them — this is mandatory, not optional. Do not mark a task complete without having done this.**
 
 ### Immutable State
 
@@ -82,6 +82,22 @@ Never use external contract types (e.g. `behandlingsflyt.kontrakt`) directly in 
 - If two consecutive events differ ONLY in these ignored fields, the second one is NOT saved
 - This means if only `saksbehandler` or `ansvarligEnhetKode` changes, a new event IS created
 - But if saksbehandler stays the same across multiple behandling state changes, only the first is saved
+
+### Updating Test Fixture Data
+
+When the data model changes (e.g. new fields added to `AvsluttetBehandlingDTO` or `StoppetBehandling`), the JSON test fixture files need updating. Use the helper class `UpdateHendelserPublicJobbJson` in `app/src/test/kotlin/no/nav/aap/statistikk/testutils/`:
+
+```bash
+./gradlew test --tests "no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJson.update_hendelser_public_jobb_fixture_with_utbetalingsdato"
+```
+
+This script processes all JSON fixtures (e.g. `hendelser_public_jobb.json`, `hendelser_klage.json`, avklaringsbehovhendelser) and:
+
+- Adds missing required fields with sensible defaults
+- Fixes date/time format issues
+- Adds calculated fields (e.g. `utbetalingsdato` from `tilDato`)
+
+To add a new field transformation, implement the `NodeTransform` interface and add it to the `behandlingTransforms` list. See existing transforms (`ÅrsakTilOpprettelseTransform`, `PerioderMedArbeidsopptrappingTransform`, `TilkjentYtelseTransform`) for examples.
 
 ### BigQuery Views
 

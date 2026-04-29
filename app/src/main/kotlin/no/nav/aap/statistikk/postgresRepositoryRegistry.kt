@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.motor.FlytJobbRepositoryImpl
 import no.nav.aap.statistikk.avsluttetbehandling.ArbeidsopptrappingperioderRepositoryImpl
+import no.nav.aap.statistikk.avsluttetbehandling.InstitusjonsoppholdRepositoryImpl
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.VedtattStansOpphørRepositoryImpl
 import no.nav.aap.statistikk.behandling.BehandlingRepository
@@ -43,6 +44,7 @@ val postgresRepositoryRegistry = RepositoryRegistry()
     .register<TilkjentYtelseRepository>()
     .register<MeldekortRepository>()
     .register<ArbeidsopptrappingperioderRepositoryImpl>()
+    .register<InstitusjonsoppholdRepositoryImpl>()
     .register<FritaksvurderingRepositoryImpl>()
     .register<VedtattStansOpphørRepositoryImpl>()
     .register<TilbakekrevingHendelseRepositoryImpl>()

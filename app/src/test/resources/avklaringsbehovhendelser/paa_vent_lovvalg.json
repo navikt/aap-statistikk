@@ -12,11 +12,7 @@
   "soknadsFormat": "DIGITAL",
   "ident": "8765432",
   "versjon": "fa4aa44a0ba963da8935cbb9db9bd52bd00031234",
-  "vurderingsbehov": [
-    "MELDEKORT",
-    "LEGEERKLÆRING",
-    "SØKNAD"
-  ],
+  "vurderingsbehov": ["MELDEKORT", "LEGEERKLÆRING", "SØKNAD"],
   "årsakTilOpprettelse": "SØKNAD",
   "avklaringsbehov": [
     {
@@ -27,9 +23,7 @@
         "løsesISteg": "VURDER_LOVVALG",
         "kreverToTrinn": true,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_NASJONAL"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
       },
       "status": "AVSLUTTET",
       "endringer": [
@@ -79,9 +73,7 @@
         "løsesISteg": "VURDER_LOVVALG",
         "kreverToTrinn": false,
         "kvalitetssikres": false,
-        "løsesAv": [
-          "SAKSBEHANDLER_NASJONAL"
-        ]
+        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
       },
       "status": "OPPRETTET",
       "endringer": [
@@ -99,9 +91,7 @@
   ],
   "hendelsesTidspunkt": "2026-02-16T23:38:26.878084323",
   "avsluttetBehandling": null,
-  "identerForSak": [
-    "8765432"
-  ],
+  "identerForSak": ["8765432"],
   "opprettetAv": null,
   "nyeMeldekort": [],
   "søknadIder": [

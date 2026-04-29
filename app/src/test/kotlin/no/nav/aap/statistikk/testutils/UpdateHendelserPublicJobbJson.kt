@@ -30,25 +30,24 @@ class UpdateHendelserPublicJobbJson {
     private val behandlingTransforms: List<NodeTransform> = listOf(
         ÅrsakTilOpprettelseTransform(),
         PerioderMedArbeidsopptrappingTransform(),
+        InstitusjonsoppholdTransform(),
         TilkjentYtelseTransform()
     )
 
     @Test
     fun update_hendelser_public_jobb_fixture_with_utbetalingsdato() {
         val testDataFiles = listOf(
-            "app/src/test/resources/hendelser_public_jobb.json",
             "src/test/resources/hendelser_public_jobb.json",
-            "app/src/test/resources/hendelser_klage.json",
             "src/test/resources/hendelser_klage.json",
-            "app/src/test/resources/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json",
-            "app/src/test/resources/avklaringsbehovhendelser/grunnlag_steg.json",
-            "app/src/test/resources/avklaringsbehovhendelser/er_pa_brev_steget.json",
-            "app/src/test/resources/avklaringsbehovhendelser/meldekort_behandling.json",
-            "app/src/test/resources/avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json",
-            "app/src/test/resources/avklaringsbehovhendelser/skal_være_iverksettes.json",
-            "app/src/test/resources/avklaringsbehovhendelser/avbrutt_revurdering.json",
-            "app/src/test/resources/avklaringsbehovhendelser/resendt_hendelse.json",
-            "app/src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json"
+            "src/test/resources/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json",
+            "src/test/resources/avklaringsbehovhendelser/grunnlag_steg.json",
+            "src/test/resources/avklaringsbehovhendelser/er_pa_brev_steget.json",
+            "src/test/resources/avklaringsbehovhendelser/meldekort_behandling.json",
+            "src/test/resources/avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json",
+            "src/test/resources/avklaringsbehovhendelser/skal_være_iverksettes.json",
+            "src/test/resources/avklaringsbehovhendelser/avbrutt_revurdering.json",
+            "src/test/resources/avklaringsbehovhendelser/resendt_hendelse.json",
+            "src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json"
         ).map { Path.of(it) }
 
         testDataFiles.filter { Files.exists(it) }.forEach { filePath ->
@@ -160,6 +159,18 @@ class UpdateHendelserPublicJobbJson {
             val avsluttetBehandlingNode = node.path("avsluttetBehandling")
             if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
                 avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
+                return true
+            }
+            return false
+        }
+    }
+
+    // Legger til tom institusjonsopphold hvis den mangler
+    private class InstitusjonsoppholdTransform : NodeTransform {
+        override fun apply(node: ObjectNode, mapper: ObjectMapper): Boolean {
+            val avsluttetBehandlingNode = node.path("avsluttetBehandling")
+            if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("institusjonsopphold")) {
+                avsluttetBehandlingNode.set<ArrayNode>("institusjonsopphold", mapper.createArrayNode())
                 return true
             }
             return false
