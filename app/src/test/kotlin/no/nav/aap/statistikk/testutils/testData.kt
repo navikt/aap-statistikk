@@ -112,7 +112,8 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
         resultat = ResultatKode.AVSLAG,
         vedtakstidspunkt = null,
         perioderMedArbeidsopptrapping = emptyList(),
-        vedtattStansOpphør = emptyList()
+        vedtattStansOpphør = emptyList(),
+        institusjonsopphold = emptyList()
     )
 }
 

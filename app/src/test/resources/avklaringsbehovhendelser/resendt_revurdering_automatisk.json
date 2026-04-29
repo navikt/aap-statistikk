@@ -10,9 +10,7 @@
   "soknadsFormat": "DIGITAL",
   "ident": "17488405519",
   "versjon": "9496562084de10e303aaa7d550e5ac779ba8b542",
-  "vurderingsbehov": [
-    "EFFEKTUER_AKTIVITETSPLIKT"
-  ],
+  "vurderingsbehov": ["EFFEKTUER_AKTIVITETSPLIKT"],
   "årsakTilOpprettelse": "AKTIVITETSPLIKT",
   "avklaringsbehov": [],
   "hendelsesTidspunkt": "2025-11-27T08:08:09.762148992",
@@ -488,12 +486,10 @@
     ],
     "resultat": null,
     "perioderMedArbeidsopptrapping": [],
-    "vedtattStansOpphør": []
+    "vedtattStansOpphør": [],
+    "institusjonsopphold": []
   },
-  "identerForSak": [
-    "17488405519",
-    "02432091956"
-  ],
+  "identerForSak": ["17488405519", "02432091956"],
   "opprettetAv": null,
   "nyeMeldekort": [],
   "søknadIder": [
