@@ -80,6 +80,7 @@ private fun Avslagsårsak.tilDomene(): no.nav.aap.statistikk.avsluttetbehandling
         Avslagsårsak.VARIGHET_OVERSKREDET_STUDENT -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.VARIGHET_OVERSKREDET_STUDENT
         Avslagsårsak.IKKE_SYKDOM_AV_VISS_VARIGHET -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_SYKDOM_AV_VISS_VARIGHET
         Avslagsårsak.IKKE_SYKDOM_SKADE_LYTE_VESENTLIGDEL -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_SYKDOM_SKADE_LYTE_VESENTLIGDEL
+        Avslagsårsak.IKKE_SYKDOM_SKADE_LYTE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_SYKDOM_SKADE_LYTE
         Avslagsårsak.IKKE_NOK_REDUSERT_ARBEIDSEVNE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_NOK_REDUSERT_ARBEIDSEVNE
         Avslagsårsak.IKKE_BEHOV_FOR_OPPFOLGING -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_BEHOV_FOR_OPPFOLGING
         Avslagsårsak.IKKE_MEDLEM_FORUTGÅENDE -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.IKKE_MEDLEM_FORUTGÅENDE
