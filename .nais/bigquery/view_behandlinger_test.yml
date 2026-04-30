@@ -30,27 +30,6 @@ spec:
           FROM
             `datastream_hendelser.public_rettighetstype` r
         ),
-        gyldige_behandlinger AS (
-          SELECT
-            b.id AS behandling_id,
-            bh.id AS bh_id
-          FROM
-            `datastream_hendelser.public_behandling` b
-          JOIN
-            `datastream_hendelser.public_behandling_historikk` bh
-            ON
-              bh.behandling_id = b.id
-          WHERE
-            bh.gjeldende = TRUE
-            AND (
-              bh.slettet IS FALSE
-              OR bh.slettet IS NULL)
-            AND bh.status = 'AVSLUTTET'
-            AND (
-              bh.resultat NOT IN ('TRUKKET', 'AVBRUTT', 'KLAGE_TRUKKET')
-              OR bh.resultat IS NULL)
-            AND b.type IN ('Førstegangsbehandling', 'Revurdering')
-        ),
         vedtatt_stans_opphor_agg AS (
           SELECT
             vso.behandling_id,
