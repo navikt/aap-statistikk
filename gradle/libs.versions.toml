@@ -1,6 +1,6 @@
 [versions]
 ktor = "3.4.3"
-komponenter = "2.0.51"
+komponenter = "2.0.53"
 tilgang = "1.0.202"
 behandlingsflyt = "0.0.598"
 oppgave = "0.0.170"
