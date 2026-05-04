@@ -110,7 +110,7 @@ spec:
        `datastream_hendelser.public_diagnose` d
      ON
        d.behandling_id = b.id
-     JOIN
+     LEFT JOIN
        rettighetstyper
      ON
        rettighetstyper.behandling_id = b.id
