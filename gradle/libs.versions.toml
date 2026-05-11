@@ -11,9 +11,9 @@ flyway = "12.5.0"
 detekt = "2.0.0-alpha.3"
 mockk = "1.14.9"
 testContainers = "2.0.5"
-postgresql = "42.7.10"
+postgresql = "42.7.11"
 hikaricp = "7.0.2"
-googleCloudBigquery = "2.65.0"
+googleCloudBigquery = "2.66.0"
 nimbusJoseJwt = "10.9"
 assertj = "3.27.7"
 junitJupiter = "6.0.3"
@@ -39,7 +39,7 @@ logback = { module = "ch.qos.logback:logback-classic", version = "1.5.32" }
 logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
 flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flywayPostgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.3" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.4" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
 googleCloudBigquery = { module = "com.google.cloud:google-cloud-bigquery", version.ref = "googleCloudBigquery" }
