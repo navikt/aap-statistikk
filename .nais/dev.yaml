@@ -1,4 +1,5 @@
 isdev: true
+pgaudit: 0
 pdl_url: pdl-api.dev-fss-pub.nais.io
 pdl_scope: api://dev-fss.pdl.pdl-api/.default
 postmottak_azp: 68642ce3-a231-4c82-b106-7a2f4ed899bc
