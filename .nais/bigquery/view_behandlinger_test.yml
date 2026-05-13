@@ -22,6 +22,7 @@ spec:
           SELECT
             r.id,
             r.behandling_id,
+            r.datastream_metadata.source_timestamp AS source_timestamp,
             ARRAY(
               SELECT STRUCT(rp.fra_dato, rp.til_dato, rp.rettighetstype)
               FROM `datastream_hendelser.public_rettighetstypeperioder` rp
@@ -84,12 +85,14 @@ spec:
         IFNULL(vso_agg.perioder, []) AS vedtatt_stans_opphor,
         DATETIME(
           timestamp_millis(
-            greatest(
+            (SELECT MAX(ts) FROM UNNEST([
               b.datastream_metadata.source_timestamp,
               bh.datastream_metadata.source_timestamp,
               br.datastream_metadata.source_timestamp,
               s.datastream_metadata.source_timestamp,
-              ifnull(d.datastream_metadata.source_timestamp, 0))),
+              d.datastream_metadata.source_timestamp,
+              rettighetstyper.source_timestamp
+            ]) AS ts)),
           'Europe/Oslo') AS rad_endret_tid,
         concat(
           b.id,
@@ -112,7 +115,7 @@ spec:
         ON
           b.referanse_id = br.id
       JOIN
-        gyldige_behandlinger gyldig
+        `ytelsestatistikk.view_gyldige_behandlinger` gyldig
         ON
           gyldig.behandling_id = b.id
       JOIN
