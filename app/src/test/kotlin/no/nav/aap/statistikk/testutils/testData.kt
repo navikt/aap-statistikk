@@ -113,7 +113,13 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
         vedtakstidspunkt = null,
         perioderMedArbeidsopptrapping = emptyList(),
         vedtattStansOpphør = emptyList(),
-        institusjonsopphold = emptyList()
+        institusjonsopphold = emptyList(),
+        samordning = SamordningDTO(
+            uføre = emptyList(),
+            statligeYtelser = emptyList(),
+            avregningAndreYtelser = emptyList(),
+            arbeidsgiver = emptyList(),
+        ),
     )
 }
 

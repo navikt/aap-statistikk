@@ -757,7 +757,13 @@ class IntegrationTest {
             fritaksvurderinger = null,
             perioderMedArbeidsopptrapping = listOf(),
             vedtattStansOpphør = emptyList(),
-            institusjonsopphold = emptyList()
+            institusjonsopphold = emptyList(),
+            samordning = no.nav.aap.behandlingsflyt.kontrakt.statistikk.SamordningDTO(
+                uføre = emptyList(),
+                statligeYtelser = emptyList(),
+                avregningAndreYtelser = emptyList(),
+                arbeidsgiver = emptyList(),
+            )
         ) else null,
         tidspunktSisteEndring = LocalDateTime.now(),
         behandlingStatus = behandlingStatus ?: this.behandlingStatus,

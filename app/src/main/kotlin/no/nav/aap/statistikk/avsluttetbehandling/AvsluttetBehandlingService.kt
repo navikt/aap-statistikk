@@ -26,6 +26,7 @@ class AvsluttetBehandlingService(
     private val arbeidsopptrappingperioderRepository: ArbeidsopptrappingperioderRepository,
     private val institusjonsoppholdRepository: InstitusjonsoppholdRepository,
     private val vedtattStansOpphørRepository: VedtattStansOpphørRepository,
+    private val samordningRepository: SamordningRepository,
     private val hendelsePublisher: HendelsePublisher,
 ) {
     private val logger = LoggerFactory.getLogger(AvsluttetBehandlingService::class.java)
@@ -79,6 +80,11 @@ class AvsluttetBehandlingService(
         vedtattStansOpphørRepository.lagre(
             uthentetBehandling.id(),
             avsluttetBehandling.vedtattStansOpphør
+        )
+
+        samordningRepository.lagre(
+            uthentetBehandling.id(),
+            avsluttetBehandling.samordning
         )
 
         fritaksvurderingRepository.lagre(
