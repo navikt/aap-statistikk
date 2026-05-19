@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
+import no.nav.aap.statistikk.avsluttetbehandling.Samordning
 import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
@@ -57,6 +58,7 @@ fun AvsluttetBehandlingDTO.tilDomene(
             Periode(it.fom, it.tom)
         },
         vedtattStansOpphør = this.vedtattStansOpphør.map { it.tilDomene() },
+        samordning = this.samordning.tilDomene(),
     )
 }
 
@@ -116,6 +118,43 @@ fun ResultatKode?.resultatTilDomene(): no.nav.aap.statistikk.avsluttetbehandling
         ResultatKode.AVBRUTT -> no.nav.aap.statistikk.avsluttetbehandling.ResultatKode.AVBRUTT
         null -> null
     }
+
+private fun SamordningDTO.tilDomene(): Samordning = Samordning(
+    uføre = uføre.map { Samordning.UførePeriode(fom = it.fom, tom = it.tom, grad = it.grad) },
+    statligeYtelser = statligeYtelser.map {
+        Samordning.StatligYtelse(
+            fom = it.fom,
+            tom = it.tom,
+            ytelse = when (it.ytelse) {
+                SamordningDTO.SamordningYtelser.SYKEPENGER -> Samordning.SamordningYtelse.SYKEPENGER
+                SamordningDTO.SamordningYtelser.FORELDREPENGER -> Samordning.SamordningYtelse.FORELDREPENGER
+                SamordningDTO.SamordningYtelser.PLEIEPENGER -> Samordning.SamordningYtelse.PLEIEPENGER
+                SamordningDTO.SamordningYtelser.SVANGERSKAPSPENGER -> Samordning.SamordningYtelse.SVANGERSKAPSPENGER
+                SamordningDTO.SamordningYtelser.OMSORGSPENGER -> Samordning.SamordningYtelse.OMSORGSPENGER
+                SamordningDTO.SamordningYtelser.OPPLÆRINGSPENGER -> Samordning.SamordningYtelse.OPPLÆRINGSPENGER
+                SamordningDTO.SamordningYtelser.FERIE_I_SYKEPENGEPERIODE -> Samordning.SamordningYtelse.FERIE_I_SYKEPENGEPERIODE
+            },
+            prosent = it.prosent,
+        )
+    },
+    avregningAndreYtelser = avregningAndreYtelser.map {
+        Samordning.AvregningAndreYtelse(
+            fom = it.fom,
+            tom = it.tom,
+            ytelse = when (it.ytelse) {
+                SamordningDTO.AndreStatligeYtelser.SYKEPENGER -> Samordning.AndreStatligeYtelse.SYKEPENGER
+                SamordningDTO.AndreStatligeYtelser.FORELDREPENGER -> Samordning.AndreStatligeYtelse.FORELDREPENGER
+                SamordningDTO.AndreStatligeYtelser.TILTAKSPENGER -> Samordning.AndreStatligeYtelse.TILTAKSPENGER
+                SamordningDTO.AndreStatligeYtelser.OMSTILLINGSSTØNAD -> Samordning.AndreStatligeYtelse.OMSTILLINGSSTØNAD
+                SamordningDTO.AndreStatligeYtelser.OVERGANGSSTØNAD -> Samordning.AndreStatligeYtelse.OVERGANGSSTØNAD
+                SamordningDTO.AndreStatligeYtelser.DAGPENGER -> Samordning.AndreStatligeYtelse.DAGPENGER
+                SamordningDTO.AndreStatligeYtelser.BARNEPENSJON -> Samordning.AndreStatligeYtelse.BARNEPENSJON
+                SamordningDTO.AndreStatligeYtelser.GJENLEVENDEPENSJON -> Samordning.AndreStatligeYtelse.GJENLEVENDEPENSJON
+            },
+        )
+    },
+    arbeidsgiver = arbeidsgiver.map { Samordning.Arbeidsgiver(fom = it.fom, tom = it.tom) },
+)
 
 fun TilkjentYtelseDTO.tilDomene(
     saksnummer: Saksnummer,

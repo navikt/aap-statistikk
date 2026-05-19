@@ -39,6 +39,7 @@ import no.nav.aap.statistikk.testutils.fakes.FakeSakRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeTilkjentYtelseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeVedtattStansOpphørRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeVilkårsResultatRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeSamordningRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
@@ -174,6 +175,7 @@ class HendelsesServiceTest {
                 fritaksvurderingRepository = FakeFritaksvurderingRepository(),
                 behandlingService = behandlingService,
                 vedtattStansOpphørRepository = FakeVedtattStansOpphørRepository(),
+                samordningRepository = FakeSamordningRepository(),
             ),
             personService = PersonService(FakePersonRepository()),
             hendelsePublisher = hendelsePublisher,
