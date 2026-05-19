@@ -238,7 +238,6 @@ fun Application.module(
                     jobbAppender,
                 )
                 mottaTilbakekrevingshendelse(transactionExecutor, jobbAppender)
-                hentBehandlingstidPerDag(transactionExecutor)
                 motorApiCallback()
             }
         }
