@@ -27,55 +27,51 @@ class SamordningRepositoryImpl(private val dbConnection: DBConnection) : Samordn
             setParams { setLong(1, id) }
         }
 
-        samordning.uføre.forEach { periode ->
-            dbConnection.execute(
-                "INSERT INTO samordning_ufore (behandling_id, fra_dato, til_dato, grad) VALUES (?, ?, ?, ?)"
-            ) {
-                setParams {
-                    setLong(1, id)
-                    setLocalDate(2, periode.fom)
-                    setLocalDate(3, periode.tom)
-                    setInt(4, periode.grad)
-                }
+        dbConnection.executeBatch(
+            "INSERT INTO samordning_ufore (behandling_id, fra_dato, til_dato, grad) VALUES (?, ?, ?, ?)",
+            samordning.uføre,
+        ) {
+            setParams {
+                setLong(1, id)
+                setLocalDate(2, it.fom)
+                setLocalDate(3, it.tom)
+                setInt(4, it.grad)
             }
         }
 
-        samordning.statligeYtelser.forEach { periode ->
-            dbConnection.execute(
-                "INSERT INTO samordning_statlig_ytelse (behandling_id, fra_dato, til_dato, ytelse, prosent) VALUES (?, ?, ?, ?, ?)"
-            ) {
-                setParams {
-                    setLong(1, id)
-                    setLocalDate(2, periode.fom)
-                    setLocalDate(3, periode.tom)
-                    setString(4, periode.ytelse.name)
-                    setInt(5, periode.prosent)
-                }
+        dbConnection.executeBatch(
+            "INSERT INTO samordning_statlig_ytelse (behandling_id, fra_dato, til_dato, ytelse, prosent) VALUES (?, ?, ?, ?, ?)",
+            samordning.statligeYtelser,
+        ) {
+            setParams {
+                setLong(1, id)
+                setLocalDate(2, it.fom)
+                setLocalDate(3, it.tom)
+                setString(4, it.ytelse.name)
+                setInt(5, it.prosent)
             }
         }
 
-        samordning.avregningAndreYtelser.forEach { periode ->
-            dbConnection.execute(
-                "INSERT INTO samordning_avregning_andre_ytelser (behandling_id, fra_dato, til_dato, ytelse) VALUES (?, ?, ?, ?)"
-            ) {
-                setParams {
-                    setLong(1, id)
-                    setLocalDate(2, periode.fom)
-                    setLocalDate(3, periode.tom)
-                    setString(4, periode.ytelse.name)
-                }
+        dbConnection.executeBatch(
+            "INSERT INTO samordning_avregning_andre_ytelser (behandling_id, fra_dato, til_dato, ytelse) VALUES (?, ?, ?, ?)",
+            samordning.avregningAndreYtelser,
+        ) {
+            setParams {
+                setLong(1, id)
+                setLocalDate(2, it.fom)
+                setLocalDate(3, it.tom)
+                setString(4, it.ytelse.name)
             }
         }
 
-        samordning.arbeidsgiver.forEach { periode ->
-            dbConnection.execute(
-                "INSERT INTO samordning_arbeidsgiver (behandling_id, fra_dato, til_dato) VALUES (?, ?, ?)"
-            ) {
-                setParams {
-                    setLong(1, id)
-                    setLocalDate(2, periode.fom)
-                    setLocalDate(3, periode.tom)
-                }
+        dbConnection.executeBatch(
+            "INSERT INTO samordning_arbeidsgiver (behandling_id, fra_dato, til_dato) VALUES (?, ?, ?)",
+            samordning.arbeidsgiver,
+        ) {
+            setParams {
+                setLong(1, id)
+                setLocalDate(2, it.fom)
+                setLocalDate(3, it.tom)
             }
         }
     }
