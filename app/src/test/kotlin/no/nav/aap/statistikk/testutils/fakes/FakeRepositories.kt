@@ -6,6 +6,8 @@ import no.nav.aap.statistikk.avsluttetbehandling.ArbeidsopptrappingperioderRepos
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.InstitusjonsoppholdRepository
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
+import no.nav.aap.statistikk.avsluttetbehandling.Samordning
+import no.nav.aap.statistikk.avsluttetbehandling.SamordningRepository
 import no.nav.aap.statistikk.avsluttetbehandling.StansEllerOpphør
 import no.nav.aap.statistikk.avsluttetbehandling.VedtattStansOpphørRepository
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
@@ -192,29 +194,23 @@ class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {
 }
 
 class FakeArbeidsopptrappingRepository : ArbeidsopptrappingperioderRepository {
-    override fun lagre(
-        behandlingId: BehandlingId,
-        perioder: List<Periode>
-    ) {
-        TODO("Not yet implemented")
+    private val data = mutableMapOf<BehandlingId, List<Periode>>()
+
+    override fun lagre(behandlingId: BehandlingId, perioder: List<Periode>) {
+        data[behandlingId] = perioder
     }
 
-    override fun hent(behandlingId: BehandlingId): List<Periode>? {
-        TODO("Not yet implemented")
-    }
+    override fun hent(behandlingId: BehandlingId): List<Periode>? = data[behandlingId]
 }
 
 class FakeInstitusjonsoppholdRepository : InstitusjonsoppholdRepository {
-    override fun lagre(
-        behandlingId: BehandlingId,
-        perioder: List<Periode>
-    ) {
-        TODO("Not yet implemented")
+    private val data = mutableMapOf<BehandlingId, List<Periode>>()
+
+    override fun lagre(behandlingId: BehandlingId, perioder: List<Periode>) {
+        data[behandlingId] = perioder
     }
 
-    override fun hent(behandlingId: BehandlingId): List<Periode>? {
-        TODO("Not yet implemented")
-    }
+    override fun hent(behandlingId: BehandlingId): List<Periode>? = data[behandlingId]
 }
 
 class FakeVedtattStansOpphørRepository : VedtattStansOpphørRepository {
@@ -236,6 +232,16 @@ class FakeFritaksvurderingRepository : FritaksvurderingRepository {
     override fun hentFritaksvurderinger(behandlingId: BehandlingId): List<Fritakvurdering> {
         TODO("Not yet implemented")
     }
+}
+
+class FakeSamordningRepository : SamordningRepository {
+    private val data = mutableMapOf<BehandlingId, Samordning>()
+
+    override fun lagre(behandlingId: BehandlingId, samordning: Samordning) {
+        data[behandlingId] = samordning
+    }
+
+    override fun hent(behandlingId: BehandlingId): Samordning? = data[behandlingId]
 }
 
 class FakeDiagnoseRepository : DiagnoseRepository {

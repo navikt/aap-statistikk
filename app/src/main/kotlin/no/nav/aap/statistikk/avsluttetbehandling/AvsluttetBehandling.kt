@@ -68,7 +68,8 @@ data class AvsluttetBehandling(
     val fritaksvurderinger: List<Fritakvurdering>,
     val behandlingResultat: ResultatKode?,
     val vedtakstidspunkt: LocalDateTime?,
-    val vedtattStansOpphør: List<StansEllerOpphør> = emptyList()
+    val vedtattStansOpphør: List<StansEllerOpphør>,
+    val samordning: Samordning,
 ) {
     init {
         if (behandlingResultat == null) {

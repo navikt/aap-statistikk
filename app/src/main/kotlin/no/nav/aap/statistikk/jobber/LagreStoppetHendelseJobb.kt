@@ -46,6 +46,7 @@ class LagreStoppetHendelseJobb(
             behandlingService = behandlingService,
             hendelsePublisher = hendelsePublisher,
             vedtattStansOpphørRepository = repositoryProvider.provide(),
+            samordningRepository = repositoryProvider.provide(),
         )
         val hendelsesService = HendelsesService(
             sakService = SakService(repositoryProvider),

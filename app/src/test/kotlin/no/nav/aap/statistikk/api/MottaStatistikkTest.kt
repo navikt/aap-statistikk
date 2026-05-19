@@ -238,7 +238,13 @@ class MottaStatistikkTest {
             vedtakstidspunkt = LocalDateTime.parse("2025-12-08T08:53:14.437000"),
             perioderMedArbeidsopptrapping = emptyList(),
             vedtattStansOpphør = emptyList(),
-            institusjonsopphold = emptyList()
+            institusjonsopphold = emptyList(),
+            samordning = SamordningDTO(
+                uføre = emptyList(),
+                statligeYtelser = emptyList(),
+                avregningAndreYtelser = emptyList(),
+                arbeidsgiver = emptyList(),
+            ),
         )
     )
 

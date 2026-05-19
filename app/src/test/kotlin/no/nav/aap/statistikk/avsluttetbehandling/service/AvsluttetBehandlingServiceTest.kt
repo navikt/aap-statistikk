@@ -178,7 +178,8 @@ class AvsluttetBehandlingServiceTest {
             fritaksvurderinger = listOf(fritaksvurdering),
             perioderMedArbeidsopptrapping = listOf(arbeidsopptrappingperiode),
             vedtakstidspunkt = opprettetTidspunkt,
-            vedtattStansOpphør = listOf(vedtattStansOpphørPeriode)
+            vedtattStansOpphør = listOf(vedtattStansOpphørPeriode),
+            samordning = Samordning(emptyList(), emptyList(), emptyList(), emptyList()),
         )
 
         val meterRegistry = SimpleMeterRegistry()
@@ -379,7 +380,9 @@ class AvsluttetBehandlingServiceTest {
             ),
             perioderMedArbeidsopptrapping = emptyList(),
             fritaksvurderinger = emptyList(),
-            vedtakstidspunkt = LocalDateTime.now()
+            vedtakstidspunkt = LocalDateTime.now(),
+            vedtattStansOpphør = emptyList(),
+            samordning = Samordning(emptyList(), emptyList(), emptyList(), emptyList()),
         )
 
         dataSource.transaction {
@@ -439,7 +442,9 @@ class AvsluttetBehandlingServiceTest {
             rettighetstypeperioder = emptyList(),
             perioderMedArbeidsopptrapping = emptyList(),
             fritaksvurderinger = emptyList(),
-            vedtakstidspunkt = LocalDateTime.now()
+            vedtakstidspunkt = LocalDateTime.now(),
+            vedtattStansOpphør = emptyList(),
+            samordning = Samordning(emptyList(), emptyList(), emptyList(), emptyList()),
         )
 
         val fakeHendelsePublisher = FakeHendelsePublisher()
@@ -478,6 +483,7 @@ class AvsluttetBehandlingServiceTest {
                 ),
                 institusjonsoppholdRepository = InstitusjonsoppholdRepositoryImpl(dbConnection),
                 vedtattStansOpphørRepository = VedtattStansOpphørRepositoryImpl(dbConnection),
+                samordningRepository = SamordningRepositoryImpl(dbConnection),
                 hendelsePublisher = hendelsePublisher,
                 fritaksvurderingRepository = FritaksvurderingRepositoryImpl(dbConnection),
                 behandlingService = BehandlingService(
