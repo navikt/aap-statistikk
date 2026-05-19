@@ -133,5 +133,6 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.ETABLERING_EGEN_VIRKSOMHET -> ETABLERING_EGEN_VIRKSOMHET
         Vurderingsbehov.REVURDER_SAMORDNING_BARNEPENSJON -> REVURDER_SAMORDNING_BARNEPENSJON
         Vurderingsbehov.VEDTAKSLENGDE_MANUELT -> VEDTAKSLENGDE_MANUELT
+        Vurderingsbehov.AKTIVITETSPLIKTBEHANDLING_AVBRUTT -> AKTIVITETSPLIKTBEHANDLING_AVBRUTT
     }
 }

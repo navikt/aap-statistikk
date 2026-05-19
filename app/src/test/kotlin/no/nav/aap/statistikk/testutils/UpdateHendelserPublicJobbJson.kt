@@ -31,6 +31,7 @@ class UpdateHendelserPublicJobbJson {
         ÅrsakTilOpprettelseTransform(),
         PerioderMedArbeidsopptrappingTransform(),
         InstitusjonsoppholdTransform(),
+        SamordningTransform(),
         TilkjentYtelseTransform()
     )
 
@@ -171,6 +172,24 @@ class UpdateHendelserPublicJobbJson {
             val avsluttetBehandlingNode = node.path("avsluttetBehandling")
             if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("institusjonsopphold")) {
                 avsluttetBehandlingNode.set<ArrayNode>("institusjonsopphold", mapper.createArrayNode())
+                return true
+            }
+            return false
+        }
+    }
+
+    // Legger til tom samordning hvis den mangler
+    private class SamordningTransform : NodeTransform {
+        override fun apply(node: ObjectNode, mapper: ObjectMapper): Boolean {
+            val avsluttetBehandlingNode = node.path("avsluttetBehandling")
+            if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("samordning")) {
+                val samordning = mapper.createObjectNode().apply {
+                    set<ArrayNode>("uføre", mapper.createArrayNode())
+                    set<ArrayNode>("statligeYtelser", mapper.createArrayNode())
+                    set<ArrayNode>("avregningAndreYtelser", mapper.createArrayNode())
+                    set<ArrayNode>("arbeidsgiver", mapper.createArrayNode())
+                }
+                avsluttetBehandlingNode.set<ObjectNode>("samordning", samordning)
                 return true
             }
             return false
