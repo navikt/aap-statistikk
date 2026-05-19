@@ -758,7 +758,7 @@ class IntegrationTest {
             perioderMedArbeidsopptrapping = listOf(),
             vedtattStansOpphør = emptyList(),
             institusjonsopphold = emptyList(),
-            samordning = no.nav.aap.behandlingsflyt.kontrakt.statistikk.SamordningDTO(
+            samordning = SamordningDTO(
                 uføre = emptyList(),
                 statligeYtelser = emptyList(),
                 avregningAndreYtelser = emptyList(),
