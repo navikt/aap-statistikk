@@ -161,7 +161,7 @@ class SaksStatistikkService(
                 )
                 null
             } else {
-                log.warn(
+                log.info(
                     "Ny hendelse har eldre endretTid enn forrige lagrede rad — lagrer med opprinnelig tidsstempel. " +
                             "Referanse: ${bqSak.behandlingUUID}. " +
                             "Forrige endretTid: ${siste.endretTid}, ny: ${bqSak.endretTid}. " +
