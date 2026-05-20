@@ -41,6 +41,7 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
         private var dataSource: HikariDataSource
         private val flyway: Migrering
         private val dbConfig: DbConfig
+        private lateinit var truncateStatement: String
 
         init {
             System.setProperty("flyway.cleanDisabled", false.toString())
@@ -53,17 +54,32 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
             )
             flyway = Migrering(dbConfig)
             dataSource = flyway.createAndMigrateDataSource()
+            truncateStatement = buildTruncateStatement()
+        }
+
+        private fun buildTruncateStatement(): String {
+            dataSource.connection.use { conn ->
+                val result = conn.metaData.getTables(null, "public", null, arrayOf("TABLE"))
+                val tables = buildList {
+                    while (result.next()) {
+                        val name = result.getString("TABLE_NAME")
+                        if (name != "flyway_schema_history" && !name.startsWith("kodeverk_")) {
+                            add("\"$name\"")
+                        }
+                    }
+                }
+                return "TRUNCATE TABLE ${tables.joinToString(", ")} RESTART IDENTITY CASCADE"
+            }
         }
     }
 
     override fun beforeEach(context: ExtensionContext) {
-        flyway.clean()
-        flyway.createAndMigrateDataSource()
+        dataSource.connection.use { conn ->
+            conn.createStatement().use { it.execute(truncateStatement) }
+        }
     }
 
     override fun afterEach(context: ExtensionContext) {
-//            flyway.clean()
-//            flyway.createAndMigrateDataSource()
     }
 
     override fun supportsParameter(
