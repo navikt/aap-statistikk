@@ -24,7 +24,6 @@ spec:
           SELECT
             array_agg(
               STRUCT(
-                ssy.behandling_id,
                 ssy.ytelse AS ytelse,
                 ssy.fra_dato AS fra_dato,
                 ssy.til_dato AS til_dato,
@@ -37,7 +36,6 @@ spec:
           SELECT
             array_agg(
               STRUCT(
-                saay.behandling_id,
                 saay.fra_dato AS fra_dato,
                 saay.til_dato AS til_dato))
           FROM
@@ -45,6 +43,18 @@ spec:
               saay
           WHERE saay.behandling_id = b.id
         ) AS avregning_andre_ytelser,
+      (
+        SELECT
+          array_agg(
+            STRUCT(
+              su.fra_dato AS fra_dato,
+              su.til_dato AS til_dato,
+              su.grad as grad
+      ))
+        FROM
+          `datastream_hendelser.public_samordning_ufore` su
+        WHERE su.behandling_id = b.id
+      ) AS ufore,
       FROM `ytelsestatistikk.view_gyldige_behandlinger` gyldig
       JOIN `datastream_hendelser.public_behandling` b
         ON gyldig.behandling_id = b.id
