@@ -23,7 +23,7 @@ import java.util.*
 )
 annotation class BigQuery
 
-class BigQueryExtension : ParameterResolver, AfterAllCallback {
+class BigQueryExtension : ParameterResolver {
 
     companion object {
         private val bigQueryContainer =
@@ -87,7 +87,4 @@ class BigQueryExtension : ParameterResolver, AfterAllCallback {
         return testBigQueryConfig()
     }
 
-    override fun afterAll(context: ExtensionContext) {
-        bigQueryContainer.stop()
-    }
 }
