@@ -60,6 +60,9 @@ data class BQBehandling(
 
     val vedtakTidTrunkert = vedtakTid?.truncatedTo(SECONDS)
 
+    val sakUtland: String
+        get() = if (ansvarligEnhetKode in setOf("0393", "4402")) "UTLAND" else "NASJONAL"
+
     fun ansesSomDuplikat(other: BQBehandling): Boolean {
         return this == other.copy(
             sekvensNummer = sekvensNummer,
