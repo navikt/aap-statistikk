@@ -18,7 +18,7 @@ spec:
     useLegacySql: false
     query: >-
       SELECT
-        br.referanse AS behandling_referanse,
+        br.referanse AS behandlingsreferanse,
         s.saksnummer AS saksnummer,
         (
           SELECT
