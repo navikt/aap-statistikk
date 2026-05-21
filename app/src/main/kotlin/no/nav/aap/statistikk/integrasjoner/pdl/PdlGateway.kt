@@ -109,7 +109,7 @@ val PERSON_BOLK_QUERY = $$"""
 data class Person(val adressebeskyttelse: List<Adressebeskyttelse>)
 
 data class Adressebeskyttelse(
-    val gradering: Gradering
+    val gradering: Gradering?
 )
 
 enum class Gradering {

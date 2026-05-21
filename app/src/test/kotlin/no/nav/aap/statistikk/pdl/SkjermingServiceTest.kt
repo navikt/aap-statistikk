@@ -73,6 +73,13 @@ class SkjermingServiceTest {
     }
 
     @Test
+    fun `returnerer false om ingen gradering er satt`() {
+        val service = SkjermingService(FakePdlGateway(identerHemmelig = mapOf("130289" to null)))
+
+        assertThat(service.erSkjermet(behandling)).isFalse()
+    }
+
+    @Test
     fun `om pdl-kall feiler med timeout, kastes exception`() {
         val service = SkjermingService(object : PdlGateway {
             override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {

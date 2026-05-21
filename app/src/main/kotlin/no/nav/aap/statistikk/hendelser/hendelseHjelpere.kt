@@ -54,7 +54,8 @@ fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
         ?.endringer?.maxByOrNull { it.tidsstempel }
         ?.årsakTilRetur ?: return null
 
-    return årsaker.sortedByDescending { it.årsak == ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE }
+    return årsaker
+        .sortedByDescending { it.årsak == ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE }
         .firstOrNull()?.årsak
 }
 
