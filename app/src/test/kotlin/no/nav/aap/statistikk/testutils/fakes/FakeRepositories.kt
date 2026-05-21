@@ -3,26 +3,26 @@ package no.nav.aap.statistikk.testutils.fakes
 import no.nav.aap.komponenter.gateway.Factory
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.avsluttetbehandling.ArbeidsopptrappingperioderRepository
+import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.InstitusjonsoppholdRepository
+import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.avsluttetbehandling.Samordning
 import no.nav.aap.statistikk.avsluttetbehandling.SamordningRepository
 import no.nav.aap.statistikk.avsluttetbehandling.StansEllerOpphør
 import no.nav.aap.statistikk.avsluttetbehandling.VedtattStansOpphørRepository
+import no.nav.aap.statistikk.behandling.BQYtelseBehandling
+import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
-import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.bigquery.BQTable
-import no.nav.aap.statistikk.bigquery.IBigQueryClient
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
-import no.nav.aap.statistikk.behandling.BQYtelseBehandling
+import no.nav.aap.statistikk.bigquery.IBigQueryClient
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
@@ -46,7 +46,7 @@ import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatReposi
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 private val logger = LoggerFactory.getLogger("FakeRepositories")
 
@@ -314,7 +314,7 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
     }
 }
 
-class FakePdlGateway(val identerHemmelig: Map<String, Boolean> = emptyMap()) : PdlGateway {
+class FakePdlGateway(val identerHemmelig: Map<String, Boolean?> = emptyMap()) : PdlGateway {
     companion object : Factory<PdlGateway> {
         override fun konstruer(): PdlGateway {
             return FakePdlGateway()
@@ -324,7 +324,15 @@ class FakePdlGateway(val identerHemmelig: Map<String, Boolean> = emptyMap()) : P
     override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {
         return identer.map {
             no.nav.aap.statistikk.integrasjoner.pdl.Person(
-                adressebeskyttelse = listOf(Adressebeskyttelse(gradering = if (identerHemmelig[it] == true) Gradering.STRENGT_FORTROLIG else Gradering.UGRADERT))
+                adressebeskyttelse = listOf(
+                    Adressebeskyttelse(
+                        gradering = when (identerHemmelig[it]) {
+                            true -> Gradering.STRENGT_FORTROLIG
+                            false -> Gradering.UGRADERT
+                            null -> null
+                        }
+                    )
+                )
             )
         }
     }

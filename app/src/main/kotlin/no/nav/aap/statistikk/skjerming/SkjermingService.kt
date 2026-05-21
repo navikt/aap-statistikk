@@ -27,6 +27,6 @@ class SkjermingService(
     }
 }
 
-fun Gradering.erHemmelig(): Boolean {
-    return this != Gradering.UGRADERT
+fun Gradering?.erHemmelig(): Boolean {
+    return this != null && this != Gradering.UGRADERT
 }
