@@ -95,7 +95,7 @@ class EndretTidBugTest {
             val alleRader = repo.hentAlleHendelserPåBehandling(behandlingUUID)
 
             // Den generelle stien i lagreBQBehandling bumper fortsatt opp til T+1µs.
-            // Produksjonsflyten går via lagreMedStoredBQBehandling (testet separat).
+            // Rotårsak-fiksen forhindrer at dette skjer via retry-flyten.
             val sisteRad = alleRader.maxBy { it.endretTid }
             assertThat(sisteRad.behandlingStatus).isEqualTo("IVERKSETTES")
             assertThat(sisteRad.endretTid).isEqualTo(endretTid.plusNanos(1000))
@@ -214,7 +214,6 @@ class EndretTidBugTest {
     }
 }
 
-// Hjelpefunksjon med erResending-parameter
 private fun lagTestBQBehandling(
     behandlingUUID: UUID = UUID.randomUUID(),
     endretTid: LocalDateTime = LocalDateTime.now(),
