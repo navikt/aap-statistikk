@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.statistikk.integrasjoner.pdl.*
 import org.junit.jupiter.api.extension.*
+import org.junit.jupiter.api.util.RestoreSystemProperties
 import java.net.URI
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.VALUE_PARAMETER)
@@ -117,6 +118,7 @@ annotation class Fakes {
         }
     }
 
+    @RestoreSystemProperties
     class FakesExtension : AfterAllCallback, BeforeAllCallback, ParameterResolver {
         private val azure = AzureFake()
         private val pdl = PdlFake()

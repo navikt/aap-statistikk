@@ -43,6 +43,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.util.RestoreSystemProperties
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -51,6 +52,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as BStatus
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse as DomeneOppgaveHendelse
 
 @Fakes
+@RestoreSystemProperties
 class IntegrationTest {
     companion object {
         @BeforeAll

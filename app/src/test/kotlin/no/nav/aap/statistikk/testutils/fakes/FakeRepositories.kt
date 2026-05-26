@@ -16,7 +16,9 @@ import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.avsluttetbehandling.DiagnoseMedPeriode
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
+import no.nav.aap.statistikk.behandling.DiagnosePerioderRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
@@ -252,6 +254,17 @@ class FakeDiagnoseRepository : DiagnoseRepository {
     override fun hentForBehandling(behandlingReferanse: UUID): DiagnoseEntity {
         TODO("Not yet implemented")
     }
+}
+
+class FakeDiagnosePerioderRepository : DiagnosePerioderRepository {
+    val lagret = mutableMapOf<BehandlingId, List<DiagnoseMedPeriode>>()
+
+    override fun lagre(behandlingId: BehandlingId, diagnoser: List<DiagnoseMedPeriode>) {
+        lagret[behandlingId] = diagnoser
+    }
+
+    override fun hentForBehandling(behandlingReferanse: UUID): List<DiagnoseMedPeriode> =
+        lagret.values.flatten()
 }
 
 class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
