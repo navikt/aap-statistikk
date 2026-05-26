@@ -19,7 +19,8 @@ spec:
     query: >-
       SELECT
         b.id AS behandling_id,
-        bh.id AS bh_id
+        bh.id AS bh_id,
+        b.opprettet_tid as opprettet_tid
       FROM
         `datastream_hendelser.public_behandling` b
       JOIN
