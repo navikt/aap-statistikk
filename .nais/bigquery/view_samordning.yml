@@ -38,25 +38,33 @@ spec:
               STRUCT(
                 saay.fra_dato AS fra_dato,
                 saay.til_dato AS til_dato,
-                saay.ytelse as ytelse,
-      ))
+                saay.ytelse AS ytelse))
           FROM
             `datastream_hendelser.public_samordning_avregning_andre_ytelser`
               saay
           WHERE saay.behandling_id = b.id
         ) AS avregning_andre_ytelser,
-      (
-        SELECT
-          array_agg(
-            STRUCT(
-              su.fra_dato AS fra_dato,
-              su.til_dato AS til_dato,
-              su.grad as grad
-      ))
-        FROM
-          `datastream_hendelser.public_samordning_ufore` su
-        WHERE su.behandling_id = b.id
-      ) AS ufore,
+        (
+          SELECT
+            array_agg(
+              STRUCT(
+                su.fra_dato AS fra_dato,
+                su.til_dato AS til_dato,
+                su.grad AS grad))
+          FROM
+            `datastream_hendelser.public_samordning_ufore` su
+          WHERE su.behandling_id = b.id
+        ) AS ufore,
+        (
+          SELECT
+            array_agg(
+              STRUCT(
+                sag.fra_dato AS fra_dato,
+                sag.til_dato AS til_dato))
+          FROM
+            `datastream_hendelser.public_samordning_arbeidsgiver` sag
+          WHERE sag.behandling_id = b.id
+        ) AS arbeidsgiver,
       FROM `ytelsestatistikk.view_gyldige_behandlinger` gyldig
       JOIN `datastream_hendelser.public_behandling` b
         ON gyldig.behandling_id = b.id

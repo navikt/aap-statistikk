@@ -233,6 +233,7 @@ class MottaStatistikkTest {
             vilkårsResultat = VilkårsResultatDTO(TypeBehandling.Revurdering, emptyList()),
             beregningsGrunnlag = null,
             diagnoser = Diagnoser("SBC", "BC", emptyList()),
+            diagnoserPeriodisert = emptyList(),
             rettighetstypePerioder = emptyList(),
             resultat = null,
             vedtakstidspunkt = LocalDateTime.parse("2025-12-08T08:53:14.437000"),
