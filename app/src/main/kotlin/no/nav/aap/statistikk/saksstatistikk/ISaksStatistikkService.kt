@@ -4,7 +4,6 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 
 interface ISaksStatistikkService {
     fun lagreSakInfoTilBigquery(
-        behandlingId: BehandlingId,
-        lagreUtenEnhet: Boolean = false
+        behandlingId: BehandlingId
     ): SakStatistikkResultat
 }

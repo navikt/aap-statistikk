@@ -70,9 +70,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
             "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount."
         )
 
-        val resultat = sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
-
-        when (resultat) {
+        when (val resultat = sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)) {
             SakStatistikkResultat.OK -> {}
             is SakStatistikkResultat.ManglerEnhet -> {
                 if (retryCount < enhetRetryConfig.maxRetries) {
