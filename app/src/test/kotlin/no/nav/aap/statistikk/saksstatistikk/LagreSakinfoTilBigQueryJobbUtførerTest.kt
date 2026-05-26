@@ -7,13 +7,11 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
 import java.util.UUID
 
 class LagreSakinfoTilBigQueryJobbUtførerTest {
@@ -198,53 +196,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         assertThat(service.sisteKallLagreUtenEnhet).isFalse()
     }
 
-    @Test
-    fun `storedBQBehandling i payload ignoreres — lagreSakInfoTilBigquery kalles alltid`() {
-        val behandlingId = BehandlingId(1)
-        val service = FakeSaksStatistikkService(SakStatistikkResultat.OK)
-        val jobbAppender = MockJobbAppender()
-
-        val utfører = lagUtfører(service, jobbAppender)
-
-        // Gammel payload med storedBQBehandling — skal ignoreres
-        val input = JobbInput(LagreSakinfoTilBigQueryJobb())
-            .medPayload(
-                LagreSakinfoPayload(
-                    behandlingId,
-                    retryCount = 1,
-                    storedBQBehandling = lagFakeBQBehandling(),
-                    avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name
-                )
-            )
-        utfører.utfør(input)
-
-        assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
-    }
 }
-
-private fun lagFakeBQBehandling(behandlingUUID: UUID = UUID.randomUUID()) = BQBehandling(
-    behandlingUUID = behandlingUUID,
-    behandlingType = "FØRSTEGANGSBEHANDLING",
-    aktorId = "12345678901",
-    saksnummer = "123",
-    tekniskTid = LocalDateTime.now(),
-    registrertTid = LocalDateTime.now().minusDays(1),
-    endretTid = LocalDateTime.now(),
-    versjon = "v1",
-    mottattTid = LocalDateTime.now().minusDays(1),
-    opprettetAv = "Kelvin",
-    ansvarligBeslutter = null,
-    søknadsFormat = SøknadsFormat.DIGITAL,
-    saksbehandler = null,
-    behandlingMetode = BehandlingMetode.MANUELL,
-    behandlingStatus = "UNDER_BEHANDLING",
-    behandlingÅrsak = "SØKNAD",
-    resultatBegrunnelse = null,
-    ansvarligEnhetKode = null,
-    sakYtelse = "AAP",
-    erResending = false,
-)
 
 private class FakeSaksStatistikkService(
     private val resultat: SakStatistikkResultat
