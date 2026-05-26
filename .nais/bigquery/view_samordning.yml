@@ -65,6 +65,8 @@ spec:
             `datastream_hendelser.public_samordning_arbeidsgiver` sag
           WHERE sag.behandling_id = b.id
         ) AS arbeidsgiver,
+      b.opprettet_tid AS reg_tid,
+      DATETIME(TIMESTAMP_MILLIS(GREATEST(b.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp, ssy.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endret_tid,
       FROM `ytelsestatistikk.view_gyldige_behandlinger` gyldig
       JOIN `datastream_hendelser.public_behandling` b
         ON gyldig.behandling_id = b.id
