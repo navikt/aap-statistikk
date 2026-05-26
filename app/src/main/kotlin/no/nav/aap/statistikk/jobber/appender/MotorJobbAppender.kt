@@ -99,5 +99,3 @@ class MotorJobbAppender : JobbAppender {
         )
     }
 }
-// rad endret og og behandling avsluttet-tid mangler i view
-// hvis fritak fra meldekort-status, dele tidslinjen

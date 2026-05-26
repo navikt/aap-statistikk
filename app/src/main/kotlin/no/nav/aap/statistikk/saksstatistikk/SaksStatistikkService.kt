@@ -68,7 +68,7 @@ class SaksStatistikkService(
     fun lagreBQBehandling(bqSak: BQBehandling) {
         val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
 
-        if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
+        if (siste?.ansesSomDuplikat(bqSak) != true) {
             // Hvis vi ikke allerede har en inngangshendelse (når behandlingen ble
             // opprettet), konstruer en.
             // Dette er kun et teknisk krav fra Team Sak om at alle hendelser bør ha inngangshendelser.
