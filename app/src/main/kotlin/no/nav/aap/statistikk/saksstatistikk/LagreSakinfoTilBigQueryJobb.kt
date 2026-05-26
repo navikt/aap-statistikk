@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.json.DeserializationException
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
@@ -22,7 +21,6 @@ data class EnhetRetryConfig(
 
 data class LagreSakinfoPayload(
     val behandlingId: BehandlingId,
-    val storedBQBehandling: BQBehandling? = null,
     val avklaringsbehovKode: String? = null,
     val retryCount: Int = 0,
     val triggerKilde: String = "ukjent",
@@ -54,20 +52,8 @@ class LagreSakinfoTilBigQueryJobbUtfører(
             input.payload<LagreSakinfoPayload>()
         } catch (_: DeserializationException) {
             log.info("Deserialisering som LagreSakinfoPayload feilet, prøver gammelt format (BehandlingId)")
-            val behandlingId = input.payload<BehandlingId>()
-            val storedBQBehandling = try {
-                input.optionalParameter("storedBQBehandling")
-                    ?.let { DefaultJsonMapper.fromJson<BQBehandling>(it) }
-            } catch (e: DeserializationException) {
-                log.warn(
-                    "Klarte ikke deserialisere storedBQBehandling fra gammelt format, ignorerer",
-                    e
-                )
-                null
-            }
             LagreSakinfoPayload(
-                behandlingId = behandlingId,
-                storedBQBehandling = storedBQBehandling,
+                behandlingId = input.payload<BehandlingId>(),
                 avklaringsbehovKode = input.optionalParameter("avklaringsbehovKode"),
                 retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0,
                 triggerKilde = input.optionalParameter("triggerKilde") ?: "ukjent",
