@@ -108,6 +108,7 @@ fun avsluttetBehandlingDTO(): AvsluttetBehandlingDTO {
             nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
             ytterligereNedsattArbeidsevneDato = null,
         ),
+        diagnoserPeriodisert = emptyList(),
         rettighetstypePerioder = listOf(),
         resultat = ResultatKode.AVSLAG,
         vedtakstidspunkt = null,

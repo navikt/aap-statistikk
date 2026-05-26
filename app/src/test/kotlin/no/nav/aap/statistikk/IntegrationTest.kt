@@ -751,6 +751,7 @@ class IntegrationTest {
             ),
             beregningsGrunnlag = null,
             diagnoser = null,
+            diagnoserPeriodisert = emptyList(),
             rettighetstypePerioder = listOf(),
             resultat = null,
             vedtakstidspunkt = null,
