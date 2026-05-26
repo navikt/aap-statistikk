@@ -64,7 +64,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
         assertThat(jobbAppender.sisteEnhetRetryCount).isEqualTo(1)
         assertThat(jobbAppender.sisteDelayInSeconds).isEqualTo(testConfig.delaySeconds)
     }
@@ -122,7 +121,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
         assertThat(jobbAppender.sisteEnhetRetryCount).isEqualTo(2)
     }
 
@@ -193,7 +191,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
     }
 
 }
@@ -202,14 +199,11 @@ private class FakeSaksStatistikkService(
     private val resultat: SakStatistikkResultat
 ) : ISaksStatistikkService {
     var kallteller = 0
-    var sisteKallLagreUtenEnhet = false
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
-        lagreUtenEnhet: Boolean
     ): SakStatistikkResultat {
         kallteller++
-        sisteKallLagreUtenEnhet = lagreUtenEnhet
-        return if (lagreUtenEnhet) SakStatistikkResultat.OK else resultat
+        return resultat
     }
 }

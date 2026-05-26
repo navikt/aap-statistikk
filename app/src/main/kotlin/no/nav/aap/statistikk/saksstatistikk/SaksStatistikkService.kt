@@ -19,8 +19,7 @@ class SaksStatistikkService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun lagreSakInfoTilBigquery(
-        behandlingId: BehandlingId,
-        lagreUtenEnhet: Boolean
+        behandlingId: BehandlingId
     ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
         require(
@@ -41,23 +40,14 @@ class SaksStatistikkService(
                     "status=${bqSak.behandlingStatus}."
         )
 
-        val manglerEnhet = !lagreUtenEnhet &&
-                bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
+        val manglerEnhet =
+            bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
 
         if (manglerEnhet) {
             return SakStatistikkResultat.ManglerEnhet(
                 behandlingId = behandling.id(),
                 avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
             )
-        }
-
-        val manglerFortsattEnhet =
-            bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
-        if (manglerFortsattEnhet) {
-            val referanse = behandling.referanse
-            val saksnummer = behandling.sak.saksnummer
-            log.warn("Ansvarlig enhet er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
-            log.warn("Saksbehandler er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
         }
 
         lagreBQBehandling(bqSak)
@@ -130,6 +120,7 @@ class SaksStatistikkService(
             PrometheusProvider.prometheus.sammeEndretTid().increment()
             bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
         }
+
         siste.endretTid > bqSak.endretTid -> {
             val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
                 bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
@@ -150,6 +141,7 @@ class SaksStatistikkService(
                 bqSak
             }
         }
+
         else -> bqSak
     }
 
