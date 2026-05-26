@@ -69,6 +69,11 @@ For testing, prefer in-memory fakes over mocks. Fakes provide:
 - Compiling alone is not sufficient — always run the full test suite
 - **Do not mark a task complete without having run and verified tests pass**
 
+### Event Ingestion
+
+Hendelser mottas via **REST POST-kall**, ikke Kafka. Det er ingen Kafka-integrasjon i
+dette prosjektet.
+
 ### Domain Classes vs. External Contracts
 
 Never use external contract types (e.g. `behandlingsflyt.kontrakt`) directly in domain logic, repositories, or database storage. Always map to local domain classes first. This keeps the domain decoupled from external contracts.

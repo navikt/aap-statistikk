@@ -8,6 +8,5 @@ sealed class SakStatistikkResultat {
     data class ManglerEnhet(
         val behandlingId: BehandlingId,
         val avklaringsbehovKode: Definisjon?,
-        val bqBehandling: BQBehandling,
     ) : SakStatistikkResultat()
 }

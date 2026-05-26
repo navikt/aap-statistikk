@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelser.BehandlingService
@@ -49,7 +48,6 @@ class SaksStatistikkService(
             return SakStatistikkResultat.ManglerEnhet(
                 behandlingId = behandling.id(),
                 avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
-                bqBehandling = bqSak,
             )
         }
 
@@ -64,27 +62,6 @@ class SaksStatistikkService(
 
         lagreBQBehandling(bqSak)
 
-        return SakStatistikkResultat.OK
-    }
-
-    override fun lagreMedStoredBQBehandling(
-        behandlingId: BehandlingId,
-        storedBQBehandling: BQBehandling,
-        avklaringsbehovKode: Definisjon?,
-    ): SakStatistikkResultat {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val erSkjermet = behandlingService.erSkjermet(behandling)
-        val (enhet, saksbehandler) = bqBehandlingMapper.hentEnhetOgSaksbehandler(
-            behandling, erSkjermet, avklaringsbehovKode
-        )
-        if (enhet == null) {
-            return SakStatistikkResultat.ManglerEnhet(
-                behandlingId = behandlingId,
-                avklaringsbehovKode = avklaringsbehovKode,
-                bqBehandling = storedBQBehandling,
-            )
-        }
-        lagreBQBehandling(storedBQBehandling.copy(ansvarligEnhetKode = enhet, saksbehandler = saksbehandler))
         return SakStatistikkResultat.OK
     }
 
@@ -115,9 +92,12 @@ class SaksStatistikkService(
             }
 
             sakstatistikkRepository.lagre(bqSakMedUnikEndretTid)
-            if (siste?.behandlingStatus == "AVSLUTTET" && bqSakMedUnikEndretTid.behandlingStatus == "IVERKSETTES") {
+            if (siste?.behandlingStatus == "AVSLUTTET"
+                && bqSakMedUnikEndretTid.behandlingStatus != "AVSLUTTET"
+                && bqSakMedUnikEndretTid.endretTid > siste.endretTid
+            ) {
                 log.error(
-                    "Feil rekkefølge: lagrer IVERKSETTES etter at AVSLUTTET allerede er lagret. " +
+                    "Feil rekkefølge: lagrer ${bqSakMedUnikEndretTid.behandlingStatus} etter at AVSLUTTET allerede er lagret. " +
                             "Referanse: ${bqSakMedUnikEndretTid.behandlingUUID}. " +
                             "Forrige endretTid: ${siste.endretTid}, ny endretTid: ${bqSakMedUnikEndretTid.endretTid}."
                 )

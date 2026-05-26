@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.json.DefaultJsonMapper
@@ -85,15 +84,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
             "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount."
         )
 
-        val resultat = if (payload.storedBQBehandling != null) {
-            sakStatistikkService.lagreMedStoredBQBehandling(
-                behandlingId, payload.storedBQBehandling, payload.avklaringsbehovKode?.let(
-                    Definisjon::forKode
-                )
-            )
-        } else {
-            sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
-        }
+        val resultat = sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)
 
         when (resultat) {
             SakStatistikkResultat.OK -> {}
@@ -110,7 +101,6 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         repositoryProvider,
                         behandlingId,
                         delayInSeconds = delay,
-                        storedBQBehandling = resultat.bqBehandling,
                         avklaringsbehovKode = resultat.avklaringsbehovKode,
                         enhetRetryCount = retryCount + 1,
                         triggerKilde = "retry($triggerKilde)",

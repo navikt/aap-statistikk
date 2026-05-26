@@ -55,7 +55,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             SakStatistikkResultat.ManglerEnhet(
                 behandlingId,
                 Definisjon.AVKLAR_SYKDOM,
-                lagFakeBQBehandling()
             )
         )
         val jobbAppender = MockJobbAppender()
@@ -79,7 +78,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             SakStatistikkResultat.ManglerEnhet(
                 behandlingId,
                 Definisjon.AVKLAR_SYKDOM,
-                lagFakeBQBehandling()
             )
         )
         val jobbAppender = MockJobbAppender()
@@ -115,7 +113,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `reschedulerer med økt retry-teller`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM)
         )
         val jobbAppender = MockJobbAppender()
 
@@ -134,7 +132,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `kaster exception etter maks antall forsøk når enhet mangler`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM)
         )
         val jobbAppender = MockJobbAppender()
         val fakeBehandlingRepository = mockk<BehandlingRepository>(relaxed = true) {
@@ -156,7 +154,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     fun `config kan overstyres i test`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, lagFakeBQBehandling())
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM)
         )
         val jobbAppender = MockJobbAppender()
         val customConfig = EnhetRetryConfig(maxRetries = 1, delaySeconds = 10)
@@ -177,7 +175,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         val resultat = SakStatistikkResultat.ManglerEnhet(
             behandlingId,
             avklaringsbehovKode,
-            lagFakeBQBehandling()
         )
 
         assertThat(resultat.avklaringsbehovKode).isEqualTo(avklaringsbehovKode)
@@ -185,67 +182,44 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     }
 
     @Test
-    fun `ved retry uten stored BQBehandling brukes lagreSakInfoTilBigquery`() {
+    fun `ved retry brukes alltid lagreSakInfoTilBigquery — ikke frossen snapshot`() {
         val behandlingId = BehandlingId(1)
         val service = FakeSaksStatistikkService(SakStatistikkResultat.OK)
         val jobbAppender = MockJobbAppender()
 
         val utfører = lagUtfører(service, jobbAppender)
 
+        // Retry med retryCount=1 skal fortsatt kalle lagreSakInfoTilBigquery
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(LagreSakinfoPayload(behandlingId, retryCount = 1))
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallVarMedStoredBQBehandling).isFalse()
+        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
     }
 
     @Test
-    fun `ved retry med stored BQBehandling brukes lagreMedStoredBQBehandling`() {
+    fun `storedBQBehandling i payload ignoreres — lagreSakInfoTilBigquery kalles alltid`() {
         val behandlingId = BehandlingId(1)
-        val fakeBQBehandling = lagFakeBQBehandling()
         val service = FakeSaksStatistikkService(SakStatistikkResultat.OK)
         val jobbAppender = MockJobbAppender()
 
         val utfører = lagUtfører(service, jobbAppender)
 
+        // Gammel payload med storedBQBehandling — skal ignoreres
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(
                 LagreSakinfoPayload(
                     behandlingId,
                     retryCount = 1,
-                    storedBQBehandling = fakeBQBehandling,
+                    storedBQBehandling = lagFakeBQBehandling(),
                     avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name
                 )
             )
         utfører.utfør(input)
 
         assertThat(service.kallteller).isEqualTo(1)
-        assertThat(service.sisteKallVarMedStoredBQBehandling).isTrue()
-        assertThat(service.sisteStoredBQBehandling?.behandlingUUID).isEqualTo(fakeBQBehandling.behandlingUUID)
-    }
-
-    @Test
-    fun `stored BQBehandling sendes med til neste retry`() {
-        val behandlingId = BehandlingId(1)
-        val fakeBQBehandling = lagFakeBQBehandling()
-        val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM, fakeBQBehandling)
-        )
-        val jobbAppender = MockJobbAppender()
-
-        val utfører = lagUtfører(service, jobbAppender)
-        utfører.utfør(
-            JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(
-                LagreSakinfoPayload(
-                    behandlingId
-                )
-            )
-        )
-
-        assertThat(jobbAppender.sisteStoredBQBehandling).isNotNull()
-        assertThat(jobbAppender.sisteStoredBQBehandling!!.behandlingUUID).isEqualTo(fakeBQBehandling.behandlingUUID)
-        assertThat(jobbAppender.sisteAvklaringsbehovKode).isEqualTo(Definisjon.AVKLAR_SYKDOM)
+        assertThat(service.sisteKallLagreUtenEnhet).isFalse()
     }
 }
 
@@ -277,8 +251,6 @@ private class FakeSaksStatistikkService(
 ) : ISaksStatistikkService {
     var kallteller = 0
     var sisteKallLagreUtenEnhet = false
-    var sisteKallVarMedStoredBQBehandling = false
-    var sisteStoredBQBehandling: BQBehandling? = null
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
@@ -286,18 +258,6 @@ private class FakeSaksStatistikkService(
     ): SakStatistikkResultat {
         kallteller++
         sisteKallLagreUtenEnhet = lagreUtenEnhet
-        sisteKallVarMedStoredBQBehandling = false
         return if (lagreUtenEnhet) SakStatistikkResultat.OK else resultat
-    }
-
-    override fun lagreMedStoredBQBehandling(
-        behandlingId: BehandlingId,
-        storedBQBehandling: BQBehandling,
-        avklaringsbehovKode: Definisjon?,
-    ): SakStatistikkResultat {
-        kallteller++
-        sisteKallVarMedStoredBQBehandling = true
-        sisteStoredBQBehandling = storedBQBehandling
-        return resultat
     }
 }
