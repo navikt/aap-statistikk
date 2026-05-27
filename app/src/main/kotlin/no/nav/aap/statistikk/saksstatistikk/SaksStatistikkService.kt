@@ -109,16 +109,26 @@ class SaksStatistikkService(
     private fun tilpassEndretTid(bqSak: BQBehandling, siste: BQBehandling?): BQBehandling? = when {
         siste == null -> bqSak
         siste.endretTid == bqSak.endretTid -> {
-            log.info(
-                "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
-                        "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
-                        "EndretTid: ${bqSak.endretTid}. " +
-                        "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
-                        "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
-                        "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
-            )
-            PrometheusProvider.prometheus.sammeEndretTid().increment()
-            bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
+            if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus != "AVSLUTTET") {
+                log.warn(
+                    "Hopper over hendelse med samme endretTid fordi AVSLUTTET allerede er lagret. " +
+                            "Referanse: ${bqSak.behandlingUUID}. " +
+                            "Eksisterende status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}, " +
+                            "endretTid: ${bqSak.endretTid}."
+                )
+                null
+            } else {
+                log.info(
+                    "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
+                            "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
+                            "EndretTid: ${bqSak.endretTid}. " +
+                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
+                            "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                            "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+                )
+                PrometheusProvider.prometheus.sammeEndretTid().increment()
+                bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
+            }
         }
 
         siste.endretTid > bqSak.endretTid -> {
