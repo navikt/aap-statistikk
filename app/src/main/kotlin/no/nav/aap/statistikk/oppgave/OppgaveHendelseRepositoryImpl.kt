@@ -113,6 +113,44 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
 
     }
 
+    override fun hentSisteCutoffAnchorForAvklaringsbehov(
+        behandlingReferanse: UUID,
+        avklaringsbehovKode: String,
+        behandlingTidspunkt: java.time.LocalDateTime,
+        preferertOppgaveId: Long?
+    ): OppgaveCutoffAnchor? {
+        val sql = """
+            select identifikator, versjon, sendt_tid
+            from oppgave_hendelser
+            where behandling_referanse = ?
+              and avklaringsbehov_kode = ?
+            order by 
+                case when identifikator = ? then 0 else 1 end,
+                case when sendt_tid <= ? then 0 else 1 end,
+                abs(extract(epoch from (sendt_tid - ?))),
+                versjon desc,
+                mottatt_tidspunkt desc
+            limit 1
+        """.trimIndent()
+
+        return dbConnection.queryFirstOrNull(sql) {
+            setParams {
+                setUUID(1, behandlingReferanse)
+                setString(2, avklaringsbehovKode)
+                setLong(3, preferertOppgaveId)
+                setLocalDateTime(4, behandlingTidspunkt)
+                setLocalDateTime(5, behandlingTidspunkt)
+            }
+            setRowMapper {
+                OppgaveCutoffAnchor(
+                    oppgaveId = it.getLong("identifikator"),
+                    versjon = it.getLongOrNull("versjon") ?: 0L,
+                    sendtTid = it.getLocalDateTime("sendt_tid")
+                )
+            }
+        }
+    }
+
     override fun hentEnhetOgReservasjonForAvklaringsbehov(
         behandlingReferanse: UUID,
         avklaringsbehovKode: String

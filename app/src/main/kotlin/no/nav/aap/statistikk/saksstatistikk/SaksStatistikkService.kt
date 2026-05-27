@@ -19,24 +19,26 @@ class SaksStatistikkService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun lagreSakInfoTilBigquery(
-        behandlingId: BehandlingId
+        behandlingId: BehandlingId,
+        cutoffTidspunkt: LocalDateTime?
     ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
+        val behandlingPåTidspunkt = cutoffTidspunkt?.let { behandling.påTidspunkt(it) } ?: behandling
         require(
-            behandling.typeBehandling in Konstanter.interessanteBehandlingstyper
+            behandlingPåTidspunkt.typeBehandling in Konstanter.interessanteBehandlingstyper
         ) {
-            "Denne jobben skal ikke kunne bli trigget av oppfølgingsbehandlinger. Behandling: ${behandling.referanse}"
+            "Denne jobben skal ikke kunne bli trigget av oppfølgingsbehandlinger. Behandling: ${behandlingPåTidspunkt.referanse}"
         }
 
-        val erSkjermet = behandlingService.erSkjermet(behandling)
+        val erSkjermet = behandlingService.erSkjermet(behandlingPåTidspunkt)
 
         val bqSak =
-            bqBehandlingMapper.bqBehandlingForBehandling(behandling, erSkjermet)
+            bqBehandlingMapper.bqBehandlingForBehandling(behandlingPåTidspunkt, erSkjermet)
 
         log.info(
             "lagreSakInfoTilBigquery: endretTid=${bqSak.endretTid}, " +
-                    "behandling.oppdatertTidspunkt=${behandling.oppdatertTidspunkt()}, " +
-                    "oppgaveDrivenEndretTid=${bqSak.endretTid.isAfter(behandling.oppdatertTidspunkt())}, " +
+                    "behandling.oppdatertTidspunkt=${behandlingPåTidspunkt.oppdatertTidspunkt()}, " +
+                    "oppgaveDrivenEndretTid=${bqSak.endretTid.isAfter(behandlingPåTidspunkt.oppdatertTidspunkt())}, " +
                     "status=${bqSak.behandlingStatus}."
         )
 
@@ -45,8 +47,8 @@ class SaksStatistikkService(
 
         if (manglerEnhet) {
             return SakStatistikkResultat.ManglerEnhet(
-                behandlingId = behandling.id(),
-                avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
+                behandlingId = behandlingPåTidspunkt.id(),
+                avklaringsbehovKode = behandlingPåTidspunkt.gjeldendeAvklaringsBehov,
             )
         }
 

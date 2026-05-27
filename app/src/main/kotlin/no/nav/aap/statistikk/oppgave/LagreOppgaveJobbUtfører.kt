@@ -31,12 +31,23 @@ class LagreOppgaveJobbUtfører(
             oppgaveHistorikkLagrer.lagre(oppgave)
 
             if (oppgave.behandlingReferanse != null) {
-                behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let {
-                    if (it.typeBehandling in Konstanter.interessanteBehandlingstyper) {
+                behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let { behandling ->
+                    if (behandling.typeBehandling in Konstanter.interessanteBehandlingstyper) {
+                        val referanseTidspunkt = oppgave.hendelser.maxOfOrNull { it.sendtTid }
+                            ?: behandling.oppdatertTidspunkt()
+                        val cutoffAnchor = oppgaveHendelseRepository.hentSisteCutoffAnchorForAvklaringsbehov(
+                            behandlingReferanse = oppgave.behandlingReferanse.referanse,
+                            avklaringsbehovKode = oppgave.avklaringsbehov,
+                            behandlingTidspunkt = referanseTidspunkt,
+                            preferertOppgaveId = oppgave.identifikator
+                        )
                         MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
                             repositoryProvider,
-                            it.id(),
-                            triggerKilde = "oppgave"
+                            behandling.id(),
+                            triggerKilde = "oppgave",
+                            cutoffTidspunkt = cutoffAnchor?.sendtTid,
+                            cutoffOppgaveId = cutoffAnchor?.oppgaveId,
+                            cutoffVersjon = cutoffAnchor?.versjon,
                         )
                     }
                 }
