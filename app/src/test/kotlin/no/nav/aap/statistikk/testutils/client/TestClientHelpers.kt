@@ -35,6 +35,7 @@ import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.DatasetInfo
 import no.nav.aap.statistikk.testutils.fakes.FakeBigQueryClient
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import org.testcontainers.gcloud.BigQueryEmulatorContainer
@@ -183,7 +184,7 @@ fun <E> testKlientNoInjectionManuell(
             dbConfig,
             azureConfig,
             bigQueryClient,
-            defaultGatewayProvider()
+            defaultGatewayProvider { register<FakePdlGateway>() }
         ) { ds, gp, jobber ->
             ManuellMotorImpl(ds, jobber, postgresRepositoryRegistry, gp).also { motor = it }
         }
