@@ -13,7 +13,6 @@ import no.nav.aap.motor.testutil.ManuellMotorImpl
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
-import no.nav.aap.statistikk.saksstatistikk.BQBehandling
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
@@ -134,7 +133,6 @@ class MockJobbAppender : JobbAppender {
     var jobber = mutableListOf<JobbInput>()
     var sisteEnhetRetryCount: Int = 0
     var sisteDelayInSeconds: Long = 0
-    var sisteStoredBQBehandling: BQBehandling? = null
     var sisteAvklaringsbehovKode: Definisjon? = null
 
     override fun leggTil(
@@ -157,13 +155,11 @@ class MockJobbAppender : JobbAppender {
         delayInSeconds: Long,
         enhetRetryCount: Int,
         triggerKilde: String,
-        storedBQBehandling: BQBehandling?,
         avklaringsbehovKode: Definisjon?,
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
         sisteEnhetRetryCount = enhetRetryCount
         sisteDelayInSeconds = delayInSeconds
-        sisteStoredBQBehandling = storedBQBehandling
         sisteAvklaringsbehovKode = avklaringsbehovKode
     }
 
