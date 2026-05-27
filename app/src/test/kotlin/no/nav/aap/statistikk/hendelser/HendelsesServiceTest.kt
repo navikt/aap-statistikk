@@ -29,6 +29,7 @@ import no.nav.aap.statistikk.testutils.fakes.FakeArbeidsopptrappingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeDiagnoseRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeDiagnosePerioderRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeFritaksvurderingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeInstitusjonsoppholdRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeMeldekortRepository
@@ -168,6 +169,7 @@ class HendelsesServiceTest {
                 beregningsgrunnlagRepository = beregningsgrunnlagRepository,
                 vilkårsResultatRepository = vilkårsresultatRepository,
                 diagnoseRepository = diagnoseRepository,
+                diagnosePerioderRepository = FakeDiagnosePerioderRepository(),
                 rettighetstypeperiodeRepository = rettighetstypeperiodeRepository,
                 arbeidsopptrappingperioderRepository = FakeArbeidsopptrappingRepository(),
                 institusjonsoppholdRepository = FakeInstitusjonsoppholdRepository(),

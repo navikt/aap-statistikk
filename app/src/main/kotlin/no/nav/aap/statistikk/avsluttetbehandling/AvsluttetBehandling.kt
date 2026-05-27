@@ -62,6 +62,7 @@ data class AvsluttetBehandling(
     val vilkårsresultat: Vilkårsresultat,
     val beregningsgrunnlag: IBeregningsGrunnlag?,
     val diagnoser: Diagnoser?,
+    val diagnoserPeriodisert: List<DiagnoseMedPeriode> = emptyList(),
     val rettighetstypeperioder: List<RettighetstypePeriode> = emptyList(),
     val perioderMedArbeidsopptrapping: List<Periode>,
     val institusjonsopphold: List<Periode> = emptyList(),
@@ -116,6 +117,14 @@ enum class RettighetsType(@Suppress("unused") val hjemmel: String) {
 
 
 data class Diagnoser(
+    val kodeverk: String,
+    val diagnosekode: String,
+    val bidiagnoser: List<String>
+)
+
+data class DiagnoseMedPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate,
     val kodeverk: String,
     val diagnosekode: String,
     val bidiagnoser: List<String>

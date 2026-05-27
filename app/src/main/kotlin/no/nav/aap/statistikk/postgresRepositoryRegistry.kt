@@ -10,6 +10,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.SamordningRepositoryImpl
 import no.nav.aap.statistikk.avsluttetbehandling.VedtattStansOpphørRepositoryImpl
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.DiagnosePerioderRepositoryImpl
 import no.nav.aap.statistikk.behandling.DiagnoseRepositoryImpl
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.BeregningsgrunnlagRepository
 import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
@@ -31,6 +32,7 @@ val postgresRepositoryRegistry = RepositoryRegistry()
     .register<FlytJobbRepositoryImpl>()
     .register<BehandlingRepository>()
     .register<DiagnoseRepositoryImpl>()
+    .register<DiagnosePerioderRepositoryImpl>()
     .register<BeregningsgrunnlagRepository>()
     .register<PersonRepository>()
     .register<SakRepositoryImpl>()

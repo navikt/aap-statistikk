@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.avsluttetbehandling.AvsluttetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
+import no.nav.aap.statistikk.avsluttetbehandling.DiagnoseMedPeriode
 import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.avsluttetbehandling.Samordning
@@ -28,6 +29,15 @@ fun AvsluttetBehandlingDTO.tilDomene(
         vilkårsresultat = vilkårsResultat.tilDomene(saksnummer, behandlingsReferanse),
         beregningsgrunnlag = beregningsGrunnlag?.let { tilDomene(it) },
         diagnoser = this.diagnoser?.let { Diagnoser(it.kodeverk, it.diagnosekode, it.bidiagnoser) },
+        diagnoserPeriodisert = this.diagnoserPeriodisert.map {
+            DiagnoseMedPeriode(
+                fom = it.periodeDTO.fom,
+                tom = it.periodeDTO.tom,
+                kodeverk = it.kodeverk,
+                diagnosekode = it.diagnosekode,
+                bidiagnoser = it.bidiagnoser
+            )
+        },
         behandlingsReferanse = behandlingsReferanse,
         behandlingResultat = resultat.resultatTilDomene(),
         vedtakstidspunkt = this.vedtakstidspunkt,
