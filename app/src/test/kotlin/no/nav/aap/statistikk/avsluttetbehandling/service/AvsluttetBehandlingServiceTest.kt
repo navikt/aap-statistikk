@@ -477,6 +477,7 @@ class AvsluttetBehandlingServiceTest {
                 BeregningsgrunnlagRepository(dbConnection),
                 VilkårsresultatRepository(dbConnection),
                 diagnoseRepository = DiagnoseRepositoryImpl(dbConnection),
+                diagnosePerioderRepository = DiagnosePerioderRepositoryImpl(dbConnection),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
                     dbConnection

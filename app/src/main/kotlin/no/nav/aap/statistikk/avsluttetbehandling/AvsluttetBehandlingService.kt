@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.avsluttetbehandling
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
+import no.nav.aap.statistikk.behandling.DiagnosePerioderRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.beregningsgrunnlag.repository.IBeregningsgrunnlagRepository
 import no.nav.aap.statistikk.hendelser.BehandlingService
@@ -20,6 +21,7 @@ class AvsluttetBehandlingService(
     private val beregningsgrunnlagRepository: IBeregningsgrunnlagRepository,
     private val vilkårsResultatRepository: IVilkårsresultatRepository,
     private val diagnoseRepository: DiagnoseRepository,
+    private val diagnosePerioderRepository: DiagnosePerioderRepository,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val fritaksvurderingRepository: FritaksvurderingRepository,
     private val behandlingService: BehandlingService,
@@ -116,6 +118,15 @@ class AvsluttetBehandlingService(
                     avsluttetBehandling.diagnoser.copy(bidiagnoser = avsluttetBehandling.diagnoser.bidiagnoser.filter { it != "INGEN_DIAGNOSE" }),
                     avsluttetBehandling.behandlingsReferanse
                 )
+            )
+        }
+
+        val behandling =
+            behandlingService.hentBehandling(avsluttetBehandling.behandlingsReferanse)
+        if (behandling != null) {
+            diagnosePerioderRepository.lagre(
+                behandling.id(),
+                avsluttetBehandling.diagnoserPeriodisert
             )
         }
     }
