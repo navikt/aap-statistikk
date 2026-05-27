@@ -33,7 +33,7 @@ class SaksStatistikkService(
         val erSkjermet = behandlingService.erSkjermet(behandlingPåTidspunkt)
 
         val bqSak =
-            bqBehandlingMapper.bqBehandlingForBehandling(behandlingPåTidspunkt, erSkjermet)
+            bqBehandlingMapper.bqBehandlingForBehandling(behandlingPåTidspunkt, erSkjermet, cutoffTidspunkt)
 
         log.info(
             "lagreSakInfoTilBigquery: endretTid=${bqSak.endretTid}, " +
