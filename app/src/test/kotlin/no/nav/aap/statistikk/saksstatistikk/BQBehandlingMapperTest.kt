@@ -4,7 +4,13 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
+import no.nav.aap.statistikk.enhet.Enhet
+import no.nav.aap.statistikk.oppgave.BehandlingReferanse
+import no.nav.aap.statistikk.oppgave.HendelseType
+import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
+import no.nav.aap.statistikk.oppgave.OppgaveRepository
+import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -32,18 +38,18 @@ class BQBehandlingMapperTest {
 
     private val skjermingService = SkjermingService(FakePdlGateway())
 
-    private class FakeOppgaveRepository : no.nav.aap.statistikk.oppgave.OppgaveRepository {
+    private class FakeOppgaveRepository : OppgaveRepository {
         private val oppgaver =
-            mutableMapOf<BehandlingId, MutableList<no.nav.aap.statistikk.oppgave.Oppgave>>()
+            mutableMapOf<BehandlingId, MutableList<Oppgave>>()
 
-        fun addOppgave(behandlingId: BehandlingId, oppgave: no.nav.aap.statistikk.oppgave.Oppgave) {
+        fun addOppgave(behandlingId: BehandlingId, oppgave: Oppgave) {
             oppgaver.getOrPut(behandlingId) { mutableListOf() }.add(oppgave)
         }
 
-        override fun lagreOppgave(oppgave: no.nav.aap.statistikk.oppgave.Oppgave) = 0L
-        override fun oppdaterOppgave(oppgave: no.nav.aap.statistikk.oppgave.Oppgave) = Unit
-        override fun hentOppgaverForEnhet(enhet: no.nav.aap.statistikk.enhet.Enhet) =
-            emptyList<no.nav.aap.statistikk.oppgave.Oppgave>()
+        override fun lagreOppgave(oppgave: Oppgave) = 0L
+        override fun oppdaterOppgave(oppgave: Oppgave) = Unit
+        override fun hentOppgaverForEnhet(enhet: Enhet) =
+            emptyList<Oppgave>()
 
         override fun hentOppgave(identifikator: Long) = null
         override fun hentOppgaverForBehandling(behandlingId: BehandlingId) =
@@ -328,38 +334,38 @@ class BQBehandlingMapperTest {
         val oppgaveRepository = FakeOppgaveRepository()
         oppgaveRepository.addOppgave(
             behandling.id(),
-            no.nav.aap.statistikk.oppgave.Oppgave(
+            Oppgave(
                 identifikator = 1L,
                 avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
-                enhet = no.nav.aap.statistikk.enhet.Enhet(0L, "0216"),
+                enhet = Enhet(0L, "0216"),
                 person = null,
-                status = no.nav.aap.statistikk.oppgave.Oppgavestatus.AVSLUTTET,
+                status = Oppgavestatus.AVSLUTTET,
                 opprettetTidspunkt = cutoffTidspunkt,
-                behandlingReferanse = no.nav.aap.statistikk.oppgave.BehandlingReferanse(
+                behandlingReferanse = BehandlingReferanse(
                     id = null,
                     referanse = behandlingRef
                 ),
                 hendelser = listOf(
                     OppgaveHendelse(
-                        hendelse = no.nav.aap.statistikk.oppgave.HendelseType.OPPRETTET,
+                        hendelse = HendelseType.OPPRETTET,
                         oppgaveId = 1L,
                         mottattTidspunkt = cutoffTidspunkt,
                         sendtTid = cutoffTidspunkt,
                         enhet = "0216",
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
-                        status = no.nav.aap.statistikk.oppgave.Oppgavestatus.OPPRETTET,
+                        status = Oppgavestatus.OPPRETTET,
                         opprettetTidspunkt = cutoffTidspunkt,
                         endretTidspunkt = cutoffTidspunkt,
                         versjon = 1L
                     ),
                     OppgaveHendelse(
-                        hendelse = no.nav.aap.statistikk.oppgave.HendelseType.LUKKET,
+                        hendelse = HendelseType.LUKKET,
                         oppgaveId = 1L,
                         mottattTidspunkt = lukketEtterCutoff,
                         sendtTid = lukketEtterCutoff,
                         enhet = "0216",
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
-                        status = no.nav.aap.statistikk.oppgave.Oppgavestatus.AVSLUTTET,
+                        status = Oppgavestatus.AVSLUTTET,
                         opprettetTidspunkt = cutoffTidspunkt,
                         endretTidspunkt = lukketEtterCutoff,
                         versjon = 2L
