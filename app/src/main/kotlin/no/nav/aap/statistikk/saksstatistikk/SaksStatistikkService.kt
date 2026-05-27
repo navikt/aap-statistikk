@@ -110,19 +110,7 @@ class SaksStatistikkService(
      */
     private fun tilpassEndretTid(bqSak: BQBehandling, siste: BQBehandling?): BQBehandling? = when {
         siste == null -> bqSak
-        siste.endretTid == bqSak.endretTid -> {
-            log.info(
-                "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
-                        "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
-                        "EndretTid: ${bqSak.endretTid}. " +
-                        "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
-                        "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
-                        "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
-            )
-            PrometheusProvider.prometheus.sammeEndretTid().increment()
-            bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
-        }
-
+        siste.endretTid == bqSak.endretTid -> håndterSammeEndretTid(siste, bqSak)
         siste.endretTid > bqSak.endretTid -> {
             val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
                 bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
@@ -143,7 +131,6 @@ class SaksStatistikkService(
                 bqSak
             }
         }
-
         else -> bqSak
     }
 
@@ -251,6 +238,70 @@ class SaksStatistikkService(
                     }
                 }
             }
+    }
+
+    private fun håndterSammeEndretTid(siste: BQBehandling, bqSak: BQBehandling): BQBehandling? {
+        return when {
+            siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus != "AVSLUTTET" && !bqSak.erResending ->
+                håndterAvsluttetMedNyStatus(siste, bqSak)
+
+            siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus != "AVSLUTTET" && bqSak.erResending ->
+                håndterResendingEtterAvsluttet(bqSak)
+
+            else -> håndterAndreHendelser(siste, bqSak)
+        }
+    }
+
+    private fun håndterAvsluttetMedNyStatus(siste: BQBehandling, bqSak: BQBehandling): BQBehandling? {
+        log.warn(
+            "Hopper over hendelse med samme endretTid fordi AVSLUTTET allerede er lagret. " +
+                    "Referanse: ${bqSak.behandlingUUID}. " +
+                    "Eksisterende status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}, " +
+                    "endretTid: ${bqSak.endretTid}."
+        )
+        return null
+    }
+
+    private fun håndterResendingEtterAvsluttet(bqSak: BQBehandling): BQBehandling? {
+        val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
+            bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
+        )
+        return if (eksisterende?.ansesSomDuplikat(bqSak) == true) {
+            log.info(
+                "Forsinket resending-hendelse allerede lagret som duplikat — hopper over. " +
+                        "Referanse: ${bqSak.behandlingUUID}. endretTid: ${bqSak.endretTid}."
+            )
+            null
+        } else {
+            log.info(
+                "Lagrer resending-hendelse med samme endretTid som AVSLUTTET (ikke duplikat). " +
+                        "Referanse: ${bqSak.behandlingUUID}. " +
+                        "Status: ${bqSak.behandlingStatus}, endretTid: ${bqSak.endretTid}."
+            )
+            bqSak
+        }
+    }
+
+    private fun håndterAndreHendelser(siste: BQBehandling, bqSak: BQBehandling): BQBehandling? {
+        if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus == "AVSLUTTET") {
+            log.warn(
+                "Ny AVSLUTTET-hendelse med samme endretTid lagres med bump for å bevare rekkefølge. " +
+                        "Referanse: ${bqSak.behandlingUUID}. EndretTid: ${bqSak.endretTid}. " +
+                        "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                        "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+            )
+        } else {
+            log.info(
+                "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
+                        "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
+                        "EndretTid: ${bqSak.endretTid}. " +
+                        "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
+                        "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                        "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+            )
+        }
+        PrometheusProvider.prometheus.sammeEndretTid().increment()
+        return bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
     }
 
     private fun nærNokITid(

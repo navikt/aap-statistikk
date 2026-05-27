@@ -23,38 +23,17 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
         requireNotNull(oppgave.enhet.id) { "Enhet-ID må være satt på enhet-objektet i oppgave. Oppgave-ID: ${oppgave.identifikator}" }
 
         val behandlingsReferanseId = oppgave.behandlingReferanse?.let {
-            val sqlVersjon = """WITH ny_ref AS (
-    INSERT INTO behandling_referanse (referanse)
-        VALUES (?)
-        ON CONFLICT DO NOTHING
-        RETURNING id)
-SELECT COALESCE(
-               (SELECT id FROM ny_ref),
-               (SELECT id FROM behandling_referanse WHERE behandling_referanse.referanse = ?)
-       ) AS id;"""
-
-            dbConnection.queryFirst(sqlVersjon) {
-                setParams {
-                    setUUID(1, it.referanse)
-                    setUUID(2, it.referanse)
-                }
-                setRowMapper { row -> row.getLong("id") }
-            }
+            hentEllerOpprettBehandlingReferanse(it)
         }
 
-
-        val reservasjonId = if (oppgave.reservasjon != null) {
-            val settInnReservasjonSql = """
-    INSERT INTO reservasjon (reservert_av, opprettet_tid)
-    VALUES (?, ?)"""
-
-            dbConnection.executeReturnKey(settInnReservasjonSql) {
+        val reservasjonId = oppgave.reservasjon?.let {
+            dbConnection.executeReturnKey("INSERT INTO reservasjon (reservert_av, opprettet_tid) VALUES (?, ?)") {
                 setParams {
-                    setLong(1, oppgave.reservasjon.reservertAv.id)
-                    setLocalDateTime(2, oppgave.reservasjon.reservasjonOpprettet)
+                    setLong(1, it.reservertAv.id)
+                    setLocalDateTime(2, it.reservasjonOpprettet)
                 }
             }
-        } else null
+        }
 
         val sql = """
             insert into oppgave (person_id, behandling_referanse_id, enhet_id, status, opprettet_tidspunkt,
@@ -134,6 +113,16 @@ where id = ?"""
                 setLocalDateTime(4, LocalDateTime.now())
                 setLong(5, oppgave.id)
             }
+        }
+    }
+
+    private fun hentEllerOpprettBehandlingReferanse(ref: BehandlingReferanse): Long {
+        dbConnection.execute("INSERT INTO behandling_referanse (referanse) VALUES (?) ON CONFLICT DO NOTHING") {
+            setParams { setUUID(1, ref.referanse) }
+        }
+        return dbConnection.queryFirst("SELECT id FROM behandling_referanse WHERE referanse = ?") {
+            setParams { setUUID(1, ref.referanse) }
+            setRowMapper { row -> row.getLong("id") }
         }
     }
 

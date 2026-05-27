@@ -375,6 +375,83 @@ class SaksStatistikkServiceTest {
     }
 
     @Test
+    fun `lagreBQBehandling skal ikke lagre ikke-avsluttet med samme endretTid etter avsluttet`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingUUID = UUID.randomUUID()
+        val t0 = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
+
+        dataSource.transaction { conn ->
+            val service = konstruerSakstatistikkService(conn)
+            val repo = SakstatistikkRepositoryImpl(conn)
+
+            val avsluttet = lagTestBQBehandling(
+                behandlingUUID = behandlingUUID,
+                endretTid = t0,
+                registrertTid = t0,
+                behandlingStatus = "AVSLUTTET",
+            )
+            service.lagreBQBehandling(avsluttet)
+
+            val underBehandlingMedSammeTid = avsluttet.copy(
+                behandlingStatus = "UNDER_BEHANDLING",
+                ansvarligEnhetKode = "0401",
+            )
+            service.lagreBQBehandling(underBehandlingMedSammeTid)
+
+            val alleRader = repo.hentAlleHendelserPåBehandling(behandlingUUID)
+            assertThat(alleRader)
+                .describedAs("Ikke-avsluttet hendelse skal ikke lagres etter AVSLUTTET med samme endretTid")
+                .hasSize(1)
+            assertThat(alleRader.single().behandlingStatus)
+                .describedAs("AVSLUTTET skal forbli siste og eneste rad")
+                .isEqualTo("AVSLUTTET")
+            assertThat(alleRader.single().endretTid).isEqualTo(t0)
+        }
+    }
+
+    @Test
+    fun `lagreBQBehandling skal lagre avsluttet med samme endretTid når payload er forskjellig`(
+        @Postgres dataSource: DataSource
+    ) {
+        val behandlingUUID = UUID.randomUUID()
+        val t0 = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
+
+        dataSource.transaction { conn ->
+            val service = konstruerSakstatistikkService(conn)
+            val repo = SakstatistikkRepositoryImpl(conn)
+
+            val førsteAvsluttet = lagTestBQBehandling(
+                behandlingUUID = behandlingUUID,
+                endretTid = t0,
+                registrertTid = t0,
+                behandlingStatus = "AVSLUTTET",
+            )
+            service.lagreBQBehandling(førsteAvsluttet)
+
+            val andreAvsluttetMedSammeTid = førsteAvsluttet.copy(
+                saksbehandler = "Z12345",
+                ansvarligEnhetKode = "0401",
+            )
+            service.lagreBQBehandling(andreAvsluttetMedSammeTid)
+
+            val alleRader = repo.hentAlleHendelserPåBehandling(behandlingUUID)
+                .sortedBy { it.endretTid }
+
+            assertThat(alleRader)
+                .describedAs("AVSLUTTET med ulik payload og samme endretTid skal lagres som ny rad")
+                .hasSize(2)
+            assertThat(alleRader.map { it.behandlingStatus })
+                .containsExactly("AVSLUTTET", "AVSLUTTET")
+            assertThat(alleRader.last().endretTid)
+                .describedAs("Ny AVSLUTTET-rad med samme endretTid skal bumpes med 1000ns")
+                .isEqualTo(t0.plusNanos(1000))
+            assertThat(alleRader.last().ansvarligEnhetKode).isEqualTo("0401")
+            assertThat(alleRader.last().saksbehandler).isEqualTo("Z12345")
+        }
+    }
+
+    @Test
     fun `retry etter ManglerEnhet ser allerede lagret rad som duplikat og lagrer ikke på nytt`(
         @Postgres dataSource: DataSource
     ) {
