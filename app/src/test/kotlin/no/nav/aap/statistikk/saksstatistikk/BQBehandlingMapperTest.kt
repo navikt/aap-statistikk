@@ -305,6 +305,88 @@ class BQBehandlingMapperTest {
     }
 
     @Test
+    fun `ansvarligEnhet skal ikke være null for UTREDES når oppgaven er lukket etter cutoff-tidspunkt`() {
+        // Reproduserer produksjonsfeil: behandling er UTREDES med avklaringsbehov 5026 (AVKLAR_SYKDOM).
+        // Oppgaven ble OPPRETTET og LUKKET – men LUKKET skjedde etter at cutoff-jobben kjørte.
+        // Event sourcing ser LUKKET-hendelsen og nuller ut enhet. Fallback i ansvarligEnhet() skal
+        // hente enhet direkte fra oppgave-tabellen og returnere riktig enhet.
+        val behandlingRef = UUID.randomUUID()
+        val cutoffTidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+        val lukketEtterCutoff = cutoffTidspunkt.plusMinutes(42)
+
+        val hendelse = lagBehandlingHendelse(
+            tidspunkt = cutoffTidspunkt,
+            avklaringsBehov = Definisjon.AVKLAR_SYKDOM,
+        )
+
+        val behandling = lagBehandling(
+            referanse = behandlingRef,
+            gjeldendeAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+            hendelser = listOf(hendelse)
+        )
+
+        val oppgaveRepository = FakeOppgaveRepository()
+        oppgaveRepository.addOppgave(
+            behandling.id(),
+            no.nav.aap.statistikk.oppgave.Oppgave(
+                identifikator = 1L,
+                avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+                enhet = no.nav.aap.statistikk.enhet.Enhet(0L, "0216"),
+                person = null,
+                status = no.nav.aap.statistikk.oppgave.Oppgavestatus.AVSLUTTET,
+                opprettetTidspunkt = cutoffTidspunkt,
+                behandlingReferanse = no.nav.aap.statistikk.oppgave.BehandlingReferanse(
+                    id = null,
+                    referanse = behandlingRef
+                ),
+                hendelser = listOf(
+                    OppgaveHendelse(
+                        hendelse = no.nav.aap.statistikk.oppgave.HendelseType.OPPRETTET,
+                        oppgaveId = 1L,
+                        mottattTidspunkt = cutoffTidspunkt,
+                        sendtTid = cutoffTidspunkt,
+                        enhet = "0216",
+                        avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
+                        status = no.nav.aap.statistikk.oppgave.Oppgavestatus.OPPRETTET,
+                        opprettetTidspunkt = cutoffTidspunkt,
+                        endretTidspunkt = cutoffTidspunkt,
+                        versjon = 1L
+                    ),
+                    OppgaveHendelse(
+                        hendelse = no.nav.aap.statistikk.oppgave.HendelseType.LUKKET,
+                        oppgaveId = 1L,
+                        mottattTidspunkt = lukketEtterCutoff,
+                        sendtTid = lukketEtterCutoff,
+                        enhet = "0216",
+                        avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
+                        status = no.nav.aap.statistikk.oppgave.Oppgavestatus.AVSLUTTET,
+                        opprettetTidspunkt = cutoffTidspunkt,
+                        endretTidspunkt = lukketEtterCutoff,
+                        versjon = 2L
+                    )
+                )
+            )
+        )
+
+        val mapper = BQBehandlingMapper(
+            behandlingService = BehandlingService(
+                behandlingRepository = FakeBehandlingRepository(),
+                skjermingService = skjermingService
+            ),
+            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+            oppgaveRepository = oppgaveRepository,
+            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
+            clock = fixedClock
+        )
+
+        val result = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+
+        assertThat(result.ansvarligEnhetKode)
+            .describedAs("Enhet skal ikke være null selv om oppgaven ble lukket etter cutoff-tidspunktet")
+            .isEqualTo("0216")
+    }
+
+    @Test
     fun `saksbehandler skal være null når ikke oppgave brukes`() {
         val behandlingRef = UUID.randomUUID()
         val tidspunkt = LocalDateTime.of(2024, 1, 10, 14, 0)
