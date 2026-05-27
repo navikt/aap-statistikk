@@ -156,6 +156,9 @@ class MockJobbAppender : JobbAppender {
         enhetRetryCount: Int,
         triggerKilde: String,
         avklaringsbehovKode: Definisjon?,
+        cutoffTidspunkt: java.time.LocalDateTime?,
+        cutoffOppgaveId: Long?,
+        cutoffVersjon: Long?,
     ) {
         logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
         sisteEnhetRetryCount = enhetRetryCount
