@@ -10,7 +10,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.postgresRepositoryRegistry
-import no.nav.aap.statistikk.saksstatistikk.BQBehandling
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoPayload
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
@@ -41,7 +40,6 @@ class MotorJobbAppender : JobbAppender {
         delayInSeconds: Long,
         enhetRetryCount: Int,
         triggerKilde: String,
-        storedBQBehandling: BQBehandling?,
         avklaringsbehovKode: Definisjon?,
     ) {
         val behandling =
@@ -55,7 +53,6 @@ class MotorJobbAppender : JobbAppender {
         val saksnummer = behandling.sak.saksnummer
         val payload = LagreSakinfoPayload(
             behandlingId = behandlingId,
-            storedBQBehandling = storedBQBehandling,
             avklaringsbehovKode = avklaringsbehovKode?.kode?.name,
             retryCount = enhetRetryCount,
             triggerKilde = triggerKilde,
@@ -102,5 +99,3 @@ class MotorJobbAppender : JobbAppender {
         )
     }
 }
-// rad endret og og behandling avsluttet-tid mangler i view
-// hvis fritak fra meldekort-status, dele tidslinjen

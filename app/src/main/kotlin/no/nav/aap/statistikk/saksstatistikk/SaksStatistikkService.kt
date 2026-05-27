@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.hendelser.BehandlingService
@@ -20,8 +19,7 @@ class SaksStatistikkService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun lagreSakInfoTilBigquery(
-        behandlingId: BehandlingId,
-        lagreUtenEnhet: Boolean
+        behandlingId: BehandlingId
     ): SakStatistikkResultat {
         val behandling = behandlingService.hentBehandling(behandlingId)
         require(
@@ -42,24 +40,14 @@ class SaksStatistikkService(
                     "status=${bqSak.behandlingStatus}."
         )
 
-        val manglerEnhet = !lagreUtenEnhet &&
-                bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
+        val manglerEnhet =
+            bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
 
         if (manglerEnhet) {
             return SakStatistikkResultat.ManglerEnhet(
                 behandlingId = behandling.id(),
                 avklaringsbehovKode = behandling.gjeldendeAvklaringsBehov,
-                bqBehandling = bqSak,
             )
-        }
-
-        val manglerFortsattEnhet =
-            bqSak.ansvarligEnhetKode == null && bqSak.behandlingMetode != BehandlingMetode.AUTOMATISK
-        if (manglerFortsattEnhet) {
-            val referanse = behandling.referanse
-            val saksnummer = behandling.sak.saksnummer
-            log.warn("Ansvarlig enhet er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
-            log.warn("Saksbehandler er ikke satt. Behandling: $referanse. Sak: $saksnummer. Status: ${behandling.behandlingStatus()}. Årsak: ${behandling.årsakTilOpprettelse}.")
         }
 
         lagreBQBehandling(bqSak)
@@ -67,31 +55,10 @@ class SaksStatistikkService(
         return SakStatistikkResultat.OK
     }
 
-    override fun lagreMedStoredBQBehandling(
-        behandlingId: BehandlingId,
-        storedBQBehandling: BQBehandling,
-        avklaringsbehovKode: Definisjon?,
-    ): SakStatistikkResultat {
-        val behandling = behandlingService.hentBehandling(behandlingId)
-        val erSkjermet = behandlingService.erSkjermet(behandling)
-        val (enhet, saksbehandler) = bqBehandlingMapper.hentEnhetOgSaksbehandler(
-            behandling, erSkjermet, avklaringsbehovKode
-        )
-        if (enhet == null) {
-            return SakStatistikkResultat.ManglerEnhet(
-                behandlingId = behandlingId,
-                avklaringsbehovKode = avklaringsbehovKode,
-                bqBehandling = storedBQBehandling,
-            )
-        }
-        lagreBQBehandling(storedBQBehandling.copy(ansvarligEnhetKode = enhet, saksbehandler = saksbehandler))
-        return SakStatistikkResultat.OK
-    }
-
     fun lagreBQBehandling(bqSak: BQBehandling) {
         val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
 
-        if (siste == null || siste.ansesSomDuplikat(bqSak) != true) {
+        if (siste?.ansesSomDuplikat(bqSak) != true) {
             // Hvis vi ikke allerede har en inngangshendelse (når behandlingen ble
             // opprettet), konstruer en.
             // Dette er kun et teknisk krav fra Team Sak om at alle hendelser bør ha inngangshendelser.
@@ -115,9 +82,12 @@ class SaksStatistikkService(
             }
 
             sakstatistikkRepository.lagre(bqSakMedUnikEndretTid)
-            if (siste?.behandlingStatus == "AVSLUTTET" && bqSakMedUnikEndretTid.behandlingStatus == "IVERKSETTES") {
+            if (siste?.behandlingStatus == "AVSLUTTET"
+                && bqSakMedUnikEndretTid.behandlingStatus != "AVSLUTTET"
+                && bqSakMedUnikEndretTid.endretTid > siste.endretTid
+            ) {
                 log.error(
-                    "Feil rekkefølge: lagrer IVERKSETTES etter at AVSLUTTET allerede er lagret. " +
+                    "Feil rekkefølge: lagrer ${bqSakMedUnikEndretTid.behandlingStatus} etter at AVSLUTTET allerede er lagret. " +
                             "Referanse: ${bqSakMedUnikEndretTid.behandlingUUID}. " +
                             "Forrige endretTid: ${siste.endretTid}, ny endretTid: ${bqSakMedUnikEndretTid.endretTid}."
                 )
@@ -150,6 +120,7 @@ class SaksStatistikkService(
             PrometheusProvider.prometheus.sammeEndretTid().increment()
             bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
         }
+
         siste.endretTid > bqSak.endretTid -> {
             val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
                 bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
@@ -170,6 +141,7 @@ class SaksStatistikkService(
                 bqSak
             }
         }
+
         else -> bqSak
     }
 
