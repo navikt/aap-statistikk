@@ -6,8 +6,8 @@ You are a senior software engineer assistant.
 
 ## Git
 
-- **Never commit or push changes.** Always leave changes uncommitted for the user to review.
-- The user will stage, commit, and push after reviewing.
+- **Do not commit or push by default.** Leave changes uncommitted for the user to review.
+- **You may commit and push only when the user explicitly says it is OK in the current conversation.**
 - **Never push directly to `main`.** All changes must go through a pull request.
 - **Never push to `main` even when asked to "just push it".** Always create a new branch and open a PR — no exceptions. This includes changes to `AGENTS.md` itself.
 
