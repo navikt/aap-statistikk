@@ -109,7 +109,7 @@ class SaksStatistikkService(
     private fun tilpassEndretTid(bqSak: BQBehandling, siste: BQBehandling?): BQBehandling? = when {
         siste == null -> bqSak
         siste.endretTid == bqSak.endretTid -> {
-            if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus != "AVSLUTTET") {
+            if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus != "AVSLUTTET" && !bqSak.erResending) {
                 log.warn(
                     "Hopper over hendelse med samme endretTid fordi AVSLUTTET allerede er lagret. " +
                             "Referanse: ${bqSak.behandlingUUID}. " +
@@ -117,6 +117,26 @@ class SaksStatistikkService(
                             "endretTid: ${bqSak.endretTid}."
                 )
                 null
+            } else if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus != "AVSLUTTET" && bqSak.erResending) {
+                // Resending: sjekk om hendelsen allerede er lagret som duplikat før vi lagrer
+                val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
+                    bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
+                )
+                if (eksisterende?.ansesSomDuplikat(bqSak) == true) {
+                    log.info(
+                        "Forsinket resending-hendelse allerede lagret som duplikat — hopper over. " +
+                                "Referanse: ${bqSak.behandlingUUID}. endretTid: ${bqSak.endretTid}."
+                    )
+                    null
+                } else {
+                    // Hendelsen er ikke en duplikat, lagre den med opprinnelig tidsstempel
+                    log.info(
+                        "Lagrer resending-hendelse med samme endretTid som AVSLUTTET (ikke duplikat). " +
+                                "Referanse: ${bqSak.behandlingUUID}. " +
+                                "Status: ${bqSak.behandlingStatus}, endretTid: ${bqSak.endretTid}."
+                    )
+                    bqSak
+                }
             } else {
                 if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus == "AVSLUTTET") {
                     log.warn(
