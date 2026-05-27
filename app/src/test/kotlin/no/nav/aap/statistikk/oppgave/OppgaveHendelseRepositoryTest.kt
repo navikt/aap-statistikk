@@ -150,4 +150,182 @@ class OppgaveHendelseRepositoryTest {
             )
         )
     }
+
+    @Test
+    fun `henter cutoff-anchor for avklaringsbehov`(@Postgres dataSource: DataSource) {
+        val oppgaveId = 40612L
+        val behandlingRef = UUID.randomUUID()
+        val tidlig = LocalDateTime.parse("2025-08-20T12:35:06.260915")
+        val sen = tidlig.plusMinutes(5)
+
+        dataSource.transaction {
+            val repo = OppgaveHendelseRepositoryImpl(it)
+            repo.lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = oppgaveId,
+                    mottattTidspunkt = tidlig,
+                    personIdent = "02499243246",
+                    saksnummer = "4o2WNB4",
+                    behandlingRef = behandlingRef,
+                    enhet = "0417",
+                    avklaringsbehovKode = "5053",
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = tidlig,
+                    sendtTid = tidlig,
+                    versjon = 1L,
+                )
+            )
+            repo.lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPDATERT,
+                    oppgaveId = oppgaveId,
+                    mottattTidspunkt = sen,
+                    personIdent = "02499243246",
+                    saksnummer = "4o2WNB4",
+                    behandlingRef = behandlingRef,
+                    enhet = "0417",
+                    avklaringsbehovKode = "5053",
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = tidlig,
+                    endretTidspunkt = sen,
+                    sendtTid = sen,
+                    versjon = 2L,
+                )
+            )
+        }
+
+        val uthentet = dataSource.transaction {
+            OppgaveHendelseRepositoryImpl(it).hentSisteCutoffAnchorForAvklaringsbehov(
+                behandlingReferanse = behandlingRef,
+                avklaringsbehovKode = "5053",
+                behandlingTidspunkt = sen,
+                preferertOppgaveId = null
+            )
+        }
+
+        assertThat(uthentet).isEqualTo(
+            OppgaveCutoffAnchor(
+                oppgaveId = oppgaveId,
+                versjon = 2L,
+                sendtTid = sen
+            )
+        )
+    }
+
+    @Test
+    fun `henter cutoff-anchor nærmest behandlingstidspunkt med bias mot tidligere tidspunkt`(@Postgres dataSource: DataSource) {
+        val behandlingRef = UUID.randomUUID()
+        val avklaringsbehov = "5053"
+        val target = LocalDateTime.of(2025, 8, 20, 12, 10, 0)
+        val før = target.minusMinutes(2)
+        val etter = target.plusMinutes(2)
+
+        dataSource.transaction {
+            val repo = OppgaveHendelseRepositoryImpl(it)
+            repo.lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = 1L,
+                    mottattTidspunkt = før,
+                    behandlingRef = behandlingRef,
+                    enhet = "0417",
+                    avklaringsbehovKode = avklaringsbehov,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = før,
+                    sendtTid = før,
+                    versjon = 1L
+                )
+            )
+            repo.lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = 2L,
+                    mottattTidspunkt = etter,
+                    behandlingRef = behandlingRef,
+                    enhet = "0418",
+                    avklaringsbehovKode = avklaringsbehov,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = etter,
+                    sendtTid = etter,
+                    versjon = 1L
+                )
+            )
+        }
+
+        val uthentet = dataSource.transaction {
+            OppgaveHendelseRepositoryImpl(it).hentSisteCutoffAnchorForAvklaringsbehov(
+                behandlingReferanse = behandlingRef,
+                avklaringsbehovKode = avklaringsbehov,
+                behandlingTidspunkt = target,
+                preferertOppgaveId = null
+            )
+        }
+
+        assertThat(uthentet).isEqualTo(
+            OppgaveCutoffAnchor(
+                oppgaveId = 1L,
+                versjon = 1L,
+                sendtTid = før
+            )
+        )
+    }
+
+    @Test
+    fun `henter cutoff-anchor for preferert oppgaveId når den finnes`(@Postgres dataSource: DataSource) {
+        val behandlingRef = UUID.randomUUID()
+        val avklaringsbehov = "5053"
+        val target = LocalDateTime.of(2025, 8, 20, 12, 10, 0)
+        val nær = target.minusMinutes(1)
+        val preferertTid = target.plusMinutes(5)
+
+        dataSource.transaction {
+            val repo = OppgaveHendelseRepositoryImpl(it)
+            repo.lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = 10L,
+                    mottattTidspunkt = nær,
+                    behandlingRef = behandlingRef,
+                    enhet = "0417",
+                    avklaringsbehovKode = avklaringsbehov,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = nær,
+                    sendtTid = nær,
+                    versjon = 1L
+                )
+            )
+            repo.lagreHendelse(
+                OppgaveHendelse(
+                    hendelse = HendelseType.OPPRETTET,
+                    oppgaveId = 99L,
+                    mottattTidspunkt = preferertTid,
+                    behandlingRef = behandlingRef,
+                    enhet = "0418",
+                    avklaringsbehovKode = avklaringsbehov,
+                    status = Oppgavestatus.OPPRETTET,
+                    opprettetTidspunkt = preferertTid,
+                    sendtTid = preferertTid,
+                    versjon = 2L
+                )
+            )
+        }
+
+        val uthentet = dataSource.transaction {
+            OppgaveHendelseRepositoryImpl(it).hentSisteCutoffAnchorForAvklaringsbehov(
+                behandlingReferanse = behandlingRef,
+                avklaringsbehovKode = avklaringsbehov,
+                behandlingTidspunkt = target,
+                preferertOppgaveId = 99L
+            )
+        }
+
+        assertThat(uthentet).isEqualTo(
+            OppgaveCutoffAnchor(
+                oppgaveId = 99L,
+                versjon = 2L,
+                sendtTid = preferertTid
+            )
+        )
+    }
 }
