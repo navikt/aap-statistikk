@@ -118,14 +118,23 @@ class SaksStatistikkService(
                 )
                 null
             } else {
-                log.info(
-                    "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
-                            "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
-                            "EndretTid: ${bqSak.endretTid}. " +
-                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
-                            "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
-                            "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
-                )
+                if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus == "AVSLUTTET") {
+                    log.warn(
+                        "Ny AVSLUTTET-hendelse med samme endretTid lagres med bump for å bevare rekkefølge. " +
+                                "Referanse: ${bqSak.behandlingUUID}. EndretTid: ${bqSak.endretTid}. " +
+                                "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                                "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+                    )
+                } else {
+                    log.info(
+                        "Ny hendelse med samme endretTid. Forrige teknisk tid: ${siste.tekniskTid}. " +
+                                "Ny: ${bqSak.tekniskTid}. Referanse: ${bqSak.behandlingUUID}. " +
+                                "EndretTid: ${bqSak.endretTid}. " +
+                                "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}. " +
+                                "Forrige saksbehandler: ${siste.saksbehandler}, ny: ${bqSak.saksbehandler}. " +
+                                "Forrige enhet: ${siste.ansvarligEnhetKode}, ny: ${bqSak.ansvarligEnhetKode}."
+                    )
+                }
                 PrometheusProvider.prometheus.sammeEndretTid().increment()
                 bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
             }
