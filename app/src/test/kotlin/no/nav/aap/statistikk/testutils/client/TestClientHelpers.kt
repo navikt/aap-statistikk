@@ -23,6 +23,7 @@ import no.nav.aap.statistikk.bigquery.SchemaRegistry
 import no.nav.aap.statistikk.bigquery.schemaRegistryYtelseStatistikk
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.defaultGatewayProvider
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -183,7 +184,7 @@ fun <E> testKlientNoInjectionManuell(
             dbConfig,
             azureConfig,
             bigQueryClient,
-            defaultGatewayProvider()
+            defaultGatewayProvider { register<FakePdlGateway>() }
         ) { ds, gp, jobber ->
             ManuellMotorImpl(ds, jobber, postgresRepositoryRegistry, gp).also { motor = it }
         }
