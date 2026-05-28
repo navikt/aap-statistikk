@@ -34,6 +34,7 @@ import no.nav.aap.statistikk.meldekort.IMeldekortRepository
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
+import no.nav.aap.statistikk.oppgave.OppgaveCutoffAnchor
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.person.IPersonRepository
 import no.nav.aap.statistikk.person.Person
@@ -368,6 +369,23 @@ class FakeOppgaveHendelseRepository : OppgaveHendelseRepository {
         avklaringsbehovKode: String
     ): List<EnhetReservasjonOgTidspunkt> {
         return enhetReservasjoner[behandlingReferanse to avklaringsbehovKode] ?: emptyList()
+    }
+
+    override fun hentSisteCutoffAnchorForAvklaringsbehov(
+        behandlingReferanse: UUID,
+        avklaringsbehovKode: String,
+        behandlingTidspunkt: LocalDateTime,
+        preferertOppgaveId: Long?
+    ): OppgaveCutoffAnchor? {
+        return hentEnhetOgReservasjonForAvklaringsbehov(behandlingReferanse, avklaringsbehovKode)
+            .maxByOrNull { it.tidspunkt }
+            ?.let {
+                OppgaveCutoffAnchor(
+                    oppgaveId = 0L,
+                    versjon = 0L,
+                    sendtTid = it.tidspunkt
+                )
+            }
     }
 
     override fun lagreHendelse(hendelse: OppgaveHendelse) = 0L

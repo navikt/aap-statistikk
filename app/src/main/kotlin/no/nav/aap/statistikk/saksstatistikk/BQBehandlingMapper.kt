@@ -325,6 +325,16 @@ class BQBehandlingMapper(
                 .maxByOrNull { it.sistEndret() }?.enhet?.kode
         }
 
+        // Fallback for UTREDES: enhet kan være null dersom siste oppgavehendelse var LUKKET
+        // (f.eks. ved historisk cutoff-jobb der oppgaven er lukket etter cutoff-tidspunktet).
+        if (behandling.behandlingStatus() == BehandlingStatus.UTREDES && enhet == null) {
+            behandling.gjeldendeAvklaringsBehov?.kode?.name?.let { kode ->
+                return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+                    .filter { it.avklaringsbehov == kode }
+                    .maxByOrNull { it.sistEndret() }?.enhet?.kode
+            }
+        }
+
         return enhet
     }
 }

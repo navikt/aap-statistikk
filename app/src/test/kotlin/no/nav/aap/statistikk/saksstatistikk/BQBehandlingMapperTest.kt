@@ -4,7 +4,13 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
+import no.nav.aap.statistikk.enhet.Enhet
+import no.nav.aap.statistikk.oppgave.BehandlingReferanse
+import no.nav.aap.statistikk.oppgave.HendelseType
+import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
+import no.nav.aap.statistikk.oppgave.OppgaveRepository
+import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -32,18 +38,18 @@ class BQBehandlingMapperTest {
 
     private val skjermingService = SkjermingService(FakePdlGateway())
 
-    private class FakeOppgaveRepository : no.nav.aap.statistikk.oppgave.OppgaveRepository {
+    private class FakeOppgaveRepository : OppgaveRepository {
         private val oppgaver =
-            mutableMapOf<BehandlingId, MutableList<no.nav.aap.statistikk.oppgave.Oppgave>>()
+            mutableMapOf<BehandlingId, MutableList<Oppgave>>()
 
-        fun addOppgave(behandlingId: BehandlingId, oppgave: no.nav.aap.statistikk.oppgave.Oppgave) {
+        fun addOppgave(behandlingId: BehandlingId, oppgave: Oppgave) {
             oppgaver.getOrPut(behandlingId) { mutableListOf() }.add(oppgave)
         }
 
-        override fun lagreOppgave(oppgave: no.nav.aap.statistikk.oppgave.Oppgave) = 0L
-        override fun oppdaterOppgave(oppgave: no.nav.aap.statistikk.oppgave.Oppgave) = Unit
-        override fun hentOppgaverForEnhet(enhet: no.nav.aap.statistikk.enhet.Enhet) =
-            emptyList<no.nav.aap.statistikk.oppgave.Oppgave>()
+        override fun lagreOppgave(oppgave: Oppgave) = 0L
+        override fun oppdaterOppgave(oppgave: Oppgave) = Unit
+        override fun hentOppgaverForEnhet(enhet: Enhet) =
+            emptyList<Oppgave>()
 
         override fun hentOppgave(identifikator: Long) = null
         override fun hentOppgaverForBehandling(behandlingId: BehandlingId) =
@@ -302,6 +308,88 @@ class BQBehandlingMapperTest {
             .describedAs("Should not use saksbehandler from previous avklaringsbehov")
             .isNull()
         assertThat(result.behandlingMetode).isEqualTo(BehandlingMetode.KVALITETSSIKRING)
+    }
+
+    @Test
+    fun `ansvarligEnhet skal ikke være null for UTREDES når oppgaven er lukket etter cutoff-tidspunkt`() {
+        // Reproduserer produksjonsfeil: behandling er UTREDES med avklaringsbehov 5026 (AVKLAR_SYKDOM).
+        // Oppgaven ble OPPRETTET og LUKKET – men LUKKET skjedde etter at cutoff-jobben kjørte.
+        // Event sourcing ser LUKKET-hendelsen og nuller ut enhet. Fallback i ansvarligEnhet() skal
+        // hente enhet direkte fra oppgave-tabellen og returnere riktig enhet.
+        val behandlingRef = UUID.randomUUID()
+        val cutoffTidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+        val lukketEtterCutoff = cutoffTidspunkt.plusMinutes(42)
+
+        val hendelse = lagBehandlingHendelse(
+            tidspunkt = cutoffTidspunkt,
+            avklaringsBehov = Definisjon.AVKLAR_SYKDOM,
+        )
+
+        val behandling = lagBehandling(
+            referanse = behandlingRef,
+            gjeldendeAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+            hendelser = listOf(hendelse)
+        )
+
+        val oppgaveRepository = FakeOppgaveRepository()
+        oppgaveRepository.addOppgave(
+            behandling.id(),
+            Oppgave(
+                identifikator = 1L,
+                avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+                enhet = Enhet(0L, "0216"),
+                person = null,
+                status = Oppgavestatus.AVSLUTTET,
+                opprettetTidspunkt = cutoffTidspunkt,
+                behandlingReferanse = BehandlingReferanse(
+                    id = null,
+                    referanse = behandlingRef
+                ),
+                hendelser = listOf(
+                    OppgaveHendelse(
+                        hendelse = HendelseType.OPPRETTET,
+                        oppgaveId = 1L,
+                        mottattTidspunkt = cutoffTidspunkt,
+                        sendtTid = cutoffTidspunkt,
+                        enhet = "0216",
+                        avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
+                        status = Oppgavestatus.OPPRETTET,
+                        opprettetTidspunkt = cutoffTidspunkt,
+                        endretTidspunkt = cutoffTidspunkt,
+                        versjon = 1L
+                    ),
+                    OppgaveHendelse(
+                        hendelse = HendelseType.LUKKET,
+                        oppgaveId = 1L,
+                        mottattTidspunkt = lukketEtterCutoff,
+                        sendtTid = lukketEtterCutoff,
+                        enhet = "0216",
+                        avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
+                        status = Oppgavestatus.AVSLUTTET,
+                        opprettetTidspunkt = cutoffTidspunkt,
+                        endretTidspunkt = lukketEtterCutoff,
+                        versjon = 2L
+                    )
+                )
+            )
+        )
+
+        val mapper = BQBehandlingMapper(
+            behandlingService = BehandlingService(
+                behandlingRepository = FakeBehandlingRepository(),
+                skjermingService = skjermingService
+            ),
+            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+            oppgaveRepository = oppgaveRepository,
+            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
+            clock = fixedClock
+        )
+
+        val result = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+
+        assertThat(result.ansvarligEnhetKode)
+            .describedAs("Enhet skal ikke være null selv om oppgaven ble lukket etter cutoff-tidspunktet")
+            .isEqualTo("0216")
     }
 
     @Test

@@ -202,6 +202,7 @@ private class FakeSaksStatistikkService(
 
     override fun lagreSakInfoTilBigquery(
         behandlingId: BehandlingId,
+        cutoffTidspunkt: java.time.LocalDateTime?,
     ): SakStatistikkResultat {
         kallteller++
         return resultat

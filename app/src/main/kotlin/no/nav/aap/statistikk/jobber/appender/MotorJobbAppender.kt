@@ -41,6 +41,9 @@ class MotorJobbAppender : JobbAppender {
         enhetRetryCount: Int,
         triggerKilde: String,
         avklaringsbehovKode: Definisjon?,
+        cutoffTidspunkt: LocalDateTime?,
+        cutoffOppgaveId: Long?,
+        cutoffVersjon: Long?,
     ) {
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
@@ -56,6 +59,7 @@ class MotorJobbAppender : JobbAppender {
             avklaringsbehovKode = avklaringsbehovKode?.kode?.name,
             retryCount = enhetRetryCount,
             triggerKilde = triggerKilde,
+            cutoffTidspunkt = cutoffTidspunkt,
         )
         val jobbInput = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(payload)

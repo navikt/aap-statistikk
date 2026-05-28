@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 data class EnhetRetryConfig(
     val maxRetries: Int = requiredConfigForKey("enhet.retry.max.retries").toInt(),
@@ -24,6 +25,7 @@ data class LagreSakinfoPayload(
     val avklaringsbehovKode: String? = null,
     val retryCount: Int = 0,
     val triggerKilde: String = "ukjent",
+    val cutoffTidspunkt: LocalDateTime? = null,
 )
 
 class LagreSakinfoTilBigQueryJobbUtfører(
@@ -70,7 +72,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
             "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount."
         )
 
-        when (val resultat = sakStatistikkService.lagreSakInfoTilBigquery(behandlingId)) {
+        when (val resultat = sakStatistikkService.lagreSakInfoTilBigquery(behandlingId, payload.cutoffTidspunkt)) {
             SakStatistikkResultat.OK -> {}
             is SakStatistikkResultat.ManglerEnhet -> {
                 if (retryCount < enhetRetryConfig.maxRetries) {
@@ -88,6 +90,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         avklaringsbehovKode = resultat.avklaringsbehovKode,
                         enhetRetryCount = retryCount + 1,
                         triggerKilde = "retry($triggerKilde)",
+                        cutoffTidspunkt = payload.cutoffTidspunkt,
                     )
                 } else {
                     error(
