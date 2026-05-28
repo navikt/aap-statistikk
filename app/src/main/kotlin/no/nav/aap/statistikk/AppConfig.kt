@@ -18,11 +18,10 @@ object AppConfig {
     // Vi skrur opp ktor sin default-verdi, som er "antall CPUer", fordi vi har en del venting på IO (db, kafka, http):
     private const val ktorParallellitet = 8
 
-    // Vi følger ktor sin metodikk for å regne ut tuning parametre som funksjon av parallellitet
-    // https://github.com/ktorio/ktor/blob/3.3.1/ktor-server/ktor-server-core/common/src/io/ktor/server/engine/ApplicationEngine.kt#L30
-    const val connectionGroupSize = ktorParallellitet / 2 + 1
-    const val workerGroupSize = ktorParallellitet / 2 + 1
-    const val callGroupSize = 4 * ktorParallellitet
+    // Vi følger *IKKE* ktor sin metodikk for å regne ut tuning parametre for callGroupSize. Vi
+    // har ikke async IO, hverken for utadgående HTTP-kall eller mot databasen, så vi trenger betydelig flere
+    // tråder enn en async kodebase.
+    const val callGroupSize = 64
 
     const val ANTALL_WORKERS_FOR_MOTOR = 4
     const val hikariMaxPoolSize = ktorParallellitet + 2 * ANTALL_WORKERS_FOR_MOTOR

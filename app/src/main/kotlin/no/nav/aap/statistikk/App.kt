@@ -69,8 +69,6 @@ fun main() {
 
 
     embeddedServer(Netty, configure = {
-        connectionGroupSize = AppConfig.connectionGroupSize
-        workerGroupSize = AppConfig.workerGroupSize
         callGroupSize = AppConfig.callGroupSize
 
         shutdownGracePeriod =
