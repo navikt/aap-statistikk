@@ -66,7 +66,7 @@ spec:
           WHERE sag.behandling_id = b.id
         ) AS arbeidsgiver,
       b.opprettet_tid AS reg_tid,
-      DATETIME(TIMESTAMP_MILLIS(GREATEST(b.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp, ssy.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endret_tid,
+      DATETIME(TIMESTAMP_MILLIS(GREATEST(b.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp, (SELECT MAX(ssy2.datastream_metadata.source_timestamp) FROM `datastream_hendelser.public_samordning_statlig_ytelse` ssy2 WHERE ssy2.behandling_id = b.id))), 'Europe/Oslo') AS endret_tid,
       FROM `ytelsestatistikk.view_gyldige_behandlinger` gyldig
       JOIN `datastream_hendelser.public_behandling` b
         ON gyldig.behandling_id = b.id
@@ -78,6 +78,3 @@ spec:
         datastream_hendelser.public_sak s
         ON
           s.id = b.sak_id
-      JOIN `datastream_hendelser.public_samordning_statlig_ytelse` ssy
-        ON
-          gyldig.behandling_id = ssy.behandling_id
