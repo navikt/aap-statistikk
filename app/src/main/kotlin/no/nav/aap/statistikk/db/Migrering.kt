@@ -15,7 +15,6 @@ class Migrering(config: DbConfig) {
 
     private val flyway = Flyway
         .configure()
-        .cleanDisabled(System.getProperty("flyway.cleanDisabled", "false").toBoolean())
         .dataSource(dataSource)
         .locations("migrering")
         .validateMigrationNaming(true)
