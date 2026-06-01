@@ -320,8 +320,15 @@ class BQBehandlingMapper(
 
         if (behandling.venteÅrsak != null && enhet == null) {
             // Hvis ingen åpne, velg enheten som hadde forrige avklaringsbehov
-            return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
-                .filter { it.avklaringsbehov == behandling.sisteLøsteAvklaringsbehov?.kode?.name }
+            val enhetSistLøsteAvklaringsbehov =
+                oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+                    .filter { it.avklaringsbehov == behandling.sisteLøsteAvklaringsbehov?.kode?.name }
+                    .maxByOrNull { it.sistEndret() }?.enhet?.kode
+
+            // Fallback til siste enhet
+            return enhetSistLøsteAvklaringsbehov ?: oppgaveRepository.hentOppgaverForBehandling(
+                behandling.id()
+            )
                 .maxByOrNull { it.sistEndret() }?.enhet?.kode
         }
 
