@@ -74,11 +74,11 @@ spec:
         ARRAY(
           SELECT
             STRUCT(
-              fra_dato,
-              til_dato,
+              fra_dato as fra_dato,
+              til_dato as til_dato,
               kodeverk AS diagnose_kodeverk,
               diagnosekode AS diagnose_kode,
-              coalesce(bidiagnoser, json '[]'))
+              coalesce(bidiagnoser, json '[]') as bidiagnoser_kode)
           FROM `datastream_hendelser.public_diagnose_periode`
           WHERE behandling_id = b.id
         ) AS diagnoser,
