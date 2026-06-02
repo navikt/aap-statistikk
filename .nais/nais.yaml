@@ -78,14 +78,6 @@ spec:
         flags:
           - name: cloudsql.logical_decoding
             value: "on"
-          {{#if pgaudit}}
-          - name: cloudsql.enable_pgaudit
-            value: "on"
-          - name: pgaudit.log
-            value: ""
-          - name: "pgaudit.log_parameter"
-            value: "off"
-          {{/if }}
         tier: db-custom-1-3840
         diskAutoresize: true
         highAvailability: true
