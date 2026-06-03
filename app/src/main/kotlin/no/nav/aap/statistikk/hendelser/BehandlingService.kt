@@ -43,13 +43,12 @@ class BehandlingService(
             logger.info("Oppdaterte behandling med referanse ${behandling.referanse} og id $eksisterendeBehandlingId.")
             behandling.copy(id = eksisterendeBehandlingId)
         } ?: run {
-            opprettBehandlingEllerOppdaterVedRace(dto = dto, sak = sak, behandling = behandling)
+            opprettBehandling(dto = dto, behandling = behandling)
         }
     }
 
-    private fun opprettBehandlingEllerOppdaterVedRace(
+    private fun opprettBehandling(
         dto: StoppetBehandling,
-        sak: Sak,
         behandling: Behandling
     ): Behandling {
         return try {
@@ -59,19 +58,13 @@ class BehandlingService(
                 .increment()
             behandling.copy(id = id)
         } catch (e: SQLException) {
-            if (!e.erUniqueConstraintViolation()) throw e
-
-            val låstEksisterende = requireNotNull(
-                behandlingRepository.hentBehandlingForUpdate(dto.behandlingReferanse)
-            ) {
-                "Fant ikke behandling med referanse ${dto.behandlingReferanse} etter unique violation."
+            if (e.erUniqueConstraintViolation()) {
+                logger.warn(
+                    "Samtidighetskonflikt ved oppretting av behandling med referanse ${dto.behandlingReferanse}. Lar jobben retrye.",
+                    e
+                )
             }
-
-            val oppdatertBehandling = konstruerBehandling(dto, sak, låstEksisterende)
-            behandlingRepository.oppdaterBehandling(oppdatertBehandling.copy(id = låstEksisterende.id))
-
-            logger.info("Oppdaterte eksisterende behandling etter race på referanse ${dto.behandlingReferanse}.")
-            oppdatertBehandling.copy(id = låstEksisterende.id())
+            throw e
         }
     }
 

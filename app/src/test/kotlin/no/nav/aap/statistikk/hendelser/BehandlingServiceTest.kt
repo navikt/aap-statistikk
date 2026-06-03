@@ -23,6 +23,7 @@ import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.sql.SQLException
 import java.time.LocalDateTime
 import java.util.UUID
@@ -73,13 +74,11 @@ class BehandlingServiceTest {
     }
 
     @Test
-    fun `hentEllerLagreBehandling håndterer duplicate key ved oppretting og låser eksisterende rad`() {
+    fun `hentEllerLagreBehandling kaster exception ved duplicate key ved oppretting`() {
         val referanse = UUID.randomUUID()
         val sak = testSak()
-        val eksisterende = eksisterendeBehandling(sak, referanse)
 
         val repository = object : IBehandlingRepository {
-            var lockHentAntall = 0
             var opprettKalt = false
             var oppdateringKalt = false
 
@@ -98,23 +97,23 @@ class BehandlingServiceTest {
 
             override fun hentEllerNull(id: BehandlingId): Behandling? = null
 
-            override fun hent(id: BehandlingId): Behandling = eksisterende
+            override fun hent(id: BehandlingId): Behandling = error("Skal ikke hente behandling")
 
-            override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = eksisterende
+            override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = error("Skal ikke hente behandling med id-lock")
 
             override fun hentBehandlingForUpdate(referanse: UUID): Behandling? {
-                lockHentAntall++
-                return if (lockHentAntall == 1) null else eksisterende
+                return null
             }
         }
 
         val behandlingService = BehandlingService(repository, SkjermingService(FakePdlGateway(emptyMap())))
-        val resultat = behandlingService.hentEllerLagreBehandling(testHendelse(referanse), sak)
+        val exception = assertThrows<SQLException> {
+            behandlingService.hentEllerLagreBehandling(testHendelse(referanse), sak)
+        }
 
         assertThat(repository.opprettKalt).isTrue()
-        assertThat(repository.lockHentAntall).isEqualTo(2)
-        assertThat(repository.oppdateringKalt).isTrue()
-        assertThat(resultat.id).isEqualTo(eksisterende.id)
+        assertThat(repository.oppdateringKalt).isFalse()
+        assertThat(exception.sqlState).isEqualTo("23505")
     }
 }
 
