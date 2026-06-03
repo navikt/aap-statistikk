@@ -6,7 +6,6 @@ import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.sakDuplikat
 import no.nav.aap.statistikk.sammeEndretTid
 import org.slf4j.LoggerFactory
-import java.time.Clock
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
@@ -57,19 +56,19 @@ class SaksStatistikkService(
         return SakStatistikkResultat.OK
     }
 
-    fun lagreBQBehandling(bqSak: BQBehandling) {
-        val siste = sakstatistikkRepository.hentSisteHendelseForBehandling(bqSak.behandlingUUID)
+    fun lagreBQBehandling(nyBQBehandling: BQBehandling) {
+        val eksisterendeRad = sakstatistikkRepository.hentSisteHendelseForBehandling(nyBQBehandling.behandlingUUID)
 
-        if (siste?.ansesSomDuplikat(bqSak) != true) {
+        if (eksisterendeRad?.ansesSomDuplikat(nyBQBehandling) != true) {
             // Hvis vi ikke allerede har en inngangshendelse (når behandlingen ble
             // opprettet), konstruer en.
             // Dette er kun et teknisk krav fra Team Sak om at alle hendelser bør ha inngangshendelser.
             // I praksis vil de "normale" hendelsene kun komme et par sekunder etter at behandlingen
             // ble opprettet i behandlingsflyt.
-            if (!erInngangsHendelse(bqSak) && siste == null) {
+            if (!erInngangsHendelse(nyBQBehandling) && eksisterendeRad == null) {
                 sakstatistikkRepository.lagre(
-                    bqSak.copy(
-                        endretTid = bqSak.registrertTid,
+                    nyBQBehandling.copy(
+                        endretTid = nyBQBehandling.registrertTid,
                         ferdigbehandletTid = null,
                         vedtakTid = null,
                         behandlingStatus = "OPPRETTET"
@@ -78,25 +77,25 @@ class SaksStatistikkService(
                 PrometheusProvider.prometheus.sakDuplikat(false).increment()
             }
 
-            val bqSakMedUnikEndretTid = tilpassEndretTid(bqSak, siste) ?: run {
+            val bqSakMedUnikEndretTid = tilpassEndretTid(nyBQBehandling, eksisterendeRad) ?: run {
                 PrometheusProvider.prometheus.sakDuplikat(true).increment()
                 return
             }
 
             sakstatistikkRepository.lagre(bqSakMedUnikEndretTid)
-            if (siste?.behandlingStatus == "AVSLUTTET"
+            if (eksisterendeRad?.behandlingStatus == "AVSLUTTET"
                 && bqSakMedUnikEndretTid.behandlingStatus != "AVSLUTTET"
-                && bqSakMedUnikEndretTid.endretTid > siste.endretTid
+                && bqSakMedUnikEndretTid.endretTid > eksisterendeRad.endretTid
             ) {
                 log.error(
                     "Feil rekkefølge: lagrer ${bqSakMedUnikEndretTid.behandlingStatus} etter at AVSLUTTET allerede er lagret. " +
                             "Referanse: ${bqSakMedUnikEndretTid.behandlingUUID}. " +
-                            "Forrige endretTid: ${siste.endretTid}, ny endretTid: ${bqSakMedUnikEndretTid.endretTid}."
+                            "Forrige endretTid: ${eksisterendeRad.endretTid}, ny endretTid: ${bqSakMedUnikEndretTid.endretTid}."
                 )
             }
             PrometheusProvider.prometheus.sakDuplikat(false).increment()
         } else {
-            log.info("Lagret ikke sakstatistikk for behandling ${bqSak.behandlingUUID} siden den anses som duplikat.")
+            log.info("Lagret ikke sakstatistikk for behandling ${nyBQBehandling.behandlingUUID} siden den anses som duplikat.")
             PrometheusProvider.prometheus.sakDuplikat(true).increment()
         }
     }
@@ -108,30 +107,30 @@ class SaksStatistikkService(
      *   returnerer null dersom hendelsen allerede er lagret (idempotens ved gjentagende retries)
      * - Nyere endretTid enn siste: returneres uendret
      */
-    private fun tilpassEndretTid(bqSak: BQBehandling, siste: BQBehandling?): BQBehandling? = when {
-        siste == null -> bqSak
-        siste.endretTid == bqSak.endretTid -> håndterSammeEndretTid(siste, bqSak)
-        siste.endretTid > bqSak.endretTid -> {
+    private fun tilpassEndretTid(nyRad: BQBehandling, eksisterendeRad: BQBehandling?): BQBehandling? = when {
+        eksisterendeRad == null -> nyRad
+        eksisterendeRad.endretTid == nyRad.endretTid -> håndterSammeEndretTid(eksisterendeRad, nyRad)
+        eksisterendeRad.endretTid > nyRad.endretTid -> {
             val eksisterende = sakstatistikkRepository.hentHendelseMedEndretTid(
-                bqSak.behandlingUUID, bqSak.endretTid, bqSak.erResending
+                nyRad.behandlingUUID, nyRad.endretTid, nyRad.erResending
             )
-            if (eksisterende?.ansesSomDuplikat(bqSak) == true) {
+            if (eksisterende?.ansesSomDuplikat(nyRad) == true) {
                 log.info(
                     "Forsinket hendelse allerede lagret med samme endretTid — hopper over. " +
-                            "Referanse: ${bqSak.behandlingUUID}. endretTid: ${bqSak.endretTid}."
+                            "Referanse: ${nyRad.behandlingUUID}. endretTid: ${nyRad.endretTid}."
                 )
                 null
             } else {
                 log.info(
                     "Ny hendelse har eldre endretTid enn forrige lagrede rad — lagrer med opprinnelig tidsstempel. " +
-                            "Referanse: ${bqSak.behandlingUUID}. " +
-                            "Forrige endretTid: ${siste.endretTid}, ny: ${bqSak.endretTid}. " +
-                            "Forrige status: ${siste.behandlingStatus}, ny status: ${bqSak.behandlingStatus}."
+                            "Referanse: ${nyRad.behandlingUUID}. " +
+                            "Forrige endretTid: ${eksisterendeRad.endretTid}, ny: ${nyRad.endretTid}. " +
+                            "Forrige status: ${eksisterendeRad.behandlingStatus}, ny status: ${nyRad.behandlingStatus}."
                 )
-                bqSak
+                nyRad
             }
         }
-        else -> bqSak
+        else -> nyRad
     }
 
     private fun erInngangsHendelse(bqBehandling: BQBehandling): Boolean {
@@ -282,7 +281,7 @@ class SaksStatistikkService(
         }
     }
 
-    private fun håndterAndreHendelser(siste: BQBehandling, bqSak: BQBehandling): BQBehandling? {
+    private fun håndterAndreHendelser(siste: BQBehandling, bqSak: BQBehandling): BQBehandling {
         if (siste.behandlingStatus == "AVSLUTTET" && bqSak.behandlingStatus == "AVSLUTTET") {
             log.warn(
                 "Ny AVSLUTTET-hendelse med samme endretTid lagres med bump for å bevare rekkefølge. " +

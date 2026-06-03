@@ -376,7 +376,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 join versjon v on bh.versjon_id = v.id
        where bh.behandling_id = ?
          and slettet = false
-       order by bh.hendelsestidspunkt, bh.oppdatert_tid
+       order by bh.hendelsestidspunkt, bh.oppdatert_tid, bh.id
                 """.trimIndent()
 
         dbConnection.queryList(historikkSpørring) {

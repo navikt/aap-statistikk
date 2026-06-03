@@ -26,7 +26,4 @@ class Migrering(config: DbConfig) {
         return dataSource  // Returnerer den konfigurerte og migrerte datasourcen
     }
 
-    fun clean() {
-        flyway.clean()
-    }
 }
