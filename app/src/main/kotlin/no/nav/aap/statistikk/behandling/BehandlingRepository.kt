@@ -425,6 +425,32 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         }
     }
 
+    override fun hentBehandlingForUpdate(id: BehandlingId): Behandling {
+        val sql = hentQuery + " WHERE b.id = ? FOR UPDATE OF b"
+
+        val behandling = dbConnection.queryFirst(sql) {
+            setParams { setLong(1, id.id) }
+            setRowMapper { mapBehandling(it) }
+        }.let {
+            it.copy(hendelser = hentBehandlingHistorikk(it))
+        }
+
+        return behandling
+    }
+
+    override fun hentBehandlingForUpdate(referanse: UUID): Behandling? {
+        val sql = hentQuery + " WHERE br.referanse = ? FOR UPDATE OF b"
+
+        val behandling = dbConnection.queryFirstOrNull(sql) {
+            setParams { setUUID(1, referanse) }
+            setRowMapper { mapBehandling(it) }
+        }?.let {
+            it.copy(hendelser = hentBehandlingHistorikk(it))
+        }
+
+        return behandling
+    }
+
     private fun mapBehandling(it: Row) = Behandling(
         id = it.getLong("b_id").let(::BehandlingId),
         referanse = it.getUUID("br_referanse"),
