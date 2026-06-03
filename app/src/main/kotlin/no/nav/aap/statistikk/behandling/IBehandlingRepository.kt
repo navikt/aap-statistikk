@@ -17,14 +17,14 @@ interface IBehandlingRepository : Repository {
     fun hent(id: BehandlingId): Behandling
     
     /**
-     * Fetch behandling with pessimistic lock (FOR UPDATE).
-     * Blocks other transactions from modifying this row until transaction completes.
+     * Henter behandling med pessimistisk lås (FOR UPDATE).
+     * Blokkerer andre transaksjoner fra å endre raden før transaksjonen er ferdig.
      */
     fun hentBehandlingForUpdate(id: BehandlingId): Behandling
-    
+
     /**
-     * Fetch behandling by referanse with pessimistic lock (FOR UPDATE).
-     * Returns null if not found.
+     * Henter behandling på referanse med pessimistisk lås (FOR UPDATE).
+     * Returnerer null hvis behandling ikke finnes.
      */
     fun hentBehandlingForUpdate(referanse: UUID): Behandling?
 }

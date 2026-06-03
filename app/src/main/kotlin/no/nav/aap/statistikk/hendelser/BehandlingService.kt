@@ -25,9 +25,7 @@ class BehandlingService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun erSkjermet(behandling: Behandling): Boolean {
-        return skjermingService.erSkjermet(behandling)
-    }
+    fun erSkjermet(behandling: Behandling): Boolean = skjermingService.erSkjermet(behandling)
 
     fun hentEllerLagreBehandling(
         dto: StoppetBehandling,
@@ -40,37 +38,41 @@ class BehandlingService(
         val eksisterendeBehandling = behandlingRepository.hentBehandlingForUpdate(dto.behandlingReferanse)
         val behandling = konstruerBehandling(dto, sak, eksisterendeBehandling)
 
-        val eksisterendeBehandlingId = behandling.id
-        val lagretBehandling = if (eksisterendeBehandlingId != null) {
-            behandlingRepository.oppdaterBehandling(
-                behandling.copy(id = eksisterendeBehandlingId)
-            )
+        return behandling.id?.let { eksisterendeBehandlingId ->
+            behandlingRepository.oppdaterBehandling(behandling.copy(id = eksisterendeBehandlingId))
             logger.info("Oppdaterte behandling med referanse ${behandling.referanse} og id $eksisterendeBehandlingId.")
             behandling.copy(id = eksisterendeBehandlingId)
-        } else {
-            try {
-                val id = behandlingRepository.opprettBehandling(behandling)
-                logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
-                PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
-                    .increment()
-                behandling.copy(id = id)
-            } catch (e: SQLException) {
-                if (!e.erUniqueConstraintViolation()) throw e
-
-                val låstEksisterende = requireNotNull(
-                    behandlingRepository.hentBehandlingForUpdate(dto.behandlingReferanse)
-                ) {
-                    "Fant ikke behandling med referanse ${dto.behandlingReferanse} etter unique violation."
-                }
-
-                val oppdatertBehandling = konstruerBehandling(dto, sak, låstEksisterende)
-                behandlingRepository.oppdaterBehandling(oppdatertBehandling.copy(id = låstEksisterende.id))
-
-                logger.info("Oppdaterte eksisterende behandling etter race på referanse ${dto.behandlingReferanse}.")
-                oppdatertBehandling.copy(id = låstEksisterende.id())
-            }
+        } ?: run {
+            opprettBehandlingEllerOppdaterVedRace(dto = dto, sak = sak, behandling = behandling)
         }
-        return lagretBehandling
+    }
+
+    private fun opprettBehandlingEllerOppdaterVedRace(
+        dto: StoppetBehandling,
+        sak: Sak,
+        behandling: Behandling
+    ): Behandling {
+        return try {
+            val id = behandlingRepository.opprettBehandling(behandling)
+            logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
+            PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
+                .increment()
+            behandling.copy(id = id)
+        } catch (e: SQLException) {
+            if (!e.erUniqueConstraintViolation()) throw e
+
+            val låstEksisterende = requireNotNull(
+                behandlingRepository.hentBehandlingForUpdate(dto.behandlingReferanse)
+            ) {
+                "Fant ikke behandling med referanse ${dto.behandlingReferanse} etter unique violation."
+            }
+
+            val oppdatertBehandling = konstruerBehandling(dto, sak, låstEksisterende)
+            behandlingRepository.oppdaterBehandling(oppdatertBehandling.copy(id = låstEksisterende.id))
+
+            logger.info("Oppdaterte eksisterende behandling etter race på referanse ${dto.behandlingReferanse}.")
+            oppdatertBehandling.copy(id = låstEksisterende.id())
+        }
     }
 
 
@@ -86,16 +88,17 @@ class BehandlingService(
 
         val (sisteLøsteAvklaringsbehov, sisteSaksbehandler, sistLøsteAvklaringsbehovTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
             ?: Triple(null, null, null)
+        val gjeldendeAvklaringsbehov = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()
 
         val eksisterendeBehandling = eksisterendeBehandlingKanskje?.leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = null,
                 hendelsesTidspunkt = dto.hendelsesTidspunkt,
-                avklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov(),
+                avklaringsBehov = gjeldendeAvklaringsbehov,
                 sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
                 sisteSaksbehandlerSomLøstebehov = sisteSaksbehandler,
                 sistLøsteAvklaringsbehovTidspunkt = sistLøsteAvklaringsbehovTidspunkt,
-                steggruppe = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
+                steggruppe = gjeldendeAvklaringsbehov?.løsesISteg?.gruppe,
                 avklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
                 venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
                 returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
@@ -114,8 +117,10 @@ class BehandlingService(
 
         val relatertBehandling = hentRelatertBehandling(dto)
 
-        if (eksisterendeBehandling == null) {
-            val nyBehandling = Behandling(
+        return eksisterendeBehandling?.copy(
+            relatertBehandlingId = relatertBehandling?.id,
+            relaterteIdenter = dto.identerForSak,
+        ) ?: Behandling(
                 referanse = dto.behandlingReferanse,
                 sak = sak,
                 typeBehandling = dto.behandlingType.tilDomene(),
@@ -130,41 +135,31 @@ class BehandlingService(
                 sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
                 sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
                 sisteSaksbehandlerSomLøstebehov = sisteSaksbehandler,
-                gjeldendeAvklaringsBehov = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov(),
+                gjeldendeAvklaringsBehov = gjeldendeAvklaringsbehov,
                 gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
                 søknadsformat = dto.soknadsFormat.tilDomene(),
                 venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
                 returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
                 resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-                gjeldendeStegGruppe = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
+                gjeldendeStegGruppe = gjeldendeAvklaringsbehov?.løsesISteg?.gruppe,
                 årsaker = dto.vurderingsbehov.map { it.tilDomene() },
                 opprettetAv = dto.opprettetAv,
                 årsakTilOpprettelse = dto.årsakTilOpprettelse.name,
                 oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
                     ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt
             )
-
-            val behandlingMedRelatertBehandling =
-                nyBehandling.copy(relatertBehandlingId = relatertBehandling?.id)
-
-            return behandlingMedRelatertBehandling
-        } else {
-            return eksisterendeBehandling.copy(
-                relatertBehandlingId = relatertBehandling?.id,
-                relaterteIdenter = dto.identerForSak,
-            )
-        }
+            .copy(relatertBehandlingId = relatertBehandling?.id)
     }
 
     private fun hentRelatertBehandling(dto: StoppetBehandling): Behandling? {
         val relatertBehandlingUUID = dto.relatertBehandling
-        val relatertBehadling =
+        val relatertBehandling =
             relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
 
-        if (relatertBehadling == null && relatertBehandlingUUID != null) {
+        if (relatertBehandling == null && relatertBehandlingUUID != null) {
             logger.warn("Fant ikke relatert behandling med UUID $relatertBehandlingUUID for behandling ${dto.behandlingReferanse}.")
         }
-        return relatertBehadling
+        return relatertBehandling
     }
 
     fun hentRelatertBehandlingUUID(behandling: Behandling): String? {
@@ -179,12 +174,7 @@ class BehandlingService(
 }
 
 private fun SQLException.erUniqueConstraintViolation(): Boolean {
-    var exception: Throwable? = this
-    while (exception != null) {
-        if (exception is SQLException && exception.sqlState == "23505") {
-            return true
-        }
-        exception = exception.cause
-    }
-    return false
+    return generateSequence<Throwable>(this) { it.cause }
+        .filterIsInstance<SQLException>()
+        .any { it.sqlState == "23505" }
 }
