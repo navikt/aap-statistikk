@@ -78,6 +78,8 @@ spec:
         flags:
           - name: cloudsql.logical_decoding
             value: "on"
+          - name: cloudsql.enable_pgaudit
+            value: "true"
         tier: db-custom-1-3840
         diskAutoresize: true
         highAvailability: true
