@@ -181,6 +181,14 @@ class FakeBehandlingRepository : IBehandlingRepository {
     override fun hentEllerNull(id: BehandlingId): Behandling? {
         return behandlinger[id.id]
     }
+
+    override fun hentBehandlingForUpdate(id: BehandlingId): Behandling {
+        return hent(id)
+    }
+
+    override fun hentBehandlingForUpdate(referanse: UUID): Behandling? {
+        return hent(referanse)
+    }
 }
 
 class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {

@@ -15,4 +15,16 @@ interface IBehandlingRepository : Repository {
     fun hentEllerNull(id: BehandlingId): Behandling?
 
     fun hent(id: BehandlingId): Behandling
+    
+    /**
+     * Fetch behandling with pessimistic lock (FOR UPDATE).
+     * Blocks other transactions from modifying this row until transaction completes.
+     */
+    fun hentBehandlingForUpdate(id: BehandlingId): Behandling
+    
+    /**
+     * Fetch behandling by referanse with pessimistic lock (FOR UPDATE).
+     * Returns null if not found.
+     */
+    fun hentBehandlingForUpdate(referanse: UUID): Behandling?
 }

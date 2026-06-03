@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
+import java.sql.SQLException
 import java.util.*
 
 class BehandlingService(
@@ -36,29 +37,47 @@ class BehandlingService(
             logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
         }
 
-        val behandling = konstruerBehandling(dto, sak)
+        val eksisterendeBehandling = behandlingRepository.hentBehandlingForUpdate(dto.behandlingReferanse)
+        val behandling = konstruerBehandling(dto, sak, eksisterendeBehandling)
 
         val eksisterendeBehandlingId = behandling.id
-        val behandlingId = if (eksisterendeBehandlingId != null) {
+        val lagretBehandling = if (eksisterendeBehandlingId != null) {
             behandlingRepository.oppdaterBehandling(
                 behandling.copy(id = eksisterendeBehandlingId)
             )
             logger.info("Oppdaterte behandling med referanse ${behandling.referanse} og id $eksisterendeBehandlingId.")
-            eksisterendeBehandlingId
+            behandling.copy(id = eksisterendeBehandlingId)
         } else {
-            val id = behandlingRepository.opprettBehandling(behandling)
-            logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
-            PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
-                .increment()
-            id
+            try {
+                val id = behandlingRepository.opprettBehandling(behandling)
+                logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
+                PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
+                    .increment()
+                behandling.copy(id = id)
+            } catch (e: SQLException) {
+                if (!e.erUniqueConstraintViolation()) throw e
+
+                val låstEksisterende = requireNotNull(
+                    behandlingRepository.hentBehandlingForUpdate(dto.behandlingReferanse)
+                ) {
+                    "Fant ikke behandling med referanse ${dto.behandlingReferanse} etter unique violation."
+                }
+
+                val oppdatertBehandling = konstruerBehandling(dto, sak, låstEksisterende)
+                behandlingRepository.oppdaterBehandling(oppdatertBehandling.copy(id = låstEksisterende.id))
+
+                logger.info("Oppdaterte eksisterende behandling etter race på referanse ${dto.behandlingReferanse}.")
+                oppdatertBehandling.copy(id = låstEksisterende.id())
+            }
         }
-        return behandling.copy(id = behandlingId)
+        return lagretBehandling
     }
 
 
     fun konstruerBehandling(
         dto: StoppetBehandling,
-        sak: Sak
+        sak: Sak,
+        eksisterendeBehandlingKanskje: Behandling? = behandlingRepository.hent(dto.behandlingReferanse)
     ): Behandling {
         val vedtakstidspunkt =
             dto.avsluttetBehandling?.vedtakstidspunkt ?: dto.avklaringsbehov.utledVedtakTid().let {
@@ -67,8 +86,6 @@ class BehandlingService(
 
         val (sisteLøsteAvklaringsbehov, sisteSaksbehandler, sistLøsteAvklaringsbehovTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
             ?: Triple(null, null, null)
-
-        val eksisterendeBehandlingKanskje = behandlingRepository.hent(dto.behandlingReferanse)
 
         val eksisterendeBehandling = eksisterendeBehandlingKanskje?.leggTilHendelse(
             BehandlingHendelse(
@@ -159,4 +176,15 @@ class BehandlingService(
     fun hentBehandling(behandlingId: BehandlingId) = behandlingRepository.hent(behandlingId)
 
     fun hentBehandling(behandlingReferanse: UUID) = behandlingRepository.hent(behandlingReferanse)
+}
+
+private fun SQLException.erUniqueConstraintViolation(): Boolean {
+    var exception: Throwable? = this
+    while (exception != null) {
+        if (exception is SQLException && exception.sqlState == "23505") {
+            return true
+        }
+        exception = exception.cause
+    }
+    return false
 }
