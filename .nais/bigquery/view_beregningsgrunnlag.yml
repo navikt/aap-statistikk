@@ -20,6 +20,11 @@ spec:
       SELECT
         s.saksnummer AS saksnummer,
         br.referanse AS behandlingsreferanse,
+        (
+          SELECT vedtak_tidspunkt
+          FROM `datastream_hendelser.public_behandling_historikk`
+          WHERE gjeldende = TRUE AND behandling_id = gyldig.behandling_id
+        ) AS vedtak_tidspunkt,
         pg.type AS type,
         (
           SELECT
@@ -30,8 +35,9 @@ spec:
               END
         ) AS grunnlaget,
         inntekter_11_19.inntekter AS inntekter,
-        pg.nedsatt_arbeidsevne_dato as nedsatt_arbeidsevne_dato,
-        pg.ytterligere_nedsatt_arbeidsevne_dato as ytterligere_nedsatt_arbeidsevne_dato,
+        pg.nedsatt_arbeidsevne_dato AS nedsatt_arbeidsevne_dato,
+        pg.ytterligere_nedsatt_arbeidsevne_dato
+          AS ytterligere_nedsatt_arbeidsevne_dato,
         g.er6g_begrenset AS grunnlag_er_6g_begrenset,
         g.er_gjennomsnitt AS grunnlag_er_gjennomsnitt,
         pg.beregningsaar,
@@ -60,10 +66,13 @@ spec:
         concat(
           pg.id,
           '-',
-          COALESCE(g.id, 0), '-',
+          COALESCE(g.id, 0),
           '-',
-          COALESCE(gy.id, 0), '-',
-          COALESCE(gu.id, 0), '-',
+          '-',
+          COALESCE(gy.id, 0),
+          '-',
+          COALESCE(gu.id, 0),
+          '-',
           b.id,
           '-',
           br.id,

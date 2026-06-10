@@ -21,6 +21,11 @@ spec:
         br.referanse AS behandlingsreferanse,
         s.saksnummer AS saksnummer,
         (
+          SELECT vedtak_tidspunkt
+          FROM `datastream_hendelser.public_behandling_historikk`
+          WHERE gjeldende = TRUE AND behandling_id = gyldig.behandling_id
+        ) AS vedtak_tidspunkt,
+        (
           SELECT
             array_agg(
               STRUCT(
@@ -73,30 +78,30 @@ spec:
               br.datastream_metadata.source_timestamp,
               s.datastream_metadata.source_timestamp,
               GREATEST(
-                  COALESCE(
-                    (
-                      SELECT MAX(ssy.datastream_metadata.source_timestamp)
-                      FROM
-                        `datastream_hendelser.public_samordning_statlig_ytelse` ssy
-                      WHERE ssy.behandling_id = b.id
-                    ),
-                    0),
-                  COALESCE(
-                    (
-                      SELECT MAX(say.datastream_metadata.source_timestamp)
-                      FROM
-                        `datastream_hendelser.public_samordning_avregning_andre_ytelser`
-                          say
-                      WHERE say.behandling_id = b.id
-                    ),
-                    0),
-                  COALESCE(
-                    (
-                      SELECT MAX(su.datastream_metadata.source_timestamp)
-                      FROM `datastream_hendelser.public_samordning_ufore` su
-                      WHERE su.behandling_id = b.id
-                    ),
-                    0)))),
+                COALESCE(
+                  (
+                    SELECT MAX(ssy.datastream_metadata.source_timestamp)
+                    FROM
+                      `datastream_hendelser.public_samordning_statlig_ytelse` ssy
+                    WHERE ssy.behandling_id = b.id
+                  ),
+                  0),
+                COALESCE(
+                  (
+                    SELECT MAX(say.datastream_metadata.source_timestamp)
+                    FROM
+                      `datastream_hendelser.public_samordning_avregning_andre_ytelser`
+                        say
+                    WHERE say.behandling_id = b.id
+                  ),
+                  0),
+                COALESCE(
+                  (
+                    SELECT MAX(su.datastream_metadata.source_timestamp)
+                    FROM `datastream_hendelser.public_samordning_ufore` su
+                    WHERE su.behandling_id = b.id
+                  ),
+                  0)))),
           'Europe/Oslo') AS endret_tid,
       FROM `ytelsestatistikk.view_gyldige_behandlinger` gyldig
       JOIN `datastream_hendelser.public_behandling` b
