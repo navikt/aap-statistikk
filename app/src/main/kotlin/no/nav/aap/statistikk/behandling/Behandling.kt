@@ -244,7 +244,7 @@ enum class TypeBehandling(val kildeSystem: KildeSystem) {
     ),
     Journalføring(kildeSystem = KildeSystem.Postmottak), Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Aktivitetsplikt(
         kildeSystem = KildeSystem.Behandlingsflyt
-    ),
+    ), Fordeling(kildeSystem = KildeSystem.Postmottak),
 
     @Suppress("EnumEntryName")
     Aktivitetsplikt11_9(kildeSystem = KildeSystem.Behandlingsflyt),

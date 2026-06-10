@@ -72,6 +72,7 @@ fun DokumentflytStoppetHendelse.tilDomene(person: Person): PostmottakBehandling 
 
 fun TypeBehandling.tilDomene(): no.nav.aap.statistikk.behandling.TypeBehandling {
     return when (this) {
+        TypeBehandling.Fordeling -> no.nav.aap.statistikk.behandling.TypeBehandling.Fordeling
         TypeBehandling.DokumentHåndtering -> no.nav.aap.statistikk.behandling.TypeBehandling.Dokumenthåndtering
         TypeBehandling.Journalføring -> no.nav.aap.statistikk.behandling.TypeBehandling.Journalføring
     }
