@@ -2,11 +2,11 @@ package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.statistikk.enhet.EnhetRepository
 import no.nav.aap.statistikk.enhet.SaksbehandlerRepository
-import no.nav.aap.statistikk.person.PersonService
+import no.nav.aap.statistikk.person.IPersonRepository
 import org.slf4j.LoggerFactory
 
 class OppgaveHistorikkLagrer(
-    private val personService: PersonService,
+    private val personRepository: IPersonRepository,
     private val oppgaveRepository: OppgaveRepository,
     private val enhetRepository: EnhetRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
@@ -23,7 +23,7 @@ class OppgaveHistorikkLagrer(
         }
 
         val personMedId =
-            oppgave.person?.let { personService.hentEllerLagrePerson(oppgave.person.ident) }
+            oppgave.person?.let { personRepository.hentEllerLagre(oppgave.person.ident) }
 
         val enhetMedId = oppgave.enhet.let {
             val id = enhetRepository.lagreEnhet(it)

@@ -4,7 +4,6 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
-import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertNull
@@ -116,7 +115,7 @@ class PostmottakBehandlingRepositoryTest {
         dataSource: DataSource, postmottakBehandling: PostmottakBehandling
     ) = dataSource.transaction {
         val personMedId =
-            PersonService(PersonRepository(it)).hentEllerLagrePerson(postmottakBehandling.person.ident)
+            PersonRepository(it).hentEllerLagre(postmottakBehandling.person.ident)
         postmottakBehandling.person.settId(personMedId.id()!!)
         val id = PostmottakBehandlingRepositoryImpl(it).opprettBehandling(
             postmottakBehandling
