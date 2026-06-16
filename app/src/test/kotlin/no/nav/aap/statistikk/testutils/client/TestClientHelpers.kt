@@ -200,7 +200,7 @@ fun <E> testKlientNoInjectionManuell(
 }
 
 fun postgresTestConfig(): DbConfig {
-    val postgres = PostgreSQLContainer("postgres:16")
+    val postgres = PostgreSQLContainer("postgres:18")
     val dumpFile = Path.of("").toAbsolutePath().resolve("dump.sql")
 
     val forHostPath = MountableFile.forHostPath(dumpFile)

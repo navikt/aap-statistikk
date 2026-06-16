@@ -74,7 +74,7 @@ spec:
         - host: {{pdl_url}}
   gcp:
     sqlInstances:
-      - type: POSTGRES_16
+      - type: POSTGRES_18
         flags:
           - name: cloudsql.logical_decoding
             value: "on"

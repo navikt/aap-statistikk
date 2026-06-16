@@ -28,7 +28,7 @@ annotation class Postgres
 class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
     companion object {
-        private val postgresContainer = PostgreSQLContainer("postgres:16").apply {
+        private val postgresContainer = PostgreSQLContainer("postgres:18").apply {
             waitingFor(
                 HostPortWaitStrategy().withStartupTimeout(
                     Duration.of(
