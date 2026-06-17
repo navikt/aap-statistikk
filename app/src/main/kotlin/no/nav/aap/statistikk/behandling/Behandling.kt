@@ -113,6 +113,8 @@ data class Behandling(
     }
 
     fun utbetalingId(): String? {
+        if (!this.typeBehandling.erYtelsesBehandling) return null
+
         return when {
             this.resultat() in listOf(
                 ResultatKode.TRUKKET, ResultatKode.AVSLAG, ResultatKode.AVBRUTT
@@ -235,14 +237,16 @@ enum class KildeSystem {
 /**
  * Ved oppdateringer her må `kodeverk_behandlingstype`-tabellen oppdateres! Legg til migrering.
  */
-enum class TypeBehandling(val kildeSystem: KildeSystem) {
-    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Revurdering(kildeSystem = KildeSystem.Behandlingsflyt), Tilbakekreving(
-        kildeSystem = KildeSystem.Behandlingsflyt
-    ),
-    Klage(kildeSystem = KildeSystem.Behandlingsflyt), SvarFraAndreinstans(kildeSystem = KildeSystem.Behandlingsflyt), Dokumenthåndtering(
+enum class TypeBehandling(val kildeSystem: KildeSystem, val erYtelsesBehandling: Boolean = false) {
+    Førstegangsbehandling(kildeSystem = KildeSystem.Behandlingsflyt, true),
+    Revurdering(kildeSystem = KildeSystem.Behandlingsflyt, true),
+    Tilbakekreving(kildeSystem = KildeSystem.Behandlingsflyt, false),
+    Klage(kildeSystem = KildeSystem.Behandlingsflyt, false),
+    SvarFraAndreinstans(kildeSystem = KildeSystem.Behandlingsflyt), Dokumenthåndtering(
         kildeSystem = KildeSystem.Postmottak
     ),
-    Journalføring(kildeSystem = KildeSystem.Postmottak), Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Aktivitetsplikt(
+    Journalføring(kildeSystem = KildeSystem.Postmottak),
+    Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Aktivitetsplikt(
         kildeSystem = KildeSystem.Behandlingsflyt
     ), Fordeling(kildeSystem = KildeSystem.Postmottak),
 
