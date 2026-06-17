@@ -135,5 +135,6 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.VEDTAKSLENGDE_MANUELT -> VEDTAKSLENGDE_MANUELT
         Vurderingsbehov.AKTIVITETSPLIKTBEHANDLING_AVBRUTT -> AKTIVITETSPLIKTBEHANDLING_AVBRUTT
         Vurderingsbehov.OVERGANG_UFORE_AUTOMATISK_STANS -> OVERGANG_UFORE_AUTOMATISK_STANS
+        Vurderingsbehov.VURDER_KRAV -> VURDER_KRAV
     }
 }
