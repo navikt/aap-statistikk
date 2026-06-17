@@ -18,10 +18,9 @@ Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på Git
 
 Interne henvendelser kan sendes via Slack i kanalen `#ytelse-aap-værsågod`.
 
-
 ## Oppdatere Gradle wrapper
 
-For å oppdatere Gradle wrapper: 
+For å oppdatere Gradle wrapper:
 
 ```
 ./gradlew wrapper --gradle-version=8.10.2
@@ -38,11 +37,13 @@ Når datamodellen endres (f.eks. nye obligatoriske felter legges til), kan testd
 ```
 
 Dette scriptet oppdaterer følgende testfiler:
+
 - `app/src/test/resources/hendelser_public_jobb.json`
 - `app/src/test/resources/hendelser_klage.json`
 - Filer under `app/src/test/resources/avklaringsbehovhendelser/`
 
 Scriptet legger til manglende felter som:
+
 - `årsakTilOpprettelse`
 - `perioderMedArbeidsopptrapping`
 - `sendtTid` (for oppgave-hendelser, konvertert til ISO-format)
@@ -50,3 +51,15 @@ Scriptet legger til manglende felter som:
 - `vedtakstidspunkt`
 
 Commit endringene etter kjøring.
+
+## PostgreSQL major-oppgradering og Datastream
+
+Ved major-oppgradering av PostgreSQL kan logiske replikeringsslots forsvinne. Prosjektet har derfor en repeatable Flyway-migrering som sikrer at sloten finnes:
+
+- `app/src/main/resources/migrering/R__ensure_datastream_slot.sql`
+
+Denne migreringen kjøres på nytt når Flyway-checksummen endres. Ved hver major-oppgradering:
+
+1. Oppdater filen `R__ensure_datastream_slot.sql` med en ufarlig endring (for eksempel en kommentar med dato/versjon) for å trigge ny checksum.
+2. Deploy applikasjonen slik at Flyway kjører migreringen på nytt.
+3. Verifiser at slot `ds_replication` finnes etter deploy.
