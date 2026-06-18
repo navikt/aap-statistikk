@@ -206,6 +206,7 @@ class LagreOppgaveJobbUtførerTest {
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
                 harHasteMarkering = true,
+                harAvslagSykdomMarkering = true,
                 sendtTid = LocalDateTime.now().minusSeconds(1),
                 versjon = 124L
             )
@@ -215,6 +216,7 @@ class LagreOppgaveJobbUtførerTest {
             OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
         assertThat(oppgaveMedMarkering.first().harHasteMarkering).isTrue()
+        assertThat(oppgaveMedMarkering.first().harAvslagSykdomMarkering).isTrue()
 
         // Fjerner hastemarkering
         settInnOppgaveHendelseOgUtførerJobb(
@@ -240,6 +242,7 @@ class LagreOppgaveJobbUtførerTest {
             OppgaveRepositoryImpl(it).hentOppgaverForBehandling(behandling.id())
         }
         assertThat(oppgaveUtenMarkering.first().harHasteMarkering).isFalse()
+        assertThat(oppgaveUtenMarkering.first().harAvslagSykdomMarkering).isFalse()
     }
 
     @Test

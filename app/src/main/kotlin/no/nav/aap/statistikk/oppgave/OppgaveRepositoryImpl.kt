@@ -38,8 +38,8 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
         val sql = """
             insert into oppgave (person_id, behandling_referanse_id, enhet_id, status, opprettet_tidspunkt,
                                  reservasjon_id, identifikator, avklaringsbehov, har_hastemarkering,
-                                 opprettet_rad, oppdatert_rad)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                 opprettet_rad, oppdatert_rad, har_avslag_sykdom_markering)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
         val nå = LocalDateTime.now()
@@ -57,6 +57,7 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
                 setBoolean(9, oppgave.harHasteMarkering)
                 setLocalDateTime(10, nå)
                 setLocalDateTime(11, nå)
+                setBoolean(12, oppgave.harAvslagSykdomMarkering)
             }
         }
     }
@@ -103,6 +104,7 @@ where id = ?"""
                    set enhet_id           = ?,
                        status             = ?,
                        har_hastemarkering = ?,
+                       har_avslag_sykdom_markering = ?,
                        oppdatert_rad      = ?
                    where id = ?"""
         ) {
@@ -110,8 +112,9 @@ where id = ?"""
                 setLong(1, oppgave.enhet.id)
                 setEnumName(2, oppgave.status)
                 setBoolean(3, oppgave.harHasteMarkering)
-                setLocalDateTime(4, LocalDateTime.now())
-                setLong(5, oppgave.id)
+                setBoolean(4, oppgave.harAvslagSykdomMarkering)
+                setLocalDateTime(5, LocalDateTime.now())
+                setLong(6, oppgave.id)
             }
         }
     }
@@ -158,6 +161,7 @@ where id = ?"""
                    o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                    o.reservasjon_id          as o_reservasjon_id,
                    o.har_hastemarkering      as o_har_hastemarkering,
+                   o.har_avslag_sykdom_markering      as o_har_avslag_sykdom_markering,
                    o.opprettet_rad           as o_opprettet_rad,
                    o.oppdatert_rad           as o_oppdatert_rad,
                    br.referanse              as o_behandling_referanse,
@@ -216,6 +220,7 @@ where id = ?"""
         avklaringsbehov = it.getString("o_avklaringsbehov"),
         hendelser = oppgaveHendelseRepository.hentHendelserForId(it.getLong("o_identifikator")),
         harHasteMarkering = it.getBooleanOrNull("o_har_hastemarkering"),
+        harAvslagSykdomMarkering = it.getBooleanOrNull("o_har_avslag_sykdom_markering"),
         opprettetRad = it.getLocalDateTimeOrNull("o_opprettet_rad"),
         oppdatertRad = it.getLocalDateTimeOrNull("o_oppdatert_rad"),
     )
@@ -232,6 +237,7 @@ where id = ?"""
                    o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                    o.reservasjon_id          as o_reservasjon_id,
                    o.har_hastemarkering      as o_har_hastemarkering,
+                   o.har_avslag_sykdom_markering  as o_har_avslag_sykdom_markering,
                    o.opprettet_rad           as o_opprettet_rad,
                    o.oppdatert_rad           as o_oppdatert_rad,
                    br.referanse              as o_behandling_referanse,
@@ -274,6 +280,7 @@ where id = ?"""
                 o.opprettet_tidspunkt     as o_opprettet_tidspunkt,
                 o.reservasjon_id          as o_reservasjon_id,
                 o.har_hastemarkering      as o_har_hastemarkering,
+                o.har_avslag_sykdom_markering as o_har_avslag_sykdom_markering,
                 o.opprettet_rad           as o_opprettet_rad,
                 o.oppdatert_rad           as o_oppdatert_rad,
                 br.referanse              as o_behandling_referanse,
