@@ -32,6 +32,7 @@ class OppgaveHendelseRepositoryTest {
             endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
             sendtTid = LocalDateTime.now().minusSeconds(1).truncatedTo(ChronoUnit.MILLIS),
             versjon = 1L,
+            harAvslagSykdomMarkering = true
         )
         dataSource.transaction {
             OppgaveHendelseRepositoryImpl(it).lagreHendelse(

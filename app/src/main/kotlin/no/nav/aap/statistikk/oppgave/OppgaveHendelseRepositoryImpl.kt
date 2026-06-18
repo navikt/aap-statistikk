@@ -21,8 +21,8 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                                            behandling_referanse,
                                            journalpost_id, enhet, avklaringsbehov_kode, status, reservert_av,
                                            reservert_tidspunkt, opprettet_tidspunkt, endret_av,
-                                           endret_tidspunkt, har_hastemarkering, versjon, sendt_tid)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                           endret_tidspunkt, har_hastemarkering, har_avslag_sykdom_markering, versjon, sendt_tid)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
         return dbConnection.executeReturnKey(sql) {
             var c = 1
@@ -43,6 +43,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 setString(c++, hendelse.endretAv)
                 setLocalDateTime(c++, hendelse.endretTidspunkt)
                 setBoolean(c++, hendelse.harHasteMarkering)
+                setBoolean(c++, hendelse.harAvslagSykdomMarkering)
                 setLong(c++, hendelse.versjon)
                 setLocalDateTime(c++, hendelse.sendtTid)
             }
@@ -78,6 +79,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                    endret_av,
                    endret_tidspunkt,
                    har_hastemarkering,
+                   har_avslag_sykdom_markering,
                    versjon,
                    sendt_tid
             FROM oppgave_hendelser
@@ -105,6 +107,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                     endretAv = it.getStringOrNull("endret_av"),
                     endretTidspunkt = it.getLocalDateTimeOrNull("endret_tidspunkt"),
                     harHasteMarkering = it.getBooleanOrNull("har_hastemarkering"),
+                    harAvslagSykdomMarkering = it.getBooleanOrNull("har_avslag_sykdom_markering"),
                     sendtTid = it.getLocalDateTime("sendt_tid"),
                     versjon = it.getLongOrNull("versjon") ?: 0L
                 )
