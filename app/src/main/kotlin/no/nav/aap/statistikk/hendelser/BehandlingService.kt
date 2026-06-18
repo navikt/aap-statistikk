@@ -82,6 +82,7 @@ class BehandlingService(
         val (sisteLøsteAvklaringsbehov, sisteSaksbehandler, sistLøsteAvklaringsbehovTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
             ?: Triple(null, null, null)
         val gjeldendeAvklaringsbehov = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()
+        val returÅrsakkoblinger = dto.avklaringsbehov.returÅrsakkoblinger()
 
         val eksisterendeBehandling = eksisterendeBehandlingKanskje?.leggTilHendelse(
             BehandlingHendelse(
@@ -95,6 +96,7 @@ class BehandlingService(
                 avklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
                 venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
                 returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
+                returÅrsakkoblinger = returÅrsakkoblinger,
                 saksbehandler = dto.avklaringsbehov.sistePersonPåBehandling()
                     ?.let(::Saksbehandler),
                 resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
@@ -133,6 +135,7 @@ class BehandlingService(
                 søknadsformat = dto.soknadsFormat.tilDomene(),
                 venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
                 returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
+                returÅrsakkoblinger = returÅrsakkoblinger,
                 resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
                 gjeldendeStegGruppe = gjeldendeAvklaringsbehov?.løsesISteg?.gruppe,
                 årsaker = dto.vurderingsbehov.map { it.tilDomene() },

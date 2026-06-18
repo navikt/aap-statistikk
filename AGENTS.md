@@ -42,6 +42,11 @@ Known terms (Norwegian): "bug" (not "bugg").
 
 We prefer immutable state throughout the codebase. Avoid mutating objects and collections; instead, create new instances with the desired changes.
 
+### Database Timestamps
+
+- Never use database-generated timestamp defaults (for example `DEFAULT NOW()`).
+- Always set timestamps explicitly in application/repository code when inserting or updating rows.
+
 ### Test-Driven Development
 
 Always write tests before making functional changes. Tests should be written first to:

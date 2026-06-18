@@ -6,6 +6,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension
@@ -203,6 +204,7 @@ class HendelseHjelpereKtTest {
     @Test
     fun `utled årsak til retur`() {
         assertThat(returHendelser.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGLENDE_UTREDNING)
+        assertThat(returHendelser.årsakerTilRetur()).containsExactly(ÅrsakTilReturKode.MANGLENDE_UTREDNING)
     }
 
     @Test
@@ -226,7 +228,56 @@ class HendelseHjelpereKtTest {
             )
         )
 
+        assertThat(hendelser.årsakerTilRetur()).containsExactly(
+            ÅrsakTilReturKode.MANGLENDE_UTREDNING,
+            ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE,
+            ÅrsakTilReturKode.ANNET,
+        )
         assertThat(hendelser.årsakTilRetur()).isEqualTo(ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE)
+    }
+
+    @Test
+    fun `returårsaker kobles til riktig avklaringsbehov`() {
+        val hendelser = listOf(
+            AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = AVKLAR_SYKDOM,
+                status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                endringer = listOf(
+                    EndringDTO(
+                        status = EndringStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                        årsakTilRetur = listOf(
+                            ÅrsakTilRetur(ÅrsakTilReturKode.MANGLENDE_UTREDNING),
+                            ÅrsakTilRetur(ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE),
+                        ),
+                        tidsstempel = LocalDateTime.parse("2024-10-18T10:53:45.371"),
+                        endretAv = "Z994573"
+                    )
+                )
+            ),
+            AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
+                status = EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER,
+                endringer = listOf(
+                    EndringDTO(
+                        status = EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER,
+                        årsakTilRetur = listOf(ÅrsakTilRetur(ÅrsakTilReturKode.ANNET)),
+                        tidsstempel = LocalDateTime.parse("2024-10-18T10:54:45.371"),
+                        endretAv = "Z9945700"
+                    )
+                )
+            ),
+        )
+
+        assertThat(hendelser.returÅrsakkoblinger()).containsExactlyInAnyOrder(
+            ReturÅrsakkobling(
+                avklaringsbehov = AVKLAR_SYKDOM,
+                returÅrsaker = listOf("MANGLENDE_UTREDNING", "MANGELFULL_BEGRUNNELSE")
+            ),
+            ReturÅrsakkobling(
+                avklaringsbehov = AVKLAR_BISTANDSBEHOV,
+                returÅrsaker = listOf("ANNET")
+            ),
+        )
     }
 
     @Test

@@ -104,6 +104,7 @@ class ReberegnHistorikk {
                     steggruppe = curr.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
                     venteÅrsak = curr.utledÅrsakTilSattPåVent(),
                     returÅrsak = curr.årsakTilRetur()?.name,
+                    returÅrsakkoblinger = curr.returÅrsakkoblinger(),
                     saksbehandler = curr.sistePersonPåBehandling()?.let(::Saksbehandler),
                     resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
                     versjon = dto.versjon.let(::Versjon),
