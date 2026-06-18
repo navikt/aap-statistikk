@@ -124,6 +124,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         }
 
         oppdaterRelaterteIdenter(behandling, historikkId)
+        lagreReturÅrsakkoblinger(historikkId, behandling.returÅrsakkoblinger)
     }
 
     @Deprecated("Fjern denne når alle aktive behandlinger har dette feltet.")
@@ -256,6 +257,29 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 setLocalDateTime(c++, hendelse.sistLøsteAvklaringsbehovTidspunkt)
             }
         }
+
+        val historikkIds = dbConnection.queryList(
+            """
+                SELECT bh.id
+                FROM behandling_historikk bh
+                WHERE bh.behandling_id = ?
+                  AND bh.slettet = false
+                ORDER BY bh.hendelsestidspunkt, bh.oppdatert_tid, bh.id
+            """.trimIndent()
+        ) {
+            setParams { setLong(1, behandling.id().id) }
+            setRowMapper { it.getLong("id") }
+        }
+        check(historikkIds.size == oppdateringer.size) {
+            "Forventet ${oppdateringer.size} historikkrader, men fant ${historikkIds.size} for behandling ${behandling.id()}."
+        }
+        lagreReturÅrsakkoblinger(
+            oppdateringer.zip(historikkIds).flatMap { (snapshot, historikkId) ->
+                snapshot.returÅrsakkoblinger.flatMap { kobling ->
+                    kobling.returÅrsaker.map { Triple(historikkId, kobling.avklaringsbehov, it) }
+                }
+            }
+        )
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
     }
 
@@ -355,6 +379,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         val historikkSpørring = """
        select bh.siste_saksbehandler                      as bh_siste_saksbehandler,
               bh.oppdatert_tid                            as bh_opprettet_tidspunkt,
+              bh.id                                       as bh_id,
               bh.hendelsestidspunkt                       as bh_hendelsestidspunkt,
               bh.venteaarsak                              as bh_venteaarsak,
               bh.retur_aarsak                             as bh_retur_aarsak,
@@ -393,6 +418,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     steggruppe = it.getEnumOrNull("bh_steggruppe"),
                     venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
                     returÅrsak = it.getStringOrNull("bh_retur_aarsak"),
+                    returÅrsakkoblinger = hentReturÅrsakkoblinger(it.getLong("bh_id")),
                     resultat = it.getEnumOrNull("bh_resultat"),
                     saksbehandler = it.getStringOrNull("bh_siste_saksbehandler")
                         ?.let { saksbehandler ->
@@ -488,6 +514,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
         venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
         returÅrsak = it.getStringOrNull("bh_retur_aarsak")?.ifBlank { null },
+        returÅrsakkoblinger = hentReturÅrsakkoblinger(it.getLong("bh_id")),
         gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
             .map { Vurderingsbehov.valueOf(it) },
@@ -495,4 +522,62 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         resultat = it.getEnumOrNull("bh_resultat"),
         oppdatertTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt")
     )
+
+    private fun lagreReturÅrsakkoblinger(
+        behandlingHistorikkId: Long,
+        koblinger: List<ReturÅrsakkobling>
+    ) {
+        lagreReturÅrsakkoblinger(
+            koblinger.flatMap { kobling ->
+                kobling.returÅrsaker.map { Triple(behandlingHistorikkId, kobling.avklaringsbehov, it) }
+            }
+        )
+    }
+
+    private fun lagreReturÅrsakkoblinger(
+        koblinger: List<Triple<Long, Definisjon, String>>
+    ) {
+        if (koblinger.isEmpty()) return
+
+        dbConnection.executeBatch(
+            """
+                INSERT INTO behandling_historikk_retur_aarsak (behandling_historikk_id, avklaringsbehov_kode, retur_aarsak)
+                VALUES (?, ?, ?)
+                ON CONFLICT DO NOTHING
+            """.trimIndent(), koblinger
+        ) {
+            setParams { (historikkId, avklaringsbehov, returÅrsak) ->
+                setLong(1, historikkId)
+                setString(2, avklaringsbehov.kode.name)
+                setString(3, returÅrsak)
+            }
+        }
+    }
+
+    private fun hentReturÅrsakkoblinger(behandlingHistorikkId: Long): List<ReturÅrsakkobling> {
+        val koblinger = dbConnection.queryList(
+            """
+                SELECT avklaringsbehov_kode, retur_aarsak
+                FROM behandling_historikk_retur_aarsak
+                WHERE behandling_historikk_id = ?
+                ORDER BY avklaringsbehov_kode, retur_aarsak
+            """.trimIndent()
+        ) {
+            setParams { setLong(1, behandlingHistorikkId) }
+            setRowMapper {
+                Pair(
+                    Definisjon.forKode(it.getString("avklaringsbehov_kode")),
+                    it.getString("retur_aarsak")
+                )
+            }
+        }
+
+        return koblinger.groupBy({ it.first }, { it.second })
+            .map { (avklaringsbehov, returÅrsaker) ->
+                ReturÅrsakkobling(
+                    avklaringsbehov = avklaringsbehov,
+                    returÅrsaker = returÅrsaker
+                )
+            }
+    }
 }

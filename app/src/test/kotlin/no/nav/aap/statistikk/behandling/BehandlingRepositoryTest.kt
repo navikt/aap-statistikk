@@ -74,6 +74,13 @@ class BehandlingRepositoryTest {
             sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
             venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
             returÅrsak = "MANGELFULL_BEGRUNNELSE",
+            returÅrsakkoblinger = listOf(
+                ReturÅrsakkobling(
+                    Definisjon.AVKLAR_SYKDOM,
+                    listOf("MANGELFULL_BEGRUNNELSE", "MANGLENDE_UTREDNING")
+                ),
+                ReturÅrsakkobling(Definisjon.AVKLAR_BISTANDSBEHOV, listOf("ANNET")),
+            ),
             gjeldendeStegGruppe = StegGruppe.BREV,
             resultat = ResultatKode.INNVILGET,
             årsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.G_REGULERING),

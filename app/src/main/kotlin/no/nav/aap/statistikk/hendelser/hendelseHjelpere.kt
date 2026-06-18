@@ -6,6 +6,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
 import no.nav.aap.statistikk.isBeforeOrEqual
 import no.nav.aap.statistikk.onlyOrNull
 import java.time.LocalDateTime
@@ -48,14 +49,35 @@ fun List<AvklaringsbehovHendelseDto>.tidspunktSisteEndring(): LocalDateTime? =
     this.maxByOrNull { it.tidspunktSisteEndring() }?.tidspunktSisteEndring()
 
 fun List<AvklaringsbehovHendelseDto>.årsakTilRetur(): ÅrsakTilReturKode? {
+    return årsakerTilRetur()
+        .sortedByDescending { it == ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE }
+        .firstOrNull()
+}
+
+fun List<AvklaringsbehovHendelseDto>.årsakerTilRetur(): List<ÅrsakTilReturKode> {
     val årsaker = this.filter { it.status.returnert() }
         .minByOrNull { it.tidspunktSisteEndring() }
         ?.endringer?.maxByOrNull { it.tidsstempel }
-        ?.årsakTilRetur ?: return null
+        ?.årsakTilRetur
+        .orEmpty()
 
-    return årsaker
-        .sortedByDescending { it.årsak == ÅrsakTilReturKode.MANGELFULL_BEGRUNNELSE }
-        .firstOrNull()?.årsak
+    return årsaker.map { it.årsak }
+}
+
+fun List<AvklaringsbehovHendelseDto>.returÅrsakkoblinger(): List<ReturÅrsakkobling> {
+    return this.filter { it.status.returnert() }
+        .mapNotNull { avklaringsbehov ->
+            val årsaker = avklaringsbehov.endringer
+                .maxByOrNull { it.tidsstempel }
+                ?.årsakTilRetur
+                .orEmpty()
+                .map { it.årsak.name }
+            if (årsaker.isEmpty()) {
+                null
+            } else {
+                ReturÅrsakkobling(avklaringsbehov.avklaringsbehovDefinisjon, årsaker)
+            }
+        }
 }
 
 fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {

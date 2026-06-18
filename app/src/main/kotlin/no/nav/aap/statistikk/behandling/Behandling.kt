@@ -43,6 +43,7 @@ data class Behandling(
     val sistLøsteAvklaringsbehovTidspunkt: LocalDateTime? = null,
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
+    val returÅrsakkoblinger: List<ReturÅrsakkobling> = listOf(),
     val gjeldendeStegGruppe: StegGruppe? = null,
     val årsaker: List<Vurderingsbehov> = listOf(),
     val årsakTilOpprettelse: String? = null,
@@ -85,6 +86,7 @@ data class Behandling(
             status = hendelse.status,
             venteÅrsak = hendelse.venteÅrsak,
             returÅrsak = hendelse.returÅrsak,
+            returÅrsakkoblinger = hendelse.returÅrsakkoblinger,
             sisteSaksbehandler = hendelse.saksbehandler?.ident,
             søknadsformat = hendelse.søknadsformat,
             resultat = hendelse.resultat,
@@ -210,6 +212,7 @@ data class BehandlingHendelse(
     val avklaringsbehovStatus: AvklaringsbehovStatus?,
     val venteÅrsak: String? = null,
     val returÅrsak: String? = null,
+    val returÅrsakkoblinger: List<ReturÅrsakkobling> = listOf(),
     val saksbehandler: Saksbehandler? = null,
     val resultat: ResultatKode? = null,
     val versjon: Versjon,
@@ -219,6 +222,11 @@ data class BehandlingHendelse(
     val mottattTid: LocalDateTime,
     val søknadsformat: SøknadsFormat,
     val relatertBehandlingReferanse: String?
+)
+
+data class ReturÅrsakkobling(
+    val avklaringsbehov: Definisjon,
+    val returÅrsaker: List<String>
 )
 
 enum class SøknadsFormat {
