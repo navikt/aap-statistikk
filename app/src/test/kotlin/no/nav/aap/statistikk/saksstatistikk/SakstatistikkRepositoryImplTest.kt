@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.Collections.synchronizedList
+import java.util.concurrent.CountDownLatch
 import java.util.function.BiPredicate
 import javax.sql.DataSource
 
@@ -119,5 +121,81 @@ class SakstatistikkRepositoryImplTest {
             .isEqualTo(
                 hendelse.copy(tekniskTid = tekniskTid.plusHours(1))
             )
+    }
+
+    @Test
+    fun `acquireBehandlingLock oppretter lås-rad og er idempotent`(@Postgres dataSource: DataSource) {
+        val uuid = UUID.randomUUID()
+
+        dataSource.transaction { conn ->
+            val repository = SakstatistikkRepositoryImpl(conn)
+            repository.acquireBehandlingLock(uuid)
+        }
+
+        // Kall igjen i ny transaksjon — skal ikke kaste
+        dataSource.transaction { conn ->
+            val repository = SakstatistikkRepositoryImpl(conn)
+            repository.acquireBehandlingLock(uuid)
+        }
+    }
+
+    @Test
+    fun `acquireBehandlingLock fungerer for flere ulike behandlinger samtidig`(@Postgres dataSource: DataSource) {
+        val uuid1 = UUID.randomUUID()
+        val uuid2 = UUID.randomUUID()
+
+        dataSource.transaction { conn ->
+            val repository = SakstatistikkRepositoryImpl(conn)
+            repository.acquireBehandlingLock(uuid1)
+            repository.acquireBehandlingLock(uuid2)
+        }
+    }
+
+    @Test
+    fun `acquireBehandlingLock serialiserer samtidige skriv til samme behandling`(@Postgres dataSource: DataSource) {
+        val uuid = UUID.randomUUID()
+        val skriveRekkefølge = synchronizedList(mutableListOf<Int>())
+
+        // Tråd 1 signaliserer her når låsen er tatt
+        val låsErtatt = CountDownLatch(1)
+        // Tråd 1 venter her til testen gir klarsignal til å committe
+        val klartilCommit = CountDownLatch(1)
+
+        val feil1 = arrayOfNulls<Throwable>(1)
+        val feil2 = arrayOfNulls<Throwable>(1)
+
+        val tråd1 = Thread {
+            runCatching {
+                dataSource.transaction { conn ->
+                    SakstatistikkRepositoryImpl(conn).acquireBehandlingLock(uuid)
+                    låsErtatt.countDown()          // Tråd 2 kan nå prøve å ta låsen
+                    klartilCommit.await()          // Vent til tråd 2 er blokkert
+                    Thread.sleep(100)              // Gi tråd 2 tid til å blokkere på SELECT FOR UPDATE
+                    skriveRekkefølge.add(1)
+                }                                  // Commit — låsen slippes
+            }.onFailure { feil1[0] = it }
+        }
+
+        val tråd2 = Thread {
+            runCatching {
+                låsErtatt.await()                  // Vent til tråd 1 har låsen
+                klartilCommit.countDown()          // Gi tråd 1 klarsignal til å sove og committe
+                dataSource.transaction { conn ->
+                    SakstatistikkRepositoryImpl(conn).acquireBehandlingLock(uuid) // Blokkerer til tråd 1 committer
+                    skriveRekkefølge.add(2)
+                }
+            }.onFailure { feil2[0] = it }
+        }
+
+        tråd1.start()
+        tråd2.start()
+        tråd1.join(5_000)
+        tråd2.join(5_000)
+
+        assertThat(feil1[0]).describedAs("Tråd 1 kastet exception").isNull()
+        assertThat(feil2[0]).describedAs("Tråd 2 kastet exception").isNull()
+        assertThat(skriveRekkefølge)
+            .describedAs("Tråd 1 skal alltid skrive før tråd 2 slipper inn")
+            .containsExactly(1, 2)
     }
 }
