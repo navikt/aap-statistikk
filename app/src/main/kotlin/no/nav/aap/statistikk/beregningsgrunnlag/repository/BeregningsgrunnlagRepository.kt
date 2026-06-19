@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -16,7 +17,8 @@ import java.util.*
 import kotlin.collections.orEmpty
 
 class BeregningsgrunnlagRepository(
-    private val dbConnection: DBConnection
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : IBeregningsgrunnlagRepository {
     companion object : RepositoryFactory<IBeregningsgrunnlagRepository> {
         override fun konstruer(connection: DBConnection): IBeregningsgrunnlagRepository {
@@ -145,16 +147,18 @@ WHERE br.referanse = ?"""
         behandlingId: BehandlingId
     ): Long {
         val sql =
-            "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar, nedsatt_arbeidsevne_dato, ytterligere_nedsatt_arbeidsevne_dato) VALUES (?, ?, ?, ?, ?, ?) "
+            "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar, nedsatt_arbeidsevne_dato, ytterligere_nedsatt_arbeidsevne_dato, oppdatert_tid) VALUES (?, ?, ?, ?, ?, ?, ?) "
 
         return connection.executeReturnKey(sql) {
             setParams {
+                val oppdatertTid = LocalDateTime.now(clock)
                 setString(1, grunnlag.type().toString())
                 setLong(2, behandlingId.id)
-                setLocalDateTime(3, LocalDateTime.now())
+                setLocalDateTime(3, oppdatertTid)
                 setInt(4, grunnlag.beregningsår().value)
                 setLocalDate(5, grunnlag.nedsattArbeidsevneEllerStudieevneDato())
                 setLocalDate(6, grunnlag.ytterligereNedsattArbeidsevneDato())
+                setLocalDateTime(7, oppdatertTid)
             }
         }
     }
@@ -195,12 +199,13 @@ INSERT INTO GRUNNLAG_YRKESSKADE(grunnlag, beregningsgrunnlag_id, beregningsgrunn
                                 andel_som_ikke_skyldes_yrkesskade,
                                 antatt_arlig_inntekt_yrkesskade_tidspunktet,
                                 yrkesskade_tidspunkt, grunnlag_for_beregning_av_yrkesskadeandel,
-                                yrkesskadeinntekt_ig,
+                                yrkesskadeinntekt_ig, oppdatert_tid,
                                 grunnlag_etter_yrkesskade_fordel)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         return connection.executeReturnKey(insertQuery) {
             var c = 1
             setParams {
+                val oppdatertTid = LocalDateTime.now(clock)
                 setDouble(c++, beregningsGrunnlag.grunnlaget())
                 setLong(c++, baseGrunnlagId)
                 setString(c++, grunnlagType)
@@ -219,6 +224,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     beregningsGrunnlag.grunnlagForBeregningAvYrkesskadeandel
                 )
                 setBigDecimal(c++, beregningsGrunnlag.yrkesskadeinntektIG)
+                setLocalDateTime(c++, oppdatertTid)
                 setBigDecimal(c, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
             }
         }
@@ -235,8 +241,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         val insertQuery =
             """INSERT INTO GRUNNLAG_UFORE(grunnlag_id, grunnlag, grunnlag_11_19_id, type,
                                uforegrad, ufore_inntekter_fra_foregaende_ar,
-                               ufore_ytterligere_nedsatt_arbeidsevne_ar, ufore_inntekter)
-    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?::jsonb)"""
+                               ufore_ytterligere_nedsatt_arbeidsevne_ar, ufore_inntekter, oppdatert_tid)
+    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?::jsonb, ?)"""
 
         val executeReturnKey = connection.executeReturnKey(insertQuery) {
             var c = 1
@@ -263,6 +269,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                         )
                     })
                 )
+                setLocalDateTime(c, LocalDateTime.now(clock))
             }
         }
 
@@ -450,8 +457,8 @@ where br.referanse = ?
         beregningsGrunnlag: IBeregningsGrunnlag.Grunnlag_11_19
     ): Long {
         val sqlStatement =
-            """INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter, inntekter_foregaaende_aar)
-                    VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb)"""
+            """INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter, inntekter_foregaaende_aar, oppdatert_tid)
+                    VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb, ?)"""
 
         return connection.executeReturnKey(sqlStatement) {
             setParams {
@@ -469,6 +476,7 @@ where br.referanse = ?
                         )
                     })
                 )
+                setLocalDateTime(7, LocalDateTime.now(clock))
             }
         }
     }

@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -15,7 +16,8 @@ import java.util.*
 private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.java)
 
 class TilkjentYtelseRepository(
-    private val dbConnection: DBConnection
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : ITilkjentYtelseRepository {
     companion object : RepositoryFactory<ITilkjentYtelseRepository> {
         override fun konstruer(connection: DBConnection): ITilkjentYtelseRepository {
@@ -35,20 +37,22 @@ class TilkjentYtelseRepository(
 
         dbConnection.execute(deletePeriodeSql) { setParams { setInt(1, behandlingId) } }
         dbConnection.execute(deleteYtelseSql) { setParams { setInt(1, behandlingId) } }
+        val oppdatertTid = LocalDateTime.now(clock)
 
         val nøkkel =
-            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt) VALUES (?, ?)") {
+            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt, oppdatert_tid) VALUES (?, ?, ?)") {
                 setParams {
                     setInt(1, behandlingId)
-                    setLocalDateTime(2, LocalDateTime.now())
+                    setLocalDateTime(2, oppdatertTid)
+                    setLocalDateTime(3, oppdatertTid)
                 }
             }
 
         val sql =
             """INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID,
                                      REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato, minstesats, barnepensjon_dagsats,
-                                     samordning_gradering, institusjon_gradering, arbeid_gradering, samordning_uforegradering, samordning_arbeidsgiver_gradering, meldeplikt_gradering)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                                     samordning_gradering, institusjon_gradering, arbeid_gradering, samordning_uforegradering, samordning_arbeidsgiver_gradering, meldeplikt_gradering, oppdatert_tid)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         tilkjentYtelse.perioder.forEach { periode ->
             dbConnection.execute(sql) {
                 setParams {
@@ -70,6 +74,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     setDouble(16, periode.samordningUføregradering)
                     setDouble(17, periode.samordningArbeidsgiverGradering)
                     setDouble(18, periode.meldepliktGradering)
+                    setLocalDateTime(19, oppdatertTid)
                 }
             }
         }

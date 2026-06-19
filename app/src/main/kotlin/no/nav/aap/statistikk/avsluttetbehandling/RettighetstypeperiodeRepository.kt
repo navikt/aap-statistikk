@@ -2,9 +2,14 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
+import java.time.Clock
+import java.time.LocalDateTime
 import java.util.*
 
-class RettighetstypeperiodeRepository(private val dbConnection: DBConnection) :
+class RettighetstypeperiodeRepository(
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
+) :
     IRettighetstypeperiodeRepository {
 
     companion object : RepositoryFactory<IRettighetstypeperiodeRepository> {
@@ -17,6 +22,7 @@ class RettighetstypeperiodeRepository(private val dbConnection: DBConnection) :
         behandlingReferanse: UUID,
         rettighetstypePeriode: List<RettighetstypePeriode>
     ) {
+        val oppdatertTid = LocalDateTime.now(clock)
         val deletePerioderSql = """
             DELETE FROM rettighetstypeperioder WHERE rettighetstype_id IN (
                 SELECT r.id FROM rettighetstype r
@@ -37,20 +43,22 @@ class RettighetstypeperiodeRepository(private val dbConnection: DBConnection) :
         dbConnection.execute(deleteRettighetstypeSql) { setParams { setUUID(1, behandlingReferanse) } }
 
         val sql = """
-            INSERT INTO rettighetstype (behandling_id)
+           INSERT INTO rettighetstype (behandling_id, oppdatert_tid)
 VALUES ((SELECT b.id
          FROM behandling b
                   join behandling_referanse br on b.referanse_id = br.id
-         WHERE br.referanse = ?));
+         WHERE br.referanse = ?),
+        ?);
         """.trimIndent()
         val key = dbConnection.executeReturnKey(sql) {
-            setParams {
-                setUUID(1, behandlingReferanse)
-            }
+           setParams {
+               setUUID(1, behandlingReferanse)
+               setLocalDateTime(2, oppdatertTid)
+           }
         }
 
         val sql2 = """
-            insert into rettighetstypeperioder (rettighetstype_id, fra_dato, til_dato, rettighetstype) values (?, ?, ?, ?);
+           insert into rettighetstypeperioder (rettighetstype_id, fra_dato, til_dato, rettighetstype, oppdatert_tid) values (?, ?, ?, ?, ?);
         """.trimIndent()
 
         dbConnection.executeBatch(sql2, rettighetstypePeriode) {
@@ -59,6 +67,7 @@ VALUES ((SELECT b.id
                 setLocalDate(2, it.fraDato)
                 setLocalDate(3, it.tilDato)
                 setString(4, it.rettighetstype.name)
+                setLocalDateTime(5, oppdatertTid)
             }
 
         }

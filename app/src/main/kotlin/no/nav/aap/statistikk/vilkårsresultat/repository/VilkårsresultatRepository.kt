@@ -5,13 +5,15 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 
 private val log = LoggerFactory.getLogger(VilkårsresultatRepository::class.java)
 
 class VilkårsresultatRepository(
-    private val dbConnection: DBConnection
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : IVilkårsresultatRepository {
     companion object : RepositoryFactory<IVilkårsresultatRepository> {
         override fun konstruer(connection: DBConnection): IVilkårsresultatRepository {
@@ -41,24 +43,26 @@ class VilkårsresultatRepository(
         dbConnection.execute(deletePeriodeSql) { setParams { setLong(1, behandlingId.id) } }
         dbConnection.execute(deleteVilkarSql) { setParams { setLong(1, behandlingId.id) } }
         dbConnection.execute(deleteResultatSql) { setParams { setLong(1, behandlingId.id) } }
+        val oppdatertTid = LocalDateTime.now(clock)
 
         val sqlInsertResultat =
-            """INSERT INTO VILKARSRESULTAT (behandling_id) VALUES (?)"""
+            """INSERT INTO VILKARSRESULTAT (behandling_id, oppdatert_tid) VALUES (?, ?)"""
 
         val uthentetId = dbConnection.executeReturnKey(sqlInsertResultat) {
             setParams {
                 setLong(1, behandlingId.id)
+                setLocalDateTime(2, oppdatertTid)
             }
         }
 
-        val sqlInsertVilkar = """INSERT INTO VILKAR(vilkar_type, vilkarresult_id)
-VALUES (?, ?);
+        val sqlInsertVilkar = """INSERT INTO VILKAR(vilkar_type, vilkarresult_id, oppdatert_tid)
+VALUES (?, ?, ?);
             """
 
         val sqlInsertPeriode =
             """INSERT INTO VILKARSPERIODE(fra_dato, til_dato, utfall, manuell_vurdering, innvilgelsesaarsak,
-                           avslagsaarsak, vilkar_id)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+                           avslagsaarsak, vilkar_id, oppdatert_tid)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 """
 
         vilkårsresultat.vilkår.forEach { vilkårEntity ->
@@ -66,6 +70,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
                 setParams {
                     setString(1, vilkårEntity.vilkårType)
                     setLong(2, uthentetId)
+                    setLocalDateTime(3, oppdatertTid)
                 }
             }
 
@@ -78,6 +83,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
                     setString(5, periode.innvilgelsesårsak)
                     setString(6, periode.avslagsårsak)
                     setLong(7, vilkårKey)
+                    setLocalDateTime(8, oppdatertTid)
                 }
             }
         }
@@ -201,4 +207,3 @@ WHERE vilkar_id = ?;
         }
     }
 }
-

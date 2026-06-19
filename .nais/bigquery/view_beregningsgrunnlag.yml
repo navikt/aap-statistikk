@@ -52,17 +52,13 @@ spec:
         gu.ufore_ytterligere_nedsatt_arbeidsevne_ar
           AS ufore_ytterligere_nedsatt_arbeidsevne_ar,
         DATETIME(pg.opprettet_tidspunkt) AS reg_dato,
-        DATETIME(
-          TIMESTAMP_MILLIS(
-            GREATEST(
-              COALESCE(b.datastream_metadata.source_timestamp, 0),
-              COALESCE(pg.datastream_metadata.source_timestamp, 0),
-              COALESCE(g.datastream_metadata.source_timestamp, 0),
-              COALESCE(gy.datastream_metadata.source_timestamp, 0),
-              COALESCE(gu.datastream_metadata.source_timestamp, 0),
-              COALESCE(s.datastream_metadata.source_timestamp, 0),
-              COALESCE(br.datastream_metadata.source_timestamp, 0))),
-          'Europe/Oslo') AS endret_tid,
+        GREATEST(
+          bh.oppdatert_tid,
+          sh.oppdatert_tid,
+          pg.oppdatert_tid,
+          COALESCE(g.oppdatert_tid, pg.oppdatert_tid),
+          COALESCE(gy.oppdatert_tid, pg.oppdatert_tid),
+          COALESCE(gu.oppdatert_tid, pg.oppdatert_tid)) AS endret_tid,
         concat(
           pg.id,
           '-',
@@ -108,6 +104,15 @@ spec:
         datastream_hendelser.public_sak s
         ON
           s.id = b.sak_id
+      JOIN
+        `datastream_hendelser.public_behandling_historikk` bh
+        ON
+          bh.id = gyldig.bh_id
+      JOIN
+        `datastream_hendelser.public_sak_historikk` sh
+        ON
+          sh.sak_id = s.id
+          AND sh.gjeldende = TRUE
       LEFT JOIN
         (
           SELECT
