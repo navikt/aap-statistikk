@@ -20,6 +20,20 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
 
     private val log = LoggerFactory.getLogger(javaClass)
 
+    override fun acquireBehandlingLock(uuid: UUID) {
+        dbConnection.execute(
+            "INSERT INTO saksstatistikk_behandling_laas (behandling_uuid) VALUES (?) ON CONFLICT DO NOTHING"
+        ) {
+            setParams { setUUID(1, uuid) }
+        }
+        dbConnection.queryFirst(
+            "SELECT behandling_uuid FROM saksstatistikk_behandling_laas WHERE behandling_uuid = ? FOR UPDATE"
+        ) {
+            setParams { setUUID(1, uuid) }
+            setRowMapper { it.getUUID("behandling_uuid") }
+        }
+    }
+
     private val insertSql = """
         insert into saksstatistikk
         (fagsystem_navn,

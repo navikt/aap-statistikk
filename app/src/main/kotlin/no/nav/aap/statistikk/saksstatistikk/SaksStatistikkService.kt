@@ -57,6 +57,7 @@ class SaksStatistikkService(
     }
 
     fun lagreBQBehandling(nyBQBehandling: BQBehandling) {
+        sakstatistikkRepository.acquireBehandlingLock(nyBQBehandling.behandlingUUID)
         val eksisterendeRad = sakstatistikkRepository.hentSisteHendelseForBehandling(nyBQBehandling.behandlingUUID)
 
         if (eksisterendeRad?.ansesSomDuplikat(nyBQBehandling) != true) {
