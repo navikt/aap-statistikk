@@ -5,6 +5,8 @@ import java.time.LocalDateTime
 import java.util.*
 
 interface SakstatistikkRepository : Repository {
+    fun acquireBehandlingLock(uuid: UUID)
+
     fun lagre(bqBehandling: BQBehandling): Long
     fun lagreFlere(bqBehandlinger: List<BQBehandling>)
 
