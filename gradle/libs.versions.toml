@@ -8,7 +8,7 @@ utbetaling = "0.0.114"
 postmottak = "6.0.6"
 
 flyway = "12.8.1"
-detekt = "2.0.0-alpha.4"
+detekt = "2.0.0-alpha.5"
 mockk = "1.14.11"
 testContainers = "2.0.5"
 postgresql = "42.7.11"
