@@ -58,7 +58,7 @@ class BehandlingPessimisticLockTest {
         }
 
         assertThat(locked).isNotNull()
-        assertThat(locked!!.id()).isEqualTo(behandlingId)
+        assertThat(locked.id()).isEqualTo(behandlingId)
         assertThat(locked.referanse).isEqualTo(referanse)
     }
 

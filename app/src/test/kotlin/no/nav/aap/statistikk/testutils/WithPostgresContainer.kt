@@ -41,7 +41,7 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
         private var dataSource: HikariDataSource
         private val flyway: Migrering
         private val dbConfig: DbConfig
-        private lateinit var truncateStatement: String
+        private var truncateStatement: String
 
         init {
             System.setProperty("flyway.cleanDisabled", false.toString())
