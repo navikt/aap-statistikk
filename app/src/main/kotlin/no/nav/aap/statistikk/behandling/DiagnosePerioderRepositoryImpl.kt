@@ -3,13 +3,10 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.DiagnoseMedPeriode
-import java.time.Clock
-import java.time.LocalDateTime
 import java.util.*
 
 class DiagnosePerioderRepositoryImpl(
     private val dbConnection: DBConnection,
-    private val clock: Clock = Clock.systemDefaultZone(),
 ) :
     DiagnosePerioderRepository {
 
@@ -22,10 +19,9 @@ class DiagnosePerioderRepositoryImpl(
     override fun lagre(behandlingId: BehandlingId, diagnoser: List<DiagnoseMedPeriode>) {
         if (diagnoser.isEmpty()) return
 
-        val oppdatertTid = LocalDateTime.now(clock)
         val sql = """
-            INSERT INTO diagnose_periode (behandling_id, fra_dato, til_dato, kodeverk, diagnosekode, bidiagnoser, oppdatert_tid)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO diagnose_periode (behandling_id, fra_dato, til_dato, kodeverk, diagnosekode, bidiagnoser)
+            VALUES (?, ?, ?, ?, ?, ?)
         """.trimIndent()
 
         dbConnection.executeBatch(sql, diagnoser) {
@@ -36,7 +32,6 @@ class DiagnosePerioderRepositoryImpl(
                 setString(4, it.kodeverk)
                 setString(5, it.diagnosekode)
                 setArray(6, it.bidiagnoser)
-                setLocalDateTime(7, oppdatertTid)
             }
         }
     }

@@ -51,8 +51,8 @@ class TilkjentYtelseRepository(
         val sql =
             """INSERT INTO TILKJENT_YTELSE_PERIODE (FRA_DATO, TIL_DATO, DAGSATS, GRADERING, TILKJENT_YTELSE_ID,
                                      REDUSERT_DAGSATS, ANTALL_BARN, BARNETILLEGG_SATS, BARNETILLEGG, utbetalingsdato, minstesats, barnepensjon_dagsats,
-                                     samordning_gradering, institusjon_gradering, arbeid_gradering, samordning_uforegradering, samordning_arbeidsgiver_gradering, meldeplikt_gradering, oppdatert_tid)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                                     samordning_gradering, institusjon_gradering, arbeid_gradering, samordning_uforegradering, samordning_arbeidsgiver_gradering, meldeplikt_gradering)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         tilkjentYtelse.perioder.forEach { periode ->
             dbConnection.execute(sql) {
                 setParams {
@@ -74,7 +74,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     setDouble(16, periode.samordningUføregradering)
                     setDouble(17, periode.samordningArbeidsgiverGradering)
                     setDouble(18, periode.meldepliktGradering)
-                    setLocalDateTime(19, oppdatertTid)
                 }
             }
         }

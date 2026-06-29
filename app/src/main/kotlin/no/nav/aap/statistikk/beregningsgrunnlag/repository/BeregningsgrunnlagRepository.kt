@@ -199,13 +199,12 @@ INSERT INTO GRUNNLAG_YRKESSKADE(grunnlag, beregningsgrunnlag_id, beregningsgrunn
                                 andel_som_ikke_skyldes_yrkesskade,
                                 antatt_arlig_inntekt_yrkesskade_tidspunktet,
                                 yrkesskade_tidspunkt, grunnlag_for_beregning_av_yrkesskadeandel,
-                                yrkesskadeinntekt_ig, oppdatert_tid,
+                                yrkesskadeinntekt_ig,
                                 grunnlag_etter_yrkesskade_fordel)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         return connection.executeReturnKey(insertQuery) {
             var c = 1
             setParams {
-                val oppdatertTid = LocalDateTime.now(clock)
                 setDouble(c++, beregningsGrunnlag.grunnlaget())
                 setLong(c++, baseGrunnlagId)
                 setString(c++, grunnlagType)
@@ -224,7 +223,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                     beregningsGrunnlag.grunnlagForBeregningAvYrkesskadeandel
                 )
                 setBigDecimal(c++, beregningsGrunnlag.yrkesskadeinntektIG)
-                setLocalDateTime(c++, oppdatertTid)
                 setBigDecimal(c, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
             }
         }
@@ -241,8 +239,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         val insertQuery =
             """INSERT INTO GRUNNLAG_UFORE(grunnlag_id, grunnlag, grunnlag_11_19_id, type,
                                uforegrad, ufore_inntekter_fra_foregaende_ar,
-                               ufore_ytterligere_nedsatt_arbeidsevne_ar, ufore_inntekter, oppdatert_tid)
-    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?::jsonb, ?)"""
+                               ufore_ytterligere_nedsatt_arbeidsevne_ar, ufore_inntekter)
+    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?::jsonb)"""
 
         val executeReturnKey = connection.executeReturnKey(insertQuery) {
             var c = 1
@@ -261,7 +259,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 )
                 setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
                 setString(
-                    c++,
+                    c,
                     DefaultJsonMapper.toJson(beregningsGrunnlag.uføreInntekterFraForegåendeÅr.entries.map {
                         ÅrOgInntekt(
                             it.key,
@@ -269,7 +267,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                         )
                     })
                 )
-                setLocalDateTime(c, LocalDateTime.now(clock))
             }
         }
 
@@ -457,8 +454,8 @@ where br.referanse = ?
         beregningsGrunnlag: IBeregningsGrunnlag.Grunnlag_11_19
     ): Long {
         val sqlStatement =
-            """INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter, inntekter_foregaaende_aar, oppdatert_tid)
-                    VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb, ?)"""
+            """INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter, inntekter_foregaaende_aar)
+                    VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb)"""
 
         return connection.executeReturnKey(sqlStatement) {
             setParams {
@@ -476,7 +473,6 @@ where br.referanse = ?
                         )
                     })
                 )
-                setLocalDateTime(7, LocalDateTime.now(clock))
             }
         }
     }

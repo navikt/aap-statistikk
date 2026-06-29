@@ -29,15 +29,6 @@ spec:
           FROM
             `datastream_hendelser.public_diagnose` d
         ),
-        diagnoseperioder AS (
-          SELECT
-            dp.behandling_id,
-            MAX(dp.oppdatert_tid) AS oppdatert_tid
-          FROM
-            `datastream_hendelser.public_diagnose_periode` dp
-          GROUP BY
-            dp.behandling_id
-        ),
         rettighetstyper AS (
           SELECT
             r.id,
@@ -71,18 +62,6 @@ spec:
             ON a.vedtatt_stans_opphor_id = vso.id
           GROUP BY
             vso.behandling_id
-        ),
-        rettighetstypeperioder AS (
-          SELECT
-            r.behandling_id,
-            MAX(rp.oppdatert_tid) AS oppdatert_tid
-          FROM
-            `datastream_hendelser.public_rettighetstype` r
-          JOIN
-            `datastream_hendelser.public_rettighetstypeperioder` rp
-            ON rp.rettighetstype_id = r.id
-          GROUP BY
-            r.behandling_id
         )
       SELECT
         s.saksnummer AS saksnummer,
@@ -136,9 +115,7 @@ spec:
                 bh.oppdatert_tid,
                 sh.oppdatert_tid,
                 d.oppdatert_tid,
-                diagnoseperioder.oppdatert_tid,
-                rettighetstyper.oppdatert_tid,
-                rettighetstypeperioder.oppdatert_tid]) AS ts
+                rettighetstyper.oppdatert_tid]) AS ts
         ) AS rad_endret_tid,
         concat(
           b.id,
@@ -182,17 +159,9 @@ spec:
         ON
           d.behandling_id = b.id
       LEFT JOIN
-        diagnoseperioder
-        ON
-          diagnoseperioder.behandling_id = b.id
-      LEFT JOIN
         rettighetstyper
         ON
           rettighetstyper.behandling_id = b.id
-      LEFT JOIN
-        rettighetstypeperioder
-        ON
-          rettighetstypeperioder.behandling_id = b.id
       LEFT JOIN
         vedtatt_stans_opphor_agg vso_agg
         ON

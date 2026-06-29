@@ -1,13 +1,7 @@
 ALTER TABLE diagnose
     ADD COLUMN oppdatert_tid TIMESTAMP(6);
 
-ALTER TABLE diagnose_periode
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
-
 ALTER TABLE rettighetstype
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
-
-ALTER TABLE rettighetstypeperioder
     ADD COLUMN oppdatert_tid TIMESTAMP(6);
 
 UPDATE diagnose d
@@ -17,13 +11,6 @@ FROM behandling b
 WHERE d.behandling_id = b.id
   AND bh.gjeldende = TRUE;
 
-UPDATE diagnose_periode dp
-SET oppdatert_tid = bh.oppdatert_tid
-FROM behandling b
-         JOIN behandling_historikk bh ON bh.behandling_id = b.id
-WHERE dp.behandling_id = b.id
-  AND bh.gjeldende = TRUE;
-
 UPDATE rettighetstype r
 SET oppdatert_tid = bh.oppdatert_tid
 FROM behandling b
@@ -31,45 +18,19 @@ FROM behandling b
 WHERE r.behandling_id = b.id
   AND bh.gjeldende = TRUE;
 
-UPDATE rettighetstypeperioder rp
-SET oppdatert_tid = bh.oppdatert_tid
-FROM rettighetstype r
-         JOIN behandling b ON r.behandling_id = b.id
-         JOIN behandling_historikk bh ON bh.behandling_id = b.id
-WHERE rp.rettighetstype_id = r.id
-  AND bh.gjeldende = TRUE;
-
 ALTER TABLE diagnose
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
-
-ALTER TABLE diagnose_periode
     ALTER COLUMN oppdatert_tid SET NOT NULL;
 
 ALTER TABLE rettighetstype
     ALTER COLUMN oppdatert_tid SET NOT NULL;
 
-ALTER TABLE rettighetstypeperioder
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
-
 ALTER TABLE vilkarsresultat
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
-ALTER TABLE vilkar
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
-ALTER TABLE vilkarsperiode
     ADD COLUMN oppdatert_tid TIMESTAMP(6);
 
 ALTER TABLE tilkjent_ytelse
     ADD COLUMN oppdatert_tid TIMESTAMP(6);
-ALTER TABLE tilkjent_ytelse_periode
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
 
 ALTER TABLE grunnlag
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
-ALTER TABLE grunnlag_11_19
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
-ALTER TABLE grunnlag_yrkesskade
-    ADD COLUMN oppdatert_tid TIMESTAMP(6);
-ALTER TABLE grunnlag_ufore
     ADD COLUMN oppdatert_tid TIMESTAMP(6);
 
 ALTER TABLE samordning_ufore
@@ -87,47 +48,17 @@ FROM behandling_historikk bh
 WHERE vr.behandling_id = bh.behandling_id
   AND bh.gjeldende = TRUE;
 
-UPDATE vilkar v
-SET oppdatert_tid = vr.oppdatert_tid
-FROM vilkarsresultat vr
-WHERE v.vilkarresult_id = vr.id;
-
-UPDATE vilkarsperiode vp
-SET oppdatert_tid = v.oppdatert_tid
-FROM vilkar v
-WHERE vp.vilkar_id = v.id;
-
 UPDATE tilkjent_ytelse ty
 SET oppdatert_tid = bh.oppdatert_tid
 FROM behandling_historikk bh
 WHERE ty.behandling_id = bh.behandling_id
   AND bh.gjeldende = TRUE;
 
-UPDATE tilkjent_ytelse_periode tp
-SET oppdatert_tid = ty.oppdatert_tid
-FROM tilkjent_ytelse ty
-WHERE tp.tilkjent_ytelse_id = ty.id;
-
 UPDATE grunnlag g
 SET oppdatert_tid = bh.oppdatert_tid
 FROM behandling_historikk bh
 WHERE g.behandling_id = bh.behandling_id
   AND bh.gjeldende = TRUE;
-
-UPDATE grunnlag_11_19 g11
-SET oppdatert_tid = g.oppdatert_tid
-FROM grunnlag g
-WHERE g11.grunnlag_id = g.id;
-
-UPDATE grunnlag_yrkesskade gy
-SET oppdatert_tid = g.oppdatert_tid
-FROM grunnlag g
-WHERE gy.beregningsgrunnlag_id = g.id;
-
-UPDATE grunnlag_ufore gu
-SET oppdatert_tid = g.oppdatert_tid
-FROM grunnlag g
-WHERE gu.grunnlag_id = g.id;
 
 UPDATE samordning_ufore su
 SET oppdatert_tid = bh.oppdatert_tid
@@ -155,23 +86,11 @@ WHERE sag.behandling_id = bh.behandling_id
 
 ALTER TABLE vilkarsresultat
     ALTER COLUMN oppdatert_tid SET NOT NULL;
-ALTER TABLE vilkar
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
-ALTER TABLE vilkarsperiode
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
 
 ALTER TABLE tilkjent_ytelse
     ALTER COLUMN oppdatert_tid SET NOT NULL;
-ALTER TABLE tilkjent_ytelse_periode
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
 
 ALTER TABLE grunnlag
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
-ALTER TABLE grunnlag_11_19
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
-ALTER TABLE grunnlag_yrkesskade
-    ALTER COLUMN oppdatert_tid SET NOT NULL;
-ALTER TABLE grunnlag_ufore
     ALTER COLUMN oppdatert_tid SET NOT NULL;
 
 ALTER TABLE samordning_ufore

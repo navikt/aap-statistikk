@@ -68,7 +68,7 @@ These views now use persisted `oppdatert_tid` fields from source tables for `end
 
 ### Manual source-table corrections
 
-Manual corrections in Postgres must update `oppdatert_tid` explicitly in the same transaction as the data change.
+Manual corrections in Postgres must update `oppdatert_tid` explicitly in the same transaction as the data change. Some child tables do not have their own `oppdatert_tid`; update the parent or another retained row used by the relevant view instead.
 
 Use one timestamp for the whole correction, so rows changed together get the same `oppdatert_tid`:
 
@@ -77,18 +77,29 @@ BEGIN;
 
 WITH oppdatering AS (
   SELECT CURRENT_TIMESTAMP(6)::timestamp AS oppdatert_tid
+),
+oppdatert_rettighetstype AS (
+  UPDATE rettighetstype r
+  SET oppdatert_tid = oppdatering.oppdatert_tid
+  FROM oppdatering
+  WHERE r.id = (
+    SELECT rp.rettighetstype_id
+    FROM rettighetstypeperioder rp
+    WHERE rp.id = 123
+  )
+  RETURNING r.id
 )
 UPDATE rettighetstypeperioder rp
 SET
-  til_dato = DATE '2026-01-31',
-  oppdatert_tid = oppdatering.oppdatert_tid
-FROM oppdatering
-WHERE rp.id = 123;
+  til_dato = DATE '2026-01-31'
+FROM oppdatert_rettighetstype
+WHERE rp.id = 123
+  AND rp.rettighetstype_id = oppdatert_rettighetstype.id;
 
 COMMIT;
 ```
 
-If multiple source tables are corrected together, set `oppdatert_tid` on every changed row that is read directly or indirectly by a BigQuery view.
+If multiple source tables are corrected together, set `oppdatert_tid` on every changed parent or retained row that is read directly or indirectly by a BigQuery view.
 
 ### Manual deletes
 

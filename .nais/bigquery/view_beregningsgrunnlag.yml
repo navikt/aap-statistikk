@@ -55,10 +55,7 @@ spec:
         GREATEST(
           bh.oppdatert_tid,
           sh.oppdatert_tid,
-          pg.oppdatert_tid,
-          COALESCE(g.oppdatert_tid, pg.oppdatert_tid),
-          COALESCE(gy.oppdatert_tid, pg.oppdatert_tid),
-          COALESCE(gu.oppdatert_tid, pg.oppdatert_tid)) AS endret_tid,
+          pg.oppdatert_tid) AS endret_tid,
         concat(
           pg.id,
           '-',

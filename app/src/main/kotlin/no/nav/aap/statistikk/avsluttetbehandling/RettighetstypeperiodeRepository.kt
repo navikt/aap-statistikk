@@ -58,7 +58,7 @@ VALUES ((SELECT b.id
         }
 
         val sql2 = """
-           insert into rettighetstypeperioder (rettighetstype_id, fra_dato, til_dato, rettighetstype, oppdatert_tid) values (?, ?, ?, ?, ?);
+           insert into rettighetstypeperioder (rettighetstype_id, fra_dato, til_dato, rettighetstype) values (?, ?, ?, ?);
         """.trimIndent()
 
         dbConnection.executeBatch(sql2, rettighetstypePeriode) {
@@ -67,7 +67,6 @@ VALUES ((SELECT b.id
                 setLocalDate(2, it.fraDato)
                 setLocalDate(3, it.tilDato)
                 setString(4, it.rettighetstype.name)
-                setLocalDateTime(5, oppdatertTid)
             }
 
         }

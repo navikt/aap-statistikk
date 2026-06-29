@@ -55,14 +55,14 @@ class VilkårsresultatRepository(
             }
         }
 
-        val sqlInsertVilkar = """INSERT INTO VILKAR(vilkar_type, vilkarresult_id, oppdatert_tid)
-VALUES (?, ?, ?);
+        val sqlInsertVilkar = """INSERT INTO VILKAR(vilkar_type, vilkarresult_id)
+VALUES (?, ?);
             """
 
         val sqlInsertPeriode =
             """INSERT INTO VILKARSPERIODE(fra_dato, til_dato, utfall, manuell_vurdering, innvilgelsesaarsak,
-                           avslagsaarsak, vilkar_id, oppdatert_tid)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                           avslagsaarsak, vilkar_id)
+VALUES (?, ?, ?, ?, ?, ?, ?);
                 """
 
         vilkårsresultat.vilkår.forEach { vilkårEntity ->
@@ -70,7 +70,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 setParams {
                     setString(1, vilkårEntity.vilkårType)
                     setLong(2, uthentetId)
-                    setLocalDateTime(3, oppdatertTid)
                 }
             }
 
@@ -83,7 +82,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                     setString(5, periode.innvilgelsesårsak)
                     setString(6, periode.avslagsårsak)
                     setLong(7, vilkårKey)
-                    setLocalDateTime(8, oppdatertTid)
                 }
             }
         }

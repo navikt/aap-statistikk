@@ -26,7 +26,7 @@ spec:
              vp.utfall         as utfall,
              vp.innvilgelsesaarsak as innvilgelsesaarsak,
              datetime(vr.opprettet_tidspunkt) as reg_dato,
-             greatest(bh.oppdatert_tid, sh.oppdatert_tid, vr.oppdatert_tid, v.oppdatert_tid, vp.oppdatert_tid) AS endret_tid,
+             greatest(bh.oppdatert_tid, COALESCE(sh.oppdatert_tid, vr.oppdatert_tid), vr.oppdatert_tid) AS endret_tid,
              concat(
                COALESCE(CAST(b.id AS STRING), '0'), '-', 
                COALESCE(CAST(v.id AS STRING), '0'), '-', 

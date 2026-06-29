@@ -45,8 +45,7 @@ spec:
         GREATEST(
           bh.oppdatert_tid,
           sh.oppdatert_tid,
-          ty.oppdatert_tid,
-          tp.oppdatert_tid) AS endret_tid,
+          ty.oppdatert_tid) AS endret_tid,
         concat(b.id, '-', tp.id, '-', ty.id, '-', br.id, '-', s.id) AS unik_id
       FROM
         `datastream_hendelser.public_tilkjent_ytelse_periode` tp

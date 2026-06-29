@@ -41,23 +41,8 @@ class DiagnosePerioderRepositoryImplTest {
         val uthentet = dataSource.transaction {
             DiagnosePerioderRepositoryImpl(it).hentForBehandling(behandlingReferanse)
         }
-        val antallMedOppdatertTid = dataSource.transaction {
-            it.queryFirst(
-                """
-                    SELECT COUNT(*) AS antall
-                    FROM diagnose_periode dp
-                    JOIN behandling b ON dp.behandling_id = b.id
-                    JOIN behandling_referanse br ON b.referanse_id = br.id
-                    WHERE br.referanse = ? AND dp.oppdatert_tid IS NOT NULL
-                """.trimIndent()
-            ) {
-                setParams { setUUID(1, behandlingReferanse) }
-                setRowMapper { row -> row.getInt("antall") }
-            }
-        }
 
         assertThat(uthentet).containsExactlyInAnyOrderElementsOf(diagnoser)
-        assertThat(antallMedOppdatertTid).isEqualTo(diagnoser.size)
     }
 
     @Test
