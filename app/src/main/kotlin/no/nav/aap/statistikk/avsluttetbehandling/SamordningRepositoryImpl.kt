@@ -3,8 +3,13 @@ package no.nav.aap.statistikk.avsluttetbehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
+import java.time.Clock
+import java.time.LocalDateTime
 
-class SamordningRepositoryImpl(private val dbConnection: DBConnection) : SamordningRepository {
+class SamordningRepositoryImpl(
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
+) : SamordningRepository {
 
     companion object : RepositoryFactory<SamordningRepositoryImpl> {
         override fun konstruer(connection: DBConnection): SamordningRepositoryImpl =
@@ -13,6 +18,7 @@ class SamordningRepositoryImpl(private val dbConnection: DBConnection) : Samordn
 
     override fun lagre(behandlingId: BehandlingId, samordning: Samordning) {
         val id = behandlingId.id
+        val oppdatertTid = LocalDateTime.now(clock)
 
         dbConnection.execute("DELETE FROM samordning_ufore WHERE behandling_id = ?") {
             setParams { setLong(1, id) }
@@ -28,7 +34,7 @@ class SamordningRepositoryImpl(private val dbConnection: DBConnection) : Samordn
         }
 
         dbConnection.executeBatch(
-            "INSERT INTO samordning_ufore (behandling_id, fra_dato, til_dato, grad) VALUES (?, ?, ?, ?)",
+            "INSERT INTO samordning_ufore (behandling_id, fra_dato, til_dato, grad, oppdatert_tid) VALUES (?, ?, ?, ?, ?)",
             samordning.uføre,
         ) {
             setParams {
@@ -36,11 +42,12 @@ class SamordningRepositoryImpl(private val dbConnection: DBConnection) : Samordn
                 setLocalDate(2, it.fom)
                 setLocalDate(3, it.tom)
                 setInt(4, it.grad)
+                setLocalDateTime(5, oppdatertTid)
             }
         }
 
         dbConnection.executeBatch(
-            "INSERT INTO samordning_statlig_ytelse (behandling_id, fra_dato, til_dato, ytelse, prosent) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO samordning_statlig_ytelse (behandling_id, fra_dato, til_dato, ytelse, prosent, oppdatert_tid) VALUES (?, ?, ?, ?, ?, ?)",
             samordning.statligeYtelser,
         ) {
             setParams {
@@ -49,11 +56,12 @@ class SamordningRepositoryImpl(private val dbConnection: DBConnection) : Samordn
                 setLocalDate(3, it.tom)
                 setString(4, it.ytelse.name)
                 setInt(5, it.prosent)
+                setLocalDateTime(6, oppdatertTid)
             }
         }
 
         dbConnection.executeBatch(
-            "INSERT INTO samordning_avregning_andre_ytelser (behandling_id, fra_dato, til_dato, ytelse) VALUES (?, ?, ?, ?)",
+            "INSERT INTO samordning_avregning_andre_ytelser (behandling_id, fra_dato, til_dato, ytelse, oppdatert_tid) VALUES (?, ?, ?, ?, ?)",
             samordning.avregningAndreYtelser,
         ) {
             setParams {
@@ -61,17 +69,19 @@ class SamordningRepositoryImpl(private val dbConnection: DBConnection) : Samordn
                 setLocalDate(2, it.fom)
                 setLocalDate(3, it.tom)
                 setString(4, it.ytelse.name)
+                setLocalDateTime(5, oppdatertTid)
             }
         }
 
         dbConnection.executeBatch(
-            "INSERT INTO samordning_arbeidsgiver (behandling_id, fra_dato, til_dato) VALUES (?, ?, ?)",
+            "INSERT INTO samordning_arbeidsgiver (behandling_id, fra_dato, til_dato, oppdatert_tid) VALUES (?, ?, ?, ?)",
             samordning.arbeidsgiver,
         ) {
             setParams {
                 setLong(1, id)
                 setLocalDate(2, it.fom)
                 setLocalDate(3, it.tom)
+                setLocalDateTime(4, oppdatertTid)
             }
         }
     }
@@ -148,4 +158,3 @@ class SamordningRepositoryImpl(private val dbConnection: DBConnection) : Samordn
         )
     }
 }
-

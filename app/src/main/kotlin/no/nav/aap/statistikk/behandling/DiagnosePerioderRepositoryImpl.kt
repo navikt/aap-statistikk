@@ -5,7 +5,9 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.DiagnoseMedPeriode
 import java.util.*
 
-class DiagnosePerioderRepositoryImpl(private val dbConnection: DBConnection) :
+class DiagnosePerioderRepositoryImpl(
+    private val dbConnection: DBConnection,
+) :
     DiagnosePerioderRepository {
 
     companion object : RepositoryFactory<DiagnosePerioderRepository> {

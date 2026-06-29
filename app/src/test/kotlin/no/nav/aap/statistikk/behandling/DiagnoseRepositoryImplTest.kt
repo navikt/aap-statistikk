@@ -6,6 +6,7 @@ import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.forberedDatabase
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -29,6 +30,9 @@ class DiagnoseRepositoryImplTest {
         val uthentet = dataSource.transaction {
             DiagnoseRepositoryImpl(it).hentForBehandling(behandlingReferanse)
         }
+        val oppdatertTid = dataSource.transaction {
+            hentOppdatertTid(it, behandlingReferanse)
+        }
 
         assertThat(uthentet).isEqualTo(
             DiagnoseEntity(
@@ -38,6 +42,7 @@ class DiagnoseRepositoryImplTest {
                 bidiagnoser = listOf("PEST", "KOLERA")
             )
         )
+        assertThat(oppdatertTid).isNotNull()
 
     }
 
@@ -47,4 +52,24 @@ class DiagnoseRepositoryImplTest {
     ) = DiagnoseRepositoryImpl(it).lagre(
         diagnoseEntity
     )
+
+    private fun hentOppdatertTid(
+        it: DBConnection,
+        behandlingReferanse: UUID
+    ): LocalDateTime = it.queryFirst(
+        """
+            SELECT d.oppdatert_tid AS oppdatert_tid
+            FROM diagnose d
+            JOIN behandling b ON d.behandling_id = b.id
+            JOIN behandling_referanse br ON b.referanse_id = br.id
+            WHERE br.referanse = ?
+        """.trimIndent()
+    ) {
+        setParams {
+            setUUID(1, behandlingReferanse)
+        }
+        setRowMapper { row ->
+            row.getLocalDateTime("oppdatert_tid")
+        }
+    }
 }

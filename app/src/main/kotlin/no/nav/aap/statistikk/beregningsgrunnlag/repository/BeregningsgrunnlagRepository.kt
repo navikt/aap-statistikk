@@ -9,6 +9,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.IBeregningsGrunnlag
 import no.nav.aap.statistikk.avsluttetbehandling.MedBehandlingsreferanse
 import no.nav.aap.statistikk.avsluttetbehandling.UføreType
 import no.nav.aap.statistikk.behandling.BehandlingId
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -16,7 +17,8 @@ import java.util.*
 import kotlin.collections.orEmpty
 
 class BeregningsgrunnlagRepository(
-    private val dbConnection: DBConnection
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : IBeregningsgrunnlagRepository {
     companion object : RepositoryFactory<IBeregningsgrunnlagRepository> {
         override fun konstruer(connection: DBConnection): IBeregningsgrunnlagRepository {
@@ -145,16 +147,18 @@ WHERE br.referanse = ?"""
         behandlingId: BehandlingId
     ): Long {
         val sql =
-            "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar, nedsatt_arbeidsevne_dato, ytterligere_nedsatt_arbeidsevne_dato) VALUES (?, ?, ?, ?, ?, ?) "
+            "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar, nedsatt_arbeidsevne_dato, ytterligere_nedsatt_arbeidsevne_dato, oppdatert_tid) VALUES (?, ?, ?, ?, ?, ?, ?) "
 
         return connection.executeReturnKey(sql) {
             setParams {
+                val oppdatertTid = LocalDateTime.now(clock)
                 setString(1, grunnlag.type().toString())
                 setLong(2, behandlingId.id)
-                setLocalDateTime(3, LocalDateTime.now())
+                setLocalDateTime(3, oppdatertTid)
                 setInt(4, grunnlag.beregningsår().value)
                 setLocalDate(5, grunnlag.nedsattArbeidsevneEllerStudieevneDato())
                 setLocalDate(6, grunnlag.ytterligereNedsattArbeidsevneDato())
+                setLocalDateTime(7, oppdatertTid)
             }
         }
     }
@@ -255,7 +259,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 )
                 setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
                 setString(
-                    c++,
+                    c,
                     DefaultJsonMapper.toJson(beregningsGrunnlag.uføreInntekterFraForegåendeÅr.entries.map {
                         ÅrOgInntekt(
                             it.key,

@@ -8,6 +8,7 @@ import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -15,7 +16,8 @@ import java.util.*
 private val logger = LoggerFactory.getLogger(TilkjentYtelseRepository::class.java)
 
 class TilkjentYtelseRepository(
-    private val dbConnection: DBConnection
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : ITilkjentYtelseRepository {
     companion object : RepositoryFactory<ITilkjentYtelseRepository> {
         override fun konstruer(connection: DBConnection): ITilkjentYtelseRepository {
@@ -35,12 +37,14 @@ class TilkjentYtelseRepository(
 
         dbConnection.execute(deletePeriodeSql) { setParams { setInt(1, behandlingId) } }
         dbConnection.execute(deleteYtelseSql) { setParams { setInt(1, behandlingId) } }
+        val oppdatertTid = LocalDateTime.now(clock)
 
         val nøkkel =
-            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt) VALUES (?, ?)") {
+            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt, oppdatert_tid) VALUES (?, ?, ?)") {
                 setParams {
                     setInt(1, behandlingId)
-                    setLocalDateTime(2, LocalDateTime.now())
+                    setLocalDateTime(2, oppdatertTid)
+                    setLocalDateTime(3, oppdatertTid)
                 }
             }
 
