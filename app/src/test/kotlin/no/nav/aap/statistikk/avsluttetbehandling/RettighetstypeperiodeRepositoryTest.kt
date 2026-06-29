@@ -37,7 +37,6 @@ class RettighetstypeperiodeRepositoryTest {
 
         val res =
             dataSource.transaction { RettighetstypeperiodeRepository(it).hent(behandlingReferanse) }
-
         assertThat(res).hasSize(2)
         assertThat(res).isEqualTo(rettighetstypePerioder)
     }
@@ -84,9 +83,24 @@ class RettighetstypeperiodeRepositoryTest {
         val res = dataSource.transaction {
             RettighetstypeperiodeRepository(it).hent(behandlingReferanse)
         }
+        val antallMedOppdatertTid = dataSource.transaction {
+            it.queryFirst(
+                """
+                    SELECT COUNT(*) AS antall
+                    FROM rettighetstype r
+                    JOIN behandling b ON r.behandling_id = b.id
+                    JOIN behandling_referanse br ON b.referanse_id = br.id
+                    WHERE br.referanse = ? AND r.oppdatert_tid IS NOT NULL
+                """.trimIndent()
+            ) {
+                setParams { setUUID(1, behandlingReferanse) }
+                setRowMapper { row -> row.getInt("antall") }
+            }
+        }
 
         assertThat(res).hasSize(2)
         assertThat(res).isEqualTo(oppdatertedPerioder)
+        assertThat(antallMedOppdatertTid).isEqualTo(1)
 
     }
 

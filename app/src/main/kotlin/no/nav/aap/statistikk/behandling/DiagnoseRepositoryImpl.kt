@@ -4,6 +4,8 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.Diagnoser
 import org.slf4j.LoggerFactory
+import java.time.Clock
+import java.time.LocalDateTime
 import java.util.*
 
 data class DiagnoseEntity(
@@ -24,7 +26,10 @@ data class DiagnoseEntity(
     }
 }
 
-class DiagnoseRepositoryImpl(private val dbConnection: DBConnection) : DiagnoseRepository {
+class DiagnoseRepositoryImpl(
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
+) : DiagnoseRepository {
     private val logger = LoggerFactory.getLogger(DiagnoseRepositoryImpl::class.java)
 
     companion object : RepositoryFactory<DiagnoseRepository> {
@@ -34,19 +39,22 @@ class DiagnoseRepositoryImpl(private val dbConnection: DBConnection) : DiagnoseR
     }
 
     override fun lagre(diagnoseEntity: DiagnoseEntity): Long {
+        val oppdatertTid = LocalDateTime.now(clock)
         val sql = """
-INSERT INTO DIAGNOSE (behandling_id, kodeverk, diagnosekode, bidiagnoser)
+INSERT INTO DIAGNOSE (behandling_id, kodeverk, diagnosekode, bidiagnoser, oppdatert_tid)
 VALUES ((SELECT b.id
          FROM behandling b
                   join behandling_referanse br on b.referanse_id = br.id
          WHERE br.referanse = ?),
         ?,
         ?,
+        ?,
         ?)
 ON CONFLICT (behandling_id) DO UPDATE SET
     kodeverk = EXCLUDED.kodeverk,
     diagnosekode = EXCLUDED.diagnosekode,
-    bidiagnoser = EXCLUDED.bidiagnoser;
+    bidiagnoser = EXCLUDED.bidiagnoser,
+    oppdatert_tid = EXCLUDED.oppdatert_tid;
 
         """.trimIndent()
 
@@ -56,6 +64,7 @@ ON CONFLICT (behandling_id) DO UPDATE SET
                 setString(2, diagnoseEntity.kodeverk)
                 setString(3, diagnoseEntity.diagnosekode)
                 setArray(4, diagnoseEntity.bidiagnoser)
+                setLocalDateTime(5, oppdatertTid)
             }
         }
 
