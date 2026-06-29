@@ -181,8 +181,8 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
 fun stringToNumber(string: String): Long {
     return requireNotNull(
         IntStream.range(0, string.length)
-        .mapToObj() { 10.0.pow(it.toDouble()) * string[it].code }
-        .reduce { acc, curr -> acc + curr }.orElse(0.0)
+            .mapToObj() { 10.0.pow(it.toDouble()) * string[it].code }
+            .reduce { acc, curr -> acc + curr }.orElse(0.0)
     ).mod(1_000_000.0).roundToLong()
 }
 

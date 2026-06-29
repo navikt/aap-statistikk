@@ -11,7 +11,7 @@ version = project.findProperty("version")?.toString() ?: "0.0.0"
 // https://docs.gradle.org/8.12.1/userguide/jvm_test_suite_plugin.html
 testing {
     suites {
-        @Suppress("UnstableApiUsage") val test by getting(JvmTestSuite::class) {
+        @Suppress("UnstableApiUsage", "unused") val test = getByName<JvmTestSuite>("test") {
             useJUnitJupiter()
         }
     }
@@ -35,8 +35,8 @@ kotlin {
     jvmToolchain(21)
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
-        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4)
     }
 }
 

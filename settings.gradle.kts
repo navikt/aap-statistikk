@@ -2,9 +2,6 @@ rootProject.name = "statistikk"
 
 include("app")
 
-
-val githubPassword: String? by settings
-
 dependencyResolutionManagement {
     // Felles for alle gradle prosjekter i repoet
     @Suppress("UnstableApiUsage")
