@@ -18,11 +18,22 @@ spec:
     useLegacySql: false
     query: >-
       WITH
+        diagnoser AS (
+          SELECT
+            d.id,
+            d.behandling_id,
+            d.oppdatert_tid AS oppdatert_tid,
+            d.kodeverk,
+            d.diagnosekode,
+            d.bidiagnoser
+          FROM
+            `datastream_hendelser.public_diagnose` d
+        ),
         rettighetstyper AS (
           SELECT
             r.id,
             r.behandling_id,
-            r.datastream_metadata.source_timestamp AS source_timestamp,
+            r.oppdatert_tid AS oppdatert_tid,
             ARRAY(
               SELECT STRUCT(rp.fra_dato, rp.til_dato, rp.rettighetstype)
               FROM `datastream_hendelser.public_rettighetstypeperioder` rp
@@ -96,21 +107,16 @@ spec:
           WHERE f.behandling_id = b.id
         ) AS perioder_med_fritak_meldeplikt,
         IFNULL(vso_agg.perioder, []) AS vedtatt_stans_opphor,
-        DATETIME(
-          timestamp_millis(
-            (
-              SELECT MAX(ts)
-              FROM
-                UNNEST(
-                  [
-                    b.datastream_metadata.source_timestamp,
-                    bh.datastream_metadata.source_timestamp,
-                    br.datastream_metadata.source_timestamp,
-                    s.datastream_metadata.source_timestamp,
-                    d.datastream_metadata.source_timestamp,
-                    rettighetstyper.source_timestamp]) AS ts
-            )),
-          'Europe/Oslo') AS rad_endret_tid,
+        (
+          SELECT MAX(ts)
+          FROM
+            UNNEST(
+              [
+                bh.oppdatert_tid,
+                sh.oppdatert_tid,
+                d.oppdatert_tid,
+                rettighetstyper.oppdatert_tid]) AS ts
+        ) AS rad_endret_tid,
         concat(
           b.id,
           '-',
@@ -128,6 +134,11 @@ spec:
         ON
           b.sak_id = s.id
       JOIN
+        `datastream_hendelser.public_sak_historikk` sh
+        ON
+          sh.sak_id = s.id
+          AND sh.gjeldende = TRUE
+      JOIN
         `datastream_hendelser.public_behandling_referanse` br
         ON
           b.referanse_id = br.id
@@ -144,7 +155,7 @@ spec:
         ON
           p.id = s.person_id
       LEFT JOIN
-        `datastream_hendelser.public_diagnose` d
+        diagnoser d
         ON
           d.behandling_id = b.id
       LEFT JOIN
