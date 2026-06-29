@@ -920,9 +920,13 @@ class IntegrationTest {
                 TilkjentYtelseRepository(it).hentForBehandling(behandlingReferanse)!!.perioder
             }
 
-            assertThat(tilkjent).hasSize(1)
-            val tilkjentYtelse = tilkjent.first()
-            assertThat(tilkjentYtelse.dagsats).isEqualTo(hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder[0].dagsats)
+            // begrensPerioderTil(vedtaksdato) inkluderer perioder som har fraDato lik vedtaksdatoen.
+            val forventedeTilkjentePerioder = hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder.take(2)
+            assertThat(tilkjent.map { it.fraDato }).containsExactlyElementsOf(
+                forventedeTilkjentePerioder.map { it.fraDato }
+            )
+            val tilkjentYtelse = tilkjent.last()
+            assertThat(tilkjentYtelse.dagsats).isEqualTo(forventedeTilkjentePerioder.last().dagsats)
 
             val sakRespons = dataSource.transaction {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)

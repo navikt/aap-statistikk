@@ -15,6 +15,7 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseEntity
 import no.nav.aap.statistikk.vilkårsresultat.repository.IVilkårsresultatRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsResultatEntity
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 class AvsluttetBehandlingService(
     private val tilkjentYtelseRepository: ITilkjentYtelseRepository,
@@ -49,15 +50,9 @@ class AvsluttetBehandlingService(
             error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
         }
 
+        val vedtakstidspunkt = vedtakstidspunktFor(avsluttetBehandling, uthentetBehandling.vedtakstidspunkt())
         tilkjentYtelseRepository.lagreTilkjentYtelse(
-            TilkjentYtelseEntity.fraDomene(
-                avsluttetBehandling.vedtakstidspunkt?.let {
-                    avsluttetBehandling.tilkjentYtelse.begrensPerioderTil(
-                        it.toLocalDate()
-                    )
-                }
-                    ?: avsluttetBehandling.tilkjentYtelse
-            )
+            tilkjentYtelsePåVedtaksdato(avsluttetBehandling, vedtakstidspunkt)
         )
 
         if (avsluttetBehandling.beregningsgrunnlag != null) {
@@ -109,6 +104,30 @@ class AvsluttetBehandlingService(
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }
         PrometheusProvider.prometheus.avsluttetBehandlingLagret().increment()
+    }
+
+    private fun vedtakstidspunktFor(
+        avsluttetBehandling: AvsluttetBehandling,
+        lagretVedtakstidspunkt: LocalDateTime?
+    ): LocalDateTime? {
+        if (avsluttetBehandling.vedtakstidspunkt == null) {
+            logger.warn("Vedtakstidspunkt mangler i avsluttet behandling for behandling ${avsluttetBehandling.behandlingsReferanse}.")
+        }
+
+        return avsluttetBehandling.vedtakstidspunkt ?: lagretVedtakstidspunkt
+    }
+
+    private fun tilkjentYtelsePåVedtaksdato(
+        avsluttetBehandling: AvsluttetBehandling,
+        vedtakstidspunkt: LocalDateTime?
+    ): TilkjentYtelseEntity {
+        return TilkjentYtelseEntity.fraDomene(
+            avsluttetBehandling.tilkjentYtelse.begrensPerioderTil(
+                requireNotNull(vedtakstidspunkt) {
+                    "Vedtakstidspunkt mangler for behandling ${avsluttetBehandling.behandlingsReferanse}."
+                }.toLocalDate()
+            )
+        )
     }
 
     private fun lagreDiagnose(avsluttetBehandling: AvsluttetBehandling) {

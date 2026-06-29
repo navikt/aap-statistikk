@@ -30,7 +30,7 @@ data class TilkjentYtelse(
     val perioder: List<TilkjentYtelsePeriode>
 ) {
     fun begrensPerioderTil(vedtaksdato: LocalDate): TilkjentYtelse {
-            return this.copy(perioder = perioder.filter { it.fraDato <= vedtaksdato })
+        return this.copy(perioder = perioder.filter { it.fraDato <= vedtaksdato })
     }
 }
 
