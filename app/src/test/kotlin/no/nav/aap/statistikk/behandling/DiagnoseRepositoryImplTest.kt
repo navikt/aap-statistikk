@@ -46,53 +46,6 @@ class DiagnoseRepositoryImplTest {
 
     }
 
-    @Test
-    fun `manuell oppdatering oppdaterer oppdatert tid`(@Postgres dataSource: DataSource) {
-        val behandlingReferanse = UUID.randomUUID()
-        dataSource.transaction {
-            forberedDatabase(it, behandlingReferanse)
-            settInnDiagnose(
-                it, DiagnoseEntity(
-                    behandlingReferanse = behandlingReferanse,
-                    kodeverk = "ICD10",
-                    diagnosekode = "A01",
-                    bidiagnoser = listOf("B02")
-                )
-            )
-        }
-
-        val førsteOppdatertTid = dataSource.transaction {
-            hentOppdatertTid(it, behandlingReferanse)
-        }
-
-        dataSource.transaction {
-            it.execute(
-                """
-                    UPDATE diagnose
-                    SET diagnosekode = ?
-                    WHERE behandling_id = (
-                        SELECT b.id
-                        FROM behandling b
-                        JOIN behandling_referanse br ON b.referanse_id = br.id
-                        WHERE br.referanse = ?
-                    )
-                """.trimIndent()
-            ) {
-                setParams {
-                    setString(1, "A02")
-                    setUUID(2, behandlingReferanse)
-                }
-            }
-        }
-
-        val oppdatertTid = dataSource.transaction {
-            hentOppdatertTid(it, behandlingReferanse)
-        }
-
-        assertThat(oppdatertTid).isAfter(førsteOppdatertTid)
-
-    }
-
     private fun settInnDiagnose(
         it: DBConnection,
         diagnoseEntity: DiagnoseEntity

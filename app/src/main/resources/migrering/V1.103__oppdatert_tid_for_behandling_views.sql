@@ -51,39 +51,6 @@ ALTER TABLE rettighetstype
 ALTER TABLE rettighetstypeperioder
     ALTER COLUMN oppdatert_tid SET NOT NULL;
 
-CREATE OR REPLACE FUNCTION oppdater_oppdatert_tid()
-    RETURNS TRIGGER AS
-$$
-BEGIN
-    NEW.oppdatert_tid = now();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER diagnose_oppdatert_tid_trg
-    BEFORE UPDATE
-    ON diagnose
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER diagnose_periode_oppdatert_tid_trg
-    BEFORE UPDATE
-    ON diagnose_periode
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER rettighetstype_oppdatert_tid_trg
-    BEFORE UPDATE
-    ON rettighetstype
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER rettighetstypeperioder_oppdatert_tid_trg
-    BEFORE UPDATE
-    ON rettighetstypeperioder
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
 ALTER TABLE vilkarsresultat
     ADD COLUMN oppdatert_tid TIMESTAMP(6);
 ALTER TABLE vilkar
@@ -215,68 +182,3 @@ ALTER TABLE samordning_avregning_andre_ytelser
     ALTER COLUMN oppdatert_tid SET NOT NULL;
 ALTER TABLE samordning_arbeidsgiver
     ALTER COLUMN oppdatert_tid SET NOT NULL;
-
-CREATE TRIGGER vilkarsresultat_oppdatert_tid_trg
-    BEFORE UPDATE ON vilkarsresultat
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER vilkar_oppdatert_tid_trg
-    BEFORE UPDATE ON vilkar
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER vilkarsperiode_oppdatert_tid_trg
-    BEFORE UPDATE ON vilkarsperiode
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER tilkjent_ytelse_oppdatert_tid_trg
-    BEFORE UPDATE ON tilkjent_ytelse
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER tilkjent_ytelse_periode_oppdatert_tid_trg
-    BEFORE UPDATE ON tilkjent_ytelse_periode
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER grunnlag_oppdatert_tid_trg
-    BEFORE UPDATE ON grunnlag
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER grunnlag_11_19_oppdatert_tid_trg
-    BEFORE UPDATE ON grunnlag_11_19
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER grunnlag_yrkesskade_oppdatert_tid_trg
-    BEFORE UPDATE ON grunnlag_yrkesskade
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER grunnlag_ufore_oppdatert_tid_trg
-    BEFORE UPDATE ON grunnlag_ufore
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER samordning_ufore_oppdatert_tid_trg
-    BEFORE UPDATE ON samordning_ufore
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER samordning_statlig_ytelse_oppdatert_tid_trg
-    BEFORE UPDATE ON samordning_statlig_ytelse
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER samordning_avregning_andre_ytelser_oppdatert_tid_trg
-    BEFORE UPDATE ON samordning_avregning_andre_ytelser
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();
-
-CREATE TRIGGER samordning_arbeidsgiver_oppdatert_tid_trg
-    BEFORE UPDATE ON samordning_arbeidsgiver
-    FOR EACH ROW
-EXECUTE FUNCTION oppdater_oppdatert_tid();

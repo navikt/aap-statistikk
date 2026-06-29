@@ -66,6 +66,64 @@ BigQuery views in `ytelsestatistikk` read those replicated tables, including:
 
 These views now use persisted `oppdatert_tid` fields from source tables for `endret_tid` / `rad_endret_tid`.
 
+### Manual source-table corrections
+
+Manual corrections in Postgres must update `oppdatert_tid` explicitly in the same transaction as the data change.
+
+Use one timestamp for the whole correction, so rows changed together get the same `oppdatert_tid`:
+
+```sql
+BEGIN;
+
+WITH oppdatering AS (
+  SELECT CURRENT_TIMESTAMP(6)::timestamp AS oppdatert_tid
+)
+UPDATE rettighetstypeperioder rp
+SET
+  til_dato = DATE '2026-01-31',
+  oppdatert_tid = oppdatering.oppdatert_tid
+FROM oppdatering
+WHERE rp.id = 123;
+
+COMMIT;
+```
+
+If multiple source tables are corrected together, set `oppdatert_tid` on every changed row that is read directly or indirectly by a BigQuery view.
+
+### Manual deletes
+
+BigQuery views only read the current replicated rows. If a joined source row is deleted, the view cannot see the deleted row's old `oppdatert_tid`; `endret_tid` / `rad_endret_tid` may therefore stay unchanged or move back to the next-highest timestamp from remaining rows.
+
+When deleting manually, first update a retained row that is included in the relevant view's `endret_tid` calculation, then delete the rows in the same transaction. For behandling-related data, the safest retained row is normally the current `behandling_historikk` row for the behandling.
+
+```sql
+BEGIN;
+
+WITH oppdatering AS (
+  SELECT CURRENT_TIMESTAMP(6)::timestamp AS oppdatert_tid
+),
+berort_behandling AS (
+  SELECT r.behandling_id
+  FROM rettighetstype r
+  WHERE r.id = 456
+)
+UPDATE behandling_historikk bh
+SET oppdatert_tid = oppdatering.oppdatert_tid
+FROM oppdatering, berort_behandling
+WHERE bh.behandling_id = berort_behandling.behandling_id
+  AND bh.gjeldende = TRUE;
+
+DELETE FROM rettighetstypeperioder
+WHERE rettighetstype_id = 456;
+
+DELETE FROM rettighetstype
+WHERE id = 456;
+
+COMMIT;
+```
+
+For child-row deletes where the parent row remains, updating the parent row can be enough. For example, before deleting from `rettighetstypeperioder`, update the corresponding `rettighetstype.oppdatert_tid`. If the parent row is also deleted, update a higher-level retained row such as current `behandling_historikk`.
+
 ## 5) Existing direct-to-BigQuery write path (still present)
 
 The codebase still contains a direct write path through `BQYtelseRepository` (`behandlinger` table in BigQuery), triggered by `LagreAvsluttetBehandlingTilBigQueryJobb`.
