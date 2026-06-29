@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aap-statistikk-soda-checks
+  namespace: aap
+  labels:
+    team: aap
+data:
+  view_gjeldende_hendelser_saksstatistikk.yaml: |
+    dataset: aap-statistikk/{{project}}/saksstatistikk/view_gjeldende_hendelser_saksstatistikk
+
+    checks:
+      - row_count:
+          threshold:
+            must_be_greater_than_or_equal_to: 1
+      - failed_rows:
+          name: Automatisk iverksettelse uten vedtakstid skal ha avsluttet hendelse
+          query: |
+            select *
+            from `{{project}}.saksstatistikk.view_gjeldende_hendelser_saksstatistikk` s
+            where vedtak_tid is null
+              and behandling_status = 'IVERKSETTES'
+              and behandlingmetode = 'AUTOMATISK'
+              and not exists (
+                select 1
+                from `{{project}}.saksstatistikk.view_gjeldende_hendelser_saksstatistikk` s2
+                where s2.behandling_status = 'AVSLUTTET'
+                  and s.behandling_uuid = s2.behandling_uuid
+              )
+
+    columns:
+      - name: behandling_uuid
+        checks:
+          - missing:
+      - name: vedtak_tid
+        checks:
+          - missing:
+              name: Avsluttede behandlinger skal ha vedtakstid
+              filter: "behandling_status = 'AVSLUTTET'"
+      - name: behandling_resultat
+        checks:
+          - missing:
+              name: Avsluttede behandlinger skal ha resultat
+              missing_values: ['UDEFINERT', 'udefinert']
+              filter: "behandling_status = 'AVSLUTTET'"
+
+  view_behandlinger.yaml: |
+    dataset: aap-statistikk/{{project}}/ytelsestatistikk/view_behandlinger
+
+    checks:
+      - failed_rows:
+          name: Kun ytelsesbehandlinger skal ha utbetaling_id
+          query: |
+            select *
+            from `{{project}}.ytelsestatistikk.view_behandlinger`
+            where utbetaling_id is not null
+              and behandlingsType not in ('Førstegangsbehandling', 'Revurdering')
+
+    columns:
+      - name: behandlingsreferanse
+        checks:
+          - missing:
+      - name: behandlingsType
+        checks:
+          - missing:
+      - name: behandlingsresultat

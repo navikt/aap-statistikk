@@ -29,6 +29,9 @@ jobs:
             .nais/bigquery/view_samordning.yml,\
             .nais/bigquery/view_gjeldende_hendelser_saksstatistikk.yml,\
             .nais/bigquery/view_behandlinger_test.yml,\
-            .nais/bigquery/view_behandlinger.yml"
+            .nais/bigquery/view_behandlinger.yml,\
+            .nais/soda-contracts/soda-config.yaml,\
+            .nais/soda-contracts/soda-checks.yaml,\
+            .nais/soda-contracts/naisjob.yaml"
           VAR: project=${{ inputs.project }}
           PRINT_PAYLOAD: true
