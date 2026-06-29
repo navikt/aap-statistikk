@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.avsluttetbehandling
 
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
+import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
 import no.nav.aap.statistikk.behandling.DiagnosePerioderRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
@@ -50,7 +51,15 @@ class AvsluttetBehandlingService(
             error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
         }
 
-        val vedtakstidspunkt = vedtakstidspunktFor(avsluttetBehandling, uthentetBehandling.vedtakstidspunkt())
+        val skalLagre = skalLagre(uthentetBehandling, avsluttetBehandling)
+
+        if (!skalLagre) {
+            logger.info("Resultat var ${uthentetBehandling.resultat()} for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer ikke.")
+            return
+        }
+
+        val vedtakstidspunkt =
+            vedtakstidspunktFor(avsluttetBehandling, uthentetBehandling.vedtakstidspunkt())
         tilkjentYtelseRepository.lagreTilkjentYtelse(
             tilkjentYtelsePåVedtaksdato(avsluttetBehandling, vedtakstidspunkt)
         )
@@ -104,6 +113,27 @@ class AvsluttetBehandlingService(
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
         }
         PrometheusProvider.prometheus.avsluttetBehandlingLagret().increment()
+    }
+
+    private fun skalLagre(
+        uthentetBehandling: Behandling,
+        avsluttetBehandling: AvsluttetBehandling
+    ): Boolean {
+        val resultat = uthentetBehandling.resultat()
+
+        return when (resultat) {
+            ResultatKode.AVBRUTT,
+            ResultatKode.TRUKKET -> false
+
+            ResultatKode.INNVILGET, ResultatKode.AVSLAG -> true
+            ResultatKode.KLAGE_OPPRETTHOLDES,
+            ResultatKode.KLAGE_OMGJØRES,
+            ResultatKode.KLAGE_DELVIS_OMGJØRES,
+            ResultatKode.KLAGE_AVSLÅTT,
+            ResultatKode.KLAGE_TRUKKET -> error("Vil ikke oppstå.")
+
+            null -> true.also { logger.info("Fant ikke resultat for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer.") }
+        }
     }
 
     private fun vedtakstidspunktFor(
