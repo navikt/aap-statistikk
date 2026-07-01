@@ -136,6 +136,30 @@ where behandling_status != 'AVSLUTTET'
   and siste_melding.rnk2 = 1;
 ```
 
+## Soda v4 Contracts
+
+De første sjekkene er implementert i `.nais/soda-contracts/` og deployes sammen
+med BigQuery-ressursene fra `.github/workflows/deploy_bigquery.yml`.
+
+Implementasjonen dekker:
+
+1. `view_gjeldende_hendelser_saksstatistikk` har rader og `behandling_uuid`.
+2. Avsluttede behandlinger skal ha `vedtak_tid`.
+3. Avsluttede behandlinger skal ha `behandling_resultat` som ikke er null eller
+   `UDEFINERT`.
+4. Automatisk `IVERKSETTES` uten `vedtak_tid` skal ha en avsluttet hendelse.
+5. `utbetaling_id` skal bare finnes på `Førstegangsbehandling` og `Revurdering`
+   i `view_behandlinger`.
+
+Sjekker som gjelder ett felt er uttrykt som standard `missing`-sjekker med
+`filter`. Sjekker som allerede er formulert som "forventer null treff", er
+uttrykt som `failed_rows`, der spørringen returnerer radene som feiler.
+
+Neste naturlige steg er å flytte de mer komplekse konsistenssjekkene mellom
+`public_behandling_historikk` og `saksstatistikk` til `failed_rows` mot
+BigQuery-tabellene i `datastream_hendelser` og viewene i
+`saksstatistikk`/`ytelsestatistikk`.
+
 ## Nyttige spørringer
 
 Alle mulige status-sekvenser, gruppert

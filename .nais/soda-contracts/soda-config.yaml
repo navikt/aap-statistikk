@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aap-statistikk-soda-config
+  namespace: aap
+  labels:
+    team: aap
+data:
+  config.yaml: |
+    type: bigquery
+    name: aap-statistikk
+    connection:
+      use_context_auth: true
+      project_id: {{project}}
