@@ -16,7 +16,7 @@ hikaricp = "7.1.0"
 googleCloudBigquery = "2.67.0"
 nimbusJoseJwt = "10.9.1"
 assertj = "3.27.7"
-junitJupiter = "6.1.0"
+junitJupiter = "6.1.1"
 
 [libraries]
 ktorServerTestHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
