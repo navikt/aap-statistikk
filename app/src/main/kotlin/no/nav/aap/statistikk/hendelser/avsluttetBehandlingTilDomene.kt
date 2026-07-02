@@ -113,6 +113,7 @@ private fun Avslagsårsak.tilDomene(): no.nav.aap.statistikk.avsluttetbehandling
         Avslagsårsak.HAR_RETT_TIL_FULLT_UTTAK_ALDERSPENSJON -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.HAR_RETT_TIL_FULLT_UTTAK_ALDERSPENSJON
         Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP
         Avslagsårsak.SYKEPENGEERSTATNINGKVOTE_BRUKT_OPP -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.SYKEPENGEERSTATNINGKVOTE_BRUKT_OPP
+        Avslagsårsak.ANNEN_FULL_YTELSE_AVSLAG -> no.nav.aap.statistikk.avsluttetbehandling.Avslagsårsak.ANNEN_FULL_YTELSE_AVSLAG
     }
 
 fun ResultatKode?.resultatTilDomene(): no.nav.aap.statistikk.avsluttetbehandling.ResultatKode? =
