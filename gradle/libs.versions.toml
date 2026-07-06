@@ -7,7 +7,7 @@ oppgave = "0.0.185"
 utbetaling = "0.0.124"
 postmottak = "6.0.7"
 
-flyway = "12.9.0"
+flyway = "12.10.0"
 detekt = "2.0.0-alpha.5"
 mockk = "1.14.11"
 testContainers = "2.0.5"
