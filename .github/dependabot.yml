@@ -12,6 +12,8 @@ updates:
       directory: /
       commit-message:
         prefix: "AAP-2194"
+      patterns:
+        - "github/codeql-action"
       schedule:
           interval: daily
 
