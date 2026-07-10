@@ -107,15 +107,17 @@ spec:
           WHERE f.behandling_id = b.id
         ) AS perioder_med_fritak_meldeplikt,
         IFNULL(vso_agg.perioder, []) AS vedtatt_stans_opphor,
-        (
-          SELECT MAX(ts)
-          FROM
-            UNNEST(
-              [
-                bh.oppdatert_tid,
-                d.oppdatert_tid,
-                rettighetstyper.oppdatert_tid]) AS ts
-        ) AS rad_endret_tid,
+        CAST(
+          (
+            SELECT MAX(ts)
+            FROM
+              UNNEST(
+                [
+                  bh.oppdatert_tid,
+                  d.oppdatert_tid,
+                  rettighetstyper.oppdatert_tid]) AS ts
+          )
+          AS DATETIME) AS rad_endret_tid,
         concat(
           b.id,
           '-',
