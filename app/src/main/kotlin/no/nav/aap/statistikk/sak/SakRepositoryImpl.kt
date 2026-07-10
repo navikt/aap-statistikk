@@ -121,6 +121,17 @@ WHERE sak.id = ?
         val sakId =
             requireNotNull(sak.id) { "Sak må ha ID før den kan oppdateres. Saksnummer: ${sak.saksnummer}." }
 
+        val gjeldendeStatus = dbConnection.queryFirstOrNull<String>(
+            "SELECT sak_status FROM sak_historikk WHERE sak_id = ? AND gjeldende = TRUE"
+        ) {
+            setParams { setLong(1, sakId) }
+            setRowMapper { row -> row.getString("sak_status") }
+        }
+
+        if (gjeldendeStatus == sak.sakStatus.toString()) {
+            return
+        }
+
         dbConnection.execute("UPDATE sak_historikk SET gjeldende = FALSE where sak_id = ?") {
             setParams { setLong(1, sakId) }
         }
@@ -135,14 +146,5 @@ WHERE sak.id = ?
             }
         }
 
-    }
-
-    override fun tellSaker(): Int {
-        val query = "SELECT COUNT(*) AS total FROM sak"
-        return dbConnection.queryFirst(query) {
-            setRowMapper { row ->
-                row.getInt("total")
-            }
-        }
     }
 }

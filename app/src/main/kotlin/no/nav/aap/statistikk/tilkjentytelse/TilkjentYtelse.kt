@@ -29,6 +29,9 @@ data class TilkjentYtelse(
     val behandlingsReferanse: UUID,
     val perioder: List<TilkjentYtelsePeriode>
 ) {
+    /**
+     * Team Spenn ønsker seg kun utbetalinger som har skjedd, altså der fra-dato er før vedtaksdato.
+     */
     fun begrensPerioderTil(vedtaksdato: LocalDate): TilkjentYtelse {
         return this.copy(perioder = perioder.filter { it.fraDato <= vedtaksdato })
     }

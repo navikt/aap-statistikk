@@ -113,4 +113,63 @@ class SakRepositoryImplTest {
             SakStatus.AVSLUTTET
         )
     }
+
+    @Test
+    fun `oppdaterSak med samme status skal ikke lage ny sak_historikk-rad`(@Postgres dataSource: DataSource) {
+        val saksnummer = Saksnummer("1234")
+        val now = Instant.now()
+        val fixed = Clock.fixed(now, ZoneId.systemDefault())
+
+        val sakService = dataSource.transaction {
+            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val sakService = SakService(SakRepositoryImpl(it), fixed)
+            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
+            sakService
+        }
+
+        // Kall med samme status
+        dataSource.transaction {
+            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val sakService = SakService(SakRepositoryImpl(it), fixed)
+            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
+        }
+
+        val antallHistorikkRader = dataSource.transaction {
+            it.queryFirst("SELECT COUNT(*) AS total FROM sak_historikk") {
+                setRowMapper { row -> row.getInt("total") }
+            }
+        }
+
+        // settInnSak lager 1 rad. Andre kall med samme status skal IKKE lage ny rad.
+        assertThat(antallHistorikkRader).isEqualTo(1)
+    }
+
+    @Test
+    fun `oppdaterSak med endret status skal lage ny sak_historikk-rad`(@Postgres dataSource: DataSource) {
+        val saksnummer = Saksnummer("1234")
+        val now = Instant.now()
+        val fixed = Clock.fixed(now, ZoneId.systemDefault())
+
+        dataSource.transaction {
+            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val sakService = SakService(SakRepositoryImpl(it), fixed)
+            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
+        }
+
+        // Kall med ny status
+        dataSource.transaction {
+            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val sakService = SakService(SakRepositoryImpl(it), fixed)
+            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.AVSLUTTET)
+        }
+
+        val antallHistorikkRader = dataSource.transaction {
+            it.queryFirst("SELECT COUNT(*) AS total FROM sak_historikk") {
+                setRowMapper { row -> row.getInt("total") }
+            }
+        }
+
+        // settInnSak lager 1 rad, oppdaterSak med ny status lager 1 til.
+        assertThat(antallHistorikkRader).isEqualTo(2)
+    }
 }
