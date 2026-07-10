@@ -18,11 +18,22 @@ spec:
     useLegacySql: false
     query: >-
       WITH
+        diagnoser AS (
+          SELECT
+            d.id,
+            d.behandling_id,
+            d.oppdatert_tid AS oppdatert_tid,
+            d.kodeverk,
+            d.diagnosekode,
+            d.bidiagnoser
+          FROM
+            `datastream_hendelser.public_diagnose` d
+        ),
         rettighetstyper AS (
           SELECT
             r.id,
             r.behandling_id,
-            r.datastream_metadata.source_timestamp AS source_timestamp,
+            r.oppdatert_tid AS oppdatert_tid,
             ARRAY(
               SELECT STRUCT(rp.fra_dato, rp.til_dato, rp.rettighetstype)
               FROM `datastream_hendelser.public_rettighetstypeperioder` rp
@@ -74,11 +85,11 @@ spec:
         ARRAY(
           SELECT
             STRUCT(
-              fra_dato as fra_dato,
-              til_dato as til_dato,
+              fra_dato AS fra_dato,
+              til_dato AS til_dato,
               kodeverk AS diagnose_kodeverk,
               diagnosekode AS diagnose_kode,
-              coalesce(bidiagnoser, json '[]') as bidiagnoser_kode)
+              coalesce(bidiagnoser, json '[]') AS bidiagnoser_kode)
           FROM `datastream_hendelser.public_diagnose_periode`
           WHERE behandling_id = b.id
         ) AS diagnoser,
@@ -96,21 +107,15 @@ spec:
           WHERE f.behandling_id = b.id
         ) AS perioder_med_fritak_meldeplikt,
         IFNULL(vso_agg.perioder, []) AS vedtatt_stans_opphor,
-        DATETIME(
-          timestamp_millis(
-            (
-              SELECT MAX(ts)
-              FROM
-                UNNEST(
-                  [
-                    b.datastream_metadata.source_timestamp,
-                    bh.datastream_metadata.source_timestamp,
-                    br.datastream_metadata.source_timestamp,
-                    s.datastream_metadata.source_timestamp,
-                    d.datastream_metadata.source_timestamp,
-                    rettighetstyper.source_timestamp]) AS ts
-            )),
-          'Europe/Oslo') AS rad_endret_tid,
+        (
+          SELECT MAX(ts)
+          FROM
+            UNNEST(
+              [
+                bh.oppdatert_tid,
+                d.oppdatert_tid,
+                rettighetstyper.oppdatert_tid]) AS ts
+        ) AS rad_endret_tid,
         concat(
           b.id,
           '-',
@@ -144,7 +149,7 @@ spec:
         ON
           p.id = s.person_id
       LEFT JOIN
-        `datastream_hendelser.public_diagnose` d
+        diagnoser d
         ON
           d.behandling_id = b.id
       LEFT JOIN

@@ -71,38 +71,38 @@ spec:
           WHERE sag.behandling_id = b.id
         ) AS arbeidsgiver,
         b.opprettet_tid AS reg_tid,
-        DATETIME(
-          TIMESTAMP_MILLIS(
-            GREATEST(
-              b.datastream_metadata.source_timestamp,
-              br.datastream_metadata.source_timestamp,
-              s.datastream_metadata.source_timestamp,
-              GREATEST(
-                COALESCE(
-                  (
-                    SELECT MAX(ssy.datastream_metadata.source_timestamp)
-                    FROM
-                      `datastream_hendelser.public_samordning_statlig_ytelse` ssy
-                    WHERE ssy.behandling_id = b.id
-                  ),
-                  0),
-                COALESCE(
-                  (
-                    SELECT MAX(say.datastream_metadata.source_timestamp)
-                    FROM
-                      `datastream_hendelser.public_samordning_avregning_andre_ytelser`
-                        say
-                    WHERE say.behandling_id = b.id
-                  ),
-                  0),
-                COALESCE(
-                  (
-                    SELECT MAX(su.datastream_metadata.source_timestamp)
-                    FROM `datastream_hendelser.public_samordning_ufore` su
-                    WHERE su.behandling_id = b.id
-                  ),
-                  0)))),
-          'Europe/Oslo') AS endret_tid,
+        GREATEST(
+          COALESCE(
+            (
+              SELECT MAX(ssy.oppdatert_tid)
+              FROM
+                `datastream_hendelser.public_samordning_statlig_ytelse` ssy
+              WHERE ssy.behandling_id = b.id
+            ),
+            b.opprettet_tid),
+          COALESCE(
+            (
+              SELECT MAX(say.oppdatert_tid)
+              FROM
+                `datastream_hendelser.public_samordning_avregning_andre_ytelser`
+                  say
+              WHERE say.behandling_id = b.id
+            ),
+            b.opprettet_tid),
+          COALESCE(
+            (
+              SELECT MAX(su.oppdatert_tid)
+              FROM `datastream_hendelser.public_samordning_ufore` su
+              WHERE su.behandling_id = b.id
+            ),
+            b.opprettet_tid),
+          COALESCE(
+            (
+              SELECT MAX(sag.oppdatert_tid)
+              FROM `datastream_hendelser.public_samordning_arbeidsgiver` sag
+              WHERE sag.behandling_id = b.id
+            ),
+            b.opprettet_tid)) AS endret_tid,
       FROM `ytelsestatistikk.view_gyldige_behandlinger` gyldig
       JOIN `datastream_hendelser.public_behandling` b
         ON gyldig.behandling_id = b.id

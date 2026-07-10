@@ -26,7 +26,7 @@ spec:
              vp.utfall         as utfall,
              vp.innvilgelsesaarsak as innvilgelsesaarsak,
              datetime(vr.opprettet_tidspunkt) as reg_dato,
-             DATETIME(timestamp_millis(greatest(b.datastream_metadata.source_timestamp, v.datastream_metadata.source_timestamp, vr.datastream_metadata.source_timestamp, vp.datastream_metadata.source_timestamp, br.datastream_metadata.source_timestamp, s.datastream_metadata.source_timestamp)), 'Europe/Oslo') AS endret_tid,
+             vr.oppdatert_tid AS endret_tid,
              concat(
                COALESCE(CAST(b.id AS STRING), '0'), '-', 
                COALESCE(CAST(v.id AS STRING), '0'), '-', 

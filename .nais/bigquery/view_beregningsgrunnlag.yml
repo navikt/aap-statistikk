@@ -52,17 +52,7 @@ spec:
         gu.ufore_ytterligere_nedsatt_arbeidsevne_ar
           AS ufore_ytterligere_nedsatt_arbeidsevne_ar,
         DATETIME(pg.opprettet_tidspunkt) AS reg_dato,
-        DATETIME(
-          TIMESTAMP_MILLIS(
-            GREATEST(
-              COALESCE(b.datastream_metadata.source_timestamp, 0),
-              COALESCE(pg.datastream_metadata.source_timestamp, 0),
-              COALESCE(g.datastream_metadata.source_timestamp, 0),
-              COALESCE(gy.datastream_metadata.source_timestamp, 0),
-              COALESCE(gu.datastream_metadata.source_timestamp, 0),
-              COALESCE(s.datastream_metadata.source_timestamp, 0),
-              COALESCE(br.datastream_metadata.source_timestamp, 0))),
-          'Europe/Oslo') AS endret_tid,
+        pg.oppdatert_tid AS endret_tid,
         concat(
           pg.id,
           '-',

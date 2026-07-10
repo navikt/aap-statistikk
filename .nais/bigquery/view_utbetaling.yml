@@ -24,15 +24,7 @@ spec:
         b.type AS behandling_type,
         b.opprettet_tid AS behandling_opprettet_tid,
         bh.utbetaling_id AS utbetaling_id,
-        DATETIME(
-          timestamp_millis(
-            greatest(
-              b.datastream_metadata.source_timestamp,
-              bh.datastream_metadata.source_timestamp,
-              br.datastream_metadata.source_timestamp,
-              s.datastream_metadata.source_timestamp,
-              p.datastream_metadata.source_timestamp)),
-          'Europe/Oslo') AS rad_endret_tid,
+        bh.oppdatert_tid AS rad_endret_tid,
         concat(b.id, '-', bh.id, '-', br.id, '-', s.id, '-', p.id) AS unik_id
       FROM
         `datastream_hendelser.public_behandling` b
