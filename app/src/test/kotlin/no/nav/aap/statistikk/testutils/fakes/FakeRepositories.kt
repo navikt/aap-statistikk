@@ -110,9 +110,6 @@ class FakeSakRepository : SakRepository {
         saker[sak.id!!] = sak.copy(sistOppdatert = LocalDateTime.now())
     }
 
-    override fun tellSaker(): Int {
-        return saker.size
-    }
 }
 
 class FakePersonRepository : IPersonRepository {
