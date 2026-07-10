@@ -24,9 +24,7 @@ spec:
         b.type AS behandling_type,
         b.opprettet_tid AS behandling_opprettet_tid,
         bh.utbetaling_id AS utbetaling_id,
-        GREATEST(
-          bh.oppdatert_tid,
-          sh.oppdatert_tid) AS rad_endret_tid,
+        bh.oppdatert_tid AS rad_endret_tid,
         concat(b.id, '-', bh.id, '-', br.id, '-', s.id, '-', p.id) AS unik_id
       FROM
         `datastream_hendelser.public_behandling` b
@@ -34,11 +32,6 @@ spec:
         `datastream_hendelser.public_sak` s
         ON
           b.sak_id = s.id
-      JOIN
-        `datastream_hendelser.public_sak_historikk` sh
-        ON
-          sh.sak_id = s.id
-          AND sh.gjeldende = TRUE
       JOIN
         `datastream_hendelser.public_behandling_referanse` br
         ON

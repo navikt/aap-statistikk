@@ -85,11 +85,11 @@ spec:
         ARRAY(
           SELECT
             STRUCT(
-              fra_dato as fra_dato,
-              til_dato as til_dato,
+              fra_dato AS fra_dato,
+              til_dato AS til_dato,
               kodeverk AS diagnose_kodeverk,
               diagnosekode AS diagnose_kode,
-              coalesce(bidiagnoser, json '[]') as bidiagnoser_kode)
+              coalesce(bidiagnoser, json '[]') AS bidiagnoser_kode)
           FROM `datastream_hendelser.public_diagnose_periode`
           WHERE behandling_id = b.id
         ) AS diagnoser,
@@ -113,7 +113,6 @@ spec:
             UNNEST(
               [
                 bh.oppdatert_tid,
-                sh.oppdatert_tid,
                 d.oppdatert_tid,
                 rettighetstyper.oppdatert_tid]) AS ts
         ) AS rad_endret_tid,
@@ -133,11 +132,6 @@ spec:
         `datastream_hendelser.public_sak` s
         ON
           b.sak_id = s.id
-      JOIN
-        `datastream_hendelser.public_sak_historikk` sh
-        ON
-          sh.sak_id = s.id
-          AND sh.gjeldende = TRUE
       JOIN
         `datastream_hendelser.public_behandling_referanse` br
         ON

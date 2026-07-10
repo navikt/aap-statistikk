@@ -113,7 +113,6 @@ spec:
             UNNEST(
               [
                 bh.oppdatert_tid,
-                sh.oppdatert_tid,
                 d.oppdatert_tid,
                 rettighetstyper.oppdatert_tid]) AS ts
         ) AS rad_endret_tid,
@@ -133,11 +132,6 @@ spec:
         `datastream_hendelser.public_sak` s
         ON
           b.sak_id = s.id
-      JOIN
-        `datastream_hendelser.public_sak_historikk` sh
-        ON
-          sh.sak_id = s.id
-          AND sh.gjeldende = TRUE
       JOIN
         `datastream_hendelser.public_behandling_referanse` br
         ON
