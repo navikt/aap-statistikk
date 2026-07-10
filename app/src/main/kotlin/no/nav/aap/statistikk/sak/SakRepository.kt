@@ -10,5 +10,4 @@ interface SakRepository : Repository {
     fun hentSakEllernull(saksnummer: Saksnummer): Sak?
     fun settInnSak(sak: Sak): SakId
     fun oppdaterSak(sak: Sak)
-    fun tellSaker(): Int
 }

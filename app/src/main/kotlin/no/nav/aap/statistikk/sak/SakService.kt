@@ -29,14 +29,12 @@ class SakService(
             )
             sak = sakRepository.hentSak(sakId)
         } else {
-            if (sak.sakStatus != sakStatus) {
-                sakRepository.oppdaterSak(
-                    sak.copy(
-                        sakStatus = sakStatus,
-                        sistOppdatert = LocalDateTime.now(clock)
-                    )
+            sakRepository.oppdaterSak(
+                sak.copy(
+                    sakStatus = sakStatus,
+                    sistOppdatert = LocalDateTime.now(clock)
                 )
-            }
+            )
         }
         return sak
     }
