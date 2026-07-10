@@ -41,6 +41,7 @@ spec:
         tp.samordning_uforegradering AS samordning_uforegradering,
         tp.samordning_arbeidsgiver_gradering AS samordning_arbeidsgiver_gradering,
         tp.meldeplikt_gradering AS meldeplikt_gradering,
+        tp.slettet as slettet, -- midlertidig felt, for testing
         DATETIME(ty.opprettet_tidspunkt) AS reg_dato,
         DATETIME(
           TIMESTAMP_MILLIS(
