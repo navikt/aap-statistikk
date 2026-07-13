@@ -46,12 +46,12 @@ spec:
     path: /actuator/live
     initialDelay: 5
     periodSeconds: 5
-    failureThreshold: 21
+    failureThreshold: 540
   readiness:
     path: /actuator/ready
     initialDelay: 5
     periodSeconds: 5
-    failureThreshold: 21
+    failureThreshold: 540
   accessPolicy:
     inbound:
       rules:
