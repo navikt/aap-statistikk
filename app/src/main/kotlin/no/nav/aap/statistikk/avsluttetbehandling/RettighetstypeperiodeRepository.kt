@@ -40,7 +40,14 @@ class RettighetstypeperiodeRepository(
         """.trimIndent()
 
         dbConnection.execute(deletePerioderSql) { setParams { setUUID(1, behandlingReferanse) } }
-        dbConnection.execute(deleteRettighetstypeSql) { setParams { setUUID(1, behandlingReferanse) } }
+        dbConnection.execute(deleteRettighetstypeSql) {
+            setParams {
+                setUUID(
+                    1,
+                    behandlingReferanse
+                )
+            }
+        }
 
         val sql = """
            INSERT INTO rettighetstype (behandling_id, oppdatert_tid)
@@ -51,10 +58,10 @@ VALUES ((SELECT b.id
         ?);
         """.trimIndent()
         val key = dbConnection.executeReturnKey(sql) {
-           setParams {
-               setUUID(1, behandlingReferanse)
-               setLocalDateTime(2, oppdatertTid)
-           }
+            setParams {
+                setUUID(1, behandlingReferanse)
+                setLocalDateTime(2, oppdatertTid)
+            }
         }
 
         val sql2 = """
