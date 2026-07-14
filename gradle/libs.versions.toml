@@ -4,7 +4,7 @@ komponenter = "2.0.95"
 tilgang = "1.0.231"
 behandlingsflyt = "0.0.633"
 oppgave = "0.0.186"
-utbetaling = "0.0.126"
+utbetaling = "0.0.128"
 postmottak = "6.0.7"
 
 flyway = "12.11.0"
