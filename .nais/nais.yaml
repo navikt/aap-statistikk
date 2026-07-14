@@ -93,6 +93,8 @@ spec:
         permission: READWRITE
       - name: ytelsestatistikk
         permission: READWRITE
+      - name: ateam
+        permission: READWRITE
 
   env:
     - name: INTEGRASJON_PDL_URL

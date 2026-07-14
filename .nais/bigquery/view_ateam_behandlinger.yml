@@ -1,0 +1,62 @@
+apiVersion: bigquery.cnrm.cloud.google.com/v1beta1
+kind: BigQueryTable
+metadata:
+  name: view-ateam-behandlinger
+  namespace: aap
+  labels:
+    team: aap
+  annotations:
+    cnrm.cloud.google.com/management-conflict-prevention-policy: none
+    cnrm.cloud.google.com/state-into-spec: absent
+    cnrm.cloud.google.com/project-id: {{project}}
+spec:
+  resourceID: view_ateam_behandlinger
+  description: "Dataprodukt for A-team. Viser én rad per behandling med gjeldende tilstand."
+  datasetRef:
+    external: ateam
+  view:
+    useLegacySql: false
+    query: >-
+      SELECT
+        p.ident AS fodselsnummer,
+        br.referanse AS behandlingreferanse,
+        s.saksnummer AS saksnummer,
+        CAST(NULL AS INT64) AS kode67,
+        CASE
+          WHEN bh.resultat IN ('TRUKKET', 'AVBRUTT') THEN bh.resultat
+          WHEN bh.vedtak_tidspunkt IS NOT NULL THEN 'FERDIGBEHANDLET'
+          ELSE 'UNDER_BEHANDLING'
+          END AS resultat,
+        bh.mottatt_tid AS mottatt_tid,
+        bh.vedtak_tidspunkt AS vedtak_tid,
+        (
+          SELECT MIN(h.hendelsestidspunkt)
+          FROM `datastream_hendelser.public_behandling_historikk` h
+          WHERE
+            h.behandling_id = b.id
+            AND h.status = 'AVSLUTTET'
+        ) AS ferdigbehandlet_tid,
+        bh.oppdatert_tid AS endret_tid,
+        bh.oppdatert_tid AS rad_opprettet,
+        bh.datastream_metadata.source_timestamp AS teknisk_tid
+      FROM
+        `datastream_hendelser.public_behandling` b
+      JOIN
+        `datastream_hendelser.public_behandling_referanse` br
+        ON b.referanse_id = br.id
+      JOIN
+        `datastream_hendelser.public_sak` s
+        ON b.sak_id = s.id
+      JOIN
+        `datastream_hendelser.public_person` p
+        ON p.id = s.person_id
+      JOIN
+        `datastream_hendelser.public_behandling_historikk` bh
+        ON bh.behandling_id = b.id
+      WHERE
+        bh.gjeldende = TRUE
+        AND bh.slettet IS FALSE
+        AND (
+          b.aarsak_til_opprettelse = 'SØKNAD'
+          OR 'SØKNAD' IN UNNEST(JSON_VALUE_ARRAY(b.aarsaker_til_behandling)))
+        AND b.type IN ('Førstegangsbehandling', 'Revurdering')
