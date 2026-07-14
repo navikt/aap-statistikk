@@ -7,13 +7,13 @@ oppgave = "0.0.186"
 utbetaling = "0.0.126"
 postmottak = "6.0.7"
 
-flyway = "12.10.0"
+flyway = "12.11.0"
 detekt = "2.0.0-alpha.5"
 mockk = "1.14.11"
 testContainers = "2.0.5"
 postgresql = "42.7.13"
 hikaricp = "7.1.0"
-googleCloudBigquery = "2.67.0"
+googleCloudBigquery = "2.68.0"
 nimbusJoseJwt = "10.9.1"
 assertj = "3.27.7"
 junitJupiter = "6.1.1"
@@ -35,7 +35,7 @@ behandlingsflytKontrakt = { module = "no.nav.aap.behandlingsflyt:kontrakt", vers
 utbetalKontrakt = { module = "no.nav.aap.utbetal:api-kontrakt", version.ref = "utbetaling" }
 oppgaveKontrakt = { module = "no.nav.aap.oppgave:api-kontrakt", version.ref = "oppgave" }
 postmottakKontrakt = { module = "no.nav.aap.postmottak:kontrakt", version.ref = "postmottak" }
-logback = { module = "ch.qos.logback:logback-classic", version = "1.5.37" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.5.38" }
 logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
 flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flywayPostgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
