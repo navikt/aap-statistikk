@@ -98,7 +98,6 @@ fun <E> testKlient(
 
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
 
-    PrometheusProvider.prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     val server = embeddedServer(Netty, port = 0) {
         commonKtorModule(
             PrometheusProvider.prometheus,

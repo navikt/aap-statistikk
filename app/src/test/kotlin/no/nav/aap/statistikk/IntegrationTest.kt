@@ -233,9 +233,8 @@ class IntegrationTest {
             dbConfig,
             azureConfig = azureConfig,
         ) { motor ->
-            referanse = prosesserHendelserOgVerifiserBehandling(
-                dataSource, hendelserFraDBDump, motor
-            )
+            oppdatertBehandlingHendelse(avsluttetBehandlingHendelser.last().data)
+            motor.kjørJobber()
         }
 
         val alleSakstatistikkHendelser = dataSource.transaction {
