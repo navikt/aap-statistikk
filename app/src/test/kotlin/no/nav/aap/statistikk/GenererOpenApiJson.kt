@@ -9,9 +9,11 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
+import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
+import com.papsign.ktor.openapigen.model.info.InfoModel
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.net.URI
@@ -42,10 +44,10 @@ fun main() {
     System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
 
     val server = embeddedServer(Netty, port = 8080) {
+        commonKtorModule(PrometheusProvider.prometheus, azureConfig, InfoModel(title = "AAP - Statistikk", version = "0.0.1"))
         module(
             transactionExecutor = noOpTransactionExecutor,
             jobbAppender = MockJobbAppender(),
-            azureConfig = azureConfig,
             motorApiCallback = { },
             lagreStoppetHendelseJobb = mockk(),
             lagreAvklaringsbehovHendelseJobb = mockk(),

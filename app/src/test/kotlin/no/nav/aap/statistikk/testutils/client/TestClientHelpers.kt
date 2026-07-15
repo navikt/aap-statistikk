@@ -1,8 +1,17 @@
 package no.nav.aap.statistikk.testutils.client
 
+import com.google.cloud.NoCredentials
+import com.google.cloud.bigquery.BigQuery
+import com.google.cloud.bigquery.BigQueryOptions
+import com.google.cloud.bigquery.DatasetInfo
+import com.papsign.ktor.openapigen.model.info.InfoModel
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.runBlocking
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
@@ -10,32 +19,28 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.testutil.ManuellMotorImpl
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
-import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.AppConfig
+import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
-import no.nav.aap.statistikk.bigquery.IBigQueryClient
+import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.bigquery.SchemaRegistry
 import no.nav.aap.statistikk.bigquery.schemaRegistryYtelseStatistikk
 import no.nav.aap.statistikk.db.DbConfig
+import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.postgresRepositoryRegistry
-import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.startUp
-import com.google.cloud.NoCredentials
-import com.google.cloud.bigquery.BigQuery
-import com.google.cloud.bigquery.BigQueryOptions
-import com.google.cloud.bigquery.DatasetInfo
-import no.nav.aap.statistikk.testutils.fakes.FakeBigQueryClient
+import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import org.testcontainers.gcloud.BigQueryEmulatorContainer
@@ -46,7 +51,7 @@ import java.net.URI
 import java.nio.file.Path
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 
 private val logger = LoggerFactory.getLogger("TestClientHelpers")
 
@@ -93,11 +98,16 @@ fun <E> testKlient(
 
     val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
 
+    PrometheusProvider.prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     val server = embeddedServer(Netty, port = 0) {
+        commonKtorModule(
+            PrometheusProvider.prometheus,
+            azureConfig,
+            InfoModel(title = "AAP - Statistikk", version = "0.0.1")
+        )
         module(
             transactionExecutor,
             jobbAppender,
-            azureConfig,
             {},
             lagreStoppetHendelseJobb,
             lagreAvklaringsbehovHendelseJobb,
@@ -157,7 +167,7 @@ fun <E> testKlientNoInjectionManuell(
         jwksUri = "http://localhost:8081/jwks",
         issuer = "tilgang"
     ),
-    bigQueryClient: IBigQueryClient = FakeBigQueryClient,
+    bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository(),
     test: TestClient.(ManuellMotorImpl) -> E,
 ): E {
     lateinit var motor: ManuellMotorImpl
@@ -179,15 +189,18 @@ fun <E> testKlientNoInjectionManuell(
         responseHandler = DefaultResponseHandler()
     )
 
+    PrometheusProvider.prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     val server = embeddedServer(Netty, port = 0) {
         startUp(
             dbConfig,
             azureConfig,
-            bigQueryClient,
-            defaultGatewayProvider { register<FakePdlGateway>() }
-        ) { ds, gp, jobber ->
-            ManuellMotorImpl(ds, jobber, postgresRepositoryRegistry, gp).also { motor = it }
-        }
+            defaultGatewayProvider { register<FakePdlGateway>() },
+            bqYtelseRepository,
+            { ds, gp, jobber ->
+                ManuellMotorImpl(ds, jobber, postgresRepositoryRegistry, gp).also { motor = it }
+            },
+
+            )
     }.start()
 
     val port = runBlocking { server.engine.resolvedConnectors().first().port }

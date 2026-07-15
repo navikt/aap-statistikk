@@ -12,7 +12,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.statistikk.PrometheusProvider
+import no.nav.aap.statistikk.WithMetrics
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.security.MessageDigest
@@ -26,9 +28,8 @@ interface PdlGateway : Gateway {
 
 private const val BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING = "B287"
 
-class PdlGraphQLGateway :
-    PdlGateway {
-    companion object : Factory<PdlGateway> {
+class PdlGraphQLGateway : PdlGateway {
+    companion object : Factory<PdlGateway>, WithMetrics {
         private val pdlCache = Caffeine.newBuilder()
             .maximumSize(1000)
             .expireAfterWrite(Duration.ofHours(4))
@@ -39,8 +40,8 @@ class PdlGraphQLGateway :
             return PdlGraphQLGateway()
         }
 
-        init {
-            CaffeineCacheMetrics.monitor(PrometheusProvider.prometheus, pdlCache, "pdl")
+        override fun registrerMetrics(registry: MeterRegistry) {
+            CaffeineCacheMetrics.monitor(registry, pdlCache, "pdl")
         }
     }
 

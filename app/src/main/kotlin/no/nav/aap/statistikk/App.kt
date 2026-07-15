@@ -47,6 +47,7 @@ import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
@@ -81,8 +82,8 @@ fun main() {
         startUp(
             dbConfig,
             azureConfig,
-            bigQueryClientYtelse,
-            gatewayProvider
+            gatewayProvider,
+            BQYtelseRepository(bigQueryClientYtelse)
         )
     }.start(wait = true)
 }
@@ -90,18 +91,33 @@ fun main() {
 fun Application.startUp(
     dbConfig: DbConfig,
     azureConfig: AzureConfig,
-    bigQueryClientYtelse: IBigQueryClient,
     gatewayProvider: GatewayProvider,
+    bqYtelseRepository: IBQYtelsesstatistikkRepository,
     motorFactory: (DataSource, GatewayProvider, List<JobbSpesifikasjon>) -> Motor = { ds, gp, jobber ->
         motor(ds, gp, jobber)
     },
 ) {
     log.info("Starter.")
 
+    // commonKtorModule registrerer LogbackMetrics som MeterFilter — må kalles før
+    // noe annet registrerer meters (HikariCP, Motor, osv.)
+    commonKtorModule(
+        PrometheusProvider.prometheus, azureConfig, InfoModel(
+            title = "AAP - Statistikk",
+            version = "0.0.1",
+            description = """
+                App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk
+                <a href="https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk">Token Generator</a> for å få token.
+                """.trimIndent(),
+            contact = ContactModel("Slack: #po_aap_dvh"),
+        )
+    )
+
+    // Registrer gateway-metrics etter at MeterFilter er satt opp
+    PdlGraphQLGateway.registrerMetrics(PrometheusProvider.prometheus)
+
     val flyway = Migrering(dbConfig)
     val dataSource = flyway.createAndMigrateDataSource()
-
-    val bqYtelseRepository = BQYtelseRepository(bigQueryClientYtelse)
 
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
 
@@ -165,7 +181,6 @@ fun Application.startUp(
     module(
         transactionExecutor,
         motorJobbAppender,
-        azureConfig,
         motorApiCallback,
         lagreStoppetHendelseJobb,
         lagreAvklaringsbehovHendelseJobb,
@@ -196,7 +211,6 @@ fun motor(
 fun Application.module(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
-    azureConfig: AzureConfig,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
@@ -208,18 +222,6 @@ fun Application.module(
     monitoring()
     statusPages()
     kodeverk(transactionExecutor)
-
-    commonKtorModule(
-        PrometheusProvider.prometheus, azureConfig, InfoModel(
-            title = "AAP - Statistikk",
-            version = "0.0.1",
-            description = """
-                App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk
-                <a href="https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk">Token Generator</a> for å få token.
-                """.trimIndent(),
-            contact = ContactModel("Slack: #po_aap_dvh"),
-        )
-    )
 
     routing {
         authenticate(AZURE) {
@@ -273,7 +275,10 @@ private fun Application.statusPages() {
                 "Noe gikk galt. Exception-type: ${cause.javaClass} Query string: ${call.request.queryString()}",
                 cause
             )
-            call.respondText(text = "500: Internal Server Error", status = HttpStatusCode.InternalServerError)
+            call.respondText(
+                text = "500: Internal Server Error",
+                status = HttpStatusCode.InternalServerError
+            )
         }
     }
 }

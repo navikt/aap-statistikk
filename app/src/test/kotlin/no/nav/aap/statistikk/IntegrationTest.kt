@@ -35,9 +35,7 @@ import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.testutils.client.TestClient
 import no.nav.aap.statistikk.testutils.client.testKlientNoInjectionManuell
-import no.nav.aap.statistikk.testutils.fakes.FakeBigQueryClient
 import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
-import no.nav.aap.statistikk.vilkårsresultat.Vilkårtype
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
@@ -235,8 +233,9 @@ class IntegrationTest {
             dbConfig,
             azureConfig = azureConfig,
         ) { motor ->
-            oppdatertBehandlingHendelse(avsluttetBehandlingHendelser.last().data)
-            motor.kjørJobber()
+            referanse = prosesserHendelserOgVerifiserBehandling(
+                dataSource, hendelserFraDBDump, motor
+            )
         }
 
         val alleSakstatistikkHendelser = dataSource.transaction {
@@ -347,7 +346,6 @@ class IntegrationTest {
         testKlientNoInjectionManuell(
             dbConfig,
             azureConfig = azureConfig,
-            FakeBigQueryClient,
         ) { motor ->
 
             prosesserHendelserOgVerifiserBehandling(

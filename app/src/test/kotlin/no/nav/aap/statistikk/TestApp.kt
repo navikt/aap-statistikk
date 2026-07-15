@@ -3,6 +3,7 @@ package no.nav.aap.statistikk
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
 import no.nav.aap.statistikk.testutils.Fakes
@@ -56,7 +57,8 @@ fun main() {
                 issuer = "tilgang",
                 tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
                 clientSecret = "xxx",
-            ), bigQueryClient, defaultGatewayProvider()
+            ), defaultGatewayProvider(),
+            bqYtelseRepository = BQYtelseRepository(bigQueryClient)
         )
     }.start(wait = true)
 }
