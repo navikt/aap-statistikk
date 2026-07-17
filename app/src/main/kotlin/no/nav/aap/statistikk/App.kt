@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.JobbInput
@@ -48,6 +49,7 @@ import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
+import no.nav.aap.tilgang.TeamAap
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
@@ -174,8 +176,9 @@ fun Application.startUp(
 
     val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
+    val påkrevdeRollerMotor = if (Miljø.erProd()) listOf(TeamAap.id) else emptyList()
     val motorApiCallback: NormalOpenAPIRoute.() -> Unit = {
-        motorApi(dataSource)
+        motorApi(dataSource, påkrevdeRollerMotor)
     }
 
     module(
