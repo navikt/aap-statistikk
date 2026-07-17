@@ -42,6 +42,8 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+        groups:
+          - id: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5 #NAIS_TEAM_AAP
   liveness:
     path: /actuator/live
     initialDelay: 5
@@ -115,3 +117,5 @@ spec:
       value: "60"
     - name: JDK_JAVA_OPTIONS
       value: "-XX:+UseParallelGC -XX:ActiveProcessorCount=4"
+    - name: NAIS_TEAM_AAP
+      value: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5
