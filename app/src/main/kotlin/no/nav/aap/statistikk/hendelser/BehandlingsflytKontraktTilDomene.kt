@@ -83,7 +83,7 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.AKTIVITETSMELDING -> AKTIVITETSMELDING
         Vurderingsbehov.MELDEKORT -> MELDEKORT
         Vurderingsbehov.FRITAK_MELDEPLIKT -> MELDEKORT
-        Vurderingsbehov.VURDER_FRITAK_MELDEPLIKT -> MELDEKORT
+        Vurderingsbehov.VURDER_FRITAK_MELDEPLIKT -> VURDER_FRITAK_MELDEPLIKT
         Vurderingsbehov.LEGEERKLÆRING -> LEGEERKLÆRING
         Vurderingsbehov.AVVIST_LEGEERKLÆRING -> AVVIST_LEGEERKLÆRING
         Vurderingsbehov.DIALOGMELDING -> DIALOGMELDING
@@ -97,7 +97,7 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.LOVVALG_OG_MEDLEMSKAP -> LOVVALG_OG_MEDLEMSKAP
         Vurderingsbehov.FORUTGAENDE_MEDLEMSKAP -> FORUTGAENDE_MEDLEMSKAP
         Vurderingsbehov.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND -> SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
-        Vurderingsbehov.FASTSETT_ARBEIDSEVNE -> SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
+        Vurderingsbehov.FASTSETT_ARBEIDSEVNE -> FASTSETT_ARBEIDSEVNE
         Vurderingsbehov.BARNETILLEGG -> BARNETILLEGG
         Vurderingsbehov.INSTITUSJONSOPPHOLD -> INSTITUSJONSOPPHOLD
         Vurderingsbehov.SAMORDNING_OG_AVREGNING -> SAMORDNING_OG_AVREGNING

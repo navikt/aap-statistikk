@@ -83,6 +83,10 @@ dette prosjektet.
 
 Never use external contract types (e.g. `behandlingsflyt.kontrakt`) directly in domain logic, repositories, or database storage. Always map to local domain classes first. This keeps the domain decoupled from external contracts.
 
+### Contract Enum Mappings
+
+When `behandlingsflyt.kontrakt` adds enum values that belong in local domain enums, add the local enum values too and map by identical names. Only add alias mappings when the domain model really needs a different bucket.
+
 ### BQBehandling Duplication Logic
 
 **Important**: BQBehandling events are NOT saved if they are duplicates of the last event.
