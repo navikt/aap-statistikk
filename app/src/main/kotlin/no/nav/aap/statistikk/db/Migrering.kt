@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.db
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.aap.statistikk.PrometheusProvider
 import org.flywaydb.core.Flyway
+import javax.sql.DataSource
 
 class Migrering(config: DbConfig) {
     private val dataSource = HikariDataSource().apply {
@@ -20,7 +21,7 @@ class Migrering(config: DbConfig) {
         .validateMigrationNaming(true)
         .load()
 
-    fun createAndMigrateDataSource(): HikariDataSource {
+    fun createAndMigrateDataSource(): DataSource {
         flyway.migrate()
 
         return dataSource  // Returnerer den konfigurerte og migrerte datasourcen

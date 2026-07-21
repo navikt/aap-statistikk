@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk
 
+import com.papsign.ktor.openapigen.model.info.InfoModel
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.mockk.mockk
@@ -7,13 +8,12 @@ import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
+import no.nav.aap.komponenter.server.auth.IdentityProvider
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.MockJobbAppender
 import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
-import com.papsign.ktor.openapigen.model.info.InfoModel
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.net.URI
@@ -21,30 +21,20 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 
 fun main() {
-    val azureFake = Fakes.AzureFake(port = 8081)
-    azureFake.start()
+    val texasFake = Fakes.TexasFake(port = 8081)
+    texasFake.start()
 
-    val azureConfig = AzureConfig(
-        tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
-        clientId = "xxx",
-        clientSecret = "xxx",
-        jwksUri = "http://localhost:${azureFake.port()}/token",
-        issuer = "xxx"
-    )
-
-    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
-    System.setProperty("azure.app.client.id", azureConfig.clientId)
-    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
-    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
-    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
-    System.setProperty("nais.token.endpoint", azureConfig.tokenEndpoint.toString())
     val randomUUID = UUID.randomUUID()
     System.setProperty("integrasjon.postmottak.azp", randomUUID.toString())
     System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
     System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
 
     val server = embeddedServer(Netty, port = 8080) {
-        commonKtorModule(PrometheusProvider.prometheus, azureConfig, InfoModel(title = "AAP - Statistikk", version = "0.0.1"))
+        commonKtorModule(
+            PrometheusProvider.prometheus,
+            InfoModel(title = "AAP - Statistikk", version = "0.0.1"),
+            identityProvider = IdentityProvider.ENTRA_ID
+        )
         module(
             transactionExecutor = noOpTransactionExecutor,
             jobbAppender = MockJobbAppender(),

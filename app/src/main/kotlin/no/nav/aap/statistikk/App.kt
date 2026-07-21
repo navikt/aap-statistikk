@@ -4,6 +4,7 @@ import com.papsign.ktor.openapigen.model.info.ContactModel
 import com.papsign.ktor.openapigen.model.info.InfoModel
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -18,10 +19,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.gateway.GatewayProvider
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.miljo.Miljø
-import no.nav.aap.komponenter.server.AZURE
+import no.nav.aap.komponenter.server.auth.IdentityProvider
 import no.nav.aap.komponenter.server.commonKtorModule
+import no.nav.aap.komponenter.server.plugins.NavIdentInterceptor
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbSpesifikasjon
 import no.nav.aap.motor.Motor
@@ -46,7 +47,6 @@ import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
-import no.nav.aap.statistikk.server.authenticate.azureconfigFraMiljøVariabler
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
 import no.nav.aap.tilgang.TeamAap
@@ -66,8 +66,6 @@ fun main() {
     val bgConfigYtelse = BigQueryConfigFromEnv("ytelsestatistikk")
     val bigQueryClientYtelse = BigQueryClient(bgConfigYtelse, schemaRegistryYtelseStatistikk)
 
-    val azureConfig = azureconfigFraMiljøVariabler()
-
     val gatewayProvider = defaultGatewayProvider()
 
 
@@ -83,7 +81,6 @@ fun main() {
 
         startUp(
             dbConfig,
-            azureConfig,
             gatewayProvider,
             BQYtelseRepository(bigQueryClientYtelse)
         )
@@ -92,7 +89,6 @@ fun main() {
 
 fun Application.startUp(
     dbConfig: DbConfig,
-    azureConfig: AzureConfig,
     gatewayProvider: GatewayProvider,
     bqYtelseRepository: IBQYtelsesstatistikkRepository,
     motorFactory: (DataSource, GatewayProvider, List<JobbSpesifikasjon>) -> Motor = { ds, gp, jobber ->
@@ -104,15 +100,17 @@ fun Application.startUp(
     // commonKtorModule registrerer LogbackMetrics som MeterFilter — må kalles før
     // noe annet registrerer meters (HikariCP, Motor, osv.)
     commonKtorModule(
-        PrometheusProvider.prometheus, azureConfig, InfoModel(
+        prometheus = PrometheusProvider.prometheus,
+        identityProvider = IdentityProvider.ENTRA_ID,
+        infoModel = InfoModel(
             title = "AAP - Statistikk",
             version = "0.0.1",
             description = """
-                App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk
-                <a href="https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk">Token Generator</a> for å få token.
-                """.trimIndent(),
+                        App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk
+                        <a href="https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk">Token Generator</a> for å få token.
+                        """.trimIndent(),
             contact = ContactModel("Slack: #po_aap_dvh"),
-        )
+        ),
     )
 
     // Registrer gateway-metrics etter at MeterFilter er satt opp
@@ -168,7 +166,7 @@ fun Application.startUp(
         // Helt til slutt, nå som vi har stanset Motor, etc. Lukk database-koblingen.
         @Suppress("TooGenericExceptionCaught")
         try {
-            dataSource.close()
+            (dataSource as? HikariDataSource)?.close()
         } catch (e: Exception) {
             log.info("Exception etter ApplicationStopped: ${e.message}", e)
         }
@@ -227,7 +225,9 @@ fun Application.module(
     kodeverk(transactionExecutor)
 
     routing {
-        authenticate(AZURE) {
+        authenticate(IdentityProvider.ENTRA_ID.value) {
+            install(NavIdentInterceptor)
+
             apiRouting {
                 mottaStoppetBehandling(transactionExecutor, jobbAppender, lagreStoppetHendelseJobb)
                 mottaOppdatertBehandling(

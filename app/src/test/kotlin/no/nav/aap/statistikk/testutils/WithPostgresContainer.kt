@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.testutils
 
-import com.zaxxer.hikari.HikariDataSource
 import no.nav.aap.statistikk.AppConfig
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.Migrering
@@ -38,7 +37,7 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
                 )
             )
         }
-        private var dataSource: HikariDataSource
+        private var dataSource: DataSource
         private val flyway: Migrering
         private val dbConfig: DbConfig
         private var truncateStatement: String

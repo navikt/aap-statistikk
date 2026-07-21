@@ -1,7 +1,6 @@
 package no.nav.aap.statistikk
 
 import io.mockk.mockk
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.testutils.*
@@ -14,16 +13,13 @@ import org.junit.jupiter.api.Test
 class ApplicationTest {
 
     @Test
-    fun `kan poste mottastatistikk, og jobb blir opprettet`(
-        @Fakes azureConfig: AzureConfig
-    ) {
+    fun `kan poste mottastatistikk, og jobb blir opprettet`() {
         val jobbAppender = MockJobbAppender()
 
         testKlient(
             transactionExecutor = noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender = jobbAppender,
-            azureConfig = azureConfig,
             lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, mockk())
         ) {
             @Language("JSON") val body = """{
@@ -74,9 +70,7 @@ class ApplicationTest {
     }
 
     @Test
-    fun `godtar payload med ukjente felter`(
-        @Fakes azureConfig: AzureConfig
-    ) {
+    fun `godtar payload med ukjente felter`() {
         @Language("JSON") val payload = """{
   "saksnummer": "123456789",
   "sakStatus": "OPPRETTET",
@@ -125,7 +119,6 @@ class ApplicationTest {
         testKlient(
             noOpTransactionExecutor,
             motorMock(),
-            azureConfig,
             LagreStoppetHendelseJobb(jobbAppender, mockk()),
             jobbAppender,
         ) {
