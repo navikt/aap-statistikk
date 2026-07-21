@@ -140,5 +140,6 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.VURDER_KRAV -> VURDER_KRAV
         Vurderingsbehov.REVURDER_INNTEKTSBORTFALL -> REVURDER_INNTEKTSBORTFALL
         Vurderingsbehov.VURDER_AVSLAG_11_27 -> VURDER_AVSLAG_11_27
+        Vurderingsbehov.VURDER_ARBEIDSOPPTRAPPING -> VURDER_ARBEIDSOPPTRAPPING
     }
 }
