@@ -24,6 +24,10 @@ fun main() {
     val texasFake = Fakes.TexasFake(port = 8081)
     texasFake.start()
 
+    System.setProperty("NAIS_TOKEN_ENDPOINT", "http://localhost:8081/token")
+    System.setProperty("NAIS_TOKEN_EXCHANGE_ENDPOINT", "http://localhost:8081/token/exchange")
+    System.setProperty("NAIS_TOKEN_INTROSPECTION_ENDPOINT", "http://localhost:8081/introspect")
+
     val randomUUID = UUID.randomUUID()
     System.setProperty("integrasjon.postmottak.azp", randomUUID.toString())
     System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())

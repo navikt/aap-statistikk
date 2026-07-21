@@ -21,12 +21,14 @@ application {
 }
 
 tasks.register<JavaExec>("runTestApp") {
+    description = "Kjør TestApp."
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("no.nav.aap.statistikk.TestAppKt")
     workingDir = rootDir
 }
 
 tasks.register<JavaExec>("genererOpenApi") {
+    description = "Generer OpenAPI JSON, lagre i openapi.json i rotmappen."
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("no.nav.aap.statistikk.GenererOpenApiJsonKt")
     workingDir = rootDir
