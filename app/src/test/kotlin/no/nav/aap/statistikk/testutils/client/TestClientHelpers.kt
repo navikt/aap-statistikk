@@ -108,16 +108,9 @@ class TestClient(private val client: RestClient<InputStream>, private val url: S
     fun postBehandlingsflytHendelse(
         hendelse: StoppetBehandling
     ) {
-
-        val texasToken = client.post<Unit, Fakes.TestToken>(
-            URI.create(requiredConfigForKey("NAIS_TOKEN_ENDPOINT")),
-            PostRequest(Unit)
-        )
-
-
         client.post<StoppetBehandling, Any>(
             URI.create("$url/stoppetBehandling"),
-            PostRequest(hendelse, currentToken = OidcToken(texasToken!!.access_token))
+            PostRequest(hendelse)
         )
     }
 
