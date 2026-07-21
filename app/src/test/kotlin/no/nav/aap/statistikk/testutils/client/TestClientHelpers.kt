@@ -12,13 +12,15 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
+import no.nav.aap.komponenter.server.auth.IdentityProvider
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.testutil.ManuellMotorImpl
@@ -39,6 +41,7 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.startUp
+import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.slf4j.LoggerFactory
@@ -51,47 +54,25 @@ import java.net.URI
 import java.nio.file.Path
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 private val logger = LoggerFactory.getLogger("TestClientHelpers")
 
-/**
- * @param azureConfig Send inn egen her om det skal gjøres autentiserte kall.
- */
 fun <E> testKlient(
     transactionExecutor: TransactionExecutor,
     motor: Motor,
-    azureConfig: AzureConfig = AzureConfig(
-        clientId = "tilgang",
-        jwksUri = "http://localhost:8081/jwks",
-        issuer = "tilgang",
-        tokenEndpoint = URI.create("http://localhost:8081/jwks"),
-        clientSecret = "xxx",
-    ),
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
     jobbAppender: JobbAppender,
     test: TestClient.() -> E,
 ): E? {
     val res: E?
-
-    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
-    System.setProperty("azure.app.client.id", azureConfig.clientId)
-    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
-    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
-    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
-    val randomUUID = UUID.randomUUID()
-    System.setProperty("integrasjon.postmottak.azp", randomUUID.toString())
-    System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
-    System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
-
     System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
 
     System.setProperty("enhet.retry.max.retries", "3")
     System.setProperty("enhet.retry.delay.seconds", "1")
 
     val restClient = RestClient(
-        config = ClientConfig(scope = "AAP_SCOPES"),
-        tokenProvider = ClientCredentialsTokenProvider,
+        config = ClientConfig(scope = "statisitkk"),
+        tokenProvider = AzureM2MTokenProvider,
         responseHandler = DefaultResponseHandler(),
     )
     motor.start()
@@ -101,8 +82,8 @@ fun <E> testKlient(
     val server = embeddedServer(Netty, port = 0) {
         commonKtorModule(
             PrometheusProvider.prometheus,
-            azureConfig,
-            InfoModel(title = "AAP - Statistikk", version = "0.0.1")
+            InfoModel(title = "AAP - Statistikk", version = "0.0.1"),
+            identityProvider = IdentityProvider.ENTRA_ID
         )
         module(
             transactionExecutor,
@@ -127,8 +108,16 @@ class TestClient(private val client: RestClient<InputStream>, private val url: S
     fun postBehandlingsflytHendelse(
         hendelse: StoppetBehandling
     ) {
+
+        val texasToken = client.post<Unit, Fakes.TestToken>(
+            URI.create(requiredConfigForKey("NAIS_TOKEN_ENDPOINT")),
+            PostRequest(Unit)
+        )
+
+
         client.post<StoppetBehandling, Any>(
-            URI.create("$url/stoppetBehandling"), PostRequest(hendelse)
+            URI.create("$url/stoppetBehandling"),
+            PostRequest(hendelse, currentToken = OidcToken(texasToken!!.access_token))
         )
     }
 
@@ -161,21 +150,10 @@ class TestClient(private val client: RestClient<InputStream>, private val url: S
 
 fun <E> testKlientNoInjectionManuell(
     dbConfig: DbConfig,
-    azureConfig: AzureConfig = AzureConfig(
-        clientId = "tilgang",
-        jwksUri = "http://localhost:8081/jwks",
-        issuer = "tilgang"
-    ),
     bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository(),
     test: TestClient.(ManuellMotorImpl) -> E,
 ): E {
     lateinit var motor: ManuellMotorImpl
-
-    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
-    System.setProperty("azure.app.client.id", azureConfig.clientId)
-    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
-    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
-    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
 
     System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
 
@@ -184,7 +162,7 @@ fun <E> testKlientNoInjectionManuell(
 
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
-        tokenProvider = ClientCredentialsTokenProvider,
+        tokenProvider = AzureM2MTokenProvider,
         responseHandler = DefaultResponseHandler()
     )
 
@@ -192,7 +170,6 @@ fun <E> testKlientNoInjectionManuell(
     val server = embeddedServer(Netty, port = 0) {
         startUp(
             dbConfig,
-            azureConfig,
             defaultGatewayProvider { register<FakePdlGateway>() },
             bqYtelseRepository,
             { ds, gp, jobber ->

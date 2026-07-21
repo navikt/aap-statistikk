@@ -2,7 +2,6 @@ package no.nav.aap.statistikk
 
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.statistikk.bigquery.BQYtelseRepository
 import no.nav.aap.statistikk.bigquery.BigQueryClient
 import no.nav.aap.statistikk.bigquery.BigQueryConfig
@@ -11,28 +10,14 @@ import no.nav.aap.statistikk.testutils.client.bigQueryContainer
 import no.nav.aap.statistikk.testutils.client.postgresTestConfig
 import no.nav.aap.statistikk.testutils.client.schemaRegistry
 import org.slf4j.LoggerFactory
-import java.net.URI
 import java.util.*
 
 private val logger = LoggerFactory.getLogger("TestApp")
 
 fun main() {
-    val azureFake = Fakes.AzureFake(port = 8081)
-    azureFake.start()
+    val texasFake = Fakes.TexasFake(port = 8081)
+    texasFake.start()
 
-    val azureConfig = AzureConfig(
-        tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
-        clientId = "xxx",
-        clientSecret = "xxx",
-        jwksUri = "xxx",
-        issuer = "xxx"
-    )
-
-    System.setProperty("azure.openid.config.token.endpoint", azureConfig.tokenEndpoint.toString())
-    System.setProperty("azure.app.client.id", azureConfig.clientId)
-    System.setProperty("azure.app.client.secret", azureConfig.clientSecret)
-    System.setProperty("azure.openid.config.jwks.uri", azureConfig.jwksUri)
-    System.setProperty("azure.openid.config.issuer", azureConfig.issuer)
     val randomUUID = UUID.randomUUID()
     System.setProperty("integrasjon.postmottak.azp", randomUUID.toString())
     System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
@@ -51,13 +36,7 @@ fun main() {
 
     embeddedServer(Netty, port = 8080, watchPaths = listOf("classes")) {
         startUp(
-            pgConfig, AzureConfig(
-                clientId = "tilgang",
-                jwksUri = "http://localhost:${azureFake.port()}/jwks",
-                issuer = "tilgang",
-                tokenEndpoint = URI.create("http://localhost:${azureFake.port()}/token"),
-                clientSecret = "xxx",
-            ), defaultGatewayProvider(),
+            pgConfig, defaultGatewayProvider(),
             bqYtelseRepository = BQYtelseRepository(bigQueryClient)
         )
     }.start(wait = true)

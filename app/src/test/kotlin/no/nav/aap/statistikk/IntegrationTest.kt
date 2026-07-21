@@ -11,7 +11,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.*
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
@@ -56,7 +55,7 @@ class IntegrationTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            val azp = UUID.randomUUID().toString()
+            val azp = Fakes.TEST_AZP_UUID.toString()
             System.setProperty("integrasjon.postmottak.azp", azp)
             System.setProperty("integrasjon.behandlingsflyt.azp", azp)
             System.setProperty("integrasjon.oppgave.azp", azp)
@@ -100,7 +99,6 @@ class IntegrationTest {
     fun `dump av ekte hendelser`(
         @Postgres dbConfig: DbConfig,
         @Postgres dataSource: DataSource,
-        @Fakes azureConfig: AzureConfig,
     ) {
         // hent på nytt slik: select payload, opprettet_tid, type from jobb where sak_id = 783332 order by opprettet_tid
         // og lagre output som json
@@ -133,7 +131,6 @@ class IntegrationTest {
         lateinit var referanse: UUID
         testKlientNoInjectionManuell(
             dbConfig,
-            azureConfig = azureConfig,
         ) { motor ->
             referanse = prosesserHendelserOgVerifiserBehandling(
                 dataSource, hendelserFraDBDump, motor
@@ -231,7 +228,6 @@ class IntegrationTest {
         // DEL 2: test resending
         testKlientNoInjectionManuell(
             dbConfig,
-            azureConfig = azureConfig,
         ) { motor ->
             oppdatertBehandlingHendelse(avsluttetBehandlingHendelser.last().data)
             motor.kjørJobber()
@@ -289,7 +285,6 @@ class IntegrationTest {
     fun `dump av hendelser for klage`(
         @Postgres dbConfig: DbConfig,
         @Postgres dataSource: DataSource,
-        @Fakes azureConfig: AzureConfig
     ) {
         /**
          * Filen er lagd slik:
@@ -344,7 +339,6 @@ class IntegrationTest {
 
         testKlientNoInjectionManuell(
             dbConfig,
-            azureConfig = azureConfig,
         ) { motor ->
 
             prosesserHendelserOgVerifiserBehandling(
@@ -367,7 +361,6 @@ class IntegrationTest {
     fun `test riktig kontor`(
         @Postgres dbConfig: DbConfig,
         @Postgres dataSource: DataSource,
-        @Fakes azureConfig: AzureConfig,
     ) {
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
         val personIdent = "2718281828"
@@ -412,7 +405,7 @@ class IntegrationTest {
             søknadIder = emptyList()
         )
 
-        testKlientNoInjectionManuell(dbConfig, azureConfig = azureConfig) { motor ->
+        testKlientNoInjectionManuell(dbConfig) { motor ->
             fun verifiserHendelseRekkefølge(
                 expectedValues: List<Triple<String?, String?, BehandlingMetode>>
             ) {
@@ -816,7 +809,6 @@ class IntegrationTest {
     fun `test flyt`(
         @Postgres dbConfig: DbConfig,
         @Postgres dataSource: DataSource,
-        @Fakes azureConfig: AzureConfig,
     ) {
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
 
@@ -835,8 +827,7 @@ class IntegrationTest {
         )
 
         testKlientNoInjectionManuell(
-            dbConfig,
-            azureConfig = azureConfig
+            dbConfig
         ) { motor ->
             val gjeldendeAVklaringsbehov =
                 hendelsx.avklaringsbehov.utledGjeldendeAvklaringsbehov()!!

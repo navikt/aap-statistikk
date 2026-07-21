@@ -22,7 +22,6 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.TilkjentYtelseDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.VilkårsResultatDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.motor.testutil.ManuellMotorImpl
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
@@ -75,9 +74,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 @Fakes
 class MottaStatistikkTest {
     @Test
-    fun `hendelse blir lagret i repository`(
-        @Fakes azureConfig: AzureConfig
-    ) {
+    fun `hendelse blir lagret i repository`() {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
         val hendelsesTidspunkt = LocalDateTime.now()
@@ -93,7 +90,6 @@ class MottaStatistikkTest {
         testKlient(
             noOpTransactionExecutor,
             motor,
-            azureConfig,
             LagreStoppetHendelseJobb(jobbAppender, mockk()),
             jobbAppender,
         ) {
@@ -190,7 +186,7 @@ class MottaStatistikkTest {
 
     @Test
     fun `regenerere historikk for behandling`(
-        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
+        @Postgres dataSource: DataSource
     ) {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
@@ -212,7 +208,6 @@ class MottaStatistikkTest {
         testKlient(
             transactionExecutor,
             motor,
-            azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
         ) {
@@ -271,7 +266,7 @@ class MottaStatistikkTest {
 
     @Test
     fun `resende meldekort-behandlinger`(
-        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
+        @Postgres dataSource: DataSource
     ) {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
@@ -293,7 +288,6 @@ class MottaStatistikkTest {
         testKlient(
             transactionExecutor,
             motor,
-            azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
         ) {
@@ -328,7 +322,7 @@ class MottaStatistikkTest {
 
     @Test
     fun `kan motta mer avansert object`(
-        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
+        @Postgres dataSource: DataSource
     ) {
         val meterRegistry = SimpleMeterRegistry()
         PrometheusProvider.prometheus = meterRegistry
@@ -355,7 +349,6 @@ class MottaStatistikkTest {
         testKlient(
             transactionExecutor,
             motor,
-            azureConfig,
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
         ) {
@@ -392,7 +385,7 @@ class MottaStatistikkTest {
 
     @Test
     fun `kan motta postmottak-hendelse, og jobb blir utført`(
-        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
+        @Postgres dataSource: DataSource
     ) {
         val referanse = UUID.randomUUID()
         val hendelse = DokumentflytStoppetHendelse(
@@ -444,7 +437,6 @@ class MottaStatistikkTest {
         testKlient(
             transactionExecutor,
             motor,
-            azureConfig,
             lagreStoppetHendelseJobb,
             jobbAppender,
         ) {
@@ -464,7 +456,7 @@ class MottaStatistikkTest {
 
     @Test
     fun `kan motta tilbakekrevingshendelse, og hendelse blir lagret`(
-        @Postgres dataSource: DataSource, @Fakes azureConfig: AzureConfig
+        @Postgres dataSource: DataSource
     ) {
         val behandlingRef = UUID.randomUUID()
         val saksnummer = "123"
@@ -506,7 +498,6 @@ class MottaStatistikkTest {
         testKlient(
             transactionExecutor,
             motor,
-            azureConfig,
             lagreStoppetHendelseJobb,
             testJobber.motorJobbAppender,
         ) {
