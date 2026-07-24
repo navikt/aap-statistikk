@@ -7,11 +7,9 @@ oppgave = "0.0.193"
 utbetaling = "0.0.135"
 postmottak = "6.0.7"
 
-flyway = "12.11.0"
 detekt = "2.0.0-alpha.5"
 mockk = "1.14.11"
 testContainers = "2.0.5"
-postgresql = "42.7.13"
 hikaricp = "7.1.0"
 googleCloudBigquery = "2.68.0"
 nimbusJoseJwt = "10.9.1"
@@ -20,11 +18,11 @@ junitJupiter = "6.1.2"
 
 [libraries]
 ktorServerTestHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
-ktorServerStatusPages = { module = "io.ktor:ktor-server-call-logging-jvm", version.ref = "ktor" }
 ktorServerHtmlBuilder = { module = "io.ktor:ktor-server-html-builder", version.ref = "ktor" }
 dbconnect = { module = "no.nav.aap.kelvin:dbconnect", version.ref = "komponenter" }
 httpklient = { module = "no.nav.aap.kelvin:httpklient", version.ref = "komponenter" }
 infrastructure = { module = "no.nav.aap.kelvin:infrastructure", version.ref = "komponenter" }
+dbmigrering = { module = "no.nav.aap.kelvin:dbmigrering", version.ref = "komponenter" }
 server = { module = "no.nav.aap.kelvin:server", version.ref = "komponenter" }
 motor = { module = "no.nav.aap.kelvin:motor", version.ref = "komponenter" }
 motorApi = { module = "no.nav.aap.kelvin:motor-api", version.ref = "komponenter" }
@@ -37,10 +35,7 @@ oppgaveKontrakt = { module = "no.nav.aap.oppgave:api-kontrakt", version.ref = "o
 postmottakKontrakt = { module = "no.nav.aap.postmottak:kontrakt", version.ref = "postmottak" }
 logback = { module = "ch.qos.logback:logback-classic", version = "1.5.38" }
 logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
-flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
-flywayPostgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.4" }
-postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
 googleCloudBigquery = { module = "com.google.cloud:google-cloud-bigquery", version.ref = "googleCloudBigquery" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

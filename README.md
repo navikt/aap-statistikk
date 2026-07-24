@@ -56,7 +56,7 @@ Commit endringene etter kjøring.
 
 Ved major-oppgradering av PostgreSQL kan logiske replikeringsslots forsvinne. Prosjektet har derfor en repeatable Flyway-migrering som sikrer at sloten finnes:
 
-- `app/src/main/resources/migrering/R__ensure_datastream_slot.sql`
+- `app/src/main/resources/flyway/R__ensure_datastream_slot.sql`
 
 Denne migreringen kjøres på nytt når Flyway-checksummen endres. Ved hver major-oppgradering:
 

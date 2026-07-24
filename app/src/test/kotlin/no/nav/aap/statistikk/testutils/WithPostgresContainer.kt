@@ -1,9 +1,14 @@
 package no.nav.aap.statistikk.testutils
 
+import no.nav.aap.komponenter.dbmigrering.Migrering
 import no.nav.aap.statistikk.AppConfig
 import no.nav.aap.statistikk.db.DbConfig
-import no.nav.aap.statistikk.db.Migrering
-import org.junit.jupiter.api.extension.*
+import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.BeforeEachCallback
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.ParameterResolver
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import org.testcontainers.postgresql.PostgreSQLContainer
 import java.time.Duration
@@ -38,12 +43,10 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
             )
         }
         private var dataSource: DataSource
-        private val flyway: Migrering
         private val dbConfig: DbConfig
         private var truncateStatement: String
 
         init {
-            System.setProperty("flyway.cleanDisabled", false.toString())
             postgresContainer.start()
             dbConfig = DbConfig(
                 jdbcUrl = postgresContainer.jdbcUrl,
@@ -51,8 +54,9 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
                 password = postgresContainer.password,
                 poolSize = AppConfig.hikariMaxPoolSize
             )
-            flyway = Migrering(dbConfig)
-            dataSource = flyway.createAndMigrateDataSource()
+            dataSource = dbConfig.datasource().also {
+                Migrering.migrate(it)
+            }
             truncateStatement = buildTruncateStatement()
         }
 

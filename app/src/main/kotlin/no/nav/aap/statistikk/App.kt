@@ -18,6 +18,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbmigrering.Migrering
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.server.auth.IdentityProvider
@@ -35,7 +36,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
-import no.nav.aap.statistikk.db.Migrering
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
@@ -116,8 +116,8 @@ fun Application.startUp(
     // Registrer gateway-metrics etter at MeterFilter er satt opp
     PdlGraphQLGateway.registrerMetrics(PrometheusProvider.prometheus)
 
-    val flyway = Migrering(dbConfig)
-    val dataSource = flyway.createAndMigrateDataSource()
+    val dataSource = dbConfig.datasource()
+    Migrering.migrate(dataSource)
 
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
 

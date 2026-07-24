@@ -36,21 +36,18 @@ tasks.register<JavaExec>("genererOpenApi") {
 
 
 dependencies {
-    implementation(libs.ktorServerStatusPages)
     implementation(libs.ktorServerHtmlBuilder)
 
     implementation(libs.logback)
     implementation(libs.logbackLogstashEncoder)
 
-    implementation(libs.flyway)
-    implementation(libs.flywayPostgres)
-    runtimeOnly(libs.postgresql)
     implementation(libs.hikaricp)
 
     implementation(libs.motor)
     implementation(libs.motorApi)
     implementation(libs.httpklient)
     implementation(libs.dbconnect)
+    implementation(libs.dbmigrering)
     implementation(libs.infrastructure)
     implementation(libs.server)
 

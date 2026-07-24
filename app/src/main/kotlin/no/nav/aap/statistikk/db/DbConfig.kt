@@ -1,6 +1,9 @@
 package no.nav.aap.statistikk.db
 
+import com.zaxxer.hikari.HikariDataSource
 import no.nav.aap.statistikk.AppConfig
+import no.nav.aap.statistikk.PrometheusProvider
+import javax.sql.DataSource
 
 data class DbConfig(
     val jdbcUrl: String,
@@ -16,5 +19,13 @@ data class DbConfig(
 
             return DbConfig(jdbcUrl, userName, password, appConfig.hikariMaxPoolSize)
         }
+    }
+
+    fun datasource(): DataSource = HikariDataSource().apply {
+        jdbcUrl = this@DbConfig.jdbcUrl
+        username = this@DbConfig.userName
+        password = this@DbConfig.password
+        connectionTestQuery = "SELECT 1"
+        metricRegistry = PrometheusProvider.prometheus
     }
 }
