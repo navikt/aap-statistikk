@@ -86,6 +86,7 @@ Never use external contract types (e.g. `behandlingsflyt.kontrakt`) directly in 
 ### Contract Enum Mappings
 
 When `behandlingsflyt.kontrakt` adds enum values that belong in local domain enums, add the local enum values too and map by identical names. Only add alias mappings when the domain model really needs a different bucket.
+For rene enum-utvidelser med identisk mapping (kontrakt -> domene), ikke legg til egne tester.
 
 ### BQBehandling Duplication Logic
 
