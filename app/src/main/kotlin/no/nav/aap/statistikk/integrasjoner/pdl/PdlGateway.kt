@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.integrasjoner.pdl
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.gateway.Factory
@@ -11,8 +12,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
-import io.micrometer.core.instrument.MeterRegistry
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.WithMetrics
 import org.slf4j.LoggerFactory
@@ -55,7 +55,7 @@ class PdlGraphQLGateway : PdlGateway {
                 )
             )
         ),
-        tokenProvider = ClientCredentialsTokenProvider,
+        tokenProvider = AzureM2MTokenProvider,
         responseHandler = DefaultResponseHandler(),
         prometheus = PrometheusProvider.prometheus
     )
