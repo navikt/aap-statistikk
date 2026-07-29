@@ -396,8 +396,7 @@ class MottaStatistikkTest {
             status = no.nav.aap.postmottak.kontrakt.behandling.Status.OPPRETTET,
             avklaringsbehov = listOf(),
             opprettetTidspunkt = LocalDateTime.now(),
-            hendelsesTidspunkt = LocalDateTime.now(),
-            saksnummer = null
+            hendelsesTidspunkt = LocalDateTime.now()
         )
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 

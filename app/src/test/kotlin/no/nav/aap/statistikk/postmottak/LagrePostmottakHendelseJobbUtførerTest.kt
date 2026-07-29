@@ -30,8 +30,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
             status = Status.OPPRETTET,
             avklaringsbehov = listOf(),
             opprettetTidspunkt = LocalDateTime.now(),
-            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23),
-            saksnummer = null
+            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23)
         )
 
         dataSource.transaction(block = utførLagreHendelseJobb(payload))
@@ -65,8 +64,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
                 )
             ),
             opprettetTidspunkt = LocalDateTime.now(),
-            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23),
-            saksnummer = null
+            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23)
         )
 
         dataSource.transaction(block = utførLagreHendelseJobb(hendelse))
