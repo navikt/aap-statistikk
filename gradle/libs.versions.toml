@@ -1,11 +1,11 @@
 [versions]
 ktor = "3.5.1"
-komponenter = "2.0.119"
+komponenter = "2.0.121"
 tilgang = "1.0.234"
 behandlingsflyt = "0.0.642"
-oppgave = "0.0.198"
+oppgave = "0.0.202"
 utbetaling = "0.0.135"
-postmottak = "6.0.7"
+postmottak = "6.0.8"
 
 detekt = "2.0.0-alpha.5"
 mockk = "1.14.11"
