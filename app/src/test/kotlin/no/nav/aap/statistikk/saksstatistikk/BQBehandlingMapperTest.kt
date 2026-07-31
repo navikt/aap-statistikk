@@ -197,26 +197,26 @@ class BQBehandlingMapperTest {
         val oppgaveRepository = FakeOppgaveRepository()
         oppgaveRepository.addOppgave(
             behandling.id(),
-            no.nav.aap.statistikk.oppgave.Oppgave(
+            Oppgave(
                 identifikator = 123L,
                 avklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
-                enhet = no.nav.aap.statistikk.enhet.Enhet(0L, "0400"),
+                enhet = Enhet(0L, "0400"),
                 person = null,
-                status = no.nav.aap.statistikk.oppgave.Oppgavestatus.OPPRETTET,
+                status = Oppgavestatus.OPPRETTET,
                 opprettetTidspunkt = tidspunkt,
-                behandlingReferanse = no.nav.aap.statistikk.oppgave.BehandlingReferanse(
+                behandlingReferanse = BehandlingReferanse(
                     id = null,
                     referanse = behandlingRef
                 ),
                 hendelser = listOf(
                     OppgaveHendelse(
-                        hendelse = no.nav.aap.statistikk.oppgave.HendelseType.RESERVERT,
+                        hendelse = HendelseType.RESERVERT,
                         oppgaveId = 123L,
                         mottattTidspunkt = tidspunkt,
                         sendtTid = tidspunkt,
                         enhet = "0400",
                         avklaringsbehovKode = Definisjon.KVALITETSSIKRING.kode.name,
-                        status = no.nav.aap.statistikk.oppgave.Oppgavestatus.OPPRETTET,
+                        status = Oppgavestatus.OPPRETTET,
                         reservertAv = "Kvaliguy",
                         reservertTidspunkt = tidspunkt,
                         opprettetTidspunkt = tidspunkt,
@@ -390,6 +390,105 @@ class BQBehandlingMapperTest {
         assertThat(result.ansvarligEnhetKode)
             .describedAs("Enhet skal ikke være null selv om oppgaven ble lukket etter cutoff-tidspunktet")
             .isEqualTo("0216")
+    }
+
+    @Test
+    fun `advarsel utløses når oppgave-systemet selv-reserverer nyåpnet kvalitetssikring til forrige saksbehandler`() {
+        // Reproduserer produksjons-"feil" for ekte sak: idet forrige avklaringsbehov
+        // (f.eks. AVKLAR_SYKDOM) lukkes av LOKAL_SAKSBEHANDLER, sender Oppgave-systemet et
+        // RESERVERT-event for det nyåpnede KVALITETSSIKRING-avklaringsbehovet med
+        // reservertAv=LOKAL_SAKSBEHANDLER, FØR det korrigeres (AVRESERVERT/reassignment) kort tid etter.
+        // Mapperen bygger snapshot ut fra behandling (som kan være "fryst" på cutoff-tidspunkt)
+        // + ALLE oppgave-hendelser (uten cutoff) og bruker kun det siste, sammenslåtte snapshotet.
+        // Dette testet viser at MAPPEREN korrekt (og etter design) reflekterer denne transiente
+        // tilstanden når den kalles akkurat i dette vinduet – dvs. dette er IKKE en
+        // cutoff/rekkefølge-bug i aap-statistikk, men en ekte, om enn kortvarig, oppstrøms
+        // selv-reservering fra Oppgave-systemet som blir fanget opp og lagret som den er.
+        val behandlingRef = UUID.randomUUID()
+        val forrigeStegLukket = LocalDateTime.of(2024, 1, 10, 8, 0)
+        val ksÅpnetOgSelvReservert = forrigeStegLukket.plusMinutes(1)
+
+        val hendelse1 = lagBehandlingHendelse(
+            tidspunkt = forrigeStegLukket,
+            avklaringsBehov = Definisjon.AVKLAR_SYKDOM,
+            saksbehandler = Saksbehandler("LOKAL_SAKSBEHANDLER")
+        )
+
+        val hendelse2 = lagBehandlingHendelse(
+            tidspunkt = ksÅpnetOgSelvReservert,
+            avklaringsBehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+            sisteSaksbehandlerSomLøstebehov = "LOKAL_SAKSBEHANDLER",
+            avklaringsbehovStatus = AvklaringsbehovStatus.OPPRETTET
+        )
+
+        val behandling = lagBehandling(
+            referanse = behandlingRef,
+            gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+            sisteSaksbehandlerSomLøstebehov = "LOKAL_SAKSBEHANDLER",
+            hendelser = listOf(hendelse1, hendelse2)
+        )
+
+        val oppgaveRepository = FakeOppgaveRepository()
+        oppgaveRepository.addOppgave(
+            behandling.id(),
+            Oppgave(
+                identifikator = 999L,
+                avklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
+                enhet = Enhet(0L, "0400"),
+                person = null,
+                status = Oppgavestatus.OPPRETTET,
+                opprettetTidspunkt = ksÅpnetOgSelvReservert,
+                behandlingReferanse = BehandlingReferanse(
+                    id = null,
+                    referanse = behandlingRef
+                ),
+                hendelser = listOf(
+                    OppgaveHendelse(
+                        hendelse = HendelseType.RESERVERT,
+                        oppgaveId = 999L,
+                        mottattTidspunkt = ksÅpnetOgSelvReservert,
+                        sendtTid = ksÅpnetOgSelvReservert,
+                        enhet = "0400",
+                        avklaringsbehovKode = Definisjon.KVALITETSSIKRING.kode.name,
+                        status = Oppgavestatus.OPPRETTET,
+                        reservertAv = "LOKAL_SAKSBEHANDLER",
+                        reservertTidspunkt = ksÅpnetOgSelvReservert,
+                        opprettetTidspunkt = ksÅpnetOgSelvReservert,
+                        endretAv = "LOKAL_SAKSBEHANDLER",
+                        endretTidspunkt = ksÅpnetOgSelvReservert,
+                        versjon = 1L
+                    )
+                )
+            )
+        )
+
+        val behandlingService = BehandlingService(
+            behandlingRepository = FakeBehandlingRepository(),
+            skjermingService = skjermingService
+        )
+
+        val mapper = BQBehandlingMapper(
+            behandlingService = behandlingService,
+            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+            oppgaveRepository = oppgaveRepository,
+            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
+            clock = fixedClock
+        )
+
+        val result = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+
+        // Dette er selve "bugen": saksbehandler gjenbrukes fra forrige behandlingmetode
+        // fordi Oppgave-systemet (kortvarig) selv-reserverte den nye KS-oppgaven til samme person.
+        assertThat(result.saksbehandler)
+            .describedAs(
+                "Viser den transiente selv-reserveringen fra oppgave-systemet: samme saksbehandler " +
+                        "som nettopp løste forrige avklaringsbehov blir stående som saksbehandler på " +
+                        "det nyåpnede kvalitetssikrings-steget, inntil en senere AVRESERVERT/omfordeling korrigerer det."
+            )
+            .isEqualTo("LOKAL_SAKSBEHANDLER")
+        assertThat(result.behandlingMetode).isEqualTo(BehandlingMetode.KVALITETSSIKRING)
     }
 
     @Test

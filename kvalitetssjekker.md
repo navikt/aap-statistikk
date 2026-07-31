@@ -2,7 +2,7 @@
 
 Alle avsluttede behandlinger skal ha vedtak_tid.
 
-```postgresql
+```sql
 select *
 from saksstatistikk_gjeldende_hendelser
 where vedtak_tid is null
@@ -208,4 +208,48 @@ where status_sequence in ('UTREDES → IVERKSETTES → AVSLUTTET → IVERKSETTES
                           'UTREDES → IVERKSETTES → AVSLUTTET → IVERKSETTES',
                           'UTREDES → IVERKSETTES → UTREDES → AVSLUTTET',
                           'UTREDES → IVERKSETTES → UTREDES → IVERKSETTES → AVSLUTTET')
+```
+
+## I BigQuery
+
+BigQuery-spørring for å spore tilfeller der en oppgave er reservert til kvalitetssikring, men har tidligere jobbet på behandlingen. Mest sannsynlig pga å reservere til seg selv.
+
+```sql
+WITH
+  res AS (
+    WITH
+      ks_rader AS (
+        SELECT behandling_uuid, saksbehandler, endretTid, behandlingmetode
+        FROM
+          `aap-prod-9adc.saksstatistikk.view_gjeldende_hendelser_saksstatistikk`
+        WHERE
+          behandlingmetode = 'KVALITETSSIKRING'
+          AND saksbehandler IS NOT NULL
+      ),
+      andre_metoder AS (
+        SELECT DISTINCT behandling_uuid, saksbehandler, behandlingmetode
+        FROM
+          `aap-prod-9adc.saksstatistikk.view_gjeldende_hendelser_saksstatistikk`
+        WHERE
+          saksbehandler IS NOT NULL
+          AND behandlingmetode != 'KVALITETSSIKRING'
+      )
+    SELECT
+      k.behandling_uuid,
+      k.saksbehandler,
+      k.endretTid AS ks_endret_tid,
+      array_agg(DISTINCT a.behandlingmetode) AS tidligere_behandlingmetoder
+    FROM ks_rader k
+    JOIN andre_metoder a
+      ON
+        a.behandling_uuid = k.behandling_uuid
+        AND a.saksbehandler = k.saksbehandler
+        where endretTid > '2026-02-18'
+    GROUP BY k.behandling_uuid, k.saksbehandler, k.endretTid
+    ORDER BY k.endretTid DESC
+  )
+SELECT timestamp(date(res.ks_endret_tid)) AS ts, COUNT(*) AS c
+FROM res
+GROUP BY timestamp(date(res.ks_endret_tid))
+ORDER BY ts
 ```
