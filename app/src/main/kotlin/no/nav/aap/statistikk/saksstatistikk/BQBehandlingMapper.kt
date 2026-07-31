@@ -80,7 +80,7 @@ class BQBehandlingMapper(
             if (tidligereBehandlingMetoderForSaksbehandler.isNotEmpty()) {
                 log.warn(
                     "Saksbehandler $saksbehandler har hatt behandlingmetode $behandlingMetode, " +
-                            "men hadde tidligere $tidligereBehandlingMetoderForSaksbehandler for behandling $behandlingReferanse. " +
+                            "men hadde tidligere $tidligereBehandlingMetoderForSaksbehandler for behandling $behandlingReferanse og saksnummer ${sak.saksnummer}. " +
                             "Mulig feil i saksbehandler-utledning."
                 )
             }
