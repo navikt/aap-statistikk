@@ -2,7 +2,7 @@
 
 [![release](https://github.com/navikt/aap-statistikk/actions/workflows/release.yaml/badge.svg)](https://github.com/navikt/aap-statistikk/actions/workflows/release.yaml)
 
-Formålet er å levere statistikk og produkssjonstyringsdata relatert til AAP.
+Formålet er å levere statistikk og produksjonsstyringsdata relatert til AAP.
 
 ## Komme i gang
 
