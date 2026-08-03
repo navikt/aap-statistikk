@@ -11,7 +11,7 @@ detekt = "2.0.0-alpha.5"
 mockk = "1.14.11"
 testContainers = "2.0.5"
 hikaricp = "7.1.0"
-googleCloudBigquery = "2.68.0"
+googleCloudBigquery = "2.69.0"
 nimbusJoseJwt = "10.9.1"
 assertj = "3.27.7"
 junitJupiter = "6.1.2"
@@ -33,7 +33,7 @@ behandlingsflytKontrakt = { module = "no.nav.aap.behandlingsflyt:kontrakt", vers
 utbetalKontrakt = { module = "no.nav.aap.utbetal:api-kontrakt", version.ref = "utbetaling" }
 oppgaveKontrakt = { module = "no.nav.aap.oppgave:api-kontrakt", version.ref = "oppgave" }
 postmottakKontrakt = { module = "no.nav.aap.postmottak:kontrakt", version.ref = "postmottak" }
-logback = { module = "ch.qos.logback:logback-classic", version = "1.6.0" }
+logback = { module = "ch.qos.logback:logback-classic", version = "1.6.1" }
 logbackLogstashEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.2.4" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
