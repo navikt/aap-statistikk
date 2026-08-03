@@ -53,5 +53,5 @@ enum class Vurderingsbehov(val sortering: Int) {
         1
     ),
     BRUKER_TILBAKE_I_ARBEID(1),
-    FERIE_I_SYKEPENGEPERIODE(1);
+    FERIE_I_SYKEPENGEPERIODE(1), MIGRERING_FRA_ARENA(1);
 }

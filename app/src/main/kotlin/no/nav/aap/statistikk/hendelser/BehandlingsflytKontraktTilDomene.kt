@@ -145,5 +145,6 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.INSTITUSJONSOPPHOLD_HELSEINSTITUSJON -> INSTITUSJONSOPPHOLD_HELSEINSTITUSJON
         Vurderingsbehov.BRUKER_TILBAKE_I_ARBEID -> BRUKER_TILBAKE_I_ARBEID
         Vurderingsbehov.FERIE_I_SYKEPENGEPERIODE -> FERIE_I_SYKEPENGEPERIODE
+        Vurderingsbehov.MIGRERING_FRA_ARENA -> MIGRERING_FRA_ARENA
     }
 }
