@@ -43,6 +43,7 @@ jobs:
       id-token: write
     concurrency:
       group: deploy-dev
+      queue: max
     needs: gradle
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
@@ -59,6 +60,7 @@ jobs:
       id-token: write
     concurrency:
       group: deploy-prod
+      queue: max
     needs: dev
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
