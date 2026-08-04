@@ -38,7 +38,7 @@ spec:
         ) AS ferdigbehandlet_tid,
         bh.oppdatert_tid AS endret_tid,
         bh.oppdatert_tid AS rad_opprettet,
-        bh.datastream_metadata.source_timestamp AS teknisk_tid
+        datetime(timestamp_millis(bh.datastream_metadata.source_timestamp), 'Europe/Oslo') as teknisk_tid
       FROM
         `datastream_hendelser.public_behandling` b
       JOIN
