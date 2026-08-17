@@ -23,6 +23,9 @@ import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.testutils.fakes.FakeRettighetsTypeRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -534,5 +537,37 @@ class BQBehandlingMapperTest {
             .describedAs("Should be null when no oppgave data available")
             .isNull()
         assertThat(result.behandlingMetode).isEqualTo(BehandlingMetode.FATTE_VEDTAK)
+    }
+
+    @ParameterizedTest
+    @MethodSource("venteÅrsakOgReturstatusKombinasjoner")
+    fun `behandlingStatus skal aldri overstige 100 tegn for noen kombinasjon av venteAarsak og returstatus`(
+        venteÅrsak: ÅrsakTilSattPåVent,
+        returStatus: AvklaringsbehovStatus?
+    ) {
+        // BigQuery-mottaket tåler ikke mer enn 100 tegn for dimensjons-/kodeverksfelt som behandling_status.
+        val behandling = lagBehandling(hendelser = emptyList())
+            .copy(venteÅrsak = venteÅrsak.name, gjeldendeAvklaringsbehovStatus = returStatus)
+
+        val resultat = BQBehandlingMapper.behandlingStatus(behandling)
+
+        assertThat(resultat.length)
+            .describedAs(
+                "behandlingStatus for venteÅrsak=$venteÅrsak, returStatus=$returStatus " +
+                        "skal være maks 100 tegn, var: $resultat"
+            )
+            .isLessThan(100)
+    }
+
+    companion object {
+        @JvmStatic
+        fun venteÅrsakOgReturstatusKombinasjoner(): List<Arguments> {
+            // Full kryssliste av alle ÅrsakTilSattPåVent- og alle AvklaringsbehovStatus-verdier (inkl. null),
+            // ikke bare de statusene som faktisk regnes som "returnert" i dag.
+            val alleStatuser: List<AvklaringsbehovStatus?> = listOf(null) + AvklaringsbehovStatus.entries
+            return ÅrsakTilSattPåVent.entries.flatMap { venteÅrsak ->
+                alleStatuser.map { returStatus -> Arguments.of(venteÅrsak, returStatus) }
+            }
+        }
     }
 }

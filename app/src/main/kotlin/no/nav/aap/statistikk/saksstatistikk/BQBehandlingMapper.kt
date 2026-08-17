@@ -20,6 +20,10 @@ private const val SKJERMET_ENHET = "-5"
 
 private const val AUTOMATISK_ENHET = "KELVIN_AUTOMATISK"
 
+// Team Sak tåler maks 100 tegn for dimensjons-/kodeverksfeltene
+// (behandling_status, behandling_type, behandling_resultat, behandlingmetode, behandling_aarsak).
+private const val MAKS_LENGDE_KODEVERKSFELT = 100
+
 class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
@@ -125,12 +129,24 @@ class BQBehandlingMapper(
         val ansvarligBeslutter = behandling.ansvarligBeslutter()
         val behandlingReferanse = behandling.referanse
 
+        val behandlingType = behandling.typeBehandling.toString().uppercase()
+        val behandlingÅrsak = årsakTilOpprettelse ?: behandling.årsaker.prioriterÅrsaker().name
+        val behandlingResultat = regnUtBehandlingResultat(behandling)
+
+        // behandlingStatus er allerede sikret å holde seg innenfor grensen, jf. ÅrsakTilSattPåVent.kortKode.
+        // De øvrige feltene har foreløpig ingen tilsvarende kortkode-løsning, så vi sikrer i det minste
+        // at vi ikke sender noe BigQuery-mottaket vil avvise.
+        kreverMaksLengdeKodeverksfelt("behandling_type", behandlingType)
+        kreverMaksLengdeKodeverksfelt("behandling_aarsak", behandlingÅrsak)
+        kreverMaksLengdeKodeverksfelt("behandling_resultat", behandlingResultat)
+        kreverMaksLengdeKodeverksfelt("behandlingmetode", behandlingMetode.name)
+
         return BQBehandling(
             behandlingUUID = behandlingReferanse,
             relatertBehandlingUUID = relatertBehandlingUUID,
             relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
             ferdigbehandletTid = hendelser.ferdigBehandletTid(),
-            behandlingType = behandling.typeBehandling.toString().uppercase(),
+            behandlingType = behandlingType,
             aktorId = sak.person.ident,
             saksnummer = sak.saksnummer.value,
             tekniskTid = LocalDateTime.now(clock),
@@ -149,8 +165,8 @@ class BQBehandlingMapper(
                 )
             },
             behandlingStatus = behandlingStatus,
-            behandlingÅrsak = årsakTilOpprettelse ?: behandling.årsaker.prioriterÅrsaker().name,
-            behandlingResultat = regnUtBehandlingResultat(behandling),
+            behandlingÅrsak = behandlingÅrsak,
+            behandlingResultat = behandlingResultat,
             resultatBegrunnelse = resultatBegrunnelse(hendelser),
             ansvarligEnhetKode = ansvarligEnhet,
             sakYtelse = "AAP",
@@ -234,67 +250,15 @@ class BQBehandlingMapper(
         }
     }
 
-    private fun behandlingStatus(
-        behandling: Behandling
-    ): String {
-        val venteÅrsak = behandling.venteÅrsak?.let { "_${it.uppercase()}" }.orEmpty()
-        val returStatus = behandling.gjeldendeAvklaringsbehovStatus
-            ?.takeIf { it.returnert() }
-            ?.let { "_${it.name.uppercase()}" }.orEmpty()
-
-        val behandlingStatus = behandling.behandlingStatus()
-        return when (behandlingStatus) {
-            BehandlingStatus.OPPRETTET -> "OPPRETTET"
-            BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
-            BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
-            BehandlingStatus.AVSLUTTET -> {
-                if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()
-                        ?.sendesTilKA() == true
-                ) {
-                    "OVERSENDT_KA"
-                } else {
-                    "AVSLUTTET"
-                }
-            }
+    private fun kreverMaksLengdeKodeverksfelt(feltNavn: String, verdi: String?) {
+        require(verdi == null || verdi.length < MAKS_LENGDE_KODEVERKSFELT) {
+            "$feltNavn er lengre enn $MAKS_LENGDE_KODEVERKSFELT tegn (${verdi?.length}), " +
+                    "Team Sak tåler ikke dette. Verdi: $verdi"
         }
     }
 
     private fun avklaringsbehovTilBehandlingMetode(avklaringsbehov: String): BehandlingMetode =
         Definisjon.forKode(avklaringsbehov).tilBehandlingMetode()
-
-    data class EnhetOgSaksbehandler(val enhet: String?, val saksbehandler: String?)
-
-    /**
-     * Resolver enhet og saksbehandler fra ferske oppgave-data for en gitt behandling.
-     * Brukes ved retry når den opprinnelige behandlingstilstanden ble snapshottet.
-     */
-    fun hentEnhetOgSaksbehandler(
-        behandling: Behandling,
-        erSkjermet: Boolean,
-        avklaringsbehovKode: Definisjon? = null,
-    ): EnhetOgSaksbehandler {
-        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
-        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
-        val enhet = when {
-            erSkjermet -> SKJERMET_ENHET
-            avklaringsbehovKode != null ->
-                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode.kode.name }
-                    .maxByOrNull { it.sistEndret() }?.enhet?.kode
-                    ?: ansvarligEnhet(behandling, snapshots)
-
-            else -> ansvarligEnhet(behandling, snapshots)
-        }
-        val saksbehandler = when {
-            erSkjermet -> SKJERMET_ENHET
-            avklaringsbehovKode != null ->
-                oppgaver.filter { it.avklaringsbehov == avklaringsbehovKode.kode.name }
-                    .maxByOrNull { it.sistEndret() }?.reservertAv()?.ident
-                    ?: utledSaksbehandler(behandling, snapshots)
-
-            else -> utledSaksbehandler(behandling, snapshots)
-        }
-        return EnhetOgSaksbehandler(enhet, saksbehandler)
-    }
 
     private fun ansvarligEnhet(
         behandling: Behandling,
@@ -343,5 +307,33 @@ class BQBehandlingMapper(
         }
 
         return enhet
+    }
+
+    companion object {
+        internal fun behandlingStatus(
+            behandling: Behandling
+        ): String {
+            val venteÅrsak =
+                behandling.venteÅrsak?.let { "_${ÅrsakTilSattPåVent.kortKodeFor(it).uppercase()}" }.orEmpty()
+            val returStatus = behandling.gjeldendeAvklaringsbehovStatus
+                ?.takeIf { it.returnert() }
+                ?.let { "_${it.name.uppercase()}" }.orEmpty()
+
+            val behandlingStatus = behandling.behandlingStatus()
+            return when (behandlingStatus) {
+                BehandlingStatus.OPPRETTET -> "OPPRETTET"
+                BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
+                BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
+                BehandlingStatus.AVSLUTTET -> {
+                    if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()
+                            ?.sendesTilKA() == true
+                    ) {
+                        "OVERSENDT_KA"
+                    } else {
+                        "AVSLUTTET"
+                    }
+                }
+            }
+        }
     }
 }

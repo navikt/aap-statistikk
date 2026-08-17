@@ -1,6 +1,8 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.komponenter.gateway.GatewayProvider
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.HendelsePublisher
 import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
@@ -17,6 +19,22 @@ class ResendHendelseService(
     private val hendelsePublisher: HendelsePublisher,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    companion object {
+        fun konstruer(
+            repositoryProvider: RepositoryProvider,
+            gatewayProvider: GatewayProvider,
+            hendelsePublisher: HendelsePublisher
+        ): ResendHendelseService {
+            return ResendHendelseService(
+                sakService = SakService(repositoryProvider),
+                personService = PersonService(repositoryProvider),
+                behandlingRepository = repositoryProvider.provide(),
+                behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
+                hendelsePublisher = hendelsePublisher,
+            )
+        }
+    }
 
     fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {
         val person = personService.hentEllerLagrePerson(hendelse.ident)
