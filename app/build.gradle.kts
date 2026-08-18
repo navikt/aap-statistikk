@@ -21,6 +21,7 @@ application {
 }
 
 tasks.register<JavaExec>("runTestApp") {
+    group = "application"
     description = "Kjør TestApp."
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("no.nav.aap.statistikk.TestAppKt")
@@ -28,6 +29,7 @@ tasks.register<JavaExec>("runTestApp") {
 }
 
 tasks.register<JavaExec>("genererOpenApi") {
+    group = "documentation"
     description = "Generer OpenAPI JSON, lagre i openapi.json i rotmappen."
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass.set("no.nav.aap.statistikk.GenererOpenApiJsonKt")
