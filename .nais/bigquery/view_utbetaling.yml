@@ -20,7 +20,7 @@ spec:
       SELECT
         s.saksnummer AS saksnummer,
         br.referanse AS behandlingsreferanse,
-        p.ident AS brukerFnr,
+        pi.ident AS brukerFnr,
         b.type AS behandling_type,
         b.opprettet_tid AS behandling_opprettet_tid,
         bh.utbetaling_id AS utbetaling_id,
@@ -48,3 +48,8 @@ spec:
         `datastream_hendelser.public_person` p
         ON
           p.id = s.person_id
+      JOIN
+        `datastream_hendelser.public_person_ident` pi
+        ON
+          pi.person_id = p.id
+          AND pi.aktiv = TRUE

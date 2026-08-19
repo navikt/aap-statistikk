@@ -18,7 +18,7 @@ spec:
     useLegacySql: false
     query: >-
       SELECT
-        p.ident AS fodselsnummer,
+        pi.ident AS fodselsnummer,
         br.referanse AS behandlingreferanse,
         s.saksnummer AS saksnummer,
         CAST(NULL AS INT64) AS kode67,
@@ -53,6 +53,11 @@ spec:
       JOIN
         `datastream_hendelser.public_person` p
         ON p.id = s.person_id
+      JOIN
+        `datastream_hendelser.public_person_ident` pi
+        ON
+          pi.person_id = p.id
+          AND pi.aktiv = TRUE
       JOIN
         `datastream_hendelser.public_behandling_historikk` bh
         ON bh.behandling_id = b.id

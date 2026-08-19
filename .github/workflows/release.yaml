@@ -11,9 +11,9 @@ on:
         options:
           - dev-gcp
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - '.github/**'
+      - ".github/**"
 
 permissions:
   id-token: write
@@ -44,7 +44,7 @@ jobs:
     concurrency:
       group: deploy-dev
       queue: max
-    needs: gradle
+    needs: [gradle, deploy-bigquery-resources-dev]
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
     with:
@@ -61,7 +61,7 @@ jobs:
     concurrency:
       group: deploy-prod
       queue: max
-    needs: dev
+    needs: [dev, deploy-bigquery-resources-prod]
     uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
     secrets: inherit
     with:

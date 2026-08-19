@@ -76,7 +76,7 @@ spec:
               UNNEST(JSON_EXTRACT_ARRAY(b.aarsaker_til_behandling)) AS value
           ),
           ', ') AS behandling_aarsak,
-        p.ident AS brukerFnr,
+        pi.ident AS brukerFnr,
         bh.resultat AS behandlingsresultat,
         bh.vedtak_tidspunkt AS vedtak_tidspunkt,
         bh.utbetaling_id AS utbetaling_id,
@@ -150,6 +150,11 @@ spec:
         `datastream_hendelser.public_person` p
         ON
           p.id = s.person_id
+      JOIN
+        `datastream_hendelser.public_person_ident` pi
+        ON
+          pi.person_id = p.id
+          AND pi.aktiv = TRUE
       LEFT JOIN
         diagnoser d
         ON
