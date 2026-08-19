@@ -19,7 +19,7 @@ import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.GraphQLRespons
 import no.nav.aap.statistikk.integrasjoner.pdl.HentPersonBolkResult
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlRespons
-import no.nav.aap.statistikk.integrasjoner.pdl.Person
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtendWith
@@ -130,7 +130,7 @@ annotation class Fakes {
                                 hentPersonBolk = listOf(
                                     HentPersonBolkResult(
                                         ident = "123",
-                                        person = Person(
+                                        person = PdlPerson(
                                             adressebeskyttelse = listOf(
                                                 Adressebeskyttelse(
                                                     gradering = Gradering.UGRADERT

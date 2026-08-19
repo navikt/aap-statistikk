@@ -5,7 +5,12 @@ import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.PrometheusProvider
-import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingHendelse
+import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.sak.Sak
@@ -25,7 +30,7 @@ class BehandlingService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun erSkjermet(behandling: Behandling): Boolean = skjermingService.erSkjermet(behandling)
+    fun erSkjermet(behandling: Behandling): Boolean = skjermingService.erSkjermet(behandling.identerPåBehandling())
 
     fun hentEllerLagreBehandling(
         dto: StoppetBehandling,
@@ -116,34 +121,34 @@ class BehandlingService(
             relatertBehandlingId = relatertBehandling?.id,
             relaterteIdenter = dto.identerForSak,
         ) ?: Behandling(
-                referanse = dto.behandlingReferanse,
-                sak = sak,
-                typeBehandling = dto.behandlingType.tilDomene(),
-                opprettetTid = dto.behandlingOpprettetTidspunkt,
-                vedtakstidspunkt = vedtakstidspunkt,
-                ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter(),
-                mottattTid = dto.mottattTid,
-                status = dto.behandlingStatus.tilDomene(),
-                versjon = Versjon(verdi = dto.versjon),
-                relaterteIdenter = dto.identerForSak,
-                relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-                sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
-                sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
-                sisteSaksbehandlerSomLøstebehov = sisteSaksbehandler,
-                gjeldendeAvklaringsBehov = gjeldendeAvklaringsbehov,
-                gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
-                søknadsformat = dto.soknadsFormat.tilDomene(),
-                venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
-                returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
-                returÅrsakkoblinger = returÅrsakkoblinger,
-                resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-                gjeldendeStegGruppe = gjeldendeAvklaringsbehov?.løsesISteg?.gruppe,
-                årsaker = dto.vurderingsbehov.map { it.tilDomene() },
-                opprettetAv = dto.opprettetAv,
-                årsakTilOpprettelse = dto.årsakTilOpprettelse.name,
-                oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
-                    ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt
-            )
+            referanse = dto.behandlingReferanse,
+            sak = sak,
+            typeBehandling = dto.behandlingType.tilDomene(),
+            opprettetTid = dto.behandlingOpprettetTidspunkt,
+            vedtakstidspunkt = vedtakstidspunkt,
+            ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter(),
+            mottattTid = dto.mottattTid,
+            status = dto.behandlingStatus.tilDomene(),
+            versjon = Versjon(verdi = dto.versjon),
+            relaterteIdenter = dto.identerForSak,
+            relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+            sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
+            sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
+            sisteSaksbehandlerSomLøstebehov = sisteSaksbehandler,
+            gjeldendeAvklaringsBehov = gjeldendeAvklaringsbehov,
+            gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus(),
+            søknadsformat = dto.soknadsFormat.tilDomene(),
+            venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent(),
+            returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name,
+            returÅrsakkoblinger = returÅrsakkoblinger,
+            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+            gjeldendeStegGruppe = gjeldendeAvklaringsbehov?.løsesISteg?.gruppe,
+            årsaker = dto.vurderingsbehov.map { it.tilDomene() },
+            opprettetAv = dto.opprettetAv,
+            årsakTilOpprettelse = dto.årsakTilOpprettelse.name,
+            oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
+                ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt
+        )
             .copy(relatertBehandlingId = relatertBehandling?.id)
     }
 

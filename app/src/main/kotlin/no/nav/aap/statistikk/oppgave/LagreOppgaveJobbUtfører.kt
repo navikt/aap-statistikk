@@ -64,7 +64,7 @@ class LagreOppgaveJobb : ProvidersJobbSpesifikasjon {
         return LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
             OppgaveHistorikkLagrer(
-                personService = PersonService(repositoryProvider),
+                personService = PersonService(repositoryProvider, gatewayProvider),
                 oppgaveRepository = repositoryProvider.provide(),
                 enhetRepository = repositoryProvider.provide(),
                 saksbehandlerRepository = repositoryProvider.provide(),

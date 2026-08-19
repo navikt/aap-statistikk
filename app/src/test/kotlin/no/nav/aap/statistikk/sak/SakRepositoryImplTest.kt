@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.sak
 
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
+
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -22,7 +24,7 @@ class SakRepositoryImplTest {
 
         dataSource.transaction {
             val ident = "214"
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(ident)
             val sakRepositoryImpl = SakRepositoryImpl(it)
 
             sakRepositoryImpl.settInnSak(
@@ -69,7 +71,7 @@ class SakRepositoryImplTest {
         )
         val sak = dataSource.transaction {
             val ident = "214"
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(ident)
             val sakRepositoryImpl = SakRepositoryImpl(it)
 
             val sak = Sak(
@@ -121,7 +123,7 @@ class SakRepositoryImplTest {
         val fixed = Clock.fixed(now, ZoneId.systemDefault())
 
         val sakService = dataSource.transaction {
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson("214")
             val sakService = SakService(SakRepositoryImpl(it), fixed)
             sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
             sakService
@@ -129,7 +131,7 @@ class SakRepositoryImplTest {
 
         // Kall med samme status
         dataSource.transaction {
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson("214")
             val sakService = SakService(SakRepositoryImpl(it), fixed)
             sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
         }
@@ -151,14 +153,14 @@ class SakRepositoryImplTest {
         val fixed = Clock.fixed(now, ZoneId.systemDefault())
 
         dataSource.transaction {
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson("214")
             val sakService = SakService(SakRepositoryImpl(it), fixed)
             sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
         }
 
         // Kall med ny status
         dataSource.transaction {
-            val person = PersonService(PersonRepository(it)).hentEllerLagrePerson("214")
+            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson("214")
             val sakService = SakService(SakRepositoryImpl(it), fixed)
             sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.AVSLUTTET)
         }

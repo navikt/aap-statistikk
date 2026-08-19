@@ -1,9 +1,10 @@
 package no.nav.aap.statistikk.postmottak
 
+import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
-import no.nav.aap.motor.ProviderJobbSpesifikasjon
+import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.postmottak.kontrakt.avklaringsbehov.Status
 import no.nav.aap.postmottak.kontrakt.behandling.TypeBehandling
 import no.nav.aap.postmottak.kontrakt.hendelse.AvklaringsbehovHendelseDto
@@ -35,13 +36,13 @@ class LagrePostmottakHendelseJobbUtfører(
     }
 }
 
-class LagrePostmottakHendelseJobb : ProviderJobbSpesifikasjon {
-    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
+class LagrePostmottakHendelseJobb : ProvidersJobbSpesifikasjon {
+    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører {
         return LagrePostmottakHendelseJobbUtfører(
             postmottakBehandlingService = PostmottakBehandlingService(
                 repositoryProvider.provide()
             ),
-            personService = PersonService(repositoryProvider),
+            personService = PersonService(repositoryProvider, gatewayProvider),
         )
     }
 

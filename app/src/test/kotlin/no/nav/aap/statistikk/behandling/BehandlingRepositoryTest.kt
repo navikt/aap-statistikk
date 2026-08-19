@@ -27,6 +27,7 @@ class BehandlingRepositoryTest {
     @Test
     fun `sette inn og hente ut igjen`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
+        val relaterteIdenter = listOf("123", "456", "123456789")
         val sak = opprettTestSak(dataSource, "123456789".let(::Saksnummer), person)
 
         val referanse = UUID.randomUUID()
@@ -66,7 +67,7 @@ class BehandlingRepositoryTest {
             versjon = Versjon("xxx"),
             søknadsformat = SøknadsFormat.PAPIR,
             sisteSaksbehandler = "Joark Jorgensen",
-            relaterteIdenter = listOf("123", "456", "123456789"),
+            relaterteIdenter = relaterteIdenter,
             gjeldendeAvklaringsBehov = Definisjon.AVKLAR_OVERGANG_ARBEID,
             gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
             sisteLøsteAvklaringsbehov = Definisjon.ARBEIDSOPPTRAPPING,
@@ -125,6 +126,7 @@ class BehandlingRepositoryTest {
             )
         }
         assertThat(uthentet2.hendelser.size).isEqualTo(3)
+        assertThat(uthentet2.relaterteIdenter).containsExactlyInAnyOrderElementsOf(relaterteIdenter)
     }
 
     @Test

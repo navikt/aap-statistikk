@@ -157,22 +157,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         historikkId: Long
     ) {
         dbConnection.executeBatch(
-            "INSERT INTO person (ident) VALUES (?) ON CONFLICT DO NOTHING",
+            """INSERT INTO relaterte_personer (behandling_id, person_id, ident)
+    VALUES ($historikkId, (SELECT person_id FROM person_ident WHERE ident = ?), ?)""",
             behandling.relaterteIdenter
-        ) {
-            setParams { ident ->
-                setString(1, ident)
-            }
-        }
-
-        dbConnection.executeBatch(
-            """INSERT INTO relaterte_personer (behandling_id, person_id)
-    SELECT $historikkId, id
-    FROM person
-    WHERE ident = ?""", behandling.relaterteIdenter
         ) {
             setParams {
                 setString(1, it)
+                setString(2, it)
             }
         }
     }
@@ -300,6 +291,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
            sh.id                                       as sh_id,
            p.ident                                     as p_ident,
            p.id                                        as p_id,
+           p.skjermet                                  as p_skjermet,
            bh.status                                   as bh_status,
            bh.versjon_id                               as bh_versjon_id,
            bh.mottatt_tid                              as bh_mottatt_tid,
@@ -336,10 +328,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                              AND behandling_historikk.behandling_id = b.id) bh
                   on bh.behandling_id = b.id
              JOIN versjon v on v.id = bh.versjon_id
-             LEFT JOIN LATERAL (SELECT rp.behandling_id, array_agg(pr.ident) as rp_ident
+             LEFT JOIN LATERAL (SELECT rp.behandling_id, array_agg(rp.ident) as rp_ident
                                 FROM relaterte_personer rp
-                                         JOIN person pr ON rp.person_id = pr.id
-                                WHERE rp.behandling_id = bh.behandling_id
+                                WHERE rp.behandling_id = bh.id
                                 GROUP BY rp.behandling_id) rp
                        on rp.behandling_id = bh.id
     """.trimIndent()
@@ -485,6 +476,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             saksnummer = Saksnummer(it.getString("s_saksnummer")),
             person = Person(
                 ident = it.getString("p_ident"),
+                skjermet = it.getBoolean("p_skjermet"),
                 id = it.getLong("p_id"),
             ),
             sistOppdatert = it.getLocalDateTime("sh_oppdatert_tid"),

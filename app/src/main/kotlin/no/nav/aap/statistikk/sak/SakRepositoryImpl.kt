@@ -16,6 +16,7 @@ SELECT sak.id           as s_id,
        sak.saksnummer   as s_saksnummer,
        sak.person_id    as s_person_id,
        p.ident          as p_ident,
+       p.skjermet       as p_skjermet,
        sh.oppdatert_tid as sh_oppdatert_tid,
        sh.sak_status    as sh_sak_status,
        sh.id            as sh_id
@@ -32,6 +33,7 @@ SELECT sak.id           as s_id,
        sak.saksnummer   as s_saksnummer,
        sak.person_id    as s_person_id,
        p.ident          as p_ident,
+       p.skjermet       as p_skjermet,
        sh.oppdatert_tid as sh_oppdatert_tid,
        sh.sak_status    as sh_sak_status,
        sh.id            as sh_id
@@ -78,6 +80,7 @@ WHERE sak.id = ?
         saksnummer = row.getString("s_saksnummer").let(::Saksnummer),
         person = Person(
             ident = row.getString("p_ident"),
+            skjermet = row.getBoolean("p_skjermet"),
             id = row.getLong("s_person_id"),
         ),
         sistOppdatert = row.getLocalDateTime("sh_oppdatert_tid"),

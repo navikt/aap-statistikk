@@ -169,6 +169,7 @@ where id = ?"""
                    e.kode                    as e_kode,
                    p.id                      as p_id,
                    p.ident                   as p_ident,
+                   p.skjermet                as p_skjermet,
                    r.reservert_av            as r_reservert_av,
                    r.opprettet_tid           as r_opprettet_tid,
                    s.id                      as s_id,
@@ -197,8 +198,9 @@ where id = ?"""
         enhet = Enhet(it.getLongOrNull("e_id"), it.getString("e_kode")),
         person = it.getLongOrNull("p_id")?.let { personId ->
             Person(
+                ident = it.getString("p_ident"),
+                skjermet = it.getBoolean("p_skjermet"),
                 id = personId,
-                ident = it.getString("p_ident")
             )
         },
         status = it.getEnum("o_status"),
@@ -245,6 +247,7 @@ where id = ?"""
                    e.kode                    as e_kode,
                    p.id                      as p_id,
                    p.ident                   as p_ident,
+                   p.skjermet                as p_skjermet,
                    r.reservert_av            as r_reservert_av,
                    r.opprettet_tid           as r_opprettet_tid,
                    s.id                      as s_id,
@@ -288,6 +291,7 @@ where id = ?"""
                 e.kode                    as e_kode,
                 p.id                      as p_id,
                 p.ident                   as p_ident,
+                p.skjermet                as p_skjermet,
                 r.reservert_av            as r_reservert_av,
                 r.opprettet_tid           as r_opprettet_tid,
                 s.id                      as s_id,

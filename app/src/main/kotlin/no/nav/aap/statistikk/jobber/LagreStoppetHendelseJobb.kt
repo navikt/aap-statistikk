@@ -51,7 +51,7 @@ class LagreStoppetHendelseJobb(
         )
         val hendelsesService = HendelsesService(
             sakService = SakService(repositoryProvider),
-            personService = PersonService(repositoryProvider),
+            personService = PersonService(repositoryProvider, gatewayProvider),
             avsluttetBehandlingService = avsluttetBehandlingService,
             behandlingService = behandlingService,
             meldekortRepository = repositoryProvider.provide<IMeldekortRepository>(),

@@ -179,7 +179,7 @@ class HendelsesServiceTest {
                 vedtattStansOpphørRepository = FakeVedtattStansOpphørRepository(),
                 samordningRepository = FakeSamordningRepository(),
             ),
-            personService = PersonService(FakePersonRepository()),
+            personService = PersonService(FakePersonRepository(), FakePdlGateway()),
             hendelsePublisher = hendelsePublisher,
             behandlingService = behandlingService,
             meldekortRepository = meldekortRepository
