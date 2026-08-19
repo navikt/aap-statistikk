@@ -289,7 +289,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
            sh.oppdatert_tid                            as sh_oppdatert_tid,
            sh.sak_status                               as sh_sak_status,
            sh.id                                       as sh_id,
-           p.ident                                     as p_ident,
+           pi.ident                                    as p_ident,
            p.id                                        as p_id,
            p.skjermet                                  as p_skjermet,
            bh.status                                   as bh_status,
@@ -321,6 +321,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                            WHERE gjeldende = TRUE
                              and sh.sak_id = s.id) sh on s.id = sh.sak_id
              JOIN person p on p.id = s.person_id
+             JOIN person_ident pi on pi.person_id = p.id and pi.aktiv = true
              JOIN LATERAL (SELECT *
                            FROM behandling_historikk
                            WHERE gjeldende = TRUE

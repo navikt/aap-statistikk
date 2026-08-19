@@ -40,10 +40,9 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
     }
 
     private fun opprettPerson(person: Person): Long {
-        return dbConnection.executeReturnKey("INSERT INTO person (ident, skjermet) VALUES (?, ?)") {
+        return dbConnection.executeReturnKey("INSERT INTO person (skjermet) VALUES (?)") {
             setParams {
-                setString(1, person.ident)
-                setBoolean(2, person.erSkjermet())
+                setBoolean(1, person.erSkjermet())
             }
         }
     }
@@ -71,11 +70,10 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
             }
         }
 
-        dbConnection.execute("UPDATE person SET ident = ?, skjermet = ? WHERE id = ?") {
+        dbConnection.execute("UPDATE person SET skjermet = ? WHERE id = ?") {
             setParams {
-                setString(1, person.ident)
-                setBoolean(2, person.erSkjermet())
-                setLong(3, personId)
+                setBoolean(1, person.erSkjermet())
+                setLong(2, personId)
             }
         }
     }

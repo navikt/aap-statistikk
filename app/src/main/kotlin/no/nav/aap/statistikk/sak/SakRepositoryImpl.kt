@@ -15,13 +15,14 @@ class SakRepositoryImpl(private val dbConnection: DBConnection) : SakRepository 
 SELECT sak.id           as s_id,
        sak.saksnummer   as s_saksnummer,
        sak.person_id    as s_person_id,
-       p.ident          as p_ident,
+       pi.ident         as p_ident,
        p.skjermet       as p_skjermet,
        sh.oppdatert_tid as sh_oppdatert_tid,
        sh.sak_status    as sh_sak_status,
        sh.id            as sh_id
 FROM sak
          JOIN person p ON sak.person_id = p.id
+         JOIN person_ident pi ON pi.person_id = p.id AND pi.aktiv = TRUE
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh ON sh.sak_id = sak.id
 WHERE sak.saksnummer = ?
         """
@@ -32,13 +33,14 @@ WHERE sak.saksnummer = ?
 SELECT sak.id           as s_id,
        sak.saksnummer   as s_saksnummer,
        sak.person_id    as s_person_id,
-       p.ident          as p_ident,
+       pi.ident         as p_ident,
        p.skjermet       as p_skjermet,
        sh.oppdatert_tid as sh_oppdatert_tid,
        sh.sak_status    as sh_sak_status,
        sh.id            as sh_id
 FROM sak
          JOIN person p ON sak.person_id = p.id
+         JOIN person_ident pi ON pi.person_id = p.id AND pi.aktiv = TRUE
          JOIN (SELECT * FROM sak_historikk sh WHERE gjeldende = TRUE) sh ON sh.sak_id = sak.id
 WHERE sak.id = ?
         """

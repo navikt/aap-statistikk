@@ -65,7 +65,11 @@ class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection)
 
     override fun hentEksisterendeBehandling(referanse: UUID): PostmottakBehandling? {
         val sql = """
-            SELECT * FROM postmottak_behandling pb JOIN person p ON p.id = pb.person_id WHERE referanse = ? 
+            SELECT pb.*, p.skjermet AS p_skjermet, pi.ident AS p_ident
+            FROM postmottak_behandling pb
+                     JOIN person p ON p.id = pb.person_id
+                     JOIN person_ident pi ON pi.person_id = p.id AND pi.aktiv = TRUE
+            WHERE referanse = ?
         """.trimIndent()
 
         val behandling = dbConnection.queryFirstOrNull(sql) {
@@ -77,8 +81,8 @@ class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection)
                     id = it.getLong("id"),
                     journalpostId = it.getLong("journalpost_id"),
                     person = Person(
-                        ident = it.getString("ident"),
-                        skjermet = it.getBoolean("skjermet"),
+                        ident = it.getString("p_ident"),
+                        skjermet = it.getBoolean("p_skjermet"),
                         id = it.getLong("person_id"),
                     ),
                     referanse = it.getUUID("referanse"),

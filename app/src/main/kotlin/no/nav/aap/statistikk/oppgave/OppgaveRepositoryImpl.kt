@@ -168,7 +168,7 @@ where id = ?"""
                    e.id                      as e_id,
                    e.kode                    as e_kode,
                    p.id                      as p_id,
-                   p.ident                   as p_ident,
+                   pi.ident                  as p_ident,
                    p.skjermet                as p_skjermet,
                    r.reservert_av            as r_reservert_av,
                    r.opprettet_tid           as r_opprettet_tid,
@@ -178,6 +178,7 @@ where id = ?"""
                      join enhet e on o.enhet_id = e.id
                      left join behandling_referanse br on o.behandling_referanse_id = br.id
                      left join person p on o.person_id = p.id
+                     left join person_ident pi on pi.person_id = p.id and pi.aktiv = true
                      left join reservasjon r on r.id = o.reservasjon_id
                      left join saksbehandler s on s.id = r.reservert_av
             where e.kode = ?
@@ -246,7 +247,7 @@ where id = ?"""
                    e.id                      as e_id,
                    e.kode                    as e_kode,
                    p.id                      as p_id,
-                   p.ident                   as p_ident,
+                   pi.ident                  as p_ident,
                    p.skjermet                as p_skjermet,
                    r.reservert_av            as r_reservert_av,
                    r.opprettet_tid           as r_opprettet_tid,
@@ -256,6 +257,7 @@ where id = ?"""
                      join enhet e on o.enhet_id = e.id
                      left join behandling_referanse br on o.behandling_referanse_id = br.id
                      left join person p on o.person_id = p.id
+                     left join person_ident pi on pi.person_id = p.id and pi.aktiv = true
                      left join reservasjon r on r.id = o.reservasjon_id
                      left join saksbehandler s on s.id = r.reservert_av
             where o.identifikator = ?
@@ -290,7 +292,7 @@ where id = ?"""
                 e.id                      as e_id,
                 e.kode                    as e_kode,
                 p.id                      as p_id,
-                p.ident                   as p_ident,
+                pi.ident                  as p_ident,
                 p.skjermet                as p_skjermet,
                 r.reservert_av            as r_reservert_av,
                 r.opprettet_tid           as r_opprettet_tid,
@@ -299,6 +301,7 @@ where id = ?"""
          from oppgave o
                   join enhet e on o.enhet_id = e.id
                   join person p on o.person_id = p.id
+                  join person_ident pi on pi.person_id = p.id and pi.aktiv = true
                   join behandling b on b.referanse_id = o.behandling_referanse_id
                   join behandling_referanse br on o.behandling_referanse_id = br.id
                   left join reservasjon r on r.id = o.reservasjon_id
