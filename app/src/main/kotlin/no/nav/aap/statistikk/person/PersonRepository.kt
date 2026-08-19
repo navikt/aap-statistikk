@@ -34,7 +34,7 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
                 setParams {
                     setString(1, ident)
                 }
-                setRowMapper { Unit }
+                setRowMapper { }
             }
         }
     }
