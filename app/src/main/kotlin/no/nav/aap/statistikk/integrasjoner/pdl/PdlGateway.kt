@@ -1,81 +1,11 @@
 package no.nav.aap.statistikk.integrasjoner.pdl
 
-import com.github.benmanes.caffeine.cache.Caffeine
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics
-import no.nav.aap.komponenter.config.requiredConfigForKey
-import no.nav.aap.komponenter.gateway.Factory
 import no.nav.aap.komponenter.gateway.Gateway
-import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
-import no.nav.aap.komponenter.httpklient.httpclient.Header
-import no.nav.aap.komponenter.httpklient.httpclient.RestClient
-import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
-import no.nav.aap.komponenter.httpklient.httpclient.post
-import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
-import no.nav.aap.statistikk.PrometheusProvider
-import no.nav.aap.statistikk.WithMetrics
-import org.slf4j.LoggerFactory
-import java.net.URI
-import java.security.MessageDigest
-import java.time.Duration
 
-private val logger = LoggerFactory.getLogger(PdlGateway::class.java)
 
 interface PdlGateway : Gateway {
-    fun hentPersoner(identer: List<String>): List<Person>
-}
-
-private const val BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING = "B287"
-
-class PdlGraphQLGateway : PdlGateway {
-    companion object : Factory<PdlGateway>, WithMetrics {
-        private val pdlCache = Caffeine.newBuilder()
-            .maximumSize(1000)
-            .expireAfterWrite(Duration.ofHours(4))
-            .recordStats()
-            .build<String, List<Person>>()
-
-        override fun konstruer(): PdlGateway {
-            return PdlGraphQLGateway()
-        }
-
-        override fun registrerMetrics(registry: MeterRegistry) {
-            CaffeineCacheMetrics.monitor(registry, pdlCache, "pdl")
-        }
-    }
-
-    private val client = RestClient(
-        config = ClientConfig(
-            scope = requiredConfigForKey("integrasjon.pdl.scope"),
-            additionalHeaders = listOf(
-                Header(
-                    "behandlingsnummer",
-                    BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING
-                )
-            )
-        ),
-        tokenProvider = AzureM2MTokenProvider,
-        responseHandler = DefaultResponseHandler(),
-        prometheus = PrometheusProvider.prometheus
-    )
-
-    override fun hentPersoner(identer: List<String>): List<Person> {
-        logger.debug("Henter ${identer.size} personer fra PDL.")
-
-        val cacheNøkkel = sha256(identer.sorted().joinToString(","))
-        return pdlCache.get(cacheNøkkel) {
-            val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
-                URI.create(requiredConfigForKey("integrasjon.pdl.url")),
-                PostRequest(body = PdlRequest.hentPersonBolk(identer))
-            )
-
-            val graphQLdata =
-                requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
-
-            graphQLdata.hentPersonBolk.map { personBolk -> requireNotNull(personBolk.person) { "Fant ikke info om person (ident maskert)" } }
-        }
-    }
+    fun hentPersoner(identer: List<String>): List<PdlPerson>
+    fun hentIdenter(ident: String): List<PdlIdent>
 }
 
 internal data class PdlRequest(val query: String, val variables: Variables) {
@@ -86,12 +16,27 @@ internal data class PdlRequest(val query: String, val variables: Variables) {
             query = PERSON_BOLK_QUERY,
             variables = Variables(identer = personidenter),
         )
+
+        fun hentIdenter(ident: String) = PdlRequest(
+            query = IDENT_QUERY,
+            variables = Variables(ident = ident),
+        )
     }
 }
 
 data class PdlRespons(val hentPersonBolk: List<HentPersonBolkResult>)
 
-data class HentPersonBolkResult(val ident: String, val person: Person?)
+data class HentPersonBolkResult(val ident: String, val person: PdlPerson?)
+
+data class PdlIdenterRespons(val hentIdenter: PdlIdenter?)
+
+data class PdlIdenter(val identer: List<PdlIdent>)
+
+data class PdlIdent(
+    val ident: String,
+    val historisk: Boolean,
+    val gruppe: String = "FOLKEREGISTERIDENT",
+)
 
 val PERSON_BOLK_QUERY = $$"""
     query($identer: [ID!]!) {
@@ -107,17 +52,25 @@ val PERSON_BOLK_QUERY = $$"""
     }
 """.trimIndent()
 
-data class Person(val adressebeskyttelse: List<Adressebeskyttelse>)
+val IDENT_QUERY = $$"""
+    query($ident: ID!) {
+        hentIdenter(ident: $ident, historikk: true, grupper: [FOLKEREGISTERIDENT]) {
+            identer {
+                ident,
+                historisk,
+                gruppe
+            }
+        }
+    }
+""".trimIndent()
+
+data class PdlPerson(val adressebeskyttelse: List<Adressebeskyttelse>)
 
 data class Adressebeskyttelse(
     val gradering: Gradering?
 )
 
+@Suppress("unused")
 enum class Gradering {
     FORTROLIG, STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, UGRADERT
 }
-
-private fun sha256(input: String): String =
-    MessageDigest.getInstance("SHA-256")
-        .digest(input.toByteArray())
-        .joinToString("") { "%02x".format(it) }

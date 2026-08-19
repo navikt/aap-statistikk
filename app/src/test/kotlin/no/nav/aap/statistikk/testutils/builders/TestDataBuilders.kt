@@ -100,7 +100,7 @@ fun opprettTestHendelse(
 fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
     return dataSource.transaction { conn ->
         val personRepository = PersonRepository(conn)
-        PersonService(personRepository).hentEllerLagrePerson(ident)
+        PersonService(personRepository, FakePdlGateway()).hentEllerLagrePerson(ident)
     }
 }
 
@@ -159,7 +159,7 @@ fun forberedDatabase(
     behandlingReferanse: UUID
 ): BehandlingId {
     val ident = "214"
-    val person = PersonService(PersonRepository(it)).hentEllerLagrePerson(ident)
+    val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(ident)
 
     val sak = Sak(
         saksnummer = "ABCDE".tilSaksnummer(),

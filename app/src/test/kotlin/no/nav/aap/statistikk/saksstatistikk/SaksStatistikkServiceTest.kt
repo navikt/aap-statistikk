@@ -100,7 +100,7 @@ class SaksStatistikkServiceTest {
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
+                personService = PersonService(PersonRepository(conn), FakePdlGateway()),
                 meldekortRepository = MeldekortRepository(conn),
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
@@ -216,7 +216,7 @@ class SaksStatistikkServiceTest {
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
+                personService = PersonService(PersonRepository(conn), FakePdlGateway()),
                 meldekortRepository = MeldekortRepository(conn),
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
@@ -463,7 +463,7 @@ class SaksStatistikkServiceTest {
             val hendelsesService = HendelsesService(
                 sakService = SakService(SakRepositoryImpl(conn)),
                 avsluttetBehandlingService = mockk(relaxed = true),
-                personService = PersonService(PersonRepository(conn)),
+                personService = PersonService(PersonRepository(conn), FakePdlGateway()),
                 meldekortRepository = MeldekortRepository(conn),
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
@@ -575,7 +575,7 @@ class SaksStatistikkServiceTest {
                     sakService = SakService(SakRepositoryImpl(it)),
                     // mockk fordi irrelevant for denne testen
                     avsluttetBehandlingService = mockk(relaxed = true),
-                    personService = PersonService(PersonRepository(it)),
+                    personService = PersonService(PersonRepository(it), FakePdlGateway()),
                     meldekortRepository = MeldekortRepository(it),
                     hendelsePublisher = FakeHendelsePublisher(),
                     behandlingService = BehandlingService(

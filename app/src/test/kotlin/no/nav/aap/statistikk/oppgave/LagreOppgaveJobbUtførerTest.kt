@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.oppgave
 
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
+
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.*
@@ -56,7 +58,7 @@ class LagreOppgaveJobbUtførerTest {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
-                    personService = PersonService(PersonRepository(it)),
+                    personService = PersonService(PersonRepository(it), FakePdlGateway()),
                     oppgaveRepository = OppgaveRepositoryImpl(it),
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
@@ -351,7 +353,7 @@ class LagreOppgaveJobbUtførerTest {
             LagreOppgaveJobbUtfører(
                 oppgaveHendelseRepository = OppgaveHendelseRepositoryImpl(it),
                 oppgaveHistorikkLagrer = OppgaveHistorikkLagrer(
-                    personService = PersonService(PersonRepository(it)),
+                    personService = PersonService(PersonRepository(it), FakePdlGateway()),
                     oppgaveRepository = OppgaveRepositoryImpl(it),
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
@@ -372,7 +374,7 @@ class LagreOppgaveJobbUtførerTest {
     private fun settOppEksisterendeBehandling(dataSource: DataSource): Behandling {
         return dataSource.transaction {
             val personUtenId = Person(ident = "123")
-            val id = PersonRepository(it).lagrePerson(personUtenId)
+            val id = PersonRepository(it).lagrePerson(personUtenId, setOf(personUtenId.ident))
             val sak = Sak(
                 saksnummer = Saksnummer("123"),
                 person = personUtenId.medId(id),

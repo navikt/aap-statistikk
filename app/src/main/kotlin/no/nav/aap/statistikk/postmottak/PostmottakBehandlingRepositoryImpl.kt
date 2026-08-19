@@ -76,7 +76,11 @@ class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection)
                 PostmottakBehandling(
                     id = it.getLong("id"),
                     journalpostId = it.getLong("journalpost_id"),
-                    person = Person(it.getString("ident"), it.getLong("person_id")),
+                    person = Person(
+                        ident = it.getString("ident"),
+                        skjermet = it.getBoolean("skjermet"),
+                        id = it.getLong("person_id"),
+                    ),
                     referanse = it.getUUID("referanse"),
                     behandlingType = TypeBehandling.valueOf(it.getString("type_behandling")),
                     mottattTid = it.getLocalDateTime("mottatt_tid"),

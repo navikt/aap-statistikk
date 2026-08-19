@@ -24,7 +24,7 @@ class ResendHendelseServiceTest {
         val hendelsePublisher = FakeHendelsePublisher()
         val hendelsesService = ResendHendelseService(
             SakService(sakRepository),
-            PersonService(FakePersonRepository()),
+            PersonService(FakePersonRepository(), FakePdlGateway()),
             behandlingRepository,
             BehandlingService(behandlingRepository, SkjermingService(FakePdlGateway(emptyMap()))),
             hendelsePublisher

@@ -31,6 +31,7 @@ import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlIdent
 import no.nav.aap.statistikk.meldekort.FritaksvurderingRepository
 import no.nav.aap.statistikk.meldekort.Fritakvurdering
 import no.nav.aap.statistikk.meldekort.IMeldekortRepository
@@ -101,14 +102,44 @@ class FakeSakRepository : SakRepository {
 
 class FakePersonRepository : IPersonRepository {
     private val personer = mutableMapOf<Long, Person>()
-    override fun lagrePerson(person: Person): Long {
-        personer[personer.size.toLong()] = person
-        return (personer.size - 1).toLong()
+    private val identTilPersonId = mutableMapOf<String, Long>()
+
+    override fun lagrePerson(person: Person, identer: Set<String>): Long {
+        val personId = person.id() ?: personer.size.toLong()
+        val alleIdenter = identer + person.ident
+        val identMedAnnenEier =
+            alleIdenter.firstOrNull { identTilPersonId[it] != null && identTilPersonId[it] != personId }
+        require(identMedAnnenEier == null) {
+            "Ident $identMedAnnenEier tilhører allerede en annen person " +
+                "(person_id=${identTilPersonId[identMedAnnenEier]})."
+        }
+
+        alleIdenter.forEach { identTilPersonId[it] = personId }
+        personer[personId] = Person(
+            ident = person.ident,
+            skjermet = person.erSkjermet(),
+            id = personId,
+        )
+        return personId
+    }
+
+    override fun slåSammenPersoner(beholdPersonId: Long, fjernPersonIder: Set<Long>, identer: Set<String>) {
+        val forventedePersonIder = fjernPersonIder + beholdPersonId
+        require(identer.mapNotNull(identTilPersonId::get).all { it in forventedePersonIder }) {
+            "En eller flere identer tilhører en person som ikke skal slås sammen."
+        }
+
+        identTilPersonId.replaceAll { _, personId ->
+            if (personId in fjernPersonIder) beholdPersonId else personId
+        }
+        fjernPersonIder.forEach(personer::remove)
     }
 
     override fun hentPerson(ident: String): Person? {
-        return personer.values.firstOrNull { it.ident == ident }
+        val personId = identTilPersonId[ident] ?: return null
+        return personer[personId]
     }
+
 }
 
 class FakeBehandlingRepository : IBehandlingRepository {
@@ -320,13 +351,16 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
     }
 }
 
-class FakePdlGateway(val identerHemmelig: Map<String, Boolean?> = emptyMap()) : PdlGateway {
+class FakePdlGateway(
+    val identerHemmelig: Map<String, Boolean?> = emptyMap(),
+    val identerForPerson: Map<String, List<PdlIdent>> = emptyMap(),
+) : PdlGateway {
     companion object : Factory<PdlGateway>, WithMetrics {
         private val pdlCache = Caffeine.newBuilder()
             .maximumSize(1000)
             .expireAfterWrite(Duration.ofHours(4))
             .recordStats()
-            .build<String, List<no.nav.aap.statistikk.integrasjoner.pdl.Person>>()
+            .build<String, List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson>>()
 
         override fun konstruer(): PdlGateway {
             return FakePdlGateway()
@@ -338,9 +372,9 @@ class FakePdlGateway(val identerHemmelig: Map<String, Boolean?> = emptyMap()) : 
         }
     }
 
-    override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.Person> {
+    override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson> {
         return identer.map {
-            no.nav.aap.statistikk.integrasjoner.pdl.Person(
+            no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson(
                 adressebeskyttelse = listOf(
                     Adressebeskyttelse(
                         gradering = when (identerHemmelig[it]) {
@@ -352,6 +386,10 @@ class FakePdlGateway(val identerHemmelig: Map<String, Boolean?> = emptyMap()) : 
                 )
             )
         }
+    }
+
+    override fun hentIdenter(ident: String): List<PdlIdent> {
+        return identerForPerson[ident] ?: listOf(PdlIdent(ident = ident, historisk = false))
     }
 }
 

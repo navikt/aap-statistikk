@@ -32,6 +32,7 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
@@ -430,7 +431,7 @@ class MottaStatistikkTest {
                 lagreStoppetHendelseJobb
             ),
             repositoryRegistry = postgresRepositoryRegistry,
-            gatewayProvider = defaultGatewayProvider { },
+            gatewayProvider = defaultGatewayProvider { register<FakePdlGateway>() },
         )
 
         testKlient(

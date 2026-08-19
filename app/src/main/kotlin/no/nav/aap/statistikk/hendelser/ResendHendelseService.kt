@@ -28,7 +28,7 @@ class ResendHendelseService(
         ): ResendHendelseService {
             return ResendHendelseService(
                 sakService = SakService(repositoryProvider),
-                personService = PersonService(repositoryProvider),
+                personService = PersonService(repositoryProvider, gatewayProvider),
                 behandlingRepository = repositoryProvider.provide(),
                 behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
                 hendelsePublisher = hendelsePublisher,

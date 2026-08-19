@@ -1,5 +1,7 @@
 package no.nav.aap.statistikk.postmottak
 
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
+
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
@@ -99,7 +101,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
     ): (DBConnection) -> Unit = {
         LagrePostmottakHendelseJobbUtfører(
             PostmottakBehandlingService(PostmottakBehandlingRepositoryImpl(it)), PersonService(
-                PersonRepository(it)
+                PersonRepository(it), FakePdlGateway()
             )
         ).utfør(
             JobbInput(LagrePostmottakHendelseJobb()).medPayload(

@@ -15,7 +15,7 @@ spec:
   {{/if}}
   image: {{image}}
   strategy:
-   type: RollingUpdate
+    type: Recreate
   port: 8080
   resources:
     limits:
