@@ -63,7 +63,7 @@ spec:
       WHERE
         bh.gjeldende = TRUE
         AND bh.slettet IS FALSE
-        AND p.skjermet IS FALSE
+        AND p.skjermet IS NOT TRUE
         AND (
           b.aarsak_til_opprettelse = 'SØKNAD'
           OR 'SØKNAD' IN UNNEST(JSON_VALUE_ARRAY(b.aarsaker_til_behandling)))
