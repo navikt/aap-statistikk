@@ -39,7 +39,14 @@ spec:
             AND h.status = 'AVSLUTTET'
         ) AS ferdigbehandlet_tid,
         timestamp(datetime(bh.hendelsestidspunkt), 'Europe/Oslo') AS endret_tid,
-        timestamp(datetime(bh.oppdatert_tid), 'Europe/Oslo') AS rad_opprettet,
+        (
+          SELECT
+            timestamp(
+              datetime(MIN(h.oppdatert_tid), 'Europe/Oslo'))
+          FROM `datastream_hendelser.public_behandling_historikk` h
+          WHERE
+            h.behandling_id = b.id
+        ) AS rad_opprettet,
         timestamp_millis(bh.datastream_metadata.source_timestamp) AS teknisk_tid,
       FROM
         `datastream_hendelser.public_behandling` b
