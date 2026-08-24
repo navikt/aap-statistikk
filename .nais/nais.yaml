@@ -7,7 +7,7 @@ metadata:
   labels:
     team: aap
     sub: statistikk
-    systemkatalog.nav.no/system: TE-496
+    systemkatalog.nav.no/system: SK-268
 
 spec:
   {{#if isdev}}
