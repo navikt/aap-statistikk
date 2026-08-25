@@ -17,6 +17,12 @@ class DiagnosePerioderRepositoryImpl(
     }
 
     override fun lagre(behandlingId: BehandlingId, diagnoser: List<DiagnoseMedPeriode>) {
+        // Sletter eksisterende perioder for behandlingen først, slik at gjentatt lagring
+        // (f.eks. ved retry av jobb) ikke fører til dupliserte diagnoseperioder.
+        dbConnection.execute("DELETE FROM diagnose_periode WHERE behandling_id = ?") {
+            setParams { setLong(1, behandlingId.id) }
+        }
+
         if (diagnoser.isEmpty()) return
 
         val sql = """
