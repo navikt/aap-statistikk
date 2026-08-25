@@ -26,6 +26,21 @@ where gjeldende = false
 order by behandling_id desc
 ```
 
+Om det finnes avsluttet-status, må også siste melding være avsluttet:
+```postgresql
+select behandling_id
+from behandling_historikk bh
+where status = 'AVSLUTTET'
+  and slettet is false
+  and gjeldende = false
+  and not exists(select *
+                 from behandling_historikk bh2
+                 where gjeldende = true
+                   and status = 'AVSLUTTET'
+                   and slettet is false
+                   and bh2.behandling_id = bh.behandling_id)
+```
+
 Tilfeller av race condition.
 
 ```postgresql

@@ -134,21 +134,41 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         dbConnection.execute(
             """
             UPDATE behandling_historikk
-            SET gjeldende = (id = (
+            SET gjeldende = FALSE
+            WHERE behandling_id = ?
+              AND slettet = FALSE
+              AND id <> (
+                  SELECT id
+                  FROM behandling_historikk
+                  WHERE behandling_id = ?
+                    AND slettet = FALSE
+                  ORDER BY hendelsestidspunkt DESC, oppdatert_tid DESC, id DESC
+                  LIMIT 1
+              )
+            """.trimIndent()
+        ) {
+            setParams {
+                setLong(1, behandlingId.id)
+                setLong(2, behandlingId.id)
+            }
+        }
+
+        dbConnection.execute(
+            """
+            UPDATE behandling_historikk
+            SET gjeldende = TRUE
+            WHERE id = (
                 SELECT id
                 FROM behandling_historikk
                 WHERE behandling_id = ?
                   AND slettet = FALSE
                 ORDER BY hendelsestidspunkt DESC, oppdatert_tid DESC, id DESC
                 LIMIT 1
-            ))
-            WHERE behandling_id = ?
-              AND slettet = FALSE
+            )
             """.trimIndent()
         ) {
             setParams {
                 setLong(1, behandlingId.id)
-                setLong(2, behandlingId.id)
             }
         }
     }
