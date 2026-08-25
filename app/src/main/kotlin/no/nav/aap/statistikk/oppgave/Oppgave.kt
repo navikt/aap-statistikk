@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.oppgave
 
 import no.nav.aap.statistikk.enhet.Enhet
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -99,7 +100,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     reservasjon(hendelse)
                 Oppgave(
                     enhet = Enhet(kode = enhet),
-                    person = hendelse.personIdent?.let { Person(it) },
+                    person = hendelse.personIdent?.let { Person(Ident(it)) },
                     status = hendelse.status,
                     opprettetTidspunkt = hendelse.mottattTidspunkt,
                     hendelser = listOf(hendelse),
@@ -116,7 +117,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     sisteHendelse = hendelse.hendelse
                 )
             } else {
-                if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident) {
+                if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident.ident) {
                     logger.warn("Person har endret seg på en oppgave. Var ${acc.person.id()}, nå forskjellig.")
                 }
                 if (hendelse.behandlingRef != null && acc.behandlingReferanse != null && hendelse.behandlingRef != acc.behandlingReferanse.referanse) {

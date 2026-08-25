@@ -145,7 +145,7 @@ class SaksStatistikkServiceTest {
 
             // Oppgave ankommer ETTER behandlingsflyt-hendelsen
             val oppgaveIdentifikator = 99L
-            val person = PersonRepository(conn).hentPerson("1234567891")!!
+            val person = PersonRepository(conn).hentPerson(no.nav.aap.statistikk.person.Ident("1234567891"))!!
             val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
             OppgaveRepositoryImpl(conn).lagreOppgave(
                 Oppgave(
@@ -265,7 +265,7 @@ class SaksStatistikkServiceTest {
                     identifikator = 88L,
                     avklaringsbehov = Definisjon.VURDER_RETTIGHETSPERIODE.kode.name,
                     enhet = Enhet(enhetId, "4491"),
-                    person = PersonRepository(conn).hentPerson("1234567893")!!,
+                    person = PersonRepository(conn).hentPerson(no.nav.aap.statistikk.person.Ident("1234567893"))!!,
                     status = Oppgavestatus.OPPRETTET,
                     opprettetTidspunkt = oppgaveSendtTid,
                     behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
@@ -507,7 +507,7 @@ class SaksStatistikkServiceTest {
             )
 
             val oppgaveIdentifikator = 77L
-            val person = PersonRepository(conn).hentPerson("1234567892")!!
+            val person = PersonRepository(conn).hentPerson(no.nav.aap.statistikk.person.Ident("1234567892"))!!
             val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
             OppgaveRepositoryImpl(conn).lagreOppgave(
                 Oppgave(

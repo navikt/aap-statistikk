@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -208,8 +209,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             behandling.relaterteIdenter
         ) {
             setParams {
-                setString(1, it)
-                setString(2, it)
+                setString(1, it.ident)
+                setString(2, it.ident)
             }
         }
     }
@@ -450,7 +451,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     hendelsesTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt"),
                     avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")?.let(Definisjon::forKode),
                     avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
-                    sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")?.let(Definisjon::forKode),
+                    sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")
+                        ?.let(Definisjon::forKode),
                     sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler"),
                     sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
                     steggruppe = it.getEnumOrNull("bh_steggruppe"),
@@ -522,7 +524,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             id = it.getLong("s_id"),
             saksnummer = Saksnummer(it.getString("s_saksnummer")),
             person = Person(
-                ident = it.getString("p_ident"),
+                ident = Ident(it.getString("p_ident")),
                 skjermet = it.getBoolean("p_skjermet"),
                 id = it.getLong("p_id"),
             ),
@@ -540,7 +542,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         versjon = Versjon(verdi = it.getString("v_versjon")),
         søknadsformat = it.getEnum("bh_soknadsformat"),
         sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
-        relaterteIdenter = it.getArray("rp_ident", String::class),
+        relaterteIdenter = it.getArray("rp_ident", String::class).map(::Ident),
         relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id")?.let(::BehandlingId),
         relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")
             ?.ifBlank { null },

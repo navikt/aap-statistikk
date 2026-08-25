@@ -17,7 +17,7 @@ class FritaksvurderingRepositoryImplTest {
     @Test
     fun `Lagre og hente ut igjen fritaksvurdering data`(@Postgres dataSource: DataSource) {
         val behandlingRef = UUID.randomUUID()
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, no.nav.aap.statistikk.person.Ident("123456789"))
         val sak = opprettTestSak(dataSource, Saksnummer("123456789"), person)
         val behandling = opprettTestBehandling(dataSource, behandlingRef, sak)
 

@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
@@ -28,7 +29,7 @@ class BehandlingTest {
             referanse = UUID.randomUUID(),
             sak = Sak(
                 saksnummer = Saksnummer("123456789"),
-                person = Person(ident = "12121"),
+                person = Person(ident = Ident("12121")),
                 sakStatus = SakStatus.OPPRETTET,
                 sistOppdatert = LocalDateTime.now()
             ),
@@ -67,7 +68,7 @@ class BehandlingTest {
             referanse = UUID.randomUUID(),
             sak = Sak(
                 saksnummer = Saksnummer("123456789"),
-                person = Person(ident = "12121"),
+                person = Person(ident = Ident("12121")),
                 sakStatus = SakStatus.OPPRETTET,
                 sistOppdatert = LocalDateTime.now()
             ),
@@ -118,7 +119,7 @@ class BehandlingTest {
             referanse = UUID.randomUUID(),
             sak = Sak(
                 saksnummer = Saksnummer("123456789"),
-                person = Person(ident = "12121"),
+                person = Person(ident = Ident("12121")),
                 sakStatus = SakStatus.OPPRETTET,
                 sistOppdatert = LocalDateTime.now()
             ),

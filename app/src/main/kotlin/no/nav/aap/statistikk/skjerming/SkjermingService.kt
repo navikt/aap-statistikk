@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.skjerming
 
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
+import no.nav.aap.statistikk.person.Ident
 import java.net.http.HttpConnectTimeoutException
 
 private val logger = org.slf4j.LoggerFactory.getLogger("SkjermingService")
@@ -9,7 +10,7 @@ private val logger = org.slf4j.LoggerFactory.getLogger("SkjermingService")
 class SkjermingService(
     private val pdlGateway: PdlGateway
 ) {
-    fun erSkjermet(identer: List<String>): Boolean {
+    fun erSkjermet(identer: List<Ident>): Boolean {
         return try {
             val hentPersoner = pdlGateway.hentPersoner(identer)
             hentPersoner

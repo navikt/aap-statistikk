@@ -79,7 +79,7 @@ class HendelsesServiceTest {
 
         val sak = Sak(
             saksnummer = Saksnummer("ABCDE"),
-            person = Person("123"),
+            person = Person(no.nav.aap.statistikk.person.Ident("123")),
             sakStatus = SakStatus.LØPENDE,
             sistOppdatert = LocalDateTime.now()
         )

@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.enhet.Enhet
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import java.time.LocalDateTime
 
@@ -68,7 +69,6 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
         // Først fjern evnt eksisterende reservasjoner
         fjernEksisterendeReservasjoner(oppgave.id)
         if (oppgave.reservasjon != null) {
-            fjernEksisterendeReservasjoner(oppgave.id)
 
             // Sett inn på nytt
             val sql = """
@@ -199,7 +199,7 @@ where id = ?"""
         enhet = Enhet(it.getLongOrNull("e_id"), it.getString("e_kode")),
         person = it.getLongOrNull("p_id")?.let { personId ->
             Person(
-                ident = it.getString("p_ident"),
+                ident = Ident(it.getString("p_ident")),
                 skjermet = it.getBoolean("p_skjermet"),
                 id = personId,
             )

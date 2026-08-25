@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.sak
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 
 class SakRepositoryImpl(private val dbConnection: DBConnection) : SakRepository {
@@ -81,7 +82,7 @@ WHERE sak.id = ?
         id = row.getLong("s_id"),
         saksnummer = row.getString("s_saksnummer").let(::Saksnummer),
         person = Person(
-            ident = row.getString("p_ident"),
+            ident = Ident(row.getString("p_ident")),
             skjermet = row.getBoolean("p_skjermet"),
             id = row.getLong("s_person_id"),
         ),

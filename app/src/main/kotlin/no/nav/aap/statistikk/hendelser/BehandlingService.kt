@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import org.slf4j.LoggerFactory
@@ -119,7 +120,7 @@ class BehandlingService(
 
         return eksisterendeBehandling?.copy(
             relatertBehandlingId = relatertBehandling?.id,
-            relaterteIdenter = dto.identerForSak,
+            relaterteIdenter = dto.identerForSak.map(::Ident),
         ) ?: Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
@@ -130,7 +131,7 @@ class BehandlingService(
             mottattTid = dto.mottattTid,
             status = dto.behandlingStatus.tilDomene(),
             versjon = Versjon(verdi = dto.versjon),
-            relaterteIdenter = dto.identerForSak,
+            relaterteIdenter = dto.identerForSak.map(::Ident),
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
             sisteSaksbehandler = dto.avklaringsbehov.sistePersonPåBehandling(),
             sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,

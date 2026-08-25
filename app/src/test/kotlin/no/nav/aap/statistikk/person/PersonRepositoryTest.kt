@@ -12,7 +12,7 @@ import javax.sql.DataSource
 class PersonRepositoryTest {
     @Test
     fun `sett inn og hent ut person`(@Postgres dataSource: DataSource) {
-        val ident = "13021913"
+        val ident = Ident("13021913")
         dataSource.transaction {
             PersonRepository(it).lagrePerson(
                 Person(
@@ -32,7 +32,7 @@ class PersonRepositoryTest {
 
     @Test
     fun `lagrer og henter ut om person er skjermet`(@Postgres dataSource: DataSource) {
-        val ident = "13021914"
+        val ident = Ident("13021914")
         dataSource.transaction {
             PersonRepository(it).lagrePerson(Person(ident = ident, skjermet = true), setOf(ident))
         }
@@ -44,7 +44,7 @@ class PersonRepositoryTest {
 
     @Test
     fun `oppdaterer skjermet ved lagring av eksisterende person`(@Postgres dataSource: DataSource) {
-        val ident = "13021921"
+        val ident = Ident("13021921")
         val personId = dataSource.transaction {
             PersonRepository(it).lagrePerson(Person(ident = ident), setOf(ident))
         }
@@ -62,8 +62,8 @@ class PersonRepositoryTest {
 
     @Test
     fun `lagrer alle historiske identer ved opprettelse`(@Postgres dataSource: DataSource) {
-        val historiskIdent = "13021919"
-        val aktivIdent = "13021920"
+        val historiskIdent = Ident("13021919")
+        val aktivIdent = Ident("13021920")
 
         val personId = dataSource.transaction {
             PersonRepository(it).lagrePerson(
@@ -81,8 +81,8 @@ class PersonRepositoryTest {
 
     @Test
     fun `kan hente person på gammel ident etter identbytte, kun én ident er aktiv`(@Postgres dataSource: DataSource) {
-        val gammelIdent = "13021915"
-        val nyIdent = "13021916"
+        val gammelIdent = Ident("13021915")
+        val nyIdent = Ident("13021916")
 
         val personId = dataSource.transaction {
             PersonRepository(it).lagrePerson(Person(ident = gammelIdent), setOf(gammelIdent))
@@ -110,8 +110,8 @@ class PersonRepositoryTest {
 
     @Test
     fun `lagrePerson kaster hvis ny ident allerede tilhører en annen person`(@Postgres dataSource: DataSource) {
-        val ident1 = "13021917"
-        val ident2 = "13021918"
+        val ident1 = Ident("13021917")
+        val ident2 = Ident("13021918")
 
         val person1Id =
             dataSource.transaction { PersonRepository(it).lagrePerson(Person(ident = ident1), setOf(ident1)) }
@@ -126,8 +126,8 @@ class PersonRepositoryTest {
 
     @Test
     fun `slår sammen eksisterende personrader når PDL knytter identene sammen`(@Postgres dataSource: DataSource) {
-        val historiskIdent = "13021924"
-        val aktivIdent = "13021925"
+        val historiskIdent = Ident("13021924")
+        val aktivIdent = Ident("13021925")
         dataSource.transaction {
             PersonRepository(it).lagrePerson(Person(ident = historiskIdent), setOf(historiskIdent))
         }
@@ -157,7 +157,7 @@ class PersonRepositoryTest {
 
     @Test
     fun `samtidig opprettelse av samme person returnerer samme person-id`(@Postgres dataSource: DataSource) {
-        val ident = "13021923"
+        val ident = Ident("13021923")
         val klar = CountDownLatch(2)
         val start = CountDownLatch(1)
         val personIder = synchronizedList(mutableListOf<Long>())

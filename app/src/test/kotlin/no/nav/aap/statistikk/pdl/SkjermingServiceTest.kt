@@ -3,6 +3,7 @@ package no.nav.aap.statistikk.pdl
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlIdent
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
@@ -24,7 +25,7 @@ class SkjermingServiceTest {
         sak = Sak(
             saksnummer = Saksnummer("234"),
             person = Person(
-                ident = "130289",
+                ident = Ident("130289"),
             ),
             sakStatus = SakStatus.LØPENDE,
             sistOppdatert = LocalDateTime.now()
@@ -42,11 +43,11 @@ class SkjermingServiceTest {
     @Test
     fun `returnerer skjermet-true om noen av relaterte identer er skjermet`() {
         val service =
-            SkjermingService(FakePdlGateway(identerHemmelig = mapOf("123" to true, "456" to false)))
+            SkjermingService(FakePdlGateway(identerHemmelig = mapOf(Ident("123") to true, Ident("456") to false)))
 
-        assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf("123")).identerPåBehandling())).isTrue()
-        assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf("456")).identerPåBehandling())).isFalse()
-        assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf("123", "456")).identerPåBehandling())).isTrue()
+        assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf(Ident("123"))).identerPåBehandling())).isTrue()
+        assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf(Ident("456"))).identerPåBehandling())).isFalse()
+        assertThat(service.erSkjermet(behandling.copy(relaterteIdenter = listOf(Ident("123"), Ident("456"))).identerPåBehandling())).isTrue()
     }
 
     @Test
@@ -55,7 +56,7 @@ class SkjermingServiceTest {
             SkjermingService(
                 FakePdlGateway(
                     identerHemmelig = mapOf(
-                        "123" to true,
+                        Ident("123") to true,
                         behandling.sak.person.ident to true
                     )
                 )
@@ -75,7 +76,7 @@ class SkjermingServiceTest {
 
     @Test
     fun `returnerer false om ingen gradering er satt`() {
-        val service = SkjermingService(FakePdlGateway(identerHemmelig = mapOf("130289" to null)))
+        val service = SkjermingService(FakePdlGateway(identerHemmelig = mapOf(Ident("130289") to null)))
 
         assertThat(service.erSkjermet(behandling.identerPåBehandling())).isFalse()
     }
@@ -83,12 +84,12 @@ class SkjermingServiceTest {
     @Test
     fun `om pdl-kall feiler med timeout, kastes exception`() {
         val service = SkjermingService(object : PdlGateway {
-            override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson> {
+            override fun hentPersoner(identer: List<Ident>): List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson> {
                 throw HttpConnectTimeoutException("oopsie")
             }
 
-            override fun hentIdenter(ident: String) =
-                listOf(PdlIdent(ident = ident, historisk = false))
+            override fun hentIdenter(ident: Ident) =
+                listOf(PdlIdent(ident = ident.ident, historisk = false))
         })
 
         assertThrows<HttpConnectTimeoutException> {

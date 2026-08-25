@@ -28,7 +28,7 @@ class PostmottakBehandlingRepositoryTest {
         val behandling = opprettBehandling(
             dataSource, PostmottakBehandling(
                 journalpostId = 213,
-                person = Person("1234"),
+                person = Person(no.nav.aap.statistikk.person.Ident("1234")),
                 referanse = UUID.randomUUID(),
                 behandlingType = TypeBehandling.Journalføring,
                 mottattTid = oppdatertTid,
@@ -66,7 +66,7 @@ class PostmottakBehandlingRepositoryTest {
         val behandling = opprettBehandling(
             dataSource, PostmottakBehandling(
                 journalpostId = 213,
-                person = Person("1235"),
+                person = Person(no.nav.aap.statistikk.person.Ident("1235")),
                 referanse = UUID.randomUUID(),
                 behandlingType = TypeBehandling.Journalføring,
                 mottattTid = LocalDateTime.now(),

@@ -66,7 +66,7 @@ class BQBehandlingMapperTest {
         sisteSaksbehandlerSomLøstebehov: String? = null,
         hendelser: List<BehandlingHendelse>
     ): Behandling {
-        val person = Person(ident = "12345678901", id = 1L)
+        val person = Person(ident = no.nav.aap.statistikk.person.Ident("12345678901"), id = 1L)
         val sak = Sak(
             id = 1L,
             person = person,
