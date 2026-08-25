@@ -225,6 +225,86 @@ class BehandlingRepositoryTest {
     }
 
     @Test
+    fun `oppdaterer behandling ut av rekkefølge - gjeldende skal ha høyest hendelsestidspunkt`(@Postgres dataSource: DataSource) {
+        val person = opprettTestPerson(dataSource, "123456789")
+        val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
+
+        val referanse = UUID.randomUUID()
+
+        val t0 = LocalDateTime.now().minusDays(3).truncatedTo(ChronoUnit.SECONDS)
+        val t1 = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS)
+        val t2 = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS)
+
+        val behandlingId = dataSource.transaction {
+            BehandlingRepository(it).opprettBehandling(
+                Behandling(
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.OPPRETTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = t0,
+                    versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
+                    oppdatertTidspunkt = t0,
+                )
+            )
+        }
+
+        // Hendelsen med tidspunkt t2 blir behandlet først (kommer "raskere" gjennom jobb-køen).
+        dataSource.transaction {
+            BehandlingRepository(it).oppdaterBehandling(
+                Behandling(
+                    id = behandlingId,
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.UTREDES,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = t2,
+                    versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
+                    oppdatertTidspunkt = t2,
+                )
+            )
+        }
+
+        // Hendelsen med tidspunkt t1 blir behandlet etterpå, selv om t1 < t2 (ute av rekkefølge).
+        dataSource.transaction {
+            BehandlingRepository(it).oppdaterBehandling(
+                Behandling(
+                    id = behandlingId,
+                    referanse = referanse,
+                    sak = sak,
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    status = BehandlingStatus.AVSLUTTET,
+                    opprettetTid = LocalDateTime.now(),
+                    mottattTid = t1,
+                    versjon = Versjon("xxx"),
+                    søknadsformat = SøknadsFormat.PAPIR,
+                    oppdatertTidspunkt = t1,
+                )
+            )
+        }
+
+        val gjeldendeStatuser = dataSource.transaction {
+            it.queryList(
+                "SELECT status, gjeldende FROM behandling_historikk WHERE behandling_id = ? AND gjeldende = TRUE"
+            ) {
+                setParams { setLong(1, behandlingId.id) }
+                setRowMapper { row -> row.getString("status") }
+            }
+        }
+
+        // Gjeldende rad i databasen skal fortsatt være den med høyest hendelsestidspunkt
+        // (t2 -> UTREDES), selv om raden med t1 (AVSLUTTET) ble skrevet sist.
+        assertThat(gjeldendeStatuser).containsExactly(BehandlingStatus.UTREDES.name)
+
+        val uthentet = dataSource.transaction { BehandlingRepository(it).hent(referanse) }
+        assertThat(uthentet!!.hendelser).hasSize(3)
+    }
+
+    @Test
     fun `telle antall fullførte behandlinger`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, "123456789")
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)

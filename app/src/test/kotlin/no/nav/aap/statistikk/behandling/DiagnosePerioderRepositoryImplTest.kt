@@ -46,6 +46,36 @@ class DiagnosePerioderRepositoryImplTest {
     }
 
     @Test
+    fun `lagre på nytt for samme behandling overskriver, ikke dupliserer`(@Postgres dataSource: DataSource) {
+        val behandlingReferanse = UUID.randomUUID()
+        val behandlingId = dataSource.transaction { forberedDatabase(it, behandlingReferanse) }
+
+        val førsteDiagnoser = listOf(
+            DiagnoseMedPeriode(
+                fom = LocalDate.of(2024, 1, 1),
+                tom = LocalDate.of(2024, 6, 30),
+                kodeverk = "ICD10",
+                diagnosekode = "A01",
+                bidiagnoser = listOf("B02")
+            )
+        )
+
+        dataSource.transaction {
+            DiagnosePerioderRepositoryImpl(it).lagre(behandlingId, førsteDiagnoser)
+        }
+        // Simulerer at jobben som lagrer diagnoseperioder blir kjørt på nytt for samme behandling.
+        dataSource.transaction {
+            DiagnosePerioderRepositoryImpl(it).lagre(behandlingId, førsteDiagnoser)
+        }
+
+        val uthentet = dataSource.transaction {
+            DiagnosePerioderRepositoryImpl(it).hentForBehandling(behandlingReferanse)
+        }
+
+        assertThat(uthentet).containsExactlyInAnyOrderElementsOf(førsteDiagnoser)
+    }
+
+    @Test
     fun `lagre tom liste gjør ingenting`(@Postgres dataSource: DataSource) {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingId = dataSource.transaction { forberedDatabase(it, behandlingReferanse) }

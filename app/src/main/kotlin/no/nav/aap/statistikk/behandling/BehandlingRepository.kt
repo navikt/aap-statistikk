@@ -76,10 +76,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
 
         val versjonId = lagreOgHentVersjonId(behandling.versjon)
 
-        dbConnection.execute("UPDATE behandling_historikk SET gjeldende = FALSE where behandling_id = ?") {
-            setParams { setLong(1, behandlingId.id) }
-        }
-
         oppdaterÅrsakerTilBehandling(behandling)
         oppdaterÅrsakTilOpprettelse(behandling)
 
@@ -99,7 +95,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 var c = 1
                 setLong(c++, behandlingId.id)
                 setLong(c++, versjonId)
-                setBoolean(c++, true)
+                setBoolean(c++, false)
                 setLocalDateTime(c++, LocalDateTime.now(clock))
                 setLocalDateTime(c++, behandling.mottattTid)
                 setLocalDateTime(c++, behandling.vedtakstidspunkt)
@@ -123,8 +119,38 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             }
         }
 
+        oppdaterGjeldendeHistorikk(behandlingId)
+
         oppdaterRelaterteIdenter(behandling, historikkId)
         lagreReturÅrsakkoblinger(historikkId, behandling.returÅrsakkoblinger)
+    }
+
+    /**
+     * Hendelser kan bli lagret ute av rekkefølge (f.eks. pga. jobber som kjøres i annen
+     * rekkefølge enn de ble mottatt i). Denne sørger for at raden som er markert som
+     * `gjeldende` alltid er den med høyest `hendelsestidspunkt`, uavhengig av innsettingsrekkefølge.
+     */
+    private fun oppdaterGjeldendeHistorikk(behandlingId: BehandlingId) {
+        dbConnection.execute(
+            """
+            UPDATE behandling_historikk
+            SET gjeldende = (id = (
+                SELECT id
+                FROM behandling_historikk
+                WHERE behandling_id = ?
+                  AND slettet = FALSE
+                ORDER BY hendelsestidspunkt DESC, oppdatert_tid DESC, id DESC
+                LIMIT 1
+            ))
+            WHERE behandling_id = ?
+              AND slettet = FALSE
+            """.trimIndent()
+        ) {
+            setParams {
+                setLong(1, behandlingId.id)
+                setLong(2, behandlingId.id)
+            }
+        }
     }
 
     @Deprecated("Fjern denne når alle aktive behandlinger har dette feltet.")
