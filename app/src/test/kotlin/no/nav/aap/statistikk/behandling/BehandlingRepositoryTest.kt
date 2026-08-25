@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.oppgave.BehandlingReferanse
 import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
@@ -26,8 +27,8 @@ import javax.sql.DataSource
 class BehandlingRepositoryTest {
     @Test
     fun `sette inn og hente ut igjen`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
-        val relaterteIdenter = listOf("123", "456", "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
+        val relaterteIdenter = listOf("123", "456", "123456789").map(::Ident)
         val sak = opprettTestSak(dataSource, "123456789".let(::Saksnummer), person)
 
         val referanse = UUID.randomUUID()
@@ -131,7 +132,7 @@ class BehandlingRepositoryTest {
 
     @Test
     fun `lagre to ganger med eksisterende versjon`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
@@ -181,7 +182,7 @@ class BehandlingRepositoryTest {
 
     @Test
     fun `lagre oppdatert behandling, henter ut nyeste info`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
@@ -226,7 +227,7 @@ class BehandlingRepositoryTest {
 
     @Test
     fun `oppdaterer behandling ut av rekkefølge - gjeldende skal ha høyest hendelsestidspunkt`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
@@ -306,7 +307,7 @@ class BehandlingRepositoryTest {
 
     @Test
     fun `telle antall fullførte behandlinger`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()
@@ -379,7 +380,7 @@ class BehandlingRepositoryTest {
 
     @Test
     fun `invalider historikk, og hent ut igjen`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val referanse = UUID.randomUUID()

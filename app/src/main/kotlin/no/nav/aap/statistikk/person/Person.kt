@@ -1,9 +1,17 @@
 package no.nav.aap.statistikk.person
 
+@JvmInline
+value class Ident(val ident: String) {
+    @Override
+    override fun toString(): String {
+        return "XXX"
+    }
+}
+
 /**
  * Representerer en person som har søkt om ytelse.
  */
-class Person(val ident: String, private val skjermet: Boolean = false, private var id: Long? = null) {
+class Person(val ident: Ident, private val skjermet: Boolean = false, private var id: Long? = null) {
     fun id() = id
     fun erSkjermet() = skjermet
     fun settId(id: Long) {

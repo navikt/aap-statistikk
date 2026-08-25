@@ -15,14 +15,14 @@ class PersonService(private val personRepository: IPersonRepository, private val
         gatewayProvider: GatewayProvider
     ) : this(repositoryProvider.provide(), gatewayProvider.provide())
 
-    fun hentEllerLagrePerson(ident: String): Person {
+    fun hentEllerLagrePerson(ident: Ident): Person {
         val identer = pdlGateway.hentIdenter(ident)
         val aktiveIdenter = identer.filterNot { it.historisk }
         require(aktiveIdenter.size == 1) {
             "Forventet nøyaktig én aktiv folkeregisterident fra PDL, fant ${aktiveIdenter.size}."
         }
-        val aktivIdent = aktiveIdenter.single().ident
-        val identverdier = identer.map { it.ident }
+        val aktivIdent = Ident(aktiveIdenter.single().ident)
+        val identverdier = identer.map { Ident(it.ident) }
         val eksisterendePersoner = finnEksisterendePersoner(identverdier)
         val erSkjermet = skjermingService.erSkjermet(identverdier)
 
@@ -41,7 +41,7 @@ class PersonService(private val personRepository: IPersonRepository, private val
         }
     }
 
-    private fun finnEksisterendePersoner(identer: List<String>): List<Person> {
+    private fun finnEksisterendePersoner(identer: List<Ident>): List<Person> {
         return identer
             .mapNotNull(personRepository::hentPerson)
             .distinctBy { it.id() }
@@ -49,8 +49,8 @@ class PersonService(private val personRepository: IPersonRepository, private val
 
     private fun slåSammenOgOppdaterPerson(
         personer: List<Person>,
-        aktivIdent: String,
-        identer: Set<String>,
+        aktivIdent: Ident,
+        identer: Set<Ident>,
         erSkjermet: Boolean,
     ): Person {
         val person = personer.firstOrNull { it.ident == aktivIdent }

@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.opprettTestPerson
@@ -32,7 +33,7 @@ class BehandlingPessimisticLockTest {
 
     @Test
     fun `hentBehandlingForUpdate should acquire lock on behandling`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
 
@@ -64,7 +65,7 @@ class BehandlingPessimisticLockTest {
 
     @Test
     fun `hentBehandlingForUpdate by referanse should acquire lock`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
 
@@ -106,7 +107,7 @@ class BehandlingPessimisticLockTest {
 
     @Test
     fun `concurrent writes to same behandling are serialized`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
 
@@ -193,7 +194,7 @@ class BehandlingPessimisticLockTest {
 
     @Test
     fun `different behandlinger can be locked concurrently`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
         val behandling1Id = dataSource.transaction {
@@ -276,7 +277,7 @@ class BehandlingPessimisticLockTest {
     @Test
     @Timeout(10)  // 10 second timeout - should complete much faster
     fun `lock is released at transaction end`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
 
@@ -323,7 +324,7 @@ class BehandlingPessimisticLockTest {
 
     @Test
     fun `duplicate event is handled idempotently with lock`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
 
@@ -404,7 +405,7 @@ class BehandlingPessimisticLockTest {
 
     @Test
     fun `update with locked behandling is consistent`(@Postgres dataSource: DataSource) {
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
 

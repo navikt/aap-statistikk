@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import no.nav.aap.utbetaling.helved.toBase64
@@ -32,7 +33,7 @@ data class Behandling(
     val versjon: Versjon,
     val søknadsformat: SøknadsFormat,
     val sisteSaksbehandler: String? = null,
-    val relaterteIdenter: List<String> = listOf(),
+    val relaterteIdenter: List<Ident> = listOf(),
     val relatertBehandlingId: BehandlingId? = null,
     val relatertBehandlingReferanse: String? = null,
     val snapShotId: Long? = null,
@@ -160,7 +161,7 @@ data class Behandling(
         return hendelser.lastOrNull()?.resultat
     }
 
-    fun identerPåBehandling(): List<String> {
+    fun identerPåBehandling(): List<Ident> {
         return listOf(this.sak.person.ident) + this.relaterteIdenter
     }
 

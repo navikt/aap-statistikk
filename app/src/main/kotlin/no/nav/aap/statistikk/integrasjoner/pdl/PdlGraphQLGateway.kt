@@ -14,6 +14,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.WithMetrics
+import no.nav.aap.statistikk.person.Ident
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.security.MessageDigest
@@ -56,10 +57,10 @@ class PdlGraphQLGateway : PdlGateway {
         prometheus = PrometheusProvider.prometheus
     )
 
-    override fun hentPersoner(identer: List<String>): List<PdlPerson> {
+    override fun hentPersoner(identer: List<Ident>): List<PdlPerson> {
         logger.debug("Henter ${identer.size} personer fra PDL.")
 
-        val cacheNøkkel = sha256(identer.sorted().joinToString(","))
+        val cacheNøkkel = sha256(identer.map { it.ident }.sorted().joinToString(","))
         return pdlCache.get(cacheNøkkel) {
             val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
                 URI.create(requiredConfigForKey("integrasjon.pdl.url")),
@@ -73,7 +74,7 @@ class PdlGraphQLGateway : PdlGateway {
         }
     }
 
-    override fun hentIdenter(ident: String): List<PdlIdent> {
+    override fun hentIdenter(ident: Ident): List<PdlIdent> {
         val graphQLRespons = client.post<Any, GraphQLRespons<PdlIdenterRespons>>(
             URI.create(requiredConfigForKey("integrasjon.pdl.url")),
             PostRequest(body = PdlRequest.hentIdenter(ident))

@@ -41,6 +41,7 @@ import no.nav.aap.statistikk.oppgave.OppgaveCutoffAnchor
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveHendelseRepository
 import no.nav.aap.statistikk.person.IPersonRepository
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakId
@@ -102,9 +103,9 @@ class FakeSakRepository : SakRepository {
 
 class FakePersonRepository : IPersonRepository {
     private val personer = mutableMapOf<Long, Person>()
-    private val identTilPersonId = mutableMapOf<String, Long>()
+    private val identTilPersonId = mutableMapOf<Ident, Long>()
 
-    override fun lagrePerson(person: Person, identer: Set<String>): Long {
+    override fun lagrePerson(person: Person, identer: Set<Ident>): Long {
         val personId = person.id() ?: personer.size.toLong()
         val alleIdenter = identer + person.ident
         val identMedAnnenEier =
@@ -123,7 +124,7 @@ class FakePersonRepository : IPersonRepository {
         return personId
     }
 
-    override fun slåSammenPersoner(beholdPersonId: Long, fjernPersonIder: Set<Long>, identer: Set<String>) {
+    override fun slåSammenPersoner(beholdPersonId: Long, fjernPersonIder: Set<Long>, identer: Set<Ident>) {
         val forventedePersonIder = fjernPersonIder + beholdPersonId
         require(identer.mapNotNull(identTilPersonId::get).all { it in forventedePersonIder }) {
             "En eller flere identer tilhører en person som ikke skal slås sammen."
@@ -135,7 +136,7 @@ class FakePersonRepository : IPersonRepository {
         fjernPersonIder.forEach(personer::remove)
     }
 
-    override fun hentPerson(ident: String): Person? {
+    override fun hentPerson(ident: Ident): Person? {
         val personId = identTilPersonId[ident] ?: return null
         return personer[personId]
     }
@@ -352,7 +353,7 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
 }
 
 class FakePdlGateway(
-    val identerHemmelig: Map<String, Boolean?> = emptyMap(),
+    val identerHemmelig: Map<Ident, Boolean?> = emptyMap(),
     val identerForPerson: Map<String, List<PdlIdent>> = emptyMap(),
 ) : PdlGateway {
     companion object : Factory<PdlGateway>, WithMetrics {
@@ -372,7 +373,7 @@ class FakePdlGateway(
         }
     }
 
-    override fun hentPersoner(identer: List<String>): List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson> {
+    override fun hentPersoner(identer: List<Ident>): List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson> {
         return identer.map {
             no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson(
                 adressebeskyttelse = listOf(
@@ -388,8 +389,8 @@ class FakePdlGateway(
         }
     }
 
-    override fun hentIdenter(ident: String): List<PdlIdent> {
-        return identerForPerson[ident] ?: listOf(PdlIdent(ident = ident, historisk = false))
+    override fun hentIdenter(ident: Ident): List<PdlIdent> {
+        return identerForPerson[ident.ident] ?: listOf(PdlIdent(ident = ident.ident, historisk = false))
     }
 }
 

@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.TypeBehandling
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -81,7 +82,7 @@ class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection)
                     id = it.getLong("id"),
                     journalpostId = it.getLong("journalpost_id"),
                     person = Person(
-                        ident = it.getString("p_ident"),
+                        ident = Ident(it.getString("p_ident")),
                         skjermet = it.getBoolean("p_skjermet"),
                         id = it.getLong("person_id"),
                     ),

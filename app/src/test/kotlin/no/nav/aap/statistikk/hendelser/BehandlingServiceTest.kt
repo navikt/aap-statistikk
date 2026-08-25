@@ -151,7 +151,7 @@ private fun testSak(): Sak {
     return Sak(
         id = 1L,
         saksnummer = Saksnummer("1234"),
-        person = Person(ident = "12345678901", id = 1L),
+        person = Person(ident = no.nav.aap.statistikk.person.Ident("12345678901"), id = 1L),
         sakStatus = SakStatus.OPPRETTET,
         sistOppdatert = LocalDateTime.now()
     )

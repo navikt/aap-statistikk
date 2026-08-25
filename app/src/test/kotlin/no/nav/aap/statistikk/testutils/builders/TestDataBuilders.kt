@@ -26,6 +26,7 @@ import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.saksstatistikk.BQBehandlingMapper
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkEventSourcing
@@ -75,7 +76,7 @@ fun opprettTestHendelse(
     vurderingsbehov: List<Vurderingsbehov> = emptyList(),
     clock: Clock = Clock.systemDefaultZone()
 ): Pair<BehandlingId, SakId> {
-    val ident = "29021946"
+    val ident = Ident("29021946")
 
     val personMedId = opprettTestPerson(dataSource, ident)
 
@@ -97,7 +98,7 @@ fun opprettTestHendelse(
     return Pair(behandlingId, sakId)
 }
 
-fun opprettTestPerson(dataSource: DataSource, ident: String): Person {
+fun opprettTestPerson(dataSource: DataSource, ident: Ident): Person {
     return dataSource.transaction { conn ->
         val personRepository = PersonRepository(conn)
         PersonService(personRepository, FakePdlGateway()).hentEllerLagrePerson(ident)
@@ -158,7 +159,7 @@ fun forberedDatabase(
     it: DBConnection,
     behandlingReferanse: UUID
 ): BehandlingId {
-    val ident = "214"
+    val ident = Ident("214")
     val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(ident)
 
     val sak = Sak(

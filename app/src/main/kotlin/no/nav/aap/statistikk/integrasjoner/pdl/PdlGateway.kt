@@ -1,25 +1,26 @@
 package no.nav.aap.statistikk.integrasjoner.pdl
 
 import no.nav.aap.komponenter.gateway.Gateway
+import no.nav.aap.statistikk.person.Ident
 
 
 interface PdlGateway : Gateway {
-    fun hentPersoner(identer: List<String>): List<PdlPerson>
-    fun hentIdenter(ident: String): List<PdlIdent>
+    fun hentPersoner(identer: List<Ident>): List<PdlPerson>
+    fun hentIdenter(ident: Ident): List<PdlIdent>
 }
 
 internal data class PdlRequest(val query: String, val variables: Variables) {
     data class Variables(val ident: String? = null, val identer: List<String>? = null)
 
     companion object {
-        fun hentPersonBolk(personidenter: List<String>) = PdlRequest(
+        fun hentPersonBolk(personidenter: List<Ident>) = PdlRequest(
             query = PERSON_BOLK_QUERY,
-            variables = Variables(identer = personidenter),
+            variables = Variables(identer = personidenter.map { it.ident }),
         )
 
-        fun hentIdenter(ident: String) = PdlRequest(
+        fun hentIdenter(ident: Ident) = PdlRequest(
             query = IDENT_QUERY,
-            variables = Variables(ident = ident),
+            variables = Variables(ident = ident.ident),
         )
     }
 }

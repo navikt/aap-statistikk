@@ -19,7 +19,7 @@ class MeldekortRepositoryTest {
     @Test
     fun `kan lagre samme meldekort to ganger`(@Postgres dataSource: DataSource) {
         val behandlingRef = UUID.randomUUID()
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, no.nav.aap.statistikk.person.Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".let(::Saksnummer), person)
         val behandling = opprettTestBehandling(dataSource, behandlingRef, sak)
         val meldekort = listOf(
@@ -79,7 +79,7 @@ class MeldekortRepositoryTest {
     @Test
     fun `Lagre og hente ut igjen meldekort data`(@Postgres dataSource: DataSource) {
         val behandlingRef = UUID.randomUUID()
-        val person = opprettTestPerson(dataSource, "123456789")
+        val person = opprettTestPerson(dataSource, no.nav.aap.statistikk.person.Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".let(::Saksnummer), person)
         val behandling = opprettTestBehandling(dataSource, behandlingRef, sak)
 

@@ -6,6 +6,7 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.HendelsePublisher
 import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -37,7 +38,7 @@ class ResendHendelseService(
     }
 
     fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {
-        val person = personService.hentEllerLagrePerson(hendelse.ident)
+        val person = personService.hentEllerLagrePerson(Ident(hendelse.ident))
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
 
         val sak =

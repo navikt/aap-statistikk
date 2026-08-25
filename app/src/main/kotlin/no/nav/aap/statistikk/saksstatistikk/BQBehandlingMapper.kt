@@ -147,7 +147,7 @@ class BQBehandlingMapper(
             relatertFagsystem = if (relatertBehandlingUUID != null) "Kelvin" else null,
             ferdigbehandletTid = hendelser.ferdigBehandletTid(),
             behandlingType = behandlingType,
-            aktorId = sak.person.ident,
+            aktorId = sak.person.ident.ident,
             saksnummer = sak.saksnummer.value,
             tekniskTid = LocalDateTime.now(clock),
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),

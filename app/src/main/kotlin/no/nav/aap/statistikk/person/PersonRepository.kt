@@ -10,7 +10,7 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    override fun lagrePerson(person: Person, identer: Set<String>): Long {
+    override fun lagrePerson(person: Person, identer: Set<Ident>): Long {
         val alleIdenter = identer + person.ident
         låsIdenter(alleIdenter)
 
@@ -28,11 +28,11 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         return personId
     }
 
-    private fun låsIdenter(identer: Set<String>) {
-        identer.sorted().forEach { ident ->
+    private fun låsIdenter(identer: Set<Ident>) {
+        identer.sortedBy { it.ident }.forEach { ident ->
             dbConnection.queryFirstOrNull("SELECT pg_advisory_xact_lock(hashtextextended(?, 0))") {
                 setParams {
-                    setString(1, ident)
+                    setString(1, ident.ident)
                 }
                 setRowMapper { }
             }
@@ -47,13 +47,13 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    private fun synkroniserIdenter(personId: Long, person: Person, identer: Set<String>) {
-        val sorterteIdenter = identer.sorted()
+    private fun synkroniserIdenter(personId: Long, person: Person, identer: Set<Ident>) {
+        val sorterteIdenter = identer.sortedBy { it.ident }
         val eiere = sorterteIdenter.associateWith(::hentEier)
         val identMedAnnenEier = eiere.entries.firstOrNull { it.value != null && it.value != personId }
         require(identMedAnnenEier == null) {
             "Ident ${identMedAnnenEier?.key} tilhører allerede en annen person " +
-                "(person_id=${identMedAnnenEier?.value})."
+                    "(person_id=${identMedAnnenEier?.value})."
         }
 
         dbConnection.execute("UPDATE person_ident SET aktiv = FALSE WHERE person_id = ? AND aktiv = TRUE") {
@@ -64,9 +64,9 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
 
         sorterteIdenter.forEach { ident ->
             if (eiere[ident] == null) {
-                leggTilIdent(personId, ident, ident == person.ident)
+                leggTilIdent(personId, ident.ident, ident == person.ident)
             } else {
-                oppdaterIdent(personId, ident, ident == person.ident)
+                oppdaterIdent(personId, ident.ident, ident == person.ident)
             }
         }
 
@@ -78,10 +78,10 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    private fun hentEier(ident: String): Long? {
+    private fun hentEier(ident: Ident): Long? {
         return dbConnection.queryFirstOrNull("SELECT person_id FROM person_ident WHERE ident = ? FOR UPDATE") {
             setParams {
-                setString(1, ident)
+                setString(1, ident.ident)
             }
             setRowMapper {
                 it.getLong("person_id")
@@ -109,7 +109,7 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    override fun slåSammenPersoner(beholdPersonId: Long, fjernPersonIder: Set<Long>, identer: Set<String>) {
+    override fun slåSammenPersoner(beholdPersonId: Long, fjernPersonIder: Set<Long>, identer: Set<Ident>) {
         if (fjernPersonIder.isEmpty()) {
             return
         }
@@ -155,7 +155,7 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    override fun hentPerson(ident: String): Person? {
+    override fun hentPerson(ident: Ident): Person? {
         return dbConnection.queryFirstOrNull(
             """
             SELECT p.id            AS id,
@@ -168,11 +168,11 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
             """.trimIndent()
         ) {
             setParams {
-                setString(1, ident)
+                setString(1, ident.ident)
             }
             setRowMapper {
                 Person(
-                    ident = it.getString("aktiv_ident"),
+                    ident = Ident(it.getString("aktiv_ident")),
                     skjermet = it.getBoolean("skjermet"),
                     id = it.getLong("id"),
                 )

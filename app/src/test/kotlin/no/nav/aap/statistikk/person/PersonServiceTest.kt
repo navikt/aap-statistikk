@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 class PersonServiceTest {
     @Test
     fun `oppretter person med gjeldende skjermet-status fra PDL`() {
-        val ident = "12345"
+        val ident = Ident("12345")
         val personService = PersonService(
             FakePersonRepository(),
             FakePdlGateway(identerHemmelig = mapOf(ident to true))
@@ -23,16 +23,16 @@ class PersonServiceTest {
 
     @Test
     fun `spør PDL på nytt og oppdaterer lagret skjermet-status for eksisterende person`() {
-        val ident = "12345"
+        val ident = Ident("12345")
         val personRepository = FakePersonRepository()
 
         val identerHemmelig = mutableMapOf(ident to false)
         val pdlGateway = object : PdlGateway {
-            override fun hentPersoner(identer: List<String>) =
+            override fun hentPersoner(identer: List<Ident>) =
                 FakePdlGateway(identerHemmelig).hentPersoner(identer)
 
-            override fun hentIdenter(ident: String) =
-                listOf(PdlIdent(ident = ident, historisk = false))
+            override fun hentIdenter(ident: Ident) =
+                listOf(PdlIdent(ident = ident.ident, historisk = false))
         }
         val personService = PersonService(personRepository, pdlGateway)
 
@@ -59,18 +59,18 @@ class PersonServiceTest {
         val pdlGateway = FakePdlGateway(identerForPerson = identerForPerson)
         val personService = PersonService(personRepository, pdlGateway)
 
-        val førstePerson = personService.hentEllerLagrePerson(gammelIdent)
+        val førstePerson = personService.hentEllerLagrePerson(Ident(gammelIdent))
         identerForPerson[nyIdent] = listOf(
             PdlIdent(gammelIdent, historisk = true),
             PdlIdent(nyIdent, historisk = false),
         )
 
-        val oppdatertPerson = personService.hentEllerLagrePerson(nyIdent)
+        val oppdatertPerson = personService.hentEllerLagrePerson(Ident(nyIdent))
 
         assertThat(oppdatertPerson.id()).isEqualTo(førstePerson.id())
-        assertThat(oppdatertPerson.ident).isEqualTo(nyIdent)
-        assertThat(personRepository.hentPerson(gammelIdent)?.ident).isEqualTo(nyIdent)
-        assertThat(personRepository.hentPerson(nyIdent)?.ident).isEqualTo(nyIdent)
+        assertThat(oppdatertPerson.ident).isEqualTo(Ident(nyIdent))
+        assertThat(personRepository.hentPerson(Ident(gammelIdent))?.ident).isEqualTo(Ident(nyIdent))
+        assertThat(personRepository.hentPerson(Ident(nyIdent))?.ident).isEqualTo(Ident(nyIdent))
     }
 
     @Test
@@ -87,9 +87,9 @@ class PersonServiceTest {
             )
         )
 
-        val person = PersonService(personRepository, pdlGateway).hentEllerLagrePerson(aktivIdent)
+        val person = PersonService(personRepository, pdlGateway).hentEllerLagrePerson(Ident(aktivIdent))
 
-        assertThat(personRepository.hentPerson(historiskIdent)?.id()).isEqualTo(person.id())
-        assertThat(personRepository.hentPerson(historiskIdent)?.ident).isEqualTo(aktivIdent)
+        assertThat(personRepository.hentPerson(Ident(historiskIdent))?.id()).isEqualTo(person.id())
+        assertThat(personRepository.hentPerson(Ident(historiskIdent))?.ident).isEqualTo(Ident(aktivIdent))
     }
 }

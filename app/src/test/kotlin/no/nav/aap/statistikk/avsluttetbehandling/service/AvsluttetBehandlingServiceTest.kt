@@ -414,7 +414,7 @@ class AvsluttetBehandlingServiceTest {
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = Saksnummer("xxxx")
-        val ident = "29021946"
+        val ident = no.nav.aap.statistikk.person.Ident("29021946")
 
         opprettTestHendelse(
             dataSource,

@@ -369,7 +369,7 @@ class SakstatistikkEventSourcingTest {
         sak = Sak(
             id = 0L,
             saksnummer = Saksnummer("123456"),
-            person = Person("234"),
+            person = Person(no.nav.aap.statistikk.person.Ident("234")),
             sakStatus = SakStatus.UTREDES,
             sistOppdatert = LocalDateTime.now(),
         ),

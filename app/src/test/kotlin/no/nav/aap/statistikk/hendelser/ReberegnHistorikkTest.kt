@@ -21,7 +21,7 @@ class ReberegnHistorikkTest {
             referanse = hendelse.behandlingReferanse,
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
-                person = Person(ident = hendelse.ident),
+                person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
                 sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
@@ -62,7 +62,7 @@ class ReberegnHistorikkTest {
             referanse = hendelse.behandlingReferanse,
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
-                person = Person(ident = hendelse.ident),
+                person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
                 sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
@@ -105,7 +105,7 @@ class ReberegnHistorikkTest {
             referanse = hendelse.behandlingReferanse,
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
-                person = Person(ident = hendelse.ident),
+                person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
                 sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
@@ -152,7 +152,7 @@ class ReberegnHistorikkTest {
             referanse = hendelse.behandlingReferanse,
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
-                person = Person(ident = hendelse.ident),
+                person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
                 sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),

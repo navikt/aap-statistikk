@@ -373,7 +373,7 @@ class LagreOppgaveJobbUtførerTest {
 
     private fun settOppEksisterendeBehandling(dataSource: DataSource): Behandling {
         return dataSource.transaction {
-            val personUtenId = Person(ident = "123")
+            val personUtenId = Person(ident = no.nav.aap.statistikk.person.Ident("123"))
             val id = PersonRepository(it).lagrePerson(personUtenId, setOf(personUtenId.ident))
             val sak = Sak(
                 saksnummer = Saksnummer("123"),

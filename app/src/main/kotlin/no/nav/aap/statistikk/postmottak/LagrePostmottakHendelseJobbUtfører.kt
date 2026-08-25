@@ -11,6 +11,7 @@ import no.nav.aap.postmottak.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.lagretPostmottakHendelse
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
 import org.slf4j.LoggerFactory
@@ -25,7 +26,7 @@ class LagrePostmottakHendelseJobbUtfører(
 
         val hendelse = input.payload<DokumentflytStoppetHendelse>()
 
-        val person = personService.hentEllerLagrePerson(hendelse.ident)
+        val person = personService.hentEllerLagrePerson(Ident(hendelse.ident))
 
         val domeneHendelse = hendelse.tilDomene(person)
         val oppdatertBehandling =

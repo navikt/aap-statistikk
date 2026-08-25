@@ -4,6 +4,7 @@ import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
+import no.nav.aap.statistikk.person.Ident
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
@@ -28,7 +29,7 @@ class YtelsesStatistikkTilBigQuery(
                 saksnummer = behandling.sak.saksnummer,
                 referanse = behandling.referanse,
                 utbetalingId = behandling.utbetalingId(),
-                brukerFnr = behandling.sak.person.ident,
+                brukerFnr = behandling.sak.person.ident.ident,
                 resultat = behandling.resultat(),
                 behandlingsType = behandling.typeBehandling,
                 datoOpprettet = behandling.opprettetTid,
