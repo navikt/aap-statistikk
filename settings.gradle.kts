@@ -7,6 +7,11 @@ rootProject.name = "statistikk"
 include("app")
 
 dependencyResolutionManagement {
+    versionCatalogs {
+        create("kelvinLibs") {
+            from("no.nav.aap.kelvin:version-catalog:2.0.161")
+        }
+    }
     // Felles for alle gradle prosjekter i repoet
     @Suppress("UnstableApiUsage")
     repositories {

@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id("aap.conventions")
     kotlin("jvm")
-    alias(libs.plugins.ktor)
+    alias(kelvinLibs.plugins.ktor)
     alias(libs.plugins.detektGradlePlugin)
     application
 }
@@ -38,12 +38,11 @@ tasks.register<JavaExec>("genererOpenApi") {
 
 
 dependencies {
-    implementation(libs.ktorServerHtmlBuilder)
+    implementation("io.ktor:ktor-server-html-builder:${kelvinLibs.versions.ktor.get()}")
+    implementation(kelvinLibs.logback.classic)
+    implementation(kelvinLibs.logstash.logback.encoder)
 
-    implementation(libs.logback)
-    implementation(libs.logbackLogstashEncoder)
-
-    implementation(libs.hikaricp)
+    implementation(kelvinLibs.hikaricp)
 
     implementation(libs.motor)
     implementation(libs.motorApi)
@@ -55,7 +54,7 @@ dependencies {
 
     implementation(libs.behandlingsflytKontrakt)
     implementation(libs.tilgangKontrakt)
-    implementation(libs.caffeine)
+    implementation(kelvinLibs.caffeine)
     api(libs.tilgangPlugin)
 
     implementation(libs.oppgaveKontrakt)
@@ -65,15 +64,14 @@ dependencies {
     implementation(libs.googleCloudBigquery)
 
     testImplementation(libs.motorTestUtils)
-    testImplementation(libs.ktorServerTestHost)
-    testImplementation(libs.nimbusJoseJwt)
-    testImplementation(libs.mockk)
-    testImplementation(libs.assertj)
-    testImplementation(libs.testcontainersPostgresql)
-    testImplementation(libs.testcontainersGcloud)
-    testImplementation(libs.testcontainersJunit)
-    testImplementation(libs.junitJupiter)
-    testRuntimeOnly(libs.junitPlatformLauncher)
+    testImplementation(kelvinLibs.ktor.server.test.host)
+    testImplementation(kelvinLibs.nimbus.jose.jwt)
+    testImplementation(kelvinLibs.mockk)
+    testImplementation(kelvinLibs.assertj.core)
+    testImplementation(kelvinLibs.testcontainers.postgresql)
+    testImplementation("org.testcontainers:testcontainers-gcloud:${kelvinLibs.versions.testcontainers.get()}")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:${kelvinLibs.versions.testcontainers.get()}")
+    testImplementation(kelvinLibs.bundles.junit)
 }
 
 tasks {
