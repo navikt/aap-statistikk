@@ -1,9 +1,9 @@
 [versions]
-komponenter = "2.0.161"
-tilgang = "1.0.238"
-behandlingsflyt = "0.0.656"
-oppgave = "0.0.207"
-utbetaling = "0.0.135"
+komponenter = "2.0.163"
+tilgang = "1.0.240"
+behandlingsflyt = "0.0.663"
+oppgave = "0.0.215"
+utbetaling = "0.0.136"
 postmottak = "6.0.10"
 
 detekt = "2.0.0-alpha.6"
