@@ -1,7 +1,7 @@
 [versions]
-komponenter = "2.0.163"
+komponenter = "2.0.165"
 tilgang = "1.0.240"
-behandlingsflyt = "0.0.663"
+behandlingsflyt = "0.0.664"
 oppgave = "0.0.215"
 utbetaling = "0.0.136"
 postmottak = "6.0.10"
