@@ -28,6 +28,7 @@ jobs:
             .nais/bigquery/view_meldekort.yml,\
             .nais/bigquery/view_samordning.yml,\
             .nais/bigquery/view_gjeldende_hendelser_saksstatistikk.yml,\
+            .nais/bigquery/view_siste_gjeldende_per_behandling.yml,\
             .nais/bigquery/view_behandlinger_test.yml,\
             .nais/bigquery/view_behandlinger.yml,\
             .nais/bigquery/view_ateam_behandlinger.yml"
