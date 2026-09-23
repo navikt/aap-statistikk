@@ -27,6 +27,7 @@ spec:
           ELSE 'UNDER_BEHANDLING'
           END AS resultat,
         timestamp(datetime(bh.mottatt_tid), 'Europe/Oslo') AS mottatt_tid,
+        timestamp(datetime(b.opprettet_tid), 'Europe/Oslo') AS behandling_opprettet_tid,
         timestamp(
           datetime(bh.vedtak_tidspunkt), 'Europe/Oslo') AS vedtak_tid,
         (

@@ -15,9 +15,6 @@ import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 
-@JvmInline
-value class BehandlingId(val id: Long)
-
 class BehandlingRepository(
     private val dbConnection: DBConnection, private val clock: Clock = Clock.systemDefaultZone()
 ) : IBehandlingRepository {
