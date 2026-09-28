@@ -23,7 +23,6 @@ class YtelsesStatistikkTilBigQuery(
         val rettighetstypeperioder = rettighetstypeperiodeRepository.hent(behandling.referanse)
         val diagnoser = diagnoseRepository.hentForBehandling(behandling.referanse)
 
-        bqRepository.start()
         bqRepository.lagre(
             BQYtelseBehandling(
                 saksnummer = behandling.sak.saksnummer,
@@ -42,7 +41,6 @@ class YtelsesStatistikkTilBigQuery(
                 vurderingsbehov = behandling.årsaker.map { it.name }
             )
         )
-        bqRepository.commit()
     }
 
 }

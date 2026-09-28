@@ -298,10 +298,6 @@ class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
     override fun lagre(payload: BQYtelseBehandling) {
         behandlinger.add(payload)
     }
-
-    override fun commit() = Unit
-
-    override fun start() = Unit
 }
 
 class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
