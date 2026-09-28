@@ -25,4 +25,3 @@ spec:
       select *
       from alle_meldinger
       where siste_melding_for_hendelse = 1
-      order by behandling_uuid, endretTid

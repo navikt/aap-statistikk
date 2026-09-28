@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.meldekort
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
-import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
 class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRepository {
