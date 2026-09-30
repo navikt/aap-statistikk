@@ -1,662 +1,863 @@
 {
-  "saksnummer": "4oT6Xo0",
-  "sakStatus": "UTREDES",
-  "behandlingReferanse": "b016f463-6f6c-4f5d-8fc0-0e7460acdd63",
-  "relatertBehandling": "2f377d43-4b8d-4c04-806f-4050655f6918",
-  "behandlingOpprettetTidspunkt": "2025-12-02T14:26:08.079",
-  "mottattTid": "2025-12-02T14:26:08.079",
-  "tidspunktSisteEndring": "2025-12-02T14:27:26.272",
-  "behandlingStatus": "AVSLUTTET",
-  "behandlingType": "Revurdering",
-  "soknadsFormat": "DIGITAL",
-  "ident": "18458534108",
-  "versjon": "fb8f6ecb26758ccbe4504b7e0b75aa0e2e04c945",
-  "vurderingsbehov": ["REVURDERING_AVBRUTT", "REVURDER_BEREGNING"],
-  "årsakTilOpprettelse": "MANUELL_OPPRETTELSE",
-  "avklaringsbehov": [
-    {
-      "avklaringsbehovDefinisjon": {
-        "kode": "5033",
-        "type": "MANUELT_PÅKREVD",
-        "løsesISteg": "AVBRYT_REVURDERING",
-        "kreverToTrinn": false,
-        "kvalitetssikres": false,
-        "løsesAv": ["BESLUTTER"]
-      },
-      "status": "AVSLUTTET",
-      "endringer": [
-        {
-          "status": "OPPRETTET",
-          "tidsstempel": "2025-12-02T14:27:15.495",
-          "frist": null,
-          "endretAv": "Kelvin",
-          "årsakTilSattPåVent": null,
-          "årsakTilRetur": [],
-          "begrunnelse": ""
-        },
-        {
-          "status": "AVSLUTTET",
-          "tidsstempel": "2025-12-02T14:27:21.621",
-          "frist": null,
-          "endretAv": "Z994573",
-          "årsakTilSattPåVent": null,
-          "årsakTilRetur": [],
-          "begrunnelse": "v"
-        }
-      ]
+  "saksnummer" : "4TEST00",
+  "sakStatus" : "UTREDES",
+  "behandlingReferanse" : "07b1b1bc-dd26-3263-8b7b-97cd7dd7ae1b",
+  "relatertBehandling" : "065df2f7-a8b7-3bc5-8901-4b9f87c83abf",
+  "relatertFagsystem" : "KELVIN",
+  "behandlingOpprettetTidspunkt" : "2025-09-24T12:00",
+  "mottattTid" : "2025-09-24T12:00",
+  "tidspunktSisteEndring" : "2025-09-24T12:00:00.007",
+  "behandlingStatus" : "AVSLUTTET",
+  "behandlingType" : "Revurdering",
+  "soknadsFormat" : "DIGITAL",
+  "ident" : "00000000001",
+  "versjon" : "test",
+  "vurderingsbehov" : [ "REVURDERING_AVBRUTT", "REVURDER_BEREGNING" ],
+  "årsakTilOpprettelse" : "MANUELL_OPPRETTELSE",
+  "avklaringsbehov" : [ {
+    "id" : 17,
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5033",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "AVBRYT_REVURDERING",
+      "kreverToTrinn" : false,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "BESLUTTER" ],
+      "måRevurderesEtterOpphør" : true,
+      "vurdererVilkår" : null
     },
-    {
-      "avklaringsbehovDefinisjon": {
-        "kode": "5008",
-        "type": "MANUELT_PÅKREVD",
-        "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
-        "kreverToTrinn": true,
-        "kvalitetssikres": false,
-        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
-      },
-      "status": "AVBRUTT",
-      "endringer": [
-        {
-          "status": "OPPRETTET",
-          "tidsstempel": "2025-12-02T14:26:10.336",
-          "frist": null,
-          "endretAv": "Kelvin",
-          "årsakTilSattPåVent": null,
-          "årsakTilRetur": [],
-          "begrunnelse": ""
-        },
-        {
-          "status": "AVBRUTT",
-          "tidsstempel": "2025-12-02T14:27:23.737",
-          "frist": null,
-          "endretAv": "Kelvin",
-          "årsakTilSattPåVent": null,
-          "årsakTilRetur": [],
-          "begrunnelse": ""
-        }
-      ]
+    "status" : "AVSLUTTET",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:00:00.003",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "",
+      "gradBehov" : null
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-09-24T12:00:00.004",
+      "frist" : null,
+      "endretAv" : "SAKSBEHANDLER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Fordi den ikke er aktuell lenger",
+      "gradBehov" : null
+    } ]
+  }, {
+    "id" : 15,
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5008",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "FASTSETT_BEREGNINGSTIDSPUNKT",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_NASJONAL" ],
+      "måRevurderesEtterOpphør" : false,
+      "vurdererVilkår" : null
     },
-    {
-      "avklaringsbehovDefinisjon": {
-        "kode": "5014",
-        "type": "MANUELT_PÅKREVD",
-        "løsesISteg": "FASTSETT_BEREGNINGSTIDSPUNKT",
-        "kreverToTrinn": true,
-        "kvalitetssikres": false,
-        "løsesAv": ["SAKSBEHANDLER_NASJONAL"]
-      },
-      "status": "AVBRUTT",
-      "endringer": [
-        {
-          "status": "OPPRETTET",
-          "tidsstempel": "2025-12-02T14:26:10.381",
-          "frist": null,
-          "endretAv": "Kelvin",
-          "årsakTilSattPåVent": null,
-          "årsakTilRetur": [],
-          "begrunnelse": ""
-        },
-        {
-          "status": "AVBRUTT",
-          "tidsstempel": "2025-12-02T14:27:23.774",
-          "frist": null,
-          "endretAv": "Kelvin",
-          "årsakTilSattPåVent": null,
-          "årsakTilRetur": [],
-          "begrunnelse": ""
-        }
-      ]
-    }
-  ],
-  "hendelsesTidspunkt": "2025-12-02T14:41:47.132383848",
-  "avsluttetBehandling": {
-    "tilkjentYtelse": {
-      "perioder": [
-        {
-          "fraDato": "2025-09-15",
-          "tilDato": "2025-09-28",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2025-09-29",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2025-09-29",
-          "tilDato": "2025-10-12",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2025-10-13",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2025-10-13",
-          "tilDato": "2025-10-26",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2025-10-27",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2025-10-27",
-          "tilDato": "2025-11-09",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2025-11-10",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2025-11-10",
-          "tilDato": "2025-11-23",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2025-11-24",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2025-11-24",
-          "tilDato": "2025-12-07",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2025-12-08",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2025-12-08",
-          "tilDato": "2025-12-21",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2025-12-22",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2025-12-22",
-          "tilDato": "2026-01-04",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-01-05",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-01-05",
-          "tilDato": "2026-01-18",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-01-19",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-01-19",
-          "tilDato": "2026-02-01",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-02-02",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-02-02",
-          "tilDato": "2026-02-15",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-02-16",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-02-16",
-          "tilDato": "2026-03-01",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-03-02",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-03-02",
-          "tilDato": "2026-03-15",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-03-16",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-03-16",
-          "tilDato": "2026-03-29",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-03-30",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-03-30",
-          "tilDato": "2026-04-12",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-04-13",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-04-13",
-          "tilDato": "2026-04-26",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-04-27",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-04-27",
-          "tilDato": "2026-05-10",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-05-11",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-05-11",
-          "tilDato": "2026-05-24",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-05-25",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-05-25",
-          "tilDato": "2026-06-07",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-06-08",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-06-08",
-          "tilDato": "2026-06-21",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-06-22",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-06-22",
-          "tilDato": "2026-07-05",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-07-06",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-07-06",
-          "tilDato": "2026-07-19",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-07-20",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-07-20",
-          "tilDato": "2026-08-02",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-08-03",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-08-03",
-          "tilDato": "2026-08-16",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-08-17",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-08-17",
-          "tilDato": "2026-08-30",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-08-31",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-08-31",
-          "tilDato": "2026-09-13",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-09-14",
-          "minsteSats": "IKKE_MINSTESATS"
-        },
-        {
-          "fraDato": "2026-09-14",
-          "tilDato": "2026-09-14",
-          "dagsats": 1094.0,
-          "gradering": 0.0,
-          "redusertDagsats": 0.0,
-          "antallBarn": 1,
-          "barnetilleggSats": 37.0,
-          "barnetillegg": 37.0,
-          "utbetalingsdato": "2026-09-15",
-          "minsteSats": "IKKE_MINSTESATS"
-        }
-      ]
+    "status" : "AVBRUTT",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:00:00.001",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "",
+      "gradBehov" : null
+    }, {
+      "status" : "AVBRUTT",
+      "tidsstempel" : "2025-09-24T12:00:00.005",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "",
+      "gradBehov" : null
+    } ]
+  }, {
+    "id" : 16,
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5014",
+      "type" : "MANUELT_PÅKREVD",
+      "løsesISteg" : "FASTSETT_BEREGNINGSTIDSPUNKT",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_NASJONAL" ],
+      "måRevurderesEtterOpphør" : false,
+      "vurdererVilkår" : null
     },
-    "vilkårsResultat": {
-      "typeBehandling": "Revurdering",
-      "vilkår": [
-        {
-          "vilkårType": "ALDERSVILKÅRET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
-            }
-          ]
-        },
-        {
-          "vilkårType": "BISTANDSVILKÅRET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "IKKE_OPPFYLT",
-              "manuellVurdering": true,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": "IKKE_BEHOV_FOR_OPPFOLGING"
-            }
-          ]
-        },
-        {
-          "vilkårType": "GRUNNLAGET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
-            }
-          ]
-        },
-        {
-          "vilkårType": "LOVVALG",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
-            }
-          ]
-        },
-        {
-          "vilkårType": "MEDLEMSKAP",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
-            }
-          ]
-        },
-        {
-          "vilkårType": "OVERGANGARBEIDVILKÅRET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "IKKE_VURDERT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
-            }
-          ]
-        },
-        {
-          "vilkårType": "OVERGANGUFØREVILKÅRET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2025-09-15",
-              "utfall": "IKKE_VURDERT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
+    "status" : "AVBRUTT",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:00:00.002",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "",
+      "gradBehov" : null
+    }, {
+      "status" : "AVBRUTT",
+      "tidsstempel" : "2025-09-24T12:00:00.006",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "",
+      "gradBehov" : null
+    } ]
+  } ],
+  "hendelsesTidspunkt" : "2025-09-24T12:00:00.007",
+  "avsluttetBehandling" : {
+    "tilkjentYtelse" : {
+      "perioder" : [ {
+        "fraDato" : "2025-06-24",
+        "tilDato" : "2025-07-06",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-07-15",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-07-07",
+        "tilDato" : "2025-07-20",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-07-29",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-07-21",
+        "tilDato" : "2025-08-03",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-08-12",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-08-04",
+        "tilDato" : "2025-08-17",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-08-26",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-08-18",
+        "tilDato" : "2025-08-31",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-09-09",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-09-01",
+        "tilDato" : "2025-09-14",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-09-23",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-09-15",
+        "tilDato" : "2025-09-28",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-10-07",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-09-29",
+        "tilDato" : "2025-10-12",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-10-21",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-10-13",
+        "tilDato" : "2025-10-26",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-11-04",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-10-27",
+        "tilDato" : "2025-11-09",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-11-18",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-11-10",
+        "tilDato" : "2025-11-23",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-12-02",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-11-24",
+        "tilDato" : "2025-12-07",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-12-16",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-12-08",
+        "tilDato" : "2025-12-21",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2025-12-30",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2025-12-22",
+        "tilDato" : "2026-01-04",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-01-13",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-01-05",
+        "tilDato" : "2026-01-18",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-01-27",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-01-19",
+        "tilDato" : "2026-02-01",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-02-10",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-02-02",
+        "tilDato" : "2026-02-15",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-02-24",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-02-16",
+        "tilDato" : "2026-03-01",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-03-10",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-03-02",
+        "tilDato" : "2026-03-15",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-03-24",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-03-16",
+        "tilDato" : "2026-03-29",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-04-07",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-03-30",
+        "tilDato" : "2026-04-12",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-04-21",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-04-13",
+        "tilDato" : "2026-04-26",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-05-05",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-04-27",
+        "tilDato" : "2026-05-10",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-05-19",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-05-11",
+        "tilDato" : "2026-05-24",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-06-02",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-05-25",
+        "tilDato" : "2026-06-07",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-06-16",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-06-08",
+        "tilDato" : "2026-06-21",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-06-30",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      }, {
+        "fraDato" : "2026-06-22",
+        "tilDato" : "2026-06-23",
+        "dagsats" : 1608.0,
+        "gradering" : 0.0,
+        "redusertDagsats" : 0.0,
+        "antallBarn" : 0,
+        "barnepensjonDagsats" : 0.0,
+        "barnetilleggSats" : 38.0,
+        "barnetillegg" : 0.0,
+        "utbetalingsdato" : "2026-07-14",
+        "minsteSats" : "IKKE_MINSTESATS",
+        "samordningGradering" : 0.0,
+        "institusjonGradering" : 0.0,
+        "arbeidGradering" : 0.0,
+        "samordningUføregradering" : 0.0,
+        "samordningArbeidsgiverGradering" : 0.0,
+        "meldepliktGradering" : 0.0
+      } ]
+    },
+    "vilkårsResultat" : {
+      "typeBehandling" : "Revurdering",
+      "vilkår" : [ {
+        "vilkårType" : "ALDERSVILKÅRET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2067-09-25",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        }, {
+          "fraDato" : "2067-09-26",
+          "tilDato" : "2997-12-26",
+          "utfall" : "IKKE_OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : "BRUKER_OVER_67"
+        } ]
+      }, {
+        "vilkårType" : "LOVVALG",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "SYKDOMSVILKÅRET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : "YRKESSKADE_ÅRSAKSSAMMENHENG",
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "BISTANDSVILKÅRET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : true,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "OVERGANGARBEIDVILKÅRET",
+        "perioder" : [ ]
+      }, {
+        "vilkårType" : "OVERGANGUFØREVILKÅRET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "IKKE_VURDERT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "MEDLEMSKAP",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "GRUNNLAGET",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "INNTEKTSBORTFALL",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "ORDINÆR_KVOTE",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2028-06-25",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        }, {
+          "fraDato" : "2028-06-26",
+          "tilDato" : "2067-09-25",
+          "utfall" : "IKKE_OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : "ORDINÆRKVOTE_BRUKT_OPP"
+        }, {
+          "fraDato" : "2067-09-26",
+          "tilDato" : "2997-12-26",
+          "utfall" : "IKKE_RELEVANT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "SYKEPENGEERSTATNING_KVOTE",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2028-06-25",
+          "utfall" : "IKKE_RELEVANT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        }, {
+          "fraDato" : "2028-06-26",
+          "tilDato" : "2067-09-25",
+          "utfall" : "IKKE_RELEVANT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        }, {
+          "fraDato" : "2067-09-26",
+          "tilDato" : "2997-12-26",
+          "utfall" : "IKKE_RELEVANT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "STUDENT",
+        "perioder" : [ ]
+      }, {
+        "vilkårType" : "SYKEPENGEERSTATNING",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "IKKE_OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : "IKKE_RETT_PA_SYKEPENGEERSTATNING"
+        } ]
+      }, {
+        "vilkårType" : "OPPHOLDSKRAV",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : true,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "STRAFFEGJENNOMFØRING",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "SAMORDNING",
+        "perioder" : [ ]
+      }, {
+        "vilkårType" : "SAMORDNING_ANNEN_LOVGIVNING",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "IKKE_VURDERT",
+          "manuellVurdering" : true,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      }, {
+        "vilkårType" : "AKTIVITETSPLIKT",
+        "perioder" : [ {
+          "fraDato" : "2025-06-24",
+          "tilDato" : "2997-12-26",
+          "utfall" : "OPPFYLT",
+          "manuellVurdering" : false,
+          "innvilgelsesårsak" : null,
+          "avslagsårsak" : null
+        } ]
+      } ]
+    },
+    "beregningsGrunnlag" : {
+      "grunnlag11_19dto" : null,
+      "grunnlagYrkesskade" : {
+        "grunnlaget" : 4.6393348767,
+        "inkludererUføre" : false,
+        "beregningsgrunnlag" : {
+          "grunnlag11_19dto" : {
+            "inntekter" : {
+              "2023" : 400000.0,
+              "2024" : 400000.0,
+              "2025" : 400000.0
             },
-            {
-              "fraDato": "2025-09-16",
-              "tilDato": "2026-05-15",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": "VURDERES_FOR_UFØRETRYGD",
-              "avslagsårsak": null
-            },
-            {
-              "fraDato": "2026-05-16",
-              "tilDato": "2026-09-14",
-              "utfall": "IKKE_VURDERT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
-            }
-          ]
-        },
-        {
-          "vilkårType": "SAMORDNING",
-          "perioder": []
-        },
-        {
-          "vilkårType": "SYKDOMSVILKÅRET",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": "YRKESSKADE_ÅRSAKSSAMMENHENG",
-              "avslagsårsak": null
-            }
-          ]
-        },
-        {
-          "vilkårType": "SYKEPENGEERSTATNING",
-          "perioder": [
-            {
-              "fraDato": "2025-09-15",
-              "tilDato": "2026-09-14",
-              "utfall": "OPPFYLT",
-              "manuellVurdering": false,
-              "innvilgelsesårsak": null,
-              "avslagsårsak": null
-            }
-          ]
-        }
-      ]
-    },
-    "beregningsGrunnlag": {
-      "grunnlag11_19dto": null,
-      "grunnlagYrkesskade": {
-        "grunnlaget": 3.3118425098,
-        "inkludererUføre": false,
-        "beregningsgrunnlag": {
-          "grunnlag11_19dto": {
-            "inntekter": {
-              "2021": 326941.0,
-              "2022": 342764.0,
-              "2023": 362918.0
-            },
-            "grunnlaget": 3.1221707,
-            "er6GBegrenset": false,
-            "erGjennomsnitt": false
+            "grunnlaget" : 3.2786697533,
+            "er6GBegrenset" : false,
+            "erGjennomsnitt" : true
           },
-          "grunnlagYrkesskade": null,
-          "grunnlagUføre": null,
-          "nedsattArbeidsevneEllerStudieevneDato": "2020-01-01",
-          "ytterligereNedsattArbeidsevneDato": null
+          "grunnlagYrkesskade" : null,
+          "grunnlagUføre" : null,
+          "nedsattArbeidsevneEllerStudieevneDato" : "2025-09-24",
+          "ytterligereNedsattArbeidsevneDato" : null
         },
-        "terskelverdiForYrkesskade": 70,
-        "andelSomSkyldesYrkesskade": 1.1263230198,
-        "andelYrkesskade": 30,
-        "benyttetAndelForYrkesskade": 30,
-        "andelSomIkkeSkyldesYrkesskade": 2.18551949,
-        "antattÅrligInntektYrkesskadeTidspunktet": 481000.0,
-        "yrkesskadeTidspunkt": 2025,
-        "grunnlagForBeregningAvYrkesskadeandel": 3.7544100659,
-        "yrkesskadeinntektIG": 3.7544100659,
-        "grunnlagEtterYrkesskadeFordel": 3.3118425098
+        "terskelverdiForYrkesskade" : 70,
+        "andelSomSkyldesYrkesskade" : 3,
+        "andelYrkesskade" : 50,
+        "benyttetAndelForYrkesskade" : 50,
+        "andelSomIkkeSkyldesYrkesskade" : 1.6393348767,
+        "antattÅrligInntektYrkesskadeTidspunktet" : 5E+6,
+        "yrkesskadeTidspunkt" : 2025,
+        "grunnlagForBeregningAvYrkesskadeandel" : 6,
+        "yrkesskadeinntektIG" : 6,
+        "grunnlagEtterYrkesskadeFordel" : 4.6393348767
       },
-      "grunnlagUføre": null,
-      "nedsattArbeidsevneEllerStudieevneDato": "2020-01-01",
-      "ytterligereNedsattArbeidsevneDato": null
+      "grunnlagUføre" : null,
+      "nedsattArbeidsevneEllerStudieevneDato" : "2025-09-24",
+      "ytterligereNedsattArbeidsevneDato" : null
     },
-    "diagnoser": {
-      "kodeverk": "ICPC2",
-      "diagnosekode": "L74",
-      "bidiagnoser": ["A09"]
+    "diagnoser" : null,
+    "diagnoserPeriodisert" : [ ],
+    "rettighetstypePerioder" : [ {
+      "fraDato" : "2025-06-24",
+      "tilDato" : "2026-06-23",
+      "rettighetstype" : "BISTANDSBEHOV"
+    } ],
+    "resultat" : "AVBRUTT",
+    "vedtakstidspunkt" : null,
+    "fritaksvurderinger" : [ ],
+    "perioderMedArbeidsopptrapping" : [ ],
+    "vedtattStansOpphør" : [ ],
+    "samordning" : {
+      "uføre" : [ ],
+      "statligeYtelser" : [ ],
+      "avregningAndreYtelser" : [ ],
+      "arbeidsgiver" : [ ]
     },
-    "rettighetstypePerioder": [
-      {
-        "fraDato": "2025-09-15",
-        "tilDato": "2025-09-15",
-        "rettighetstype": "SYKEPENGEERSTATNING"
-      },
-      {
-        "fraDato": "2025-09-16",
-        "tilDato": "2026-05-15",
-        "rettighetstype": "VURDERES_FOR_UFØRETRYGD"
-      },
-      {
-        "fraDato": "2026-05-16",
-        "tilDato": "2026-09-14",
-        "rettighetstype": "SYKEPENGEERSTATNING"
-      }
-    ],
-    "resultat": "AVBRUTT",
-    "vedtakstidspunkt": "2025-12-02T14:27:26.019",
-    "perioderMedArbeidsopptrapping": [],
-    "vedtattStansOpphør": [],
-    "institusjonsopphold": [],
-    "samordning": {
-      "uføre": [],
-      "statligeYtelser": [],
-      "avregningAndreYtelser": [],
-      "arbeidsgiver": []
-    },
-    "diagnoserPeriodisert": []
+    "institusjonsopphold" : [ ]
   },
-  "identerForSak": ["18458534108", "27452590307"],
-  "opprettetAv": null,
-  "nyeMeldekort": [],
-  "søknadIder": [
-    {
-      "identifikator": "1757932687980"
-    }
-  ]
+  "identerForSak" : [ "00000000001" ],
+  "opprettetAv" : null,
+  "nyeMeldekort" : [ ],
+  "søknadIder" : [ ]
 }

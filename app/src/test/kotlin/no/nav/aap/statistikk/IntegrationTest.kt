@@ -810,11 +810,10 @@ class IntegrationTest {
         @Postgres dbConfig: DbConfig,
         @Postgres dataSource: DataSource,
     ) {
-        val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
-
         val hendelse =
             object {}.javaClass.getResource("/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")!!
                 .readText().let { DefaultJsonMapper.fromJson<StoppetBehandling>(it) }
+        val behandlingReferanse = hendelse.behandlingReferanse
 
         val tidspunkter =
             hendelse.avklaringsbehov.flatMap { it.endringer.map { endringDTO -> endringDTO.tidsstempel } }
@@ -899,7 +898,7 @@ class IntegrationTest {
                 VilkårsresultatRepository(it).hentForBehandling(behandlingReferanse)
             }.vilkår
 
-            assertThat(vilkårRespons).hasSize(9)
+            assertThat(vilkårRespons).hasSize(hendelse.avsluttetBehandling!!.vilkårsResultat.vilkår.size)
             val vilkårsVurderingRad = vilkårRespons.first()
 
             assertThat(vilkårsVurderingRad.vilkårType).isEqualTo(Vilkårtype.ALDERSVILKÅRET.name)
@@ -909,7 +908,9 @@ class IntegrationTest {
             }
 
             // begrensPerioderTil(vedtaksdato) inkluderer perioder som har fraDato lik vedtaksdatoen.
-            val forventedeTilkjentePerioder = hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder.take(2)
+            val vedtaksdato = requireNotNull(hendelse.avsluttetBehandling!!.vedtakstidspunkt).toLocalDate()
+            val forventedeTilkjentePerioder = hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder
+                .filter { it.fraDato <= vedtaksdato }
             assertThat(tilkjent.map { it.fraDato }).containsExactlyElementsOf(
                 forventedeTilkjentePerioder.map { it.fraDato }
             )
@@ -925,7 +926,7 @@ class IntegrationTest {
 //            assertThat(sakRespons.first().saksbehandler).isEqualTo("VEILEDER")
             assertThat(sakRespons).anyMatch { it.vedtakTidTrunkert != null }
             assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
-                LocalDateTime.parse("2025-10-06T13:56:38")
+                requireNotNull(hendelse.avsluttetBehandling!!.vedtakstidspunkt).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
             )
         }
     }
