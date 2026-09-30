@@ -39,7 +39,7 @@ class HendelseHjelpereKtTest {
             assertThat(triple).isNotNull
             assertThat(triple!!.first).isEqualTo(KVALITETSSIKRING)
             assertThat(triple.second).isEqualTo("KVALITETSSIKRER")
-            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T12:39:00.211"))
+            assertThat(triple.third).isEqualTo(hendelser.single { it.avklaringsbehovDefinisjon == KVALITETSSIKRING }.endringer.last().tidsstempel)
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
@@ -75,11 +75,12 @@ class HendelseHjelpereKtTest {
         val stoppetBehandling =
             hendelseFraFil("avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json")
         val hendelser = stoppetBehandling.avklaringsbehov
+        val fatteVedtak = hendelser.single { it.avklaringsbehovDefinisjon == FATTE_VEDTAK }
 
         softly.apply {
             assertThat(hendelser).isNotEmpty()
             assertThat(hendelser.utledAnsvarligBeslutter()).isNull()
-            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("BESLUTTER")
             assertThat(hendelser.utledVedtakTid()).isNull()
             assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isEqualTo(
                 ÅrsakTilReturKode.MANGLENDE_UTREDNING
@@ -88,11 +89,12 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
                 AVKLAR_SYKDOM
             )
+            assertThat(fatteVedtak.status).isEqualTo(EndringStatus.AVSLUTTET)
             val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
             assertThat(triple).isNotNull
             assertThat(triple!!.first).isEqualTo(FATTE_VEDTAK)
-            assertThat(triple.second).isEqualTo("VEILEDER")
-            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:41:38.441"))
+            assertThat(triple.second).isEqualTo("BESLUTTER")
+            assertThat(triple.third).isEqualTo(fatteVedtak.endringer.last().tidsstempel)
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.SENDT_TILBAKE_FRA_BESLUTTER)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
@@ -106,9 +108,9 @@ class HendelseHjelpereKtTest {
 
         softly.apply {
             assertThat(hendelser).isNotEmpty()
-            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("VEILEDER")
-            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("VEILEDER")
-            assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
+            assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("BESLUTTER")
+            assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("BESLUTTER")
+            assertThat(hendelser.utledVedtakTid()).isEqualTo(hendelser.single { it.avklaringsbehovDefinisjon == FATTE_VEDTAK }.endringer.last().tidsstempel)
             assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.IVERKSETTES)
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
@@ -117,8 +119,8 @@ class HendelseHjelpereKtTest {
             val triple = hendelser.utledForrigeLøsteAvklaringsbehov()
             assertThat(triple).isNotNull
             assertThat(triple!!.first).isEqualTo(FATTE_VEDTAK)
-            assertThat(triple.second).isEqualTo("VEILEDER")
-            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
+            assertThat(triple.second).isEqualTo("BESLUTTER")
+            assertThat(triple.third).isEqualTo(hendelser.single { it.avklaringsbehovDefinisjon == FATTE_VEDTAK }.endringer.last().tidsstempel)
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(EndringStatus.OPPRETTET)
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
@@ -134,7 +136,7 @@ class HendelseHjelpereKtTest {
             assertThat(hendelser).isNotEmpty()
             assertThat(hendelser.utledAnsvarligBeslutter()).isEqualTo("BESLUTTER")
             assertThat(hendelser.sistePersonPåBehandling()).isEqualTo("BESLUTTER")
-            assertThat(hendelser.utledVedtakTid()).isEqualTo(LocalDateTime.parse("2025-09-24T13:53:01.368"))
+            assertThat(hendelser.utledVedtakTid()).isEqualTo(hendelser.single { it.avklaringsbehovDefinisjon == FATTE_VEDTAK }.endringer.last().tidsstempel)
             assertThat(hendelser.årsakTilRetur()).describedAs("Årsak til retur").isNull()
             assertThat(hendelser.utledBehandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
             assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(
@@ -144,7 +146,7 @@ class HendelseHjelpereKtTest {
             assertThat(triple).isNotNull
             assertThat(triple!!.first).isEqualTo(SKRIV_VEDTAKSBREV)
             assertThat(triple.second).isEqualTo("BESLUTTER")
-            assertThat(triple.third).isEqualTo(LocalDateTime.parse("2025-09-24T13:56:38.567"))
+            assertThat(triple.third).isEqualTo(hendelser.single { it.avklaringsbehovDefinisjon == SKRIV_VEDTAKSBREV }.endringer.last().tidsstempel)
             assertThat(hendelser.sisteAvklaringsbehovStatus()).isNull()
             assertThat(hendelser.utledÅrsakTilSattPåVent()).isNull()
         }
