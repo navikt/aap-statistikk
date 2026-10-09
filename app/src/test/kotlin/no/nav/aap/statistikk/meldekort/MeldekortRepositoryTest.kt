@@ -1,5 +1,9 @@
 package no.nav.aap.statistikk.meldekort
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.Postgres
@@ -9,6 +13,7 @@ import no.nav.aap.statistikk.testutils.builders.opprettTestSak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
@@ -45,14 +50,30 @@ class MeldekortRepositoryTest {
             )
         )
 
-        assertDoesNotThrow {
-            dataSource.transaction {
-                MeldekortRepository(it).lagre(
-                    behandlingId = behandling.id(),
-                    meldekort = meldekort
-                )
-            }
+        val logger = LoggerFactory.getLogger(MeldekortRepository::class.java) as Logger
+        val appender = ListAppender<ILoggingEvent>().apply {
+            context = logger.loggerContext
+            start()
         }
+        logger.addAppender(appender)
+        try {
+            assertDoesNotThrow {
+                dataSource.transaction {
+                    MeldekortRepository(it).lagre(
+                        behandlingId = behandling.id(),
+                        meldekort = meldekort
+                    )
+                }
+            }
+        } finally {
+            logger.detachAppender(appender)
+            appender.stop()
+        }
+
+        assertThat(appender.list).hasSize(1)
+        assertThat(appender.list.single().level).isEqualTo(Level.WARN)
+        assertThat(appender.list.single().formattedMessage)
+            .contains("JP654321", behandling.id().id.toString())
 
         val uthentet = dataSource.transaction {
             MeldekortRepository(it).hentMeldekort(
@@ -68,7 +89,7 @@ class MeldekortRepositoryTest {
                         ArbeidIPerioder(
                             periodeFom = LocalDate.of(2024, 1, 1),
                             periodeTom = LocalDate.of(2024, 1, 7),
-                            timerArbeidet = BigDecimal("20")
+                            timerArbeidet = BigDecimal("20.0")
                         )
                     )
                 )
@@ -94,7 +115,7 @@ class MeldekortRepositoryTest {
                     ArbeidIPerioder(
                         periodeFom = LocalDate.of(2024, 1, 1),
                         periodeTom = LocalDate.of(2024, 1, 7),
-                        timerArbeidet = BigDecimal("20")
+                        timerArbeidet = BigDecimal("7.5")
                     )
                 )
             )

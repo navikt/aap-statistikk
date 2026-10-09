@@ -1,5 +1,5 @@
 [versions]
-komponenter = "2.0.165"
+komponenter = "2.0.173"
 tilgang = "1.0.240"
 behandlingsflyt = "0.0.669"
 oppgave = "0.0.215"
