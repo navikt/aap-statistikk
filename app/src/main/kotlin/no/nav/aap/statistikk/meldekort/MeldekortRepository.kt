@@ -3,8 +3,10 @@ package no.nav.aap.statistikk.meldekort
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
+import org.slf4j.LoggerFactory
 
 class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRepository {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     companion object : RepositoryFactory<IMeldekortRepository> {
         override fun konstruer(connection: DBConnection): IMeldekortRepository {
@@ -15,10 +17,17 @@ class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRe
 
     override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
         meldekort.forEach { enkeltMeldekort ->
-            lagreEnkeltMeldekort(
+            val meldekortId = lagreEnkeltMeldekort(
                 behandlingId,
                 enkeltMeldekort
-            )?.let { lagreArbeidIPeriode(it, enkeltMeldekort.arbeidIPeriodeDTO) }
+            )
+            if (meldekortId == null) {
+                log.warn(
+                    "Meldekort med journalpostId ${enkeltMeldekort.journalpostId} for behandling ${behandlingId.id} ble ikke lagret fordi journalpostId allerede finnes."
+                )
+            } else {
+                lagreArbeidIPeriode(meldekortId, enkeltMeldekort.arbeidIPeriodeDTO)
+            }
         }
     }
 

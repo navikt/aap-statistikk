@@ -10,6 +10,8 @@ Bruker Gradle wrapper, så bare klon og kjør `./gradlew build`.
 
 Dokumentasjon på [sysdok](https://aap-sysdoc.ansatt.nav.no/funksjonalitet/Statistikk/teknisk).
 
+Se https://dbt.ansatt.dev.nav.no/docs/aap/dbt-aap/index.html for hvordan dataen blir brukt internt på Team AAP.
+
 ## Henvendelser
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
