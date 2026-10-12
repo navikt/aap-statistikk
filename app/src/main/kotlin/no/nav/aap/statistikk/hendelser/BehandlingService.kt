@@ -159,7 +159,7 @@ class BehandlingService(
             relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
 
         if (relatertBehandling == null && relatertBehandlingUUID != null) {
-            logger.warn("Fant ikke relatert behandling med UUID $relatertBehandlingUUID for behandling ${dto.behandlingReferanse}.")
+            logger.warn("Fant ikke relatert behandling med UUID $relatertBehandlingUUID for behandling ${dto.behandlingReferanse}. Behandlingtype: ${dto.behandlingType}.")
         }
         return relatertBehandling
     }
