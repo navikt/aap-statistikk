@@ -12,8 +12,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM
 import no.nav.aap.komponenter.server.auth.IdentityProvider
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.statistikk.testutils.Fakes
-import no.nav.aap.statistikk.testutils.MockJobbAppender
-import no.nav.aap.statistikk.testutils.noOpTransactionExecutor
+import no.nav.aap.statistikk.testutils.motor.MockJobbAppender
+import no.nav.aap.statistikk.testutils.motor.noOpTransactionExecutor
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.net.URI

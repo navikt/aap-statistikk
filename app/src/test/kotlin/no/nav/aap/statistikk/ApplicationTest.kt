@@ -5,6 +5,9 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.testutils.client.testKlient
+import no.nav.aap.statistikk.testutils.motor.MockJobbAppender
+import no.nav.aap.statistikk.testutils.motor.motorMock
+import no.nav.aap.statistikk.testutils.motor.noOpTransactionExecutor
 import org.assertj.core.api.Assertions.assertThat
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package no.nav.aap.statistikk.testutils
+package no.nav.aap.statistikk.testutils.motor
 
 import io.mockk.Runs
 import io.mockk.every
@@ -19,7 +19,6 @@ import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
-import no.nav.aap.statistikk.motor
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.postgresRepositoryRegistry
@@ -30,6 +29,7 @@ import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import javax.sql.DataSource
 
 private val logger = LoggerFactory.getLogger("MotorTestHelpers")
@@ -54,35 +54,6 @@ fun konstruerTestJobber(
         lagreAvsluttetBehandlingTilBigQueryJobb,
         resendSakstatistikkJobb,
         motorJobbAppender
-    )
-}
-
-fun konstruerMotor(
-    dataSource: DataSource,
-    jobbAppender: MotorJobbAppender,
-    bqYtelseRepository: IBQYtelsesstatistikkRepository,
-    resendSakstatistikkJobb: ResendSakstatistikkJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
-    lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
-): Motor {
-    val lagreOppgaveJobb = LagreOppgaveJobb()
-    val lagreAvsluttetBehandlingTilBigQueryJobb =
-        LagreAvsluttetBehandlingTilBigQueryJobb(bqYtelseRepository)
-    return motor(
-        dataSource = dataSource,
-        gatewayProvider = defaultGatewayProvider { register<FakePdlGateway>() },
-        jobber = listOf(
-            lagreAvsluttetBehandlingTilBigQueryJobb,
-            lagreOppgaveJobb,
-            resendSakstatistikkJobb,
-            lagreAvklaringsbehovHendelseJobb,
-            lagrePostmottakHendelseJobb,
-            LagreOppgaveHendelseJobb(),
-            lagreSakinfoTilBigQueryJobb,
-            LagreStoppetHendelseJobb(jobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb),
-            LagreTilbakekrevingHendelseJobb()
-        )
     )
 }
 
@@ -156,7 +127,7 @@ class MockJobbAppender : JobbAppender {
         enhetRetryCount: Int,
         triggerKilde: String,
         avklaringsbehovKode: Definisjon?,
-        cutoffTidspunkt: java.time.LocalDateTime?,
+        cutoffTidspunkt: LocalDateTime?,
         cutoffOppgaveId: Long?,
         cutoffVersjon: Long?,
     ) {

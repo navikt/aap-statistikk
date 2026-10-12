@@ -7,7 +7,7 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.testutils.MockJobbAppender
+import no.nav.aap.statistikk.testutils.motor.MockJobbAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
