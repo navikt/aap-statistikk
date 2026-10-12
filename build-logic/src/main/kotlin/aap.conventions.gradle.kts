@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 // Felles kode for alle build.gradle.kts filer som laster inn denne conventions pluginen
 
 plugins {
@@ -31,10 +33,15 @@ tasks {
     }
 }
 
+// Sentral kilde for JDK-versjon: se jdkVersion i gradle.properties (rot og build-logic).
+val jdkVersion: Provider<String> = providers.gradleProperty("jdkVersion")
+
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain {
+        languageVersion.set(jdkVersion.map(String::toInt).map(JavaLanguageVersion::of))
+    }
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        jvmTarget.set(jdkVersion.map(JvmTarget::fromTarget))
         apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4)
         languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_4)
     }
@@ -42,7 +49,7 @@ kotlin {
 
 // Pass på at når vi kaller JavaExec eller Test tasks så bruker vi samme språk-versjon som vi kompilerer til
 val toolchainLauncher = javaToolchains.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(21))
+    languageVersion.set(jdkVersion.map(String::toInt).map(JavaLanguageVersion::of))
 }
 tasks.withType<Test>().configureEach { javaLauncher.set(toolchainLauncher) }
 tasks.withType<JavaExec>().configureEach { javaLauncher.set(toolchainLauncher) }

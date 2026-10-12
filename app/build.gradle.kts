@@ -13,7 +13,7 @@ detekt {
 }
 
 tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
-    jvmTarget.set("21")
+    jvmTarget.set(providers.gradleProperty("jdkVersion"))
 }
 
 application {
