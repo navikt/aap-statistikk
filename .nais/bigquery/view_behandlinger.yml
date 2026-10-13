@@ -76,6 +76,7 @@ spec:
               UNNEST(JSON_EXTRACT_ARRAY(b.aarsaker_til_behandling)) AS value
           ),
           ', ') AS behandling_aarsak,
+        b.aarsak_til_opprettelse AS aarsak_til_opprettelse,
         pi.ident AS brukerFnr,
         bh.resultat AS behandlingsresultat,
         bh.vedtak_tidspunkt AS vedtak_tidspunkt,
