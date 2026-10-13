@@ -82,7 +82,7 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
         Vurderingsbehov.SØKNAD -> SØKNAD
         Vurderingsbehov.AKTIVITETSMELDING -> AKTIVITETSMELDING
         Vurderingsbehov.MELDEKORT -> MELDEKORT
-        Vurderingsbehov.FRITAK_MELDEPLIKT -> MELDEKORT
+        Vurderingsbehov.FRITAK_MELDEPLIKT -> FRITAK_MELDEPLIKT
         Vurderingsbehov.VURDER_FRITAK_MELDEPLIKT -> VURDER_FRITAK_MELDEPLIKT
         Vurderingsbehov.LEGEERKLÆRING -> LEGEERKLÆRING
         Vurderingsbehov.AVVIST_LEGEERKLÆRING -> AVVIST_LEGEERKLÆRING
