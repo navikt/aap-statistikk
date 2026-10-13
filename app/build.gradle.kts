@@ -70,7 +70,7 @@ dependencies {
     testImplementation(kelvinLibs.assertj.core)
     testImplementation(kelvinLibs.testcontainers.postgresql)
     testImplementation("org.testcontainers:testcontainers-gcloud:${kelvinLibs.versions.testcontainers.get()}")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter:${kelvinLibs.versions.testcontainers.get()}")
+    testImplementation(kelvinLibs.testcontainers.junit.jupiter)
     testImplementation(kelvinLibs.bundles.junit)
 }
 
