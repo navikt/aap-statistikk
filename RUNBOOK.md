@@ -125,3 +125,21 @@ WHERE siste = 1 AND behandling_status != 'AVSLUTTET' and behandling_status != 'I
 ORDER BY endretTid ASC
 limit 50
 ```
+
+## Fikse feil i `aarsaker_til_behandling`
+
+Pga feil mapping (se [commit](https://github.com/navikt/aap-statistikk/commit/381cd9c6ec9219da0b4819c0416cb5621545c40f)) ble det lagret feil vurderingsbehov på behandlinger.
+
+Disse ble identifisert og fikset slik
+
+```sql
+update behandling b
+set aarsaker_til_behandling = array_replace(aarsaker_til_behandling, 'MELDEKORT',
+                                            'FRITAK_MELDEPLIKT')
+where aarsak_til_opprettelse = 'FRITAK_MELDEPLIKT'
+  and aarsaker_til_behandling && ARRAY ['MELDEKORT']::varchar[];
+```
+
+Konsekvensen var forvirring hos Team Spenn vedr. hvilke behandlinger man kan forvente at skal ha meldekort koblet til seg.
+
+I tillegg ble det gitt en liste med saksnumre som var mappet feil, disse ble manuelt fikset ved å sjekke i Paw Patrol.
