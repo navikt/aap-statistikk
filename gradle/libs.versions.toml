@@ -1,6 +1,6 @@
 [versions]
 komponenter = "2.0.185"
-tilgang = "1.0.240"
+tilgang = "1.0.243"
 behandlingsflyt = "0.0.669"
 oppgave = "0.0.215"
 utbetaling = "0.0.136"
