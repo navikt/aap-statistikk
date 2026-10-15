@@ -7,19 +7,21 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov as KontraktVurderingsbehov
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling as DomeneTypeBehandling
+import no.nav.aap.statistikk.behandling.Vurderingsbehov
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -34,6 +36,7 @@ class BehandlingServiceTest {
         val referanse = UUID.randomUUID()
         val sak = testSak()
         val eksisterende = eksisterendeBehandling(sak, referanse)
+        var lagretBehandling: Behandling? = null
 
         val repository = object : IBehandlingRepository {
             var oppdateringKalt = false
@@ -45,6 +48,7 @@ class BehandlingServiceTest {
 
             override fun oppdaterBehandling(behandling: Behandling) {
                 oppdateringKalt = true
+                lagretBehandling = behandling
             }
 
             override fun invaliderOgLagreNyHistorikk(behandling: Behandling) = Unit
@@ -71,6 +75,28 @@ class BehandlingServiceTest {
         assertThat(repository.lockHentKalt).isTrue()
         assertThat(repository.oppdateringKalt).isTrue()
         assertThat(resultat.id).isEqualTo(eksisterende.id)
+        assertThat(lagretBehandling?.årsaker).containsExactly(Vurderingsbehov.SØKNAD)
+    }
+
+    @Test
+    fun `hentEllerLagreBehandling oppdaterer årsaker på eksisterende behandling`() {
+        val referanse = UUID.randomUUID()
+        val sak = testSak()
+        val eksisterende = eksisterendeBehandling(sak, referanse)
+        val repository = FakeBehandlingRepository()
+        repository.opprettBehandling(eksisterende)
+
+        val behandlingService = BehandlingService(repository, SkjermingService(FakePdlGateway(emptyMap())))
+        behandlingService.hentEllerLagreBehandling(
+            testHendelse(
+                referanse,
+                listOf(KontraktVurderingsbehov.SØKNAD, KontraktVurderingsbehov.MELDEKORT)
+            ),
+            sak
+        )
+
+        assertThat(repository.hent(referanse)?.årsaker)
+            .containsExactly(Vurderingsbehov.SØKNAD, Vurderingsbehov.MELDEKORT)
     }
 
     @Test
@@ -117,7 +143,10 @@ class BehandlingServiceTest {
     }
 }
 
-private fun testHendelse(referanse: UUID): StoppetBehandling {
+private fun testHendelse(
+    referanse: UUID,
+    vurderingsbehov: List<KontraktVurderingsbehov> = listOf(KontraktVurderingsbehov.SØKNAD)
+): StoppetBehandling {
     return StoppetBehandling(
         saksnummer = "1234",
         behandlingReferanse = referanse,
@@ -142,7 +171,7 @@ private fun testHendelse(referanse: UUID): StoppetBehandling {
         mottattTid = LocalDateTime.now().minusDays(1),
         sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
         hendelsesTidspunkt = LocalDateTime.now(),
-        vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
+        vurderingsbehov = vurderingsbehov,
         årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
     )
 }
@@ -168,6 +197,7 @@ private fun eksisterendeBehandling(sak: Sak, referanse: UUID): Behandling {
         mottattTid = LocalDateTime.now().minusDays(1),
         versjon = Versjon("versjon"),
         søknadsformat = SøknadsFormat.PAPIR,
+        årsaker = listOf(Vurderingsbehov.SØKNAD),
         oppdatertTidspunkt = LocalDateTime.now(),
         relaterteIdenter = emptyList()
     )
