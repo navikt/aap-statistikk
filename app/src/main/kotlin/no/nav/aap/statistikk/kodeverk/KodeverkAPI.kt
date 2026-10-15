@@ -8,6 +8,7 @@ import kotlinx.html.body
 import kotlinx.html.*
 import kotlinx.html.head
 import kotlinx.html.title
+import no.nav.aap.statistikk.behandling.ÅrsakTilSattPåVent
 import no.nav.aap.statistikk.db.TransactionExecutor
 
 fun Application.kodeverk(
@@ -55,9 +56,32 @@ fun Application.kodeverk(
                     kodeverkTabell("Vilkår", vilkår)
                     kodeverkTabell("Resultat", resultat)
                     kodeverkTabell("Rettighetstype", rettighetsType)
+                    venteårsakerTabell()
                 }
             }
 
+        }
+    }
+}
+
+internal fun BODY.venteårsakerTabell() {
+    p {
+        h2 {
+            +"Venteårsaker"
+        }
+        table {
+            thead {
+                tr {
+                    th { +"Venteårsak" }
+                }
+            }
+            tbody {
+                ÅrsakTilSattPåVent.entries.forEach {
+                    tr {
+                        td { +it.name }
+                    }
+                }
+            }
         }
     }
 }
