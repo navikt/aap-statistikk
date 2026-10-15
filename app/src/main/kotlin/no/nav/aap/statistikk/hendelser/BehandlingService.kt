@@ -121,6 +121,13 @@ class BehandlingService(
         return eksisterendeBehandling?.copy(
             relatertBehandlingId = relatertBehandling?.id,
             relaterteIdenter = dto.identerForSak.map(::Ident),
+            årsaker = if (eksisterendeBehandlingKanskje != null &&
+                dto.hendelsesTidspunkt < eksisterendeBehandlingKanskje.oppdatertTidspunkt()
+            ) {
+                eksisterendeBehandlingKanskje.årsaker
+            } else {
+                dto.vurderingsbehov.map { it.tilDomene() }
+            },
         ) ?: Behandling(
             referanse = dto.behandlingReferanse,
             sak = sak,
