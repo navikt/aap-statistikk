@@ -16,7 +16,7 @@ fun Application.kodeverk(
 ) {
     routing {
         get("/kodeverk") {
-            val name = "Ktor"
+            val name = "Kodeverk for AAP"
             val behandlingstyper = transactionExecutor.withinTransaction {
                 KodeverkRepository(it).hentBehandlingType()
             }
