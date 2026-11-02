@@ -24,7 +24,7 @@ Interne henvendelser kan sendes via Slack i kanalen `#ytelse-aap-værsågod`.
 
 For å oppdatere Gradle wrapper:
 
-```
+```bash
 ./gradlew wrapper --gradle-version=8.10.2
 ```
 
