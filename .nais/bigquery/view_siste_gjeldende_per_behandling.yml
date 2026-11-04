@@ -24,6 +24,6 @@ spec:
             row_number()
               OVER (PARTITION BY behandling_uuid ORDER BY endretTid DESC) AS rn
           FROM
-            `aap-prod-9adc.saksstatistikk.view_gjeldende_hendelser_saksstatistikk` s
+            `saksstatistikk.view_gjeldende_hendelser_saksstatistikk` s
         )
       select * from siste_fra_sak s where rn = 1
