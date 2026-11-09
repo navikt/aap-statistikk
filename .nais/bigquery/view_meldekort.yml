@@ -33,7 +33,7 @@ spec:
           br.referanse AS behandlingsreferanse,
           s.saksnummer,
           m.journalpost_id,
-          arb.timer_arbeidet
+          IFNULL(arb.timer_arbeidet, []) AS timer_arbeidet
         FROM `datastream_hendelser.public_meldekort` m
         JOIN `datastream_hendelser.public_behandling` b
           ON b.id = m.behandling_id
@@ -43,5 +43,5 @@ spec:
           ON gyldig.behandling_id = b.id
         JOIN `datastream_hendelser.public_behandling_referanse` br
           ON br.id = b.referanse_id
-        JOIN arbeid_per_meldekort arb
+        left JOIN arbeid_per_meldekort arb
           ON arb.meldekort_id = m.id
