@@ -93,10 +93,11 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         cutoffTidspunkt = payload.cutoffTidspunkt,
                     )
                 } else {
+                    val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
                     error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
-                                "avklaringsbehov=${resultat.avklaringsbehovKode}."
+                                "avklaringsbehov=${resultat.avklaringsbehovKode}. Saksnummer: ${behandling.sak.saksnummer}."
                     )
                 }
             }
