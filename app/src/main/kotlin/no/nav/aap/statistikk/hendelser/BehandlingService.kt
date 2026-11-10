@@ -121,8 +121,7 @@ class BehandlingService(
         return eksisterendeBehandling?.copy(
             relatertBehandlingId = relatertBehandling?.id,
             relaterteIdenter = dto.identerForSak.map(::Ident),
-            årsaker = if (eksisterendeBehandlingKanskje != null &&
-                dto.hendelsesTidspunkt < eksisterendeBehandlingKanskje.oppdatertTidspunkt()
+            årsaker = if (dto.hendelsesTidspunkt < eksisterendeBehandlingKanskje.oppdatertTidspunkt()
             ) {
                 eksisterendeBehandlingKanskje.årsaker
             } else {

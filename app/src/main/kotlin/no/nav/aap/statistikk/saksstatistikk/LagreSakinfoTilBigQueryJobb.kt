@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.json.DeserializationException
@@ -9,8 +10,7 @@ import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.LoggingKontekst
 import no.nav.aap.statistikk.behandling.BehandlingId
-import no.nav.aap.statistikk.behandling.BehandlingRepository
-import no.nav.aap.statistikk.jobber.appender.JobbAppender
+import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -30,8 +30,8 @@ data class LagreSakinfoPayload(
 
 class LagreSakinfoTilBigQueryJobbUtfører(
     private val sakStatistikkService: ISaksStatistikkService,
-    private val jobbAppender: JobbAppender,
-    private val repositoryProvider: RepositoryProvider,
+    private val behandlingRepository: IBehandlingRepository,
+    private val leggTilRetry: (LagreSakinfoPayload, Long) -> Unit,
     private val enhetRetryConfig: EnhetRetryConfig = EnhetRetryConfig()
 ) : JobbUtfører {
 
@@ -41,7 +41,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
         val payload = lesPayload(input)
         val behandlingId = payload.behandlingId
 
-        val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
+        val behandling = behandlingRepository.hent(behandlingId)
 
         LoggingKontekst(behandling.referanse).use {
             utførJobb(payload)
@@ -83,17 +83,16 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                                 "Reschedulerer om ${delay}s " +
                                 "(forsøk ${retryCount + 1}/${enhetRetryConfig.maxRetries})."
                     )
-                    jobbAppender.leggTilLagreSakTilBigQueryJobb(
-                        repositoryProvider,
-                        behandlingId,
-                        delayInSeconds = delay,
-                        avklaringsbehovKode = resultat.avklaringsbehovKode,
-                        enhetRetryCount = retryCount + 1,
-                        triggerKilde = "retry($triggerKilde)",
-                        cutoffTidspunkt = payload.cutoffTidspunkt,
+                    leggTilRetry(
+                        payload.copy(
+                            avklaringsbehovKode = resultat.avklaringsbehovKode?.kode?.name,
+                            retryCount = retryCount + 1,
+                            triggerKilde = "retry($triggerKilde)",
+                        ),
+                        delay,
                     )
                 } else {
-                    val behandling = repositoryProvider.provide<BehandlingRepository>().hent(behandlingId)
+                    val behandling = behandlingRepository.hent(behandlingId)
                     error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                                 "for behandling ${resultat.behandlingId}, " +
@@ -112,9 +111,19 @@ class LagreSakinfoTilBigQueryJobb : ProvidersJobbSpesifikasjon {
     ): JobbUtfører {
         val sakStatistikkService = lagSaksStatistikkService(repositoryProvider, gatewayProvider)
         return LagreSakinfoTilBigQueryJobbUtfører(
-            sakStatistikkService,
-            MotorJobbAppender(),
-            repositoryProvider
+            sakStatistikkService = sakStatistikkService,
+            behandlingRepository = repositoryProvider.provide<IBehandlingRepository>(),
+            leggTilRetry = { payload, delay ->
+                MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
+                    repositoryProvider,
+                    payload.behandlingId,
+                    delayInSeconds = delay,
+                    avklaringsbehovKode = payload.avklaringsbehovKode?.let(Definisjon::forKode),
+                    enhetRetryCount = payload.retryCount,
+                    triggerKilde = payload.triggerKilde,
+                    cutoffTidspunkt = payload.cutoffTidspunkt,
+                )
+            },
         )
     }
 
