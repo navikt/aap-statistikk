@@ -19,8 +19,6 @@ interface JobbAppender {
         triggerKilde: String = "ukjent",
         avklaringsbehovKode: Definisjon? = null,
         cutoffTidspunkt: LocalDateTime? = null,
-        cutoffOppgaveId: Long? = null,
-        cutoffVersjon: Long? = null,
     )
 
     fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

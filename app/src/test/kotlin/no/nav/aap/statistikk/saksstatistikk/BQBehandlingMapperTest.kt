@@ -150,7 +150,6 @@ class BQBehandlingMapperTest {
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = FakeOppgaveRepository(),
-            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
             clock = fixedClock
         )
 
@@ -240,7 +239,6 @@ class BQBehandlingMapperTest {
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
             clock = fixedClock
         )
 
@@ -300,7 +298,6 @@ class BQBehandlingMapperTest {
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = FakeOppgaveRepository(),
-            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
             clock = fixedClock
         )
 
@@ -384,7 +381,6 @@ class BQBehandlingMapperTest {
             ),
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
             clock = fixedClock
         )
 
@@ -476,7 +472,6 @@ class BQBehandlingMapperTest {
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
             clock = fixedClock
         )
 
@@ -524,7 +519,6 @@ class BQBehandlingMapperTest {
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = FakeOppgaveRepository(),
-            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
             clock = fixedClock
         )
 

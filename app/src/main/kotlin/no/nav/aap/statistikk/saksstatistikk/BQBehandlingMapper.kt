@@ -28,7 +28,6 @@ class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val sakstatistikkEventSourcing: SakstatistikkEventSourcing,
     private val clock: Clock = systemDefaultZone()
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -43,7 +42,7 @@ class BQBehandlingMapper(
         val behandlingReferanse = behandling.referanse
 
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
-        val snapshots = sakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
+        val snapshots = SakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
 
         val sisteSnapshot = snapshots.lastOrNull()
         val oppgaveDriverEndretTid = sisteSnapshot?.kilde == Kilde.Oppgave

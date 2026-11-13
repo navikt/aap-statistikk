@@ -17,7 +17,7 @@ import java.util.*
 class SakstatistikkEventSourcingTest {
 
     private val behandlingRef = UUID.randomUUID()
-    private val eventSourcing = SakstatistikkEventSourcing()
+    private val eventSourcing = SakstatistikkEventSourcing
 
     @Test
     fun `kun behandlingsflyt-hendelser gir snapshots uten saksbehandler`() {

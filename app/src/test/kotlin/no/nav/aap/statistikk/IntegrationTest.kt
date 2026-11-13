@@ -924,8 +924,8 @@ class IntegrationTest {
 //            assertThat(sakRespons).hasSize(4)
             sakRespons.forEach { println(it) }
 //            assertThat(sakRespons.first().saksbehandler).isEqualTo("VEILEDER")
-            assertThat(sakRespons).anyMatch { it.vedtakTidTrunkert != null }
-            assertThat(sakRespons.last().vedtakTidTrunkert).isEqualTo(
+            assertThat(sakRespons).anyMatch { it != null }
+            assertThat(sakRespons.last().vedtakTid).isEqualTo(
                 requireNotNull(hendelse.avsluttetBehandling!!.vedtakstidspunkt).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
             )
         }

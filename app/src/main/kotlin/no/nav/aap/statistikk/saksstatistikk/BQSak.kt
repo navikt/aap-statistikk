@@ -6,7 +6,6 @@ import no.nav.aap.statistikk.isBeforeOrEqual
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit.SECONDS
 import java.util.UUID
 
 /**
@@ -57,8 +56,6 @@ data class BQBehandling(
             }
         }
     }
-
-    val vedtakTidTrunkert = vedtakTid?.truncatedTo(SECONDS)
 
     val sakUtland: String
         get() = if (ansvarligEnhetKode in setOf("0393", "4402")) "UTLAND" else "NASJONAL"
