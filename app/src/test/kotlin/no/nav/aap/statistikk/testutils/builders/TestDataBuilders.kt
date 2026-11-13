@@ -7,6 +7,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
@@ -16,6 +17,7 @@ import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.behandling.Vurderingsbehov
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.oppgave.OppgaveRepositoryImpl
+import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -25,18 +27,15 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
-import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
-import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.saksstatistikk.BQBehandlingMapper
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
-import no.nav.aap.statistikk.saksstatistikk.SakstatistikkEventSourcing
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 @JvmOverloads
@@ -198,8 +197,7 @@ fun konstruerSakstatistikkService(
         bqBehandlingMapper = BQBehandlingMapper(
             behandlingService,
             RettighetstypeperiodeRepository(connection),
-            OppgaveRepositoryImpl(connection),
-            SakstatistikkEventSourcing()
+            OppgaveRepositoryImpl(connection)
         )
     )
 }

@@ -42,8 +42,6 @@ class MotorJobbAppender : JobbAppender {
         triggerKilde: String,
         avklaringsbehovKode: Definisjon?,
         cutoffTidspunkt: LocalDateTime?,
-        cutoffOppgaveId: Long?,
-        cutoffVersjon: Long?,
     ) {
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()

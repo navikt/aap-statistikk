@@ -16,7 +16,6 @@ internal fun lagSaksStatistikkService(
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = repositoryProvider.provide(),
             oppgaveRepository = repositoryProvider.provide(),
-            sakstatistikkEventSourcing = SakstatistikkEventSourcing(),
         ),
     )
 }

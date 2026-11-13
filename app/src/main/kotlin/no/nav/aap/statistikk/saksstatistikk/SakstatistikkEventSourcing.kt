@@ -8,7 +8,7 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import java.time.LocalDateTime
 import java.util.*
 
-class SakstatistikkEventSourcing {
+object SakstatistikkEventSourcing {
 
     fun byggSakstatistikkHendelser(
         behandling: Behandling,

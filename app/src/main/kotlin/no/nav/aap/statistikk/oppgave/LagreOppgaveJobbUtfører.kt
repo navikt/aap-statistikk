@@ -46,8 +46,6 @@ class LagreOppgaveJobbUtfører(
                             behandling.id(),
                             triggerKilde = "oppgave",
                             cutoffTidspunkt = cutoffAnchor?.sendtTid,
-                            cutoffOppgaveId = cutoffAnchor?.oppgaveId,
-                            cutoffVersjon = cutoffAnchor?.versjon,
                         )
                     }
                 }
