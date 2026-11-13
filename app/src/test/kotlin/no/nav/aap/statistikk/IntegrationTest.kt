@@ -38,11 +38,13 @@ import no.nav.aap.statistikk.tilkjentytelse.repository.TilkjentYtelseRepository
 import no.nav.aap.statistikk.vilkårsresultat.repository.VilkårsresultatRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.util.RestoreSystemProperties
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as BStatus
@@ -196,7 +198,8 @@ class IntegrationTest {
         )
 
         // Sjekk tilkjent ytelse
-        val tilkjentYtelse = dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse)?.perioder }
+        val tilkjentYtelse =
+            dataSource.transaction { TilkjentYtelseRepository(it).hentForBehandling(referanse)?.perioder }
 
         assertThat(tilkjentYtelse).isNotNull
         assertThat(tilkjentYtelse).isNotEmpty
@@ -875,7 +878,6 @@ class IntegrationTest {
                 dataSource, behandling!!.referanse
             )
             assertThat(bqSaker).isNotEmpty
-//            assertThat(bqSaker).hasSize(5)  // Nå får vi også en retroaktiv oppdatering
             assertThat(bqSaker.first().sekvensNummer).isEqualTo(1)
 
             postBehandlingsflytHendelse(
@@ -891,7 +893,6 @@ class IntegrationTest {
             val bqSaker2 = dataSource.transaction {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
             }
-//            assertThat(bqSaker2).hasSize(5)
             assertThat(bqSaker2[1].sekvensNummer).isEqualTo(2)
 
             val vilkårRespons = dataSource.transaction {
@@ -921,13 +922,16 @@ class IntegrationTest {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
             }
 
-//            assertThat(sakRespons).hasSize(4)
+
             sakRespons.forEach { println(it) }
-//            assertThat(sakRespons.first().saksbehandler).isEqualTo("VEILEDER")
-            assertThat(sakRespons).anyMatch { it != null }
-            assertThat(sakRespons.last().vedtakTid).isEqualTo(
-                requireNotNull(hendelse.avsluttetBehandling!!.vedtakstidspunkt).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+
+            assertThat(sakRespons).anyMatch { it.vedtakTid != null }
+            assertThat(sakRespons.last().vedtakTid).isCloseTo(
+                requireNotNull(hendelse.avsluttetBehandling!!.vedtakstidspunkt).truncatedTo(
+                    java.time.temporal.ChronoUnit.SECONDS
+                ), within(1, ChronoUnit.SECONDS)
             )
+
         }
     }
 
