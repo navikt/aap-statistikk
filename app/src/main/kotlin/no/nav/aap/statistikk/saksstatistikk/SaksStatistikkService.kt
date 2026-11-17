@@ -35,7 +35,7 @@ class SaksStatistikkService(
             bqBehandlingMapper.bqBehandlingForBehandling(
                 behandlingPåTidspunkt,
                 erSkjermet,
-                cutoffTidspunkt ?: behandlingPåTidspunkt.oppdatertTidspunkt()
+                cutoffTidspunkt
             )
 
         log.info(

@@ -340,6 +340,7 @@ class BQBehandlingMapperTest {
         assertThat(resultat.ansvarligEnhetKode).isEqualTo("4491")
         assertThat(resultat.saksbehandler).isNull()
         assertThat(resultat.behandlingMetode).isEqualTo(BehandlingMetode.FATTE_VEDTAK)
+        assertThat(resultat.endretTid).isEqualTo(tidspunkt)
     }
 
     @Test
@@ -369,12 +370,58 @@ class BQBehandlingMapperTest {
             enhet = "9999"
         )
 
-        assertThat(
-            mapMellomBehov(
-                listOf(opprettet, fremtidig),
-                cutoffTidspunkt = opprettet.sendtTid
-            ).ansvarligEnhetKode
-        ).isEqualTo("4491")
+        val resultat = mapMellomBehov(
+            listOf(opprettet, fremtidig),
+            cutoffTidspunkt = opprettet.sendtTid
+        )
+
+        assertThat(resultat.ansvarligEnhetKode).isEqualTo("4491")
+        assertThat(resultat.endretTid).isEqualTo(opprettet.sendtTid)
+    }
+
+    @Test
+    fun `bruker oppgavedata fra valgt tidspunkt, eller nyeste data når tidspunkt ikke er angitt`() {
+        val tidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+        val behandling = lagBehandling(
+            gjeldendeAvklaringsbehov = Definisjon.FATTE_VEDTAK,
+            hendelser = listOf(
+                lagBehandlingHendelse(tidspunkt = tidspunkt, avklaringsBehov = Definisjon.FATTE_VEDTAK)
+            )
+        )
+        val opprettet = oppgavehendelseFørOvergang(tidspunkt)
+        val reservert = opprettet.copy(
+            hendelse = HendelseType.RESERVERT,
+            sendtTid = tidspunkt.plusMinutes(2),
+            mottattTidspunkt = tidspunkt.plusMinutes(2),
+            enhet = "9999",
+            reservertAv = "Ny beslutter",
+            reservertTidspunkt = tidspunkt.plusMinutes(2)
+        )
+        val oppgaveRepository = FakeOppgaveRepository()
+        oppgaveRepository.addOppgave(
+            behandling.id(),
+            listOf(opprettet, reservert).tilOppgave().copy(
+                behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse)
+            )
+        )
+        val mapper = BQBehandlingMapper(
+            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
+            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+            oppgaveRepository = oppgaveRepository,
+            clock = fixedClock
+        )
+
+        val resultat = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+        val historisk = mapper.bqBehandlingForBehandling(
+            behandling, erSkjermet = false, cutoffTidspunkt = tidspunkt
+        )
+
+        assertThat(resultat.endretTid).isEqualTo(reservert.sendtTid)
+        assertThat(resultat.ansvarligEnhetKode).isEqualTo("9999")
+        assertThat(resultat.saksbehandler).isEqualTo("Ny beslutter")
+        assertThat(historisk.endretTid).isEqualTo(tidspunkt)
+        assertThat(historisk.ansvarligEnhetKode).isEqualTo("4491")
+        assertThat(historisk.saksbehandler).isEqualTo("Beslutter")
     }
 
     private fun oppgavehendelseFørOvergang(tidspunkt: LocalDateTime) = OppgaveHendelse(

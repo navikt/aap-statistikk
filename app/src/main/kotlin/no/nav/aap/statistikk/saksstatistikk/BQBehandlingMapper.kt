@@ -35,7 +35,7 @@ class BQBehandlingMapper(
     fun bqBehandlingForBehandling(
         behandling: Behandling,
         erSkjermet: Boolean,
-        cutoffTidspunkt: LocalDateTime = behandling.oppdatertTidspunkt(),
+        cutoffTidspunkt: LocalDateTime? = null,
     ): BQBehandling {
         val sak = behandling.sak
         val relatertBehandlingUUID =
@@ -44,6 +44,7 @@ class BQBehandlingMapper(
 
         val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
         val snapshots = SakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
+            .filter { cutoffTidspunkt == null || it.tidspunkt <= cutoffTidspunkt }
 
         val sisteSnapshot = snapshots.lastOrNull()
         val oppgaveDriverEndretTid = sisteSnapshot?.kilde == Kilde.Oppgave
@@ -60,7 +61,9 @@ class BQBehandlingMapper(
         }
 
         val ansvarligEnhet =
-            if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots, cutoffTidspunkt)
+            if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(
+                behandling, snapshots, cutoffTidspunkt ?: behandling.oppdatertTidspunkt()
+            )
 
         val saksbehandler =
             if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots)
