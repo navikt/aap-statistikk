@@ -1,6 +1,8 @@
 package no.nav.aap.statistikk.hendelser
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.*
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.GradBehov
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
@@ -20,6 +22,86 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as EndringStat
 
 @ExtendWith(SoftAssertionsExtension::class)
 class HendelseHjelpereKtTest {
+    @Test
+    fun `frivillig behov skal ikke skygge for gjeldende påkrevde behov eller status`() {
+        val hendelser = listOf(
+            behov(AVKLAR_SAMORDNING_SYKESTIPEND, GradBehov.FRIVILLIG),
+            behov(FATTE_VEDTAK, GradBehov.PÅKREVD, Status.SENDT_TILBAKE_FRA_BESLUTTER)
+        )
+
+        assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(FATTE_VEDTAK)
+        assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.SENDT_TILBAKE_FRA_BESLUTTER)
+    }
+
+    @Test
+    fun `siste eksplisitte gradering avgjør om behovet er frivillig`() {
+        val frivillig = behov(AVKLAR_SAMORDNING_SYKESTIPEND, GradBehov.FRIVILLIG)
+        val førsteEndring = frivillig.endringer.single()
+        val påkrevd = frivillig.copy(
+            endringer = listOf(
+                førsteEndring.copy(tidsstempel = førsteEndring.tidsstempel.plusMinutes(2), gradBehov = null),
+                førsteEndring.copy(tidsstempel = førsteEndring.tidsstempel.plusMinutes(1), gradBehov = GradBehov.PÅKREVD),
+                førsteEndring,
+            )
+        )
+        val fatteVedtak = behov(FATTE_VEDTAK, GradBehov.PÅKREVD)
+
+        assertThat(listOf(påkrevd, fatteVedtak).utledGjeldendeAvklaringsbehov())
+            .isEqualTo(AVKLAR_SAMORDNING_SYKESTIPEND)
+
+        val frivilligIgjen = påkrevd.copy(
+            endringer = påkrevd.endringer + førsteEndring.copy(
+                tidsstempel = førsteEndring.tidsstempel.plusMinutes(3),
+                gradBehov = GradBehov.FRIVILLIG
+            )
+        )
+        assertThat(listOf(frivilligIgjen, fatteVedtak).utledGjeldendeAvklaringsbehov())
+            .isEqualTo(FATTE_VEDTAK)
+    }
+
+    @Test
+    fun `behov uten gradering beholder eksisterende prioritering`() {
+        val hendelser = listOf(
+            behov(AVKLAR_SAMORDNING_SYKESTIPEND),
+            behov(FATTE_VEDTAK)
+        )
+
+        assertThat(hendelser.utledGjeldendeAvklaringsbehov()).isEqualTo(AVKLAR_SAMORDNING_SYKESTIPEND)
+        assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.OPPRETTET)
+    }
+
+    @Test
+    fun `ventebehov velges når bare frivillige manuelle behov gjenstår`() {
+        val hendelser = listOf(
+            behov(AVKLAR_SAMORDNING_SYKESTIPEND, GradBehov.FRIVILLIG),
+            behov(VENTE_PÅ_UTENLANDSK_VIDEREFØRING_AVKLARING),
+        )
+
+        assertThat(hendelser.utledGjeldendeAvklaringsbehov())
+            .isEqualTo(VENTE_PÅ_UTENLANDSK_VIDEREFØRING_AVKLARING)
+        assertThat(hendelser.sisteAvklaringsbehovStatus()).isEqualTo(Status.OPPRETTET)
+        assertThat((hendelser + behov(FATTE_VEDTAK)).utledGjeldendeAvklaringsbehov()).isEqualTo(FATTE_VEDTAK)
+        assertThat(hendelser.take(1).utledGjeldendeAvklaringsbehov()).isNull()
+        assertThat(hendelser.take(1).sisteAvklaringsbehovStatus()).isNull()
+    }
+
+    private fun behov(
+        definisjon: Definisjon,
+        gradBehov: GradBehov? = null,
+        status: Status = Status.OPPRETTET
+    ) = AvklaringsbehovHendelseDto(
+        avklaringsbehovDefinisjon = definisjon,
+        status = status,
+        endringer = listOf(
+            EndringDTO(
+                status = status,
+                tidsstempel = LocalDateTime.of(2026, 11, 13, 10, 25),
+                endretAv = "Kelvin",
+                gradBehov = gradBehov
+            )
+        )
+    )
+
     @Test
     fun `midt i behandling`(softly: SoftAssertions) {
         val stoppetBehandling = hendelseFraFil("avklaringsbehovhendelser/grunnlag_steg.json")
