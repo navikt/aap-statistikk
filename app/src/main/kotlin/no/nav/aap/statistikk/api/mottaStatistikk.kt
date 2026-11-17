@@ -29,11 +29,10 @@ import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingBehandlingStatus
 import no.nav.aap.statistikk.tilbakekreving.TilbakekrevingHendelse
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
+import java.nio.ByteBuffer
+import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.util.*
-import java.util.stream.IntStream
-import kotlin.math.pow
-import kotlin.math.roundToLong
 
 /**
  * Generisk hjelpefunksjon for alle route-handlers som mottar en statistikk-hendelse.
@@ -179,11 +178,8 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
 }
 
 fun stringToNumber(string: String): Long {
-    return requireNotNull(
-        IntStream.range(0, string.length)
-            .mapToObj() { 10.0.pow(it.toDouble()) * string[it].code }
-            .reduce { acc, curr -> acc + curr }.orElse(0.0)
-    ).mod(1_000_000.0).roundToLong()
+    val hash = MessageDigest.getInstance("SHA-256").digest(string.toByteArray(Charsets.UTF_8))
+    return ByteBuffer.wrap(hash).long
 }
 
 private fun TilbakekrevingsbehandlingOppdatertHendelse.tilDomene(): TilbakekrevingHendelse {
