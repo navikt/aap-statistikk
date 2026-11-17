@@ -12,6 +12,7 @@ import no.nav.aap.statistikk.oppgave.OppgaveHendelse
 import no.nav.aap.statistikk.oppgave.OppgaveRepository
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.oppgave.tilOppgave
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
@@ -308,6 +309,123 @@ class BQBehandlingMapperTest {
             .describedAs("Should not use saksbehandler from previous avklaringsbehov")
             .isNull()
         assertThat(result.behandlingMetode).isEqualTo(BehandlingMetode.KVALITETSSIKRING)
+    }
+
+    @Test
+    fun `mellom behov brukes historisk enhet fra sist løste behov uten reservasjonen`() {
+        val tidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+        val opprettet = oppgavehendelseFørOvergang(tidspunkt.minusMinutes(2))
+        val lukket = opprettet.copy(
+            hendelse = HendelseType.LUKKET,
+            status = Oppgavestatus.AVSLUTTET,
+            sendtTid = tidspunkt,
+            mottattTidspunkt = tidspunkt.plusSeconds(5),
+            reservertAv = null,
+            reservertTidspunkt = null
+        )
+        val fremtidig = opprettet.copy(
+            hendelse = HendelseType.OPPDATERT,
+            sendtTid = tidspunkt.plusMinutes(1),
+            mottattTidspunkt = tidspunkt.plusMinutes(1),
+            enhet = "9999"
+        )
+        val forsinket = opprettet.copy(
+            sendtTid = tidspunkt.minusMinutes(1),
+            mottattTidspunkt = tidspunkt.plusMinutes(2),
+            enhet = "4500"
+        )
+
+        val resultat = mapMellomBehov(listOf(opprettet, lukket, fremtidig, forsinket))
+
+        assertThat(resultat.ansvarligEnhetKode).isEqualTo("4491")
+        assertThat(resultat.saksbehandler).isNull()
+        assertThat(resultat.behandlingMetode).isEqualTo(BehandlingMetode.FATTE_VEDTAK)
+    }
+
+    @Test
+    fun `mellom behov kreves historiske oppgavehendelser for sist løste behov`() {
+        val tidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+        val fremtidig = oppgavehendelseFørOvergang(tidspunkt.plusSeconds(1))
+        val annetBehov = oppgavehendelseFørOvergang(tidspunkt.minusMinutes(1))
+            .copy(avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name)
+
+        assertThat(mapMellomBehov(emptyList()).ansvarligEnhetKode).isNull()
+        assertThat(mapMellomBehov(listOf(fremtidig, annetBehov)).ansvarligEnhetKode).isNull()
+        assertThat(
+            mapMellomBehov(
+                listOf(oppgavehendelseFørOvergang(tidspunkt.minusMinutes(1))),
+                gjeldendeBehov = Definisjon.AVKLAR_SYKDOM
+            ).ansvarligEnhetKode
+        ).isNull()
+    }
+
+    @Test
+    fun `oppgavejobber bruker eksplisitt cutoff også etter siste behandlingshendelse`() {
+        val tidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+        val opprettet = oppgavehendelseFørOvergang(tidspunkt.plusSeconds(30))
+        val fremtidig = opprettet.copy(
+            sendtTid = tidspunkt.plusMinutes(2),
+            mottattTidspunkt = tidspunkt.plusMinutes(2),
+            enhet = "9999"
+        )
+
+        assertThat(
+            mapMellomBehov(
+                listOf(opprettet, fremtidig),
+                cutoffTidspunkt = opprettet.sendtTid
+            ).ansvarligEnhetKode
+        ).isEqualTo("4491")
+    }
+
+    private fun oppgavehendelseFørOvergang(tidspunkt: LocalDateTime) = OppgaveHendelse(
+        hendelse = HendelseType.OPPRETTET,
+        oppgaveId = 1L,
+        mottattTidspunkt = tidspunkt,
+        sendtTid = tidspunkt,
+        enhet = "4491",
+        avklaringsbehovKode = Definisjon.FATTE_VEDTAK.kode.name,
+        status = Oppgavestatus.OPPRETTET,
+        reservertAv = "Beslutter",
+        reservertTidspunkt = tidspunkt,
+        opprettetTidspunkt = tidspunkt,
+        versjon = 1L
+    )
+
+    private fun mapMellomBehov(
+        oppgavehendelser: List<OppgaveHendelse>,
+        gjeldendeBehov: Definisjon? = null,
+        cutoffTidspunkt: LocalDateTime = LocalDateTime.of(2024, 1, 10, 12, 0)
+    ): BQBehandling {
+        val tidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+        val behandling = lagBehandling(hendelser = emptyList())
+            .leggTilHendelse(
+                lagBehandlingHendelse(
+                    tidspunkt = tidspunkt.minusMinutes(3),
+                    avklaringsBehov = Definisjon.FATTE_VEDTAK
+                )
+            ).leggTilHendelse(
+                lagBehandlingHendelse(
+                    tidspunkt = tidspunkt,
+                    avklaringsBehov = gjeldendeBehov,
+                    sisteLøsteAvklaringsbehov = Definisjon.FATTE_VEDTAK,
+                    sisteSaksbehandlerSomLøstebehov = "Beslutter"
+                )
+            )
+        val oppgaveRepository = FakeOppgaveRepository()
+        if (oppgavehendelser.isNotEmpty()) {
+            oppgaveRepository.addOppgave(
+                behandling.id(),
+                oppgavehendelser.tilOppgave().copy(
+                    behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse)
+                )
+            )
+        }
+        return BQBehandlingMapper(
+            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
+            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+            oppgaveRepository = oppgaveRepository,
+            clock = fixedClock
+        ).bqBehandlingForBehandling(behandling, erSkjermet = false, cutoffTidspunkt = cutoffTidspunkt)
     }
 
     @Test

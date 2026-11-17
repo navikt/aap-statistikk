@@ -35,6 +35,7 @@ class BQBehandlingMapper(
     fun bqBehandlingForBehandling(
         behandling: Behandling,
         erSkjermet: Boolean,
+        cutoffTidspunkt: LocalDateTime = behandling.oppdatertTidspunkt(),
     ): BQBehandling {
         val sak = behandling.sak
         val relatertBehandlingUUID =
@@ -59,7 +60,7 @@ class BQBehandlingMapper(
         }
 
         val ansvarligEnhet =
-            if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots)
+            if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(behandling, snapshots, cutoffTidspunkt)
 
         val saksbehandler =
             if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots)
@@ -262,6 +263,7 @@ class BQBehandlingMapper(
     private fun ansvarligEnhet(
         behandling: Behandling,
         snapshots: List<SakstatistikkSnapshot>,
+        cutoffTidspunkt: LocalDateTime,
     ): String? {
         if (behandling.behandlingMetode() == BehandlingMetode.AUTOMATISK) {
             return AUTOMATISK_ENHET
@@ -298,14 +300,29 @@ class BQBehandlingMapper(
         // Fallback for UTREDES: enhet kan være null dersom siste oppgavehendelse var LUKKET
         // (f.eks. ved historisk cutoff-jobb der oppgaven er lukket etter cutoff-tidspunktet).
         if (behandling.behandlingStatus() == BehandlingStatus.UTREDES && enhet == null) {
-            behandling.gjeldendeAvklaringsBehov?.kode?.name?.let { kode ->
-                return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+            val kode = behandling.gjeldendeAvklaringsBehov?.kode?.name
+            return if (kode == null) {
+                historiskEnhetForSistLøsteBehov(behandling, cutoffTidspunkt)
+            } else {
+                oppgaveRepository.hentOppgaverForBehandling(behandling.id())
                     .filter { it.avklaringsbehov == kode }
                     .maxByOrNull { it.sistEndret() }?.enhet?.kode
             }
         }
 
         return enhet
+    }
+
+    private fun historiskEnhetForSistLøsteBehov(
+        behandling: Behandling,
+        cutoffTidspunkt: LocalDateTime
+    ): String? {
+        val kode = behandling.sisteLøsteAvklaringsbehov?.kode?.name ?: return null
+        return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+            .flatMap { it.hendelser }
+            .filter { it.avklaringsbehovKode == kode && it.sendtTid <= cutoffTidspunkt }
+            .maxWithOrNull(compareBy({ it.sendtTid }, { it.mottattTidspunkt }))
+            ?.enhet
     }
 
     companion object {
