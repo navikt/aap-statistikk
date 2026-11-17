@@ -4,3 +4,4 @@ pdl_scope: api://prod-fss.pdl.pdl-api/.default
 postmottak_azp: 7f9044f1-fa3a-4356-9062-05035400fd6a
 behandlingsflyt_azp: ead3bfb6-d403-43b3-bb45-dc184ce314b7
 oppgave_azp: 2d076bcc-3b6a-4bc7-878e-791aed30433c
+drift_les: ec868c89-5d4f-47b4-8298-e954035d3873
