@@ -5,7 +5,6 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.motor.JobbInput
-import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
@@ -51,7 +50,6 @@ class MotorJobbAppender : JobbAppender {
             return
         }
 
-        val saksnummer = behandling.sak.saksnummer
         val payload = LagreSakinfoPayload(
             behandlingId = behandlingId,
             avklaringsbehovKode = avklaringsbehovKode?.kode?.name,
@@ -62,7 +60,7 @@ class MotorJobbAppender : JobbAppender {
         val jobbInput = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(payload)
             .medNesteKjøring(LocalDateTime.now().plusSeconds(delayInSeconds))
-            .forSak(stringToNumber(saksnummer.value))
+            .forSak(requireNotNull(behandling.sak.id))
 
         leggTil(repositoryProvider, jobbInput)
     }
@@ -75,12 +73,11 @@ class MotorJobbAppender : JobbAppender {
         val behandling =
             provider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
-        val saksnummer = behandling.sak.saksnummer
         leggTil(
             provider, JobbInput(lagreAvsluttetBehandlingTilBigQueryJobb).medPayload(
                 behandling.referanse
             ).forSak(
-                stringToNumber(saksnummer.value)
+                requireNotNull(behandling.sak.id)
             )
         )
     }
@@ -93,11 +90,10 @@ class MotorJobbAppender : JobbAppender {
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
-        val saksnummer = behandling.sak.saksnummer
         leggTil(
             repositoryProvider,
             JobbInput(ResendSakstatistikkJobb()).medPayload(behandlingId)
-                .forSak(stringToNumber(saksnummer.value))
+                .forSak(requireNotNull(behandling.sak.id))
         )
     }
 }

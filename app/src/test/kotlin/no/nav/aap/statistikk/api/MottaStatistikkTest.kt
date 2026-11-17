@@ -75,6 +75,44 @@ import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 @Fakes
 class MottaStatistikkTest {
     @Test
+    fun `ulike saker med samme prefiks får ulike stabile jobbnøkler før saken finnes`(
+        @Postgres dataSource: DataSource
+    ) {
+        val jobbAppender = MotorJobbAppender()
+        val første = hendelse.copy(saksnummer = "TEST_4Y7KNC0")
+        val andre = hendelse.copy(saksnummer = "TEST_4Y7KNC1")
+
+        testKlient(
+            FellesKomponentTransactionalExecutor(dataSource),
+            motorMock(),
+            ekteLagreStoppetHendelseJobb(jobbAppender),
+            jobbAppender,
+        ) {
+            postBehandlingsflytHendelse(første)
+            postBehandlingsflytHendelse(andre)
+            postBehandlingsflytHendelse(første)
+            oppdatertBehandlingHendelse(første)
+        }
+
+        val nøkler = dataSource.transaction { connection ->
+            connection.queryList(
+                "SELECT sak_id FROM jobb WHERE type IN ('statistikk.lagreHendelse', 'statistikk.lagreAvklaringsbehovHendelseJobb') ORDER BY id"
+            ) {
+                setRowMapper { it.getLong("sak_id") }
+            }
+        }
+        assertThat(nøkler).hasSize(4)
+        assertThat(nøkler[0]).isNotEqualTo(nøkler[1])
+        assertThat(nøkler[0]).isEqualTo(nøkler[2]).isEqualTo(nøkler[3])
+        val antallSaker = dataSource.transaction { connection ->
+            connection.queryFirst("SELECT count(*) AS antall FROM sak") {
+                setRowMapper { it.getLong("antall") }
+            }
+        }
+        assertThat(antallSaker).isZero()
+    }
+
+    @Test
     fun `hendelse blir lagret i repository`() {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingOpprettetTidspunkt = LocalDateTime.now()
