@@ -1,6 +1,7 @@
 package no.nav.aap.statistikk.hendelser
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.GradBehov
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
@@ -113,13 +114,19 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
         .maxByOrNull { it.tidsstempel }?.endretAv
 }
 
-fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsbehov(): Definisjon? {
-    return this.filter { it.status.erÅpent() }
-        // false sorteres først
+private fun List<AvklaringsbehovHendelseDto>.gjeldendeBehov(): AvklaringsbehovHendelseDto? =
+    filter { it.status.erÅpent() }
+        .filterNot { behov ->
+            behov.endringer
+                .filter { it.gradBehov != null }
+                .maxByOrNull { it.tidsstempel }
+                ?.gradBehov == GradBehov.FRIVILLIG
+        }
         .sortedBy { it.avklaringsbehovDefinisjon.erVentebehov() }
         .firstOrNull()
-        ?.avklaringsbehovDefinisjon
-}
+
+fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsbehov(): Definisjon? =
+    gjeldendeBehov()?.avklaringsbehovDefinisjon
 
 fun List<AvklaringsbehovHendelseDto>.utledForrigeLøsteAvklaringsbehov(): Triple<Definisjon, String, LocalDateTime>? {
     return this.lastOrNull {
@@ -134,13 +141,8 @@ fun List<EndringDTO>.løstAv(): String? {
     return this.sortedBy { it.tidsstempel }.lastOrNull { it.status.erAvsluttet() }?.endretAv
 }
 
-fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? {
-    return this.filter { it.status.erÅpent() }
-        // false sorteres først
-        .sortedBy { it.avklaringsbehovDefinisjon.erVentebehov() }
-        .firstOrNull()
-        ?.status
-}
+fun List<AvklaringsbehovHendelseDto>.sisteAvklaringsbehovStatus(): Status? =
+    gjeldendeBehov()?.status
 
 fun List<AvklaringsbehovHendelseDto>.utledÅrsakTilSattPåVent(): String? {
     return this.filter { it.status.erÅpent() }

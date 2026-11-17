@@ -43,7 +43,7 @@ class ResendHendelseService(
 
         val sak =
             sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
-        val behandling = behandlingService.konstruerBehandling(hendelse, sak)
+        val behandling = behandlingService.konstruerBehandling(hendelse, sak, eksisterendeBehandlingKanskje = null)
 
         val behandlingMedHistorikk =
             ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
