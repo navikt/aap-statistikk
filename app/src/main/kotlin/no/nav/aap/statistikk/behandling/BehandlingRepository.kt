@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.Params
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.oppgave.Saksbehandler
@@ -79,43 +80,14 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         oppdaterÅrsakerTilBehandling(behandling)
         oppdaterÅrsakTilOpprettelse(behandling)
 
-        val historikkId = dbConnection.executeReturnKey(
-            """INSERT INTO behandling_historikk (behandling_id,
-                                  versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
-                                  vedtak_tidspunkt, ansvarlig_beslutter,
-                                  status, siste_saksbehandler, gjeldende_avklaringsbehov,
-                                  gjeldende_avklaringsbehov_status,
-                                  soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse,
-                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler,
-                                  sist_loste_avklaringsbehov_tidspunkt)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        ) {
+        val historikkId = dbConnection.executeReturnKey(insertHistorikkSql) {
             setParams {
-                var c = 1
-                setLong(c++, behandlingId.id)
-                setLong(c++, versjonId)
-                setBoolean(c++, false)
-                setLocalDateTime(c++, LocalDateTime.now(clock))
-                setLocalDateTime(c++, behandling.mottattTid)
-                setLocalDateTime(c++, behandling.vedtakstidspunkt)
-                setString(c++, behandling.ansvarligBeslutter)
-                setString(c++, behandling.behandlingStatus().name)
-                setString(c++, behandling.sisteSaksbehandler)
-                setString(c++, behandling.gjeldendeAvklaringsBehov?.kode?.name)
-                setString(c++, behandling.gjeldendeAvklaringsbehovStatus?.name)
-                setEnumName(c++, behandling.søknadsformat)
-                setString(c++, behandling.venteÅrsak)
-                setEnumName(c++, behandling.gjeldendeStegGruppe)
-                setString(c++, behandling.returÅrsak)
-                setEnumName(c++, behandling.resultat)
-                setLocalDateTime(c++, behandling.oppdatertTidspunkt())
-                setBoolean(c++, false)
-                setString(c++, behandling.utbetalingId())
-                setString(c++, behandling.relatertBehandlingReferanse)
-                setString(c++, behandling.sisteLøsteAvklaringsbehov?.kode?.name)
-                setString(c++, behandling.sisteSaksbehandlerSomLøstebehov)
-                setLocalDateTime(c++, behandling.sistLøsteAvklaringsbehovTidspunkt)
+                settHistorikkParametre(
+                    behandling,
+                    versjonId,
+                    gjeldende = false,
+                    oppdatertTid = LocalDateTime.now(clock),
+                )
             }
         }
 
@@ -123,6 +95,52 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
 
         oppdaterRelaterteIdenter(behandling, historikkId)
         lagreReturÅrsakkoblinger(historikkId, behandling.returÅrsakkoblinger)
+    }
+
+    @Language("PostgreSQL")
+    private val insertHistorikkSql = """
+        INSERT INTO behandling_historikk (
+            behandling_id, versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
+            vedtak_tidspunkt, ansvarlig_beslutter,
+            status, siste_saksbehandler, gjeldende_avklaringsbehov,
+            gjeldende_avklaringsbehov_status,
+            soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
+            hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse,
+            sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler,
+            sist_loste_avklaringsbehov_tidspunkt
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """.trimIndent()
+
+    private fun Params.settHistorikkParametre(
+        behandling: Behandling,
+        versjonId: Long,
+        gjeldende: Boolean,
+        oppdatertTid: LocalDateTime,
+    ) {
+        setLong(1, behandling.id().id)
+        setLong(2, versjonId)
+        setBoolean(3, gjeldende)
+        setLocalDateTime(4, oppdatertTid)
+        setLocalDateTime(5, behandling.mottattTid)
+        setLocalDateTime(6, behandling.vedtakstidspunkt)
+        setString(7, behandling.ansvarligBeslutter)
+        setString(8, behandling.behandlingStatus().name)
+        setString(9, behandling.sisteSaksbehandler)
+        setString(10, behandling.gjeldendeAvklaringsBehov?.kode?.name)
+        setString(11, behandling.gjeldendeAvklaringsbehovStatus?.name)
+        setEnumName(12, behandling.søknadsformat)
+        setString(13, behandling.venteÅrsak)
+        setEnumName(14, behandling.gjeldendeStegGruppe)
+        setString(15, behandling.returÅrsak)
+        setEnumName(16, behandling.resultat)
+        setLocalDateTime(17, behandling.oppdatertTidspunkt())
+        setBoolean(18, false)
+        setString(19, behandling.utbetalingId())
+        setString(20, behandling.relatertBehandlingReferanse)
+        setString(21, behandling.sisteLøsteAvklaringsbehov?.kode?.name)
+        setString(22, behandling.sisteSaksbehandlerSomLøstebehov)
+        setLocalDateTime(23, behandling.sistLøsteAvklaringsbehovTidspunkt)
     }
 
     /**
@@ -252,44 +270,16 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         val oppdateringer = behandling.hendelsesHistorikk()
 
         dbConnection.executeBatch(
-            """INSERT INTO behandling_historikk (behandling_id,
-                                  versjon_id, gjeldende, oppdatert_tid, mottatt_tid,
-                                  vedtak_tidspunkt, ansvarlig_beslutter,
-                                  status, siste_saksbehandler, gjeldende_avklaringsbehov,
-                                  gjeldende_avklaringsbehov_status,
-                                  soknadsformat, venteaarsak, steggruppe, retur_aarsak, resultat,
-                                  hendelsestidspunkt, slettet, utbetaling_id, relatert_behandling_referanse,
-                                  sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler,
-                                  sist_loste_avklaringsbehov_tidspunkt)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
+            insertHistorikkSql,
             oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) },
         ) {
             setParams { (hendelse, idx) ->
-                var c = 1
-                setLong(c++, hendelse.id().id)
-                setLong(c++, versjonId)
-                setBoolean(c++, idx == oppdateringer.lastIndex)
-                setLocalDateTime(c++, LocalDateTime.now(clock))
-                setLocalDateTime(c++, hendelse.mottattTid)
-                setLocalDateTime(c++, hendelse.vedtakstidspunkt)
-                setString(c++, hendelse.ansvarligBeslutter)
-                setString(c++, hendelse.behandlingStatus().name)
-                setString(c++, hendelse.sisteSaksbehandler)
-                setString(c++, hendelse.gjeldendeAvklaringsBehov?.kode?.name)
-                setString(c++, hendelse.gjeldendeAvklaringsbehovStatus?.name)
-                setEnumName(c++, hendelse.søknadsformat)
-                setString(c++, hendelse.venteÅrsak)
-                setEnumName(c++, hendelse.gjeldendeStegGruppe)
-                setString(c++, hendelse.returÅrsak)
-                setEnumName(c++, hendelse.resultat)
-                setLocalDateTime(c++, hendelse.oppdatertTidspunkt())
-                setBoolean(c++, false)
-                setString(c++, hendelse.utbetalingId())
-                setString(c++, hendelse.relatertBehandlingReferanse)
-                setString(c++, hendelse.sisteLøsteAvklaringsbehov?.kode?.name)
-                setString(c++, hendelse.sisteSaksbehandlerSomLøstebehov)
-                setLocalDateTime(c++, hendelse.sistLøsteAvklaringsbehovTidspunkt)
+                settHistorikkParametre(
+                    hendelse,
+                    versjonId,
+                    gjeldende = idx == oppdateringer.lastIndex,
+                    oppdatertTid = LocalDateTime.now(clock),
+                )
             }
         }
 
