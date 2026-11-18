@@ -6,9 +6,7 @@ import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.sakDuplikat
 import no.nav.aap.statistikk.sammeEndretTid
 import org.slf4j.LoggerFactory
-import java.time.Duration
 import java.time.LocalDateTime
-import java.util.*
 
 class SaksStatistikkService(
     private val behandlingService: BehandlingService,
@@ -164,90 +162,15 @@ class SaksStatistikkService(
                 )
             }
 
-        return flettBehandlingHendelser(originaleHendelser, alleHendelser)
-    }
+        val flettedeHendelser = flettSaksstatistikkHistorikk(originaleHendelser, alleHendelser)
 
-    /**
-     * Må bevare mengden av endringTid-verdier pga krav fra saksstatistikk.
-     */
-    private fun flettBehandlingHendelser(
-        originaleHendelser: List<BQBehandling>,
-        nyeHendelser: List<BQBehandling>,
-    ): List<BQBehandling> {
-        val sorterteNye = nyeHendelser.sortedBy { it.endretTid }
-        val nyeQueue = LinkedList(sorterteNye)
-
-        var forrigeNye: BQBehandling? = null
-        val originaleMedNyData = originaleHendelser
-            .sorted()
-            .map {
-                if (nyeQueue.isEmpty()) {
-                    val last = sorterteNye.last()
-                    forrigeNye = last
-                    last.copy(endretTid = it.endretTid) // ???
-                } else if (nærNokITid(it.endretTid, nyeQueue.peek().endretTid)) {
-                    val ny = nyeQueue.poll()
-                    forrigeNye = ny
-                    ny.copy(endretTid = it.endretTid)
-                } else if (it.endretTid.isBefore(nyeQueue.peek().endretTid) && forrigeNye != null) {
-                    /*
-                    GAMMEL: -------   X ---------
-                    NY    : -- Z ------- Y ------ (Z = forrigeNye)
-                     */
-                    forrigeNye.copy(endretTid = it.endretTid)
-                } else if (it.endretTid.isBefore(nyeQueue.peek().endretTid) && forrigeNye == null) {
-                    /*
-                    GAMMEL: ---- X ---------
-                    NY    : ---------- Y ---
-                     */
-                    val ny = nyeQueue.poll()
-                    forrigeNye = ny
-                    ny.copy(endretTid = it.endretTid)
-                } else if (it.endretTid.isAfter(nyeQueue.peek().endretTid) && forrigeNye != null) {
-                    /*
-                    GAMMEL: ------------ X --
-                    NY    : -- Z --- Y ------
-                     */
-                    val ny = nyeQueue.poll()
-                    forrigeNye = ny
-                    ny.copy(endretTid = it.endretTid)
-                } else if (it.endretTid.isAfter(nyeQueue.peek().endretTid) && forrigeNye == null) {
-                    /*
-                    GAMMEL: ------------ X --
-                    NY    : ------ Y ------
-                     */
-                    val ny = nyeQueue.poll()
-                    forrigeNye = ny
-                    ny.copy(endretTid = it.endretTid)
-                } else {
-                    error("Ukjent situasjon")
-                }
-            }
-
-        check(
-            originaleMedNyData.map { it.endretTid }
-            .toSet() == originaleHendelser.map { it.endretTid }.toSet()
-        )
-
-        val nyeTidspunkter = nyeHendelser.map { it.endretTid }.toSet()
-            .minus(originaleMedNyData.map { it.endretTid }.toSet())
+        val nyeTidspunkter = alleHendelser.map { it.endretTid }.toSet()
+            .minus(originaleHendelser.map { it.endretTid }.toSet())
         val gamleTidspunkter = originaleHendelser.map { it.endretTid }.toSet()
-            .minus(nyeHendelser.map { it.endretTid }.toSet())
+            .minus(alleHendelser.map { it.endretTid }.toSet())
         log.info("Nye tidspunkter: $nyeTidspunkter. Gamle tidspunkter: $gamleTidspunkter.")
 
-        return (nyeQueue.toList() + originaleMedNyData).sorted()
-            .fold(listOf()) { acc, curr ->
-                val forrige = acc.lastOrNull()
-                if (forrige == null) {
-                    acc + curr
-                } else {
-                    if (forrige.ansesSomDuplikat(curr)) {
-                        acc
-                    } else {
-                        acc + curr
-                    }
-                }
-            }
+        return flettedeHendelser
     }
 
     private fun håndterSammeEndretTid(siste: BQBehandling, bqSak: BQBehandling): BQBehandling? = when {
@@ -312,10 +235,5 @@ class SaksStatistikkService(
         }
         PrometheusProvider.prometheus.sammeEndretTid().increment()
         return bqSak.copy(endretTid = siste.endretTid.plusNanos(1000))
-    }
-
-    private fun nærNokITid(originalTid: LocalDateTime, nyTid: LocalDateTime): Boolean {
-        val duration = Duration.between(originalTid, nyTid)
-        return duration.abs().toMillis() <= 10
     }
 }
