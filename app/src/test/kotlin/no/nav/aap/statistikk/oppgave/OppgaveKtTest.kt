@@ -28,7 +28,7 @@ class OppgaveKtTest {
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
                 versjon = 12L,
-            )
+            ),
         )
 
         val oppgave = hendelser.tilOppgave()

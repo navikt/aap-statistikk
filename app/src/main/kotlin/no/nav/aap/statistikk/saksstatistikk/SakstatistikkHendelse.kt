@@ -11,7 +11,8 @@ sealed interface SakstatistikkHendelse : Comparable<SakstatistikkHendelse> {
 }
 
 enum class Kilde {
-    Behandling, Oppgave
+    Behandling,
+    Oppgave,
 }
 
 data class BehandlingsflytHendelse(
@@ -21,27 +22,22 @@ data class BehandlingsflytHendelse(
     val status: String,
     val avklaringsbehov: Definisjon?,
     val sisteLøsteAvklaringsbehov: Definisjon?,
-    val sisteSaksbehandlerPåBehandling: String?
+    val sisteSaksbehandlerPåBehandling: String?,
 ) : SakstatistikkHendelse {
-    override fun compareTo(other: SakstatistikkHendelse): Int {
-        return tidspunkt.compareTo(other.tidspunkt)
-    }
+    override fun compareTo(other: SakstatistikkHendelse): Int = tidspunkt.compareTo(other.tidspunkt)
 }
 
 sealed interface OppgaveHendelse : SakstatistikkHendelse {
     val mottattTidspunkt: LocalDateTime
 
-    override fun compareTo(other: SakstatistikkHendelse): Int {
-        return when {
-            other is OppgaveHendelse -> if (this.tidspunkt != other.tidspunkt) {
-                this.tidspunkt.compareTo(other.tidspunkt)
-            } else {
-                this.mottattTidspunkt.compareTo(other.mottattTidspunkt)
-            }
-
-            else -> this.tidspunkt.compareTo(other.tidspunkt)
+    override fun compareTo(other: SakstatistikkHendelse): Int = when {
+        other is OppgaveHendelse -> if (this.tidspunkt != other.tidspunkt) {
+            this.tidspunkt.compareTo(other.tidspunkt)
+        } else {
+            this.mottattTidspunkt.compareTo(other.mottattTidspunkt)
         }
 
+        else -> this.tidspunkt.compareTo(other.tidspunkt)
     }
 }
 
@@ -52,7 +48,7 @@ data class OppgaveReservertHendelse(
     override val mottattTidspunkt: LocalDateTime,
     val avklaringsbehovKode: String,
     val reservertAv: String,
-    val enhet: String
+    val enhet: String,
 ) : OppgaveHendelse
 
 data class OppgaveLukketHendelse(
@@ -60,7 +56,7 @@ data class OppgaveLukketHendelse(
     override val tidspunkt: LocalDateTime,
     override val mottattTidspunkt: LocalDateTime,
     override val kilde: Kilde = Kilde.Oppgave,
-    val avklaringsbehovKode: String
+    val avklaringsbehovKode: String,
 ) : OppgaveHendelse
 
 data class OppgaveOpprettetHendelse(
@@ -70,7 +66,7 @@ data class OppgaveOpprettetHendelse(
     override val kilde: Kilde = Kilde.Oppgave,
     val avklaringsbehovKode: String,
     val enhet: String,
-    val reservertAv: String? = null
+    val reservertAv: String? = null,
 ) : OppgaveHendelse
 
 data class OppgaveAvreservertHendelse(
@@ -78,7 +74,7 @@ data class OppgaveAvreservertHendelse(
     override val tidspunkt: LocalDateTime,
     override val mottattTidspunkt: LocalDateTime,
     override val kilde: Kilde = Kilde.Oppgave,
-    val avklaringsbehovKode: String
+    val avklaringsbehovKode: String,
 ) : OppgaveHendelse
 
 data class OppgaveOppdatertHendelse(
@@ -88,5 +84,5 @@ data class OppgaveOppdatertHendelse(
     val avklaringsbehovKode: String,
     override val kilde: Kilde = Kilde.Oppgave,
     val reservertAv: String?,
-    val enhet: String
+    val enhet: String,
 ) : OppgaveHendelse

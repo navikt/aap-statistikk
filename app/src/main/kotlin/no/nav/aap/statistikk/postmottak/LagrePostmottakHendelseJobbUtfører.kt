@@ -23,7 +23,6 @@ class LagrePostmottakHendelseJobbUtfører(
     private val logger = LoggerFactory.getLogger(LagrePostmottakHendelseJobbUtfører::class.java)
 
     override fun utfør(input: JobbInput) {
-
         val hendelse = input.payload<DokumentflytStoppetHendelse>()
 
         val person = personService.hentEllerLagrePerson(Ident(hendelse.ident))
@@ -38,14 +37,13 @@ class LagrePostmottakHendelseJobbUtfører(
 }
 
 class LagrePostmottakHendelseJobb : ProvidersJobbSpesifikasjon {
-    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører {
-        return LagrePostmottakHendelseJobbUtfører(
+    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører =
+        LagrePostmottakHendelseJobbUtfører(
             postmottakBehandlingService = PostmottakBehandlingService(
-                repositoryProvider.provide()
+                repositoryProvider.provide(),
             ),
             personService = PersonService(repositoryProvider, gatewayProvider),
         )
-    }
 
     override val type: String = "statistikk.lagrePostmottakHendelse"
     override val navn: String = "Konverter postmottakhendelser"
@@ -66,36 +64,34 @@ fun DokumentflytStoppetHendelse.tilDomene(person: Person): PostmottakBehandling 
                 status = this.status.name,
                 oppdatertTid = this.hendelsesTidspunkt,
                 sisteSaksbehandler = this.avklaringsbehov.sistePersonPåBehandling(),
-                gjeldendeAvklaringsBehov = this.avklaringsbehov.utledGjeldendeAvklaringsBehov()
-            )
-        )
+                gjeldendeAvklaringsBehov = this.avklaringsbehov.utledGjeldendeAvklaringsBehov(),
+            ),
+        ),
     )
 }
 
-fun TypeBehandling.tilDomene(): no.nav.aap.statistikk.behandling.TypeBehandling {
-    return when (this) {
-        TypeBehandling.Fordeling -> no.nav.aap.statistikk.behandling.TypeBehandling.Fordeling
-        TypeBehandling.DokumentHåndtering -> no.nav.aap.statistikk.behandling.TypeBehandling.Dokumenthåndtering
-        TypeBehandling.Journalføring -> no.nav.aap.statistikk.behandling.TypeBehandling.Journalføring
-    }
+fun TypeBehandling.tilDomene(): no.nav.aap.statistikk.behandling.TypeBehandling = when (this) {
+    TypeBehandling.Fordeling -> no.nav.aap.statistikk.behandling.TypeBehandling.Fordeling
+    TypeBehandling.DokumentHåndtering -> no.nav.aap.statistikk.behandling.TypeBehandling.Dokumenthåndtering
+    TypeBehandling.Journalføring -> no.nav.aap.statistikk.behandling.TypeBehandling.Journalføring
 }
 
 /**
  * Nøyaktig samme logikk som [no.nav.aap.statistikk.hendelser.sistePersonPåBehandling]. Finnes måte å unngå å duplisere kode?
  */
-fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? {
-    return this.flatMap { it.endringer }.filter { it.endretAv.lowercase() != "Kelvin".lowercase() }
-        .maxByOrNull { it.tidsstempel }?.endretAv
-}
+fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? = this.flatMap {
+    it.endringer
+}.filter { it.endretAv.lowercase() != "Kelvin".lowercase() }
+    .maxByOrNull { it.tidsstempel }?.endretAv
 
-fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? {
-    return this.filter(function()).sortedByDescending {
+fun List<AvklaringsbehovHendelseDto>.utledGjeldendeAvklaringsBehov(): String? =
+    this.filter(function()).sortedByDescending {
         it.endringer.minBy { endring -> endring.tidsstempel }.tidsstempel
     }.map { it.avklaringsbehovDefinisjon.kode }.firstOrNull()?.toString()
-}
 
 private fun function(): (AvklaringsbehovHendelseDto) -> Boolean = {
     setOf(
-        Status.OPPRETTET, Status.SENDT_TILBAKE_FRA_BESLUTTER
+        Status.OPPRETTET,
+        Status.SENDT_TILBAKE_FRA_BESLUTTER,
     ).contains(it.status)
 }

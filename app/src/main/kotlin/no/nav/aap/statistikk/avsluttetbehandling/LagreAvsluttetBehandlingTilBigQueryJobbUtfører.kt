@@ -7,28 +7,27 @@ import no.nav.aap.motor.ProviderJobbSpesifikasjon
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import java.util.*
 
-class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(private val ytelsesStatistikkTilBigQuery: YtelsesStatistikkTilBigQuery) :
-    JobbUtfører {
+class LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
+    private val ytelsesStatistikkTilBigQuery: YtelsesStatistikkTilBigQuery,
+) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val behandlingReferanse = input.payload<UUID>()
         ytelsesStatistikkTilBigQuery.lagre(behandlingReferanse)
     }
 }
 
-class LagreAvsluttetBehandlingTilBigQueryJobb(
-    private val bqYtelseRepository: IBQYtelsesstatistikkRepository,
-) : ProviderJobbSpesifikasjon {
+class LagreAvsluttetBehandlingTilBigQueryJobb(private val bqYtelseRepository: IBQYtelsesstatistikkRepository) :
+    ProviderJobbSpesifikasjon {
 
-    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
-        return LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
+    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører =
+        LagreAvsluttetBehandlingTilBigQueryJobbUtfører(
             YtelsesStatistikkTilBigQuery(
                 bqRepository = bqYtelseRepository,
                 behandlingRepository = repositoryProvider.provide(),
                 rettighetstypeperiodeRepository = repositoryProvider.provide(),
                 diagnoseRepository = repositoryProvider.provide(),
-            )
+            ),
         )
-    }
 
     override val retries: Int = 1
 

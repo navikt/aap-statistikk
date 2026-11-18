@@ -30,7 +30,7 @@ class OppgaveRepositoryTest {
             opprettetTidspunkt = LocalDateTime.now(),
             reservasjon = null,
             behandlingReferanse = BehandlingReferanse(referanse = UUID.randomUUID()),
-            hendelser = listOf()
+            hendelser = listOf(),
         )
 
         dataSource.transaction {
@@ -48,7 +48,7 @@ class OppgaveRepositoryTest {
         assertThat(res.status).isEqualTo(oppgave.status)
         assertThat(res.opprettetTidspunkt).isCloseTo(
             oppgave.opprettetTidspunkt,
-            within(1, ChronoUnit.SECONDS)
+            within(1, ChronoUnit.SECONDS),
         )
         assertThat(res.reservasjon).isNull()
         assertThat(res.behandlingReferanse!!.referanse).isEqualTo(oppgave.behandlingReferanse!!.referanse)
@@ -87,8 +87,8 @@ class OppgaveRepositoryTest {
                     status = Oppgavestatus.OPPRETTET,
                     opprettetTidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     behandlingRef = behandlingRef,
-                    versjon = 1
-                )
+                    versjon = 1,
+                ),
             )
 
             hendelseRepo.lagreHendelse(
@@ -104,8 +104,8 @@ class OppgaveRepositoryTest {
                     behandlingRef = behandlingRef,
                     reservertAv = saksbehandler.ident,
                     reservertTidspunkt = LocalDateTime.of(2024, 1, 1, 11, 0),
-                    versjon = 2
-                )
+                    versjon = 2,
+                ),
             )
         }
 
@@ -118,10 +118,10 @@ class OppgaveRepositoryTest {
             opprettetTidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
             reservasjon = Reservasjon(
                 reservertAv = saksbehandler,
-                reservasjonOpprettet = LocalDateTime.of(2024, 1, 1, 11, 0)
+                reservasjonOpprettet = LocalDateTime.of(2024, 1, 1, 11, 0),
             ),
             behandlingReferanse = BehandlingReferanse(referanse = behandlingRef),
-            hendelser = listOf()
+            hendelser = listOf(),
         )
 
         dataSource.transaction {
@@ -166,8 +166,8 @@ class OppgaveRepositoryTest {
                     status = Oppgavestatus.OPPRETTET,
                     opprettetTidspunkt = LocalDateTime.of(2024, 2, 1, 10, 0),
                     behandlingRef = behandlingRef,
-                    versjon = 1
-                )
+                    versjon = 1,
+                ),
             )
 
             hendelseRepo.lagreHendelse(
@@ -183,8 +183,8 @@ class OppgaveRepositoryTest {
                     behandlingRef = behandlingRef,
                     reservertAv = saksbehandler.ident,
                     reservertTidspunkt = LocalDateTime.of(2024, 2, 1, 12, 0),
-                    versjon = 2
-                )
+                    versjon = 2,
+                ),
             )
 
             hendelseRepo.lagreHendelse(
@@ -200,8 +200,8 @@ class OppgaveRepositoryTest {
                     behandlingRef = behandlingRef,
                     reservertAv = saksbehandler.ident,
                     reservertTidspunkt = LocalDateTime.of(2024, 2, 1, 12, 0),
-                    versjon = 3
-                )
+                    versjon = 3,
+                ),
             )
         }
 
@@ -214,10 +214,10 @@ class OppgaveRepositoryTest {
             opprettetTidspunkt = LocalDateTime.of(2024, 2, 1, 10, 0),
             reservasjon = Reservasjon(
                 reservertAv = saksbehandler,
-                reservasjonOpprettet = LocalDateTime.of(2024, 2, 1, 12, 0)
+                reservasjonOpprettet = LocalDateTime.of(2024, 2, 1, 12, 0),
             ),
             behandlingReferanse = BehandlingReferanse(referanse = behandlingRef),
-            hendelser = listOf()
+            hendelser = listOf(),
         )
 
         dataSource.transaction {

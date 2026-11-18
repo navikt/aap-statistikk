@@ -32,7 +32,7 @@ class UpdateHendelserPublicJobbJson {
         PerioderMedArbeidsopptrappingTransform(),
         InstitusjonsoppholdTransform(),
         SamordningTransform(),
-        TilkjentYtelseTransform()
+        TilkjentYtelseTransform(),
     )
 
     @Test
@@ -48,7 +48,7 @@ class UpdateHendelserPublicJobbJson {
             "src/test/resources/avklaringsbehovhendelser/skal_være_iverksettes.json",
             "src/test/resources/avklaringsbehovhendelser/avbrutt_revurdering.json",
             "src/test/resources/avklaringsbehovhendelser/resendt_hendelse.json",
-            "src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json"
+            "src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json",
         ).map { Path.of(it) }
 
         testDataFiles.filter { Files.exists(it) }.forEach { filePath ->
@@ -68,7 +68,7 @@ class UpdateHendelserPublicJobbJson {
 
     private fun processArrayNode(jsonNode: ArrayNode, filePath: Path): Boolean {
         var modified = false
-        
+
         for (elem in jsonNode) {
             if (elem !is ObjectNode) continue
 
@@ -132,10 +132,11 @@ class UpdateHendelserPublicJobbJson {
         return false
     }
 
-    private fun applyCommonBehandlingUpdates(node: ObjectNode): Boolean {
-        return behandlingTransforms.fold(false) { modified, transform ->
-            transform.apply(node, mapper) || modified
-        }
+    private fun applyCommonBehandlingUpdates(node: ObjectNode): Boolean = behandlingTransforms.fold(false) {
+            modified,
+            transform,
+        ->
+        transform.apply(node, mapper) || modified
     }
 
     // Interface for transformasjoner - gjør det enkelt å legge til nye
@@ -158,7 +159,10 @@ class UpdateHendelserPublicJobbJson {
     private class PerioderMedArbeidsopptrappingTransform : NodeTransform {
         override fun apply(node: ObjectNode, mapper: ObjectMapper): Boolean {
             val avsluttetBehandlingNode = node.path("avsluttetBehandling")
-            if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has("perioderMedArbeidsopptrapping")) {
+            if (avsluttetBehandlingNode is ObjectNode && !avsluttetBehandlingNode.has(
+                    "perioderMedArbeidsopptrapping",
+                )
+            ) {
                 avsluttetBehandlingNode.set<ArrayNode>("perioderMedArbeidsopptrapping", mapper.createArrayNode())
                 return true
             }
@@ -244,7 +248,7 @@ class UpdateHendelserPublicJobbJson {
 
         val lastElem = jsonNode.get(lastLagreHendelseIndex) as? ObjectNode ?: return false
         val payloadText = lastElem.get("payload")?.asText() ?: return false
-        
+
         val payloadNode = try {
             mapper.readTree(payloadText) as? ObjectNode
         } catch (_: Exception) {
@@ -258,7 +262,7 @@ class UpdateHendelserPublicJobbJson {
 
         payloadNode.put("vedtakstidspunkt", hendelsesTidspunkt)
         lastElem.put("payload", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode))
-        
+
         return true
     }
 

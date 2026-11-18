@@ -9,7 +9,6 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
-
 class OppgaveHendelseRepositoryTest {
     @Test
     fun `Lagre og hente ut igjen oppgave-hendelser`(@Postgres dataSource: DataSource) {
@@ -32,11 +31,11 @@ class OppgaveHendelseRepositoryTest {
             endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
             sendtTid = LocalDateTime.now().minusSeconds(1).truncatedTo(ChronoUnit.MILLIS),
             versjon = 1L,
-            harAvslagSykdomMarkering = true
+            harAvslagSykdomMarkering = true,
         )
         dataSource.transaction {
             OppgaveHendelseRepositoryImpl(it).lagreHendelse(
-                hendelse = hendelse
+                hendelse = hendelse,
             )
         }
 
@@ -49,7 +48,7 @@ class OppgaveHendelseRepositoryTest {
 
     @Test
     fun `hendelser for id returneres sortert etter mottatt_tidspunkt - opprettet-hendelse uten endret_tidspunkt skal komme forst`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val oppgaveId = 456L
         val tidlig = LocalDateTime.of(2025, 1, 1, 10, 0, 0)
@@ -130,14 +129,14 @@ class OppgaveHendelseRepositoryTest {
         )
         dataSource.transaction {
             OppgaveHendelseRepositoryImpl(it).lagreHendelse(
-                hendelse = hendelse
+                hendelse = hendelse,
             )
         }
 
         val uthentet = dataSource.transaction {
             OppgaveHendelseRepositoryImpl(it).hentEnhetOgReservasjonForAvklaringsbehov(
                 behandlingRef,
-                "5053"
+                "5053",
             )
         }
 
@@ -147,8 +146,8 @@ class OppgaveHendelseRepositoryTest {
                     enhet = "0417",
                     reservertAv = null,
                     tidspunkt = LocalDateTime.parse("2025-08-20T12:35:06.260915"),
-                )
-            )
+                ),
+            ),
         )
     }
 
@@ -175,7 +174,7 @@ class OppgaveHendelseRepositoryTest {
                     opprettetTidspunkt = tidlig,
                     sendtTid = tidlig,
                     versjon = 1L,
-                )
+                ),
             )
             repo.lagreHendelse(
                 OppgaveHendelse(
@@ -192,7 +191,7 @@ class OppgaveHendelseRepositoryTest {
                     endretTidspunkt = sen,
                     sendtTid = sen,
                     versjon = 2L,
-                )
+                ),
             )
         }
 
@@ -201,7 +200,7 @@ class OppgaveHendelseRepositoryTest {
                 behandlingReferanse = behandlingRef,
                 avklaringsbehovKode = "5053",
                 behandlingTidspunkt = sen,
-                preferertOppgaveId = null
+                preferertOppgaveId = null,
             )
         }
 
@@ -209,13 +208,15 @@ class OppgaveHendelseRepositoryTest {
             OppgaveCutoffAnchor(
                 oppgaveId = oppgaveId,
                 versjon = 2L,
-                sendtTid = sen
-            )
+                sendtTid = sen,
+            ),
         )
     }
 
     @Test
-    fun `henter cutoff-anchor nærmest behandlingstidspunkt med bias mot tidligere tidspunkt`(@Postgres dataSource: DataSource) {
+    fun `henter cutoff-anchor nærmest behandlingstidspunkt med bias mot tidligere tidspunkt`(
+        @Postgres dataSource: DataSource,
+    ) {
         val behandlingRef = UUID.randomUUID()
         val avklaringsbehov = "5053"
         val target = LocalDateTime.of(2025, 8, 20, 12, 10, 0)
@@ -235,8 +236,8 @@ class OppgaveHendelseRepositoryTest {
                     status = Oppgavestatus.OPPRETTET,
                     opprettetTidspunkt = før,
                     sendtTid = før,
-                    versjon = 1L
-                )
+                    versjon = 1L,
+                ),
             )
             repo.lagreHendelse(
                 OppgaveHendelse(
@@ -249,8 +250,8 @@ class OppgaveHendelseRepositoryTest {
                     status = Oppgavestatus.OPPRETTET,
                     opprettetTidspunkt = etter,
                     sendtTid = etter,
-                    versjon = 1L
-                )
+                    versjon = 1L,
+                ),
             )
         }
 
@@ -259,7 +260,7 @@ class OppgaveHendelseRepositoryTest {
                 behandlingReferanse = behandlingRef,
                 avklaringsbehovKode = avklaringsbehov,
                 behandlingTidspunkt = target,
-                preferertOppgaveId = null
+                preferertOppgaveId = null,
             )
         }
 
@@ -267,8 +268,8 @@ class OppgaveHendelseRepositoryTest {
             OppgaveCutoffAnchor(
                 oppgaveId = 1L,
                 versjon = 1L,
-                sendtTid = før
-            )
+                sendtTid = før,
+            ),
         )
     }
 
@@ -293,8 +294,8 @@ class OppgaveHendelseRepositoryTest {
                     status = Oppgavestatus.OPPRETTET,
                     opprettetTidspunkt = nær,
                     sendtTid = nær,
-                    versjon = 1L
-                )
+                    versjon = 1L,
+                ),
             )
             repo.lagreHendelse(
                 OppgaveHendelse(
@@ -307,8 +308,8 @@ class OppgaveHendelseRepositoryTest {
                     status = Oppgavestatus.OPPRETTET,
                     opprettetTidspunkt = preferertTid,
                     sendtTid = preferertTid,
-                    versjon = 2L
-                )
+                    versjon = 2L,
+                ),
             )
         }
 
@@ -317,7 +318,7 @@ class OppgaveHendelseRepositoryTest {
                 behandlingReferanse = behandlingRef,
                 avklaringsbehovKode = avklaringsbehov,
                 behandlingTidspunkt = target,
-                preferertOppgaveId = 99L
+                preferertOppgaveId = 99L,
             )
         }
 
@@ -325,8 +326,8 @@ class OppgaveHendelseRepositoryTest {
             OppgaveCutoffAnchor(
                 oppgaveId = 99L,
                 versjon = 2L,
-                sendtTid = preferertTid
-            )
+                sendtTid = preferertTid,
+            ),
         )
     }
 }

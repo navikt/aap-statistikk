@@ -19,8 +19,7 @@ fun MeterRegistry.nyBehandlingOpprettet(type: TypeBehandling): Counter =
 fun MeterRegistry.oppgaveHendelseMottatt(nyVersjon: Boolean): Counter =
     this.counter("statistikk_oppgave_hendelse_mottatt_total", listOf(Tag.of("ny_versjon", nyVersjon.toString())))
 
-fun MeterRegistry.lagretPostmottakHendelse(): Counter =
-    this.counter("statistikk_lagret_postmottak_hendelse_total")
+fun MeterRegistry.lagretPostmottakHendelse(): Counter = this.counter("statistikk_lagret_postmottak_hendelse_total")
 
 fun MeterRegistry.årsakTilOpprettelseIkkeSatt(): Counter =
     this.counter("statistikk_aarsak_til_opprettelse_ikke_satt_total")
@@ -28,5 +27,4 @@ fun MeterRegistry.årsakTilOpprettelseIkkeSatt(): Counter =
 fun MeterRegistry.sakDuplikat(erDuplikat: Boolean): Counter =
     this.counter("statistikk_sak_duplikat_total", listOf(Tag.of("duplikat", erDuplikat.toString())))
 
-fun MeterRegistry.sammeEndretTid(): Counter =
-    this.counter("statistikk_samme_endret_tid")
+fun MeterRegistry.sammeEndretTid(): Counter = this.counter("statistikk_samme_endret_tid")

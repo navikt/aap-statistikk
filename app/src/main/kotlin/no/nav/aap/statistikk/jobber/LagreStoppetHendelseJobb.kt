@@ -21,13 +21,10 @@ import org.slf4j.LoggerFactory
 
 class LagreStoppetHendelseJobb(
     private val jobbAppender: JobbAppender,
-    private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
+    private val lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
 ) : ProvidersJobbSpesifikasjon {
 
-    override fun konstruer(
-        repositoryProvider: RepositoryProvider,
-        gatewayProvider: GatewayProvider
-    ): JobbUtfører {
+    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører {
         val hendelsePublisher = MotorHendelsePublisher.medYtelseJobb(
             jobbAppender = jobbAppender,
             repositoryProvider = repositoryProvider,
@@ -64,12 +61,9 @@ class LagreStoppetHendelseJobb(
 
     override val navn = "lagreHendelse"
     override val beskrivelse = "beskrivelse"
-
 }
 
-private class LagreStoppetHendelseJobbUtfører(
-    private val hendelsesService: HendelsesService
-) : JobbUtfører {
+private class LagreStoppetHendelseJobbUtfører(private val hendelsesService: HendelsesService) : JobbUtfører {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun utfør(input: JobbInput) {

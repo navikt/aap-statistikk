@@ -10,12 +10,7 @@ data class Samordning(
 ) {
     data class UførePeriode(val fom: LocalDate, val tom: LocalDate, val grad: Int)
 
-    data class StatligYtelse(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val ytelse: SamordningYtelse,
-        val prosent: Int,
-    )
+    data class StatligYtelse(val fom: LocalDate, val tom: LocalDate, val ytelse: SamordningYtelse, val prosent: Int)
 
     enum class SamordningYtelse {
         SYKEPENGER,
@@ -27,11 +22,7 @@ data class Samordning(
         FERIE_I_SYKEPENGEPERIODE,
     }
 
-    data class AvregningAndreYtelse(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val ytelse: AndreStatligeYtelse,
-    )
+    data class AvregningAndreYtelse(val fom: LocalDate, val tom: LocalDate, val ytelse: AndreStatligeYtelse)
 
     enum class AndreStatligeYtelse {
         SYKEPENGER,

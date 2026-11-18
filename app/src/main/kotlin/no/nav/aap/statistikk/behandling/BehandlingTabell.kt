@@ -31,7 +31,7 @@ data class BQYtelseBehandling(
     val rettighetsPerioder: List<RettighetstypePeriode>,
     val vurderingsbehov: List<String>,
     val resultat: ResultatKode? = null,
-    val radEndret: LocalDateTime
+    val radEndret: LocalDateTime,
 )
 
 class BehandlingTabell : BQTable<BQYtelseBehandling> {
@@ -55,7 +55,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 .setDescription(
                     "Behandlingstype. Mulige verdier ${
                         TypeBehandling.entries.joinToString { it.name }
-                    }"
+                    }",
                 ).build()
             val datoAvsluttet = Field.newBuilder("datoAvsluttet", StandardSQLTypeName.DATETIME)
                 .setDescription("På hvilken dato ble saksbehandlingen avsluttet i Kelvin. Ikke-null.")
@@ -64,7 +64,9 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 .setDescription("På hvilken dato ble behandling opprettet i Kelvin. Ikke-null.")
                 .build()
             val kodeverk = Field.newBuilder("kodeverk", StandardSQLTypeName.STRING)
-                .setDescription("Kodeverk brukt for diagnose i 11-5-vurderingen. Kan være null om søknaden ble avslått før sykdomsbildet ble vurdert.")
+                .setDescription(
+                    "Kodeverk brukt for diagnose i 11-5-vurderingen. Kan være null om søknaden ble avslått før sykdomsbildet ble vurdert.",
+                )
                 .setMode(Field.Mode.NULLABLE).build()
             val diagnosekode = Field.newBuilder("diagnosekode", StandardSQLTypeName.STRING)
                 .setDescription("Samme beskrivelse som for 'kodeverk'.")
@@ -72,7 +74,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             val bidiagnoser = Field.newBuilder(
                 "bidiagnoser",
                 StandardSQLTypeName.STRUCT,
-                Field.of("kode", StandardSQLTypeName.STRING)
+                Field.of("kode", StandardSQLTypeName.STRING),
             )
                 .setDescription("Samme beskrivelse som for 'kodeverk'.")
                 .setMode(Field.Mode.REPEATED)
@@ -85,9 +87,11 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 Field.newBuilder("tilDato", StandardSQLTypeName.DATE)
                     .setDescription("Til-og-med-dato for rettighetstypen. Ikke-null").build(),
                 Field.newBuilder("rettighetstype", StandardSQLTypeName.STRING)
-                    .setDescription("Rettighetstypen. Ikke-null.").build()
+                    .setDescription("Rettighetstypen. Ikke-null.").build(),
             ).setMode(Field.Mode.REPEATED)
-                .setDescription("Periodisering av rettighetstype. F.eks kan AAP fås som sykepengeerstatning i en periode, og ordniær i en annen.")
+                .setDescription(
+                    "Periodisering av rettighetstype. F.eks kan AAP fås som sykepengeerstatning i en periode, og ordniær i en annen.",
+                )
                 .build()
 
             val radEndret = Field.newBuilder("radEndret", StandardSQLTypeName.DATETIME)
@@ -98,7 +102,9 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 .build()
 
             val resultat = Field.newBuilder("resultat", StandardSQLTypeName.STRING)
-                .setDescription("Resultat av behandlingen. Ved innvilget førstegangsbehandling er denne INNVILGET. Kan være null.")
+                .setDescription(
+                    "Resultat av behandlingen. Ved innvilget førstegangsbehandling er denne INNVILGET. Kan være null.",
+                )
                 .setMode(Field.Mode.NULLABLE).build()
 
             val vurderingsbehov = Field.newBuilder("vurderingsbehov", StandardSQLTypeName.STRING)
@@ -120,7 +126,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 radEndret,
                 utbetalingId,
                 resultat,
-                vurderingsbehov
+                vurderingsbehov,
             )
         }
 
@@ -145,7 +151,7 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
                 RettighetstypePeriode(
                     fraDato = LocalDate.parse(it.recordValue[0].stringValue),
                     tilDato = LocalDate.parse(it.recordValue[1].stringValue),
-                    rettighetstype = RettighetsType.valueOf(it.recordValue[2].stringValue)
+                    rettighetstype = RettighetsType.valueOf(it.recordValue[2].stringValue),
                 )
             }
 
@@ -163,41 +169,39 @@ class BehandlingTabell : BQTable<BQYtelseBehandling> {
             radEndret = radEndret,
             utbetalingId = utbetalingId,
             resultat = fieldValueList.hentEllerNull("resultat")?.let { ResultatKode.valueOf(it) },
-            vurderingsbehov = vurderingsbehov
+            vurderingsbehov = vurderingsbehov,
         )
     }
 
-    override fun toRow(value: BQYtelseBehandling): InsertAllRequest.RowToInsert {
-        return InsertAllRequest.RowToInsert.of(
-            mapOf(
-                "saksnummer" to value.saksnummer.value,
-                "behandlingsreferanse" to value.referanse.toString(),
-                "brukerFnr" to value.brukerFnr,
-                "behandlingsType" to value.behandlingsType.toString(),
-                "datoOpprettet" to value.datoOpprettet.truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "datoAvsluttet" to value.datoAvsluttet.truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "kodeverk" to value.kodeverk,
-                "diagnosekode" to value.diagnosekode,
-                "bidiagnoser" to value.bidiagnoser?.map {
-                    mapOf(
-                        "kode" to it
-                    )
-                },
-                "rettighetstypePerioder" to value.rettighetsPerioder.map { periode ->
-                    mapOf(
-                        "fraDato" to periode.fraDato.toString(),
-                        "tilDato" to periode.tilDato.toString(),
-                        "rettighetstype" to periode.rettighetstype.toString()
-                    )
-                },
-                "resultat" to value.resultat?.toString(),
-                "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                "utbetalingId" to value.referanse.toBase64(),
-                "vurderingsbehov" to value.vurderingsbehov.joinToString(",").let(::listOf)
-            )
-        )
-    }
+    override fun toRow(value: BQYtelseBehandling): InsertAllRequest.RowToInsert = InsertAllRequest.RowToInsert.of(
+        mapOf(
+            "saksnummer" to value.saksnummer.value,
+            "behandlingsreferanse" to value.referanse.toString(),
+            "brukerFnr" to value.brukerFnr,
+            "behandlingsType" to value.behandlingsType.toString(),
+            "datoOpprettet" to value.datoOpprettet.truncatedTo(ChronoUnit.MILLIS)
+                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            "datoAvsluttet" to value.datoAvsluttet.truncatedTo(ChronoUnit.MILLIS)
+                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            "kodeverk" to value.kodeverk,
+            "diagnosekode" to value.diagnosekode,
+            "bidiagnoser" to value.bidiagnoser?.map {
+                mapOf(
+                    "kode" to it,
+                )
+            },
+            "rettighetstypePerioder" to value.rettighetsPerioder.map { periode ->
+                mapOf(
+                    "fraDato" to periode.fraDato.toString(),
+                    "tilDato" to periode.tilDato.toString(),
+                    "rettighetstype" to periode.rettighetstype.toString(),
+                )
+            },
+            "resultat" to value.resultat?.toString(),
+            "radEndret" to value.radEndret.truncatedTo(ChronoUnit.MILLIS)
+                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            "utbetalingId" to value.referanse.toBase64(),
+            "vurderingsbehov" to value.vurderingsbehov.joinToString(",").let(::listOf),
+        ),
+    )
 }

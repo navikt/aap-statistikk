@@ -15,21 +15,23 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
-
 @Target(
     AnnotationTarget.FUNCTION,
     AnnotationTarget.FIELD,
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.CLASS,
-    AnnotationTarget.VALUE_PARAMETER
+    AnnotationTarget.VALUE_PARAMETER,
 )
 @Retention(AnnotationRetention.RUNTIME)
 @ExtendWith(
-    WithPostgresContainer::class
+    WithPostgresContainer::class,
 )
 annotation class Postgres
 
-class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterResolver {
+class WithPostgresContainer :
+    AfterEachCallback,
+    BeforeEachCallback,
+    ParameterResolver {
 
     companion object {
         private val postgresContainer = PostgreSQLContainer("postgres:18").apply {
@@ -37,9 +39,9 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
                 HostPortWaitStrategy().withStartupTimeout(
                     Duration.of(
                         60L,
-                        ChronoUnit.SECONDS
-                    )
-                )
+                        ChronoUnit.SECONDS,
+                    ),
+                ),
             )
         }
         private var dataSource: DataSource
@@ -52,7 +54,7 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
                 jdbcUrl = postgresContainer.jdbcUrl,
                 userName = postgresContainer.username,
                 password = postgresContainer.password,
-                poolSize = AppConfig.hikariMaxPoolSize
+                poolSize = AppConfig.hikariMaxPoolSize,
             )
             dataSource = dbConfig.datasource().also {
                 Migrering.migrate(it)
@@ -85,19 +87,18 @@ class WithPostgresContainer : AfterEachCallback, BeforeEachCallback, ParameterRe
     override fun afterEach(context: ExtensionContext) {
     }
 
-    override fun supportsParameter(
-        parameterContext: ParameterContext,
-        extensionContext: ExtensionContext
-    ): Boolean {
-        return (parameterContext.isAnnotated(Postgres::class.java) && (parameterContext.parameter.type == DataSource::class.java)) || (parameterContext.isAnnotated(
-            Postgres::class.java
-        ) && (parameterContext.parameter.type == DbConfig::class.java))
-    }
+    override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean =
+        (
+            parameterContext.isAnnotated(
+            Postgres::class.java,
+        ) && (parameterContext.parameter.type == DataSource::class.java)
+        ) || (
+            parameterContext.isAnnotated(
+            Postgres::class.java,
+        ) && (parameterContext.parameter.type == DbConfig::class.java)
+        )
 
-    override fun resolveParameter(
-        parameterContext: ParameterContext,
-        extensionContext: ExtensionContext
-    ): Any {
+    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
         if (parameterContext.parameter.type == DataSource::class.java) {
             return dataSource
         }

@@ -11,10 +11,9 @@ import no.nav.aap.statistikk.api.stringToNumber
 import no.nav.aap.statistikk.oppgaveHendelseMottatt
 import org.slf4j.LoggerFactory
 
-
 class LagreOppgaveHendelseJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
-    private val flytJobbRepository: FlytJobbRepository
+    private val flytJobbRepository: FlytJobbRepository,
 ) : JobbUtfører {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -24,13 +23,15 @@ class LagreOppgaveHendelseJobbUtfører(
 
         val forrigeHendelseVersjon = oppgaveHendelseRepository.sisteVersjonForId(hendelse.oppgaveId)
         if (forrigeHendelseVersjon != null && forrigeHendelseVersjon > hendelse.versjon) {
-            log.info("Mottok oppgave med lavere versjon enn forrige hendelse. (forrige: $forrigeHendelseVersjon, ny: ${hendelse.versjon})")
+            log.info(
+                "Mottok oppgave med lavere versjon enn forrige hendelse. (forrige: $forrigeHendelseVersjon, ny: ${hendelse.versjon})",
+            )
             PrometheusProvider.prometheus.oppgaveHendelseMottatt(false).increment()
         } else {
             oppgaveHendelseRepository.lagreHendelse(hendelse)
             flytJobbRepository.leggTil(
                 JobbInput(LagreOppgaveJobb()).medPayload(hendelse.oppgaveId.toString())
-                    .forSak(hendelse.saksnummer?.let(::stringToNumber) ?: hendelse.oppgaveId)
+                    .forSak(hendelse.saksnummer?.let(::stringToNumber) ?: hendelse.oppgaveId),
             )
             PrometheusProvider.prometheus.oppgaveHendelseMottatt(true).increment()
         }
@@ -38,12 +39,10 @@ class LagreOppgaveHendelseJobbUtfører(
 }
 
 class LagreOppgaveHendelseJobb : ProviderJobbSpesifikasjon {
-    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
-        return LagreOppgaveHendelseJobbUtfører(
-            repositoryProvider.provide(),
-            repositoryProvider.provide()
-        )
-    }
+    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører = LagreOppgaveHendelseJobbUtfører(
+        repositoryProvider.provide(),
+        repositoryProvider.provide(),
+    )
 
     override val type: String = "statistikk.lagreOppgaveHendelseJobb"
     override val navn: String = "lagreOppgaveHendelse"

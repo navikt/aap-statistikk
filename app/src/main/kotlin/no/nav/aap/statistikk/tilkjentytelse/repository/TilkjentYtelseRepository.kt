@@ -8,8 +8,8 @@ import no.nav.aap.statistikk.tilkjentytelse.Minstesats
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelse
 import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import org.slf4j.LoggerFactory
-import java.time.Clock
 import java.math.BigDecimal
+import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,9 +20,8 @@ class TilkjentYtelseRepository(
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ITilkjentYtelseRepository {
     companion object : RepositoryFactory<ITilkjentYtelseRepository> {
-        override fun konstruer(connection: DBConnection): ITilkjentYtelseRepository {
-            return TilkjentYtelseRepository(connection)
-        }
+        override fun konstruer(connection: DBConnection): ITilkjentYtelseRepository =
+            TilkjentYtelseRepository(connection)
     }
 
     override fun lagreTilkjentYtelse(tilkjentYtelse: TilkjentYtelseEntity): Long {
@@ -40,7 +39,9 @@ class TilkjentYtelseRepository(
         val oppdatertTid = LocalDateTime.now(clock)
 
         val nøkkel =
-            dbConnection.executeReturnKey("INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt, oppdatert_tid) VALUES (?, ?, ?)") {
+            dbConnection.executeReturnKey(
+                "INSERT INTO TILKJENT_YTELSE (behandling_id, opprettet_tidspunkt, oppdatert_tid) VALUES (?, ?, ?)",
+            ) {
                 setParams {
                     setInt(1, behandlingId)
                     setLocalDateTime(2, oppdatertTid)
@@ -108,7 +109,7 @@ FROM tilkjent_ytelse_periode
          left join behandling on behandling.id = tilkjent_ytelse.behandling_id
          left join behandling_referanse br on br.id = behandling.referanse_id
          left join sak on sak.id = behandling.sak_id
-WHERE tilkjent_ytelse.id = ?"""
+WHERE tilkjent_ytelse.id = ?""",
         ) {
             setParams { setInt(1, tilkjentYtelseId) }
             setRowMapper(mapTilkjentTriple())
@@ -120,7 +121,8 @@ WHERE tilkjent_ytelse.id = ?"""
         return TilkjentYtelse(
             saksnummer.let(::Saksnummer),
             behandlingsReferanse,
-            perioderTriple.map { it.first })
+            perioderTriple.map { it.first },
+        )
     }
 
     override fun hentForBehandling(behandlingId: UUID): TilkjentYtelse? {
@@ -132,7 +134,7 @@ FROM tilkjent_ytelse_periode
          left join behandling on behandling.id = tilkjent_ytelse.behandling_id
          left join behandling_referanse br on br.id = behandling.referanse_id
          left join sak on sak.id = behandling.sak_id
-WHERE br.referanse = ?"""
+WHERE br.referanse = ?""",
         ) {
             setParams { setUUID(1, behandlingId) }
             setRowMapper(mapTilkjentTriple())
@@ -148,7 +150,8 @@ WHERE br.referanse = ?"""
         return TilkjentYtelse(
             saksnummer.let(::Saksnummer),
             behandlingsReferanse,
-            perioderTriple.map { it.first })
+            perioderTriple.map { it.first },
+        )
     }
 
     private fun mapTilkjentTriple(): (Row) -> Triple<TilkjentYtelsePeriode, UUID, String> = { row ->
@@ -191,7 +194,9 @@ WHERE br.referanse = ?"""
                 samordningUføregradering = samordningUføregradering,
                 samordningArbeidsgiverGradering = samordningArbeidsgiverGradering,
                 meldepliktGradering = meldepliktGradering,
-            ), row.getUUID("referanse"), row.getString("saksnummer")
+            ),
+            row.getUUID("referanse"),
+            row.getString("saksnummer"),
         )
     }
 }

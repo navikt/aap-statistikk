@@ -8,9 +8,7 @@ import no.nav.aap.statistikk.person.Person
 
 class SakRepositoryImpl(private val dbConnection: DBConnection) : SakRepository {
     companion object : RepositoryFactory<SakRepository> {
-        override fun konstruer(connection: DBConnection): SakRepository {
-            return SakRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): SakRepository = SakRepositoryImpl(connection)
 
         private const val HENT_SAK_QUERY = """
 SELECT sak.id           as s_id,
@@ -56,25 +54,21 @@ WHERE sak.id = ?
         }
     }
 
-    override fun hentSak(saksnummer: Saksnummer): Sak {
-        return dbConnection.queryFirst(HENT_SAK_QUERY) {
-            setParams {
-                setString(1, saksnummer.value)
-            }
-            setRowMapper { row ->
-                sakRowMapper(row)
-            }
+    override fun hentSak(saksnummer: Saksnummer): Sak = dbConnection.queryFirst(HENT_SAK_QUERY) {
+        setParams {
+            setString(1, saksnummer.value)
+        }
+        setRowMapper { row ->
+            sakRowMapper(row)
         }
     }
 
-    override fun hentSakEllernull(saksnummer: Saksnummer): Sak? {
-        return dbConnection.queryFirstOrNull<Sak>(HENT_SAK_QUERY) {
-            setParams {
-                setString(1, saksnummer.value)
-            }
-            setRowMapper { row ->
-                sakRowMapper(row)
-            }
+    override fun hentSakEllernull(saksnummer: Saksnummer): Sak? = dbConnection.queryFirstOrNull<Sak>(HENT_SAK_QUERY) {
+        setParams {
+            setString(1, saksnummer.value)
+        }
+        setRowMapper { row ->
+            sakRowMapper(row)
         }
     }
 
@@ -88,7 +82,7 @@ WHERE sak.id = ?
         ),
         sistOppdatert = row.getLocalDateTime("sh_oppdatert_tid"),
         snapShotId = row.getLong("sh_id"),
-        sakStatus = row.getEnum("sh_sak_status")
+        sakStatus = row.getEnum("sh_sak_status"),
     )
 
     override fun settInnSak(sak: Sak): Long {
@@ -128,7 +122,7 @@ WHERE sak.id = ?
             requireNotNull(sak.id) { "Sak må ha ID før den kan oppdateres. Saksnummer: ${sak.saksnummer}." }
 
         val gjeldendeStatus = dbConnection.queryFirstOrNull<String>(
-            "SELECT sak_status FROM sak_historikk WHERE sak_id = ? AND gjeldende = TRUE"
+            "SELECT sak_status FROM sak_historikk WHERE sak_id = ? AND gjeldende = TRUE",
         ) {
             setParams { setLong(1, sakId) }
             setRowMapper { row -> row.getString("sak_status") }
@@ -142,7 +136,9 @@ WHERE sak.id = ?
             setParams { setLong(1, sakId) }
         }
 
-        dbConnection.executeReturnKey("INSERT INTO sak_historikk (gjeldende, oppdatert_tid, sak_id, sak_status) VALUES (?, ?, ?, ?)") {
+        dbConnection.executeReturnKey(
+            "INSERT INTO sak_historikk (gjeldende, oppdatert_tid, sak_id, sak_status) VALUES (?, ?, ?, ?)",
+        ) {
             setParams {
                 var c = 1
                 setBoolean(c++, true)
@@ -151,6 +147,5 @@ WHERE sak.id = ?
                 setString(c, sak.sakStatus.toString())
             }
         }
-
     }
 }

@@ -18,16 +18,16 @@ class VedtattStansOpphørRepositoryImplTest {
             StansEllerOpphør(
                 type = StansType.STANS,
                 fom = LocalDate.of(2024, 1, 1),
-                årsaker = setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)
+                årsaker = setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS),
             ),
             StansEllerOpphør(
                 type = StansType.OPPHØR,
                 fom = LocalDate.of(2024, 6, 1),
                 årsaker = setOf(
                     Avslagsårsak.BRUDD_PÅ_OPPHOLDSKRAV_OPPHØR,
-                    Avslagsårsak.MANGLENDE_DOKUMENTASJON
-                )
-            )
+                    Avslagsårsak.MANGLENDE_DOKUMENTASJON,
+                ),
+            ),
         )
 
         dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, stansOpphørListe) }
@@ -44,7 +44,13 @@ class VedtattStansOpphørRepositoryImplTest {
         dataSource.transaction {
             VedtattStansOpphørRepositoryImpl(it).lagre(
                 behandlingId,
-                listOf(StansEllerOpphør(StansType.STANS, LocalDate.of(2024, 1, 1), setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)))
+                listOf(
+                    StansEllerOpphør(
+                        StansType.STANS,
+                        LocalDate.of(2024, 1, 1),
+                        setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS),
+                    ),
+                ),
             )
         }
         dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, emptyList()) }
@@ -61,12 +67,18 @@ class VedtattStansOpphørRepositoryImplTest {
         dataSource.transaction {
             VedtattStansOpphørRepositoryImpl(it).lagre(
                 behandlingId,
-                listOf(StansEllerOpphør(StansType.STANS, LocalDate.of(2024, 1, 1), setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)))
+                listOf(
+                    StansEllerOpphør(
+                        StansType.STANS,
+                        LocalDate.of(2024, 1, 1),
+                        setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS),
+                    ),
+                ),
             )
         }
 
         val oppdatert = listOf(
-            StansEllerOpphør(StansType.OPPHØR, LocalDate.of(2024, 3, 1), setOf(Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP))
+            StansEllerOpphør(StansType.OPPHØR, LocalDate.of(2024, 3, 1), setOf(Avslagsårsak.ORDINÆRKVOTE_BRUKT_OPP)),
         )
         dataSource.transaction { VedtattStansOpphørRepositoryImpl(it).lagre(behandlingId, oppdatert) }
 

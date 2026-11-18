@@ -15,14 +15,12 @@ interface PostmottakBehandlingRepository : Repository {
     fun oppdaterBehandling(referanse: UUID, behandling: PostmottakOppdatering)
 }
 
-class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection) :
-    PostmottakBehandlingRepository {
+class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection) : PostmottakBehandlingRepository {
     private val logger = LoggerFactory.getLogger(PostmottakBehandlingRepositoryImpl::class.java)
 
     companion object : RepositoryFactory<PostmottakBehandlingRepository> {
-        override fun konstruer(connection: DBConnection): PostmottakBehandlingRepository {
-            return PostmottakBehandlingRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): PostmottakBehandlingRepository =
+            PostmottakBehandlingRepositoryImpl(connection)
     }
 
     override fun opprettBehandling(behandling: PostmottakBehandling): Long {
@@ -109,7 +107,7 @@ class PostmottakBehandlingRepositoryImpl(private val dbConnection: DBConnection)
                     sisteSaksbehandler = it.getStringOrNull("siste_saksbehandler"),
                     gjeldendeAvklaringsBehov = it.getStringOrNull("gjeldende_avklaringsbehov"),
                     status = it.getString("status"),
-                    oppdatertTid = it.getLocalDateTime("oppdatert_tid")
+                    oppdatertTid = it.getLocalDateTime("oppdatert_tid"),
                 )
             }
         }

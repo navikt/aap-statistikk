@@ -16,15 +16,11 @@ class VilkårsresultatRepository(
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : IVilkårsresultatRepository {
     companion object : RepositoryFactory<IVilkårsresultatRepository> {
-        override fun konstruer(connection: DBConnection): IVilkårsresultatRepository {
-            return VilkårsresultatRepository(connection)
-        }
+        override fun konstruer(connection: DBConnection): IVilkårsresultatRepository =
+            VilkårsresultatRepository(connection)
     }
 
-    override fun lagreVilkårsResultat(
-        vilkårsresultat: VilkårsResultatEntity,
-        behandlingId: BehandlingId
-    ): Long {
+    override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity, behandlingId: BehandlingId): Long {
         val deletePeriodeSql = """
             DELETE
             FROM VILKARSPERIODE
@@ -90,12 +86,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
         return uthentetId
     }
 
-    data class EkstraInfo(
-        val id: Long,
-        val saksnummer: String,
-        val type: String,
-        val referanse: String
-    )
+    data class EkstraInfo(val id: Long, val saksnummer: String, val type: String, val referanse: String)
 
     override fun hentVilkårsResultat(vilkårResultatId: Long): VilkårsResultatEntity {
         val preparedSqlStatement = """
@@ -164,8 +155,10 @@ WHERE br.referanse = ?;
         val vilkårEntity = vilkårId?.let {
             VilkårEntity(
                 id = vilkårId,
-                vilkårType = requireNotNull(vilkårType) { "VilkårType må være satt når vilkårId finnes. Vilkår-ID: $vilkårId." },
-                perioder = vilkårPerioder
+                vilkårType = requireNotNull(
+                    vilkårType,
+                ) { "VilkårType må være satt når vilkårId finnes. Vilkår-ID: $vilkårId." },
+                perioder = vilkårPerioder,
             )
         }
 
@@ -174,15 +167,13 @@ WHERE br.referanse = ?;
                 id = id,
                 saksnummer = saksNummer,
                 type = typeBehandling,
-                referanse = behandlingsReferanse
-            ), vilkårEntity
+                referanse = behandlingsReferanse,
+            ),
+            vilkårEntity,
         )
     }
 
-    private fun getVilkårPerioder(
-        dbConnection: DBConnection,
-        vilkårId: Long,
-    ): List<VilkårsPeriodeEntity> {
+    private fun getVilkårPerioder(dbConnection: DBConnection, vilkårId: Long): List<VilkårsPeriodeEntity> {
         val sql = """SELECT *
 FROM VILKARSPERIODE
 WHERE vilkar_id = ?;
@@ -199,7 +190,7 @@ WHERE vilkar_id = ?;
                     utfall = it.getString("utfall"),
                     manuellVurdering = it.getBoolean("manuell_vurdering"),
                     innvilgelsesårsak = it.getStringOrNull("innvilgelsesaarsak"),
-                    avslagsårsak = it.getStringOrNull("avslagsaarsak")
+                    avslagsårsak = it.getStringOrNull("avslagsaarsak"),
                 )
             }
         }

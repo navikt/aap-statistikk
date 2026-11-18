@@ -10,10 +10,12 @@ plugins {
 
 detekt {
     ignoreFailures = true
+    buildUponDefaultConfig = true
 }
 
 tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
     jvmTarget.set(providers.gradleProperty("jdkVersion"))
+    autoCorrect.set(true)
 }
 
 application {
@@ -38,6 +40,8 @@ tasks.register<JavaExec>("genererOpenApi") {
 
 
 dependencies {
+    detektPlugins(libs.detektKtlintWrapper)
+
     implementation("io.ktor:ktor-server-html-builder:${kelvinLibs.versions.ktor.get()}")
     implementation(kelvinLibs.logback.classic)
     implementation(kelvinLibs.logstash.logback.encoder)

@@ -19,17 +19,11 @@ import java.time.LocalDateTime
 class MotorJobbAppender : JobbAppender {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun leggTil(
-        connection: DBConnection,
-        jobb: JobbInput
-    ) {
+    override fun leggTil(connection: DBConnection, jobb: JobbInput) {
         leggTil(postgresRepositoryRegistry.provider(connection), jobb)
     }
 
-    override fun leggTil(
-        repositoryProvider: RepositoryProvider,
-        jobb: JobbInput
-    ) {
+    override fun leggTil(repositoryProvider: RepositoryProvider, jobb: JobbInput) {
         repositoryProvider.provide<FlytJobbRepository>().leggTil(jobb)
     }
 
@@ -46,7 +40,9 @@ class MotorJobbAppender : JobbAppender {
             repositoryProvider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
         if (behandling.typeBehandling !in Konstanter.interessanteBehandlingstyper) {
-            log.info("Prøver å legge til uinteressant behandling til saksstatikk. Ignorerer. Behandling: $behandlingId. Referanse: ${behandling.referanse}")
+            log.info(
+                "Prøver å legge til uinteressant behandling til saksstatikk. Ignorerer. Behandling: $behandlingId. Referanse: ${behandling.referanse}",
+            )
             return
         }
 
@@ -68,24 +64,22 @@ class MotorJobbAppender : JobbAppender {
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
         provider: RepositoryProvider,
         behandlingId: BehandlingId,
-        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
+        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
     ) {
         val behandling =
             provider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
         leggTil(
-            provider, JobbInput(lagreAvsluttetBehandlingTilBigQueryJobb).medPayload(
-                behandling.referanse
+            provider,
+            JobbInput(lagreAvsluttetBehandlingTilBigQueryJobb).medPayload(
+                behandling.referanse,
             ).forSak(
-                requireNotNull(behandling.sak.id)
-            )
+                requireNotNull(behandling.sak.id),
+            ),
         )
     }
 
-    override fun leggTilResendSakstatistikkJobb(
-        repositoryProvider: RepositoryProvider,
-        behandlingId: BehandlingId
-    ) {
+    override fun leggTilResendSakstatistikkJobb(repositoryProvider: RepositoryProvider, behandlingId: BehandlingId) {
         log.info("Starter resending-jobb. BehandlingId: $behandlingId")
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
@@ -93,7 +87,7 @@ class MotorJobbAppender : JobbAppender {
         leggTil(
             repositoryProvider,
             JobbInput(ResendSakstatistikkJobb()).medPayload(behandlingId)
-                .forSak(requireNotNull(behandling.sak.id))
+                .forSak(requireNotNull(behandling.sak.id)),
         )
     }
 }

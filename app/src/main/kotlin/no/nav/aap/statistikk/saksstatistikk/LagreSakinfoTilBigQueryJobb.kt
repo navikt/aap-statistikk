@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 
 data class EnhetRetryConfig(
     val maxRetries: Int = requiredConfigForKey("enhet.retry.max.retries").toInt(),
-    val delaySeconds: Long = requiredConfigForKey("enhet.retry.delay.seconds").toLong()
+    val delaySeconds: Long = requiredConfigForKey("enhet.retry.delay.seconds").toLong(),
 )
 
 data class LagreSakinfoPayload(
@@ -32,7 +32,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
     private val sakStatistikkService: ISaksStatistikkService,
     private val behandlingRepository: IBehandlingRepository,
     private val leggTilRetry: (LagreSakinfoPayload, Long) -> Unit,
-    private val enhetRetryConfig: EnhetRetryConfig = EnhetRetryConfig()
+    private val enhetRetryConfig: EnhetRetryConfig = EnhetRetryConfig(),
 ) : JobbUtfører {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -49,18 +49,16 @@ class LagreSakinfoTilBigQueryJobbUtfører(
     }
 
     // TODO: Fjern bakoverkompatibilitet etter at alle gamle jobber er prosessert
-    private fun lesPayload(input: JobbInput): LagreSakinfoPayload {
-        return try {
-            input.payload<LagreSakinfoPayload>()
-        } catch (_: DeserializationException) {
-            log.info("Deserialisering som LagreSakinfoPayload feilet, prøver gammelt format (BehandlingId)")
-            LagreSakinfoPayload(
-                behandlingId = input.payload<BehandlingId>(),
-                avklaringsbehovKode = input.optionalParameter("avklaringsbehovKode"),
-                retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0,
-                triggerKilde = input.optionalParameter("triggerKilde") ?: "ukjent",
-            )
-        }
+    private fun lesPayload(input: JobbInput): LagreSakinfoPayload = try {
+        input.payload<LagreSakinfoPayload>()
+    } catch (_: DeserializationException) {
+        log.info("Deserialisering som LagreSakinfoPayload feilet, prøver gammelt format (BehandlingId)")
+        LagreSakinfoPayload(
+            behandlingId = input.payload<BehandlingId>(),
+            avklaringsbehovKode = input.optionalParameter("avklaringsbehovKode"),
+            retryCount = input.optionalParameter("enhetRetryCount")?.toInt() ?: 0,
+            triggerKilde = input.optionalParameter("triggerKilde") ?: "ukjent",
+        )
     }
 
     private fun utførJobb(payload: LagreSakinfoPayload) {
@@ -69,19 +67,20 @@ class LagreSakinfoTilBigQueryJobbUtfører(
         val triggerKilde = payload.triggerKilde
 
         log.info(
-            "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount."
+            "Kjører: triggerKilde=$triggerKilde, retryCount=$retryCount.",
         )
 
         when (val resultat = sakStatistikkService.lagreSakInfoTilBigquery(behandlingId, payload.cutoffTidspunkt)) {
             SakStatistikkResultat.OK -> {}
+
             is SakStatistikkResultat.ManglerEnhet -> {
                 if (retryCount < enhetRetryConfig.maxRetries) {
                     val delay = enhetRetryConfig.delaySeconds * (1L shl retryCount)
                     log.info(
                         "Enhet mangler for behandling ${resultat.behandlingId}, " +
-                                "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
-                                "Reschedulerer om ${delay}s " +
-                                "(forsøk ${retryCount + 1}/${enhetRetryConfig.maxRetries})."
+                            "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
+                            "Reschedulerer om ${delay}s " +
+                            "(forsøk ${retryCount + 1}/${enhetRetryConfig.maxRetries}).",
                     )
                     leggTilRetry(
                         payload.copy(
@@ -95,8 +94,8 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                     val behandling = behandlingRepository.hent(behandlingId)
                     error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
-                                "for behandling ${resultat.behandlingId}, " +
-                                "avklaringsbehov=${resultat.avklaringsbehovKode}. Saksnummer: ${behandling.sak.saksnummer}."
+                            "for behandling ${resultat.behandlingId}, " +
+                            "avklaringsbehov=${resultat.avklaringsbehovKode}. Saksnummer: ${behandling.sak.saksnummer}.",
                     )
                 }
             }
@@ -105,10 +104,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
 }
 
 class LagreSakinfoTilBigQueryJobb : ProvidersJobbSpesifikasjon {
-    override fun konstruer(
-        repositoryProvider: RepositoryProvider,
-        gatewayProvider: GatewayProvider
-    ): JobbUtfører {
+    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører {
         val sakStatistikkService = lagSaksStatistikkService(repositoryProvider, gatewayProvider)
         return LagreSakinfoTilBigQueryJobbUtfører(
             sakStatistikkService = sakStatistikkService,

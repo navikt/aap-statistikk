@@ -6,49 +6,35 @@ import no.nav.aap.statistikk.vilkårsresultat.*
 import java.time.LocalDate
 import java.util.*
 
-data class VilkårsResultatEntity(
-    val id: Long?,
-    val vilkår: List<VilkårEntity>
-) {
+data class VilkårsResultatEntity(val id: Long?, val vilkår: List<VilkårEntity>) {
     fun tilVilkårsResultat(
         saksnummer: Saksnummer,
         behandlingsReferanse: UUID,
-        typeBehandling: String
-    ): Vilkårsresultat {
-        return Vilkårsresultat(
-            saksnummer,
-            behandlingsReferanse,
-            TypeBehandling.valueOf(typeBehandling),
-            vilkår.map { it.tilVilkår() })
-    }
+        typeBehandling: String,
+    ): Vilkårsresultat = Vilkårsresultat(
+        saksnummer,
+        behandlingsReferanse,
+        TypeBehandling.valueOf(typeBehandling),
+        vilkår.map { it.tilVilkår() },
+    )
 
     companion object {
-        fun fraDomene(vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity {
-            return VilkårsResultatEntity(
-                null,
-                vilkårsresultat.vilkår.map { VilkårEntity.fraDomene(it) }
-            )
-        }
+        fun fraDomene(vilkårsresultat: Vilkårsresultat): VilkårsResultatEntity = VilkårsResultatEntity(
+            null,
+            vilkårsresultat.vilkår.map { VilkårEntity.fraDomene(it) },
+        )
     }
 }
 
-data class VilkårEntity(
-    val id: Long?,
-    val vilkårType: String,
-    val perioder: List<VilkårsPeriodeEntity>
-) {
-    fun tilVilkår(): Vilkår {
-        return Vilkår(Vilkårtype.valueOf(vilkårType), perioder.map { it.tilVilkårsPeriode() })
-    }
+data class VilkårEntity(val id: Long?, val vilkårType: String, val perioder: List<VilkårsPeriodeEntity>) {
+    fun tilVilkår(): Vilkår = Vilkår(Vilkårtype.valueOf(vilkårType), perioder.map { it.tilVilkårsPeriode() })
 
     companion object {
-        fun fraDomene(vilkår: Vilkår): VilkårEntity {
-            return VilkårEntity(
-                null,
-                vilkår.vilkårType.toString(),
-                vilkår.perioder.map { VilkårsPeriodeEntity.fraDomene(it) }
-            )
-        }
+        fun fraDomene(vilkår: Vilkår): VilkårEntity = VilkårEntity(
+            null,
+            vilkår.vilkårType.toString(),
+            vilkår.perioder.map { VilkårsPeriodeEntity.fraDomene(it) },
+        )
     }
 }
 
@@ -59,30 +45,26 @@ data class VilkårsPeriodeEntity(
     val utfall: String,
     val manuellVurdering: Boolean,
     val innvilgelsesårsak: String?,
-    val avslagsårsak: String?
+    val avslagsårsak: String?,
 ) {
-    fun tilVilkårsPeriode(): VilkårsPeriode {
-        return VilkårsPeriode(
-            fraDato,
-            tilDato,
-            Utfall.valueOf(utfall),
-            manuellVurdering,
-            innvilgelsesårsak,
-            avslagsårsak
-        )
-    }
+    fun tilVilkårsPeriode(): VilkårsPeriode = VilkårsPeriode(
+        fraDato,
+        tilDato,
+        Utfall.valueOf(utfall),
+        manuellVurdering,
+        innvilgelsesårsak,
+        avslagsårsak,
+    )
 
     companion object {
-        fun fraDomene(vilkårsPeriode: VilkårsPeriode): VilkårsPeriodeEntity {
-            return VilkårsPeriodeEntity(
-                null,
-                vilkårsPeriode.fraDato,
-                vilkårsPeriode.tilDato,
-                vilkårsPeriode.utfall.toString(),
-                vilkårsPeriode.manuellVurdering,
-                vilkårsPeriode.innvilgelsesårsak,
-                vilkårsPeriode.avslagsårsak
-            )
-        }
+        fun fraDomene(vilkårsPeriode: VilkårsPeriode): VilkårsPeriodeEntity = VilkårsPeriodeEntity(
+            null,
+            vilkårsPeriode.fraDato,
+            vilkårsPeriode.tilDato,
+            vilkårsPeriode.utfall.toString(),
+            vilkårsPeriode.manuellVurdering,
+            vilkårsPeriode.innvilgelsesårsak,
+            vilkårsPeriode.avslagsårsak,
+        )
     }
 }

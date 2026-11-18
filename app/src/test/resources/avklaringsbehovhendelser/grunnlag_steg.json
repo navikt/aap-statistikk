@@ -35,7 +35,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.002",
@@ -76,7 +76,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.004",
@@ -117,7 +117,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.006",
@@ -149,7 +149,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.008",
@@ -190,7 +190,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.010",
@@ -222,7 +222,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.015",
@@ -254,7 +254,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     } ]
   } ],
   "hendelsesTidspunkt" : "2025-09-24T12:00:00.017",

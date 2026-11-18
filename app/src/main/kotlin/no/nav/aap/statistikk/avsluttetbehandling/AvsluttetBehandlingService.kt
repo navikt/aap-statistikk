@@ -45,7 +45,7 @@ class AvsluttetBehandlingService(
             vilkårsResultatRepository
                 .lagreVilkårsResultat(
                     VilkårsResultatEntity.fraDomene(avsluttetBehandling.vilkårsresultat),
-                    uthentetBehandling.id()
+                    uthentetBehandling.id(),
                 )
         } else {
             error("Ingen behandling med referanse ${avsluttetBehandling.behandlingsReferanse}.")
@@ -54,60 +54,62 @@ class AvsluttetBehandlingService(
         val skalLagre = skalLagre(uthentetBehandling, avsluttetBehandling)
 
         if (!skalLagre) {
-            logger.info("Resultat var ${uthentetBehandling.resultat()} for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer ikke.")
+            logger.info(
+                "Resultat var ${uthentetBehandling.resultat()} for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer ikke.",
+            )
             return
         }
 
         val vedtakstidspunkt =
             vedtakstidspunktFor(avsluttetBehandling, uthentetBehandling.vedtakstidspunkt())
         tilkjentYtelseRepository.lagreTilkjentYtelse(
-            tilkjentYtelsePåVedtaksdato(avsluttetBehandling, vedtakstidspunkt)
+            tilkjentYtelsePåVedtaksdato(avsluttetBehandling, vedtakstidspunkt),
         )
 
         if (avsluttetBehandling.beregningsgrunnlag != null) {
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     value = avsluttetBehandling.beregningsgrunnlag,
-                    behandlingsReferanse = avsluttetBehandling.behandlingsReferanse
-                )
+                    behandlingsReferanse = avsluttetBehandling.behandlingsReferanse,
+                ),
             )
         }
 
         arbeidsopptrappingperioderRepository.lagre(
             uthentetBehandling.id(),
-            avsluttetBehandling.perioderMedArbeidsopptrapping
+            avsluttetBehandling.perioderMedArbeidsopptrapping,
         )
 
         institusjonsoppholdRepository.lagre(
             uthentetBehandling.id(),
-            avsluttetBehandling.institusjonsopphold
+            avsluttetBehandling.institusjonsopphold,
         )
 
         vedtattStansOpphørRepository.lagre(
             uthentetBehandling.id(),
-            avsluttetBehandling.vedtattStansOpphør
+            avsluttetBehandling.vedtattStansOpphør,
         )
 
         samordningRepository.lagre(
             uthentetBehandling.id(),
-            avsluttetBehandling.samordning
+            avsluttetBehandling.samordning,
         )
 
         fritaksvurderingRepository.lagre(
             uthentetBehandling.id(),
-            avsluttetBehandling.fritaksvurderinger
+            avsluttetBehandling.fritaksvurderinger,
         )
 
         rettighetstypeperiodeRepository.lagre(
             avsluttetBehandling.behandlingsReferanse,
-            avsluttetBehandling.rettighetstypeperioder
+            avsluttetBehandling.rettighetstypeperioder,
         )
 
         if (!behandlingService.erSkjermet(uthentetBehandling)) {
             hendelsePublisher.publiser(
                 StatistikkHendelse.YtelsesstatistikkSkalLagres(
                     behandlingId = uthentetBehandling.id(),
-                )
+                ),
             )
         } else {
             logger.info("Lagrer ikke i BigQuery fordi noen i saken er skjermet.")
@@ -115,33 +117,39 @@ class AvsluttetBehandlingService(
         PrometheusProvider.prometheus.avsluttetBehandlingLagret().increment()
     }
 
-    private fun skalLagre(
-        uthentetBehandling: Behandling,
-        avsluttetBehandling: AvsluttetBehandling
-    ): Boolean {
+    private fun skalLagre(uthentetBehandling: Behandling, avsluttetBehandling: AvsluttetBehandling): Boolean {
         val resultat = uthentetBehandling.resultat()
 
         return when (resultat) {
             ResultatKode.AVBRUTT,
-            ResultatKode.TRUKKET -> false
+            ResultatKode.TRUKKET,
+            -> false
 
             ResultatKode.INNVILGET, ResultatKode.AVSLAG -> true
+
             ResultatKode.KLAGE_OPPRETTHOLDES,
             ResultatKode.KLAGE_OMGJØRES,
             ResultatKode.KLAGE_DELVIS_OMGJØRES,
             ResultatKode.KLAGE_AVSLÅTT,
-            ResultatKode.KLAGE_TRUKKET -> error("Vil ikke oppstå.")
+            ResultatKode.KLAGE_TRUKKET,
+            -> error("Vil ikke oppstå.")
 
-            null -> true.also { logger.info("Fant ikke resultat for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer.") }
+            null -> true.also {
+                logger.info(
+                    "Fant ikke resultat for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer.",
+                )
+            }
         }
     }
 
     private fun vedtakstidspunktFor(
         avsluttetBehandling: AvsluttetBehandling,
-        lagretVedtakstidspunkt: LocalDateTime?
+        lagretVedtakstidspunkt: LocalDateTime?,
     ): LocalDateTime? {
         if (avsluttetBehandling.vedtakstidspunkt == null) {
-            logger.warn("Vedtakstidspunkt mangler i avsluttet behandling for behandling ${avsluttetBehandling.behandlingsReferanse}.")
+            logger.warn(
+                "Vedtakstidspunkt mangler i avsluttet behandling for behandling ${avsluttetBehandling.behandlingsReferanse}.",
+            )
         }
 
         return avsluttetBehandling.vedtakstidspunkt ?: lagretVedtakstidspunkt
@@ -149,24 +157,24 @@ class AvsluttetBehandlingService(
 
     private fun tilkjentYtelsePåVedtaksdato(
         avsluttetBehandling: AvsluttetBehandling,
-        vedtakstidspunkt: LocalDateTime?
-    ): TilkjentYtelseEntity {
-        return TilkjentYtelseEntity.fraDomene(
-            avsluttetBehandling.tilkjentYtelse.begrensPerioderTil(
-                requireNotNull(vedtakstidspunkt) {
-                    "Vedtakstidspunkt mangler for behandling ${avsluttetBehandling.behandlingsReferanse}."
-                }.toLocalDate()
-            )
-        )
-    }
+        vedtakstidspunkt: LocalDateTime?,
+    ): TilkjentYtelseEntity = TilkjentYtelseEntity.fraDomene(
+        avsluttetBehandling.tilkjentYtelse.begrensPerioderTil(
+            requireNotNull(vedtakstidspunkt) {
+                "Vedtakstidspunkt mangler for behandling ${avsluttetBehandling.behandlingsReferanse}."
+            }.toLocalDate(),
+        ),
+    )
 
     private fun lagreDiagnose(avsluttetBehandling: AvsluttetBehandling) {
         if (avsluttetBehandling.diagnoser != null) {
             diagnoseRepository.lagre(
                 DiagnoseEntity.fraDomene(
-                    avsluttetBehandling.diagnoser.copy(bidiagnoser = avsluttetBehandling.diagnoser.bidiagnoser.filter { it != "INGEN_DIAGNOSE" }),
-                    avsluttetBehandling.behandlingsReferanse
-                )
+                    avsluttetBehandling.diagnoser.copy(
+                        bidiagnoser = avsluttetBehandling.diagnoser.bidiagnoser.filter { it != "INGEN_DIAGNOSE" },
+                    ),
+                    avsluttetBehandling.behandlingsReferanse,
+                ),
             )
         }
 
@@ -175,9 +183,8 @@ class AvsluttetBehandlingService(
         if (behandling != null) {
             diagnosePerioderRepository.lagre(
                 behandling.id(),
-                avsluttetBehandling.diagnoserPeriodisert
+                avsluttetBehandling.diagnoserPeriodisert,
             )
         }
     }
-
 }

@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.integrasjoner.pdl
 import no.nav.aap.komponenter.gateway.Gateway
 import no.nav.aap.statistikk.person.Ident
 
-
 interface PdlGateway : Gateway {
     fun hentPersoner(identer: List<Ident>): List<PdlPerson>
     fun hentIdenter(ident: Ident): List<PdlIdent>
@@ -33,11 +32,7 @@ data class PdlIdenterRespons(val hentIdenter: PdlIdenter?)
 
 data class PdlIdenter(val identer: List<PdlIdent>)
 
-data class PdlIdent(
-    val ident: String,
-    val historisk: Boolean,
-    val gruppe: String = "FOLKEREGISTERIDENT",
-)
+data class PdlIdent(val ident: String, val historisk: Boolean, val gruppe: String = "FOLKEREGISTERIDENT")
 
 val PERSON_BOLK_QUERY = $$"""
     query($identer: [ID!]!) {
@@ -67,11 +62,12 @@ val IDENT_QUERY = $$"""
 
 data class PdlPerson(val adressebeskyttelse: List<Adressebeskyttelse>)
 
-data class Adressebeskyttelse(
-    val gradering: Gradering?
-)
+data class Adressebeskyttelse(val gradering: Gradering?)
 
 @Suppress("unused")
 enum class Gradering {
-    FORTROLIG, STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, UGRADERT
+    FORTROLIG,
+    STRENGT_FORTROLIG_UTLAND,
+    STRENGT_FORTROLIG,
+    UGRADERT,
 }

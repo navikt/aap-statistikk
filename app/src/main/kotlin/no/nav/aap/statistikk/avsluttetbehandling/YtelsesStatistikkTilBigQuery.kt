@@ -4,7 +4,6 @@ import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
-import no.nav.aap.statistikk.person.Ident
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.*
@@ -19,7 +18,9 @@ class YtelsesStatistikkTilBigQuery(
 
     fun lagre(behandlingReferanse: UUID) {
         val behandling =
-            requireNotNull(behandlingRepository.hent(behandlingReferanse)) { "Prøver å lagre en ikke-eksisterende behandling med referanse $behandlingReferanse" }
+            requireNotNull(
+                behandlingRepository.hent(behandlingReferanse),
+            ) { "Prøver å lagre en ikke-eksisterende behandling med referanse $behandlingReferanse" }
         val rettighetstypeperioder = rettighetstypeperiodeRepository.hent(behandling.referanse)
         val diagnoser = diagnoseRepository.hentForBehandling(behandling.referanse)
 
@@ -38,9 +39,8 @@ class YtelsesStatistikkTilBigQuery(
                 bidiagnoser = diagnoser?.bidiagnoser,
                 rettighetsPerioder = rettighetstypeperioder,
                 radEndret = LocalDateTime.now(clock),
-                vurderingsbehov = behandling.årsaker.map { it.name }
-            )
+                vurderingsbehov = behandling.årsaker.map { it.name },
+            ),
         )
     }
-
 }

@@ -8,9 +8,7 @@ import no.nav.aap.motor.ProvidersJobbSpesifikasjon
 import no.nav.aap.statistikk.behandling.BehandlingId
 import org.slf4j.LoggerFactory
 
-class ResendSakstatistikkJobbUtfører(
-    val sakStatikkService: SaksStatistikkService
-) : JobbUtfører {
+class ResendSakstatistikkJobbUtfører(val sakStatikkService: SaksStatistikkService) : JobbUtfører {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -30,17 +28,12 @@ class ResendSakstatistikkJobbUtfører(
 
 class ResendSakstatistikkJobb : ProvidersJobbSpesifikasjon {
 
-    override fun konstruer(
-        repositoryProvider: RepositoryProvider,
-        gatewayProvider: GatewayProvider
-    ): JobbUtfører {
-        return ResendSakstatistikkJobbUtfører(
+    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører =
+        ResendSakstatistikkJobbUtfører(
             sakStatikkService = lagSaksStatistikkService(repositoryProvider, gatewayProvider),
         )
-    }
 
     override val type: String = "statistikk.resendSakstatistikk"
     override val navn: String = "Resend saksstatikk"
     override val beskrivelse: String = "Resend saksstatikk"
-
 }

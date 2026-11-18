@@ -35,16 +35,14 @@ class KodeverkRepository(private val dbConnection: DBConnection) {
         return mapTilKodeverk(sql)
     }
 
-    private fun mapTilKodeverk(sql: String): List<Kodeverk> {
-        return dbConnection.queryList(sql) {
-            setRowMapper {
-                Kodeverk(
-                    kode = it.getString("kode"),
-                    beskrivelse = it.getString("beskrivelse"),
-                    gyldigFra = it.getLocalDate("gyldig_fra"),
-                    gyldigTil = it.getLocalDateOrNull("gyldig_til")
-                )
-            }
+    private fun mapTilKodeverk(sql: String): List<Kodeverk> = dbConnection.queryList(sql) {
+        setRowMapper {
+            Kodeverk(
+                kode = it.getString("kode"),
+                beskrivelse = it.getString("beskrivelse"),
+                gyldigFra = it.getLocalDate("gyldig_fra"),
+                gyldigTil = it.getLocalDateOrNull("gyldig_til"),
+            )
         }
     }
 }

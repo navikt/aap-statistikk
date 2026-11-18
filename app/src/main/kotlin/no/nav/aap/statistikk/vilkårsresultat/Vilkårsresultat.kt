@@ -9,14 +9,11 @@ data class Vilkårsresultat(
     val saksnummer: Saksnummer,
     val behandlingsReferanse: UUID,
     val behandlingsType: TypeBehandling,
-    val vilkår: List<Vilkår>
+    val vilkår: List<Vilkår>,
 )
 
-
 data class Vilkår(val vilkårType: Vilkårtype, val perioder: List<VilkårsPeriode>) {
-    fun harPerioderSomErOppfylt(): Boolean {
-        return perioder.any { it.utfall == Utfall.OPPFYLT }
-    }
+    fun harPerioderSomErOppfylt(): Boolean = perioder.any { it.utfall == Utfall.OPPFYLT }
 }
 
 data class VilkårsPeriode(
@@ -25,7 +22,7 @@ data class VilkårsPeriode(
     val utfall: Utfall,
     val manuellVurdering: Boolean,
     val innvilgelsesårsak: String? = null,
-    val avslagsårsak: String? = null
+    val avslagsårsak: String? = null,
 )
 
 /**
@@ -49,11 +46,14 @@ enum class Vilkårtype {
     SAMORDNING_ANNEN_LOVGIVNING,
     STUDENT,
     ORDINÆR_KVOTE,
-    SYKEPENGEERSTATNING_KVOTE
+    SYKEPENGEERSTATNING_KVOTE,
 }
 
 enum class Utfall {
-    IKKE_VURDERT, IKKE_RELEVANT, OPPFYLT, IKKE_OPPFYLT
+    IKKE_VURDERT,
+    IKKE_RELEVANT,
+    OPPFYLT,
+    IKKE_OPPFYLT,
 }
 
 // endringslogikk

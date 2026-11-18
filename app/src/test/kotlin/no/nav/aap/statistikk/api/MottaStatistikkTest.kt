@@ -32,7 +32,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQ
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.tilDomene
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
@@ -51,11 +50,12 @@ import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepository
 import no.nav.aap.statistikk.testutils.Fakes
-import no.nav.aap.statistikk.testutils.motor.MockJobbAppender
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.opprettTestStoppetBehandling
 import no.nav.aap.statistikk.testutils.client.testKlient
 import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
+import no.nav.aap.statistikk.testutils.motor.MockJobbAppender
 import no.nav.aap.statistikk.testutils.motor.konstruerManuellMotor
 import no.nav.aap.statistikk.testutils.motor.konstruerTestJobber
 import no.nav.aap.statistikk.testutils.motor.motorMock
@@ -71,12 +71,11 @@ import java.util.*
 import javax.sql.DataSource
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
-
 @Fakes
 class MottaStatistikkTest {
     @Test
     fun `ulike saker med samme prefiks får ulike stabile jobbnøkler før saken finnes`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val jobbAppender = MotorJobbAppender()
         val første = hendelse.copy(saksnummer = "TEST_4Y7KNC0")
@@ -96,7 +95,7 @@ class MottaStatistikkTest {
 
         val nøkler = dataSource.transaction { connection ->
             connection.queryList(
-                "SELECT sak_id FROM jobb WHERE type IN ('statistikk.lagreHendelse', 'statistikk.lagreAvklaringsbehovHendelseJobb') ORDER BY id"
+                "SELECT sak_id FROM jobb WHERE type IN ('statistikk.lagreHendelse', 'statistikk.lagreAvklaringsbehovHendelseJobb') ORDER BY id",
             ) {
                 setRowMapper { it.getLong("sak_id") }
             }
@@ -123,7 +122,10 @@ class MottaStatistikkTest {
         val motor = motorMock()
 
         val testHendelse = opprettTestStoppetBehandling(
-            behandlingReferanse, behandlingOpprettetTidspunkt, hendelsesTidspunkt, mottattTid
+            behandlingReferanse,
+            behandlingOpprettetTidspunkt,
+            hendelsesTidspunkt,
+            mottattTid,
         )
 
         testKlient(
@@ -137,14 +139,13 @@ class MottaStatistikkTest {
 
         assertThat(jobbAppender.jobber.first().payload()).isEqualTo(
             DefaultJsonMapper.toJson(
-                testHendelse
-            )
+                testHendelse,
+            ),
         )
     }
 
-    private fun ekteLagreStoppetHendelseJobb(
-        jobbAppender: JobbAppender,
-    ): LagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, mockk())
+    private fun ekteLagreStoppetHendelseJobb(jobbAppender: JobbAppender): LagreStoppetHendelseJobb =
+        LagreStoppetHendelseJobb(jobbAppender, mockk())
 
     private val hendelse = StoppetBehandling(
         saksnummer = "4LFK2S0",
@@ -161,15 +162,17 @@ class MottaStatistikkTest {
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T10:35:34.842"),
                         frist = null,
-                        endretAv = "Kelvin"
-                    ), EndringDTO(
+                        endretAv = "Kelvin",
+                    ),
+                    EndringDTO(
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:50:50.217"),
                         frist = null,
-                        endretAv = "Z9945111"
-                    )
-                )
-            ), AvklaringsbehovHendelseDto(
+                        endretAv = "Z9945111",
+                    ),
+                ),
+            ),
+            AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = AVKLAR_BISTANDSBEHOV,
                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                 endringer = listOf(
@@ -177,15 +180,17 @@ class MottaStatistikkTest {
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:50:52.049"),
                         frist = null,
-                        endretAv = "Kelvin"
-                    ), EndringDTO(
+                        endretAv = "Kelvin",
+                    ),
+                    EndringDTO(
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:51:16.176"),
                         frist = null,
-                        endretAv = "Z994573"
-                    )
-                )
-            ), AvklaringsbehovHendelseDto(
+                        endretAv = "Z994573",
+                    ),
+                ),
+            ),
+            AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = KVALITETSSIKRING,
                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                 endringer = listOf(
@@ -193,15 +198,17 @@ class MottaStatistikkTest {
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:51:17.231"),
                         frist = null,
-                        endretAv = "Kelvin"
-                    ), EndringDTO(
+                        endretAv = "Kelvin",
+                    ),
+                    EndringDTO(
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
                         tidsstempel = LocalDateTime.parse("2024-08-14T11:54:22.268"),
                         frist = null,
-                        endretAv = "Z994500"
-                    )
-                )
-            ), AvklaringsbehovHendelseDto(
+                        endretAv = "Z994500",
+                    ),
+                ),
+            ),
+            AvklaringsbehovHendelseDto(
                 avklaringsbehovDefinisjon = SKRIV_VEDTAKSBREV,
                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                 endringer = listOf(
@@ -209,10 +216,10 @@ class MottaStatistikkTest {
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                         tidsstempel = LocalDateTime.parse("2024-08-15T11:51:17.231"),
                         frist = null,
-                        endretAv = "Kelvin"
-                    )
-                )
-            )
+                        endretAv = "Kelvin",
+                    ),
+                ),
+            ),
         ),
         behandlingOpprettetTidspunkt = LocalDateTime.parse("2024-08-14T10:35:33.595"),
         versjon = "UKJENT",
@@ -220,13 +227,11 @@ class MottaStatistikkTest {
         sakStatus = SakStatus.UTREDES,
         hendelsesTidspunkt = LocalDateTime.now(),
         vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
+        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
     )
 
     @Test
-    fun `regenerere historikk for behandling`(
-        @Postgres dataSource: DataSource
-    ) {
+    fun `regenerere historikk for behandling`(@Postgres dataSource: DataSource) {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
@@ -241,7 +246,7 @@ class MottaStatistikkTest {
             testJobber.resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            testJobber.lagreSakinfoTilBigQueryJobb
+            testJobber.lagreSakinfoTilBigQueryJobb,
         )
 
         testKlient(
@@ -250,7 +255,6 @@ class MottaStatistikkTest {
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
         ) {
-
             oppdatertBehandlingHendelse(hendelse)
 
             motor.kjørJobber()
@@ -260,7 +264,7 @@ class MottaStatistikkTest {
                 Pair(
                     behandling,
                     it.provider().provide<SakstatistikkRepository>()
-                        .hentAlleHendelserPåBehandling(behandling.referanse)
+                        .hentAlleHendelserPåBehandling(behandling.referanse),
                 )
             }
             assertThat(behandling.hendelser.sortedBy { it.hendelsesTidspunkt }).hasSize(5)
@@ -300,13 +304,11 @@ class MottaStatistikkTest {
                 avregningAndreYtelser = emptyList(),
                 arbeidsgiver = emptyList(),
             ),
-        )
+        ),
     )
 
     @Test
-    fun `resende meldekort-behandlinger`(
-        @Postgres dataSource: DataSource
-    ) {
+    fun `resende meldekort-behandlinger`(@Postgres dataSource: DataSource) {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
 
@@ -321,7 +323,7 @@ class MottaStatistikkTest {
             testJobber.resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            testJobber.lagreSakinfoTilBigQueryJobb
+            testJobber.lagreSakinfoTilBigQueryJobb,
         )
 
         testKlient(
@@ -330,7 +332,6 @@ class MottaStatistikkTest {
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
         ) {
-
             postBehandlingsflytHendelse(meldekorthendelse)
 
             motor.kjørJobber()
@@ -345,7 +346,6 @@ class MottaStatistikkTest {
 
                 it.provider().provide<SakstatistikkRepository>()
                     .hentAlleHendelserPåBehandling(behandling.referanse)
-
             }
             bqBehandlinger.forEach {
                 println(it)
@@ -353,16 +353,13 @@ class MottaStatistikkTest {
             assertThat(bqBehandlinger).hasSize(4)
             assertThat(bqBehandlinger.map { it.behandlingStatus }).containsSubsequence(
                 "OPPRETTET",
-                "AVSLUTTET"
+                "AVSLUTTET",
             )
         }
     }
 
-
     @Test
-    fun `kan motta mer avansert object`(
-        @Postgres dataSource: DataSource
-    ) {
+    fun `kan motta mer avansert object`(@Postgres dataSource: DataSource) {
         val meterRegistry = SimpleMeterRegistry()
         PrometheusProvider.prometheus = meterRegistry
         val stoppetHendelseLagretCounter = meterRegistry.hendelseLagret()
@@ -382,7 +379,7 @@ class MottaStatistikkTest {
             testJobber.resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            testJobber.lagreSakinfoTilBigQueryJobb
+            testJobber.lagreSakinfoTilBigQueryJobb,
         )
 
         testKlient(
@@ -391,7 +388,6 @@ class MottaStatistikkTest {
             ekteLagreStoppetHendelseJobb(testJobber.motorJobbAppender),
             testJobber.motorJobbAppender,
         ) {
-
             postBehandlingsflytHendelse(hendelse)
 
             motor.kjørJobber()
@@ -399,7 +395,7 @@ class MottaStatistikkTest {
 
         val (uthentetSak, uthentetBehandling) = dataSource.transaction {
             val hendelsesRepository = SakRepositoryImpl(
-                it
+                it,
             )
             val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer.let(::Saksnummer))
             val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
@@ -411,7 +407,7 @@ class MottaStatistikkTest {
         assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
         assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
         assertThat(uthentetBehandling.opprettetTid).isEqualTo(
-            hendelse.behandlingOpprettetTidspunkt
+            hendelse.behandlingOpprettetTidspunkt,
         )
         assertThat(uthentetBehandling.typeBehandling).isEqualTo(hendelse.behandlingType.tilDomene())
         assertThat(uthentetBehandling.behandlingStatus()).isEqualTo(hendelse.behandlingStatus.tilDomene())
@@ -423,9 +419,7 @@ class MottaStatistikkTest {
     }
 
     @Test
-    fun `kan motta postmottak-hendelse, og jobb blir utført`(
-        @Postgres dataSource: DataSource
-    ) {
+    fun `kan motta postmottak-hendelse, og jobb blir utført`(@Postgres dataSource: DataSource) {
         val referanse = UUID.randomUUID()
         val hendelse = DokumentflytStoppetHendelse(
             journalpostId = JournalpostId(23),
@@ -435,7 +429,7 @@ class MottaStatistikkTest {
             status = no.nav.aap.postmottak.kontrakt.behandling.Status.OPPRETTET,
             avklaringsbehov = listOf(),
             opprettetTidspunkt = LocalDateTime.now(),
-            hendelsesTidspunkt = LocalDateTime.now()
+            hendelsesTidspunkt = LocalDateTime.now(),
         )
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
 
@@ -466,7 +460,7 @@ class MottaStatistikkTest {
                 lagrePostmottakHendelseJobb,
                 lagreOppgaveHendelseJobb,
                 lagreOppgaveJobb,
-                lagreStoppetHendelseJobb
+                lagreStoppetHendelseJobb,
             ),
             repositoryRegistry = postgresRepositoryRegistry,
             gatewayProvider = defaultGatewayProvider { register<FakePdlGateway>() },
@@ -493,9 +487,7 @@ class MottaStatistikkTest {
     }
 
     @Test
-    fun `kan motta tilbakekrevingshendelse, og hendelse blir lagret`(
-        @Postgres dataSource: DataSource
-    ) {
+    fun `kan motta tilbakekrevingshendelse, og hendelse blir lagret`(@Postgres dataSource: DataSource) {
         val behandlingRef = UUID.randomUUID()
         val saksnummer = "123"
         val stoppetBehandling = opprettTestStoppetBehandling(
@@ -530,7 +522,7 @@ class MottaStatistikkTest {
             testJobber.resendSakstatistikkJobb,
             lagreAvklaringsbehovHendelseJobb,
             lagrePostmottakHendelseJobb,
-            testJobber.lagreSakinfoTilBigQueryJobb
+            testJobber.lagreSakinfoTilBigQueryJobb,
         )
 
         testKlient(
@@ -564,7 +556,7 @@ class MottaStatistikkTest {
                     totaltFeilutbetaltBeløp = BigDecimal("12345.67"),
                     saksbehandlingURL = "https://tilbakekreving.nav.no/behandling/$behandlingRef",
                     opprettetTid = LocalDateTime.now(),
-                )
+                ),
             )
 
         motor.stop()

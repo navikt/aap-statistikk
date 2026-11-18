@@ -34,9 +34,9 @@ class MeldekortRepositoryTest {
                     ArbeidIPerioder(
                         periodeFom = LocalDate.of(2024, 1, 1),
                         periodeTom = LocalDate.of(2024, 1, 7),
-                        timerArbeidet = BigDecimal("20")
-                    )
-                )
+                        timerArbeidet = BigDecimal("20"),
+                    ),
+                ),
             ),
             Meldekort(
                 journalpostId = "JP654321",
@@ -44,10 +44,10 @@ class MeldekortRepositoryTest {
                     ArbeidIPerioder(
                         periodeFom = LocalDate.of(2024, 1, 1),
                         periodeTom = LocalDate.of(2024, 1, 7),
-                        timerArbeidet = BigDecimal("20")
-                    )
-                )
-            )
+                        timerArbeidet = BigDecimal("20"),
+                    ),
+                ),
+            ),
         )
 
         val logger = LoggerFactory.getLogger(MeldekortRepository::class.java) as Logger
@@ -61,7 +61,7 @@ class MeldekortRepositoryTest {
                 dataSource.transaction {
                     MeldekortRepository(it).lagre(
                         behandlingId = behandling.id(),
-                        meldekort = meldekort
+                        meldekort = meldekort,
                     )
                 }
             }
@@ -77,7 +77,7 @@ class MeldekortRepositoryTest {
 
         val uthentet = dataSource.transaction {
             MeldekortRepository(it).hentMeldekort(
-                behandlingId = behandling.id()
+                behandlingId = behandling.id(),
             )
         }
 
@@ -89,11 +89,11 @@ class MeldekortRepositoryTest {
                         ArbeidIPerioder(
                             periodeFom = LocalDate.of(2024, 1, 1),
                             periodeTom = LocalDate.of(2024, 1, 7),
-                            timerArbeidet = BigDecimal("20.0")
-                        )
-                    )
-                )
-            )
+                            timerArbeidet = BigDecimal("20.0"),
+                        ),
+                    ),
+                ),
+            ),
         )
     }
 
@@ -107,7 +107,7 @@ class MeldekortRepositoryTest {
         val meldekort = listOf(
             Meldekort(
                 journalpostId = "JP123456",
-                arbeidIPeriodeDTO = listOf()
+                arbeidIPeriodeDTO = listOf(),
             ),
             Meldekort(
                 journalpostId = "JP654321",
@@ -115,23 +115,22 @@ class MeldekortRepositoryTest {
                     ArbeidIPerioder(
                         periodeFom = LocalDate.of(2024, 1, 1),
                         periodeTom = LocalDate.of(2024, 1, 7),
-                        timerArbeidet = BigDecimal("7.5")
-                    )
-                )
-            )
+                        timerArbeidet = BigDecimal("7.5"),
+                    ),
+                ),
+            ),
         )
-
 
         dataSource.transaction {
             MeldekortRepository(it).lagre(
                 behandlingId = behandling.id(),
-                meldekort = meldekort
+                meldekort = meldekort,
             )
         }
 
         val uthentet = dataSource.transaction {
             MeldekortRepository(it).hentMeldekort(
-                behandlingId = behandling.id()
+                behandlingId = behandling.id(),
             )
         }
 

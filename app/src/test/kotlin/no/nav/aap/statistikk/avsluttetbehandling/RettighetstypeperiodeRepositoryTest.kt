@@ -20,18 +20,18 @@ class RettighetstypeperiodeRepositoryTest {
             RettighetstypePeriode(
                 fraDato = now.minusWeeks(2),
                 tilDato = now,
-                rettighetstype = RettighetsType.STUDENT
+                rettighetstype = RettighetsType.STUDENT,
             ),
             RettighetstypePeriode(
                 fraDato = now.minusWeeks(4),
                 tilDato = now.minusWeeks(2).minusDays(1),
-                rettighetstype = RettighetsType.STUDENT
-            )
+                rettighetstype = RettighetsType.STUDENT,
+            ),
         )
         dataSource.transaction {
             RettighetstypeperiodeRepository(it).lagre(
                 behandlingReferanse,
-                rettighetstypePerioder
+                rettighetstypePerioder,
             )
         }
 
@@ -51,13 +51,13 @@ class RettighetstypeperiodeRepositoryTest {
             RettighetstypePeriode(
                 fraDato = now.minusMonths(3),
                 tilDato = now.minusMonths(2),
-                rettighetstype = RettighetsType.BISTANDSBEHOV
-            )
+                rettighetstype = RettighetsType.BISTANDSBEHOV,
+            ),
         )
         dataSource.transaction {
             RettighetstypeperiodeRepository(it).lagre(
                 behandlingReferanse,
-                initialPerioder
+                initialPerioder,
             )
         }
 
@@ -65,18 +65,18 @@ class RettighetstypeperiodeRepositoryTest {
             RettighetstypePeriode(
                 fraDato = now.minusWeeks(6),
                 tilDato = now.minusWeeks(1),
-                rettighetstype = RettighetsType.ARBEIDSSØKER
+                rettighetstype = RettighetsType.ARBEIDSSØKER,
             ),
             RettighetstypePeriode(
                 fraDato = now.minusWeeks(12),
                 tilDato = now.minusWeeks(6).minusDays(1),
-                rettighetstype = RettighetsType.STUDENT
-            )
+                rettighetstype = RettighetsType.STUDENT,
+            ),
         )
         dataSource.transaction {
             RettighetstypeperiodeRepository(it).lagre(
                 behandlingReferanse,
-                oppdatertedPerioder
+                oppdatertedPerioder,
             )
         }
 
@@ -91,7 +91,7 @@ class RettighetstypeperiodeRepositoryTest {
                     JOIN behandling b ON r.behandling_id = b.id
                     JOIN behandling_referanse br ON b.referanse_id = br.id
                     WHERE br.referanse = ? AND r.oppdatert_tid IS NOT NULL
-                """.trimIndent()
+                """.trimIndent(),
             ) {
                 setParams { setUUID(1, behandlingReferanse) }
                 setRowMapper { row -> row.getInt("antall") }
@@ -101,7 +101,6 @@ class RettighetstypeperiodeRepositoryTest {
         assertThat(res).hasSize(2)
         assertThat(res).isEqualTo(oppdatertedPerioder)
         assertThat(antallMedOppdatertTid).isEqualTo(1)
-
     }
 
     @Test

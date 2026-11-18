@@ -5,9 +5,7 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 
 class EnhetRepositoryImpl(private val dbConnection: DBConnection) : EnhetRepository {
     companion object : RepositoryFactory<EnhetRepository> {
-        override fun konstruer(connection: DBConnection): EnhetRepository {
-            return EnhetRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): EnhetRepository = EnhetRepositoryImpl(connection)
     }
 
     override fun lagreEnhet(enhet: Enhet): Long {
@@ -19,7 +17,7 @@ class EnhetRepositoryImpl(private val dbConnection: DBConnection) : EnhetReposit
 )
 SELECT id FROM ny_enhet
 UNION ALL
-SELECT id FROM enhet WHERE kode = ?;""";
+SELECT id FROM enhet WHERE kode = ?;"""
 
         return dbConnection.queryFirst(sql) {
             setParams {

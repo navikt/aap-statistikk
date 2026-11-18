@@ -12,17 +12,15 @@ data class DiagnoseEntity(
     val behandlingReferanse: UUID,
     val kodeverk: String,
     val diagnosekode: String,
-    val bidiagnoser: List<String>
+    val bidiagnoser: List<String>,
 ) {
     companion object {
-        fun fraDomene(domene: Diagnoser, behandlingReferanse: UUID): DiagnoseEntity {
-            return DiagnoseEntity(
-                behandlingReferanse = behandlingReferanse,
-                kodeverk = domene.kodeverk,
-                diagnosekode = domene.diagnosekode,
-                bidiagnoser = domene.bidiagnoser
-            )
-        }
+        fun fraDomene(domene: Diagnoser, behandlingReferanse: UUID): DiagnoseEntity = DiagnoseEntity(
+            behandlingReferanse = behandlingReferanse,
+            kodeverk = domene.kodeverk,
+            diagnosekode = domene.diagnosekode,
+            bidiagnoser = domene.bidiagnoser,
+        )
     }
 }
 
@@ -33,9 +31,7 @@ class DiagnoseRepositoryImpl(
     private val logger = LoggerFactory.getLogger(DiagnoseRepositoryImpl::class.java)
 
     companion object : RepositoryFactory<DiagnoseRepository> {
-        override fun konstruer(connection: DBConnection): DiagnoseRepository {
-            return DiagnoseRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): DiagnoseRepository = DiagnoseRepositoryImpl(connection)
     }
 
     override fun lagre(diagnoseEntity: DiagnoseEntity): Long {
@@ -92,10 +88,9 @@ ON CONFLICT (behandling_id) DO UPDATE SET
                     behandlingReferanse = behandlingReferanse,
                     kodeverk = it.getString("d_kodeverk"),
                     diagnosekode = it.getString("d_diagnosekode"),
-                    bidiagnoser = it.getArray("d_bidiagnoser", String::class)
+                    bidiagnoser = it.getArray("d_bidiagnoser", String::class),
                 )
             }
         }
     }
-
 }

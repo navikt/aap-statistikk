@@ -15,11 +15,11 @@ import java.util.*
     AnnotationTarget.FIELD,
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.CLASS,
-    AnnotationTarget.VALUE_PARAMETER
+    AnnotationTarget.VALUE_PARAMETER,
 )
 @Retention(AnnotationRetention.RUNTIME)
 @ExtendWith(
-    BigQueryExtension::class
+    BigQueryExtension::class,
 )
 annotation class BigQuery
 
@@ -29,8 +29,8 @@ class BigQueryExtension : ParameterResolver {
         private val bigQueryContainer =
             BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.6.3").waitingFor(
                 HostPortWaitStrategy().withStartupTimeout(
-                    Duration.ofSeconds(10)
-                )
+                    Duration.ofSeconds(10),
+                ),
             ).withCommand("--log-level=debug --project test-project")
 
         init {
@@ -47,14 +47,12 @@ class BigQueryExtension : ParameterResolver {
             override val dataset: String
                 get() = datasetName
 
-            override fun bigQueryOptions(): BigQueryOptions {
-                return BigQueryOptions.newBuilder()
-                    .setLocation(bigQueryContainer.emulatorHttpEndpoint)
-                    .setProjectId(bigQueryContainer.projectId)
-                    .setHost(bigQueryContainer.emulatorHttpEndpoint)
-                    .setCredentials(NoCredentials.getInstance())
-                    .build()
-            }
+            override fun bigQueryOptions(): BigQueryOptions = BigQueryOptions.newBuilder()
+                .setLocation(bigQueryContainer.emulatorHttpEndpoint)
+                .setProjectId(bigQueryContainer.projectId)
+                .setHost(bigQueryContainer.emulatorHttpEndpoint)
+                .setCredentials(NoCredentials.getInstance())
+                .build()
         }
 
         config.bigQueryOptions().service.create(datasetInfo)
@@ -73,18 +71,11 @@ class BigQueryExtension : ParameterResolver {
         return sb.toString()
     }
 
-    override fun supportsParameter(
-        parameterContext: ParameterContext,
-        extensionContext: ExtensionContext
-    ): Boolean {
-        return parameterContext.isAnnotated(BigQuery::class.java) && (parameterContext.parameter.type == BigQueryConfig::class.java)
-    }
+    override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean =
+        parameterContext.isAnnotated(
+            BigQuery::class.java,
+        ) && (parameterContext.parameter.type == BigQueryConfig::class.java)
 
-    override fun resolveParameter(
-        parameterContext: ParameterContext,
-        extensionContext: ExtensionContext
-    ): Any {
-        return testBigQueryConfig()
-    }
-
+    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any =
+        testBigQueryConfig()
 }

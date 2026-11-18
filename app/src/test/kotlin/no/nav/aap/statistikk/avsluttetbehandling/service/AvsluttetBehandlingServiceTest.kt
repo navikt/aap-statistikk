@@ -46,7 +46,7 @@ class AvsluttetBehandlingServiceTest {
     @Test
     fun `avsluttet behandling-objekt lagres både i BigQuery og Postgres`(
         @Postgres dataSource: DataSource,
-        @BigQuery bigQuery: BigQueryConfig
+        @BigQuery bigQuery: BigQueryConfig,
     ) {
         val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Moscow"))
 
@@ -61,7 +61,7 @@ class AvsluttetBehandlingServiceTest {
             status = BehandlingStatus.AVSLUTTET,
             opprettetTidspunkt = opprettetTidspunkt,
             vurderingsbehov = listOf(Vurderingsbehov.OVERGANG_UFORE),
-            clock
+            clock,
         )
 
         val datoNå = LocalDate.now(clock)
@@ -69,12 +69,12 @@ class AvsluttetBehandlingServiceTest {
         val vedtattStansOpphørPeriode = StansEllerOpphør(
             type = StansType.STANS,
             fom = LocalDate.now(),
-            årsaker = setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS)
+            årsaker = setOf(Avslagsårsak.BRUDD_PÅ_AKTIVITETSPLIKT_STANS),
         )
         val fritaksvurdering = Fritakvurdering(
             harFritak = true,
             fraDato = LocalDate.now(),
-            tilDato = LocalDate.now().plusDays(11)
+            tilDato = LocalDate.now().plusDays(11),
         )
         val avsluttetBehandling = AvsluttetBehandling(
             behandlingsReferanse = behandlingReferanse,
@@ -119,8 +119,8 @@ class AvsluttetBehandlingServiceTest {
                         samordningUføregradering = null,
                         samordningArbeidsgiverGradering = null,
                         meldepliktGradering = null,
-                    )
-                )
+                    ),
+                ),
             ),
             vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
@@ -128,16 +128,17 @@ class AvsluttetBehandlingServiceTest {
                 saksnummer = saksnummer,
                 vilkår = listOf(
                     Vilkår(
-                        vilkårType = Vilkårtype.ALDERSVILKÅRET, perioder = listOf(
+                        vilkårType = Vilkårtype.ALDERSVILKÅRET,
+                        perioder = listOf(
                             VilkårsPeriode(
                                 fraDato = datoNå.minusYears(2),
                                 tilDato = datoNå.plusDays(3),
                                 manuellVurdering = false,
-                                utfall = Utfall.OPPFYLT
-                            )
-                        )
-                    )
-                )
+                                utfall = Utfall.OPPFYLT,
+                            ),
+                        ),
+                    ),
+                ),
             ),
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
                 grunnlaget = 25000.0,
@@ -147,8 +148,8 @@ class AvsluttetBehandlingServiceTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
-                    ),
+                    ytterligereNedsattArbeidsevneDato = null,
+                ),
                 terskelverdiForYrkesskade = 70,
                 andelSomSkyldesYrkesskade = BigDecimal(30),
                 andelYrkesskade = 25,
@@ -165,15 +166,15 @@ class AvsluttetBehandlingServiceTest {
             diagnoser = Diagnoser(
                 kodeverk = "KODEVERK",
                 diagnosekode = "KOLERA",
-                bidiagnoser = listOf("PEST")
+                bidiagnoser = listOf("PEST"),
             ),
             behandlingResultat = ResultatKode.INNVILGET,
             rettighetstypeperioder = listOf(
                 RettighetstypePeriode(
                     datoNå.minusYears(1),
                     datoNå.minusYears(2),
-                    rettighetstype = RettighetsType.BISTANDSBEHOV
-                )
+                    rettighetstype = RettighetsType.BISTANDSBEHOV,
+                ),
             ),
             fritaksvurderinger = listOf(fritaksvurdering),
             perioderMedArbeidsopptrapping = listOf(arbeidsopptrappingperiode),
@@ -211,8 +212,8 @@ class AvsluttetBehandlingServiceTest {
                     behandlingRepository = BehandlingRepository(it),
                     rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(it),
                     diagnoseRepository = DiagnoseRepositoryImpl(it),
-                    clock = clock
-                )
+                    clock = clock,
+                ),
             ).utfør(JobbInput(mockk()).medPayload(behandlingReferanse))
         }
 
@@ -220,7 +221,7 @@ class AvsluttetBehandlingServiceTest {
 
         val datoSammenligner: BiPredicate<LocalDateTime, LocalDateTime> = BiPredicate { t, u ->
             abs(
-                t.toEpochSecond(ZoneOffset.UTC) - u.toEpochSecond(ZoneOffset.UTC)
+                t.toEpochSecond(ZoneOffset.UTC) - u.toEpochSecond(ZoneOffset.UTC),
             ) < 1
         }
         assertThat(utlestFraBehandlingTabell).usingRecursiveComparison()
@@ -240,14 +241,14 @@ class AvsluttetBehandlingServiceTest {
                         RettighetstypePeriode(
                             datoNå.minusYears(1),
                             datoNå.minusYears(2),
-                            rettighetstype = RettighetsType.BISTANDSBEHOV
-                        )
+                            rettighetstype = RettighetsType.BISTANDSBEHOV,
+                        ),
                     ),
                     radEndret = LocalDateTime.now(clock)
                         .truncatedTo(ChronoUnit.MILLIS),
                     utbetalingId = avsluttetBehandling.behandlingsReferanse.toBase64(),
                     vurderingsbehov = listOf(Vurderingsbehov.OVERGANG_UFORE.name),
-                )
+                ),
             )
 
         val uthentetArbeidsopptrapping =
@@ -270,7 +271,7 @@ class AvsluttetBehandlingServiceTest {
         assertThat(uthentetTilkjentYtelse.perioder).usingRecursiveComparison()
             .withComparatorForType(
                 DoubleComparator(0.00001),
-                Double::class.javaObjectType
+                Double::class.javaObjectType,
             )
             .isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
         assertThat(counter.count()).isEqualTo(1.0)
@@ -279,7 +280,7 @@ class AvsluttetBehandlingServiceTest {
     @Test
     fun `går fint å hente tilkjent ytelse når ingenting er lagret`(
         @Postgres dataSource: DataSource,
-        @BigQuery bigQuery: BigQueryConfig
+        @BigQuery bigQuery: BigQueryConfig,
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = Saksnummer("xxxx")
@@ -293,7 +294,7 @@ class AvsluttetBehandlingServiceTest {
             dataSource,
             behandlingReferanse,
             saksnummer,
-            status = BehandlingStatus.AVSLUTTET
+            status = BehandlingStatus.AVSLUTTET,
         )
 
         val nå = LocalDate.now()
@@ -321,8 +322,8 @@ class AvsluttetBehandlingServiceTest {
                         samordningUføregradering = null,
                         samordningArbeidsgiverGradering = null,
                         meldepliktGradering = null,
-                    )
-                )
+                    ),
+                ),
             ),
             vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
@@ -336,11 +337,11 @@ class AvsluttetBehandlingServiceTest {
                                 fraDato = nå.minusYears(2),
                                 tilDato = nå,
                                 utfall = Utfall.OPPFYLT,
-                                manuellVurdering = true
-                            )
-                        )
-                    )
-                )
+                                manuellVurdering = true,
+                            ),
+                        ),
+                    ),
+                ),
             ),
             beregningsgrunnlag = IBeregningsGrunnlag.GrunnlagYrkesskade(
                 grunnlaget = 25000.0,
@@ -350,8 +351,8 @@ class AvsluttetBehandlingServiceTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
-                    ),
+                    ytterligereNedsattArbeidsevneDato = null,
+                ),
                 terskelverdiForYrkesskade = 70,
                 andelSomSkyldesYrkesskade = BigDecimal(30),
                 andelYrkesskade = 25,
@@ -368,15 +369,15 @@ class AvsluttetBehandlingServiceTest {
             diagnoser = Diagnoser(
                 kodeverk = "KODEVERK",
                 diagnosekode = "KOLERA",
-                bidiagnoser = listOf("PEST")
+                bidiagnoser = listOf("PEST"),
             ),
             behandlingResultat = ResultatKode.INNVILGET,
             rettighetstypeperioder = listOf(
                 RettighetstypePeriode(
                     nå.minusYears(1),
                     nå.minusYears(2),
-                    rettighetstype = RettighetsType.BISTANDSBEHOV
-                )
+                    rettighetstype = RettighetsType.BISTANDSBEHOV,
+                ),
             ),
             perioderMedArbeidsopptrapping = emptyList(),
             fritaksvurderinger = emptyList(),
@@ -388,7 +389,7 @@ class AvsluttetBehandlingServiceTest {
         dataSource.transaction {
             val (_, service) = konstruerAvsluttetBehandlingService(
                 it,
-                bigQuery
+                bigQuery,
             )
             service.lagre(avsluttetBehandling)
         }
@@ -399,7 +400,7 @@ class AvsluttetBehandlingServiceTest {
         assertThat(uthentet.perioder).usingRecursiveComparison()
             .withComparatorForType(
                 DoubleComparator(0.00001),
-                Double::class.javaObjectType
+                Double::class.javaObjectType,
             )
             .ignoringCollectionOrder()
             .isEqualTo(avsluttetBehandling.tilkjentYtelse.perioder)
@@ -410,7 +411,7 @@ class AvsluttetBehandlingServiceTest {
     @Test
     fun `skjermet behandling publiserer ikke ytelses-hendelse`(
         @Postgres dataSource: DataSource,
-        @BigQuery bigQuery: BigQueryConfig
+        @BigQuery bigQuery: BigQueryConfig,
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val saksnummer = Saksnummer("xxxx")
@@ -428,13 +429,13 @@ class AvsluttetBehandlingServiceTest {
             tilkjentYtelse = TilkjentYtelse(
                 behandlingsReferanse = behandlingReferanse,
                 saksnummer = saksnummer,
-                perioder = emptyList()
+                perioder = emptyList(),
             ),
             vilkårsresultat = Vilkårsresultat(
                 behandlingsReferanse = behandlingReferanse,
                 behandlingsType = TypeBehandling.Førstegangsbehandling,
                 saksnummer = saksnummer,
-                vilkår = emptyList()
+                vilkår = emptyList(),
             ),
             beregningsgrunnlag = null,
             diagnoser = null,
@@ -480,7 +481,7 @@ class AvsluttetBehandlingServiceTest {
                 diagnosePerioderRepository = DiagnosePerioderRepositoryImpl(dbConnection),
                 rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(dbConnection),
                 arbeidsopptrappingperioderRepository = ArbeidsopptrappingperioderRepositoryImpl(
-                    dbConnection
+                    dbConnection,
                 ),
                 institusjonsoppholdRepository = InstitusjonsoppholdRepositoryImpl(dbConnection),
                 vedtattStansOpphørRepository = VedtattStansOpphørRepositoryImpl(dbConnection),
@@ -489,10 +490,9 @@ class AvsluttetBehandlingServiceTest {
                 fritaksvurderingRepository = FritaksvurderingRepositoryImpl(dbConnection),
                 behandlingService = BehandlingService(
                     behandlingRepository,
-                    skjermingService
-                )
+                    skjermingService,
+                ),
             )
         return Pair(bigQueryClient, service)
     }
-
 }

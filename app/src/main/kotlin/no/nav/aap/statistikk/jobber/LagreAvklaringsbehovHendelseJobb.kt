@@ -13,32 +13,25 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorHendelsePublisher
 import org.slf4j.LoggerFactory
 
-class LagreAvklaringsbehovHendelseJobb(
-    private val jobbAppender: JobbAppender,
-) : ProvidersJobbSpesifikasjon {
+class LagreAvklaringsbehovHendelseJobb(private val jobbAppender: JobbAppender) : ProvidersJobbSpesifikasjon {
 
-    override fun konstruer(
-        repositoryProvider: RepositoryProvider,
-        gatewayProvider: GatewayProvider,
-    ): JobbUtfører {
+    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører {
         val hendelsePublisher = MotorHendelsePublisher.utenYtelseJobb(
             jobbAppender = jobbAppender,
             repositoryProvider = repositoryProvider,
         )
         return LagreAvklaringsbehovHendelseJobbUtfører(
-            ResendHendelseService.konstruer(repositoryProvider, gatewayProvider, hendelsePublisher)
+            ResendHendelseService.konstruer(repositoryProvider, gatewayProvider, hendelsePublisher),
         )
     }
 
     override val type = "statistikk.lagreAvklaringsbehovHendelseJobb"
     override val navn = "LagreAvklaringsbehovHendelseJobb"
     override val beskrivelse = "Jobb for å regenerere behandlinghistorikk fra behandlingsflyt."
-
 }
 
-private class LagreAvklaringsbehovHendelseJobbUtfører(
-    private val resendHendelseService: ResendHendelseService
-) : JobbUtfører {
+private class LagreAvklaringsbehovHendelseJobbUtfører(private val resendHendelseService: ResendHendelseService) :
+    JobbUtfører {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

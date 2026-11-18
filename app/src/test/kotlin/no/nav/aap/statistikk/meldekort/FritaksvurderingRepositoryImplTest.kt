@@ -25,25 +25,25 @@ class FritaksvurderingRepositoryImplTest {
             Fritakvurdering(
                 harFritak = true,
                 fraDato = LocalDate.of(2024, 1, 1),
-                tilDato = LocalDate.of(2024, 12, 31)
+                tilDato = LocalDate.of(2024, 12, 31),
             ),
             Fritakvurdering(
                 harFritak = false,
                 fraDato = LocalDate.of(2025, 1, 1),
-                tilDato = null
-            )
+                tilDato = null,
+            ),
         )
 
         dataSource.transaction {
             FritaksvurderingRepositoryImpl(it).lagre(
                 behandlingId = behandling.id(),
-                vurderinger = vurderinger
+                vurderinger = vurderinger,
             )
         }
 
         val uthentet = dataSource.transaction {
             FritaksvurderingRepositoryImpl(it).hentFritaksvurderinger(
-                behandlingId = behandling.id()
+                behandlingId = behandling.id(),
             )
         }
 

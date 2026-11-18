@@ -11,9 +11,7 @@ import java.time.LocalDateTime
 
 class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRepository {
     companion object : RepositoryFactory<OppgaveRepository> {
-        override fun konstruer(connection: DBConnection): OppgaveRepository {
-            return OppgaveRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): OppgaveRepository = OppgaveRepositoryImpl(connection)
     }
 
     private val oppgaveHendelseRepository: OppgaveHendelseRepository by lazy {
@@ -21,7 +19,9 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
     }
 
     override fun lagreOppgave(oppgave: Oppgave): Long {
-        requireNotNull(oppgave.enhet.id) { "Enhet-ID må være satt på enhet-objektet i oppgave. Oppgave-ID: ${oppgave.identifikator}" }
+        requireNotNull(
+            oppgave.enhet.id,
+        ) { "Enhet-ID må være satt på enhet-objektet i oppgave. Oppgave-ID: ${oppgave.identifikator}" }
 
         val behandlingsReferanseId = oppgave.behandlingReferanse?.let {
             hentEllerOpprettBehandlingReferanse(it)
@@ -64,12 +64,13 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
     }
 
     override fun oppdaterOppgave(oppgave: Oppgave) {
-        requireNotNull(oppgave.id) { "Oppgave må ha ID før den kan oppdateres. Identifikator: ${oppgave.identifikator}" }
+        requireNotNull(
+            oppgave.id,
+        ) { "Oppgave må ha ID før den kan oppdateres. Identifikator: ${oppgave.identifikator}" }
         // Sjekk reservasjon-status
         // Først fjern evnt eksisterende reservasjoner
         fjernEksisterendeReservasjoner(oppgave.id)
         if (oppgave.reservasjon != null) {
-
             // Sett inn på nytt
             val sql = """
                 insert into reservasjon (reservert_av, opprettet_tid) values (?, ?)
@@ -88,7 +89,7 @@ class OppgaveRepositoryImpl(private val dbConnection: DBConnection) : OppgaveRep
 update oppgave
 set reservasjon_id  = ?,
     avklaringsbehov = ?
-where id = ?"""
+where id = ?""",
             ) {
                 setParams {
                     setLong(1, reservasjonId)
@@ -106,7 +107,7 @@ where id = ?"""
                        har_hastemarkering = ?,
                        har_avslag_sykdom_markering = ?,
                        oppdatert_rad      = ?
-                   where id = ?"""
+                   where id = ?""",
         ) {
             setParams {
                 setLong(1, oppgave.enhet.id)
@@ -214,9 +215,9 @@ where id = ?"""
                 id = reservasjon,
                 reservertAv = Saksbehandler(
                     id = it.getLong("r_reservert_av"),
-                    ident = it.getString("s_nav_ident")
+                    ident = it.getString("s_nav_ident"),
                 ),
-                reservasjonOpprettet = it.getLocalDateTime("r_opprettet_tid")
+                reservasjonOpprettet = it.getLocalDateTime("r_opprettet_tid"),
             )
         },
         identifikator = it.getLong("o_identifikator"),

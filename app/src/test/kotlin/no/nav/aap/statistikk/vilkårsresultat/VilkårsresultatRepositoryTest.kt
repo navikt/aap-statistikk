@@ -28,10 +28,12 @@ class VilkårsresultatRepositoryTest {
         val (behandlingId, _) = opprettTestHendelse(dataSource, randomUUID, saksnummer)
 
         val vilkårsResultatEntity = VilkårsResultatEntity(
-            id = null, listOf(
+            id = null,
+            listOf(
                 VilkårEntity(
                     id = null,
-                    Vilkårtype.MEDLEMSKAP.toString(), listOf(
+                    Vilkårtype.MEDLEMSKAP.toString(),
+                    listOf(
                         VilkårsPeriodeEntity(
                             id = null,
                             LocalDate.now().minusDays(5),
@@ -39,7 +41,7 @@ class VilkårsresultatRepositoryTest {
                             Utfall.IKKE_OPPFYLT.toString(),
                             false,
                             null,
-                            null
+                            null,
                         ),
                         VilkårsPeriodeEntity(
                             id = null,
@@ -48,13 +50,14 @@ class VilkårsresultatRepositoryTest {
                             Utfall.IKKE_OPPFYLT.toString(),
                             false,
                             null,
-                            null
-                        )
-                    )
+                            null,
+                        ),
+                    ),
                 ),
                 VilkårEntity(
                     id = null,
-                    Vilkårtype.SYKDOMSVILKÅRET.toString(), listOf(
+                    Vilkårtype.SYKDOMSVILKÅRET.toString(),
+                    listOf(
                         VilkårsPeriodeEntity(
                             id = null,
                             LocalDate.now().minusDays(5),
@@ -62,7 +65,7 @@ class VilkårsresultatRepositoryTest {
                             Utfall.IKKE_OPPFYLT.toString(),
                             false,
                             null,
-                            null
+                            null,
                         ),
                         VilkårsPeriodeEntity(
                             id = null,
@@ -71,11 +74,11 @@ class VilkårsresultatRepositoryTest {
                             Utfall.OPPFYLT.toString(),
                             true,
                             null,
-                            null
-                        )
-                    )
-                )
-            )
+                            null,
+                        ),
+                    ),
+                ),
+            ),
         )
 
         val generertId = dataSource.transaction { conn ->
@@ -92,14 +95,14 @@ class VilkårsresultatRepositoryTest {
             hentetUt.tilVilkårsResultat(
                 saksnummer = saksnummer,
                 behandlingsReferanse = randomUUID,
-                typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
-            )
+                typeBehandling = TypeBehandling.Førstegangsbehandling.toString(),
+            ),
         ).isEqualTo(
             vilkårsResultatEntity.tilVilkårsResultat(
                 saksnummer = saksnummer,
                 behandlingsReferanse = randomUUID,
-                typeBehandling = TypeBehandling.Førstegangsbehandling.toString()
-            )
+                typeBehandling = TypeBehandling.Førstegangsbehandling.toString(),
+            ),
         )
 
         val hentUtMedReferanse =
@@ -110,7 +113,6 @@ class VilkårsresultatRepositoryTest {
 
     @RepeatedTest(5)
     fun `lagre og hente på flere behandlinger`(@Postgres dataSource: DataSource) {
-
         val referanser = (0..10).associate { UUID.randomUUID() to tilfeldigVilkårsResultatEntity() }
 
         for ((referanse, vilkårsResultat) in referanser) {
@@ -120,7 +122,7 @@ class VilkårsresultatRepositoryTest {
             dataSource.transaction { conn ->
                 VilkårsresultatRepository(conn).lagreVilkårsResultat(
                     vilkårsResultat,
-                    behandlingId
+                    behandlingId,
                 )
             }
         }
@@ -140,41 +142,34 @@ class VilkårsresultatRepositoryTest {
         }
     }
 
-    private fun tilfeldigVilkårsResultatEntity(): VilkårsResultatEntity {
-        return VilkårsResultatEntity(
-            id = null,
-            (0..10).random().let { antall ->
-                (0 until antall).map {
-                    tilfeldigVilkårEntity()
-                }
+    private fun tilfeldigVilkårsResultatEntity(): VilkårsResultatEntity = VilkårsResultatEntity(
+        id = null,
+        (0..10).random().let { antall ->
+            (0 until antall).map {
+                tilfeldigVilkårEntity()
             }
-        )
-    }
+        },
+    )
 
-    private fun tilfeldigVilkårEntity(): VilkårEntity {
-        return VilkårEntity(
-            id = null,
-            Vilkårtype.entries.toTypedArray().random().toString(),
-            (0..10).random().let { antall ->
-                (0 until antall).map {
-                    tilfeldigVilkårsPeriodeEntity()
-                }
+    private fun tilfeldigVilkårEntity(): VilkårEntity = VilkårEntity(
+        id = null,
+        Vilkårtype.entries.toTypedArray().random().toString(),
+        (0..10).random().let { antall ->
+            (0 until antall).map {
+                tilfeldigVilkårsPeriodeEntity()
             }
-        )
-    }
+        },
+    )
 
-    private fun tilfeldigVilkårsPeriodeEntity(): VilkårsPeriodeEntity {
-        return VilkårsPeriodeEntity(
-            id = null,
-            LocalDate.now().minusDays((1..10).random().toLong()),
-            LocalDate.now(),
-            Utfall.entries.toTypedArray().random().toString(),
-            (0..1).random() == 1,
-            if (random() > 0.5) "innvilgelsesårsak" else null,
-            if (random() > 0.5) "avslagsårsak" else null
-        )
-    }
-
+    private fun tilfeldigVilkårsPeriodeEntity(): VilkårsPeriodeEntity = VilkårsPeriodeEntity(
+        id = null,
+        LocalDate.now().minusDays((1..10).random().toLong()),
+        LocalDate.now(),
+        Utfall.entries.toTypedArray().random().toString(),
+        (0..1).random() == 1,
+        if (random() > 0.5) "innvilgelsesårsak" else null,
+        if (random() > 0.5) "avslagsårsak" else null,
+    )
 
     @Test
     fun `kun ett vilkårsresultat per behandling - skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
@@ -184,10 +179,12 @@ class VilkårsresultatRepositoryTest {
         val (behandlingId, _) = opprettTestHendelse(dataSource, randomUUID, saksnummer)
 
         val vilkårsresultat = VilkårsResultatEntity(
-            id = null, listOf(
+            id = null,
+            listOf(
                 VilkårEntity(
                     id = null,
-                    Vilkårtype.MEDLEMSKAP.toString(), listOf(
+                    Vilkårtype.MEDLEMSKAP.toString(),
+                    listOf(
                         VilkårsPeriodeEntity(
                             id = null,
                             LocalDate.now().minusDays(5),
@@ -195,18 +192,20 @@ class VilkårsresultatRepositoryTest {
                             "utfall",
                             false,
                             null,
-                            null
-                        )
-                    )
+                            null,
+                        ),
+                    ),
                 ),
-            )
+            ),
         )
 
         val nyttVilkårsresultat = VilkårsResultatEntity(
-            id = null, listOf(
+            id = null,
+            listOf(
                 VilkårEntity(
                     id = null,
-                    Vilkårtype.MEDLEMSKAP.toString(), listOf(
+                    Vilkårtype.MEDLEMSKAP.toString(),
+                    listOf(
                         VilkårsPeriodeEntity(
                             id = null,
                             LocalDate.now().minusDays(10),
@@ -214,11 +213,11 @@ class VilkårsresultatRepositoryTest {
                             "nytt utfall",
                             true,
                             null,
-                            null
-                        )
-                    )
+                            null,
+                        ),
+                    ),
                 ),
-            )
+            ),
         )
 
         // Lagre én gang

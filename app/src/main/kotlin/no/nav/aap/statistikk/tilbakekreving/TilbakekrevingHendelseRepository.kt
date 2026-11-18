@@ -4,7 +4,6 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.sak.Saksnummer
-import java.util.UUID
 
 interface TilbakekrevingHendelseRepository : Repository {
     fun lagre(sakId: Long, hendelse: TilbakekrevingHendelse)
@@ -15,9 +14,8 @@ class TilbakekrevingHendelseRepositoryImpl(private val dbConnection: DBConnectio
     TilbakekrevingHendelseRepository {
 
     companion object : RepositoryFactory<TilbakekrevingHendelseRepository> {
-        override fun konstruer(connection: DBConnection): TilbakekrevingHendelseRepository {
-            return TilbakekrevingHendelseRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): TilbakekrevingHendelseRepository =
+            TilbakekrevingHendelseRepositoryImpl(connection)
     }
 
     override fun lagre(sakId: Long, hendelse: TilbakekrevingHendelse) {

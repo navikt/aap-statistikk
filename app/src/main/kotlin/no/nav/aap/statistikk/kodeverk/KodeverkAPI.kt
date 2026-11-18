@@ -4,16 +4,14 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
 import io.ktor.server.routing.*
-import kotlinx.html.body
 import kotlinx.html.*
+import kotlinx.html.body
 import kotlinx.html.head
 import kotlinx.html.title
 import no.nav.aap.statistikk.behandling.ÅrsakTilSattPåVent
 import no.nav.aap.statistikk.db.TransactionExecutor
 
-fun Application.kodeverk(
-    transactionExecutor: TransactionExecutor,
-) {
+fun Application.kodeverk(transactionExecutor: TransactionExecutor) {
     routing {
         get("/kodeverk") {
             val name = "Kodeverk for AAP"
@@ -44,7 +42,7 @@ fun Application.kodeverk(
                                 border-bottom: 1px solid black;
                                 }
                                </style>
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
                 }
@@ -59,7 +57,6 @@ fun Application.kodeverk(
                     venteårsakerTabell()
                 }
             }
-
         }
     }
 }

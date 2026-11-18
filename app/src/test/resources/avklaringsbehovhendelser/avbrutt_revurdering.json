@@ -15,7 +15,7 @@
   "vurderingsbehov" : [ "REVURDERING_AVBRUTT", "REVURDER_BEREGNING" ],
   "årsakTilOpprettelse" : "MANUELL_OPPRETTELSE",
   "avklaringsbehov" : [ {
-    "id" : 17,
+    "id" : 18,
     "avklaringsbehovDefinisjon" : {
       "kode" : "5033",
       "type" : "MANUELT_PÅKREVD",
@@ -35,7 +35,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.004",
@@ -47,7 +47,7 @@
       "gradBehov" : null
     } ]
   }, {
-    "id" : 15,
+    "id" : 16,
     "avklaringsbehovDefinisjon" : {
       "kode" : "5008",
       "type" : "MANUELT_PÅKREVD",
@@ -67,7 +67,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVBRUTT",
       "tidsstempel" : "2025-09-24T12:00:00.005",
@@ -79,7 +79,7 @@
       "gradBehov" : null
     } ]
   }, {
-    "id" : 16,
+    "id" : 17,
     "avklaringsbehovDefinisjon" : {
       "kode" : "5014",
       "type" : "MANUELT_PÅKREVD",
@@ -99,7 +99,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVBRUTT",
       "tidsstempel" : "2025-09-24T12:00:00.006",

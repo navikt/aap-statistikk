@@ -18,8 +18,8 @@ import no.nav.aap.statistikk.integrasjoner.pdl.Adressebeskyttelse
 import no.nav.aap.statistikk.integrasjoner.pdl.Gradering
 import no.nav.aap.statistikk.integrasjoner.pdl.GraphQLRespons
 import no.nav.aap.statistikk.integrasjoner.pdl.HentPersonBolkResult
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlRespons
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlRespons
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtendWith
@@ -44,9 +44,7 @@ annotation class Fakes {
             texas.start()
         }
 
-        fun port(): Int {
-            return texas.port()
-        }
+        fun port(): Int = texas.port()
 
         private fun module(): Application.() -> Unit = {
             install(ContentNegotiation) {
@@ -57,7 +55,7 @@ annotation class Fakes {
 
                     call.respond(
                         status = HttpStatusCode.InternalServerError,
-                        message = ErrorRespons(cause.message)
+                        message = ErrorRespons(cause.message),
                     )
                 }
             }
@@ -101,9 +99,7 @@ annotation class Fakes {
             pdl.stop(500L, 10_000L)
         }
 
-        fun port(): Int {
-            return pdl.port()
-        }
+        fun port(): Int = pdl.port()
 
         private fun Application.pdl() {
             install(ContentNegotiation) {
@@ -114,11 +110,11 @@ annotation class Fakes {
                     this@pdl.log.info(
                         "AZURE :: Ukjent feil ved kall til '{}'",
                         call.request.local.uri,
-                        cause
+                        cause,
                     )
                     call.respond(
                         status = HttpStatusCode.InternalServerError,
-                        message = ErrorRespons(cause.message)
+                        message = ErrorRespons(cause.message),
                     )
                 }
             }
@@ -133,14 +129,14 @@ annotation class Fakes {
                                         person = PdlPerson(
                                             adressebeskyttelse = listOf(
                                                 Adressebeskyttelse(
-                                                    gradering = Gradering.UGRADERT
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
+                                                    gradering = Gradering.UGRADERT,
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
                             ),
-                        )
+                        ),
                     )
                 }
             }
@@ -148,7 +144,10 @@ annotation class Fakes {
     }
 
     @RestoreSystemProperties
-    class FakesExtension : AfterAllCallback, BeforeAllCallback, ParameterResolver {
+    class FakesExtension :
+        AfterAllCallback,
+        BeforeAllCallback,
+        ParameterResolver {
         private val texas = TexasFake()
         private val pdl = PdlFake()
 
@@ -158,11 +157,11 @@ annotation class Fakes {
             System.setProperty("NAIS_TOKEN_ENDPOINT", "http://localhost:${texas.port()}/token")
             System.setProperty(
                 "NAIS_TOKEN_EXCHANGE_ENDPOINT",
-                "http://localhost:${texas.port()}/token/exchange"
+                "http://localhost:${texas.port()}/token/exchange",
             )
             System.setProperty(
                 "NAIS_TOKEN_INTROSPECTION_ENDPOINT",
-                "http://localhost:${texas.port()}/introspect"
+                "http://localhost:${texas.port()}/introspect",
             )
             System.setProperty("integrasjon.pdl.url", "http://localhost:${pdl.port()}")
             System.setProperty("integrasjon.pdl.scope", "xxx")
@@ -180,16 +179,17 @@ annotation class Fakes {
 
         override fun supportsParameter(
             parameterContext: ParameterContext,
-            extensionContext: ExtensionContext
-        ): Boolean {
-            return (parameterContext.isAnnotated(Fakes::class.java) && (parameterContext.parameter.type == TestToken::class.java))
-        }
+            extensionContext: ExtensionContext,
+        ): Boolean = (
+            parameterContext.isAnnotated(
+            Fakes::class.java,
+        ) && (parameterContext.parameter.type == TestToken::class.java)
+        )
 
-        override fun resolveParameter(
-            parameterContext: ParameterContext,
-            extensionContext: ExtensionContext
-        ): Any {
-            if (parameterContext.isAnnotated(Fakes::class.java) && parameterContext.parameter.type == TestToken::class.java
+        override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
+            if (parameterContext.isAnnotated(
+                    Fakes::class.java,
+                ) && parameterContext.parameter.type == TestToken::class.java
             ) {
                 val token = AzureTokenGen("tilgang").generate(isApp = true, azp = "tilgang")
                 return TestToken(access_token = token, scope = "AAP_SCOPES")
@@ -210,10 +210,8 @@ annotation class Fakes {
         val scope: String? = null,
         val expires_in: Int = 3599,
     )
-
 }
 
-private fun EmbeddedServer<*, *>.port(): Int =
-    runBlocking { this@port.engine.resolvedConnectors() }
-        .first { it.type == ConnectorType.HTTP }
-        .port
+private fun EmbeddedServer<*, *>.port(): Int = runBlocking { this@port.engine.resolvedConnectors() }
+    .first { it.type == ConnectorType.HTTP }
+    .port

@@ -10,11 +10,12 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.enhet.Enhet
+import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.HendelsesService
 import no.nav.aap.statistikk.meldekort.MeldekortRepository
-import no.nav.aap.statistikk.enhet.Enhet
-import no.nav.aap.statistikk.enhet.EnhetRepositoryImpl
 import no.nav.aap.statistikk.oppgave.BehandlingReferanse
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.Oppgave
@@ -28,10 +29,9 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.konstruerSakstatistikkService
-import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.verdityper.dokument.Kanal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -49,7 +49,6 @@ class SaksStatistikkServiceTest {
     @Test
     @Disabled
     fun `hente ut historikk`(@Postgres dataSource: DataSource) {
-
         val referanse = lagreHendelser(dataSource)
         val behandlingId =
             dataSource.transaction { BehandlingRepository(it).hent(referanse)!!.id!! }
@@ -62,7 +61,7 @@ class SaksStatistikkServiceTest {
 
         dataSource.transaction {
             konstruerSakstatistikkService(
-                it
+                it,
             ).lagreSakInfoTilBigquery(behandlingId)
         }
 
@@ -77,12 +76,12 @@ class SaksStatistikkServiceTest {
                 BiPredicate { a: LocalDateTime, b: LocalDateTime ->
                     Duration.between(a, b).abs() < Duration.ofSeconds(1)
                 },
-                "(endret|teknisk)Tid"
+                "(endret|teknisk)Tid",
             )
             .isEqualTo(nedlagrete.last())
 
         assertThat(alleHendelser.last().ansvarligEnhetKode).describedAs(
-            "Ansvarlig enhet should be set from oppgave. Last event: ${alleHendelser.last()}"
+            "Ansvarlig enhet should be set from oppgave. Last event: ${alleHendelser.last()}",
         ).isEqualTo("0220")
         assertThat(alleHendelser.map { it.endretTid }).doesNotHaveDuplicates()
         assertThat(alleHendelser.size).isEqualTo(2)
@@ -90,7 +89,7 @@ class SaksStatistikkServiceTest {
 
     @Test
     fun `lagreBQBehandling skal bumpe endretTid slik at ny hendelse alltid har høyere endretTid enn forrige`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingsflytTid = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
@@ -105,7 +104,7 @@ class SaksStatistikkServiceTest {
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
-                    SkjermingService(FakePdlGateway(emptyMap()))
+                    SkjermingService(FakePdlGateway(emptyMap())),
                 ),
             )
 
@@ -133,14 +132,14 @@ class SaksStatistikkServiceTest {
                                     status = AvklaringsbehovStatus.OPPRETTET,
                                     tidsstempel = behandlingsflytTid,
                                     endretAv = "system",
-                                )
+                                ),
                             ),
-                        )
+                        ),
                     ),
                     hendelsesTidspunkt = behandlingsflytTid,
                     avsluttetBehandling = null,
-                    identerForSak = listOf("1234567891")
-                )
+                    identerForSak = listOf("1234567891"),
+                ),
             )
 
             // Oppgave ankommer ETTER behandlingsflyt-hendelsen
@@ -157,7 +156,7 @@ class SaksStatistikkServiceTest {
                     opprettetTidspunkt = oppgaveSendtTid,
                     behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
                     hendelser = emptyList(),
-                )
+                ),
             )
             OppgaveHendelseRepositoryImpl(conn).lagreHendelse(
                 OppgaveHendelse(
@@ -177,7 +176,7 @@ class SaksStatistikkServiceTest {
                     endretTidspunkt = null,
                     sendtTid = oppgaveSendtTid,
                     versjon = 1L,
-                )
+                ),
             )
 
             val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
@@ -206,7 +205,7 @@ class SaksStatistikkServiceTest {
 
     @Test
     fun `lagreBQBehandling skal lagre hendelse med eldre endretTid på riktig historisk posisjon`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingsflytTid = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
@@ -221,7 +220,7 @@ class SaksStatistikkServiceTest {
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
-                    SkjermingService(FakePdlGateway(emptyMap()))
+                    SkjermingService(FakePdlGateway(emptyMap())),
                 ),
             )
 
@@ -249,14 +248,14 @@ class SaksStatistikkServiceTest {
                                     status = AvklaringsbehovStatus.OPPRETTET,
                                     tidsstempel = behandlingsflytTid,
                                     endretAv = "system",
-                                )
+                                ),
                             ),
-                        )
+                        ),
                     ),
                     hendelsesTidspunkt = behandlingsflytTid,
                     avsluttetBehandling = null,
-                    identerForSak = listOf("1234567893")
-                )
+                    identerForSak = listOf("1234567893"),
+                ),
             )
 
             val enhetId = EnhetRepositoryImpl(conn).lagreEnhet(Enhet(null, "4491"))
@@ -270,7 +269,7 @@ class SaksStatistikkServiceTest {
                     opprettetTidspunkt = oppgaveSendtTid,
                     behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
                     hendelser = emptyList(),
-                )
+                ),
             )
             OppgaveHendelseRepositoryImpl(conn).lagreHendelse(
                 OppgaveHendelse(
@@ -290,7 +289,7 @@ class SaksStatistikkServiceTest {
                     endretTidspunkt = null,
                     sendtTid = oppgaveSendtTid,
                     versjon = 1L,
-                )
+                ),
             )
 
             val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
@@ -308,7 +307,7 @@ class SaksStatistikkServiceTest {
             val stalTidspunkt = behandlingsflytTid.plusSeconds(2)
             val forsinketHendelse = nyesteRad.copy(
                 ansvarligEnhetKode = "ANNEN_ENHET",
-                endretTid = stalTidspunkt
+                endretTid = stalTidspunkt,
             )
             service.lagreBQBehandling(forsinketHendelse)
 
@@ -329,11 +328,11 @@ class SaksStatistikkServiceTest {
 
     @Test
     fun `lagreBQBehandling er idempotent for forsinket hendelse som kjøres to ganger`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val behandlingUUID = UUID.randomUUID()
         val t2 = LocalDateTime.of(2024, 1, 1, 10, 0, 10)
-        val t0 = t2.minusSeconds(8)  // stale: eldre enn t2
+        val t0 = t2.minusSeconds(8) // stale: eldre enn t2
 
         dataSource.transaction { conn ->
             val service = konstruerSakstatistikkService(conn)
@@ -355,11 +354,11 @@ class SaksStatistikkServiceTest {
                 registrertTid = t2,
                 behandlingStatus = "AVSLUTTET",
             )
-            service.lagreBQBehandling(forsinketHendelse)  // første gang: lagres
+            service.lagreBQBehandling(forsinketHendelse) // første gang: lagres
 
             val antallEtterFørsteRetry = repo.hentAlleHendelserPåBehandling(behandlingUUID).size
 
-            service.lagreBQBehandling(forsinketHendelse)  // andre gang: skal hoppes over
+            service.lagreBQBehandling(forsinketHendelse) // andre gang: skal hoppes over
 
             val alleRader = repo.hentAlleHendelserPåBehandling(behandlingUUID)
             assertThat(alleRader)
@@ -376,7 +375,7 @@ class SaksStatistikkServiceTest {
 
     @Test
     fun `lagreBQBehandling skal ikke lagre ikke-avsluttet med samme endretTid etter avsluttet`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val behandlingUUID = UUID.randomUUID()
         val t0 = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
@@ -412,7 +411,7 @@ class SaksStatistikkServiceTest {
 
     @Test
     fun `lagreBQBehandling skal lagre avsluttet med samme endretTid når payload er forskjellig`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val behandlingUUID = UUID.randomUUID()
         val t0 = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
@@ -453,7 +452,7 @@ class SaksStatistikkServiceTest {
 
     @Test
     fun `retry etter ManglerEnhet ser allerede lagret rad som duplikat og lagrer ikke på nytt`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val behandlingReferanse = UUID.randomUUID()
         val behandlingsflytTid = LocalDateTime.of(2024, 1, 1, 10, 0, 0)
@@ -468,7 +467,7 @@ class SaksStatistikkServiceTest {
                 hendelsePublisher = FakeHendelsePublisher(),
                 behandlingService = BehandlingService(
                     BehandlingRepository(conn),
-                    SkjermingService(FakePdlGateway(emptyMap()))
+                    SkjermingService(FakePdlGateway(emptyMap())),
                 ),
             )
 
@@ -496,14 +495,14 @@ class SaksStatistikkServiceTest {
                                     status = AvklaringsbehovStatus.OPPRETTET,
                                     tidsstempel = behandlingsflytTid,
                                     endretAv = "system",
-                                )
+                                ),
                             ),
-                        )
+                        ),
                     ),
                     hendelsesTidspunkt = behandlingsflytTid,
                     avsluttetBehandling = null,
-                    identerForSak = listOf("1234567892")
-                )
+                    identerForSak = listOf("1234567892"),
+                ),
             )
 
             val oppgaveIdentifikator = 77L
@@ -519,7 +518,7 @@ class SaksStatistikkServiceTest {
                     opprettetTidspunkt = oppgaveSendtTid,
                     behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
                     hendelser = emptyList(),
-                )
+                ),
             )
             OppgaveHendelseRepositoryImpl(conn).lagreHendelse(
                 OppgaveHendelse(
@@ -539,7 +538,7 @@ class SaksStatistikkServiceTest {
                     endretTidspunkt = null,
                     sendtTid = oppgaveSendtTid,
                     versjon = 1L,
-                )
+                ),
             )
 
             val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
@@ -580,7 +579,7 @@ class SaksStatistikkServiceTest {
                     hendelsePublisher = FakeHendelsePublisher(),
                     behandlingService = BehandlingService(
                         BehandlingRepository(it),
-                        SkjermingService(FakePdlGateway(emptyMap()))
+                        SkjermingService(FakePdlGateway(emptyMap())),
                     ),
                 )
 
@@ -608,14 +607,14 @@ class SaksStatistikkServiceTest {
                                         status = AvklaringsbehovStatus.OPPRETTET,
                                         tidsstempel = baseTid.plusSeconds(1),
                                         endretAv = "Bork",
-                                    )
+                                    ),
                                 ),
-                            )
+                            ),
                         ),
                         hendelsesTidspunkt = baseTid.plusSeconds(1),
                         avsluttetBehandling = null,
-                        identerForSak = listOf("1233455", "11212")
-                    )
+                        identerForSak = listOf("1233455", "11212"),
+                    ),
                 )
 
                 hendelsesService.prosesserNyHendelse(
@@ -647,7 +646,7 @@ class SaksStatistikkServiceTest {
                                         status = AvklaringsbehovStatus.AVSLUTTET,
                                         tidsstempel = baseTid.plusSeconds(3),
                                         endretAv = "Bork",
-                                    )
+                                    ),
                                 ),
                             ),
                             AvklaringsbehovHendelseDto(
@@ -658,14 +657,14 @@ class SaksStatistikkServiceTest {
                                         status = AvklaringsbehovStatus.OPPRETTET,
                                         tidsstempel = baseTid.plusSeconds(3),
                                         endretAv = "Bjork",
-                                    )
+                                    ),
                                 ),
                             ),
                         ),
                         hendelsesTidspunkt = baseTid.plusSeconds(3),
                         avsluttetBehandling = null,
-                        identerForSak = listOf("1233455", "11212")
-                    )
+                        identerForSak = listOf("1233455", "11212"),
+                    ),
                 )
 
                 // Oppgave opprettet ETTER at AVKLAR_SYKDOM ble gjeldende
@@ -687,7 +686,7 @@ class SaksStatistikkServiceTest {
                         endretTidspunkt = baseTid.plusSeconds(4),
                         sendtTid = baseTid.plusSeconds(4),
                         versjon = 1L,
-                    )
+                    ),
                 )
             }
 

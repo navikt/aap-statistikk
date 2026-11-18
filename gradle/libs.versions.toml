@@ -10,6 +10,7 @@ detekt = "2.0.0-alpha.6"
 googleCloudBigquery = "2.71.0"
 
 [libraries]
+detektKtlintWrapper = { module = "dev.detekt:detekt-rules-ktlint-wrapper", version.ref = "detekt" }
 dbconnect = { module = "no.nav.aap.kelvin:dbconnect", version.ref = "komponenter" }
 httpklient = { module = "no.nav.aap.kelvin:httpklient", version.ref = "komponenter" }
 infrastructure = { module = "no.nav.aap.kelvin:infrastructure", version.ref = "komponenter" }

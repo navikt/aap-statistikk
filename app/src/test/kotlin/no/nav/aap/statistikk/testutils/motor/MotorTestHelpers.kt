@@ -42,7 +42,7 @@ data class TestJobberSetup(
 )
 
 fun konstruerTestJobber(
-    bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository()
+    bqYtelseRepository: IBQYtelsesstatistikkRepository = FakeBQYtelseRepository(),
 ): TestJobberSetup {
     val lagreSakinfoTilBigQueryJobb = LagreSakinfoTilBigQueryJobb()
     val lagreAvsluttetBehandlingTilBigQueryJobb =
@@ -53,7 +53,7 @@ fun konstruerTestJobber(
         lagreSakinfoTilBigQueryJobb,
         lagreAvsluttetBehandlingTilBigQueryJobb,
         resendSakstatistikkJobb,
-        motorJobbAppender
+        motorJobbAppender,
     )
 }
 
@@ -64,7 +64,7 @@ fun konstruerManuellMotor(
     resendSakstatistikkJobb: ResendSakstatistikkJobb,
     lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
-    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb
+    lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
 ): ManuellMotorImpl {
     val lagreOppgaveJobb = LagreOppgaveJobb()
     val lagreAvsluttetBehandlingTilBigQueryJobb =
@@ -80,7 +80,7 @@ fun konstruerManuellMotor(
             LagreOppgaveHendelseJobb(),
             lagreSakinfoTilBigQueryJobb,
             LagreStoppetHendelseJobb(jobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb),
-            LagreTilbakekrevingHendelseJobb()
+            LagreTilbakekrevingHendelseJobb(),
         ),
         repositoryRegistry = postgresRepositoryRegistry,
         gatewayProvider = defaultGatewayProvider { register<FakePdlGateway>() },
@@ -88,9 +88,7 @@ fun konstruerManuellMotor(
 }
 
 val noOpTransactionExecutor = object : TransactionExecutor {
-    override fun <E> withinTransaction(block: (DBConnection) -> E): E {
-        return block(mockk(relaxed = true))
-    }
+    override fun <E> withinTransaction(block: (DBConnection) -> E): E = block(mockk(relaxed = true))
 }
 
 fun motorMock(): Motor {
@@ -106,17 +104,11 @@ class MockJobbAppender : JobbAppender {
     var sisteDelayInSeconds: Long = 0
     var sisteAvklaringsbehovKode: Definisjon? = null
 
-    override fun leggTil(
-        connection: DBConnection,
-        jobb: JobbInput
-    ) {
+    override fun leggTil(connection: DBConnection, jobb: JobbInput) {
         jobber.add(jobb)
     }
 
-    override fun leggTil(
-        repositoryProvider: RepositoryProvider,
-        jobb: JobbInput
-    ) {
+    override fun leggTil(repositoryProvider: RepositoryProvider, jobb: JobbInput) {
         jobber.add(jobb)
     }
 
@@ -129,7 +121,9 @@ class MockJobbAppender : JobbAppender {
         avklaringsbehovKode: Definisjon?,
         cutoffTidspunkt: LocalDateTime?,
     ) {
-        logger.info("NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.")
+        logger.info(
+            "NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.",
+        )
         sisteEnhetRetryCount = enhetRetryCount
         sisteDelayInSeconds = delayInSeconds
         sisteAvklaringsbehovKode = avklaringsbehovKode
@@ -138,15 +132,12 @@ class MockJobbAppender : JobbAppender {
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
         provider: RepositoryProvider,
         behandlingId: BehandlingId,
-        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
+        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
     ) {
         TODO("Not yet implemented")
     }
 
-    override fun leggTilResendSakstatistikkJobb(
-        repositoryProvider: RepositoryProvider,
-        behandlingId: BehandlingId
-    ) {
+    override fun leggTilResendSakstatistikkJobb(repositoryProvider: RepositoryProvider, behandlingId: BehandlingId) {
         TODO("Not yet implemented")
     }
 }

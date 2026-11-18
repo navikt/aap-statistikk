@@ -12,7 +12,6 @@ import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
 
-
 class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
     private val oppgaveHistorikkLagrer: OppgaveHistorikkLagrer,
@@ -39,7 +38,7 @@ class LagreOppgaveJobbUtfører(
                             behandlingReferanse = oppgave.behandlingReferanse.referanse,
                             avklaringsbehovKode = oppgave.avklaringsbehov,
                             behandlingTidspunkt = referanseTidspunkt,
-                            preferertOppgaveId = oppgave.identifikator
+                            preferertOppgaveId = oppgave.identifikator,
                         )
                         MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
                             repositoryProvider,
@@ -55,11 +54,8 @@ class LagreOppgaveJobbUtfører(
 }
 
 class LagreOppgaveJobb : ProvidersJobbSpesifikasjon {
-    override fun konstruer(
-        repositoryProvider: RepositoryProvider,
-        gatewayProvider: GatewayProvider
-    ): JobbUtfører {
-        return LagreOppgaveJobbUtfører(
+    override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører =
+        LagreOppgaveJobbUtfører(
             repositoryProvider.provide(),
             OppgaveHistorikkLagrer(
                 personService = PersonService(repositoryProvider, gatewayProvider),
@@ -70,7 +66,6 @@ class LagreOppgaveJobb : ProvidersJobbSpesifikasjon {
             repositoryProvider.provide<IBehandlingRepository>(),
             repositoryProvider,
         )
-    }
 
     override val type: String = "statistikk.konverterOppgavehendelserTilModell"
     override val navn: String = "Konverter oppgavehendelser til modell"

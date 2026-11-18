@@ -5,8 +5,7 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.behandling.BehandlingId
 import java.time.LocalDate
 
-class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) :
-    VedtattStansOpphørRepository {
+class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) : VedtattStansOpphørRepository {
 
     companion object : RepositoryFactory<VedtattStansOpphørRepositoryImpl> {
         override fun konstruer(connection: DBConnection) = VedtattStansOpphørRepositoryImpl(connection)
@@ -19,7 +18,7 @@ class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) 
             WHERE vedtatt_stans_opphor_id IN (
                 SELECT id FROM vedtatt_stans_opphor WHERE behandling_id = ?
             )
-            """.trimIndent()
+            """.trimIndent(),
         ) {
             setParams { setLong(1, behandlingId.id) }
         }
@@ -72,7 +71,7 @@ class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) 
             LEFT JOIN vedtatt_stans_opphor_aarsak a ON a.vedtatt_stans_opphor_id = s.id
             WHERE s.behandling_id = ?
             ORDER BY s.id
-            """.trimIndent()
+            """.trimIndent(),
         ) {
             setParams { setLong(1, behandlingId.id) }
             setRowMapper {
@@ -80,7 +79,7 @@ class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) 
                     id = it.getLong("id"),
                     type = it.getString("type"),
                     fom = it.getLocalDate("fom"),
-                    aarsak = it.getString("aarsak")
+                    aarsak = it.getString("aarsak"),
                 )
             }
         }
@@ -92,7 +91,7 @@ class VedtattStansOpphørRepositoryImpl(private val dbConnection: DBConnection) 
                 StansEllerOpphør(
                     type = StansType.valueOf(første.type),
                     fom = første.fom,
-                    årsaker = raderForStans.mapNotNull { it.aarsak }.map { Avslagsårsak.valueOf(it) }.toSet()
+                    årsaker = raderForStans.mapNotNull { it.aarsak }.map { Avslagsårsak.valueOf(it) }.toSet(),
                 )
             }
     }

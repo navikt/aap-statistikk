@@ -28,7 +28,7 @@ class BeregningsgrunnlagRepositoryTest {
             erGjennomsnitt = true,
             inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
             nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-            ytterligereNedsattArbeidsevneDato = null
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -38,13 +38,13 @@ class BeregningsgrunnlagRepositoryTest {
                 MedBehandlingsreferanse(
                     value = grunnlag,
                     behandlingsReferanse = behandlingsReferanse,
-                )
+                ),
             )
         }
 
         val hentBeregningsGrunnlag = dataSource.transaction {
             BeregningsgrunnlagRepository(
-                it
+                it,
             ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
@@ -52,8 +52,8 @@ class BeregningsgrunnlagRepositoryTest {
         assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
             MedBehandlingsreferanse(
                 value = grunnlag,
-                behandlingsReferanse = behandlingsReferanse
-            )
+                behandlingsReferanse = behandlingsReferanse,
+            ),
         )
     }
 
@@ -70,7 +70,7 @@ class BeregningsgrunnlagRepositoryTest {
                 erGjennomsnitt = true,
                 inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                 nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                ytterligereNedsattArbeidsevneDato = null
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -92,23 +92,23 @@ class BeregningsgrunnlagRepositoryTest {
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     value = grunnlagYrkesskade,
-                    behandlingsReferanse = behandlingsReferanse
-                )
+                    behandlingsReferanse = behandlingsReferanse,
+                ),
             )
         }
 
         val hentBeregningsGrunnlag =
             dataSource.transaction {
                 BeregningsgrunnlagRepository(
-                    it
+                    it,
                 ).hentBeregningsGrunnlag(behandlingsReferanse)
             }
 
         assertThat(hentBeregningsGrunnlag).hasSize(1).first().isEqualTo(
             MedBehandlingsreferanse(
                 value = grunnlagYrkesskade,
-                behandlingsReferanse = behandlingsReferanse
-            )
+                behandlingsReferanse = behandlingsReferanse,
+            ),
         )
     }
 
@@ -127,17 +127,17 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
+                    ytterligereNedsattArbeidsevneDato = null,
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
-                    LocalDate.of(2021, 1, 1) to 60
+                    LocalDate.of(2021, 1, 1) to 60,
                 ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
                     2019 to 27500.0,
-                    2020 to 28000.0
+                    2020 to 28000.0,
                 ),
                 uføreYtterligereNedsattArbeidsevneÅr = 2020,
                 nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
@@ -163,14 +163,14 @@ class BeregningsgrunnlagRepositoryTest {
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse = behandlingsReferanse,
-                    value = grunnlagYrkesskade
-                )
+                    value = grunnlagYrkesskade,
+                ),
             )
         }
 
         val hentBeregningsGrunnlag = dataSource.transaction {
             BeregningsgrunnlagRepository(
-                it
+                it,
             ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
@@ -178,10 +178,9 @@ class BeregningsgrunnlagRepositoryTest {
         assertThat(hentBeregningsGrunnlag.first()).isEqualTo(
             MedBehandlingsreferanse(
                 behandlingsReferanse,
-                grunnlagYrkesskade
-            )
+                grunnlagYrkesskade,
+            ),
         )
-
     }
 
     @Test
@@ -198,11 +197,11 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
+                    ytterligereNedsattArbeidsevneDato = null,
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
-                    LocalDate.of(2021, 1, 1) to 60
+                    LocalDate.of(2021, 1, 1) to 60,
                 ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
@@ -221,14 +220,14 @@ class BeregningsgrunnlagRepositoryTest {
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     value = grunnlagUfore,
-                    behandlingsReferanse = behandlingsReferanse
-                )
+                    behandlingsReferanse = behandlingsReferanse,
+                ),
             )
         }
 
         val uthentet = dataSource.transaction {
             BeregningsgrunnlagRepository(
-                it
+                it,
             ).hentBeregningsGrunnlag(behandlingsReferanse)
         }
 
@@ -236,10 +235,9 @@ class BeregningsgrunnlagRepositoryTest {
         assertThat(uthentet.first()).isEqualTo(
             MedBehandlingsreferanse(
                 value = grunnlagUfore,
-                behandlingsReferanse = behandlingsReferanse
-            )
+                behandlingsReferanse = behandlingsReferanse,
+            ),
         )
-
     }
 
     @Test
@@ -261,17 +259,17 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
+                    ytterligereNedsattArbeidsevneDato = null,
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
-                    LocalDate.of(2021, 1, 1) to 60
+                    LocalDate.of(2021, 1, 1) to 60,
                 ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
                     2019 to 27500.0,
-                    2020 to 28000.0
+                    2020 to 28000.0,
                 ),
                 uføreYtterligereNedsattArbeidsevneÅr = 2020,
                 nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
@@ -300,17 +298,17 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
+                    ytterligereNedsattArbeidsevneDato = null,
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
-                    LocalDate.of(2021, 1, 1) to 60
+                    LocalDate.of(2021, 1, 1) to 60,
                 ),
                 type = UføreType.YTTERLIGERE_NEDSATT,
                 uføreInntekterFraForegåendeÅr = mapOf(
                     2018 to 27000.0,
                     2019 to 27500.0,
-                    2020 to 28000.0
+                    2020 to 28000.0,
                 ),
                 uføreYtterligereNedsattArbeidsevneÅr = 2020,
                 nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
@@ -322,22 +320,22 @@ class BeregningsgrunnlagRepositoryTest {
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse = behandlingsReferanse,
-                    value = grunnlagUfore
-                )
+                    value = grunnlagUfore,
+                ),
             )
 
             beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse = behandlingsReferanse2,
-                    value = grunnlagYrkesskade
-                )
+                    value = grunnlagYrkesskade,
+                ),
             )
         }
 
         val uthentet =
             dataSource.transaction {
                 BeregningsgrunnlagRepository(
-                    it
+                    it,
                 ).hentBeregningsGrunnlag(behandlingsReferanse)
             }
 
@@ -348,7 +346,7 @@ class BeregningsgrunnlagRepositoryTest {
 
         val uthentet2 = dataSource.transaction {
             BeregningsgrunnlagRepository(
-                it
+                it,
             ).hentBeregningsGrunnlag(behandlingsReferanse2)
         }
 
@@ -372,14 +370,14 @@ class BeregningsgrunnlagRepositoryTest {
                 beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                     MedBehandlingsreferanse(
                         value = grunnlag1,
-                        behandlingsReferanse = ref
-                    )
+                        behandlingsReferanse = ref,
+                    ),
                 )
                 beregningsgrunnlagRepository.lagreBeregningsGrunnlag(
                     MedBehandlingsreferanse(
                         value = grunnlag2,
-                        behandlingsReferanse = ref
-                    )
+                        behandlingsReferanse = ref,
+                    ),
                 )
             }
         }
@@ -388,7 +386,7 @@ class BeregningsgrunnlagRepositoryTest {
         referanser.forEach { (ref, grunnlag) ->
             val hentet = dataSource.transaction {
                 BeregningsgrunnlagRepository(
-                    it
+                    it,
                 ).hentBeregningsGrunnlag(ref)
             }
             assertThat(hentet).hasSize(1)
@@ -409,7 +407,7 @@ class BeregningsgrunnlagRepositoryTest {
             erGjennomsnitt = true,
             inntekter = mapOf(2019 to 25000.0),
             nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-            ytterligereNedsattArbeidsevneDato = null
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         val grunnlag2 = IBeregningsGrunnlag.Grunnlag_11_19(
@@ -418,7 +416,7 @@ class BeregningsgrunnlagRepositoryTest {
             erGjennomsnitt = false,
             inntekter = mapOf(2020 to 35000.0),
             nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-            ytterligereNedsattArbeidsevneDato = null
+            ytterligereNedsattArbeidsevneDato = null,
         )
 
         dataSource.transaction {
@@ -454,7 +452,7 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
+                    ytterligereNedsattArbeidsevneDato = null,
                 ),
                 uføregrader = mapOf(
                     LocalDate.of(2020, 1, 1) to 50,
@@ -486,8 +484,8 @@ class BeregningsgrunnlagRepositoryTest {
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
-                    grunnlagYrkesskadeUfore
-                )
+                    grunnlagYrkesskadeUfore,
+                ),
             )
         }
 
@@ -497,8 +495,8 @@ class BeregningsgrunnlagRepositoryTest {
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
-                    grunnlagYrkesskadeUfore
-                )
+                    grunnlagYrkesskadeUfore,
+                ),
             )
         }
 
@@ -512,7 +510,9 @@ class BeregningsgrunnlagRepositoryTest {
     }
 
     @Test
-    fun `lagre beregningsgrunnlag yrkesskade med normal skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
+    fun `lagre beregningsgrunnlag yrkesskade med normal skal overskrive eksisterende`(
+        @Postgres dataSource: DataSource,
+    ) {
         val behandlingsReferanse = UUID.randomUUID()
         opprettTestHendelse(dataSource, behandlingsReferanse, Saksnummer("ABCDE"))
 
@@ -524,7 +524,7 @@ class BeregningsgrunnlagRepositoryTest {
                 erGjennomsnitt = true,
                 inntekter = mapOf(2019 to 25000.0, 2020 to 26000.0),
                 nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                ytterligereNedsattArbeidsevneDato = null
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -545,8 +545,8 @@ class BeregningsgrunnlagRepositoryTest {
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
-                    grunnlagYrkesskadeNormal
-                )
+                    grunnlagYrkesskadeNormal,
+                ),
             )
         }
 
@@ -556,8 +556,8 @@ class BeregningsgrunnlagRepositoryTest {
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
-                    grunnlagYrkesskadeNormal
-                )
+                    grunnlagYrkesskadeNormal,
+                ),
             )
         }
 
@@ -583,7 +583,7 @@ class BeregningsgrunnlagRepositoryTest {
                 erGjennomsnitt = true,
                 inntekter = mapOf(2019 to 25000.0),
                 nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                ytterligereNedsattArbeidsevneDato = null
+                ytterligereNedsattArbeidsevneDato = null,
             ),
             terskelverdiForYrkesskade = 70,
             andelSomSkyldesYrkesskade = BigDecimal(30),
@@ -604,8 +604,8 @@ class BeregningsgrunnlagRepositoryTest {
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
-                    grunnlagYrkesskade
-                )
+                    grunnlagYrkesskade,
+                ),
             )
         }
 
@@ -615,8 +615,8 @@ class BeregningsgrunnlagRepositoryTest {
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     behandlingsReferanse,
-                    grunnlagYrkesskade
-                )
+                    grunnlagYrkesskade,
+                ),
             )
         }
 
@@ -642,15 +642,16 @@ class BeregningsgrunnlagRepositoryTest {
             // Lagre noe for ref1 først for å dytte GRUNNLAG-sekvensen fremover
             repo.lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
-                    ref1, IBeregningsGrunnlag.Grunnlag_11_19(
+                    ref1,
+                    IBeregningsGrunnlag.Grunnlag_11_19(
                         grunnlag = 10000.0,
                         er6GBegrenset = false,
                         erGjennomsnitt = false,
                         inntekter = mapOf(2023 to 10000.0),
                         nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                        ytterligereNedsattArbeidsevneDato = null
-                    )
-                )
+                        ytterligereNedsattArbeidsevneDato = null,
+                    ),
+                ),
             )
         }
 
@@ -664,7 +665,7 @@ class BeregningsgrunnlagRepositoryTest {
                     erGjennomsnitt = true,
                     inntekter = mapOf(2019 to 25000.0),
                     nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-                    ytterligereNedsattArbeidsevneDato = null
+                    ytterligereNedsattArbeidsevneDato = null,
                 ),
                 uføregrader = mapOf(LocalDate.of(2020, 1, 1) to 50),
                 type = UføreType.YTTERLIGERE_NEDSATT,
@@ -691,8 +692,8 @@ class BeregningsgrunnlagRepositoryTest {
             BeregningsgrunnlagRepository(it).lagreBeregningsGrunnlag(
                 MedBehandlingsreferanse(
                     ref2,
-                    grunnlagYrkesskadeUfore
-                )
+                    grunnlagYrkesskadeUfore,
+                ),
             )
         }
 
@@ -710,8 +711,8 @@ fun genererTilfeldigGrunnlag(
     options: List<GrunnlagType> = listOf(
         GrunnlagType.GrunnlagYrkesskade,
         GrunnlagType.Grunnlag_Ufore,
-        GrunnlagType.Grunnlag11_19
-    )
+        GrunnlagType.Grunnlag11_19,
+    ),
 ): IBeregningsGrunnlag {
     options.random().let {
         return when (it) {
@@ -722,51 +723,47 @@ fun genererTilfeldigGrunnlag(
     }
 }
 
-fun genererTilfeldig1119Grunnlag(): IBeregningsGrunnlag.Grunnlag_11_19 {
-    return IBeregningsGrunnlag.Grunnlag_11_19(
-        grunnlag = (10000..50000).random().toDouble(),
-        er6GBegrenset = randomBool(),
-        erGjennomsnitt = randomBool(),
-        inntekter = mapOf(
-            2019 to (20000..60000).random().toDouble(),
-            2020 to (20000..60000).random().toDouble()
-        ),
-        nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-        ytterligereNedsattArbeidsevneDato = null
-    )
-}
+fun genererTilfeldig1119Grunnlag(): IBeregningsGrunnlag.Grunnlag_11_19 = IBeregningsGrunnlag.Grunnlag_11_19(
+    grunnlag = (10000..50000).random().toDouble(),
+    er6GBegrenset = randomBool(),
+    erGjennomsnitt = randomBool(),
+    inntekter = mapOf(
+        2019 to (20000..60000).random().toDouble(),
+        2020 to (20000..60000).random().toDouble(),
+    ),
+    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+    ytterligereNedsattArbeidsevneDato = null,
+)
 
 private fun randomBool(): Boolean = (0..1).random() == 1
 
-fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre {
-    return IBeregningsGrunnlag.GrunnlagUføre(
-        grunnlag = (10000..50000).random().toDouble(),
-        grunnlag11_19 = genererTilfeldig1119Grunnlag(),
-        uføregrader = mapOf(
-            LocalDate.of(2015, 1, 1) to (0..100).random(),
-            LocalDate.of(2022, 1, 1) to (0..100).random(),
-            LocalDate.of(2023, 1, 1) to (0..100).random()
-        ),
-        type = UføreType.entries.toTypedArray().random(),
-        uføreInntekterFraForegåendeÅr = mapOf(
-            2018 to (20000..60000).random().toDouble(),
-            2019 to (20000..60000).random().toDouble(),
-            2020 to (20000..60000).random().toDouble()
-        ),
-        uføreYtterligereNedsattArbeidsevneÅr = (2018..2022).random(),
-        nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-        ytterligereNedsattArbeidsevneDato = null
-    )
-}
+fun genererTilfeldigUforeGrunnlag(): IBeregningsGrunnlag.GrunnlagUføre = IBeregningsGrunnlag.GrunnlagUføre(
+    grunnlag = (10000..50000).random().toDouble(),
+    grunnlag11_19 = genererTilfeldig1119Grunnlag(),
+    uføregrader = mapOf(
+        LocalDate.of(2015, 1, 1) to (0..100).random(),
+        LocalDate.of(2022, 1, 1) to (0..100).random(),
+        LocalDate.of(2023, 1, 1) to (0..100).random(),
+    ),
+    type = UføreType.entries.toTypedArray().random(),
+    uføreInntekterFraForegåendeÅr = mapOf(
+        2018 to (20000..60000).random().toDouble(),
+        2019 to (20000..60000).random().toDouble(),
+        2020 to (20000..60000).random().toDouble(),
+    ),
+    uføreYtterligereNedsattArbeidsevneÅr = (2018..2022).random(),
+    nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
+    ytterligereNedsattArbeidsevneDato = null,
+)
 
-fun genererTilfeldigYrkesskadeGrunnlag(): IBeregningsGrunnlag.GrunnlagYrkesskade {
-    return IBeregningsGrunnlag.GrunnlagYrkesskade(
+fun genererTilfeldigYrkesskadeGrunnlag(): IBeregningsGrunnlag.GrunnlagYrkesskade =
+    IBeregningsGrunnlag.GrunnlagYrkesskade(
         grunnlaget = (10000..50000).random().toDouble(),
         beregningsgrunnlag = genererTilfeldigGrunnlag(
             options = listOf(
                 GrunnlagType.Grunnlag11_19,
-                GrunnlagType.Grunnlag_Ufore
-            )
+                GrunnlagType.Grunnlag_Ufore,
+            ),
         ),
         terskelverdiForYrkesskade = (50..100).random(),
         andelSomSkyldesYrkesskade = BigDecimal((10..90).random()),
@@ -779,6 +776,5 @@ fun genererTilfeldigYrkesskadeGrunnlag(): IBeregningsGrunnlag.GrunnlagYrkesskade
         yrkesskadeinntektIG = BigDecimal((20000..60000).random()),
         grunnlagEtterYrkesskadeFordel = BigDecimal((20000..60000).random()),
         nedsattArbeidsevneEllerStudieevneDato = LocalDate.of(2020, 1, 1),
-        ytterligereNedsattArbeidsevneDato = null
+        ytterligereNedsattArbeidsevneDato = null,
     )
-}

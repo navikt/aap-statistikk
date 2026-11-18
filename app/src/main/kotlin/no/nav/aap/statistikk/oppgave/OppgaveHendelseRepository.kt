@@ -12,23 +12,15 @@ interface OppgaveHendelseRepository : Repository {
         behandlingReferanse: UUID,
         avklaringsbehovKode: String,
         behandlingTidspunkt: LocalDateTime,
-        preferertOppgaveId: Long?
+        preferertOppgaveId: Long?,
     ): OppgaveCutoffAnchor?
 
     fun hentEnhetOgReservasjonForAvklaringsbehov(
         behandlingReferanse: UUID,
-        avklaringsbehovKode: String
+        avklaringsbehovKode: String,
     ): List<EnhetReservasjonOgTidspunkt>
 }
 
-data class OppgaveCutoffAnchor(
-    val oppgaveId: Long,
-    val versjon: Long,
-    val sendtTid: LocalDateTime
-)
+data class OppgaveCutoffAnchor(val oppgaveId: Long, val versjon: Long, val sendtTid: LocalDateTime)
 
-data class EnhetReservasjonOgTidspunkt(
-    val enhet: String,
-    val tidspunkt: LocalDateTime,
-    val reservertAv: String?
-)
+data class EnhetReservasjonOgTidspunkt(val enhet: String, val tidspunkt: LocalDateTime, val reservertAv: String?)

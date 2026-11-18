@@ -13,43 +13,51 @@ import javax.sql.DataSource
 
 class KodeverksTest {
     @Test
-    fun `alle vilkårstyper eksisterer i kodeverkstabell`(
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `alle vilkårstyper eksisterer i kodeverkstabell`(@Postgres dataSource: DataSource) {
         val vilkår = hentVilkårTyper(dataSource) {
             this.hentVilkår()
         }
 
-        assertThat(vilkår).containsExactlyInAnyOrder(*Vilkårtype.entries.map { it.name }
-            .toTypedArray())
-        assertThat(vilkår).containsExactlyInAnyOrder(*no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.entries.map { it.name }
-            .toTypedArray())
+        assertThat(vilkår).containsExactlyInAnyOrder(
+            *Vilkårtype.entries.map { it.name }
+                .toTypedArray(),
+        )
+        assertThat(
+            vilkår,
+        ).containsExactlyInAnyOrder(
+            *no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vilkårtype.entries.map { it.name }
+                .toTypedArray(),
+        )
     }
 
     @Test
-    fun `alle resultatkoder eksisterer i kodeverkstabell`(
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `alle resultatkoder eksisterer i kodeverkstabell`(@Postgres dataSource: DataSource) {
         val resultatkoder = hentVilkårTyper(dataSource) {
             this.hentResultat()
         }
 
-        assertThat(resultatkoder).containsExactlyInAnyOrder(*ResultatKode.entries.map { it.name }
-            .toTypedArray())
-        assertThat(resultatkoder).containsExactlyInAnyOrder(*no.nav.aap.behandlingsflyt.kontrakt.statistikk.ResultatKode.entries.map { it.name }
-            .toTypedArray())
+        assertThat(resultatkoder).containsExactlyInAnyOrder(
+            *ResultatKode.entries.map { it.name }
+                .toTypedArray(),
+        )
+        assertThat(
+            resultatkoder,
+        ).containsExactlyInAnyOrder(
+            *no.nav.aap.behandlingsflyt.kontrakt.statistikk.ResultatKode.entries.map { it.name }
+                .toTypedArray(),
+        )
     }
 
     @Test
-    fun `alle rettighetstyper eksisterer i kodeverkstabell`(
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `alle rettighetstyper eksisterer i kodeverkstabell`(@Postgres dataSource: DataSource) {
         val rettighetstyperFraDB = hentVilkårTyper(dataSource) {
             this.hentRettighetstype()
         }
 
         val rettighetstyper = RettighetsType.entries.map { it.name }
-        val rettighetstyperFraBehandlingsflyt = no.nav.aap.behandlingsflyt.kontrakt.statistikk.RettighetsType.entries.map { it.name }
+        val rettighetstyperFraBehandlingsflyt = no.nav.aap.behandlingsflyt.kontrakt.statistikk.RettighetsType.entries.map {
+            it.name
+        }
 
         // Oppdater når det kommer flere
         assertThat(rettighetstyperFraDB).containsExactlyInAnyOrder(*rettighetstyper.toTypedArray())
@@ -57,9 +65,7 @@ class KodeverksTest {
     }
 
     @Test
-    fun `alle behandlingstyper eksisterer i kodeverkstabell`(
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `alle behandlingstyper eksisterer i kodeverkstabell`(@Postgres dataSource: DataSource) {
         val behandlingstyper = hentVilkårTyper(dataSource) {
             this.hentBehandlingType()
         }
@@ -75,11 +81,7 @@ class KodeverksTest {
         )
     }
 
-
-    private fun hentVilkårTyper(
-        dataSource: DataSource,
-        koder: KodeverkRepository.() -> List<Kodeverk>
-    ): List<String> {
+    private fun hentVilkårTyper(dataSource: DataSource, koder: KodeverkRepository.() -> List<Kodeverk>): List<String> {
         val vilkår = dataSource.transaction { connection ->
             KodeverkRepository(connection).koder().map { it.kode }
         }

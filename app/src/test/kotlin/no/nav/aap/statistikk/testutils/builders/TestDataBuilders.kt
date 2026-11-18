@@ -48,23 +48,22 @@ fun opprettTestStoppetBehandling(
     behandlingStatus: Status = Status.OPPRETTET,
     behandlingType: TypeBehandling = TypeBehandling.Førstegangsbehandling,
     ident: String = "0",
-    avklaringsbehov: List<AvklaringsbehovHendelseDto> = listOf()
-): StoppetBehandling =
-    StoppetBehandling(
-        saksnummer = saksnummer,
-        behandlingStatus = behandlingStatus,
-        behandlingType = behandlingType,
-        ident = ident,
-        behandlingReferanse = behandlingReferanse,
-        behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
-        avklaringsbehov = avklaringsbehov,
-        versjon = "UKJENT",
-        mottattTid = mottattTid,
-        sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
-        hendelsesTidspunkt = hendelsesTidspunkt,
-        vurderingsbehov = listOf(no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov.SØKNAD),
-        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
-    )
+    avklaringsbehov: List<AvklaringsbehovHendelseDto> = listOf(),
+): StoppetBehandling = StoppetBehandling(
+    saksnummer = saksnummer,
+    behandlingStatus = behandlingStatus,
+    behandlingType = behandlingType,
+    ident = ident,
+    behandlingReferanse = behandlingReferanse,
+    behandlingOpprettetTidspunkt = behandlingOpprettetTidspunkt,
+    avklaringsbehov = avklaringsbehov,
+    versjon = "UKJENT",
+    mottattTid = mottattTid,
+    sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
+    hendelsesTidspunkt = hendelsesTidspunkt,
+    vurderingsbehov = listOf(no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov.SØKNAD),
+    årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+)
 
 fun opprettTestHendelse(
     dataSource: DataSource,
@@ -73,7 +72,7 @@ fun opprettTestHendelse(
     status: BehandlingStatus = BehandlingStatus.UTREDES,
     opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
     vurderingsbehov: List<Vurderingsbehov> = emptyList(),
-    clock: Clock = Clock.systemDefaultZone()
+    clock: Clock = Clock.systemDefaultZone(),
 ): Pair<BehandlingId, SakId> {
     val ident = Ident("29021946")
 
@@ -88,7 +87,7 @@ fun opprettTestHendelse(
         status,
         opprettetTidspunkt,
         vurderingsbehov,
-        clock
+        clock,
     )
 
     val sakId = sak.id!!
@@ -97,25 +96,21 @@ fun opprettTestHendelse(
     return Pair(behandlingId, sakId)
 }
 
-fun opprettTestPerson(dataSource: DataSource, ident: Ident): Person {
-    return dataSource.transaction { conn ->
-        val personRepository = PersonRepository(conn)
-        PersonService(personRepository, FakePdlGateway()).hentEllerLagrePerson(ident)
-    }
+fun opprettTestPerson(dataSource: DataSource, ident: Ident): Person = dataSource.transaction { conn ->
+    val personRepository = PersonRepository(conn)
+    PersonService(personRepository, FakePdlGateway()).hentEllerLagrePerson(ident)
 }
 
-fun opprettTestSak(dataSource: DataSource, saksnummer: Saksnummer, person: Person): Sak {
-    return dataSource.transaction {
-        val sak = Sak(
-            saksnummer = saksnummer,
-            person = person,
-            id = null,
-            sistOppdatert = LocalDateTime.now(),
-            sakStatus = SakStatus.UTREDES,
-        )
-        val id = SakRepositoryImpl(it).settInnSak(sak)
-        sak.copy(id = id)
-    }
+fun opprettTestSak(dataSource: DataSource, saksnummer: Saksnummer, person: Person): Sak = dataSource.transaction {
+    val sak = Sak(
+        saksnummer = saksnummer,
+        person = person,
+        id = null,
+        sistOppdatert = LocalDateTime.now(),
+        sakStatus = SakStatus.UTREDES,
+    )
+    val id = SakRepositoryImpl(it).settInnSak(sak)
+    sak.copy(id = id)
 }
 
 fun opprettTestBehandling(
@@ -125,7 +120,7 @@ fun opprettTestBehandling(
     status: BehandlingStatus = BehandlingStatus.UTREDES,
     opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
     vurderingsbehov: List<Vurderingsbehov> = emptyList(),
-    clock: Clock = Clock.systemDefaultZone()
+    clock: Clock = Clock.systemDefaultZone(),
 ): Behandling {
     val behandling = Behandling(
         referanse = referanse,
@@ -147,17 +142,14 @@ fun opprettTestBehandling(
             uthentet.id
         } else {
             BehandlingRepository(it, clock).opprettBehandling(
-                behandling
+                behandling,
             )
         }
         behandling.copy(id = id)
     }
 }
 
-fun forberedDatabase(
-    it: DBConnection,
-    behandlingReferanse: UUID
-): BehandlingId {
+fun forberedDatabase(it: DBConnection, behandlingReferanse: UUID): BehandlingId {
     val ident = Ident("214")
     val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(ident)
 
@@ -165,7 +157,7 @@ fun forberedDatabase(
         saksnummer = "ABCDE".tilSaksnummer(),
         person = person,
         sakStatus = SakStatus.LØPENDE,
-        sistOppdatert = LocalDateTime.now()
+        sistOppdatert = LocalDateTime.now(),
     )
     val sakId = SakRepositoryImpl(it).settInnSak(sak)
 
@@ -179,17 +171,15 @@ fun forberedDatabase(
             mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
             versjon = Versjon("xxx"),
             søknadsformat = SøknadsFormat.DIGITAL,
-            oppdatertTidspunkt = LocalDateTime.now()
-        )
+            oppdatertTidspunkt = LocalDateTime.now(),
+        ),
     )
 }
 
-fun konstruerSakstatistikkService(
-    connection: DBConnection
-): SaksStatistikkService {
+fun konstruerSakstatistikkService(connection: DBConnection): SaksStatistikkService {
     val behandlingService = BehandlingService(
         BehandlingRepository(connection),
-        SkjermingService(FakePdlGateway())
+        SkjermingService(FakePdlGateway()),
     )
     return SaksStatistikkService(
         behandlingService = behandlingService,
@@ -197,7 +187,7 @@ fun konstruerSakstatistikkService(
         bqBehandlingMapper = BQBehandlingMapper(
             behandlingService,
             RettighetstypeperiodeRepository(connection),
-            OppgaveRepositoryImpl(connection)
-        )
+            OppgaveRepositoryImpl(connection),
+        ),
     )
 }

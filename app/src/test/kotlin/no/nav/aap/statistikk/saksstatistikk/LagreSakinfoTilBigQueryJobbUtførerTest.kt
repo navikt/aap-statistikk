@@ -41,13 +41,13 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
             versjon = Versjon("1.0"),
             søknadsformat = SøknadsFormat.DIGITAL,
-        )
+        ),
     )
 
     private fun lagUtfører(
         service: ISaksStatistikkService,
         jobbAppender: FakeSakinfoRetryAppender,
-        config: EnhetRetryConfig = testConfig
+        config: EnhetRetryConfig = testConfig,
     ) = LagreSakinfoTilBigQueryJobbUtfører(service, behandlingRepository, jobbAppender::leggTil, config)
 
     @Test
@@ -71,7 +71,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             SakStatistikkResultat.ManglerEnhet(
                 behandlingId,
                 Definisjon.AVKLAR_SYKDOM,
-            )
+            ),
         )
         val jobbAppender = FakeSakinfoRetryAppender()
 
@@ -91,7 +91,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
                 avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
                 retryCount = 1,
                 triggerKilde = "retry(oppgave)",
-            ) to testConfig.delaySeconds
+            ) to testConfig.delaySeconds,
         )
     }
 
@@ -101,7 +101,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
             SakStatistikkResultat.ManglerEnhet(
                 behandlingId,
                 Definisjon.AVKLAR_SYKDOM,
-            )
+            ),
         )
         val jobbAppender = FakeSakinfoRetryAppender()
 
@@ -111,23 +111,23 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         utfører.utfør(
             JobbInput(LagreSakinfoTilBigQueryJobb()).medPayload(
                 LagreSakinfoPayload(
-                    behandlingId
-                )
-            )
+                    behandlingId,
+                ),
+            ),
         )
         assertThat(jobbAppender.jobber.last().second).isEqualTo(60L)
 
         // retryCount=1 → delay = 60 * 2^1 = 120
         utfører.utfør(
             JobbInput(LagreSakinfoTilBigQueryJobb())
-                .medPayload(LagreSakinfoPayload(behandlingId, retryCount = 1))
+                .medPayload(LagreSakinfoPayload(behandlingId, retryCount = 1)),
         )
         assertThat(jobbAppender.jobber.last().second).isEqualTo(120L)
 
         // retryCount=2 → delay = 60 * 2^2 = 240
         utfører.utfør(
             JobbInput(LagreSakinfoTilBigQueryJobb())
-                .medPayload(LagreSakinfoPayload(behandlingId, retryCount = 2))
+                .medPayload(LagreSakinfoPayload(behandlingId, retryCount = 2)),
         )
         assertThat(jobbAppender.jobber.last().second).isEqualTo(240L)
     }
@@ -135,7 +135,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     @Test
     fun `reschedulerer med økt retry-teller`() {
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM),
         )
         val jobbAppender = FakeSakinfoRetryAppender()
 
@@ -152,7 +152,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     @Test
     fun `kaster exception etter maks antall forsøk når enhet mangler`() {
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM),
         )
         val jobbAppender = FakeSakinfoRetryAppender()
 
@@ -166,8 +166,8 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
         }
         assertThat(exception).hasMessage(
             "Enhet mangler fortsatt etter ${testConfig.maxRetries} forsøk " +
-                    "for behandling $behandlingId, " +
-                    "avklaringsbehov=${Definisjon.AVKLAR_SYKDOM}. Saksnummer: $testSaksnummer."
+                "for behandling $behandlingId, " +
+                "avklaringsbehov=${Definisjon.AVKLAR_SYKDOM}. Saksnummer: $testSaksnummer.",
         )
         assertThat(jobbAppender.jobber).isEmpty()
     }
@@ -175,7 +175,7 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     @Test
     fun `config kan overstyres i test`() {
         val service = FakeSaksStatistikkService(
-            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM)
+            SakStatistikkResultat.ManglerEnhet(behandlingId, Definisjon.AVKLAR_SYKDOM),
         )
         val jobbAppender = FakeSakinfoRetryAppender()
         val customConfig = EnhetRetryConfig(maxRetries = 1, delaySeconds = 10)
@@ -215,7 +215,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
 
         assertThat(service.kallteller).isEqualTo(1)
     }
-
 }
 
 private class FakeSakinfoRetryAppender {
@@ -227,9 +226,7 @@ private class FakeSakinfoRetryAppender {
     }
 }
 
-private class FakeSaksStatistikkService(
-    private val resultat: SakStatistikkResultat
-) : ISaksStatistikkService {
+private class FakeSaksStatistikkService(private val resultat: SakStatistikkResultat) : ISaksStatistikkService {
     var kallteller = 0
 
     override fun lagreSakInfoTilBigquery(

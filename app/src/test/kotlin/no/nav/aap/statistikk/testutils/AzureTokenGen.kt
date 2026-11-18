@@ -35,7 +35,8 @@ class AzureTokenGen(private val audience: String) {
             builder
                 .claim("idtyp", "app")
                 .claim(
-                    "roles", listOf(
+                    "roles",
+                    listOf(
                         "opprett-sak",
                         "hent-personinfo",
                         "hent-brev",
@@ -48,33 +49,31 @@ class AzureTokenGen(private val audience: String) {
                         "medlemskaplovvalg-api",
                         "oppdater-behandlingsflyt-oppgaver",
                         "oppdater-postmottak-oppgaver",
-                        "syfo-api"
-                    )
+                        "syfo-api",
+                    ),
                 )
                 // Lokalt er NAIS_TEAM_AAP satt til strengen "NAIS_TEAM_AAP".
                 // Nødvendig for å kalle drift-endepunkter som krever team-tilgang (f.eks. motorApi).
                 .claim("groups", listOf(System.getProperty("NAIS_TEAM_AAP", "NAIS_TEAM_AAP")))
                 .claim(
-                    "azp", azp
+                    "azp",
+                    azp,
                 )
         } else {
             builder.claim("NAVident", navIdent ?: "X123456")
                 .claim(
                     "groups",
-                    listOf("saksbehandler-rolle", "veileder-rolle", "kvalitetssikrer-rolle", "beslutter-rolle")
+                    listOf("saksbehandler-rolle", "veileder-rolle", "kvalitetssikrer-rolle", "beslutter-rolle"),
                 )
         }
 
         return builder.build()
     }
 
-    private fun LocalDateTime.toDate(): Date {
-        return Date.from(this.atZone(ZoneId.systemDefault()).toInstant())
-    }
+    private fun LocalDateTime.toDate(): Date = Date.from(this.atZone(ZoneId.systemDefault()).toInstant())
 
-    fun generate(isApp: Boolean, azp: String, navIdent: String? = null): String {
-        return signed(claims(isApp, azp, navIdent)).serialize()
-    }
+    fun generate(isApp: Boolean, azp: String, navIdent: String? = null): String =
+        signed(claims(isApp, azp, navIdent)).serialize()
 }
 
 @Language("JSON")
