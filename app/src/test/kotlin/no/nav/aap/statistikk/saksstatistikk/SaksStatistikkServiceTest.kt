@@ -62,7 +62,7 @@ class SaksStatistikkServiceTest {
         dataSource.transaction {
             konstruerSakstatistikkService(
                 it,
-            ).lagreSakInfoTilBigquery(behandlingId)
+            ).lagreSaksstatistikk(behandlingId)
         }
 
         val nedlagrete = dataSource.transaction {
@@ -183,7 +183,7 @@ class SaksStatistikkServiceTest {
             val service = konstruerSakstatistikkService(conn)
 
             // Simuler oppgave-trigget jobb: lagrer UTREDES-tilstand med endretTid = oppgaveSendtTid
-            service.lagreSakInfoTilBigquery(behandlingId)
+            service.lagreSaksstatistikk(behandlingId)
 
             val utredesRad = SakstatistikkRepositoryImpl(conn)
                 .hentAlleHendelserPåBehandling(behandlingReferanse).last()
@@ -296,7 +296,7 @@ class SaksStatistikkServiceTest {
             val service = konstruerSakstatistikkService(conn)
 
             // Lagre hendelser for behandlingen (OPPRETTET + UNDER_BEHANDLING med endretTid = oppgaveSendtTid)
-            service.lagreSakInfoTilBigquery(behandlingId)
+            service.lagreSaksstatistikk(behandlingId)
 
             // Hent siste rad — dette er den "nyere" hendelsen vi vil bevare som gjeldende tilstand
             val nyesteRad = SakstatistikkRepositoryImpl(conn)
@@ -545,13 +545,13 @@ class SaksStatistikkServiceTest {
             val service = konstruerSakstatistikkService(conn)
 
             // Oppgave-trigget jobb lagrer korrekt tilstand
-            service.lagreSakInfoTilBigquery(behandlingId)
+            service.lagreSaksstatistikk(behandlingId)
             val raderEtterFørsteKall =
                 SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse).size
 
-            // Retry (simulert) kaller lagreSakInfoTilBigquery igjen med nåværende tilstand
+            // Retry (simulert) kaller lagreSaksstatistikk igjen med nåværende tilstand
             // → skal se raden som duplikat og ikke lagre på nytt
-            service.lagreSakInfoTilBigquery(behandlingId)
+            service.lagreSaksstatistikk(behandlingId)
 
             val alleRader = SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(behandlingReferanse)
             assertThat(alleRader)

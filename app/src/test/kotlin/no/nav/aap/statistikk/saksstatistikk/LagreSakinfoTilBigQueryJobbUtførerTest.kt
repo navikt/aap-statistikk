@@ -202,13 +202,13 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
     }
 
     @Test
-    fun `ved retry brukes alltid lagreSakInfoTilBigquery — ikke frossen snapshot`() {
+    fun `ved retry brukes alltid lagreSaksstatistikk — ikke frossen snapshot`() {
         val service = FakeSaksStatistikkService(SakStatistikkResultat.OK)
         val jobbAppender = FakeSakinfoRetryAppender()
 
         val utfører = lagUtfører(service, jobbAppender)
 
-        // Retry med retryCount=1 skal fortsatt kalle lagreSakInfoTilBigquery
+        // Retry med retryCount=1 skal fortsatt kalle lagreSaksstatistikk
         val input = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(LagreSakinfoPayload(behandlingId, retryCount = 1))
         utfører.utfør(input)
@@ -229,7 +229,7 @@ private class FakeSakinfoRetryAppender {
 private class FakeSaksStatistikkService(private val resultat: SakStatistikkResultat) : ISaksStatistikkService {
     var kallteller = 0
 
-    override fun lagreSakInfoTilBigquery(
+    override fun lagreSaksstatistikk(
         behandlingId: BehandlingId,
         cutoffTidspunkt: LocalDateTime?,
     ): SakStatistikkResultat {

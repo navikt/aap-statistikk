@@ -17,7 +17,7 @@ class SaksStatistikkService(
 ) : ISaksStatistikkService {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun lagreSakInfoTilBigquery(
+    override fun lagreSaksstatistikk(
         behandlingId: BehandlingId,
         cutoffTidspunkt: LocalDateTime?,
     ): SakStatistikkResultat {
@@ -39,7 +39,7 @@ class SaksStatistikkService(
             )
 
         log.info(
-            "lagreSakInfoTilBigquery: endretTid=${bqSak.endretTid}, " +
+            "lagreSaksstatistikk: endretTid=${bqSak.endretTid}, " +
                 "behandling.oppdatertTidspunkt=${behandlingPåTidspunkt.oppdatertTidspunkt()}, " +
                 "oppgaveDrivenEndretTid=${bqSak.endretTid.isAfter(behandlingPåTidspunkt.oppdatertTidspunkt())}, " +
                 "status=${bqSak.behandlingStatus}.",
