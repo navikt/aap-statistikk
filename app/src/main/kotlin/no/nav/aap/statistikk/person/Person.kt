@@ -3,9 +3,7 @@ package no.nav.aap.statistikk.person
 @JvmInline
 value class Ident(val ident: String) {
     @Override
-    override fun toString(): String {
-        return "XXX"
-    }
+    override fun toString(): String = "XXX"
 }
 
 /**
@@ -23,9 +21,7 @@ class Person(val ident: Ident, private val skjermet: Boolean = false, private va
         return this
     }
 
-    override fun toString(): String {
-        return "Person(id=$id, ident=XXXX)"
-    }
+    override fun toString(): String = "Person(id=$id, ident=XXXX)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

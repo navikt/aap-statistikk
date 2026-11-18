@@ -23,14 +23,14 @@ class DiagnosePerioderRepositoryImplTest {
                 tom = LocalDate.of(2024, 6, 30),
                 kodeverk = "ICD10",
                 diagnosekode = "A01",
-                bidiagnoser = listOf("B02", "C03")
+                bidiagnoser = listOf("B02", "C03"),
             ),
             DiagnoseMedPeriode(
                 fom = LocalDate.of(2024, 7, 1),
                 tom = LocalDate.of(2024, 12, 31),
                 kodeverk = "ICD10",
                 diagnosekode = "D04",
-                bidiagnoser = emptyList()
+                bidiagnoser = emptyList(),
             ),
         )
 
@@ -56,8 +56,8 @@ class DiagnosePerioderRepositoryImplTest {
                 tom = LocalDate.of(2024, 6, 30),
                 kodeverk = "ICD10",
                 diagnosekode = "A01",
-                bidiagnoser = listOf("B02")
-            )
+                bidiagnoser = listOf("B02"),
+            ),
         )
 
         dataSource.transaction {

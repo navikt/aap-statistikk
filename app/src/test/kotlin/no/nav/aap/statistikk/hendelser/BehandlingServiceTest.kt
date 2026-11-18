@@ -7,15 +7,13 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov as KontraktVurderingsbehov
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.SøknadsFormat
-import no.nav.aap.statistikk.behandling.TypeBehandling as DomeneTypeBehandling
-import no.nav.aap.statistikk.behandling.Vurderingsbehov
 import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.Vurderingsbehov
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
@@ -29,6 +27,8 @@ import org.junit.jupiter.api.assertThrows
 import java.sql.SQLException
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov as KontraktVurderingsbehov
+import no.nav.aap.statistikk.behandling.TypeBehandling as DomeneTypeBehandling
 
 class BehandlingServiceTest {
     @Test
@@ -90,9 +90,9 @@ class BehandlingServiceTest {
         behandlingService.hentEllerLagreBehandling(
             testHendelse(
                 referanse,
-                listOf(KontraktVurderingsbehov.SØKNAD, KontraktVurderingsbehov.MELDEKORT)
+                listOf(KontraktVurderingsbehov.SØKNAD, KontraktVurderingsbehov.MELDEKORT),
             ),
-            sak
+            sak,
         )
 
         assertThat(repository.hent(referanse)?.årsaker)
@@ -125,11 +125,11 @@ class BehandlingServiceTest {
 
             override fun hent(id: BehandlingId): Behandling = error("Skal ikke hente behandling")
 
-            override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = error("Skal ikke hente behandling med id-lock")
+            override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = error(
+                "Skal ikke hente behandling med id-lock",
+            )
 
-            override fun hentBehandlingForUpdate(referanse: UUID): Behandling? {
-                return null
-            }
+            override fun hentBehandlingForUpdate(referanse: UUID): Behandling? = null
         }
 
         val behandlingService = BehandlingService(repository, SkjermingService(FakePdlGateway(emptyMap())))
@@ -145,60 +145,54 @@ class BehandlingServiceTest {
 
 private fun testHendelse(
     referanse: UUID,
-    vurderingsbehov: List<KontraktVurderingsbehov> = listOf(KontraktVurderingsbehov.SØKNAD)
-): StoppetBehandling {
-    return StoppetBehandling(
-        saksnummer = "1234",
-        behandlingReferanse = referanse,
-        behandlingOpprettetTidspunkt = LocalDateTime.now(),
-        behandlingStatus = Status.OPPRETTET,
-        behandlingType = TypeBehandling.Førstegangsbehandling,
-        ident = "12345678901",
-        versjon = "versjon",
-        avklaringsbehov = listOf(
-            AvklaringsbehovHendelseDto(
-                avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
-                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                endringer = listOf(
-                    EndringDTO(
-                        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
-                        tidsstempel = LocalDateTime.now(),
-                        endretAv = "Z999999"
-                    )
-                )
-            )
+    vurderingsbehov: List<KontraktVurderingsbehov> = listOf(KontraktVurderingsbehov.SØKNAD),
+): StoppetBehandling = StoppetBehandling(
+    saksnummer = "1234",
+    behandlingReferanse = referanse,
+    behandlingOpprettetTidspunkt = LocalDateTime.now(),
+    behandlingStatus = Status.OPPRETTET,
+    behandlingType = TypeBehandling.Førstegangsbehandling,
+    ident = "12345678901",
+    versjon = "versjon",
+    avklaringsbehov = listOf(
+        AvklaringsbehovHendelseDto(
+            avklaringsbehovDefinisjon = Definisjon.AVKLAR_SYKDOM,
+            status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+            endringer = listOf(
+                EndringDTO(
+                    status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
+                    tidsstempel = LocalDateTime.now(),
+                    endretAv = "Z999999",
+                ),
+            ),
         ),
-        mottattTid = LocalDateTime.now().minusDays(1),
-        sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
-        hendelsesTidspunkt = LocalDateTime.now(),
-        vurderingsbehov = vurderingsbehov,
-        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
-    )
-}
+    ),
+    mottattTid = LocalDateTime.now().minusDays(1),
+    sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
+    hendelsesTidspunkt = LocalDateTime.now(),
+    vurderingsbehov = vurderingsbehov,
+    årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+)
 
-private fun testSak(): Sak {
-    return Sak(
-        id = 1L,
-        saksnummer = Saksnummer("1234"),
-        person = Person(ident = no.nav.aap.statistikk.person.Ident("12345678901"), id = 1L),
-        sakStatus = SakStatus.OPPRETTET,
-        sistOppdatert = LocalDateTime.now()
-    )
-}
+private fun testSak(): Sak = Sak(
+    id = 1L,
+    saksnummer = Saksnummer("1234"),
+    person = Person(ident = no.nav.aap.statistikk.person.Ident("12345678901"), id = 1L),
+    sakStatus = SakStatus.OPPRETTET,
+    sistOppdatert = LocalDateTime.now(),
+)
 
-private fun eksisterendeBehandling(sak: Sak, referanse: UUID): Behandling {
-    return Behandling(
-        id = BehandlingId(123L),
-        referanse = referanse,
-        sak = sak,
-        typeBehandling = DomeneTypeBehandling.Førstegangsbehandling,
-        status = BehandlingStatus.OPPRETTET,
-        opprettetTid = LocalDateTime.now(),
-        mottattTid = LocalDateTime.now().minusDays(1),
-        versjon = Versjon("versjon"),
-        søknadsformat = SøknadsFormat.PAPIR,
-        årsaker = listOf(Vurderingsbehov.SØKNAD),
-        oppdatertTidspunkt = LocalDateTime.now(),
-        relaterteIdenter = emptyList()
-    )
-}
+private fun eksisterendeBehandling(sak: Sak, referanse: UUID): Behandling = Behandling(
+    id = BehandlingId(123L),
+    referanse = referanse,
+    sak = sak,
+    typeBehandling = DomeneTypeBehandling.Førstegangsbehandling,
+    status = BehandlingStatus.OPPRETTET,
+    opprettetTid = LocalDateTime.now(),
+    mottattTid = LocalDateTime.now().minusDays(1),
+    versjon = Versjon("versjon"),
+    søknadsformat = SøknadsFormat.PAPIR,
+    årsaker = listOf(Vurderingsbehov.SØKNAD),
+    oppdatertTidspunkt = LocalDateTime.now(),
+    relaterteIdenter = emptyList(),
+)

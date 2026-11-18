@@ -18,12 +18,13 @@ class DiagnoseRepositoryImplTest {
         dataSource.transaction {
             forberedDatabase(it, behandlingReferanse)
             settInnDiagnose(
-                it, DiagnoseEntity(
+                it,
+                DiagnoseEntity(
                     behandlingReferanse = behandlingReferanse,
                     kodeverk = "dsdsd",
                     diagnosekode = "DD",
-                    bidiagnoser = listOf("PEST", "KOLERA")
-                )
+                    bidiagnoser = listOf("PEST", "KOLERA"),
+                ),
             )
         }
 
@@ -39,31 +40,24 @@ class DiagnoseRepositoryImplTest {
                 behandlingReferanse = behandlingReferanse,
                 kodeverk = "dsdsd",
                 diagnosekode = "DD",
-                bidiagnoser = listOf("PEST", "KOLERA")
-            )
+                bidiagnoser = listOf("PEST", "KOLERA"),
+            ),
         )
         assertThat(oppdatertTid).isNotNull()
-
     }
 
-    private fun settInnDiagnose(
-        it: DBConnection,
-        diagnoseEntity: DiagnoseEntity
-    ) = DiagnoseRepositoryImpl(it).lagre(
-        diagnoseEntity
+    private fun settInnDiagnose(it: DBConnection, diagnoseEntity: DiagnoseEntity) = DiagnoseRepositoryImpl(it).lagre(
+        diagnoseEntity,
     )
 
-    private fun hentOppdatertTid(
-        it: DBConnection,
-        behandlingReferanse: UUID
-    ): LocalDateTime = it.queryFirst(
+    private fun hentOppdatertTid(it: DBConnection, behandlingReferanse: UUID): LocalDateTime = it.queryFirst(
         """
             SELECT d.oppdatert_tid AS oppdatert_tid
             FROM diagnose d
             JOIN behandling b ON d.behandling_id = b.id
             JOIN behandling_referanse br ON b.referanse_id = br.id
             WHERE br.referanse = ?
-        """.trimIndent()
+        """.trimIndent(),
     ) {
         setParams {
             setUUID(1, behandlingReferanse)

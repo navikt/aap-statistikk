@@ -27,7 +27,6 @@ fun main() {
     System.setProperty("integrasjon.oppgave.azp", randomUUID.toString())
     System.setProperty("integrasjon.behandlingsflyt.azp", randomUUID.toString())
 
-
     val pgConfig = postgresTestConfig()
     logger.info("Postgres Config: $pgConfig")
     val bqConfig: BigQueryConfig = bigQueryContainer()
@@ -40,8 +39,9 @@ fun main() {
 
     embeddedServer(Netty, port = 8080, watchPaths = listOf("classes")) {
         startUp(
-            pgConfig, defaultGatewayProvider(),
-            bqYtelseRepository = BQYtelseRepository(bigQueryClient)
+            pgConfig,
+            defaultGatewayProvider(),
+            bqYtelseRepository = BQYtelseRepository(bigQueryClient),
         )
     }.start(wait = true)
 }

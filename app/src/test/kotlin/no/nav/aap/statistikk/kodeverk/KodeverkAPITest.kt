@@ -1,8 +1,8 @@
 package no.nav.aap.statistikk.kodeverk
 
-import kotlinx.html.stream.createHTML
 import kotlinx.html.body
 import kotlinx.html.html
+import kotlinx.html.stream.createHTML
 import no.nav.aap.statistikk.behandling.ÅrsakTilSattPåVent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

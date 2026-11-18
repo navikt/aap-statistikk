@@ -9,9 +9,7 @@ import no.nav.aap.statistikk.oppgave.Saksbehandler
 
 // TODO; oppdater dette
 class ReberegnHistorikk {
-    fun avklaringsbehovTilHistorikk(
-        dto: StoppetBehandling, behandling: Behandling
-    ): Behandling {
+    fun avklaringsbehovTilHistorikk(dto: StoppetBehandling, behandling: Behandling): Behandling {
         val avklaringsbehov = dto.avklaringsbehov
         val (forrigeLøste, forrigeLøsteAvHvem, forrigeLøsteTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
             ?: Triple(null, null, null)
@@ -34,7 +32,7 @@ class ReberegnHistorikk {
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
             sisteLøsteAvklaringsbehov = forrigeLøste,
             sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem,
-            sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
+            sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt,
         )
 
         if (avklaringsbehov.isEmpty() && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
@@ -62,8 +60,8 @@ class ReberegnHistorikk {
                         relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                         sisteLøsteAvklaringsbehov = forrigeLøste,
                         sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem,
-                        sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
-                    )
+                        sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt,
+                    ),
                 )
         }
 
@@ -83,18 +81,23 @@ class ReberegnHistorikk {
                 .any { it.behandlingStatus() == BehandlingStatus.OPPRETTET }
 
         val behandlingMedEllerUtenInngangshendelse =
-            if (finnesInngangshendelse) behandling else behandling.copy(
+            if (finnesInngangshendelse) {
+                behandling
+            } else {
+                behandling.copy(
                 hendelser = listOf(
-                    inngangshendelse
-                ) + behandling.hendelser
+                    inngangshendelse,
+                ) + behandling.hendelser,
             )
+            }
 
         return avklaringsbehovHistorikk.fold(behandlingMedEllerUtenInngangshendelse) { acc, curr ->
-            val (forrigeLøste, forrigeløstAvHvem, forrigeLøsteTidspunkt) = curr.utledForrigeLøsteAvklaringsbehov() ?: Triple(
-                null,
-                null,
-                null
-            )
+            val (forrigeLøste, forrigeløstAvHvem, forrigeLøsteTidspunkt) = curr.utledForrigeLøsteAvklaringsbehov()
+                ?: Triple(
+                    null,
+                    null,
+                    null,
+                )
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
@@ -110,24 +113,32 @@ class ReberegnHistorikk {
                     versjon = dto.versjon.let(::Versjon),
                     status = curr.utledBehandlingStatus(),
                     ansvarligBeslutter = curr.utledAnsvarligBeslutter(),
-                    vedtakstidspunkt = if (behandlingMedEllerUtenInngangshendelse.behandlingStatus() == BehandlingStatus.AVSLUTTET) behandlingMedEllerUtenInngangshendelse.vedtakstidspunkt
-                        ?: curr.utledVedtakTid() else null,
+                    vedtakstidspunkt = if (behandlingMedEllerUtenInngangshendelse.behandlingStatus() ==
+                        BehandlingStatus.AVSLUTTET
+                    ) {
+                            behandlingMedEllerUtenInngangshendelse.vedtakstidspunkt
+                        ?: curr.utledVedtakTid()
+                        } else {
+                            null
+                        },
                     mottattTid = dto.mottattTid,
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                     relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                     sisteLøsteAvklaringsbehov = forrigeLøste,
                     sisteSaksbehandlerSomLøstebehov = forrigeløstAvHvem,
-                    sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt
+                    sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt,
 
-                )
+                ),
             )
         }.let {
-            if (it.behandlingStatus() != BehandlingStatus.AVSLUTTET && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) {
+            if (it.behandlingStatus() != BehandlingStatus.AVSLUTTET &&
+                dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET
+            ) {
                 it.leggTilHendelse(
                     BehandlingHendelse(
                         tidspunkt = null, // Vil etterfylles
                         hendelsesTidspunkt = requireNotNull(
-                            dto.avsluttetBehandling?.vedtakstidspunkt ?: dto.tidspunktSisteEndring
+                            dto.avsluttetBehandling?.vedtakstidspunkt ?: dto.tidspunktSisteEndring,
                         ),
                         avklaringsBehov = null,
                         avklaringsbehovStatus = null,
@@ -145,11 +156,13 @@ class ReberegnHistorikk {
                         søknadsformat = dto.soknadsFormat.tilDomene(),
                         relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
                         sisteLøsteAvklaringsbehov = forrigeLøste,
-                        sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem
+                        sisteSaksbehandlerSomLøstebehov = forrigeLøsteAvHvem,
 
-                    )
+                    ),
                 )
-            } else it
+            } else {
+                it
+            }
         }
     }
 }

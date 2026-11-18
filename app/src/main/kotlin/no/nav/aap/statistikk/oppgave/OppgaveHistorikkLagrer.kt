@@ -18,7 +18,7 @@ class OppgaveHistorikkLagrer(
             saksbehandlerRepository.hentSaksbehandler(it.reservertAv.ident)
                 ?: Saksbehandler(
                     id = saksbehandlerRepository.lagreSaksbehandler(it.reservertAv),
-                    it.reservertAv.ident
+                    it.reservertAv.ident,
                 )
         }
 
@@ -38,7 +38,9 @@ class OppgaveHistorikkLagrer(
         val oppgaveMedOppdaterteFelter = oppgave.copy(
             enhet = enhetMedId,
             person = personMedId,
-            reservasjon = oppgave.reservasjon?.copy(reservertAv = requireNotNull(saksbehandlerMedId) { "Forventer at saksbehandler har ID." })
+            reservasjon = oppgave.reservasjon?.copy(
+                reservertAv = requireNotNull(saksbehandlerMedId) { "Forventer at saksbehandler har ID." },
+            ),
         )
 
         if (eksisterendeOppgave != null) {

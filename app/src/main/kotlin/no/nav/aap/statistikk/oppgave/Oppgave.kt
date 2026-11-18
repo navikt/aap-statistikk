@@ -10,7 +10,8 @@ import java.util.*
 private val logger = LoggerFactory.getLogger("oppgave.oppgave")
 
 enum class Oppgavestatus {
-    OPPRETTET, AVSLUTTET
+    OPPRETTET,
+    AVSLUTTET,
 }
 
 data class Oppgave(
@@ -30,29 +31,21 @@ data class Oppgave(
     val opprettetRad: LocalDateTime? = null,
     val oppdatertRad: LocalDateTime? = null,
 ) {
-    fun sistEndret(): LocalDateTime {
-        return hendelser.lastOrNull()?.endretTidspunkt ?: opprettetTidspunkt
-    }
+    fun sistEndret(): LocalDateTime = hendelser.lastOrNull()?.endretTidspunkt ?: opprettetTidspunkt
 
-    fun reservertAv(): Saksbehandler? {
-        return reservasjon?.reservertAv
-    }
+    fun reservertAv(): Saksbehandler? = reservasjon?.reservertAv
 }
 
 data class BehandlingReferanse(val id: Long? = null, val referanse: UUID)
 
-data class Reservasjon(
-    val id: Long? = null,
-    val reservertAv: Saksbehandler,
-    val reservasjonOpprettet: LocalDateTime
-)
+data class Reservasjon(val id: Long? = null, val reservertAv: Saksbehandler, val reservasjonOpprettet: LocalDateTime)
 
 enum class HendelseType {
     OPPRETTET,
     RESERVERT,
     AVRESERVERT,
     LUKKET,
-    OPPDATERT
+    OPPDATERT,
 }
 
 /**
@@ -106,7 +99,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     hendelser = listOf(hendelse),
                     behandlingReferanse = hendelse.behandlingRef?.let {
                         BehandlingReferanse(
-                            referanse = it
+                            referanse = it,
                         )
                     },
                     reservasjon = reservasjon,
@@ -114,18 +107,28 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     avklaringsbehov = hendelse.avklaringsbehovKode,
                     harHasteMarkering = hendelse.harHasteMarkering,
                     harAvslagSykdomMarkering = hendelse.harAvslagSykdomMarkering,
-                    sisteHendelse = hendelse.hendelse
+                    sisteHendelse = hendelse.hendelse,
                 )
             } else {
-                if (hendelse.personIdent != null && acc.person != null && hendelse.personIdent != acc.person.ident.ident) {
+                if (hendelse.personIdent != null && acc.person != null &&
+                    hendelse.personIdent != acc.person.ident.ident
+                ) {
                     logger.warn("Person har endret seg på en oppgave. Var ${acc.person.id()}, nå forskjellig.")
                 }
-                if (hendelse.behandlingRef != null && acc.behandlingReferanse != null && hendelse.behandlingRef != acc.behandlingReferanse.referanse) {
-                    logger.warn("Behandlings-referanse har endret seg på en oppgave. Var ${acc.behandlingReferanse}, nå ${hendelse.behandlingRef}")
+                if (hendelse.behandlingRef != null && acc.behandlingReferanse != null &&
+                    hendelse.behandlingRef != acc.behandlingReferanse.referanse
+                ) {
+                    logger.warn(
+                        "Behandlings-referanse har endret seg på en oppgave. Var ${acc.behandlingReferanse}, nå ${hendelse.behandlingRef}",
+                    )
                 }
-                require(hendelse.oppgaveId == acc.identifikator) { "Skal kun aggregere oppgaver med samme id. Fikk ${hendelse.oppgaveId} og ${acc.id}." }
+                require(
+                    hendelse.oppgaveId == acc.identifikator,
+                ) { "Skal kun aggregere oppgaver med samme id. Fikk ${hendelse.oppgaveId} og ${acc.id}." }
                 if (hendelse.avklaringsbehovKode != acc.avklaringsbehov) {
-                    logger.warn("Fant oppgave med ikke-unikt avklaringsbehov. Ignorerer ${hendelse.avklaringsbehovKode}, beholder ${acc.avklaringsbehov}.")
+                    logger.warn(
+                        "Fant oppgave med ikke-unikt avklaringsbehov. Ignorerer ${hendelse.avklaringsbehovKode}, beholder ${acc.avklaringsbehov}.",
+                    )
                 }
 
                 acc.copy(
@@ -135,7 +138,7 @@ fun List<OppgaveHendelse>.tilOppgave(): Oppgave {
                     reservasjon = reservasjon(hendelse),
                     harHasteMarkering = hendelse.harHasteMarkering,
                     harAvslagSykdomMarkering = hendelse.harAvslagSykdomMarkering,
-                    sisteHendelse = hendelse.hendelse
+                    sisteHendelse = hendelse.hendelse,
                 )
             }
         }!!
@@ -145,7 +148,8 @@ private fun reservasjon(hendelse: OppgaveHendelse) =
     if (hendelse.reservertAv != null && hendelse.reservertTidspunkt != null) {
         Reservasjon(
             reservertAv = Saksbehandler(ident = hendelse.reservertAv),
-            reservasjonOpprettet = hendelse.reservertTidspunkt
+            reservasjonOpprettet = hendelse.reservertTidspunkt,
         )
-    } else null
-
+    } else {
+        null
+    }

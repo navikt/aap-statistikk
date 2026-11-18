@@ -25,7 +25,7 @@ class PersonRepositoryTest {
         val uthentet = dataSource.transaction { PersonRepository(it).hentPerson(ident = ident) }
 
         assertThat(uthentet?.ident).isEqualTo(
-            ident
+            ident,
         )
         assertThat(uthentet?.id()).isNotNull()
     }
@@ -184,5 +184,4 @@ class PersonRepositoryTest {
         assertThat(feil).isEmpty()
         assertThat(personIder).hasSize(2).allMatch { it == personIder.first() }
     }
-
 }

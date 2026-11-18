@@ -13,7 +13,7 @@ class PersonServiceTest {
         val ident = Ident("12345")
         val personService = PersonService(
             FakePersonRepository(),
-            FakePdlGateway(identerHemmelig = mapOf(ident to true))
+            FakePdlGateway(identerHemmelig = mapOf(ident to true)),
         )
 
         val person = personService.hentEllerLagrePerson(ident)
@@ -28,11 +28,9 @@ class PersonServiceTest {
 
         val identerHemmelig = mutableMapOf(ident to false)
         val pdlGateway = object : PdlGateway {
-            override fun hentPersoner(identer: List<Ident>) =
-                FakePdlGateway(identerHemmelig).hentPersoner(identer)
+            override fun hentPersoner(identer: List<Ident>) = FakePdlGateway(identerHemmelig).hentPersoner(identer)
 
-            override fun hentIdenter(ident: Ident) =
-                listOf(PdlIdent(ident = ident.ident, historisk = false))
+            override fun hentIdenter(ident: Ident) = listOf(PdlIdent(ident = ident.ident, historisk = false))
         }
         val personService = PersonService(personRepository, pdlGateway)
 
@@ -54,7 +52,7 @@ class PersonServiceTest {
         val nyIdent = "67890"
         val personRepository = FakePersonRepository()
         val identerForPerson = mutableMapOf(
-            gammelIdent to listOf(PdlIdent(gammelIdent, historisk = false))
+            gammelIdent to listOf(PdlIdent(gammelIdent, historisk = false)),
         )
         val pdlGateway = FakePdlGateway(identerForPerson = identerForPerson)
         val personService = PersonService(personRepository, pdlGateway)
@@ -83,8 +81,8 @@ class PersonServiceTest {
                 aktivIdent to listOf(
                     PdlIdent(historiskIdent, historisk = true),
                     PdlIdent(aktivIdent, historisk = false),
-                )
-            )
+                ),
+            ),
         )
 
         val person = PersonService(personRepository, pdlGateway).hentEllerLagrePerson(Ident(aktivIdent))

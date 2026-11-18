@@ -8,11 +8,8 @@ interface TransactionExecutor {
     fun <E> withinTransaction(block: (connection: DBConnection) -> E): E
 }
 
-class FellesKomponentTransactionalExecutor(private val dataSource: DataSource) :
-    TransactionExecutor {
-    override fun <E> withinTransaction(block: (connection: DBConnection) -> E): E {
-        return dataSource.transaction { conn ->
-            block(conn)
-        }
+class FellesKomponentTransactionalExecutor(private val dataSource: DataSource) : TransactionExecutor {
+    override fun <E> withinTransaction(block: (connection: DBConnection) -> E): E = dataSource.transaction { conn ->
+        block(conn)
     }
 }

@@ -9,15 +9,11 @@ class ArbeidsopptrappingperioderRepositoryImpl(private val dbConnection: DBConne
     ArbeidsopptrappingperioderRepository {
 
     companion object : RepositoryFactory<ArbeidsopptrappingperioderRepositoryImpl> {
-        override fun konstruer(connection: DBConnection): ArbeidsopptrappingperioderRepositoryImpl {
-            return ArbeidsopptrappingperioderRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): ArbeidsopptrappingperioderRepositoryImpl =
+            ArbeidsopptrappingperioderRepositoryImpl(connection)
     }
 
-    override fun lagre(
-        behandlingId: BehandlingId,
-        perioder: List<Periode>
-    ) {
+    override fun lagre(behandlingId: BehandlingId, perioder: List<Periode>) {
         val deleteSql = """
             DELETE FROM arbeidsopptrappingperioder WHERE behandling_id = ?
         """.trimIndent()
@@ -73,7 +69,7 @@ class ArbeidsopptrappingperioderRepositoryImpl(private val dbConnection: DBConne
             setRowMapper {
                 Periode(
                     fom = it.getLocalDate("fra_dato"),
-                    tom = it.getLocalDate("til_dato")
+                    tom = it.getLocalDate("til_dato"),
                 )
             }
         }

@@ -21,12 +21,12 @@ class InstitusjonsoppholdRepositoryImplTest {
         val perioder = listOf(
             Periode(
                 fom = now.minusWeeks(4),
-                tom = now.minusWeeks(2)
+                tom = now.minusWeeks(2),
             ),
             Periode(
                 fom = now.minusWeeks(2).plusDays(1),
-                tom = now
-            )
+                tom = now,
+            ),
         )
 
         dataSource.transaction {
@@ -50,8 +50,8 @@ class InstitusjonsoppholdRepositoryImplTest {
         val initialPerioder = listOf(
             Periode(
                 fom = now.minusMonths(3),
-                tom = now.minusMonths(2)
-            )
+                tom = now.minusMonths(2),
+            ),
         )
 
         dataSource.transaction {
@@ -61,12 +61,12 @@ class InstitusjonsoppholdRepositoryImplTest {
         val oppdatertePerioder = listOf(
             Periode(
                 fom = now.minusWeeks(6),
-                tom = now.minusWeeks(1)
+                tom = now.minusWeeks(1),
             ),
             Periode(
                 fom = now.minusWeeks(12),
-                tom = now.minusWeeks(7)
-            )
+                tom = now.minusWeeks(7),
+            ),
         )
 
         dataSource.transaction {
@@ -90,12 +90,12 @@ class InstitusjonsoppholdRepositoryImplTest {
         val initialPerioder = listOf(
             Periode(
                 fom = now.minusMonths(3),
-                tom = now.minusMonths(2)
+                tom = now.minusMonths(2),
             ),
             Periode(
                 fom = now.minusMonths(2).plusDays(1),
-                tom = now.minusMonths(1)
-            )
+                tom = now.minusMonths(1),
+            ),
         )
 
         dataSource.transaction {

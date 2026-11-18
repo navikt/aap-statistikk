@@ -28,7 +28,7 @@ class BQBehandlingMapper(
     private val behandlingService: BehandlingService,
     private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val clock: Clock = systemDefaultZone()
+    private val clock: Clock = systemDefaultZone(),
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -50,8 +50,8 @@ class BQBehandlingMapper(
         val oppgaveDriverEndretTid = sisteSnapshot?.kilde == Kilde.Oppgave
         log.info(
             "Siste snapshot av type: ${sisteSnapshot?.kilde}, tidspunkt: ${sisteSnapshot?.tidspunkt}. " +
-                    "behandling.oppdatertTidspunkt: ${behandling.oppdatertTidspunkt()}. " +
-                    "Antall oppgaver: ${oppgaver.size}."
+                "behandling.oppdatertTidspunkt: ${behandling.oppdatertTidspunkt()}. " +
+                "Antall oppgaver: ${oppgaver.size}.",
         )
         if (oppgaveDriverEndretTid) {
             val alleSnapshots = snapshots.joinToString(" | ") {
@@ -61,9 +61,15 @@ class BQBehandlingMapper(
         }
 
         val ansvarligEnhet =
-            if (erSkjermet) SKJERMET_ENHET else ansvarligEnhet(
-                behandling, snapshots, cutoffTidspunkt ?: behandling.oppdatertTidspunkt()
+            if (erSkjermet) {
+                SKJERMET_ENHET
+            } else {
+                ansvarligEnhet(
+                behandling,
+                snapshots,
+                cutoffTidspunkt ?: behandling.oppdatertTidspunkt(),
             )
+            }
 
         val saksbehandler =
             if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots)
@@ -77,7 +83,7 @@ class BQBehandlingMapper(
                 .mapNotNull { snapshot ->
                     snapshot.avklaringsbehov?.let {
                         avklaringsbehovTilBehandlingMetode(
-                            it
+                            it,
                         )
                     }
                 }
@@ -87,8 +93,8 @@ class BQBehandlingMapper(
             if (tidligereBehandlingMetoderForSaksbehandler.isNotEmpty()) {
                 log.warn(
                     "Saksbehandler $saksbehandler har hatt behandlingmetode $behandlingMetode, " +
-                            "men hadde tidligere $tidligereBehandlingMetoderForSaksbehandler for behandling $behandlingReferanse og saksnummer ${sak.saksnummer}. " +
-                            "Mulig feil i saksbehandler-utledning."
+                        "men hadde tidligere $tidligereBehandlingMetoderForSaksbehandler for behandling $behandlingReferanse og saksnummer ${sak.saksnummer}. " +
+                        "Mulig feil i saksbehandler-utledning.",
                 )
             }
         }
@@ -100,7 +106,9 @@ class BQBehandlingMapper(
         }
 
         if (behandling.mottattTid.isAfter(behandling.opprettetTid)) {
-            log.warn("Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.")
+            log.warn(
+                "Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.",
+            )
         }
 
         return byggBQBehandling(
@@ -163,9 +171,11 @@ class BQBehandlingMapper(
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
             behandlingMetode = behandlingMetode.also {
-                if (it == BehandlingMetode.AUTOMATISK) log.info(
-                    "Behandling $behandlingReferanse er automatisk behandlet. Behandlingtype ${behandling.typeBehandling}"
+                if (it == BehandlingMetode.AUTOMATISK) {
+                    log.info(
+                    "Behandling $behandlingReferanse er automatisk behandlet. Behandlingtype ${behandling.typeBehandling}",
                 )
+                }
             },
             behandlingStatus = behandlingStatus,
             behandlingÅrsak = behandlingÅrsak,
@@ -173,23 +183,20 @@ class BQBehandlingMapper(
             resultatBegrunnelse = resultatBegrunnelse(hendelser),
             ansvarligEnhetKode = ansvarligEnhet,
             sakYtelse = "AAP",
-            erResending = false
+            erResending = false,
         )
     }
 
-    private fun utledSaksbehandler(
-        behandling: Behandling,
-        snapshots: List<SakstatistikkSnapshot>,
-    ): String? {
+    private fun utledSaksbehandler(behandling: Behandling, snapshots: List<SakstatistikkSnapshot>): String? {
         val saksbehandler = snapshots.lastOrNull()?.saksbehandler
 
         // For avsluttede behandlinger: bruk sisteSaksbehandler som fallback
         if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && saksbehandler == null) {
             return behandling.sisteSaksbehandler ?: behandling.sisteSaksbehandlerSomLøstebehov
-            ?: oppgaveRepository.hentOppgaverForBehandling(
-                behandling.id()
-            )
-                .maxByOrNull { it.sistEndret() }?.reservasjon?.reservertAv?.ident
+                ?: oppgaveRepository.hentOppgaverForBehandling(
+                    behandling.id(),
+                )
+                    .maxByOrNull { it.sistEndret() }?.reservasjon?.reservertAv?.ident
         }
 
         return saksbehandler
@@ -200,9 +207,7 @@ class BQBehandlingMapper(
      *
      * TODO: begrunnelse ved avslag/innvilgelse
      */
-    private fun resultatBegrunnelse(
-        behandlingHendelser: List<BehandlingHendelse>
-    ): String? {
+    private fun resultatBegrunnelse(behandlingHendelser: List<BehandlingHendelse>): String? {
         if (behandlingHendelser.last().avklaringsbehovStatus?.returnert() == true) {
             return behandlingHendelser.last().returÅrsak
         }
@@ -212,43 +217,49 @@ class BQBehandlingMapper(
     /**
      * For en avsluttet behandling, tolkes dette som rettighetstype.
      */
-    private fun regnUtBehandlingResultat(
-        behandling: Behandling
-    ): String? {
-        return when (behandling.behandlingStatus()) {
-            BehandlingStatus.OPPRETTET,
-            BehandlingStatus.UTREDES -> null
+    private fun regnUtBehandlingResultat(behandling: Behandling): String? = when (behandling.behandlingStatus()) {
+        BehandlingStatus.OPPRETTET,
+        BehandlingStatus.UTREDES,
+        -> null
 
-            BehandlingStatus.IVERKSETTES,
-            BehandlingStatus.AVSLUTTET -> {
-                val behandlingReferanse = behandling.referanse
-                val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
-                val resultat = behandling.resultat()
+        BehandlingStatus.IVERKSETTES,
+        BehandlingStatus.AVSLUTTET,
+        -> {
+            val behandlingReferanse = behandling.referanse
+            val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
+            val resultat = behandling.resultat()
 
-                when (resultat) {
-                    ResultatKode.INNVILGET -> if (rettighetstyper.isEmpty()) {
-                        // Hva med avslag?
-                        "AAP"
-                    } else {
-                        if (rettighetstyper.size > 1) {
-                            log.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
-                        }
-                        // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
-                        val førsteRettighetstype =
-                            rettighetstyper.first().rettighetstype.name.uppercase()
-                        "AAP_$førsteRettighetstype"
+            when (resultat) {
+                ResultatKode.INNVILGET -> if (rettighetstyper.isEmpty()) {
+                    // Hva med avslag?
+                    "AAP"
+                } else {
+                    if (rettighetstyper.size > 1) {
+                        log.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
                     }
-
-                    ResultatKode.AVSLAG -> "AVSLAG"
-                    ResultatKode.TRUKKET -> "TRUKKET"
-                    ResultatKode.KLAGE_OPPRETTHOLDES -> "KLAGE_OPPRETTHOLDES"
-                    ResultatKode.KLAGE_OMGJØRES -> "KLAGE_OMGJØRES"
-                    ResultatKode.KLAGE_DELVIS_OMGJØRES -> "KLAGE_DELVIS_OMGJØRES"
-                    ResultatKode.KLAGE_AVSLÅTT -> "KLAGE_AVSLÅTT"
-                    ResultatKode.KLAGE_TRUKKET -> "KLAGE_TRUKKET"
-                    ResultatKode.AVBRUTT -> "AVBRUTT"
-                    null -> "UDEFINERT"
+                    // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
+                    val førsteRettighetstype =
+                        rettighetstyper.first().rettighetstype.name.uppercase()
+                    "AAP_$førsteRettighetstype"
                 }
+
+                ResultatKode.AVSLAG -> "AVSLAG"
+
+                ResultatKode.TRUKKET -> "TRUKKET"
+
+                ResultatKode.KLAGE_OPPRETTHOLDES -> "KLAGE_OPPRETTHOLDES"
+
+                ResultatKode.KLAGE_OMGJØRES -> "KLAGE_OMGJØRES"
+
+                ResultatKode.KLAGE_DELVIS_OMGJØRES -> "KLAGE_DELVIS_OMGJØRES"
+
+                ResultatKode.KLAGE_AVSLÅTT -> "KLAGE_AVSLÅTT"
+
+                ResultatKode.KLAGE_TRUKKET -> "KLAGE_TRUKKET"
+
+                ResultatKode.AVBRUTT -> "AVBRUTT"
+
+                null -> "UDEFINERT"
             }
         }
     }
@@ -256,7 +267,7 @@ class BQBehandlingMapper(
     private fun kreverMaksLengdeKodeverksfelt(feltNavn: String, verdi: String?) {
         require(verdi == null || verdi.length < MAKS_LENGDE_KODEVERKSFELT) {
             "$feltNavn er lengre enn $MAKS_LENGDE_KODEVERKSFELT tegn (${verdi?.length}), " +
-                    "Team Sak tåler ikke dette. Verdi: $verdi"
+                "Team Sak tåler ikke dette. Verdi: $verdi"
         }
     }
 
@@ -275,7 +286,9 @@ class BQBehandlingMapper(
         val enhet = snapshots.lastOrNull()?.enhet
 
         if (behandling.behandlingStatus() == BehandlingStatus.IVERKSETTES && enhet == null) {
-            log.info("Fant ikke oppgave for iverksettes-steg. Behandling: ${behandling.referanse}. Sak: ${behandling.sak.saksnummer}.")
+            log.info(
+                "Fant ikke oppgave for iverksettes-steg. Behandling: ${behandling.referanse}. Sak: ${behandling.sak.saksnummer}.",
+            )
             // Fallback til siste enhet
             return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
                 .maxByOrNull { it.sistEndret() }?.enhet?.kode
@@ -295,7 +308,7 @@ class BQBehandlingMapper(
 
             // Fallback til siste enhet
             return enhetSistLøsteAvklaringsbehov ?: oppgaveRepository.hentOppgaverForBehandling(
-                behandling.id()
+                behandling.id(),
             )
                 .maxByOrNull { it.sistEndret() }?.enhet?.kode
         }
@@ -316,10 +329,7 @@ class BQBehandlingMapper(
         return enhet
     }
 
-    private fun historiskEnhetForSistLøsteBehov(
-        behandling: Behandling,
-        cutoffTidspunkt: LocalDateTime
-    ): String? {
+    private fun historiskEnhetForSistLøsteBehov(behandling: Behandling, cutoffTidspunkt: LocalDateTime): String? {
         val kode = behandling.sisteLøsteAvklaringsbehov?.kode?.name ?: return null
         return oppgaveRepository.hentOppgaverForBehandling(behandling.id())
             .flatMap { it.hendelser }
@@ -329,9 +339,7 @@ class BQBehandlingMapper(
     }
 
     companion object {
-        internal fun behandlingStatus(
-            behandling: Behandling
-        ): String {
+        internal fun behandlingStatus(behandling: Behandling): String {
             val venteÅrsak =
                 behandling.venteÅrsak?.let { "_${ÅrsakTilSattPåVent.kortKodeFor(it).uppercase()}" }.orEmpty()
             val returStatus = behandling.gjeldendeAvklaringsbehovStatus
@@ -341,8 +349,11 @@ class BQBehandlingMapper(
             val behandlingStatus = behandling.behandlingStatus()
             return when (behandlingStatus) {
                 BehandlingStatus.OPPRETTET -> "OPPRETTET"
+
                 BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
+
                 BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
+
                 BehandlingStatus.AVSLUTTET -> {
                     if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()
                             ?.sendesTilKA() == true

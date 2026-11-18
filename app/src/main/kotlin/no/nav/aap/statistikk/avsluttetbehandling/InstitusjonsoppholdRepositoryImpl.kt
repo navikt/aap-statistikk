@@ -5,19 +5,14 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.komponenter.type.Periode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
-class InstitusjonsoppholdRepositoryImpl(private val dbConnection: DBConnection) :
-    InstitusjonsoppholdRepository {
+class InstitusjonsoppholdRepositoryImpl(private val dbConnection: DBConnection) : InstitusjonsoppholdRepository {
 
     companion object : RepositoryFactory<InstitusjonsoppholdRepositoryImpl> {
-        override fun konstruer(connection: DBConnection): InstitusjonsoppholdRepositoryImpl {
-            return InstitusjonsoppholdRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): InstitusjonsoppholdRepositoryImpl =
+            InstitusjonsoppholdRepositoryImpl(connection)
     }
 
-    override fun lagre(
-        behandlingId: BehandlingId,
-        perioder: List<Periode>
-    ) {
+    override fun lagre(behandlingId: BehandlingId, perioder: List<Periode>) {
         val deleteSql = """
             DELETE FROM institusjonsopphold WHERE behandling_id = ?
         """.trimIndent()
@@ -73,7 +68,7 @@ class InstitusjonsoppholdRepositoryImpl(private val dbConnection: DBConnection) 
             setRowMapper {
                 Periode(
                     fom = it.getLocalDate("fra_dato"),
-                    tom = it.getLocalDate("til_dato")
+                    tom = it.getLocalDate("til_dato"),
                 )
             }
         }

@@ -32,23 +32,29 @@ import javax.sql.DataSource
 class ResendHendelseServiceTest {
     @Test
     fun `rekjøring erstatter feil historikk og gir samme aktive historikk ved gjentakelse`(
-        @Postgres dataSource: DataSource
+        @Postgres dataSource: DataSource,
     ) {
         val tidspunkt = LocalDateTime.of(2026, 11, 13, 10, 25)
         val referanse = UUID.randomUUID()
         val saksnummer = Saksnummer("TEST_REPLAY")
         val (behandlingId) = opprettTestHendelse(
-            dataSource, referanse, saksnummer, opprettetTidspunkt = tidspunkt
+            dataSource,
+            referanse,
+            saksnummer,
+            opprettetTidspunkt = tidspunkt,
         )
         dataSource.transaction { connection ->
             connection.execute(
-                "UPDATE behandling_historikk SET gjeldende_avklaringsbehov = '5034' WHERE behandling_id = ?"
+                "UPDATE behandling_historikk SET gjeldende_avklaringsbehov = '5034' WHERE behandling_id = ?",
             ) {
                 setParams { setLong(1, behandlingId.id) }
             }
         }
         val hendelse = opprettTestStoppetBehandling(
-            referanse, tidspunkt, tidspunkt.plusMinutes(2), tidspunkt,
+            referanse,
+            tidspunkt,
+            tidspunkt.plusMinutes(2),
+            tidspunkt,
             saksnummer = saksnummer.value,
             behandlingStatus = no.nav.aap.behandlingsflyt.kontrakt.behandling.Status.UTREDES,
             ident = "29021946",
@@ -61,9 +67,9 @@ class ResendHendelseServiceTest {
                             status = Status.OPPRETTET,
                             tidsstempel = tidspunkt.plusMinutes(1),
                             endretAv = "Kelvin",
-                            gradBehov = GradBehov.FRIVILLIG
-                        )
-                    )
+                            gradBehov = GradBehov.FRIVILLIG,
+                        ),
+                    ),
                 ),
                 AvklaringsbehovHendelseDto(
                     avklaringsbehovDefinisjon = Definisjon.FATTE_VEDTAK,
@@ -73,11 +79,11 @@ class ResendHendelseServiceTest {
                             status = Status.OPPRETTET,
                             tidsstempel = tidspunkt.plusMinutes(2),
                             endretAv = "Kelvin",
-                            gradBehov = GradBehov.PÅKREVD
-                        )
-                    )
-                )
-            )
+                            gradBehov = GradBehov.PÅKREVD,
+                        ),
+                    ),
+                ),
+            ),
         )
         val publisher = FakeHendelsePublisher()
 
@@ -89,7 +95,7 @@ class ResendHendelseServiceTest {
                 PersonService(PersonRepository(connection), pdl),
                 repository,
                 BehandlingService(repository, SkjermingService(pdl)),
-                publisher
+                publisher,
             ).prosesserNyHistorikkHendelse(hendelse)
             repository.hent(behandlingId)
         }
@@ -116,7 +122,7 @@ class ResendHendelseServiceTest {
             PersonService(FakePersonRepository(), FakePdlGateway()),
             behandlingRepository,
             BehandlingService(behandlingRepository, SkjermingService(FakePdlGateway(emptyMap()))),
-            hendelsePublisher
+            hendelsePublisher,
         )
 
         hendelsesService.prosesserNyHistorikkHendelse(hendelse)
@@ -125,8 +131,7 @@ class ResendHendelseServiceTest {
 
         assertThat(behandling.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(hendelsePublisher.hendelser).containsExactly(
-            StatistikkHendelse.SakstatistikkSkalResendes(behandling.id())
+            StatistikkHendelse.SakstatistikkSkalResendes(behandling.id()),
         )
     }
-
 }

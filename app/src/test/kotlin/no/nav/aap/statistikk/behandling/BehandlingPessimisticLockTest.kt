@@ -50,7 +50,7 @@ class BehandlingPessimisticLockTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -82,7 +82,7 @@ class BehandlingPessimisticLockTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -124,7 +124,7 @@ class BehandlingPessimisticLockTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -138,7 +138,7 @@ class BehandlingPessimisticLockTest {
             val task1 = async(Dispatchers.IO) {
                 ready.countDown()
                 ready.await()
-                
+
                 dataSource.transaction {
                     val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
                     lockAcquiredCount.incrementAndGet()
@@ -146,12 +146,12 @@ class BehandlingPessimisticLockTest {
 
                     // Hold lock for a bit
                     Thread.sleep(500)
-                    
+
                     BehandlingRepository(it).oppdaterBehandling(
                         locked.copy(
                             sisteSaksbehandler = "handler1",
-                            oppdatertTidspunkt = LocalDateTime.now()
-                        )
+                            oppdatertTidspunkt = LocalDateTime.now(),
+                        ),
                     )
                     executionOrder.add("task1-updated")
                 }
@@ -160,7 +160,7 @@ class BehandlingPessimisticLockTest {
             val task2 = async(Dispatchers.IO) {
                 ready.countDown()
                 ready.await()
-                
+
                 // Give task1 time to acquire lock
                 Thread.sleep(100)
 
@@ -172,8 +172,8 @@ class BehandlingPessimisticLockTest {
                     BehandlingRepository(it).oppdaterBehandling(
                         locked.copy(
                             sisteSaksbehandler = "handler2",
-                            oppdatertTidspunkt = LocalDateTime.now()
-                        )
+                            oppdatertTidspunkt = LocalDateTime.now(),
+                        ),
                     )
                     executionOrder.add("task2-updated")
                 }
@@ -185,7 +185,7 @@ class BehandlingPessimisticLockTest {
 
         // Both should successfully acquire lock
         assertThat(lockAcquiredCount.get()).isEqualTo(2)
-        
+
         // task1 should complete before task2 can lock
         assertThat(executionOrder).startsWith("task1-locked")
         assertThat(executionOrder.indexOf("task1-updated"))
@@ -210,7 +210,7 @@ class BehandlingPessimisticLockTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -227,7 +227,7 @@ class BehandlingPessimisticLockTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -240,10 +240,10 @@ class BehandlingPessimisticLockTest {
                 dataSource.transaction {
                     val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandling1Id)
                     results["task1-lock"] = "locked"
-                    
+
                     // Hold lock for 500ms
                     Thread.sleep(taskDuration)
-                    
+
                     results["task1-release"] = "released"
                 }
             }
@@ -252,10 +252,10 @@ class BehandlingPessimisticLockTest {
                 dataSource.transaction {
                     val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandling2Id)
                     results["task2-lock"] = "locked"
-                    
+
                     // Hold lock for 500ms
                     Thread.sleep(taskDuration)
-                    
+
                     results["task2-release"] = "released"
                 }
             }
@@ -268,14 +268,14 @@ class BehandlingPessimisticLockTest {
 
         // Both tasks should complete
         assertThat(results).containsKeys("task1-lock", "task1-release", "task2-lock", "task2-release")
-        
+
         // Since they're different behandlinger, they should run concurrently
         // If run sequentially, would take 1000ms. If concurrent, should take ~500ms.
-        assertThat(elapsedMs).isLessThan(800)  // Allow 300ms buffer for overhead
+        assertThat(elapsedMs).isLessThan(800) // Allow 300ms buffer for overhead
     }
 
     @Test
-    @Timeout(10)  // 10 second timeout - should complete much faster
+    @Timeout(10) // 10 second timeout - should complete much faster
     fun `lock is released at transaction end`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
@@ -294,7 +294,7 @@ class BehandlingPessimisticLockTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -341,7 +341,7 @@ class BehandlingPessimisticLockTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -352,17 +352,17 @@ class BehandlingPessimisticLockTest {
             val task1 = async(Dispatchers.IO) {
                 ready.countDown()
                 ready.await()
-                
+
                 dataSource.transaction {
                     val locked = BehandlingRepository(it).hentBehandlingForUpdate(referanse)
                     assertThat(locked).isNotNull()
-                    
+
                     // Update saksbehandler
                     BehandlingRepository(it).oppdaterBehandling(
                         locked!!.copy(
                             sisteSaksbehandler = "s001",
-                            oppdatertTidspunkt = LocalDateTime.now()
-                        )
+                            oppdatertTidspunkt = LocalDateTime.now(),
+                        ),
                     )
                 }
             }
@@ -370,20 +370,20 @@ class BehandlingPessimisticLockTest {
             val task2 = async(Dispatchers.IO) {
                 ready.countDown()
                 ready.await()
-                
+
                 // Small delay to ensure task1 processes first
                 Thread.sleep(50)
-                
+
                 dataSource.transaction {
                     val locked = BehandlingRepository(it).hentBehandlingForUpdate(referanse)
                     assertThat(locked).isNotNull()
-                    
+
                     // Same saksbehandler update (idempotent)
                     BehandlingRepository(it).oppdaterBehandling(
                         locked!!.copy(
                             sisteSaksbehandler = "s001",
-                            oppdatertTidspunkt = LocalDateTime.now()
-                        )
+                            oppdatertTidspunkt = LocalDateTime.now(),
+                        ),
                     )
                 }
             }
@@ -398,7 +398,7 @@ class BehandlingPessimisticLockTest {
         }
         assertThat(final).isNotNull()
         assertThat(final!!.id()).isEqualTo(behandlingId)
-        
+
         // Verify two historikk entries (one from each event)
         assertThat(final.hendelser.size).isGreaterThanOrEqualTo(2)
     }
@@ -413,7 +413,7 @@ class BehandlingPessimisticLockTest {
             referanse = referanse,
             sak = sak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
+            status = BehandlingStatus.UTREDES,
             opprettetTid = LocalDateTime.now(),
             mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
             versjon = Versjon("v1"),
@@ -432,7 +432,7 @@ class BehandlingPessimisticLockTest {
             val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
             val modified = locked.copy(
                 sisteSaksbehandler = "s002",
-                oppdatertTidspunkt = LocalDateTime.now()
+                oppdatertTidspunkt = LocalDateTime.now(),
             )
             BehandlingRepository(it).oppdaterBehandling(modified)
             modified

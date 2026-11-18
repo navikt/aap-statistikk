@@ -108,7 +108,7 @@ class SamordningRepositoryImplTest {
                     tom = now,
                     ytelse = Samordning.SamordningYtelse.FORELDREPENGER,
                     prosent = 100,
-                )
+                ),
             ),
             avregningAndreYtelser = emptyList(),
             arbeidsgiver = emptyList(),

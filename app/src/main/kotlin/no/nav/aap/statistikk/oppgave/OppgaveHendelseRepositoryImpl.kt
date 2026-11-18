@@ -5,12 +5,10 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import org.slf4j.LoggerFactory
 import java.util.*
 
-class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
-    OppgaveHendelseRepository {
+class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) : OppgaveHendelseRepository {
     companion object : RepositoryFactory<OppgaveHendelseRepository> {
-        override fun konstruer(connection: DBConnection): OppgaveHendelseRepository {
-            return OppgaveHendelseRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): OppgaveHendelseRepository =
+            OppgaveHendelseRepositoryImpl(connection)
     }
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -109,18 +107,17 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                     harHasteMarkering = it.getBooleanOrNull("har_hastemarkering"),
                     harAvslagSykdomMarkering = it.getBooleanOrNull("har_avslag_sykdom_markering"),
                     sendtTid = it.getLocalDateTime("sendt_tid"),
-                    versjon = it.getLongOrNull("versjon") ?: 0L
+                    versjon = it.getLongOrNull("versjon") ?: 0L,
                 )
             }
         }
-
     }
 
     override fun hentSisteCutoffAnchorForAvklaringsbehov(
         behandlingReferanse: UUID,
         avklaringsbehovKode: String,
         behandlingTidspunkt: java.time.LocalDateTime,
-        preferertOppgaveId: Long?
+        preferertOppgaveId: Long?,
     ): OppgaveCutoffAnchor? {
         val sql = """
             select identifikator, versjon, sendt_tid
@@ -148,7 +145,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 OppgaveCutoffAnchor(
                     oppgaveId = it.getLong("identifikator"),
                     versjon = it.getLongOrNull("versjon") ?: 0L,
-                    sendtTid = it.getLocalDateTime("sendt_tid")
+                    sendtTid = it.getLocalDateTime("sendt_tid"),
                 )
             }
         }
@@ -156,7 +153,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
 
     override fun hentEnhetOgReservasjonForAvklaringsbehov(
         behandlingReferanse: UUID,
-        avklaringsbehovKode: String
+        avklaringsbehovKode: String,
     ): List<EnhetReservasjonOgTidspunkt> {
         val sql = """
             select enhet, reservert_av, mottatt_tidspunkt
@@ -175,7 +172,7 @@ class OppgaveHendelseRepositoryImpl(private val dbConnection: DBConnection) :
                 EnhetReservasjonOgTidspunkt(
                     enhet = it.getString("enhet"),
                     reservertAv = it.getStringOrNull("reservert_av"),
-                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt")
+                    tidspunkt = it.getLocalDateTime("mottatt_tidspunkt"),
                 )
             }
         }

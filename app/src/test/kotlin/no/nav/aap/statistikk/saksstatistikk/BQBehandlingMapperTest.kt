@@ -2,10 +2,10 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.hendelser.BehandlingService
-import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
 import no.nav.aap.statistikk.enhet.Enhet
+import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.oppgave.BehandlingReferanse
+import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
@@ -37,7 +37,7 @@ class BQBehandlingMapperTest {
 
     private val fixedClock = Clock.fixed(
         LocalDateTime.of(2024, 1, 15, 12, 0).atZone(ZoneId.systemDefault()).toInstant(),
-        ZoneId.systemDefault()
+        ZoneId.systemDefault(),
     )
 
     private val skjermingService = SkjermingService(FakePdlGateway())
@@ -52,12 +52,10 @@ class BQBehandlingMapperTest {
 
         override fun lagreOppgave(oppgave: Oppgave) = 0L
         override fun oppdaterOppgave(oppgave: Oppgave) = Unit
-        override fun hentOppgaverForEnhet(enhet: Enhet) =
-            emptyList<Oppgave>()
+        override fun hentOppgaverForEnhet(enhet: Enhet) = emptyList<Oppgave>()
 
         override fun hentOppgave(identifikator: Long) = null
-        override fun hentOppgaverForBehandling(behandlingId: BehandlingId) =
-            oppgaver[behandlingId] ?: emptyList()
+        override fun hentOppgaverForBehandling(behandlingId: BehandlingId) = oppgaver[behandlingId] ?: emptyList()
     }
 
     private fun lagBehandling(
@@ -65,7 +63,7 @@ class BQBehandlingMapperTest {
         gjeldendeAvklaringsbehov: Definisjon? = null,
         sisteLøsteAvklaringsbehov: Definisjon? = null,
         sisteSaksbehandlerSomLøstebehov: String? = null,
-        hendelser: List<BehandlingHendelse>
+        hendelser: List<BehandlingHendelse>,
     ): Behandling {
         val person = Person(ident = no.nav.aap.statistikk.person.Ident("12345678901"), id = 1L)
         val sak = Sak(
@@ -73,7 +71,7 @@ class BQBehandlingMapperTest {
             person = person,
             saksnummer = Saksnummer("SAK123"),
             sakStatus = SakStatus.UTREDES,
-            sistOppdatert = LocalDateTime.of(2024, 1, 1, 10, 0)
+            sistOppdatert = LocalDateTime.of(2024, 1, 1, 10, 0),
         )
 
         return Behandling(
@@ -90,7 +88,7 @@ class BQBehandlingMapperTest {
             sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
             sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
             hendelser = hendelser,
-            årsaker = listOf(Vurderingsbehov.SØKNAD)
+            årsaker = listOf(Vurderingsbehov.SØKNAD),
         )
     }
 
@@ -101,29 +99,27 @@ class BQBehandlingMapperTest {
         sisteLøsteAvklaringsbehov: Definisjon? = null,
         sisteSaksbehandlerSomLøstebehov: String? = null,
         saksbehandler: Saksbehandler? = null,
-        avklaringsbehovStatus: AvklaringsbehovStatus? = null
-    ): BehandlingHendelse {
-        return BehandlingHendelse(
-            tidspunkt = tidspunkt,
-            hendelsesTidspunkt = hendelsesTidspunkt,
-            avklaringsBehov = avklaringsBehov,
-            sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
-            sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
-            saksbehandler = saksbehandler,
-            avklaringsbehovStatus = avklaringsbehovStatus,
-            versjon = Versjon("1.0"),
-            status = BehandlingStatus.UTREDES,
-            mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            relatertBehandlingReferanse = null,
-            steggruppe = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            ansvarligBeslutter = null,
-            vedtakstidspunkt = null,
-            resultat = null
-        )
-    }
+        avklaringsbehovStatus: AvklaringsbehovStatus? = null,
+    ): BehandlingHendelse = BehandlingHendelse(
+        tidspunkt = tidspunkt,
+        hendelsesTidspunkt = hendelsesTidspunkt,
+        avklaringsBehov = avklaringsBehov,
+        sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
+        sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
+        saksbehandler = saksbehandler,
+        avklaringsbehovStatus = avklaringsbehovStatus,
+        versjon = Versjon("1.0"),
+        status = BehandlingStatus.UTREDES,
+        mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
+        søknadsformat = SøknadsFormat.DIGITAL,
+        relatertBehandlingReferanse = null,
+        steggruppe = null,
+        venteÅrsak = null,
+        returÅrsak = null,
+        ansvarligBeslutter = null,
+        vedtakstidspunkt = null,
+        resultat = null,
+    )
 
     @Test
     fun `saksbehandler skal være null når oppgave ikke er reservert ennå`() {
@@ -131,7 +127,7 @@ class BQBehandlingMapperTest {
         val hendelse = lagBehandlingHendelse(
             avklaringsBehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
-            sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid"
+            sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
         )
 
         val behandling = lagBehandling(
@@ -139,19 +135,19 @@ class BQBehandlingMapperTest {
             gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
-            hendelser = listOf(hendelse)
+            hendelser = listOf(hendelse),
         )
 
         val behandlingService = BehandlingService(
             behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService
+            skjermingService = skjermingService,
         )
 
         val mapper = BQBehandlingMapper(
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = FakeOppgaveRepository(),
-            clock = fixedClock
+            clock = fixedClock,
         )
 
         val result =
@@ -173,7 +169,7 @@ class BQBehandlingMapperTest {
             hendelsesTidspunkt = tidspunkt,
             avklaringsBehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
-            sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid"
+            sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
         )
 
         val behandling = lagBehandling(
@@ -181,7 +177,7 @@ class BQBehandlingMapperTest {
             gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
-            hendelser = listOf(hendelse)
+            hendelser = listOf(hendelse),
         )
 
         val oppgaveRepo = FakeOppgaveHendelseRepository()
@@ -192,9 +188,9 @@ class BQBehandlingMapperTest {
                 EnhetReservasjonOgTidspunkt(
                     enhet = "0400",
                     reservertAv = "Kvaliguy",
-                    tidspunkt = tidspunkt
-                )
-            )
+                    tidspunkt = tidspunkt,
+                ),
+            ),
         )
 
         val oppgaveRepository = FakeOppgaveRepository()
@@ -209,7 +205,7 @@ class BQBehandlingMapperTest {
                 opprettetTidspunkt = tidspunkt,
                 behandlingReferanse = BehandlingReferanse(
                     id = null,
-                    referanse = behandlingRef
+                    referanse = behandlingRef,
                 ),
                 hendelser = listOf(
                     OppgaveHendelse(
@@ -225,22 +221,22 @@ class BQBehandlingMapperTest {
                         opprettetTidspunkt = tidspunkt,
                         endretAv = "Kvaliguy",
                         endretTidspunkt = tidspunkt,
-                        versjon = 1L
-                    )
-                )
-            )
+                        versjon = 1L,
+                    ),
+                ),
+            ),
         )
 
         val behandlingService = BehandlingService(
             behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService
+            skjermingService = skjermingService,
         )
 
         val mapper = BQBehandlingMapper(
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            clock = fixedClock
+            clock = fixedClock,
         )
 
         val result =
@@ -258,7 +254,7 @@ class BQBehandlingMapperTest {
         val hendelse1 = lagBehandlingHendelse(
             tidspunkt = tidspunkt.minusHours(2),
             avklaringsBehov = Definisjon.AVKLAR_SYKDOM,
-            saksbehandler = Saksbehandler("Kompanjong Korrodheid")
+            saksbehandler = Saksbehandler("Kompanjong Korrodheid"),
         )
 
         val hendelse2 = lagBehandlingHendelse(
@@ -266,7 +262,7 @@ class BQBehandlingMapperTest {
             avklaringsBehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
-            saksbehandler = Saksbehandler("Kompanjong Korrodheid")
+            saksbehandler = Saksbehandler("Kompanjong Korrodheid"),
         )
 
         val behandling = lagBehandling(
@@ -274,7 +270,7 @@ class BQBehandlingMapperTest {
             gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "Kompanjong Korrodheid",
-            hendelser = listOf(hendelse1, hendelse2)
+            hendelser = listOf(hendelse1, hendelse2),
         )
 
         val oppgaveRepo = FakeOppgaveHendelseRepository()
@@ -285,21 +281,21 @@ class BQBehandlingMapperTest {
                 EnhetReservasjonOgTidspunkt(
                     enhet = "0401",
                     reservertAv = "Kompanjong Korrodheid",
-                    tidspunkt = tidspunkt.minusHours(2)
-                )
-            )
+                    tidspunkt = tidspunkt.minusHours(2),
+                ),
+            ),
         )
 
         val behandlingService = BehandlingService(
             behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService
+            skjermingService = skjermingService,
         )
 
         val mapper = BQBehandlingMapper(
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = FakeOppgaveRepository(),
-            clock = fixedClock
+            clock = fixedClock,
         )
 
         val result =
@@ -321,18 +317,18 @@ class BQBehandlingMapperTest {
             sendtTid = tidspunkt,
             mottattTidspunkt = tidspunkt.plusSeconds(5),
             reservertAv = null,
-            reservertTidspunkt = null
+            reservertTidspunkt = null,
         )
         val fremtidig = opprettet.copy(
             hendelse = HendelseType.OPPDATERT,
             sendtTid = tidspunkt.plusMinutes(1),
             mottattTidspunkt = tidspunkt.plusMinutes(1),
-            enhet = "9999"
+            enhet = "9999",
         )
         val forsinket = opprettet.copy(
             sendtTid = tidspunkt.minusMinutes(1),
             mottattTidspunkt = tidspunkt.plusMinutes(2),
-            enhet = "4500"
+            enhet = "4500",
         )
 
         val resultat = mapMellomBehov(listOf(opprettet, lukket, fremtidig, forsinket))
@@ -355,8 +351,8 @@ class BQBehandlingMapperTest {
         assertThat(
             mapMellomBehov(
                 listOf(oppgavehendelseFørOvergang(tidspunkt.minusMinutes(1))),
-                gjeldendeBehov = Definisjon.AVKLAR_SYKDOM
-            ).ansvarligEnhetKode
+                gjeldendeBehov = Definisjon.AVKLAR_SYKDOM,
+            ).ansvarligEnhetKode,
         ).isNull()
     }
 
@@ -367,12 +363,12 @@ class BQBehandlingMapperTest {
         val fremtidig = opprettet.copy(
             sendtTid = tidspunkt.plusMinutes(2),
             mottattTidspunkt = tidspunkt.plusMinutes(2),
-            enhet = "9999"
+            enhet = "9999",
         )
 
         val resultat = mapMellomBehov(
             listOf(opprettet, fremtidig),
-            cutoffTidspunkt = opprettet.sendtTid
+            cutoffTidspunkt = opprettet.sendtTid,
         )
 
         assertThat(resultat.ansvarligEnhetKode).isEqualTo("4491")
@@ -385,8 +381,8 @@ class BQBehandlingMapperTest {
         val behandling = lagBehandling(
             gjeldendeAvklaringsbehov = Definisjon.FATTE_VEDTAK,
             hendelser = listOf(
-                lagBehandlingHendelse(tidspunkt = tidspunkt, avklaringsBehov = Definisjon.FATTE_VEDTAK)
-            )
+                lagBehandlingHendelse(tidspunkt = tidspunkt, avklaringsBehov = Definisjon.FATTE_VEDTAK),
+            ),
         )
         val opprettet = oppgavehendelseFørOvergang(tidspunkt)
         val reservert = opprettet.copy(
@@ -395,25 +391,27 @@ class BQBehandlingMapperTest {
             mottattTidspunkt = tidspunkt.plusMinutes(2),
             enhet = "9999",
             reservertAv = "Ny beslutter",
-            reservertTidspunkt = tidspunkt.plusMinutes(2)
+            reservertTidspunkt = tidspunkt.plusMinutes(2),
         )
         val oppgaveRepository = FakeOppgaveRepository()
         oppgaveRepository.addOppgave(
             behandling.id(),
             listOf(opprettet, reservert).tilOppgave().copy(
-                behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse)
-            )
+                behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse),
+            ),
         )
         val mapper = BQBehandlingMapper(
             behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            clock = fixedClock
+            clock = fixedClock,
         )
 
         val resultat = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
         val historisk = mapper.bqBehandlingForBehandling(
-            behandling, erSkjermet = false, cutoffTidspunkt = tidspunkt
+            behandling,
+            erSkjermet = false,
+            cutoffTidspunkt = tidspunkt,
         )
 
         assertThat(resultat.endretTid).isEqualTo(reservert.sendtTid)
@@ -435,43 +433,43 @@ class BQBehandlingMapperTest {
         reservertAv = "Beslutter",
         reservertTidspunkt = tidspunkt,
         opprettetTidspunkt = tidspunkt,
-        versjon = 1L
+        versjon = 1L,
     )
 
     private fun mapMellomBehov(
         oppgavehendelser: List<OppgaveHendelse>,
         gjeldendeBehov: Definisjon? = null,
-        cutoffTidspunkt: LocalDateTime = LocalDateTime.of(2024, 1, 10, 12, 0)
+        cutoffTidspunkt: LocalDateTime = LocalDateTime.of(2024, 1, 10, 12, 0),
     ): BQBehandling {
         val tidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
         val behandling = lagBehandling(hendelser = emptyList())
             .leggTilHendelse(
                 lagBehandlingHendelse(
                     tidspunkt = tidspunkt.minusMinutes(3),
-                    avklaringsBehov = Definisjon.FATTE_VEDTAK
-                )
+                    avklaringsBehov = Definisjon.FATTE_VEDTAK,
+                ),
             ).leggTilHendelse(
                 lagBehandlingHendelse(
                     tidspunkt = tidspunkt,
                     avklaringsBehov = gjeldendeBehov,
                     sisteLøsteAvklaringsbehov = Definisjon.FATTE_VEDTAK,
-                    sisteSaksbehandlerSomLøstebehov = "Beslutter"
-                )
+                    sisteSaksbehandlerSomLøstebehov = "Beslutter",
+                ),
             )
         val oppgaveRepository = FakeOppgaveRepository()
         if (oppgavehendelser.isNotEmpty()) {
             oppgaveRepository.addOppgave(
                 behandling.id(),
                 oppgavehendelser.tilOppgave().copy(
-                    behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse)
-                )
+                    behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse),
+                ),
             )
         }
         return BQBehandlingMapper(
             behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            clock = fixedClock
+            clock = fixedClock,
         ).bqBehandlingForBehandling(behandling, erSkjermet = false, cutoffTidspunkt = cutoffTidspunkt)
     }
 
@@ -493,7 +491,7 @@ class BQBehandlingMapperTest {
         val behandling = lagBehandling(
             referanse = behandlingRef,
             gjeldendeAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
-            hendelser = listOf(hendelse)
+            hendelser = listOf(hendelse),
         )
 
         val oppgaveRepository = FakeOppgaveRepository()
@@ -508,7 +506,7 @@ class BQBehandlingMapperTest {
                 opprettetTidspunkt = cutoffTidspunkt,
                 behandlingReferanse = BehandlingReferanse(
                     id = null,
-                    referanse = behandlingRef
+                    referanse = behandlingRef,
                 ),
                 hendelser = listOf(
                     OppgaveHendelse(
@@ -521,7 +519,7 @@ class BQBehandlingMapperTest {
                         status = Oppgavestatus.OPPRETTET,
                         opprettetTidspunkt = cutoffTidspunkt,
                         endretTidspunkt = cutoffTidspunkt,
-                        versjon = 1L
+                        versjon = 1L,
                     ),
                     OppgaveHendelse(
                         hendelse = HendelseType.LUKKET,
@@ -533,20 +531,20 @@ class BQBehandlingMapperTest {
                         status = Oppgavestatus.AVSLUTTET,
                         opprettetTidspunkt = cutoffTidspunkt,
                         endretTidspunkt = lukketEtterCutoff,
-                        versjon = 2L
-                    )
-                )
-            )
+                        versjon = 2L,
+                    ),
+                ),
+            ),
         )
 
         val mapper = BQBehandlingMapper(
             behandlingService = BehandlingService(
                 behandlingRepository = FakeBehandlingRepository(),
-                skjermingService = skjermingService
+                skjermingService = skjermingService,
             ),
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            clock = fixedClock
+            clock = fixedClock,
         )
 
         val result = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
@@ -575,7 +573,7 @@ class BQBehandlingMapperTest {
         val hendelse1 = lagBehandlingHendelse(
             tidspunkt = forrigeStegLukket,
             avklaringsBehov = Definisjon.AVKLAR_SYKDOM,
-            saksbehandler = Saksbehandler("LOKAL_SAKSBEHANDLER")
+            saksbehandler = Saksbehandler("LOKAL_SAKSBEHANDLER"),
         )
 
         val hendelse2 = lagBehandlingHendelse(
@@ -583,7 +581,7 @@ class BQBehandlingMapperTest {
             avklaringsBehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "LOKAL_SAKSBEHANDLER",
-            avklaringsbehovStatus = AvklaringsbehovStatus.OPPRETTET
+            avklaringsbehovStatus = AvklaringsbehovStatus.OPPRETTET,
         )
 
         val behandling = lagBehandling(
@@ -591,7 +589,7 @@ class BQBehandlingMapperTest {
             gjeldendeAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
             sisteSaksbehandlerSomLøstebehov = "LOKAL_SAKSBEHANDLER",
-            hendelser = listOf(hendelse1, hendelse2)
+            hendelser = listOf(hendelse1, hendelse2),
         )
 
         val oppgaveRepository = FakeOppgaveRepository()
@@ -606,7 +604,7 @@ class BQBehandlingMapperTest {
                 opprettetTidspunkt = ksÅpnetOgSelvReservert,
                 behandlingReferanse = BehandlingReferanse(
                     id = null,
-                    referanse = behandlingRef
+                    referanse = behandlingRef,
                 ),
                 hendelser = listOf(
                     OppgaveHendelse(
@@ -622,22 +620,22 @@ class BQBehandlingMapperTest {
                         opprettetTidspunkt = ksÅpnetOgSelvReservert,
                         endretAv = "LOKAL_SAKSBEHANDLER",
                         endretTidspunkt = ksÅpnetOgSelvReservert,
-                        versjon = 1L
-                    )
-                )
-            )
+                        versjon = 1L,
+                    ),
+                ),
+            ),
         )
 
         val behandlingService = BehandlingService(
             behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService
+            skjermingService = skjermingService,
         )
 
         val mapper = BQBehandlingMapper(
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = oppgaveRepository,
-            clock = fixedClock
+            clock = fixedClock,
         )
 
         val result = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
@@ -647,8 +645,8 @@ class BQBehandlingMapperTest {
         assertThat(result.saksbehandler)
             .describedAs(
                 "Viser den transiente selv-reserveringen fra oppgave-systemet: samme saksbehandler " +
-                        "som nettopp løste forrige avklaringsbehov blir stående som saksbehandler på " +
-                        "det nyåpnede kvalitetssikrings-steget, inntil en senere AVRESERVERT/omfordeling korrigerer det."
+                    "som nettopp løste forrige avklaringsbehov blir stående som saksbehandler på " +
+                    "det nyåpnede kvalitetssikrings-steget, inntil en senere AVRESERVERT/omfordeling korrigerer det.",
             )
             .isEqualTo("LOKAL_SAKSBEHANDLER")
         assertThat(result.behandlingMetode).isEqualTo(BehandlingMetode.KVALITETSSIKRING)
@@ -664,7 +662,7 @@ class BQBehandlingMapperTest {
             avklaringsBehov = Definisjon.FATTE_VEDTAK,
             sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteSaksbehandlerSomLøstebehov = "Kvaliguy",
-            avklaringsbehovStatus = AvklaringsbehovStatus.OPPRETTET
+            avklaringsbehovStatus = AvklaringsbehovStatus.OPPRETTET,
         )
 
         val behandling = lagBehandling(
@@ -672,19 +670,19 @@ class BQBehandlingMapperTest {
             gjeldendeAvklaringsbehov = Definisjon.FATTE_VEDTAK,
             sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
             sisteSaksbehandlerSomLøstebehov = "Kvaliguy",
-            hendelser = listOf(hendelse)
+            hendelser = listOf(hendelse),
         )
 
         val behandlingService = BehandlingService(
             behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService
+            skjermingService = skjermingService,
         )
 
         val mapper = BQBehandlingMapper(
             behandlingService = behandlingService,
             rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
             oppgaveRepository = FakeOppgaveRepository(),
-            clock = fixedClock
+            clock = fixedClock,
         )
 
         // Execute
@@ -702,7 +700,7 @@ class BQBehandlingMapperTest {
     @MethodSource("venteÅrsakOgReturstatusKombinasjoner")
     fun `behandlingStatus skal aldri overstige 100 tegn for noen kombinasjon av venteAarsak og returstatus`(
         venteÅrsak: ÅrsakTilSattPåVent,
-        returStatus: AvklaringsbehovStatus?
+        returStatus: AvklaringsbehovStatus?,
     ) {
         // BigQuery-mottaket tåler ikke mer enn 100 tegn for dimensjons-/kodeverksfelt som behandling_status.
         val behandling = lagBehandling(hendelser = emptyList())
@@ -713,7 +711,7 @@ class BQBehandlingMapperTest {
         assertThat(resultat.length)
             .describedAs(
                 "behandlingStatus for venteÅrsak=$venteÅrsak, returStatus=$returStatus " +
-                        "skal være maks 100 tegn, var: $resultat"
+                    "skal være maks 100 tegn, var: $resultat",
             )
             .isLessThan(100)
     }

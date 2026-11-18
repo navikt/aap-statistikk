@@ -24,10 +24,8 @@ interface JobbAppender {
     fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
         provider: RepositoryProvider,
         behandlingId: BehandlingId,
-        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb
+        lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
     )
 
-    fun leggTilResendSakstatistikkJobb(
-        repositoryProvider: RepositoryProvider, behandlingId: BehandlingId
-    )
+    fun leggTilResendSakstatistikkJobb(repositoryProvider: RepositoryProvider, behandlingId: BehandlingId)
 }

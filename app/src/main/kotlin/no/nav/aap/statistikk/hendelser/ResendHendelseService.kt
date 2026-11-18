@@ -25,16 +25,14 @@ class ResendHendelseService(
         fun konstruer(
             repositoryProvider: RepositoryProvider,
             gatewayProvider: GatewayProvider,
-            hendelsePublisher: HendelsePublisher
-        ): ResendHendelseService {
-            return ResendHendelseService(
-                sakService = SakService(repositoryProvider),
-                personService = PersonService(repositoryProvider, gatewayProvider),
-                behandlingRepository = repositoryProvider.provide(),
-                behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
-                hendelsePublisher = hendelsePublisher,
-            )
-        }
+            hendelsePublisher: HendelsePublisher,
+        ): ResendHendelseService = ResendHendelseService(
+            sakService = SakService(repositoryProvider),
+            personService = PersonService(repositoryProvider, gatewayProvider),
+            behandlingRepository = repositoryProvider.provide(),
+            behandlingService = BehandlingService(repositoryProvider, gatewayProvider),
+            hendelsePublisher = hendelsePublisher,
+        )
     }
 
     fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {
@@ -49,7 +47,9 @@ class ResendHendelseService(
             ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
 
         check(behandling.behandlingStatus() == behandlingMedHistorikk.behandlingStatus())
-        { "Behandlingstatus er ikke lik behandling med historikk-status. Behandlingstatus: ${behandling.behandlingStatus()}, behandling med historikk-status: ${behandlingMedHistorikk.behandlingStatus()}. Saksnummer: ${hendelse.saksnummer}. Behandling: ${hendelse.behandlingReferanse}" }
+        {
+            "Behandlingstatus er ikke lik behandling med historikk-status. Behandlingstatus: ${behandling.behandlingStatus()}, behandling med historikk-status: ${behandlingMedHistorikk.behandlingStatus()}. Saksnummer: ${hendelse.saksnummer}. Behandling: ${hendelse.behandlingReferanse}"
+        }
 
         val behandlingId =
             checkNotNull(behandlingService.hentEllerLagreBehandling(hendelse, sak).id)

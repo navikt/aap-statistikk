@@ -14,12 +14,12 @@ data class Sak(
     val person: Person,
     val sakStatus: SakStatus,
     val sistOppdatert: LocalDateTime,
-    val snapShotId: Long? = null
+    val snapShotId: Long? = null,
 )
 
 enum class SakStatus {
     OPPRETTET,
     UTREDES,
     LØPENDE,
-    AVSLUTTET
+    AVSLUTTET,
 }

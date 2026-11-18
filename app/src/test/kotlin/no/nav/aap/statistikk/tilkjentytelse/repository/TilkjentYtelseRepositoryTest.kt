@@ -16,7 +16,9 @@ import javax.sql.DataSource
 
 class TilkjentYtelseRepositoryTest {
     @Test
-    fun `kun én lagret tilkjent ytelse per behandlingsreferanse - skal overskrive eksisterende`(@Postgres dataSource: DataSource) {
+    fun `kun én lagret tilkjent ytelse per behandlingsreferanse - skal overskrive eksisterende`(
+        @Postgres dataSource: DataSource,
+    ) {
         val behandlingsReferanse = UUID.randomUUID()
         opprettTestHendelse(dataSource, behandlingsReferanse, "123456789".tilSaksnummer())
 
@@ -43,8 +45,8 @@ class TilkjentYtelseRepositoryTest {
                         samordningUføregradering = 10.0,
                         samordningArbeidsgiverGradering = 20.0,
                         meldepliktGradering = 30.0,
-                    )
-                )
+                    ),
+                ),
             )
 
         dataSource.transaction { conn ->
@@ -71,8 +73,8 @@ class TilkjentYtelseRepositoryTest {
                     samordningUføregradering = 10.0,
                     samordningArbeidsgiverGradering = 20.0,
                     meldepliktGradering = 30.0,
-                )
-            )
+                ),
+            ),
         )
 
         dataSource.transaction { conn ->
@@ -133,8 +135,8 @@ class TilkjentYtelseRepositoryTest {
                         samordningUføregradering = 15.0,
                         samordningArbeidsgiverGradering = 25.0,
                         meldepliktGradering = 40.0,
-                    )
-                )
+                    ),
+                ),
             )
 
         opprettTestHendelse(dataSource, behandlingsReferanse, saksnummer)
@@ -142,11 +144,10 @@ class TilkjentYtelseRepositoryTest {
         val id = dataSource.transaction { conn ->
             val tilkjentYtelseRepository = TilkjentYtelseRepository(conn)
 
-
             tilkjentYtelseRepository.lagreTilkjentYtelse(
                 TilkjentYtelseEntity.fraDomene(
-                    tilkjentYtelse
-                )
+                    tilkjentYtelse,
+                ),
             )
         }
 
@@ -159,7 +160,7 @@ class TilkjentYtelseRepositoryTest {
             .usingRecursiveComparison()
             .withComparatorForType(
                 DoubleComparator(0.00001),
-                Double::class.javaObjectType
+                Double::class.javaObjectType,
             )
             .isEqualTo(tilkjentYtelse.perioder)
 

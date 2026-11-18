@@ -15,7 +15,7 @@ interface IBehandlingRepository : Repository {
     fun hentEllerNull(id: BehandlingId): Behandling?
 
     fun hent(id: BehandlingId): Behandling
-    
+
     /**
      * Henter behandling med pessimistisk lås (FOR UPDATE).
      * Blokkerer andre transaksjoner fra å endre raden før transaksjonen er ferdig.

@@ -21,12 +21,11 @@ class LagreTilbakekrevingHendelseJobbUtfører(
 }
 
 class LagreTilbakekrevingHendelseJobb : ProviderJobbSpesifikasjon {
-    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører {
-        return LagreTilbakekrevingHendelseJobbUtfører(
+    override fun konstruer(repositoryProvider: RepositoryProvider): JobbUtfører =
+        LagreTilbakekrevingHendelseJobbUtfører(
             repository = repositoryProvider.provide(),
             sakRepository = repositoryProvider.provide(),
         )
-    }
 
     override val type: String = "statistikk.lagreTilbakekrevingHendelse"
     override val navn: String = "Lagre tilbakekrevingshendelse"

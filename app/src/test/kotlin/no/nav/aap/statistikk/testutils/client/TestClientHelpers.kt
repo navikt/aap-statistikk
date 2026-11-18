@@ -12,13 +12,11 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.TilbakekrevingsbehandlingOppdatertHendelse
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
-import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
 import no.nav.aap.komponenter.server.auth.IdentityProvider
 import no.nav.aap.komponenter.server.commonKtorModule
@@ -41,7 +39,6 @@ import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.startUp
-import no.nav.aap.statistikk.testutils.Fakes
 import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.slf4j.LoggerFactory
@@ -83,7 +80,7 @@ fun <E> testKlient(
         commonKtorModule(
             PrometheusProvider.prometheus,
             InfoModel(title = "AAP - Statistikk", version = "0.0.1"),
-            identityProvider = IdentityProvider.ENTRA_ID
+            identityProvider = IdentityProvider.ENTRA_ID,
         )
         module(
             transactionExecutor,
@@ -105,38 +102,38 @@ fun <E> testKlient(
 }
 
 class TestClient(private val client: RestClient<InputStream>, private val url: String) {
-    fun postBehandlingsflytHendelse(
-        hendelse: StoppetBehandling
-    ) {
+    fun postBehandlingsflytHendelse(hendelse: StoppetBehandling) {
         client.post<StoppetBehandling, Any>(
             URI.create("$url/stoppetBehandling"),
-            PostRequest(hendelse)
+            PostRequest(hendelse),
         )
     }
 
     fun oppdatertBehandlingHendelse(hendelse: StoppetBehandling) {
         client.post<StoppetBehandling, Any>(
-            URI.create("$url/oppdatertBehandling"), PostRequest(hendelse)
+            URI.create("$url/oppdatertBehandling"),
+            PostRequest(hendelse),
         )
     }
 
-    fun postOppgaveData(
-        oppgaveHendelse: OppgaveHendelse
-    ) {
+    fun postOppgaveData(oppgaveHendelse: OppgaveHendelse) {
         client.post<OppgaveHendelse, Any>(
-            URI.create("$url/oppgave"), PostRequest(oppgaveHendelse)
+            URI.create("$url/oppgave"),
+            PostRequest(oppgaveHendelse),
         )
     }
 
     fun postPostmottakHendelse(hendelse: DokumentflytStoppetHendelse) {
         client.post<DokumentflytStoppetHendelse, Any>(
-            URI.create("$url/postmottak"), PostRequest(hendelse)
+            URI.create("$url/postmottak"),
+            PostRequest(hendelse),
         )
     }
 
     fun postTilbakekrevingshendelse(hendelse: TilbakekrevingsbehandlingOppdatertHendelse) {
         client.post<TilbakekrevingsbehandlingOppdatertHendelse, Any>(
-            URI.create("$url/tilbakekrevingshendelse"), PostRequest(hendelse)
+            URI.create("$url/tilbakekrevingshendelse"),
+            PostRequest(hendelse),
         )
     }
 }
@@ -156,7 +153,7 @@ fun <E> testKlientNoInjectionManuell(
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
         tokenProvider = AzureM2MTokenProvider,
-        responseHandler = DefaultResponseHandler()
+        responseHandler = DefaultResponseHandler(),
     )
 
     PrometheusProvider.prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
@@ -169,7 +166,7 @@ fun <E> testKlientNoInjectionManuell(
                 ManuellMotorImpl(ds, jobber, postgresRepositoryRegistry, gp).also { motor = it }
             },
 
-            )
+        )
     }.start()
 
     val port = runBlocking { server.engine.resolvedConnectors().first().port }
@@ -191,12 +188,12 @@ fun postgresTestConfig(): DbConfig {
         HostPortWaitStrategy().withStartupTimeout(
             Duration.of(
                 60L,
-                ChronoUnit.SECONDS
-            )
-        )
+                ChronoUnit.SECONDS,
+            ),
+        ),
     ).withCopyFileToContainer(
         forHostPath,
-        "/dump.sql"
+        "/dump.sql",
     )
     postgres.start()
 
@@ -213,7 +210,7 @@ fun postgresTestConfig(): DbConfig {
         jdbcUrl = postgres.jdbcUrl,
         userName = postgres.username,
         password = postgres.password,
-        poolSize = AppConfig.hikariMaxPoolSize
+        poolSize = AppConfig.hikariMaxPoolSize,
     )
 
     return dbConfig
@@ -230,14 +227,12 @@ fun bigQueryContainer(): BigQueryConfig {
         override val dataset: String
             get() = "my-dataset"
 
-        override fun bigQueryOptions(): BigQueryOptions {
-            return BigQueryOptions.newBuilder()
-                .setLocation(url)
-                .setProjectId(container.projectId)
-                .setHost(url)
-                .setCredentials(NoCredentials.getInstance())
-                .build()
-        }
+        override fun bigQueryOptions(): BigQueryOptions = BigQueryOptions.newBuilder()
+            .setLocation(url)
+            .setProjectId(container.projectId)
+            .setHost(url)
+            .setCredentials(NoCredentials.getInstance())
+            .build()
     }
 
     logger.info("BigQuery URL: $url")

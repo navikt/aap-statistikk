@@ -17,12 +17,12 @@ class ResendSakstatistikkJobbUtførerTest {
         val behandlingId = dataSource.transaction { BehandlingRepository(it).hent(ref) }?.id!!
 
         val input = JobbInput(
-            jobb = ResendSakstatistikkJobb()
+            jobb = ResendSakstatistikkJobb(),
         ).medPayload(behandlingId)
 
         dataSource.transaction {
             ResendSakstatistikkJobbUtfører(
-                konstruerSakstatistikkService(it)
+                konstruerSakstatistikkService(it),
             ).utfør(input)
         }
 
@@ -33,5 +33,4 @@ class ResendSakstatistikkJobbUtførerTest {
 
         assertThat(uthentet).isNotEmpty
     }
-
 }

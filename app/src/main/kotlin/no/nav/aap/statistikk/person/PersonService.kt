@@ -12,7 +12,7 @@ class PersonService(private val personRepository: IPersonRepository, private val
 
     constructor(
         repositoryProvider: RepositoryProvider,
-        gatewayProvider: GatewayProvider
+        gatewayProvider: GatewayProvider,
     ) : this(repositoryProvider.provide(), gatewayProvider.provide())
 
     fun hentEllerLagrePerson(ident: Ident): Person {
@@ -41,11 +41,9 @@ class PersonService(private val personRepository: IPersonRepository, private val
         }
     }
 
-    private fun finnEksisterendePersoner(identer: List<Ident>): List<Person> {
-        return identer
-            .mapNotNull(personRepository::hentPerson)
-            .distinctBy { it.id() }
-    }
+    private fun finnEksisterendePersoner(identer: List<Ident>): List<Person> = identer
+        .mapNotNull(personRepository::hentPerson)
+        .distinctBy { it.id() }
 
     private fun slåSammenOgOppdaterPerson(
         personer: List<Person>,

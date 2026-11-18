@@ -16,4 +16,3 @@ interface SakstatistikkRepository : Repository {
 
     fun hentAlleHendelserPåBehandling(referanse: UUID): List<BQBehandling>
 }
-

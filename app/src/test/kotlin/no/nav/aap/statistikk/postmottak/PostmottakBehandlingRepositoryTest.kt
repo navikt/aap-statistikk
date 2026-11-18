@@ -1,13 +1,12 @@
 package no.nav.aap.statistikk.postmottak
 
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
-
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -26,7 +25,8 @@ class PostmottakBehandlingRepositoryTest {
     fun `lagre og hente ut igjen`(@Postgres dataSource: DataSource) {
         val oppdatertTid = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         val behandling = opprettBehandling(
-            dataSource, PostmottakBehandling(
+            dataSource,
+            PostmottakBehandling(
                 journalpostId = 213,
                 person = Person(no.nav.aap.statistikk.person.Ident("1234")),
                 referanse = UUID.randomUUID(),
@@ -38,10 +38,10 @@ class PostmottakBehandlingRepositoryTest {
                         status = "ddd",
                         oppdatertTid = oppdatertTid,
                         sisteSaksbehandler = "sasdasd",
-                        gjeldendeAvklaringsBehov = "asdasd"
-                    )
-                )
-            )
+                        gjeldendeAvklaringsBehov = "asdasd",
+                    ),
+                ),
+            ),
         )
 
         val uthentet = hentUtBehandling(dataSource, behandling)
@@ -64,7 +64,8 @@ class PostmottakBehandlingRepositoryTest {
     @Test
     fun `oppdater eksisterende behandling`(@Postgres dataSource: DataSource) {
         val behandling = opprettBehandling(
-            dataSource, PostmottakBehandling(
+            dataSource,
+            PostmottakBehandling(
                 journalpostId = 213,
                 person = Person(no.nav.aap.statistikk.person.Ident("1235")),
                 referanse = UUID.randomUUID(),
@@ -76,10 +77,10 @@ class PostmottakBehandlingRepositoryTest {
                         status = "ddd",
                         oppdatertTid = LocalDateTime.now(),
                         sisteSaksbehandler = "sasdasd",
-                        gjeldendeAvklaringsBehov = "asdasd"
-                    )
-                )
-            )
+                        gjeldendeAvklaringsBehov = "asdasd",
+                    ),
+                ),
+            ),
         )
 
         val uthentet = hentUtBehandling(dataSource, behandling)
@@ -88,13 +89,14 @@ class PostmottakBehandlingRepositoryTest {
 
         dataSource.transaction {
             PostmottakBehandlingRepositoryImpl(it).oppdaterBehandling(
-                uthentet.referanse, PostmottakOppdatering(
+                uthentet.referanse,
+                PostmottakOppdatering(
                     gjeldende = true,
                     status = "enstatus",
                     oppdatertTid = LocalDateTime.now(),
                     sisteSaksbehandler = "ny saksbehandler",
-                    gjeldendeAvklaringsBehov = "avkl"
-                )
+                    gjeldendeAvklaringsBehov = "avkl",
+                ),
             )
         }
 
@@ -107,22 +109,21 @@ class PostmottakBehandlingRepositoryTest {
         assertThat(gjeldendeOppdatering.gjeldendeAvklaringsBehov).isEqualTo("avkl")
     }
 
-    private fun hentUtBehandling(
-        dataSource: DataSource,
-        behandling: PostmottakBehandling
-    ) = dataSource.transaction {
+    private fun hentUtBehandling(dataSource: DataSource, behandling: PostmottakBehandling) = dataSource.transaction {
         PostmottakBehandlingRepositoryImpl(it).hentEksisterendeBehandling(behandling.referanse)
     }
 
-    private fun opprettBehandling(
-        dataSource: DataSource, postmottakBehandling: PostmottakBehandling
-    ) = dataSource.transaction {
-        val personMedId =
-            PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(postmottakBehandling.person.ident)
-        postmottakBehandling.person.settId(personMedId.id()!!)
-        val id = PostmottakBehandlingRepositoryImpl(it).opprettBehandling(
-            postmottakBehandling
-        )
-        postmottakBehandling.medId(id)
-    }
+    private fun opprettBehandling(dataSource: DataSource, postmottakBehandling: PostmottakBehandling) =
+        dataSource.transaction {
+            val personMedId =
+                PersonService(
+                    PersonRepository(it),
+                    FakePdlGateway(),
+                ).hentEllerLagrePerson(postmottakBehandling.person.ident)
+            postmottakBehandling.person.settId(personMedId.id()!!)
+            val id = PostmottakBehandlingRepositoryImpl(it).opprettBehandling(
+                postmottakBehandling,
+            )
+            postmottakBehandling.medId(id)
+        }
 }

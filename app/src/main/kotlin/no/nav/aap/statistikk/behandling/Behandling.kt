@@ -54,54 +54,50 @@ data class Behandling(
     val opprettetAv: String? = null,
 ) {
     init {
-        require(hendelser.sortedBy { it.hendelsesTidspunkt }
-            .zipWithNext { a, b -> a.hendelsesTidspunkt <= b.hendelsesTidspunkt }
-            .all { it }) { "Hendelser må være sortert." }
+        require(
+            hendelser.sortedBy { it.hendelsesTidspunkt }
+                .zipWithNext { a, b -> a.hendelsesTidspunkt <= b.hendelsesTidspunkt }
+                .all { it },
+        ) { "Hendelser må være sortert." }
 
         check(
-            (sisteLøsteAvklaringsbehov == null && sisteSaksbehandlerSomLøstebehov == null)
-                    || (sisteLøsteAvklaringsbehov != null && sisteSaksbehandlerSomLøstebehov != null)
+            (sisteLøsteAvklaringsbehov == null && sisteSaksbehandlerSomLøstebehov == null) ||
+                (sisteLøsteAvklaringsbehov != null && sisteSaksbehandlerSomLøstebehov != null),
         ) {
             "Siste løste avklaringsbehov og siste saksbehandler som løste behov må enten begge være null eller begge være ikke-null: $sisteLøsteAvklaringsbehov og $sisteSaksbehandlerSomLøstebehov"
         }
     }
 
-    fun id(): BehandlingId {
-        return requireNotNull(id) { "Behandling må ha ID" }
-    }
+    fun id(): BehandlingId = requireNotNull(id) { "Behandling må ha ID" }
 
-    fun leggTilHendelse(hendelse: BehandlingHendelse): Behandling {
-        return this.copy(
-            hendelser = this.hendelser + hendelse,
-            oppdatertTidspunkt = hendelse.hendelsesTidspunkt,
-            versjon = hendelse.versjon,
-            gjeldendeAvklaringsBehov = hendelse.avklaringsBehov,
-            gjeldendeAvklaringsbehovStatus = hendelse.avklaringsbehovStatus,
-            sisteLøsteAvklaringsbehov = hendelse.sisteLøsteAvklaringsbehov,
-            sisteSaksbehandlerSomLøstebehov = hendelse.sisteSaksbehandlerSomLøstebehov,
-            sistLøsteAvklaringsbehovTidspunkt = hendelse.sistLøsteAvklaringsbehovTidspunkt,
-            mottattTid = hendelse.mottattTid,
-            vedtakstidspunkt = hendelse.vedtakstidspunkt,
-            gjeldendeStegGruppe = hendelse.steggruppe,
-            ansvarligBeslutter = hendelse.ansvarligBeslutter,
-            status = hendelse.status,
-            venteÅrsak = hendelse.venteÅrsak,
-            returÅrsak = hendelse.returÅrsak,
-            returÅrsakkoblinger = hendelse.returÅrsakkoblinger,
-            sisteSaksbehandler = hendelse.saksbehandler?.ident,
-            søknadsformat = hendelse.søknadsformat,
-            resultat = hendelse.resultat,
-            relatertBehandlingReferanse = hendelse.relatertBehandlingReferanse,
-        )
-    }
+    fun leggTilHendelse(hendelse: BehandlingHendelse): Behandling = this.copy(
+        hendelser = this.hendelser + hendelse,
+        oppdatertTidspunkt = hendelse.hendelsesTidspunkt,
+        versjon = hendelse.versjon,
+        gjeldendeAvklaringsBehov = hendelse.avklaringsBehov,
+        gjeldendeAvklaringsbehovStatus = hendelse.avklaringsbehovStatus,
+        sisteLøsteAvklaringsbehov = hendelse.sisteLøsteAvklaringsbehov,
+        sisteSaksbehandlerSomLøstebehov = hendelse.sisteSaksbehandlerSomLøstebehov,
+        sistLøsteAvklaringsbehovTidspunkt = hendelse.sistLøsteAvklaringsbehovTidspunkt,
+        mottattTid = hendelse.mottattTid,
+        vedtakstidspunkt = hendelse.vedtakstidspunkt,
+        gjeldendeStegGruppe = hendelse.steggruppe,
+        ansvarligBeslutter = hendelse.ansvarligBeslutter,
+        status = hendelse.status,
+        venteÅrsak = hendelse.venteÅrsak,
+        returÅrsak = hendelse.returÅrsak,
+        returÅrsakkoblinger = hendelse.returÅrsakkoblinger,
+        sisteSaksbehandler = hendelse.saksbehandler?.ident,
+        søknadsformat = hendelse.søknadsformat,
+        resultat = hendelse.resultat,
+        relatertBehandlingReferanse = hendelse.relatertBehandlingReferanse,
+    )
 
-    fun hendelsesHistorikk(): List<Behandling> {
-        return (1..<this.hendelser.size + 1)
-            .map { this.hendelser.subList(0, it) }
-            .scan(this.copy(hendelser = emptyList())) { acc, hendelser ->
-                acc.leggTilHendelse(hendelser.last())
-            }.drop(1)
-    }
+    fun hendelsesHistorikk(): List<Behandling> = (1..<this.hendelser.size + 1)
+        .map { this.hendelser.subList(0, it) }
+        .scan(this.copy(hendelser = emptyList())) { acc, hendelser ->
+            acc.leggTilHendelse(hendelser.last())
+        }.drop(1)
 
     /**
      * Returnerer behandlingen slik den var på gitt tidspunkt, ved å filtrere
@@ -120,50 +116,37 @@ data class Behandling(
 
         return when {
             this.resultat() in listOf(
-                ResultatKode.TRUKKET, ResultatKode.AVSLAG, ResultatKode.AVBRUTT
+                ResultatKode.TRUKKET,
+                ResultatKode.AVSLAG,
+                ResultatKode.AVBRUTT,
             ) -> null
 
             this.status in listOf(
-                BehandlingStatus.IVERKSETTES, BehandlingStatus.AVSLUTTET
+                BehandlingStatus.IVERKSETTES,
+                BehandlingStatus.AVSLUTTET,
             ) -> this.referanse.toBase64()
 
             else -> null
         }
     }
 
-    fun versjon(): String {
-        return this.hendelser.lastOrNull()?.versjon?.verdi ?: versjon.verdi
-    }
+    fun versjon(): String = this.hendelser.lastOrNull()?.versjon?.verdi ?: versjon.verdi
 
-    fun ansvarligBeslutter(): String? {
-        return this.hendelser.lastOrNull()?.ansvarligBeslutter ?: ansvarligBeslutter
-    }
+    fun ansvarligBeslutter(): String? = this.hendelser.lastOrNull()?.ansvarligBeslutter ?: ansvarligBeslutter
 
-    fun vedtakstidspunkt(): LocalDateTime? {
-        return this.hendelser.lastOrNull()?.vedtakstidspunkt ?: vedtakstidspunkt
-    }
+    fun vedtakstidspunkt(): LocalDateTime? = this.hendelser.lastOrNull()?.vedtakstidspunkt ?: vedtakstidspunkt
 
-    fun behandlingStatus(): BehandlingStatus {
-        return hendelser.lastOrNull()?.status ?: this.status
-    }
+    fun behandlingStatus(): BehandlingStatus = hendelser.lastOrNull()?.status ?: this.status
 
-    fun avsluttetTid(): LocalDateTime {
-        return hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }
-            .maxOf { it.hendelsesTidspunkt }
-    }
+    fun avsluttetTid(): LocalDateTime = hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }
+        .maxOf { it.hendelsesTidspunkt }
 
-    fun oppdatertTidspunkt(): LocalDateTime {
-        return hendelser.maxOfOrNull { it.hendelsesTidspunkt }
-            ?: requireNotNull(this.oppdatertTidspunkt) { "oppdatertTidspunkt er ikke satt på behandling $referanse." }
-    }
+    fun oppdatertTidspunkt(): LocalDateTime = hendelser.maxOfOrNull { it.hendelsesTidspunkt }
+        ?: requireNotNull(this.oppdatertTidspunkt) { "oppdatertTidspunkt er ikke satt på behandling $referanse." }
 
-    fun resultat(): ResultatKode? {
-        return hendelser.lastOrNull()?.resultat
-    }
+    fun resultat(): ResultatKode? = hendelser.lastOrNull()?.resultat
 
-    fun identerPåBehandling(): List<Ident> {
-        return listOf(this.sak.person.ident) + this.relaterteIdenter
-    }
+    fun identerPåBehandling(): List<Ident> = listOf(this.sak.person.ident) + this.relaterteIdenter
 
     fun behandlingMetode(): BehandlingMetode {
         if (this.hendelser.isEmpty()) {
@@ -185,10 +168,8 @@ data class Behandling(
 }
 
 @JvmName("erAutomatisk")
-private fun List<BehandlingHendelse>.erManuell(): Boolean {
-    return this.filterNot { it.avklaringsBehov == null }.any {
-        !requireNotNull(it.avklaringsBehov).erAutomatisk()
-    }
+private fun List<BehandlingHendelse>.erManuell(): Boolean = this.filterNot { it.avklaringsBehov == null }.any {
+    !requireNotNull(it.avklaringsBehov).erAutomatisk()
 }
 
 fun Definisjon.tilBehandlingMetode(): BehandlingMetode = when {
@@ -222,25 +203,26 @@ data class BehandlingHendelse(
     val vedtakstidspunkt: LocalDateTime? = null,
     val mottattTid: LocalDateTime,
     val søknadsformat: SøknadsFormat,
-    val relatertBehandlingReferanse: String?
+    val relatertBehandlingReferanse: String?,
 )
 
-data class ReturÅrsakkobling(
-    val avklaringsbehov: Definisjon,
-    val returÅrsaker: List<String>
-)
+data class ReturÅrsakkobling(val avklaringsbehov: Definisjon, val returÅrsaker: List<String>)
 
 enum class SøknadsFormat {
-    PAPIR, DIGITAL
+    PAPIR,
+    DIGITAL,
 }
 
-
 enum class BehandlingStatus {
-    OPPRETTET, UTREDES, IVERKSETTES, AVSLUTTET;
+    OPPRETTET,
+    UTREDES,
+    IVERKSETTES,
+    AVSLUTTET,
 }
 
 enum class KildeSystem {
-    Behandlingsflyt, Postmottak
+    Behandlingsflyt,
+    Postmottak,
 }
 
 /**
@@ -251,23 +233,24 @@ enum class TypeBehandling(val kildeSystem: KildeSystem, val erYtelsesBehandling:
     Revurdering(kildeSystem = KildeSystem.Behandlingsflyt, true),
     Tilbakekreving(kildeSystem = KildeSystem.Behandlingsflyt, false),
     Klage(kildeSystem = KildeSystem.Behandlingsflyt, false),
-    SvarFraAndreinstans(kildeSystem = KildeSystem.Behandlingsflyt), Dokumenthåndtering(
-        kildeSystem = KildeSystem.Postmottak
+    SvarFraAndreinstans(kildeSystem = KildeSystem.Behandlingsflyt),
+    Dokumenthåndtering(
+        kildeSystem = KildeSystem.Postmottak,
     ),
     Journalføring(kildeSystem = KildeSystem.Postmottak),
-    Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt), Aktivitetsplikt(
-        kildeSystem = KildeSystem.Behandlingsflyt
-    ), Fordeling(kildeSystem = KildeSystem.Postmottak),
+    Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt),
+    Aktivitetsplikt(
+        kildeSystem = KildeSystem.Behandlingsflyt,
+    ),
+    Fordeling(kildeSystem = KildeSystem.Postmottak),
 
     @Suppress("EnumEntryName")
     Aktivitetsplikt11_9(kildeSystem = KildeSystem.Behandlingsflyt),
 }
 
 @Deprecated("Når aarsak_til_opprettelse finnes for alle nye behandlinger, slett denne.")
-fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov {
-    return this.sortedBy { it.name }.minBy { it.sortering }
-}
+fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov = this.sortedBy { it.name }.minBy { it.sortering }
 
-fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? {
-    return this.firstOrNull { it.status == BehandlingStatus.AVSLUTTET }?.hendelsesTidspunkt
-}
+fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? = this.firstOrNull {
+    it.status == BehandlingStatus.AVSLUTTET
+}?.hendelsesTidspunkt

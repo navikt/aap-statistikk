@@ -1,7 +1,5 @@
 package no.nav.aap.statistikk.postmottak
 
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
-
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
@@ -15,6 +13,7 @@ import no.nav.aap.postmottak.kontrakt.journalpost.JournalpostId
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -32,7 +31,7 @@ class LagrePostmottakHendelseJobbUtførerTest {
             status = Status.OPPRETTET,
             avklaringsbehov = listOf(),
             opprettetTidspunkt = LocalDateTime.now(),
-            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23)
+            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23),
         )
 
         dataSource.transaction(block = utførLagreHendelseJobb(payload))
@@ -60,13 +59,13 @@ class LagrePostmottakHendelseJobbUtførerTest {
                             status = no.nav.aap.postmottak.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = LocalDateTime.of(2025, 1, 29, 12, 12),
                             frist = null,
-                            endretAv = "Kelvin"
-                        )
-                    )
-                )
+                            endretAv = "Kelvin",
+                        ),
+                    ),
+                ),
             ),
             opprettetTidspunkt = LocalDateTime.now(),
-            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23)
+            hendelsesTidspunkt = LocalDateTime.now().minusSeconds(23),
         )
 
         dataSource.transaction(block = utførLagreHendelseJobb(hendelse))
@@ -78,8 +77,8 @@ class LagrePostmottakHendelseJobbUtførerTest {
 
         dataSource.transaction(
             block = utførLagreHendelseJobb(
-                hendelse.copy(status = Status.AVSLUTTET)
-            )
+                hendelse.copy(status = Status.AVSLUTTET),
+            ),
         )
 
         val uthentet2 = hentUt(dataSource, hendelse.referanse)
@@ -87,26 +86,23 @@ class LagrePostmottakHendelseJobbUtførerTest {
         assertThat(uthentet2!!.status()).isEqualTo(Status.AVSLUTTET.toString())
     }
 
-    private fun hentUt(
-        dataSource: DataSource,
-        referanse: UUID
-    ) = dataSource.transaction {
+    private fun hentUt(dataSource: DataSource, referanse: UUID) = dataSource.transaction {
         PostmottakBehandlingRepositoryImpl(it).hentEksisterendeBehandling(
-            referanse
+            referanse,
         )
     }
 
-    private fun utførLagreHendelseJobb(
-        payload: DokumentflytStoppetHendelse
-    ): (DBConnection) -> Unit = {
+    private fun utførLagreHendelseJobb(payload: DokumentflytStoppetHendelse): (DBConnection) -> Unit = {
         LagrePostmottakHendelseJobbUtfører(
-            PostmottakBehandlingService(PostmottakBehandlingRepositoryImpl(it)), PersonService(
-                PersonRepository(it), FakePdlGateway()
-            )
+            PostmottakBehandlingService(PostmottakBehandlingRepositoryImpl(it)),
+            PersonService(
+                PersonRepository(it),
+                FakePdlGateway(),
+            ),
         ).utfør(
             JobbInput(LagrePostmottakHendelseJobb()).medPayload(
-                payload
-            )
+                payload,
+            ),
         )
     }
 }

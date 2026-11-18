@@ -5,15 +5,11 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.statistikk.avsluttetbehandling.DiagnoseMedPeriode
 import java.util.*
 
-class DiagnosePerioderRepositoryImpl(
-    private val dbConnection: DBConnection,
-) :
-    DiagnosePerioderRepository {
+class DiagnosePerioderRepositoryImpl(private val dbConnection: DBConnection) : DiagnosePerioderRepository {
 
     companion object : RepositoryFactory<DiagnosePerioderRepository> {
-        override fun konstruer(connection: DBConnection): DiagnosePerioderRepository {
-            return DiagnosePerioderRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): DiagnosePerioderRepository =
+            DiagnosePerioderRepositoryImpl(connection)
     }
 
     override fun lagre(behandlingId: BehandlingId, diagnoser: List<DiagnoseMedPeriode>) {
@@ -59,7 +55,7 @@ class DiagnosePerioderRepositoryImpl(
                     tom = it.getLocalDate("til_dato"),
                     kodeverk = it.getString("kodeverk"),
                     diagnosekode = it.getString("diagnosekode"),
-                    bidiagnoser = it.getArray("bidiagnoser", String::class)
+                    bidiagnoser = it.getArray("bidiagnoser", String::class),
                 )
             }
         }

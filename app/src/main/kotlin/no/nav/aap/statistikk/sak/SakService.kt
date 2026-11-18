@@ -5,17 +5,10 @@ import no.nav.aap.statistikk.person.Person
 import java.time.Clock
 import java.time.LocalDateTime
 
-class SakService(
-    private val sakRepository: SakRepository,
-    private val clock: Clock = Clock.systemDefaultZone()
-) {
+class SakService(private val sakRepository: SakRepository, private val clock: Clock = Clock.systemDefaultZone()) {
     constructor(repositoryProvider: RepositoryProvider) : this(repositoryProvider.provide())
 
-    fun hentEllerSettInnSak(
-        person: Person,
-        saksnummer: Saksnummer,
-        sakStatus: SakStatus
-    ): Sak {
+    fun hentEllerSettInnSak(person: Person, saksnummer: Saksnummer, sakStatus: SakStatus): Sak {
         var sak = sakRepository.hentSakEllernull(saksnummer)
         if (sak == null) {
             val sakId = sakRepository.settInnSak(
@@ -24,16 +17,16 @@ class SakService(
                     saksnummer = saksnummer,
                     person = person,
                     sistOppdatert = LocalDateTime.now(clock),
-                    sakStatus = sakStatus
-                )
+                    sakStatus = sakStatus,
+                ),
             )
             sak = sakRepository.hentSak(sakId)
         } else {
             sakRepository.oppdaterSak(
                 sak.copy(
                     sakStatus = sakStatus,
-                    sistOppdatert = LocalDateTime.now(clock)
-                )
+                    sistOppdatert = LocalDateTime.now(clock),
+                ),
             )
         }
         return sak

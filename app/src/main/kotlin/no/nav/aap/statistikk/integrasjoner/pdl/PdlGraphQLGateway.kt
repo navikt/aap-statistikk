@@ -33,9 +33,7 @@ class PdlGraphQLGateway : PdlGateway {
             .recordStats()
             .build<String, List<PdlPerson>>()
 
-        override fun konstruer(): PdlGateway {
-            return PdlGraphQLGateway()
-        }
+        override fun konstruer(): PdlGateway = PdlGraphQLGateway()
 
         override fun registrerMetrics(registry: MeterRegistry) {
             CaffeineCacheMetrics.monitor(registry, pdlCache, "pdl")
@@ -48,13 +46,13 @@ class PdlGraphQLGateway : PdlGateway {
             additionalHeaders = listOf(
                 Header(
                     "behandlingsnummer",
-                    BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING
-                )
-            )
+                    BEHANDLINGSNUMMER_AAP_SAKSBEHANDLING,
+                ),
+            ),
         ),
         tokenProvider = AzureM2MTokenProvider,
         responseHandler = DefaultResponseHandler(),
-        prometheus = PrometheusProvider.prometheus
+        prometheus = PrometheusProvider.prometheus,
     )
 
     override fun hentPersoner(identer: List<Ident>): List<PdlPerson> {
@@ -64,20 +62,26 @@ class PdlGraphQLGateway : PdlGateway {
         return pdlCache.get(cacheNøkkel) {
             val graphQLRespons = client.post<Any, GraphQLRespons<PdlRespons>>(
                 URI.create(requiredConfigForKey("integrasjon.pdl.url")),
-                PostRequest(body = PdlRequest.hentPersonBolk(identer))
+                PostRequest(body = PdlRequest.hentPersonBolk(identer)),
             )
 
             val graphQLdata =
-                requireNotNull(graphQLRespons?.data) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
+                requireNotNull(
+                    graphQLRespons?.data,
+                ) { "Ingen data på graphql-respons. Errors: ${graphQLRespons?.errors}" }
 
-            graphQLdata.hentPersonBolk.map { personBolk -> requireNotNull(personBolk.person) { "Fant ikke info om person (ident maskert)" } }
+            graphQLdata.hentPersonBolk.map { personBolk ->
+                requireNotNull(
+                    personBolk.person,
+                ) { "Fant ikke info om person (ident maskert)" }
+            }
         }
     }
 
     override fun hentIdenter(ident: Ident): List<PdlIdent> {
         val graphQLRespons = client.post<Any, GraphQLRespons<PdlIdenterRespons>>(
             URI.create(requiredConfigForKey("integrasjon.pdl.url")),
-            PostRequest(body = PdlRequest.hentIdenter(ident))
+            PostRequest(body = PdlRequest.hentIdenter(ident)),
         )
 
         val graphQLData =

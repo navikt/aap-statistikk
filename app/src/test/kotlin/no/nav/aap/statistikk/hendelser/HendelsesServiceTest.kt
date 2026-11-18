@@ -28,8 +28,8 @@ import no.nav.aap.statistikk.testutils.*
 import no.nav.aap.statistikk.testutils.fakes.FakeArbeidsopptrappingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeBeregningsgrunnlagRepository
-import no.nav.aap.statistikk.testutils.fakes.FakeDiagnoseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeDiagnosePerioderRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeDiagnoseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeFritaksvurderingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeInstitusjonsoppholdRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeMeldekortRepository
@@ -37,10 +37,10 @@ import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.testutils.fakes.FakePersonRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeRettighetsTypeRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeSakRepository
+import no.nav.aap.statistikk.testutils.fakes.FakeSamordningRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeTilkjentYtelseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeVedtattStansOpphørRepository
 import no.nav.aap.statistikk.testutils.fakes.FakeVilkårsResultatRepository
-import no.nav.aap.statistikk.testutils.fakes.FakeSamordningRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
@@ -74,14 +74,14 @@ class HendelsesServiceTest {
             meldekortRepository,
             skjermingService,
             rettighetstypeperiodeRepository,
-            hendelsePublisher
+            hendelsePublisher,
         )
 
         val sak = Sak(
             saksnummer = Saksnummer("ABCDE"),
             person = Person(no.nav.aap.statistikk.person.Ident("123")),
             sakStatus = SakStatus.LØPENDE,
-            sistOppdatert = LocalDateTime.now()
+            sistOppdatert = LocalDateTime.now(),
         )
         sakRepository.settInnSak(sak)
 
@@ -95,11 +95,11 @@ class HendelsesServiceTest {
                 opprettetTid = LocalDateTime.now().minusWeeks(4),
                 mottattTid = LocalDateTime.now().minusWeeks(4).truncatedTo(ChronoUnit.SECONDS),
                 versjon = Versjon(
-                    verdi = "1111"
+                    verdi = "1111",
                 ),
                 søknadsformat = SøknadsFormat.PAPIR,
                 årsakTilOpprettelse = "SØKNAD",
-            )
+            ),
         )
 
         val behandlingReferanse = UUID.randomUUID()
@@ -121,17 +121,17 @@ class HendelsesServiceTest {
                                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                                 tidsstempel = LocalDateTime.now(),
                                 endretAv = "Fredrik",
-                            )
-                        )
-                    )
+                            ),
+                        ),
+                    ),
                 ),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID,
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
-            )
+                årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+            ),
         )
 
         val uthentet = behandlingRepository.hent(behandlingReferanse)
@@ -145,7 +145,7 @@ class HendelsesServiceTest {
 
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
         assertThat(
-            simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
+            simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count(),
         ).isEqualTo(0.0) // Fordi behandlingen allerede eksisterer
     }
 
@@ -156,7 +156,7 @@ class HendelsesServiceTest {
         meldekortRepository: IMeldekortRepository,
         skjermingService: SkjermingService,
         rettighetstypeperiodeRepository: FakeRettighetsTypeRepository,
-        hendelsePublisher: FakeHendelsePublisher = FakeHendelsePublisher()
+        hendelsePublisher: FakeHendelsePublisher = FakeHendelsePublisher(),
     ): HendelsesService {
         val vilkårsresultatRepository = FakeVilkårsResultatRepository()
         val tilkjentYtelseRepository = FakeTilkjentYtelseRepository()
@@ -182,7 +182,7 @@ class HendelsesServiceTest {
             personService = PersonService(FakePersonRepository(), FakePdlGateway()),
             hendelsePublisher = hendelsePublisher,
             behandlingService = behandlingService,
-            meldekortRepository = meldekortRepository
+            meldekortRepository = meldekortRepository,
         )
     }
 
@@ -204,7 +204,7 @@ class HendelsesServiceTest {
             behandlingRepository,
             FakeMeldekortRepository(),
             skjermingService,
-            rettighetstypeperiodeRepository
+            rettighetstypeperiodeRepository,
         )
 
         hendelsesService.prosesserNyHendelse(
@@ -225,21 +225,21 @@ class HendelsesServiceTest {
                                 status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                                 tidsstempel = LocalDateTime.now(),
                                 endretAv = "Fredrik",
-                            )
-                        )
-                    )
+                            ),
+                        ),
+                    ),
                 ),
                 mottattTid = LocalDateTime.now().minusDays(1),
                 sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
-                årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD
-            )
+                årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+            ),
         )
 
         assertThat(hendelseLagretCounter.count()).isEqualTo(1.0)
         assertThat(
-            simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count()
+            simpleMeterRegistry.nyBehandlingOpprettet(TypeBehandling.Førstegangsbehandling).count(),
         ).isEqualTo(1.0) // Fordi behandlingen allerede eksisterer
     }
 }

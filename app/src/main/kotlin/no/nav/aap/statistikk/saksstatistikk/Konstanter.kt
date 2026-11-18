@@ -7,6 +7,6 @@ object Konstanter {
         TypeBehandling.Førstegangsbehandling,
         TypeBehandling.Revurdering,
         TypeBehandling.Klage,
-        TypeBehandling.Tilbakekreving
+        TypeBehandling.Tilbakekreving,
     )
 }

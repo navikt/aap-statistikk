@@ -1,12 +1,11 @@
 package no.nav.aap.statistikk.sak
 
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
-
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.TemporalUnitLessThanOffset
 import org.junit.jupiter.api.Test
@@ -36,10 +35,10 @@ class SakRepositoryImplTest {
                     sistOppdatert = LocalDateTime.now(
                         Clock.fixed(
                             now,
-                            ZoneId.systemDefault()
-                        )
-                    )
-                )
+                            ZoneId.systemDefault(),
+                        ),
+                    ),
+                ),
             )
         }
 
@@ -50,13 +49,14 @@ class SakRepositoryImplTest {
         }
 
         assertThat(sak.sakStatus).isEqualTo(
-            SakStatus.UTREDES
+            SakStatus.UTREDES,
         )
         assertThat(sak.sistOppdatert).isCloseTo(
             LocalDateTime.ofInstant(
                 now,
-                ZoneId.systemDefault()
-            ), TemporalUnitLessThanOffset(1, ChronoUnit.SECONDS)
+                ZoneId.systemDefault(),
+            ),
+            TemporalUnitLessThanOffset(1, ChronoUnit.SECONDS),
         )
     }
 
@@ -68,7 +68,7 @@ class SakRepositoryImplTest {
         // Sette inn
         val fixed = Clock.fixed(
             now,
-            ZoneId.systemDefault()
+            ZoneId.systemDefault(),
         )
         val sak = dataSource.transaction {
             val ident = Ident("214")
@@ -79,10 +79,10 @@ class SakRepositoryImplTest {
                 saksnummer = saksnummer,
                 person = person,
                 sakStatus = SakStatus.UTREDES,
-                sistOppdatert = LocalDateTime.now(fixed).minusDays(1)
+                sistOppdatert = LocalDateTime.now(fixed).minusDays(1),
             )
             val id = sakRepositoryImpl.settInnSak(
-                sak
+                sak,
             )
 
             sak.copy(id = id)
@@ -94,8 +94,8 @@ class SakRepositoryImplTest {
             sakRepositoryImpl.oppdaterSak(
                 sak.copy(
                     sakStatus = SakStatus.AVSLUTTET,
-                    sistOppdatert = LocalDateTime.now(fixed)
-                )
+                    sistOppdatert = LocalDateTime.now(fixed),
+                ),
             )
         }
 
@@ -109,11 +109,11 @@ class SakRepositoryImplTest {
         assertThat(uthentet.sistOppdatert.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(
             LocalDateTime.ofInstant(
                 now,
-                ZoneId.systemDefault()
-            ).truncatedTo(ChronoUnit.SECONDS)
+                ZoneId.systemDefault(),
+            ).truncatedTo(ChronoUnit.SECONDS),
         )
         assertThat(uthentet.sakStatus).isEqualTo(
-            SakStatus.AVSLUTTET
+            SakStatus.AVSLUTTET,
         )
     }
 

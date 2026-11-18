@@ -25,7 +25,9 @@ class MotorJobbAppenderTest {
             val provider = connection.provider()
             jobbAppender.leggTilLagreSakTilBigQueryJobb(provider, behandlingId)
             jobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
-                provider, behandlingId, LagreAvsluttetBehandlingTilBigQueryJobb(FakeBQYtelseRepository())
+                provider,
+                behandlingId,
+                LagreAvsluttetBehandlingTilBigQueryJobb(FakeBQYtelseRepository()),
             )
             jobbAppender.leggTilResendSakstatistikkJobb(provider, behandlingId)
         }

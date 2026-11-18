@@ -22,21 +22,18 @@ import java.util.*
 
 class BehandlingService(
     private val behandlingRepository: IBehandlingRepository,
-    private val skjermingService: SkjermingService
+    private val skjermingService: SkjermingService,
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
         repositoryProvider.provide(),
-        SkjermingService(gatewayProvider.provide())
+        SkjermingService(gatewayProvider.provide()),
     )
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun erSkjermet(behandling: Behandling): Boolean = skjermingService.erSkjermet(behandling.identerPåBehandling())
 
-    fun hentEllerLagreBehandling(
-        dto: StoppetBehandling,
-        sak: Sak
-    ): Behandling {
+    fun hentEllerLagreBehandling(dto: StoppetBehandling, sak: Sak): Behandling {
         if (!Miljø.erProd()) {
             logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
         }
@@ -53,36 +50,36 @@ class BehandlingService(
         }
     }
 
-    private fun opprettBehandling(
-        dto: StoppetBehandling,
-        behandling: Behandling
-    ): Behandling {
-        return try {
-            val id = behandlingRepository.opprettBehandling(behandling)
-            logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
-            PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
-                .increment()
-            behandling.copy(id = id)
-        } catch (e: SQLException) {
-            if (e.erUniqueConstraintViolation()) {
-                logger.warn(
-                    "Samtidighetskonflikt ved oppretting av behandling med referanse ${dto.behandlingReferanse}. Lar jobben retrye.",
-                    e
-                )
-            }
-            throw e
+    private fun opprettBehandling(dto: StoppetBehandling, behandling: Behandling): Behandling = try {
+        val id = behandlingRepository.opprettBehandling(behandling)
+        logger.info("Opprettet behandling med referanse ${behandling.referanse} og id $id.")
+        PrometheusProvider.prometheus.nyBehandlingOpprettet(dto.behandlingType.tilDomene())
+            .increment()
+        behandling.copy(id = id)
+    } catch (e: SQLException) {
+        if (e.erUniqueConstraintViolation()) {
+            logger.warn(
+                "Samtidighetskonflikt ved oppretting av behandling med referanse ${dto.behandlingReferanse}. Lar jobben retrye.",
+                e,
+            )
         }
+        throw e
     }
-
 
     fun konstruerBehandling(
         dto: StoppetBehandling,
         sak: Sak,
-        eksisterendeBehandlingKanskje: Behandling? = behandlingRepository.hent(dto.behandlingReferanse)
+        eksisterendeBehandlingKanskje: Behandling? = behandlingRepository.hent(dto.behandlingReferanse),
     ): Behandling {
         val vedtakstidspunkt =
             dto.avsluttetBehandling?.vedtakstidspunkt ?: dto.avklaringsbehov.utledVedtakTid().let {
-                if (it == null && dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET) dto.tidspunktSisteEndring else it
+                if (it == null &&
+                    dto.behandlingStatus.tilDomene() == BehandlingStatus.AVSLUTTET
+                ) {
+                        dto.tidspunktSisteEndring
+                    } else {
+                        it
+                    }
             }
 
         val (sisteLøsteAvklaringsbehov, sisteSaksbehandler, sistLøsteAvklaringsbehovTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
@@ -112,8 +109,8 @@ class BehandlingService(
                 vedtakstidspunkt = vedtakstidspunkt,
                 mottattTid = dto.mottattTid,
                 søknadsformat = dto.soknadsFormat.tilDomene(),
-                relatertBehandlingReferanse = dto.relatertBehandling?.toString()
-            )
+                relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+            ),
         )
 
         val relatertBehandling = hentRelatertBehandling(dto)
@@ -121,8 +118,7 @@ class BehandlingService(
         return eksisterendeBehandling?.copy(
             relatertBehandlingId = relatertBehandling?.id,
             relaterteIdenter = dto.identerForSak.map(::Ident),
-            årsaker = if (dto.hendelsesTidspunkt < eksisterendeBehandlingKanskje.oppdatertTidspunkt()
-            ) {
+            årsaker = if (dto.hendelsesTidspunkt < eksisterendeBehandlingKanskje.oppdatertTidspunkt()) {
                 eksisterendeBehandlingKanskje.årsaker
             } else {
                 dto.vurderingsbehov.map { it.tilDomene() }
@@ -154,7 +150,7 @@ class BehandlingService(
             opprettetAv = dto.opprettetAv,
             årsakTilOpprettelse = dto.årsakTilOpprettelse.name,
             oppdatertTidspunkt = dto.avklaringsbehov.tidspunktSisteEndring()
-                ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt
+                ?: dto.tidspunktSisteEndring ?: dto.hendelsesTidspunkt,
         )
             .copy(relatertBehandlingId = relatertBehandling?.id)
     }
@@ -165,7 +161,9 @@ class BehandlingService(
             relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
 
         if (relatertBehandling == null && relatertBehandlingUUID != null) {
-            logger.warn("Fant ikke relatert behandling med UUID $relatertBehandlingUUID for behandling ${dto.behandlingReferanse}. Behandlingtype: ${dto.behandlingType}.")
+            logger.warn(
+                "Fant ikke relatert behandling med UUID $relatertBehandlingUUID for behandling ${dto.behandlingReferanse}. Behandlingtype: ${dto.behandlingType}.",
+            )
         }
         return relatertBehandling
     }
@@ -181,8 +179,6 @@ class BehandlingService(
     fun hentBehandling(behandlingReferanse: UUID) = behandlingRepository.hent(behandlingReferanse)
 }
 
-private fun SQLException.erUniqueConstraintViolation(): Boolean {
-    return generateSequence<Throwable>(this) { it.cause }
-        .filterIsInstance<SQLException>()
-        .any { it.sqlState == "23505" }
-}
+private fun SQLException.erUniqueConstraintViolation(): Boolean = generateSequence<Throwable>(this) { it.cause }
+    .filterIsInstance<SQLException>()
+    .any { it.sqlState == "23505" }

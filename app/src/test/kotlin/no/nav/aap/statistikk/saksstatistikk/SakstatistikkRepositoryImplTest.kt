@@ -26,7 +26,7 @@ class SakstatistikkRepositoryImplTest {
         registrertTid: LocalDateTime,
         mottattTid: LocalDateTime,
         endretTid: LocalDateTime,
-        relatertBehandlingUUID: String = UUID.randomUUID().toString()
+        relatertBehandlingUUID: String = UUID.randomUUID().toString(),
     ) = BQBehandling(
         fagsystemNavn = "KELVIN",
         sekvensNummer = 1,
@@ -104,8 +104,8 @@ class SakstatistikkRepositoryImplTest {
                 hendelse.copy(
                     endretTid = endretTid.minusHours(1),
                     tekniskTid = tekniskTid.minusHours(1),
-                    behandlingStatus = "OPPRETTET"
-                )
+                    behandlingStatus = "OPPRETTET",
+                ),
             )
             repository.lagre(hendelse)
             repository.lagre(hendelse.copy(tekniskTid = tekniskTid.plusHours(1)))
@@ -119,7 +119,7 @@ class SakstatistikkRepositoryImplTest {
             .withEqualsForType(datoSammenligner, LocalDateTime::class.java)
             .ignoringFields("sekvensNummer")
             .isEqualTo(
-                hendelse.copy(tekniskTid = tekniskTid.plusHours(1))
+                hendelse.copy(tekniskTid = tekniskTid.plusHours(1)),
             )
     }
 
@@ -168,18 +168,18 @@ class SakstatistikkRepositoryImplTest {
             runCatching {
                 dataSource.transaction { conn ->
                     SakstatistikkRepositoryImpl(conn).acquireBehandlingLock(uuid)
-                    låsErtatt.countDown()          // Tråd 2 kan nå prøve å ta låsen
-                    klartilCommit.await()          // Vent til tråd 2 er blokkert
-                    Thread.sleep(100)              // Gi tråd 2 tid til å blokkere på SELECT FOR UPDATE
+                    låsErtatt.countDown() // Tråd 2 kan nå prøve å ta låsen
+                    klartilCommit.await() // Vent til tråd 2 er blokkert
+                    Thread.sleep(100) // Gi tråd 2 tid til å blokkere på SELECT FOR UPDATE
                     skriveRekkefølge.add(1)
-                }                                  // Commit — låsen slippes
+                } // Commit — låsen slippes
             }.onFailure { feil1[0] = it }
         }
 
         val tråd2 = Thread {
             runCatching {
-                låsErtatt.await()                  // Vent til tråd 1 har låsen
-                klartilCommit.countDown()          // Gi tråd 1 klarsignal til å sove og committe
+                låsErtatt.await() // Vent til tråd 1 har låsen
+                klartilCommit.countDown() // Gi tråd 1 klarsignal til å sove og committe
                 dataSource.transaction { conn ->
                     SakstatistikkRepositoryImpl(conn).acquireBehandlingLock(uuid) // Blokkerer til tråd 1 committer
                     skriveRekkefølge.add(2)

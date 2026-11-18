@@ -5,9 +5,7 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 
 class PersonRepository(private val dbConnection: DBConnection) : IPersonRepository {
     companion object : RepositoryFactory<IPersonRepository> {
-        override fun konstruer(connection: DBConnection): IPersonRepository {
-            return PersonRepository(connection)
-        }
+        override fun konstruer(connection: DBConnection): IPersonRepository = PersonRepository(connection)
     }
 
     override fun lagrePerson(person: Person, identer: Set<Ident>): Long {
@@ -39,13 +37,12 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    private fun opprettPerson(person: Person): Long {
-        return dbConnection.executeReturnKey("INSERT INTO person (skjermet) VALUES (?)") {
+    private fun opprettPerson(person: Person): Long =
+        dbConnection.executeReturnKey("INSERT INTO person (skjermet) VALUES (?)") {
             setParams {
                 setBoolean(1, person.erSkjermet())
             }
         }
-    }
 
     private fun synkroniserIdenter(personId: Long, person: Person, identer: Set<Ident>) {
         val sorterteIdenter = identer.sortedBy { it.ident }
@@ -53,7 +50,7 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         val identMedAnnenEier = eiere.entries.firstOrNull { it.value != null && it.value != personId }
         require(identMedAnnenEier == null) {
             "Ident ${identMedAnnenEier?.key} tilhører allerede en annen person " +
-                    "(person_id=${identMedAnnenEier?.value})."
+                "(person_id=${identMedAnnenEier?.value})."
         }
 
         dbConnection.execute("UPDATE person_ident SET aktiv = FALSE WHERE person_id = ? AND aktiv = TRUE") {
@@ -78,8 +75,8 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    private fun hentEier(ident: Ident): Long? {
-        return dbConnection.queryFirstOrNull("SELECT person_id FROM person_ident WHERE ident = ? FOR UPDATE") {
+    private fun hentEier(ident: Ident): Long? =
+        dbConnection.queryFirstOrNull("SELECT person_id FROM person_ident WHERE ident = ? FOR UPDATE") {
             setParams {
                 setString(1, ident.ident)
             }
@@ -87,7 +84,6 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
                 it.getLong("person_id")
             }
         }
-    }
 
     private fun leggTilIdent(personId: Long, ident: String, aktiv: Boolean) {
         dbConnection.execute("INSERT INTO person_ident (person_id, ident, aktiv) VALUES (?, ?, ?)") {
@@ -155,9 +151,8 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
         }
     }
 
-    override fun hentPerson(ident: Ident): Person? {
-        return dbConnection.queryFirstOrNull(
-            """
+    override fun hentPerson(ident: Ident): Person? = dbConnection.queryFirstOrNull(
+        """
             SELECT p.id            AS id,
                    p.skjermet      AS skjermet,
                    aktiv_pi.ident  AS aktiv_ident
@@ -165,19 +160,17 @@ class PersonRepository(private val dbConnection: DBConnection) : IPersonReposito
                      JOIN person p ON p.id = pi.person_id
                      JOIN person_ident aktiv_pi ON aktiv_pi.person_id = p.id AND aktiv_pi.aktiv = TRUE
             WHERE pi.ident = ?
-            """.trimIndent()
-        ) {
-            setParams {
-                setString(1, ident.ident)
-            }
-            setRowMapper {
-                Person(
-                    ident = Ident(it.getString("aktiv_ident")),
-                    skjermet = it.getBoolean("skjermet"),
-                    id = it.getLong("id"),
-                )
-            }
+        """.trimIndent(),
+    ) {
+        setParams {
+            setString(1, ident.ident)
+        }
+        setRowMapper {
+            Person(
+                ident = Ident(it.getString("aktiv_ident")),
+                skjermet = it.getBoolean("skjermet"),
+                id = it.getLong("id"),
+            )
         }
     }
-
 }

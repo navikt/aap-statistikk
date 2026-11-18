@@ -71,8 +71,8 @@ class IntegrationTest {
         val type: String,
         @param:JsonDeserialize(using = LocalDateTimeDeserializer::class) @param:JsonFormat(
             shape = JsonFormat.Shape.STRING,
-            pattern = "yyyy-MM-dd HH:mm:ss.SSS"
-        ) @param:JsonProperty("opprettet_tid") val opprettetTid: LocalDateTime
+            pattern = "yyyy-MM-dd HH:mm:ss.SSS",
+        ) @param:JsonProperty("opprettet_tid") val opprettetTid: LocalDateTime,
     )
 
     data class Dump(val jobb: List<Jobbdump>)
@@ -83,25 +83,24 @@ class IntegrationTest {
     }
 
     data class BehandlingHendelseData(
-        override val data: StoppetBehandling, override val opprettetTidspunkt: LocalDateTime
+        override val data: StoppetBehandling,
+        override val opprettetTidspunkt: LocalDateTime,
     ) : HendelseData
 
     data class OppgaveHendelseData(
-        override val data: DomeneOppgaveHendelse, override val opprettetTidspunkt: LocalDateTime
+        override val data: DomeneOppgaveHendelse,
+        override val opprettetTidspunkt: LocalDateTime,
     ) : HendelseData
 
     data class OppgaveHendelseAPIData(
         override val data: no.nav.aap.oppgave.statistikk.OppgaveHendelse,
-        override val opprettetTidspunkt: LocalDateTime
+        override val opprettetTidspunkt: LocalDateTime,
     ) : HendelseData
 
     private val logger = LoggerFactory.getLogger(IntegrationTest::class.java)
 
     @Test
-    fun `dump av ekte hendelser`(
-        @Postgres dbConfig: DbConfig,
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `dump av ekte hendelser`(@Postgres dbConfig: DbConfig, @Postgres dataSource: DataSource) {
         // hent på nytt slik: select payload, opprettet_tid, type from jobb where sak_id = 783332 order by opprettet_tid
         // og lagre output som json
         val lines = object {}.javaClass.getResource("/hendelser_public_jobb.json")!!.readText()
@@ -135,7 +134,9 @@ class IntegrationTest {
             dbConfig,
         ) { motor ->
             referanse = prosesserHendelserOgVerifiserBehandling(
-                dataSource, hendelserFraDBDump, motor
+                dataSource,
+                hendelserFraDBDump,
+                motor,
             )
         }
 
@@ -146,7 +147,7 @@ class IntegrationTest {
             "ansvarligEnhetKode",
             "behandlingMetode",
             "behandlingStatus",
-            "behandlingResultat"
+            "behandlingResultat",
         )
             .containsSubsequence(
 //                tuple(null, BehandlingMetode.MANUELL, "OPPRETTET", null),
@@ -164,20 +165,20 @@ class IntegrationTest {
             "5701",
             "5700",
             "5701",
-            "4491"
+            "4491",
         )
         assertThat(bqSaker.map { it.behandlingStatus }).containsSubsequence(
             "UNDER_BEHANDLING",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
-            "AVSLUTTET"
+            "AVSLUTTET",
         )
         assertThat(bqSaker.map { it.behandlingStatus }.toSet()).contains(
             "OPPRETTET",
             "UNDER_BEHANDLING",
             "AVSLUTTET",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
-            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER"
+            "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
         )
         val avsluttede = bqSaker.filter { it.behandlingStatus == "AVSLUTTET" }
             .groupBy { it.endretTid }
@@ -215,7 +216,9 @@ class IntegrationTest {
             println("...")
             println("AVSLUTTEDE HENDELSER:")
             avsluttede.forEach { h ->
-                println("  saksbehandler=${h.saksbehandler}, ansvarligEnhetKode=${h.ansvarligEnhetKode}, behandlingStatus=${h.behandlingStatus}")
+                println(
+                    "  saksbehandler=${h.saksbehandler}, ansvarligEnhetKode=${h.ansvarligEnhetKode}, behandlingStatus=${h.behandlingStatus}",
+                )
             }
             println("...")
         }
@@ -238,7 +241,7 @@ class IntegrationTest {
 
         val alleSakstatistikkHendelser = dataSource.transaction {
             SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                avsluttetBehandlingHendelser.last().data.behandlingReferanse
+                avsluttetBehandlingHendelser.last().data.behandlingReferanse,
             ).sortedBy { it.endretTid }
         }
 
@@ -252,7 +255,7 @@ class IntegrationTest {
             "UNDER_BEHANDLING",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_KVALITETSSIKRER",
             "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
-            "AVSLUTTET"
+            "AVSLUTTET",
         )
         assertThat(resendinger.filter { it.resultatBegrunnelse != null }).isNotEmpty
         assertThat(resendinger.filter { it.resultatBegrunnelse != null }).allSatisfy {
@@ -269,26 +272,20 @@ class IntegrationTest {
         println("Resendinger: ${resendinger.size}")
     }
 
-    private fun postOppgaveHendelse(
-        dataSource: DataSource, hendelse: OppgaveHendelse
-    ) {
+    private fun postOppgaveHendelse(dataSource: DataSource, hendelse: OppgaveHendelse) {
         dataSource.transaction {
             FlytJobbRepository(it).leggTil(
                 JobbInput(
-                    LagreOppgaveHendelseJobb()
+                    LagreOppgaveHendelseJobb(),
                 ).medPayload(
-                    DefaultJsonMapper.toJson(hendelse)
-                ).forSak(stringToNumber(hendelse.saksnummer!!))
+                    DefaultJsonMapper.toJson(hendelse),
+                ).forSak(stringToNumber(hendelse.saksnummer!!)),
             )
         }
-
     }
 
     @Test
-    fun `dump av hendelser for klage`(
-        @Postgres dbConfig: DbConfig,
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `dump av hendelser for klage`(@Postgres dbConfig: DbConfig, @Postgres dataSource: DataSource) {
         /**
          * Filen er lagd slik:
          *  - Inne i FakeServers i behandlingsflyt, legg til denne på endepunktet for statistikk:
@@ -327,25 +324,28 @@ class IntegrationTest {
                         opprettetAv = "Kompanjong Korrodheid",
                         opprettetTidspunkt = behandling.hendelsesTidspunkt.plusSeconds(1),
                         versjon = 3,
-                        harHasteMarkering = false
+                        harHasteMarkering = false,
                     ),
-                    sendtTidspunkt = behandling.hendelsesTidspunkt.plusSeconds(1)
+                    sendtTidspunkt = behandling.hendelsesTidspunkt.plusSeconds(1),
                 )
             }
         }
 
-        val behandlingHendelser = (hendelserFraFlyt.map {
-            BehandlingHendelseData(it, LocalDateTime.now())
-        } + oppgaver.map { OppgaveHendelseAPIData(it, it.sendtTidspunkt.plusSeconds(1)) })
+        val behandlingHendelser = (
+            hendelserFraFlyt.map {
+                BehandlingHendelseData(it, LocalDateTime.now())
+            } + oppgaver.map { OppgaveHendelseAPIData(it, it.sendtTidspunkt.plusSeconds(1)) }
+            )
             .sortedBy { it.opprettetTidspunkt }
-
 
         testKlientNoInjectionManuell(
             dbConfig,
         ) { motor ->
 
             prosesserHendelserOgVerifiserBehandling(
-                dataSource, behandlingHendelser, motor
+                dataSource,
+                behandlingHendelser,
+                motor,
             )
         }
 
@@ -356,15 +356,12 @@ class IntegrationTest {
             "OPPRETTET",
             "UNDER_BEHANDLING",
             "IVERKSETTES",
-            "OVERSENDT_KA"
+            "OVERSENDT_KA",
         )
     }
 
     @Test
-    fun `test riktig kontor`(
-        @Postgres dbConfig: DbConfig,
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `test riktig kontor`(@Postgres dbConfig: DbConfig, @Postgres dataSource: DataSource) {
         val behandlingReferanse = UUID.fromString("ca0a378d-9249-47b3-808a-afe6a6357ac5")
         val personIdent = "2718281828"
         val saksnummer = "ABCDE"
@@ -396,26 +393,24 @@ class IntegrationTest {
                             status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                             tidsstempel = behovOpprettetTid,
                             endretAv = "Kelvin",
-                        )
-                    )
-                )
+                        ),
+                    ),
+                ),
             ),
             hendelsesTidspunkt = LocalDateTime.now(),
             avsluttetBehandling = null,
             identerForSak = listOf(personIdent),
             opprettetAv = null,
             nyeMeldekort = emptyList(),
-            søknadIder = emptyList()
+            søknadIder = emptyList(),
         )
 
         testKlientNoInjectionManuell(dbConfig) { motor ->
-            fun verifiserHendelseRekkefølge(
-                expectedValues: List<Triple<String?, String?, BehandlingMetode>>
-            ) {
+            fun verifiserHendelseRekkefølge(expectedValues: List<Triple<String?, String?, BehandlingMetode>>) {
                 motor.kjørJobber()
                 val alleSakstatistikkHendelser = dataSource.transaction {
                     SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(
-                        behandlingReferanse
+                        behandlingReferanse,
                     )
                 }
 
@@ -426,8 +421,8 @@ class IntegrationTest {
                             "%-15s %-15s %-15s",
                             it.ansvarligEnhetKode,
                             it.saksbehandler,
-                            it.behandlingMetode.name
-                        )
+                            it.behandlingMetode.name,
+                        ),
                     )
                 }
                 println("...")
@@ -437,7 +432,7 @@ class IntegrationTest {
                     .containsExactly(
                         *expectedValues.map { (enhet, saksbehandler, metode) ->
                             tuple(enhet, saksbehandler, metode)
-                        }.toTypedArray()
+                        }.toTypedArray(),
                     )
             }
 
@@ -455,14 +450,14 @@ class IntegrationTest {
                         oppgaveId = 123L,
                         enhet = "0401",
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM,
-                        status = Status.OPPRETTET
-                    )
-                )
+                        status = Status.OPPRETTET,
+                    ),
+                ),
             )
 
             val førsteHendelser = listOf(
                 Triple("0401", null, BehandlingMetode.MANUELL),
-                Triple("0401", null, BehandlingMetode.MANUELL)
+                Triple("0401", null, BehandlingMetode.MANUELL),
             )
             verifiserHendelseRekkefølge(førsteHendelser)
 
@@ -481,9 +476,9 @@ class IntegrationTest {
                         status = Status.OPPRETTET,
                         reservertAv = "Kompanjong Korrodheid",
                         endretAv = "Kompanjong Korrodheid",
-                        versjon = 2
-                    )
-                )
+                        versjon = 2,
+                    ),
+                ),
             )
 
             val tredjeHendelser =
@@ -494,7 +489,7 @@ class IntegrationTest {
             val hendelseMedKvalitetssikring = initialBehandlingHendelse.nyHendelse().copy(
                 avklaringsbehov = initialBehandlingHendelse.avklaringsbehov
                     .løs(Definisjon.AVKLAR_SYKDOM, "Kompanjong Korrodheid")
-                    .leggTilBehov(Definisjon.KVALITETSSIKRING)
+                    .leggTilBehov(Definisjon.KVALITETSSIKRING),
             )
             postBehandlingsflytHendelse(hendelseMedKvalitetssikring)
 
@@ -513,9 +508,9 @@ class IntegrationTest {
                         status = Status.AVSLUTTET,
                         reservertAv = "Kompanjong Korrodheid",
                         endretAv = "Kompanjong Korrodheid",
-                        versjon = 3
-                    )
-                )
+                        versjon = 3,
+                    ),
+                ),
             )
 
             // Oppgave for kvalitetssikring opprettes — må postes før kjørJobber
@@ -530,13 +525,13 @@ class IntegrationTest {
                         oppgaveId = 124L,
                         enhet = "0400",
                         avklaringsbehovKode = Definisjon.KVALITETSSIKRING,
-                        status = Status.OPPRETTET
-                    )
-                )
+                        status = Status.OPPRETTET,
+                    ),
+                ),
             )
 
             val fjerdeHendelser = tredjeHendelser +
-                    Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
+                Triple("0400", null, BehandlingMetode.KVALITETSSIKRING)
 
             verifiserHendelseRekkefølge(fjerdeHendelser)
 
@@ -555,9 +550,9 @@ class IntegrationTest {
                         status = Status.OPPRETTET,
                         reservertAv = "Kvaliguy",
                         endretAv = "Kelvin",
-                        versjon = 2
-                    )
-                )
+                        versjon = 2,
+                    ),
+                ),
             )
 
             // LagreOppgaveJobbUtfører triggers a new BQBehandling with saksbehandler
@@ -569,7 +564,7 @@ class IntegrationTest {
             val hendelseMedBeslutter = hendelseMedKvalitetssikring.nyHendelse().copy(
                 avklaringsbehov = hendelseMedKvalitetssikring.avklaringsbehov
                     .løs(Definisjon.KVALITETSSIKRING, "Kvaliguy")
-                    .leggTilBehov(Definisjon.FATTE_VEDTAK)
+                    .leggTilBehov(Definisjon.FATTE_VEDTAK),
             )
             postBehandlingsflytHendelse(hendelseMedBeslutter)
 
@@ -589,9 +584,9 @@ class IntegrationTest {
                         oppgaveId = 127L,
                         enhet = "4491",
                         avklaringsbehovKode = Definisjon.FATTE_VEDTAK,
-                        status = Status.OPPRETTET
-                    )
-                )
+                        status = Status.OPPRETTET,
+                    ),
+                ),
             )
 
             val syvendeHendelser =
@@ -614,9 +609,9 @@ class IntegrationTest {
                         status = Status.OPPRETTET,
                         reservertAv = "Besluttersen",
                         endretAv = "Besluttersen",
-                        versjon = 2
-                    )
-                )
+                        versjon = 2,
+                    ),
+                ),
             )
 
             // LagreOppgaveJobbUtfører trigger en ny BQBehandling med saksbehandler
@@ -629,7 +624,7 @@ class IntegrationTest {
                 .nyHendelse(BStatus.IVERKSETTES).copy(
                     avklaringsbehov = hendelseMedBeslutter.avklaringsbehov
                         .løs(Definisjon.FATTE_VEDTAK, "Besluttersen")
-                        .leggTilBehov(Definisjon.SKRIV_VEDTAKSBREV)
+                        .leggTilBehov(Definisjon.SKRIV_VEDTAKSBREV),
                 )
             postBehandlingsflytHendelse(hendelseIverksettes)
 
@@ -652,9 +647,9 @@ class IntegrationTest {
                         enhet = "4491",
                         avklaringsbehovKode = Definisjon.FATTE_VEDTAK,
                         status = Status.AVSLUTTET,
-                        endretAv = "Kelvin"
-                    ).copy(versjon = 3, reservertAv = null, reservertTidspunkt = null)
-                )
+                        endretAv = "Kelvin",
+                    ).copy(versjon = 3, reservertAv = null, reservertTidspunkt = null),
+                ),
             )
 
             // Ingen endring
@@ -675,13 +670,13 @@ class IntegrationTest {
                         enhet = "4491",
                         avklaringsbehovKode = Definisjon.SKRIV_VEDTAKSBREV,
                         status = Status.OPPRETTET,
-                        endretAv = "Kelvin"
+                        endretAv = "Kelvin",
                     ).copy(
                         versjon = 1,
                         reservertAv = "Brev-Besluttersen",
-                        reservertTidspunkt = LocalDateTime.now()
-                    )
-                )
+                        reservertTidspunkt = LocalDateTime.now(),
+                    ),
+                ),
             )
 
             val ellevteHendelser =
@@ -693,8 +688,8 @@ class IntegrationTest {
                 .nyHendelse(BStatus.AVSLUTTET).copy(
                     avklaringsbehov = hendelseIverksettes.avklaringsbehov.løs(
                         Definisjon.SKRIV_VEDTAKSBREV,
-                        "Brev-Besluttersen"
-                    )
+                        "Brev-Besluttersen",
+                    ),
                 )
 
             postBehandlingsflytHendelse(hendelseAvsluttet)
@@ -711,31 +706,35 @@ class IntegrationTest {
     }
 
     fun StoppetBehandling.nyHendelse(behandlingStatus: BStatus? = null) = this.copy(
-        avsluttetBehandling = if (behandlingStatus == BStatus.AVSLUTTET) AvsluttetBehandlingDTO(
-            tilkjentYtelse = TilkjentYtelseDTO(
-                listOf()
-            ),
-            vilkårsResultat = VilkårsResultatDTO(
-                typeBehandling = TypeBehandling.Førstegangsbehandling,
-                listOf()
-            ),
-            beregningsGrunnlag = null,
-            diagnoser = null,
-            diagnoserPeriodisert = emptyList(),
-            rettighetstypePerioder = listOf(),
-            resultat = null,
-            vedtakstidspunkt = null,
-            fritaksvurderinger = null,
-            perioderMedArbeidsopptrapping = listOf(),
-            vedtattStansOpphør = emptyList(),
-            institusjonsopphold = emptyList(),
-            samordning = SamordningDTO(
-                uføre = emptyList(),
-                statligeYtelser = emptyList(),
-                avregningAndreYtelser = emptyList(),
-                arbeidsgiver = emptyList(),
+        avsluttetBehandling = if (behandlingStatus == BStatus.AVSLUTTET) {
+            AvsluttetBehandlingDTO(
+                tilkjentYtelse = TilkjentYtelseDTO(
+                    listOf(),
+                ),
+                vilkårsResultat = VilkårsResultatDTO(
+                    typeBehandling = TypeBehandling.Førstegangsbehandling,
+                    listOf(),
+                ),
+                beregningsGrunnlag = null,
+                diagnoser = null,
+                diagnoserPeriodisert = emptyList(),
+                rettighetstypePerioder = listOf(),
+                resultat = null,
+                vedtakstidspunkt = null,
+                fritaksvurderinger = null,
+                perioderMedArbeidsopptrapping = listOf(),
+                vedtattStansOpphør = emptyList(),
+                institusjonsopphold = emptyList(),
+                samordning = SamordningDTO(
+                    uføre = emptyList(),
+                    statligeYtelser = emptyList(),
+                    avregningAndreYtelser = emptyList(),
+                    arbeidsgiver = emptyList(),
+                ),
             )
-        ) else null,
+        } else {
+            null
+        },
         tidspunktSisteEndring = LocalDateTime.now(),
         behandlingStatus = behandlingStatus ?: this.behandlingStatus,
         versjon = UUID.randomUUID().toString(),
@@ -744,24 +743,24 @@ class IntegrationTest {
 
     fun List<AvklaringsbehovHendelseDto>.løs(
         definisjon: Definisjon,
-        endretAv: String
-    ): List<AvklaringsbehovHendelseDto> {
-        return map { avklaringsbehov ->
-            if (avklaringsbehov.avklaringsbehovDefinisjon == definisjon) {
-                avklaringsbehov.copy(
+        endretAv: String,
+    ): List<AvklaringsbehovHendelseDto> = map { avklaringsbehov ->
+        if (avklaringsbehov.avklaringsbehovDefinisjon == definisjon) {
+            avklaringsbehov.copy(
+                status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
+                endringer = avklaringsbehov.endringer + EndringDTO(
                     status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
-                    endringer = avklaringsbehov.endringer + EndringDTO(
-                        status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.AVSLUTTET,
-                        tidsstempel = LocalDateTime.now(),
-                        endretAv = endretAv,
-                    )
-                )
-            } else avklaringsbehov
+                    tidsstempel = LocalDateTime.now(),
+                    endretAv = endretAv,
+                ),
+            )
+        } else {
+            avklaringsbehov
         }
     }
 
-    fun List<AvklaringsbehovHendelseDto>.leggTilBehov(definisjon: Definisjon): List<AvklaringsbehovHendelseDto> {
-        return this + listOf(
+    fun List<AvklaringsbehovHendelseDto>.leggTilBehov(definisjon: Definisjon): List<AvklaringsbehovHendelseDto> =
+        this + listOf(
             AvklaringsbehovHendelseDto(
                 id = this.size.toLong(),
                 avklaringsbehovDefinisjon = definisjon,
@@ -771,11 +770,10 @@ class IntegrationTest {
                         status = no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status.OPPRETTET,
                         tidsstempel = LocalDateTime.now(),
                         endretAv = "Kelvin",
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
-    }
 
     fun opprettOppgaveDto(
         personIdent: String? = null,
@@ -805,14 +803,11 @@ class IntegrationTest {
         endretAv = endretAv,
         endretTidspunkt = if (endretAv != null) LocalDateTime.now() else null,
         versjon = versjon.toLong(),
-        harHasteMarkering = false
+        harHasteMarkering = false,
     )
 
     @Test
-    fun `test flyt`(
-        @Postgres dbConfig: DbConfig,
-        @Postgres dataSource: DataSource,
-    ) {
+    fun `test flyt`(@Postgres dbConfig: DbConfig, @Postgres dataSource: DataSource) {
         val hendelse =
             object {}.javaClass.getResource("/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")!!
                 .readText().let { DefaultJsonMapper.fromJson<StoppetBehandling>(it) }
@@ -820,16 +815,19 @@ class IntegrationTest {
 
         val tidspunkter =
             hendelse.avklaringsbehov.flatMap { it.endringer.map { endringDTO -> endringDTO.tidsstempel } }
-        val midtI = tidspunkter[tidspunkter.size / 2 + 1]
+        val midtI = tidspunkter.sorted().first {
+            hendelse.avklaringsbehov.påTidspunkt(it)
+                .utledGjeldendeAvklaringsbehov()?.erVentebehov() == false
+        }
         val hendelsx = hendelse.copy(
             behandlingStatus = BStatus.UTREDES,
             avsluttetBehandling = null,
             avklaringsbehov = hendelse.avklaringsbehov.påTidspunkt(midtI),
-            hendelsesTidspunkt = hendelse.hendelsesTidspunkt.minusMinutes(5)
+            hendelsesTidspunkt = hendelse.hendelsesTidspunkt.minusMinutes(5),
         )
 
         testKlientNoInjectionManuell(
-            dbConfig
+            dbConfig,
         ) { motor ->
             val gjeldendeAVklaringsbehov =
                 hendelsx.avklaringsbehov.utledGjeldendeAvklaringsbehov()!!
@@ -853,9 +851,9 @@ class IntegrationTest {
                         reservertTidspunkt = midtI,
                         opprettetAv = "Kelvin",
                         opprettetTidspunkt = midtI,
-                        endretTidspunkt = midtI
-                    )
-                )
+                        endretTidspunkt = midtI,
+                    ),
+                ),
             )
             motor.kjørJobber()
 
@@ -875,7 +873,8 @@ class IntegrationTest {
             assertThat(enhet.enhet).isEqualTo("0400")
 
             val bqSaker = hentSakstatistikkHendelserMedEksaktAntall(
-                dataSource, behandling!!.referanse
+                dataSource,
+                behandling!!.referanse,
             )
             assertThat(bqSaker).isNotEmpty
             assertThat(bqSaker.first().sekvensNummer).isEqualTo(1)
@@ -883,8 +882,8 @@ class IntegrationTest {
             postBehandlingsflytHendelse(
                 hendelse.copy(
                     behandlingStatus = BStatus.AVSLUTTET,
-                    avsluttetBehandling = hendelse.avsluttetBehandling
-                )
+                    avsluttetBehandling = hendelse.avsluttetBehandling,
+                ),
             )
 
             motor.kjørJobber()
@@ -913,7 +912,7 @@ class IntegrationTest {
             val forventedeTilkjentePerioder = hendelse.avsluttetBehandling!!.tilkjentYtelse.perioder
                 .filter { it.fraDato <= vedtaksdato }
             assertThat(tilkjent.map { it.fraDato }).containsExactlyElementsOf(
-                forventedeTilkjentePerioder.map { it.fraDato }
+                forventedeTilkjentePerioder.map { it.fraDato },
             )
             val tilkjentYtelse = tilkjent.last()
             assertThat(tilkjentYtelse.dagsats).isEqualTo(forventedeTilkjentePerioder.last().dagsats)
@@ -922,16 +921,15 @@ class IntegrationTest {
                 SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(behandlingReferanse)
             }
 
-
             sakRespons.forEach { println(it) }
 
             assertThat(sakRespons).anyMatch { it.vedtakTid != null }
             assertThat(sakRespons.last().vedtakTid).isCloseTo(
                 requireNotNull(hendelse.avsluttetBehandling!!.vedtakstidspunkt).truncatedTo(
-                    java.time.temporal.ChronoUnit.SECONDS
-                ), within(1, ChronoUnit.SECONDS)
+                    java.time.temporal.ChronoUnit.SECONDS,
+                ),
+                within(1, ChronoUnit.SECONDS),
             )
-
         }
     }
 
@@ -939,7 +937,7 @@ class IntegrationTest {
         dataSource: DataSource,
         hendelser: List<HendelseData>,
         motor: ManuellMotorImpl,
-        expectedStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET
+        expectedStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET,
     ): UUID {
         var referanse: UUID? = null
         var c = 1
@@ -984,19 +982,12 @@ class IntegrationTest {
         return referanse!!
     }
 
-    private fun hentSakstatistikkHendelser(
-        dataSource: DataSource,
-        referanse: UUID
-    ) = dataSource.transaction {
+    private fun hentSakstatistikkHendelser(dataSource: DataSource, referanse: UUID) = dataSource.transaction {
         SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
     }
 
-    private fun hentSakstatistikkHendelserMedEksaktAntall(
-        dataSource: DataSource,
-        referanse: UUID
-    ) = dataSource.transaction {
-        SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
-    }
-
-
+    private fun hentSakstatistikkHendelserMedEksaktAntall(dataSource: DataSource, referanse: UUID) =
+        dataSource.transaction {
+            SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
+        }
 }

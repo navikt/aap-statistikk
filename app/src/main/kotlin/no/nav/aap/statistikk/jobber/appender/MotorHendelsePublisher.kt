@@ -17,10 +17,8 @@ class MotorHendelsePublisher private constructor(
             lagreAvsluttetBehandlingTilBigQueryJobb: LagreAvsluttetBehandlingTilBigQueryJobb,
         ) = MotorHendelsePublisher(jobbAppender, repositoryProvider, lagreAvsluttetBehandlingTilBigQueryJobb)
 
-        fun utenYtelseJobb(
-            jobbAppender: JobbAppender,
-            repositoryProvider: RepositoryProvider,
-        ) = MotorHendelsePublisher(jobbAppender, repositoryProvider, null)
+        fun utenYtelseJobb(jobbAppender: JobbAppender, repositoryProvider: RepositoryProvider) =
+            MotorHendelsePublisher(jobbAppender, repositoryProvider, null)
     }
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -35,19 +33,19 @@ class MotorHendelsePublisher private constructor(
                     // Veldig hacky! Dette er for at jobben som kjører etter melding fra
                     // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
                     delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L,
-                    triggerKilde = "behandling"
+                    triggerKilde = "behandling",
                 )
             }
 
             is StatistikkHendelse.YtelsesstatistikkSkalLagres -> {
                 val jobb = lagreAvsluttetBehandlingTilBigQueryJobb
                     ?: throw UnsupportedOperationException(
-                        "Denne publisher-instansen støtter ikke YtelsesstatistikkSkalLagres. Bruk medYtelseJobb() ved konstruksjon."
+                        "Denne publisher-instansen støtter ikke YtelsesstatistikkSkalLagres. Bruk medYtelseJobb() ved konstruksjon.",
                     )
                 jobbAppender.leggTilLagreAvsluttetBehandlingTilBigQueryJobb(
                     repositoryProvider,
                     hendelse.behandlingId,
-                    jobb
+                    jobb,
                 )
             }
 

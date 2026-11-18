@@ -26,9 +26,9 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, emptyList())
@@ -46,9 +46,9 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -60,10 +60,10 @@ class SakstatistikkEventSourcingTest {
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "Kompanjong",
                         enhet = "0401",
-                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name
-                    )
-                )
-            )
+                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -87,8 +87,8 @@ class SakstatistikkEventSourcingTest {
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 12, 0),
                     status = BehandlingStatus.OPPRETTET,
                     avklaringsbehov = Definisjon.AVKLAR_BISTANDSBEHOV,
-                )
-            )
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -100,10 +100,10 @@ class SakstatistikkEventSourcingTest {
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "Kompanjong",
                         enhet = "0401",
-                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name
-                    )
-                )
-            )
+                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -123,14 +123,14 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
                 ),
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 12, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_BISTANDSBEHOV
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_BISTANDSBEHOV,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -142,10 +142,10 @@ class SakstatistikkEventSourcingTest {
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "Kompanjong",
                         enhet = "0401",
-                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name
-                    )
-                )
-            )
+                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -164,14 +164,14 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
                 ),
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 14, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_BISTANDSBEHOV
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_BISTANDSBEHOV,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -183,10 +183,10 @@ class SakstatistikkEventSourcingTest {
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "Kompanjong",
                         enhet = "0401",
-                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name
-                    )
-                )
-            )
+                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -204,9 +204,9 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -218,16 +218,16 @@ class SakstatistikkEventSourcingTest {
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "Kompanjong",
                         enhet = "0401",
-                        avklaringsbehov = "5003"
+                        avklaringsbehov = "5003",
                     ),
                     lagOppgaveHendelse(
                         tidspunkt = LocalDateTime.of(2024, 1, 1, 12, 0),
                         hendelseType = HendelseType.LUKKET,
                         enhet = "0401",
-                        avklaringsbehov = "5003"
-                    )
-                )
-            )
+                        avklaringsbehov = "5003",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -246,15 +246,15 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
                 ),
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 14, 0),
                     status = BehandlingStatus.OPPRETTET,
                     avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
-                    sisteSaksbehandlerPåBehandling = "Kvaliguy"
-                )
-            )
+                    sisteSaksbehandlerPåBehandling = "Kvaliguy",
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -265,10 +265,10 @@ class SakstatistikkEventSourcingTest {
                         tidspunkt = LocalDateTime.of(2024, 1, 1, 11, 0),
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "Kompanjong",
-                        enhet = "0401"
-                    )
-                )
-            )
+                        enhet = "0401",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -276,7 +276,9 @@ class SakstatistikkEventSourcingTest {
         assertThat(snapshots).hasSize(3)
         assertThat(snapshots[1].saksbehandler).isEqualTo("Kompanjong")
         assertThat(snapshots[2].saksbehandler)
-            .describedAs("Skal beholde oppgave-reservasjonen selv om behandlingshendelse med samme avklaringsbehov ankommer")
+            .describedAs(
+                "Skal beholde oppgave-reservasjonen selv om behandlingshendelse med samme avklaringsbehov ankommer",
+            )
             .isEqualTo("Kompanjong")
         assertThat(snapshots[2].avklaringsbehov).isEqualTo(Definisjon.AVKLAR_SYKDOM.kode.name)
     }
@@ -292,16 +294,16 @@ class SakstatistikkEventSourcingTest {
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.UTREDES,
                     avklaringsbehov = Definisjon.KVALITETSSIKRING,
-                    sisteSaksbehandlerPåBehandling = "B144259"
+                    sisteSaksbehandlerPåBehandling = "B144259",
                 ),
                 // Ny behandlingshendelse med samme avklaringsbehov, ankommer etter reservasjonen
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 30),
                     status = BehandlingStatus.UTREDES,
                     avklaringsbehov = Definisjon.KVALITETSSIKRING,
-                    sisteSaksbehandlerPåBehandling = "B144259"
-                )
-            )
+                    sisteSaksbehandlerPåBehandling = "B144259",
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -313,10 +315,10 @@ class SakstatistikkEventSourcingTest {
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "M132487",
                         enhet = "0300",
-                        avklaringsbehov = "5097"
-                    )
-                )
-            )
+                        avklaringsbehov = "5097",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -335,9 +337,9 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -348,10 +350,10 @@ class SakstatistikkEventSourcingTest {
                         tidspunkt = LocalDateTime.of(2024, 1, 1, 11, 0),
                         hendelseType = HendelseType.OPPRETTET,
                         enhet = "0401",
-                        avklaringsbehov = "5003"
-                    )
-                )
-            )
+                        avklaringsbehov = "5003",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -362,9 +364,7 @@ class SakstatistikkEventSourcingTest {
         assertThat(snapshots[1].saksbehandler).isNull()
     }
 
-    private fun lagBehandling(
-        hendelser: List<BehandlingHendelse>
-    ) = Behandling(
+    private fun lagBehandling(hendelser: List<BehandlingHendelse>) = Behandling(
         referanse = behandlingRef,
         sak = Sak(
             id = 0L,
@@ -379,14 +379,14 @@ class SakstatistikkEventSourcingTest {
         mottattTid = LocalDateTime.now(),
         versjon = Versjon("1"),
         søknadsformat = SøknadsFormat.PAPIR,
-        hendelser = hendelser
+        hendelser = hendelser,
     )
 
     private fun lagBehandlingHendelse(
         tidspunkt: LocalDateTime,
         status: BehandlingStatus,
         avklaringsbehov: Definisjon?,
-        sisteSaksbehandlerPåBehandling: String? = null
+        sisteSaksbehandlerPåBehandling: String? = null,
     ) = BehandlingHendelse(
         tidspunkt = tidspunkt,
         hendelsesTidspunkt = tidspunkt,
@@ -399,22 +399,20 @@ class SakstatistikkEventSourcingTest {
         versjon = Versjon("1"),
         mottattTid = tidspunkt,
         søknadsformat = SøknadsFormat.PAPIR,
-        relatertBehandlingReferanse = null
+        relatertBehandlingReferanse = null,
     )
 
-    private fun lagOppgave(
-        avklaringsbehov: String,
-        hendelser: List<no.nav.aap.statistikk.oppgave.OppgaveHendelse>
-    ) = Oppgave(
-        identifikator = 123L,
-        avklaringsbehov = avklaringsbehov,
-        enhet = Enhet(0L, "0401"),
-        person = null,
-        status = Oppgavestatus.OPPRETTET,
-        opprettetTidspunkt = LocalDateTime.now(),
-        behandlingReferanse = BehandlingReferanse(id = null, referanse = behandlingRef),
-        hendelser = hendelser
-    )
+    private fun lagOppgave(avklaringsbehov: String, hendelser: List<no.nav.aap.statistikk.oppgave.OppgaveHendelse>) =
+        Oppgave(
+            identifikator = 123L,
+            avklaringsbehov = avklaringsbehov,
+            enhet = Enhet(0L, "0401"),
+            person = null,
+            status = Oppgavestatus.OPPRETTET,
+            opprettetTidspunkt = LocalDateTime.now(),
+            behandlingReferanse = BehandlingReferanse(id = null, referanse = behandlingRef),
+            hendelser = hendelser,
+        )
 
     @Test
     fun `ny behandlingshendelse med nytt avklaringsbehov setter enhet til null`() {
@@ -423,14 +421,14 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
                 ),
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 14, 0),
                     status = BehandlingStatus.OPPRETTET,
                     avklaringsbehov = Definisjon.AVKLAR_BISTANDSBEHOV,
-                )
-            )
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -441,10 +439,10 @@ class SakstatistikkEventSourcingTest {
                         tidspunkt = LocalDateTime.of(2024, 1, 1, 11, 0),
                         hendelseType = HendelseType.OPPRETTET,
                         enhet = "0401",
-                        avklaringsbehov = "5003"
-                    )
-                )
-            )
+                        avklaringsbehov = "5003",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -465,15 +463,15 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
                 ),
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 14, 0),
                     status = BehandlingStatus.OPPRETTET,
                     avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
-                    sisteSaksbehandlerPåBehandling = "Kvaliguy"
-                )
-            )
+                    sisteSaksbehandlerPåBehandling = "Kvaliguy",
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -484,10 +482,10 @@ class SakstatistikkEventSourcingTest {
                         tidspunkt = LocalDateTime.of(2024, 1, 1, 11, 0),
                         hendelseType = HendelseType.OPPRETTET,
                         enhet = "0401",
-                        avklaringsbehov = "5003"
-                    )
-                )
-            )
+                        avklaringsbehov = "5003",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -507,9 +505,9 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -520,17 +518,17 @@ class SakstatistikkEventSourcingTest {
                         tidspunkt = LocalDateTime.of(2024, 1, 1, 11, 0),
                         hendelseType = HendelseType.OPPRETTET,
                         enhet = "0401",
-                        avklaringsbehov = "5003"
+                        avklaringsbehov = "5003",
                     ),
                     lagOppgaveHendelse(
                         tidspunkt = LocalDateTime.of(2024, 1, 1, 12, 0),
                         hendelseType = HendelseType.RESERVERT,
                         reservertAv = "Kompanjong",
                         enhet = "0401",
-                        avklaringsbehov = "5003"
-                    )
-                )
-            )
+                        avklaringsbehov = "5003",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -553,9 +551,9 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = LocalDateTime.of(2024, 1, 1, 10, 0),
                     status = BehandlingStatus.OPPRETTET,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -567,10 +565,10 @@ class SakstatistikkEventSourcingTest {
                         hendelseType = HendelseType.OPPRETTET,
                         reservertAv = "Brev-Besluttersen",
                         enhet = "4491",
-                        avklaringsbehov = "5003"
-                    )
-                )
-            )
+                        avklaringsbehov = "5003",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -600,9 +598,9 @@ class SakstatistikkEventSourcingTest {
                 lagBehandlingHendelse(
                     tidspunkt = behandlingsflytTidspunkt,
                     status = BehandlingStatus.UTREDES,
-                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM
-                )
-            )
+                    avklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+                ),
+            ),
         )
 
         val oppgaver = listOf(
@@ -614,10 +612,10 @@ class SakstatistikkEventSourcingTest {
                         opprettetTidspunkt = tidligOpprettet,
                         hendelseType = HendelseType.OPPRETTET,
                         enhet = "0401",
-                        avklaringsbehov = "5003"
-                    )
-                )
-            )
+                        avklaringsbehov = "5003",
+                    ),
+                ),
+            ),
         )
 
         val snapshots = eventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
@@ -635,7 +633,7 @@ class SakstatistikkEventSourcingTest {
         hendelseType: HendelseType,
         reservertAv: String? = null,
         enhet: String,
-        avklaringsbehov: String = "5003"
+        avklaringsbehov: String = "5003",
     ) = OppgaveHendelse(
         hendelse = hendelseType,
         oppgaveId = 123L,
@@ -649,6 +647,6 @@ class SakstatistikkEventSourcingTest {
         opprettetTidspunkt = opprettetTidspunkt,
         endretAv = reservertAv,
         endretTidspunkt = if (hendelseType != HendelseType.OPPRETTET) mottattTidspunkt else null,
-        versjon = 1L
+        versjon = 1L,
     )
 }

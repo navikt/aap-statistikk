@@ -5,10 +5,7 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import java.util.*
 
 interface IVilkårsresultatRepository : Repository {
-    fun lagreVilkårsResultat(
-        vilkårsresultat: VilkårsResultatEntity,
-        behandlingId: BehandlingId
-    ): Long
+    fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity, behandlingId: BehandlingId): Long
 
     fun hentVilkårsResultat(vilkårResultatId: Long): VilkårsResultatEntity?
 

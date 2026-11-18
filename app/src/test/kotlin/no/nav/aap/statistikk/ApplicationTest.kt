@@ -23,9 +23,10 @@ class ApplicationTest {
             transactionExecutor = noOpTransactionExecutor,
             motor = motorMock(),
             jobbAppender = jobbAppender,
-            lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, mockk())
+            lagreStoppetHendelseJobb = LagreStoppetHendelseJobb(jobbAppender, mockk()),
         ) {
-            @Language("JSON") val body = """{
+            @Language("JSON")
+            val body = """{
   "saksnummer": "123456789",
   "sakStatus": "OPPRETTET",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
@@ -74,7 +75,8 @@ class ApplicationTest {
 
     @Test
     fun `godtar payload med ukjente felter`() {
-        @Language("JSON") val payload = """{
+        @Language("JSON")
+        val payload = """{
   "saksnummer": "123456789",
   "sakStatus": "OPPRETTET",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",

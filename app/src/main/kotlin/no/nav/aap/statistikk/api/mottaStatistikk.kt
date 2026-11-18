@@ -52,7 +52,7 @@ inline fun <reified DTO : Any> NormalOpenAPIRoute.mottaHendelse(
     route(path).status(HttpStatusCode.Accepted) {
         authorizedPost<Unit, String, DTO>(
             modules = modules,
-            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps)
+            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps),
         ) { _, dto ->
             transactionExecutor.withinTransaction { conn ->
                 val sak = saksnummer(dto)
@@ -112,10 +112,7 @@ fun NormalOpenAPIRoute.mottaOppdatertBehandling(
     )
 }
 
-fun NormalOpenAPIRoute.mottaOppgaveOppdatering(
-    transactionExecutor: TransactionExecutor,
-    jobbAppender: JobbAppender,
-) {
+fun NormalOpenAPIRoute.mottaOppgaveOppdatering(transactionExecutor: TransactionExecutor, jobbAppender: JobbAppender) {
     mottaHendelse<OppgaveHendelse>(
         path = "/oppgave",
         authorizedAzps = listOf(Azp.Oppgave.uuid),
@@ -173,7 +170,7 @@ private fun OppgaveHendelse.tilDomene(): no.nav.aap.statistikk.oppgave.OppgaveHe
         harHasteMarkering = nyOppgaveDto.harHasteMarkering,
         harAvslagSykdomMarkering = nyOppgaveDto.harAvslagSykdomMarkering,
         sendtTid = this.sendtTidspunkt,
-        versjon = nyOppgaveDto.versjon
+        versjon = nyOppgaveDto.versjon,
     )
 }
 
@@ -182,26 +179,22 @@ fun stringToNumber(string: String): Long {
     return ByteBuffer.wrap(hash).long
 }
 
-private fun TilbakekrevingsbehandlingOppdatertHendelse.tilDomene(): TilbakekrevingHendelse {
-    return TilbakekrevingHendelse(
-        saksnummer = Saksnummer(saksnummer.toString()),
-        behandlingRef = behandlingref.referanse.toString(),
-        behandlingStatus = behandlingStatus.tilDomene(),
-        sakOpprettet = sakOpprettet,
-        totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
-        saksbehandlingURL = saksbehandlingURL,
-        opprettetTid = LocalDateTime.now(),
-    )
-}
+private fun TilbakekrevingsbehandlingOppdatertHendelse.tilDomene(): TilbakekrevingHendelse = TilbakekrevingHendelse(
+    saksnummer = Saksnummer(saksnummer.toString()),
+    behandlingRef = behandlingref.referanse.toString(),
+    behandlingStatus = behandlingStatus.tilDomene(),
+    sakOpprettet = sakOpprettet,
+    totaltFeilutbetaltBeløp = totaltFeilutbetaltBeløp,
+    saksbehandlingURL = saksbehandlingURL,
+    opprettetTid = LocalDateTime.now(),
+)
 
-private fun TilbakekrevingBehandlingsstatus.tilDomene(): TilbakekrevingBehandlingStatus {
-    return when (this) {
-        TilbakekrevingBehandlingsstatus.OPPRETTET -> TilbakekrevingBehandlingStatus.OPPRETTET
-        TilbakekrevingBehandlingsstatus.TIL_BEHANDLING -> TilbakekrevingBehandlingStatus.TIL_BEHANDLING
-        TilbakekrevingBehandlingsstatus.TIL_GODKJENNING -> TilbakekrevingBehandlingStatus.TIL_GODKJENNING
-        TilbakekrevingBehandlingsstatus.TIL_BESLUTTER -> TilbakekrevingBehandlingStatus.TIL_BESLUTTER
-        TilbakekrevingBehandlingsstatus.RETUR_FRA_BESLUTTER -> TilbakekrevingBehandlingStatus.RETUR_FRA_BESLUTTER
-        TilbakekrevingBehandlingsstatus.AVSLUTTET -> TilbakekrevingBehandlingStatus.AVSLUTTET
-        TilbakekrevingBehandlingsstatus.TIL_FORHÅNDSVARSEL -> TilbakekrevingBehandlingStatus.TIL_FORHÅNDSVARSEL
-    }
+private fun TilbakekrevingBehandlingsstatus.tilDomene(): TilbakekrevingBehandlingStatus = when (this) {
+    TilbakekrevingBehandlingsstatus.OPPRETTET -> TilbakekrevingBehandlingStatus.OPPRETTET
+    TilbakekrevingBehandlingsstatus.TIL_BEHANDLING -> TilbakekrevingBehandlingStatus.TIL_BEHANDLING
+    TilbakekrevingBehandlingsstatus.TIL_GODKJENNING -> TilbakekrevingBehandlingStatus.TIL_GODKJENNING
+    TilbakekrevingBehandlingsstatus.TIL_BESLUTTER -> TilbakekrevingBehandlingStatus.TIL_BESLUTTER
+    TilbakekrevingBehandlingsstatus.RETUR_FRA_BESLUTTER -> TilbakekrevingBehandlingStatus.RETUR_FRA_BESLUTTER
+    TilbakekrevingBehandlingsstatus.AVSLUTTET -> TilbakekrevingBehandlingStatus.AVSLUTTET
+    TilbakekrevingBehandlingsstatus.TIL_FORHÅNDSVARSEL -> TilbakekrevingBehandlingStatus.TIL_FORHÅNDSVARSEL
 }

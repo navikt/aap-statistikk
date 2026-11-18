@@ -27,14 +27,16 @@ data class TilkjentYtelsePeriode(
 data class TilkjentYtelse(
     val saksnummer: Saksnummer,
     val behandlingsReferanse: UUID,
-    val perioder: List<TilkjentYtelsePeriode>
+    val perioder: List<TilkjentYtelsePeriode>,
 ) {
     /**
      * Team Spenn ønsker seg kun utbetalinger som har skjedd, altså der fra-dato er før vedtaksdato.
      */
-    fun begrensPerioderTil(vedtaksdato: LocalDate): TilkjentYtelse {
-        return this.copy(perioder = perioder.filter { it.fraDato <= vedtaksdato })
+    fun begrensPerioderTil(vedtaksdato: LocalDate): TilkjentYtelse = this.copy(
+        perioder = perioder.filter {
+        it.fraDato <= vedtaksdato
     }
+    )
 }
 
 enum class Minstesats { IKKE_MINSTESATS, MINSTESATS_OVER_25, MINSTESATS_UNDER_25 }

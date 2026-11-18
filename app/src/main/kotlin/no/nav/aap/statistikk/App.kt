@@ -37,6 +37,7 @@ import no.nav.aap.statistikk.bigquery.*
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.TransactionExecutor
+import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
 import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
@@ -48,11 +49,9 @@ import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
-import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
 import no.nav.aap.tilgang.TeamAap
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
-
 
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk")
 
@@ -68,7 +67,6 @@ fun main() {
 
     val gatewayProvider = defaultGatewayProvider()
 
-
     embeddedServer(Netty, configure = {
         callGroupSize = AppConfig.callGroupSize
 
@@ -78,11 +76,10 @@ fun main() {
 
         connector { port = 8080 }
     }) {
-
         startUp(
             dbConfig,
             gatewayProvider,
-            BQYtelseRepository(bigQueryClientYtelse)
+            BQYtelseRepository(bigQueryClientYtelse),
         )
     }.start(wait = true)
 }
@@ -108,7 +105,7 @@ fun Application.startUp(
             description = """
                         App med ansvar for å overlevere data for stønadstatistikk og saksstatistikk. For å teste API i dev, besøk
                         <a href="https://azure-token-generator.intern.dev.nav.no/api/m2m?aud=dev-gcp:aap:statistikk">Token Generator</a> for å få token.
-                        """.trimIndent(),
+            """.trimIndent(),
             contact = ContactModel("Slack: #po_aap_dvh"),
         ),
     )
@@ -144,7 +141,7 @@ fun Application.startUp(
         lagreAvsluttetBehandlingTilBigQueryJobb,
         lagreOppgaveJobb,
         resendSakstatistikkJobb,
-        LagreTilbakekrevingHendelseJobb()
+        LagreTilbakekrevingHendelseJobb(),
     )
 
     val motor = motorFactory(dataSource, gatewayProvider, jobberListe)
@@ -162,7 +159,9 @@ fun Application.startUp(
     }
 
     monitor.subscribe(ApplicationStopped) { environment ->
-        environment.log.info("Ktor-hendelsE: ApplicationStopped. Ktor har fullført nedstoppingen sin. Eventuelle requester og annet arbeid som ikke ble fullført innen timeout ble avbrutt.")
+        environment.log.info(
+            "Ktor-hendelsE: ApplicationStopped. Ktor har fullført nedstoppingen sin. Eventuelle requester og annet arbeid som ikke ble fullført innen timeout ble avbrutt.",
+        )
         // Helt til slutt, nå som vi har stanset Motor, etc. Lukk database-koblingen.
         @Suppress("TooGenericExceptionCaught")
         try {
@@ -188,19 +187,13 @@ fun Application.startUp(
     )
 }
 
-fun motor(
-    dataSource: DataSource,
-    gatewayProvider: GatewayProvider,
-    jobber: List<JobbSpesifikasjon>,
-): Motor {
+fun motor(dataSource: DataSource, gatewayProvider: GatewayProvider, jobber: List<JobbSpesifikasjon>): Motor {
     return Motor(
-        dataSource = dataSource, antallKammer = AppConfig.ANTALL_WORKERS_FOR_MOTOR,
+        dataSource = dataSource,
+        antallKammer = AppConfig.ANTALL_WORKERS_FOR_MOTOR,
         logInfoProvider = object : JobbLogInfoProvider {
-            override fun hentInformasjon(
-                connection: DBConnection, jobbInput: JobbInput
-            ): LogInformasjon {
-                return LogInformasjon(mapOf())
-            }
+            override fun hentInformasjon(connection: DBConnection, jobbInput: JobbInput): LogInformasjon =
+                LogInformasjon(mapOf())
         },
         jobber = jobber,
         prometheus = PrometheusProvider.prometheus,
@@ -247,7 +240,6 @@ fun Application.module(
     }
 }
 
-
 private fun Application.monitoring() {
     routing {
         route("/actuator") {
@@ -276,11 +268,11 @@ private fun Application.statusPages() {
         exception<Throwable> { call, cause ->
             LoggerFactory.getLogger(App::class.java).error(
                 "Noe gikk galt. Exception-type: ${cause.javaClass} Query string: ${call.request.queryString()}",
-                cause
+                cause,
             )
             call.respondText(
                 text = "500: Internal Server Error",
-                status = HttpStatusCode.InternalServerError
+                status = HttpStatusCode.InternalServerError,
             )
         }
     }

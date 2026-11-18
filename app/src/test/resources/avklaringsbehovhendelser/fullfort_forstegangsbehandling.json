@@ -6,7 +6,7 @@
   "relatertFagsystem" : "KELVIN",
   "behandlingOpprettetTidspunkt" : "2025-09-24T12:00",
   "mottattTid" : "2025-06-24T12:00",
-  "tidspunktSisteEndring" : "2025-09-24T12:00:00.033",
+  "tidspunktSisteEndring" : "2025-09-24T12:00:00.035",
   "behandlingStatus" : "AVSLUTTET",
   "behandlingType" : "Førstegangsbehandling",
   "soknadsFormat" : "DIGITAL",
@@ -35,7 +35,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.002",
@@ -56,7 +56,7 @@
       "gradBehov" : null
     }, {
       "status" : "TOTRINNS_VURDERT",
-      "tidsstempel" : "2025-09-24T12:00:00.025",
+      "tidsstempel" : "2025-09-24T12:00:00.026",
       "frist" : null,
       "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
@@ -85,7 +85,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.004",
@@ -106,7 +106,7 @@
       "gradBehov" : null
     }, {
       "status" : "TOTRINNS_VURDERT",
-      "tidsstempel" : "2025-09-24T12:00:00.026",
+      "tidsstempel" : "2025-09-24T12:00:00.027",
       "frist" : null,
       "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
@@ -135,7 +135,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.006",
@@ -167,7 +167,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.008",
@@ -208,7 +208,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.010",
@@ -240,7 +240,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.015",
@@ -272,7 +272,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.017",
@@ -284,7 +284,7 @@
       "gradBehov" : null
     }, {
       "status" : "TOTRINNS_VURDERT",
-      "tidsstempel" : "2025-09-24T12:00:00.027",
+      "tidsstempel" : "2025-09-24T12:00:00.028",
       "frist" : null,
       "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
@@ -313,7 +313,7 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
       "tidsstempel" : "2025-09-24T12:00:00.019",
@@ -325,7 +325,7 @@
       "gradBehov" : null
     }, {
       "status" : "TOTRINNS_VURDERT",
-      "tidsstempel" : "2025-09-24T12:00:00.028",
+      "tidsstempel" : "2025-09-24T12:00:00.029",
       "frist" : null,
       "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
@@ -336,9 +336,9 @@
   }, {
     "id" : 9,
     "avklaringsbehovDefinisjon" : {
-      "kode" : "5027",
+      "kode" : "5034",
       "type" : "MANUELT_FRIVILLIG",
-      "løsesISteg" : "SAMORDNING_ANDRE_STATLIGE_YTELSER",
+      "løsesISteg" : "SAMORDNING_SYKESTIPEND",
       "kreverToTrinn" : true,
       "kvalitetssikres" : false,
       "løsesAv" : [ "SAKSBEHANDLER_NASJONAL" ],
@@ -354,19 +354,10 @@
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
-    }, {
-      "status" : "AVSLUTTET",
-      "tidsstempel" : "2025-09-24T12:00:00.021",
-      "frist" : null,
-      "endretAv" : "SAKSBEHANDLER",
-      "årsakTilSattPåVent" : null,
-      "årsakTilRetur" : [ ],
-      "begrunnelse" : "Vurdert samordning andre statlige ytelser",
-      "gradBehov" : null
+      "gradBehov" : "FRIVILLIG"
     }, {
       "status" : "TOTRINNS_VURDERT",
-      "tidsstempel" : "2025-09-24T12:00:00.029",
+      "tidsstempel" : "2025-09-24T12:00:00.030",
       "frist" : null,
       "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
@@ -376,6 +367,47 @@
     } ]
   }, {
     "id" : 10,
+    "avklaringsbehovDefinisjon" : {
+      "kode" : "5027",
+      "type" : "MANUELT_FRIVILLIG",
+      "løsesISteg" : "SAMORDNING_ANDRE_STATLIGE_YTELSER",
+      "kreverToTrinn" : true,
+      "kvalitetssikres" : false,
+      "løsesAv" : [ "SAKSBEHANDLER_NASJONAL" ],
+      "måRevurderesEtterOpphør" : true,
+      "vurdererVilkår" : null
+    },
+    "status" : "TOTRINNS_VURDERT",
+    "endringer" : [ {
+      "status" : "OPPRETTET",
+      "tidsstempel" : "2025-09-24T12:00:00.021",
+      "frist" : null,
+      "endretAv" : "Kelvin",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "",
+      "gradBehov" : "PÅKREVD"
+    }, {
+      "status" : "AVSLUTTET",
+      "tidsstempel" : "2025-09-24T12:00:00.022",
+      "frist" : null,
+      "endretAv" : "SAKSBEHANDLER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "Vurdert samordning andre statlige ytelser",
+      "gradBehov" : null
+    }, {
+      "status" : "TOTRINNS_VURDERT",
+      "tidsstempel" : "2025-09-24T12:00:00.031",
+      "frist" : null,
+      "endretAv" : "BESLUTTER",
+      "årsakTilSattPåVent" : null,
+      "årsakTilRetur" : [ ],
+      "begrunnelse" : "begrunnelse",
+      "gradBehov" : null
+    } ]
+  }, {
+    "id" : 11,
     "avklaringsbehovDefinisjon" : {
       "kode" : "5098",
       "type" : "MANUELT_PÅKREVD",
@@ -389,16 +421,16 @@
     "status" : "AVSLUTTET",
     "endringer" : [ {
       "status" : "OPPRETTET",
-      "tidsstempel" : "2025-09-24T12:00:00.022",
+      "tidsstempel" : "2025-09-24T12:00:00.023",
       "frist" : null,
       "endretAv" : "Kelvin",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
-      "tidsstempel" : "2025-09-24T12:00:00.023",
+      "tidsstempel" : "2025-09-24T12:00:00.024",
       "frist" : null,
       "endretAv" : "SAKSBEHANDLER",
       "årsakTilSattPåVent" : null,
@@ -407,7 +439,7 @@
       "gradBehov" : null
     } ]
   }, {
-    "id" : 11,
+    "id" : 12,
     "avklaringsbehovDefinisjon" : {
       "kode" : "5099",
       "type" : "MANUELT_PÅKREVD",
@@ -421,25 +453,25 @@
     "status" : "AVSLUTTET",
     "endringer" : [ {
       "status" : "OPPRETTET",
-      "tidsstempel" : "2025-09-24T12:00:00.024",
+      "tidsstempel" : "2025-09-24T12:00:00.025",
       "frist" : null,
       "endretAv" : "Kelvin",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
-      "tidsstempel" : "2025-09-24T12:00:00.030",
+      "tidsstempel" : "2025-09-24T12:00:00.032",
       "frist" : null,
       "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
-      "begrunnelse" : "begrunnelse\\nbegrunnelse\\nbegrunnelse\\nbegrunnelse\\nbegrunnelse",
+      "begrunnelse" : "begrunnelse\\nbegrunnelse\\nbegrunnelse\\nbegrunnelse\\nbegrunnelse\\nbegrunnelse",
       "gradBehov" : null
     } ]
   }, {
-    "id" : 12,
+    "id" : 13,
     "avklaringsbehovDefinisjon" : {
       "kode" : "5051",
       "type" : "MANUELT_PÅKREVD",
@@ -453,16 +485,16 @@
     "status" : "AVSLUTTET",
     "endringer" : [ {
       "status" : "OPPRETTET",
-      "tidsstempel" : "2025-09-24T12:00:00.031",
+      "tidsstempel" : "2025-09-24T12:00:00.033",
       "frist" : null,
       "endretAv" : "Kelvin",
       "årsakTilSattPåVent" : null,
       "årsakTilRetur" : [ ],
       "begrunnelse" : "",
-      "gradBehov" : null
+      "gradBehov" : "PÅKREVD"
     }, {
       "status" : "AVSLUTTET",
-      "tidsstempel" : "2025-09-24T12:00:00.032",
+      "tidsstempel" : "2025-09-24T12:00:00.034",
       "frist" : null,
       "endretAv" : "BESLUTTER",
       "årsakTilSattPåVent" : null,
@@ -471,7 +503,7 @@
       "gradBehov" : null
     } ]
   } ],
-  "hendelsesTidspunkt" : "2025-09-24T12:00:00.033",
+  "hendelsesTidspunkt" : "2025-09-24T12:00:00.035",
   "avsluttetBehandling" : {
     "tilkjentYtelse" : {
       "perioder" : [ {
@@ -1184,7 +1216,7 @@
       "rettighetstype" : "BISTANDSBEHOV"
     } ],
     "resultat" : "INNVILGET",
-    "vedtakstidspunkt" : "2025-09-24T12:00:00.030",
+    "vedtakstidspunkt" : "2025-09-24T12:00:00.032",
     "fritaksvurderinger" : [ ],
     "perioderMedArbeidsopptrapping" : [ ],
     "vedtattStansOpphør" : [ ],

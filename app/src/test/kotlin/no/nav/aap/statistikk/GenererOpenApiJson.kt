@@ -37,7 +37,7 @@ fun main() {
         commonKtorModule(
             PrometheusProvider.prometheus,
             InfoModel(title = "AAP - Statistikk", version = "0.0.1"),
-            identityProvider = IdentityProvider.ENTRA_ID
+            identityProvider = IdentityProvider.ENTRA_ID,
         )
         module(
             transactionExecutor = noOpTransactionExecutor,
@@ -51,15 +51,14 @@ fun main() {
     val restClient = RestClient(
         config = ClientConfig(scope = "AAP_SCOPES"),
         tokenProvider = AzureM2MTokenProvider,
-        responseHandler = DefaultResponseHandler()
+        responseHandler = DefaultResponseHandler(),
     )
 
     val resp = restClient.get(
         URI.create("http://localhost:8080/openapi.json"),
         request = GetRequest(),
-        mapper = { body, _ -> String(body.readAllBytes(), StandardCharsets.UTF_8) }
+        mapper = { body, _ -> String(body.readAllBytes(), StandardCharsets.UTF_8) },
     )!!
-
 
     val writer = BufferedWriter(FileWriter("openapi.json"))
     writer.use {

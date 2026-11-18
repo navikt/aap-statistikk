@@ -4,7 +4,6 @@ import no.nav.aap.statistikk.behandling.KildeSystem
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.person.Person
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 data class PostmottakBehandling(
@@ -37,9 +36,7 @@ data class PostmottakBehandling(
         return this
     }
 
-    fun status(): String? {
-        return this.endringer.find { it.gjeldende }?.status
-    }
+    fun status(): String? = this.endringer.find { it.gjeldende }?.status
 
     /**
      * Få et ikke-muterbar view av endringer-listen.

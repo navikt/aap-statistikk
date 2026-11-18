@@ -31,7 +31,7 @@ class BehandlingTest {
                 saksnummer = Saksnummer("123456789"),
                 person = Person(ident = Ident("12121")),
                 sakStatus = SakStatus.OPPRETTET,
-                sistOppdatert = LocalDateTime.now()
+                sistOppdatert = LocalDateTime.now(),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
             status = BehandlingStatus.OPPRETTET,
@@ -43,7 +43,7 @@ class BehandlingTest {
             hendelser = listOf(
                 behandlingHendelse(Definisjon.AVKLAR_SYKDOM),
                 behandlingHendelse(Definisjon.AVKLAR_HELSEINSTITUSJON),
-            )
+            ),
         )
 
         val res = behandling.hendelsesHistorikk()
@@ -70,7 +70,7 @@ class BehandlingTest {
                 saksnummer = Saksnummer("123456789"),
                 person = Person(ident = Ident("12121")),
                 sakStatus = SakStatus.OPPRETTET,
-                sistOppdatert = LocalDateTime.now()
+                sistOppdatert = LocalDateTime.now(),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
             status = BehandlingStatus.OPPRETTET,
@@ -84,21 +84,21 @@ class BehandlingTest {
                     Definisjon.AVKLAR_SYKDOM,
                     t1,
                     Versjon("v1"),
-                    BehandlingStatus.OPPRETTET
+                    BehandlingStatus.OPPRETTET,
                 ),
                 behandlingHendelse(
                     Definisjon.AVKLAR_HELSEINSTITUSJON,
                     t2,
                     Versjon("v2"),
-                    BehandlingStatus.UTREDES
+                    BehandlingStatus.UTREDES,
                 ),
                 behandlingHendelse(
                     Definisjon.AVKLAR_OVERGANG_ARBEID,
                     t3,
                     Versjon("v3"),
-                    BehandlingStatus.IVERKSETTES
+                    BehandlingStatus.IVERKSETTES,
                 ),
-            )
+            ),
         )
 
         val snapshot = behandling.påTidspunkt(t2)
@@ -121,7 +121,7 @@ class BehandlingTest {
                 saksnummer = Saksnummer("123456789"),
                 person = Person(ident = Ident("12121")),
                 sakStatus = SakStatus.OPPRETTET,
-                sistOppdatert = LocalDateTime.now()
+                sistOppdatert = LocalDateTime.now(),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
             status = BehandlingStatus.OPPRETTET,
@@ -135,15 +135,15 @@ class BehandlingTest {
                     Definisjon.AVKLAR_SYKDOM,
                     t1,
                     Versjon("v1"),
-                    BehandlingStatus.OPPRETTET
+                    BehandlingStatus.OPPRETTET,
                 ),
                 behandlingHendelse(
                     Definisjon.AVKLAR_HELSEINSTITUSJON,
                     t2,
                     Versjon("v2"),
-                    BehandlingStatus.UTREDES
+                    BehandlingStatus.UTREDES,
                 ),
-            )
+            ),
         )
 
         val snapshot = behandling.påTidspunkt(t2.plusHours(1))
@@ -156,38 +156,34 @@ class BehandlingTest {
         avklaringsbehov: Definisjon,
         hendelsesTidspunkt: LocalDateTime,
         versjon: Versjon,
-        status: BehandlingStatus
-    ): BehandlingHendelse {
-        return BehandlingHendelse(
-            tidspunkt = hendelsesTidspunkt,
-            hendelsesTidspunkt = hendelsesTidspunkt,
-            avklaringsBehov = avklaringsbehov,
-            avklaringsbehovStatus = Status.OPPRETTET,
-            saksbehandler = Saksbehandler(ident = "Albert"),
-            versjon = versjon,
-            status = status,
-            ansvarligBeslutter = "Åberg",
-            vedtakstidspunkt = null,
-            mottattTid = hendelsesTidspunkt,
-            søknadsformat = SøknadsFormat.DIGITAL,
-            relatertBehandlingReferanse = null
-        )
-    }
+        status: BehandlingStatus,
+    ): BehandlingHendelse = BehandlingHendelse(
+        tidspunkt = hendelsesTidspunkt,
+        hendelsesTidspunkt = hendelsesTidspunkt,
+        avklaringsBehov = avklaringsbehov,
+        avklaringsbehovStatus = Status.OPPRETTET,
+        saksbehandler = Saksbehandler(ident = "Albert"),
+        versjon = versjon,
+        status = status,
+        ansvarligBeslutter = "Åberg",
+        vedtakstidspunkt = null,
+        mottattTid = hendelsesTidspunkt,
+        søknadsformat = SøknadsFormat.DIGITAL,
+        relatertBehandlingReferanse = null,
+    )
 
-    private fun behandlingHendelse(avklaringsbehov: Definisjon): BehandlingHendelse {
-        return BehandlingHendelse(
-            tidspunkt = LocalDateTime.now(),
-            hendelsesTidspunkt = LocalDateTime.now(),
-            avklaringsBehov = avklaringsbehov,
-            avklaringsbehovStatus = Status.OPPRETTET,
-            saksbehandler = Saksbehandler(ident = "Albert"),
-            versjon = Versjon("323"),
-            status = BehandlingStatus.OPPRETTET,
-            ansvarligBeslutter = "Åberg",
-            vedtakstidspunkt = LocalDateTime.now(),
-            mottattTid = LocalDateTime.now(),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            relatertBehandlingReferanse = null
-        )
-    }
+    private fun behandlingHendelse(avklaringsbehov: Definisjon): BehandlingHendelse = BehandlingHendelse(
+        tidspunkt = LocalDateTime.now(),
+        hendelsesTidspunkt = LocalDateTime.now(),
+        avklaringsBehov = avklaringsbehov,
+        avklaringsbehovStatus = Status.OPPRETTET,
+        saksbehandler = Saksbehandler(ident = "Albert"),
+        versjon = Versjon("323"),
+        status = BehandlingStatus.OPPRETTET,
+        ansvarligBeslutter = "Åberg",
+        vedtakstidspunkt = LocalDateTime.now(),
+        mottattTid = LocalDateTime.now(),
+        søknadsformat = SøknadsFormat.DIGITAL,
+        relatertBehandlingReferanse = null,
+    )
 }

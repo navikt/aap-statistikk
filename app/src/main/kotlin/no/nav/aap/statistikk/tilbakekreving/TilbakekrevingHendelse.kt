@@ -11,7 +11,7 @@ enum class TilbakekrevingBehandlingStatus {
     TIL_BESLUTTER,
     RETUR_FRA_BESLUTTER,
     AVSLUTTET,
-    TIL_FORHÅNDSVARSEL
+    TIL_FORHÅNDSVARSEL,
 }
 
 data class TilbakekrevingHendelse(

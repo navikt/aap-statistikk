@@ -47,8 +47,8 @@ class BehandlingRepositoryTest {
                     status = Oppgavestatus.OPPRETTET,
                     behandlingReferanse = BehandlingReferanse(referanse = referanse),
                     opprettetTidspunkt = LocalDateTime.now(),
-                    hendelser = listOf()
-                )
+                    hendelser = listOf(),
+                ),
             )
         }
 
@@ -79,7 +79,7 @@ class BehandlingRepositoryTest {
             returÅrsakkoblinger = listOf(
                 ReturÅrsakkobling(
                     Definisjon.AVKLAR_SYKDOM,
-                    listOf("MANGELFULL_BEGRUNNELSE", "MANGLENDE_UTREDNING")
+                    listOf("MANGELFULL_BEGRUNNELSE", "MANGLENDE_UTREDNING"),
                 ),
                 ReturÅrsakkobling(Definisjon.AVKLAR_BISTANDSBEHOV, listOf("ANNET")),
             ),
@@ -88,7 +88,7 @@ class BehandlingRepositoryTest {
             årsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.G_REGULERING),
             årsakTilOpprettelse = "SØKNAD",
             oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
-            opprettetAv = "Saksbehandler"
+            opprettetAv = "Saksbehandler",
         )
         dataSource.transaction {
             BehandlingRepository(it, clock = clock).opprettBehandling(behandling)
@@ -108,14 +108,14 @@ class BehandlingRepositoryTest {
         dataSource.transaction {
             BehandlingRepository(it).oppdaterBehandling(
                 uthentet!!.copy(
-                    venteÅrsak = "XXX"
-                )
+                    venteÅrsak = "XXX",
+                ),
             )
 
             BehandlingRepository(it).oppdaterBehandling(
                 uthentet.copy(
-                    venteÅrsak = "ABC"
-                )
+                    venteÅrsak = "ABC",
+                ),
             )
         }
 
@@ -123,7 +123,7 @@ class BehandlingRepositoryTest {
 
         assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 ->
             c1.hendelsesTidspunkt.compareTo(
-                c2.hendelsesTidspunkt
+                c2.hendelsesTidspunkt,
             )
         }
         assertThat(uthentet2.hendelser.size).isEqualTo(3)
@@ -149,7 +149,7 @@ class BehandlingRepositoryTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -167,7 +167,7 @@ class BehandlingRepositoryTest {
                     søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -199,7 +199,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
         dataSource.transaction {
@@ -216,7 +216,7 @@ class BehandlingRepositoryTest {
                     søknadsformat = SøknadsFormat.DIGITAL,
                     sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(),
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -226,7 +226,9 @@ class BehandlingRepositoryTest {
     }
 
     @Test
-    fun `oppdaterer behandling ut av rekkefølge - gjeldende skal ha høyest hendelsestidspunkt`(@Postgres dataSource: DataSource) {
+    fun `oppdaterer behandling ut av rekkefølge - gjeldende skal ha høyest hendelsestidspunkt`(
+        @Postgres dataSource: DataSource,
+    ) {
         val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
 
@@ -248,7 +250,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = t0,
-                )
+                ),
             )
         }
 
@@ -266,7 +268,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = t2,
-                )
+                ),
             )
         }
 
@@ -284,13 +286,13 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = t1,
-                )
+                ),
             )
         }
 
         val gjeldendeStatuser = dataSource.transaction {
             it.queryList(
-                "SELECT status, gjeldende FROM behandling_historikk WHERE behandling_id = ? AND gjeldende = TRUE"
+                "SELECT status, gjeldende FROM behandling_historikk WHERE behandling_id = ? AND gjeldende = TRUE",
             ) {
                 setParams { setLong(1, behandlingId.id) }
                 setRowMapper { row -> row.getString("status") }
@@ -325,7 +327,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
         dataSource.transaction {
@@ -341,7 +343,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
 
@@ -357,7 +359,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.DIGITAL,
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
         dataSource.transaction {
@@ -373,7 +375,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.DIGITAL,
                     oppdatertTidspunkt = LocalDateTime.now(),
-                )
+                ),
             )
         }
     }
@@ -399,7 +401,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
-                )
+                ),
             )
         }
 
@@ -418,7 +420,7 @@ class BehandlingRepositoryTest {
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.DIGITAL,
                     oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
-                )
+                ),
             )
         }
 

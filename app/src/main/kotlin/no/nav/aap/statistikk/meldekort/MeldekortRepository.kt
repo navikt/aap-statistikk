@@ -9,21 +9,18 @@ class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRe
     private val log = LoggerFactory.getLogger(javaClass)
 
     companion object : RepositoryFactory<IMeldekortRepository> {
-        override fun konstruer(connection: DBConnection): IMeldekortRepository {
-            return MeldekortRepository(connection)
-        }
+        override fun konstruer(connection: DBConnection): IMeldekortRepository = MeldekortRepository(connection)
     }
-
 
     override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
         meldekort.forEach { enkeltMeldekort ->
             val meldekortId = lagreEnkeltMeldekort(
                 behandlingId,
-                enkeltMeldekort
+                enkeltMeldekort,
             )
             if (meldekortId == null) {
                 log.warn(
-                    "Meldekort med journalpostId ${enkeltMeldekort.journalpostId} for behandling ${behandlingId.id} ble ikke lagret fordi journalpostId allerede finnes."
+                    "Meldekort med journalpostId ${enkeltMeldekort.journalpostId} for behandling ${behandlingId.id} ble ikke lagret fordi journalpostId allerede finnes.",
                 )
             } else {
                 lagreArbeidIPeriode(meldekortId, enkeltMeldekort.arbeidIPeriodeDTO)
@@ -31,22 +28,22 @@ class MeldekortRepository(private val dbConnection: DBConnection) : IMeldekortRe
         }
     }
 
-    private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: Meldekort): Long? {
-        return dbConnection.executeReturnKeys(
-            """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?) ON CONFLICT DO NOTHING""".trimIndent()
+    private fun lagreEnkeltMeldekort(behandlingId: BehandlingId, meldekort: Meldekort): Long? =
+        dbConnection.executeReturnKeys(
+            """INSERT INTO meldekort (behandling_id, journalpost_id) VALUES (?,?) ON CONFLICT DO NOTHING""".trimIndent(),
         ) {
             setParams {
                 setLong(1, behandlingId.id)
                 setString(2, meldekort.journalpostId)
             }
         }.firstOrNull()
-    }
 
     private fun lagreArbeidIPeriode(meldekortId: Long, arbeid: List<ArbeidIPerioder>) {
         dbConnection.executeBatch(
             """INSERT INTO arbeid_i_periode (meldekort_id, timerArbeidet, til_dato, fra_dato)
-VALUES (?, ?, ?, ?)""".trimIndent(),
-            arbeid
+VALUES (?, ?, ?, ?)
+""".trimIndent(),
+            arbeid,
         ) {
             setParams {
                 setLong(1, meldekortId)
@@ -57,44 +54,38 @@ VALUES (?, ?, ?, ?)""".trimIndent(),
         }
     }
 
-    override fun hentMeldekort(
-        behandlingId: BehandlingId
-    ): List<Meldekort> {
-        return dbConnection.queryList(
-            """SELECT * 
+    override fun hentMeldekort(behandlingId: BehandlingId): List<Meldekort> = dbConnection.queryList(
+        """SELECT * 
                FROM meldekort
-               WHERE behandling_id = ?""".trimIndent()
-        ) {
-            setParams {
-                setLong(1, behandlingId.id)
-            }
-            setRowMapper {
-                Meldekort(
-                    journalpostId = it.getString("journalpost_id"),
-                    arbeidIPeriodeDTO = hentArbeidIPerioder(it.getLong("id"))
-                )
-            }
+               WHERE behandling_id = ?
+""".trimIndent(),
+    ) {
+        setParams {
+            setLong(1, behandlingId.id)
+        }
+        setRowMapper {
+            Meldekort(
+                journalpostId = it.getString("journalpost_id"),
+                arbeidIPeriodeDTO = hentArbeidIPerioder(it.getLong("id")),
+            )
         }
     }
 
-    private fun hentArbeidIPerioder(
-        meldekortId: Long
-    ): List<ArbeidIPerioder> {
-        return dbConnection.queryList(
-            """SELECT fra_dato, til_dato, timerArbeidet 
+    private fun hentArbeidIPerioder(meldekortId: Long): List<ArbeidIPerioder> = dbConnection.queryList(
+        """SELECT fra_dato, til_dato, timerArbeidet 
                FROM arbeid_i_periode
-               WHERE meldekort_id = ?""".trimIndent()
-        ) {
-            setParams {
-                setLong(1, meldekortId)
-            }
-            setRowMapper {
-                ArbeidIPerioder(
-                    periodeFom = it.getLocalDate("fra_dato"),
-                    periodeTom = it.getLocalDate("til_dato"),
-                    timerArbeidet = it.getBigDecimal("timerArbeidet")
-                )
-            }
+               WHERE meldekort_id = ?
+""".trimIndent(),
+    ) {
+        setParams {
+            setLong(1, meldekortId)
+        }
+        setRowMapper {
+            ArbeidIPerioder(
+                periodeFom = it.getLocalDate("fra_dato"),
+                periodeTom = it.getLocalDate("til_dato"),
+                timerArbeidet = it.getBigDecimal("timerArbeidet"),
+            )
         }
     }
 }

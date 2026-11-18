@@ -61,16 +61,11 @@ private val logger = LoggerFactory.getLogger("FakeRepositories")
 
 class FakeMeldekortRepository : IMeldekortRepository {
     private val meldekort = mutableMapOf<Long, List<Meldekort>>()
-    override fun lagre(
-        behandlingId: BehandlingId,
-        meldekort: List<Meldekort>
-    ) {
+    override fun lagre(behandlingId: BehandlingId, meldekort: List<Meldekort>) {
         this.meldekort[behandlingId.id] = meldekort
     }
 
-    override fun hentMeldekort(behandlingId: BehandlingId): List<Meldekort> {
-        return meldekort[behandlingId.id] ?: emptyList()
-    }
+    override fun hentMeldekort(behandlingId: BehandlingId): List<Meldekort> = meldekort[behandlingId.id] ?: emptyList()
 }
 
 class FakeSakRepository : SakRepository {
@@ -80,14 +75,12 @@ class FakeSakRepository : SakRepository {
         throw IllegalArgumentException("Fant ikke sak med id $sakID")
     }
 
-    override fun hentSak(saksnummer: Saksnummer): Sak {
-        return saker.values.firstOrNull { it.saksnummer == saksnummer }!!
-    }
+    override fun hentSak(saksnummer: Saksnummer): Sak = saker.values.firstOrNull { it.saksnummer == saksnummer }!!
 
-    override fun hentSakEllernull(saksnummer: Saksnummer): Sak? {
-        return saker.values.firstOrNull { it.saksnummer == saksnummer }
-            ?.also { requireNotNull(it.id) }
+    override fun hentSakEllernull(saksnummer: Saksnummer): Sak? = saker.values.firstOrNull {
+        it.saksnummer == saksnummer
     }
+        ?.also { requireNotNull(it.id) }
 
     override fun settInnSak(sak: Sak): SakId {
         val id = saker.size.toLong()
@@ -98,7 +91,6 @@ class FakeSakRepository : SakRepository {
     override fun oppdaterSak(sak: Sak) {
         saker[sak.id!!] = sak.copy(sistOppdatert = LocalDateTime.now())
     }
-
 }
 
 class FakePersonRepository : IPersonRepository {
@@ -140,7 +132,6 @@ class FakePersonRepository : IPersonRepository {
         val personId = identTilPersonId[ident] ?: return null
         return personer[personId]
     }
-
 }
 
 class FakeBehandlingRepository : IBehandlingRepository {
@@ -157,8 +148,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 versjon = behandling.versjon,
                 mottattTid = behandling.mottattTid,
                 søknadsformat = behandling.søknadsformat,
-                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse
-            )
+                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse,
+            ),
         )
         nextId++
 
@@ -177,8 +168,8 @@ class FakeBehandlingRepository : IBehandlingRepository {
                 versjon = behandling.versjon,
                 mottattTid = behandling.mottattTid,
                 søknadsformat = behandling.søknadsformat,
-                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse
-            )
+                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse,
+            ),
         )
     }
 
@@ -186,38 +177,25 @@ class FakeBehandlingRepository : IBehandlingRepository {
         behandlinger[behandling.id?.id!!] = behandling
     }
 
-    override fun hent(referanse: UUID): Behandling? {
-        return behandlinger.asIterable().firstOrNull { it.value.referanse == referanse }?.value
-    }
+    override fun hent(referanse: UUID): Behandling? = behandlinger.asIterable().firstOrNull {
+        it.value.referanse == referanse
+    }?.value
 
-    override fun hent(id: BehandlingId): Behandling {
-        return behandlinger[id.id]!!
-    }
+    override fun hent(id: BehandlingId): Behandling = behandlinger[id.id]!!
 
-    override fun hentEllerNull(id: BehandlingId): Behandling? {
-        return behandlinger[id.id]
-    }
+    override fun hentEllerNull(id: BehandlingId): Behandling? = behandlinger[id.id]
 
-    override fun hentBehandlingForUpdate(id: BehandlingId): Behandling {
-        return hent(id)
-    }
+    override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = hent(id)
 
-    override fun hentBehandlingForUpdate(referanse: UUID): Behandling? {
-        return hent(referanse)
-    }
+    override fun hentBehandlingForUpdate(referanse: UUID): Behandling? = hent(referanse)
 }
 
 class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {
-    override fun lagre(
-        behandlingReferanse: UUID,
-        rettighetstypePeriode: List<RettighetstypePeriode>
-    ) {
+    override fun lagre(behandlingReferanse: UUID, rettighetstypePeriode: List<RettighetstypePeriode>) {
         TODO("Not yet implemented")
     }
 
-    override fun hent(behandlingReferanse: UUID): List<RettighetstypePeriode> {
-        return emptyList()
-    }
+    override fun hent(behandlingReferanse: UUID): List<RettighetstypePeriode> = emptyList()
 }
 
 class FakeArbeidsopptrappingRepository : ArbeidsopptrappingperioderRepository {
@@ -247,8 +225,7 @@ class FakeVedtattStansOpphørRepository : VedtattStansOpphørRepository {
         lagret[behandlingId] = vedtattStansOpphør
     }
 
-    override fun hent(behandlingId: BehandlingId): List<StansEllerOpphør> =
-        lagret[behandlingId] ?: emptyList()
+    override fun hent(behandlingId: BehandlingId): List<StansEllerOpphør> = lagret[behandlingId] ?: emptyList()
 }
 
 class FakeFritaksvurderingRepository : FritaksvurderingRepository {
@@ -288,8 +265,7 @@ class FakeDiagnosePerioderRepository : DiagnosePerioderRepository {
         lagret[behandlingId] = diagnoser
     }
 
-    override fun hentForBehandling(behandlingReferanse: UUID): List<DiagnoseMedPeriode> =
-        lagret.values.flatten()
+    override fun hentForBehandling(behandlingReferanse: UUID): List<DiagnoseMedPeriode> = lagret.values.flatten()
 }
 
 class FakeBQYtelseRepository : IBQYtelsesstatistikkRepository {
@@ -319,10 +295,7 @@ class FakeTilkjentYtelseRepository : ITilkjentYtelseRepository {
 class FakeVilkårsResultatRepository : IVilkårsresultatRepository {
     private val vilkår = mutableMapOf<Long, VilkårsResultatEntity>()
 
-    override fun lagreVilkårsResultat(
-        vilkårsresultat: VilkårsResultatEntity,
-        behandlingId: BehandlingId
-    ): Long {
+    override fun lagreVilkårsResultat(vilkårsresultat: VilkårsResultatEntity, behandlingId: BehandlingId): Long {
         vilkår[vilkår.size.toLong()] = vilkårsresultat
         return (vilkår.size - 1).toLong()
     }
@@ -343,9 +316,7 @@ class FakeBeregningsgrunnlagRepository : IBeregningsgrunnlagRepository {
         return grunnlag.indexOf(beregningsGrunnlag).toLong()
     }
 
-    override fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> {
-        return grunnlag
-    }
+    override fun hentBeregningsGrunnlag(referanse: UUID): List<MedBehandlingsreferanse<IBeregningsGrunnlag>> = grunnlag
 }
 
 class FakePdlGateway(
@@ -359,18 +330,15 @@ class FakePdlGateway(
             .recordStats()
             .build<String, List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson>>()
 
-        override fun konstruer(): PdlGateway {
-            return FakePdlGateway()
-        }
+        override fun konstruer(): PdlGateway = FakePdlGateway()
 
         override fun registrerMetrics(registry: MeterRegistry) {
             CaffeineCacheMetrics.monitor(PrometheusProvider.prometheus, pdlCache, "pdl")
-
         }
     }
 
-    override fun hentPersoner(identer: List<Ident>): List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson> {
-        return identer.map {
+    override fun hentPersoner(identer: List<Ident>): List<no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson> =
+        identer.map {
             no.nav.aap.statistikk.integrasjoner.pdl.PdlPerson(
                 adressebeskyttelse = listOf(
                     Adressebeskyttelse(
@@ -378,56 +346,45 @@ class FakePdlGateway(
                             true -> Gradering.STRENGT_FORTROLIG
                             false -> Gradering.UGRADERT
                             null -> null
-                        }
-                    )
-                )
+                        },
+                    ),
+                ),
             )
         }
-    }
 
-    override fun hentIdenter(ident: Ident): List<PdlIdent> {
-        return identerForPerson[ident.ident] ?: listOf(PdlIdent(ident = ident.ident, historisk = false))
-    }
+    override fun hentIdenter(ident: Ident): List<PdlIdent> =
+        identerForPerson[ident.ident] ?: listOf(PdlIdent(ident = ident.ident, historisk = false))
 }
 
 class FakeOppgaveHendelseRepository : OppgaveHendelseRepository {
     private val enhetReservasjoner =
         mutableMapOf<Pair<UUID, String>, List<EnhetReservasjonOgTidspunkt>>()
 
-    fun addEnhetReservasjon(
-        behandlingRef: UUID,
-        avklaringsbehovKode: String,
-        data: List<EnhetReservasjonOgTidspunkt>
-    ) {
+    fun addEnhetReservasjon(behandlingRef: UUID, avklaringsbehovKode: String, data: List<EnhetReservasjonOgTidspunkt>) {
         enhetReservasjoner[behandlingRef to avklaringsbehovKode] = data
     }
 
     override fun hentEnhetOgReservasjonForAvklaringsbehov(
         behandlingReferanse: UUID,
-        avklaringsbehovKode: String
-    ): List<EnhetReservasjonOgTidspunkt> {
-        return enhetReservasjoner[behandlingReferanse to avklaringsbehovKode] ?: emptyList()
-    }
+        avklaringsbehovKode: String,
+    ): List<EnhetReservasjonOgTidspunkt> = enhetReservasjoner[behandlingReferanse to avklaringsbehovKode] ?: emptyList()
 
     override fun hentSisteCutoffAnchorForAvklaringsbehov(
         behandlingReferanse: UUID,
         avklaringsbehovKode: String,
         behandlingTidspunkt: LocalDateTime,
-        preferertOppgaveId: Long?
-    ): OppgaveCutoffAnchor? {
-        return hentEnhetOgReservasjonForAvklaringsbehov(behandlingReferanse, avklaringsbehovKode)
-            .maxByOrNull { it.tidspunkt }
-            ?.let {
-                OppgaveCutoffAnchor(
-                    oppgaveId = 0L,
-                    versjon = 0L,
-                    sendtTid = it.tidspunkt
-                )
-            }
-    }
+        preferertOppgaveId: Long?,
+    ): OppgaveCutoffAnchor? = hentEnhetOgReservasjonForAvklaringsbehov(behandlingReferanse, avklaringsbehovKode)
+        .maxByOrNull { it.tidspunkt }
+        ?.let {
+            OppgaveCutoffAnchor(
+                oppgaveId = 0L,
+                versjon = 0L,
+                sendtTid = it.tidspunkt,
+            )
+        }
 
     override fun lagreHendelse(hendelse: OppgaveHendelse) = 0L
     override fun sisteVersjonForId(id: Long) = null
-    override fun hentHendelserForId(id: Long) =
-        emptyList<OppgaveHendelse>()
+    override fun hentHendelserForId(id: Long) = emptyList<OppgaveHendelse>()
 }

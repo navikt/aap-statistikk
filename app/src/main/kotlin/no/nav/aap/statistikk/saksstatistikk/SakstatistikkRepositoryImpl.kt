@@ -9,25 +9,23 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
-    SakstatistikkRepository {
+class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) : SakstatistikkRepository {
 
     companion object : RepositoryFactory<SakstatistikkRepository> {
-        override fun konstruer(connection: DBConnection): SakstatistikkRepository {
-            return SakstatistikkRepositoryImpl(connection)
-        }
+        override fun konstruer(connection: DBConnection): SakstatistikkRepository =
+            SakstatistikkRepositoryImpl(connection)
     }
 
     private val log = LoggerFactory.getLogger(javaClass)
 
     override fun acquireBehandlingLock(uuid: UUID) {
         dbConnection.execute(
-            "INSERT INTO saksstatistikk_behandling_laas (behandling_uuid) VALUES (?) ON CONFLICT DO NOTHING"
+            "INSERT INTO saksstatistikk_behandling_laas (behandling_uuid) VALUES (?) ON CONFLICT DO NOTHING",
         ) {
             setParams { setUUID(1, uuid) }
         }
         dbConnection.queryFirst(
-            "SELECT behandling_uuid FROM saksstatistikk_behandling_laas WHERE behandling_uuid = ? FOR UPDATE"
+            "SELECT behandling_uuid FROM saksstatistikk_behandling_laas WHERE behandling_uuid = ? FOR UPDATE",
         ) {
             setParams { setUUID(1, uuid) }
             setRowMapper { it.getUUID("behandling_uuid") }
@@ -67,13 +65,11 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """.trimIndent()
 
-    override fun lagre(bqBehandling: BQBehandling): Long {
-        return dbConnection.executeReturnKey(insertSql) {
-            setParams {
-                setParams(bqBehandling)
-            }
-            setResultValidator { it == 1 }
+    override fun lagre(bqBehandling: BQBehandling): Long = dbConnection.executeReturnKey(insertSql) {
+        setParams {
+            setParams(bqBehandling)
         }
+        setResultValidator { it == 1 }
     }
 
     private fun Params.setParams(bqBehandling: BQBehandling) {
@@ -107,11 +103,9 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         setString(28, bqBehandling.sakUtland)
     }
 
-    override fun lagreFlere(bqBehandlinger: List<BQBehandling>) {
-        return dbConnection.executeBatch(insertSql, bqBehandlinger) {
-            setParams { bqBehandling ->
-                setParams(bqBehandling)
-            }
+    override fun lagreFlere(bqBehandlinger: List<BQBehandling>) = dbConnection.executeBatch(insertSql, bqBehandlinger) {
+        setParams { bqBehandling ->
+            setParams(bqBehandling)
         }
     }
 
@@ -147,9 +141,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         }
     }
 
-    override fun hentAlleHendelserPåBehandling(
-        referanse: UUID
-    ): List<BQBehandling> {
+    override fun hentAlleHendelserPåBehandling(referanse: UUID): List<BQBehandling> {
         val sql = """
             select * from saksstatistikk where behandling_uuid = ? order by endret_tid, teknisk_tid
         """.trimIndent()
@@ -187,7 +179,7 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         vedtakTid = row.getLocalDateTimeOrNull("vedtak_tid"),
         søknadsFormat = SøknadsFormat.valueOf(row.getString("soknadsformat")),
         behandlingMetode = BehandlingMetode.valueOf(
-            row.getString("behandlingmetode")
+            row.getString("behandlingmetode"),
         ),
         ansvarligBeslutter = row.getStringOrNull("ansvarlig_beslutter"),
         behandlingStatus = row.getString("behandling_status"),
@@ -198,5 +190,4 @@ class SakstatistikkRepositoryImpl(private val dbConnection: DBConnection) :
         resultatBegrunnelse = row.getStringOrNull("resultat_begrunnelse"),
         erResending = row.getBoolean("er_relast"),
     )
-
 }

@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(BQYtelseRepository::class.java)
 
-class BQYtelseRepository(
-    private val client: IBigQueryClient
-) : IBQYtelsesstatistikkRepository {
+class BQYtelseRepository(private val client: IBigQueryClient) : IBQYtelsesstatistikkRepository {
     private val behandlingTabell = BehandlingTabell()
 
     override fun lagre(payload: BQYtelseBehandling) {
@@ -16,7 +14,5 @@ class BQYtelseRepository(
         client.insert(behandlingTabell, payload)
     }
 
-    override fun toString(): String {
-        return "BQRepository(behandlingTabell=$behandlingTabell, client=$client)"
-    }
+    override fun toString(): String = "BQRepository(behandlingTabell=$behandlingTabell, client=$client)"
 }

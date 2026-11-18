@@ -7,25 +7,19 @@ import java.net.http.HttpConnectTimeoutException
 
 private val logger = org.slf4j.LoggerFactory.getLogger("SkjermingService")
 
-class SkjermingService(
-    private val pdlGateway: PdlGateway
-) {
-    fun erSkjermet(identer: List<Ident>): Boolean {
-        return try {
-            val hentPersoner = pdlGateway.hentPersoner(identer)
-            hentPersoner
-                .flatMap { it.adressebeskyttelse }
-                .any { it.gradering.erHemmelig() }
-        } catch (e: HttpConnectTimeoutException) {
-            logger.warn("Feilet kall til PDL (HttpConnectTimeoutException). Kaster exception.", e)
-            throw e
-        } catch (e: java.net.ConnectException) {
-            logger.error("Feilet kall til PDL (ConnectException). Kaster exception.", e)
-            throw e
-        }
+class SkjermingService(private val pdlGateway: PdlGateway) {
+    fun erSkjermet(identer: List<Ident>): Boolean = try {
+        val hentPersoner = pdlGateway.hentPersoner(identer)
+        hentPersoner
+            .flatMap { it.adressebeskyttelse }
+            .any { it.gradering.erHemmelig() }
+    } catch (e: HttpConnectTimeoutException) {
+        logger.warn("Feilet kall til PDL (HttpConnectTimeoutException). Kaster exception.", e)
+        throw e
+    } catch (e: java.net.ConnectException) {
+        logger.error("Feilet kall til PDL (ConnectException). Kaster exception.", e)
+        throw e
     }
 }
 
-fun Gradering?.erHemmelig(): Boolean {
-    return this != null && this != Gradering.UGRADERT
-}
+fun Gradering?.erHemmelig(): Boolean = this != null && this != Gradering.UGRADERT

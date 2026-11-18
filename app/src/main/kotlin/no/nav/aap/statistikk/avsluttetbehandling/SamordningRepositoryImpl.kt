@@ -90,7 +90,7 @@ class SamordningRepositoryImpl(
         val id = behandlingId.id
 
         val behandlingExists = dbConnection.queryFirst(
-            "SELECT COUNT(*) as count FROM behandling WHERE id = ?"
+            "SELECT COUNT(*) as count FROM behandling WHERE id = ?",
         ) {
             setParams { setLong(1, id) }
             setRowMapper { it.getInt("count") > 0 }
@@ -99,7 +99,7 @@ class SamordningRepositoryImpl(
         if (!behandlingExists) return null
 
         val uføre = dbConnection.queryList(
-            "SELECT fra_dato, til_dato, grad FROM samordning_ufore WHERE behandling_id = ?"
+            "SELECT fra_dato, til_dato, grad FROM samordning_ufore WHERE behandling_id = ?",
         ) {
             setParams { setLong(1, id) }
             setRowMapper {
@@ -112,7 +112,7 @@ class SamordningRepositoryImpl(
         }
 
         val statligeYtelser = dbConnection.queryList(
-            "SELECT fra_dato, til_dato, ytelse, prosent FROM samordning_statlig_ytelse WHERE behandling_id = ?"
+            "SELECT fra_dato, til_dato, ytelse, prosent FROM samordning_statlig_ytelse WHERE behandling_id = ?",
         ) {
             setParams { setLong(1, id) }
             setRowMapper {
@@ -126,7 +126,7 @@ class SamordningRepositoryImpl(
         }
 
         val avregningAndreYtelser = dbConnection.queryList(
-            "SELECT fra_dato, til_dato, ytelse FROM samordning_avregning_andre_ytelser WHERE behandling_id = ?"
+            "SELECT fra_dato, til_dato, ytelse FROM samordning_avregning_andre_ytelser WHERE behandling_id = ?",
         ) {
             setParams { setLong(1, id) }
             setRowMapper {
@@ -139,7 +139,7 @@ class SamordningRepositoryImpl(
         }
 
         val arbeidsgiver = dbConnection.queryList(
-            "SELECT fra_dato, til_dato FROM samordning_arbeidsgiver WHERE behandling_id = ?"
+            "SELECT fra_dato, til_dato FROM samordning_arbeidsgiver WHERE behandling_id = ?",
         ) {
             setParams { setLong(1, id) }
             setRowMapper {

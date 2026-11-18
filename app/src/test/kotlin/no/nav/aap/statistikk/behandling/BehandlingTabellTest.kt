@@ -31,17 +31,18 @@ class BehandlingTabellTest {
             RettighetstypePeriode(
                 fraDato = LocalDate.now(),
                 tilDato = LocalDate.now().plusDays(1),
-                rettighetstype = RettighetsType.STUDENT
+                rettighetstype = RettighetsType.STUDENT,
             ),
             RettighetstypePeriode(
                 fraDato = LocalDate.now().plusDays(5),
                 tilDato = LocalDate.now().plusDays(3),
-                rettighetstype = RettighetsType.BISTANDSBEHOV
-            )
+                rettighetstype = RettighetsType.BISTANDSBEHOV,
+            ),
         )
         val datoOpprettet = LocalDateTime.now().minusDays(1)
         client.insert(
-            tabell, BQYtelseBehandling(
+            tabell,
+            BQYtelseBehandling(
                 saksnummer = Saksnummer("123XXX"),
                 referanse = referanse,
                 brukerFnr = "2902198512345",
@@ -56,21 +57,22 @@ class BehandlingTabellTest {
                 utbetalingId = referanse.toBase64(),
                 vurderingsbehov = listOf(
                     Vurderingsbehov.OVERGANG_UFORE.name,
-                    Vurderingsbehov.SØKNAD.name
-                )
-            )
+                    Vurderingsbehov.SØKNAD.name,
+                ),
+            ),
         )
 
         val read = client.read(tabell)
 
-        assertThat(read).hasSize(1).first().satisfies(Consumer {
+        assertThat(read).hasSize(1).first().satisfies(
+            Consumer {
             assertThat(it.saksnummer.value).isEqualTo("123XXX")
             assertThat(it.referanse).isEqualTo(referanse)
             assertThat(it.brukerFnr).isEqualTo("2902198512345")
             assertThat(it.behandlingsType).isEqualTo(TypeBehandling.Førstegangsbehandling)
             assertThat(it.datoAvsluttet).isCloseTo(
                 datoAvsluttet,
-                within(500, ChronoUnit.MILLIS)
+                within(500, ChronoUnit.MILLIS),
             )
             assertThat(it.datoOpprettet).isCloseTo(datoOpprettet, within(500, ChronoUnit.MILLIS))
             assertThat(it.kodeverk).isEqualTo("IC23")
@@ -81,9 +83,10 @@ class BehandlingTabellTest {
             assertThat(it.vurderingsbehov).isEqualTo(
                 listOf(
                     Vurderingsbehov.OVERGANG_UFORE.name + "," +
-                            Vurderingsbehov.SØKNAD.name
-                )
+                        Vurderingsbehov.SØKNAD.name,
+                ),
             )
-        })
+        }
+        )
     }
 }

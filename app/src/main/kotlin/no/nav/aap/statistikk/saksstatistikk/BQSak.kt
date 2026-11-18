@@ -42,7 +42,7 @@ data class BQBehandling(
     val resultatBegrunnelse: String?,
     val ansvarligEnhetKode: String?,
     val sakYtelse: String,
-    val erResending: Boolean
+    val erResending: Boolean,
 ) : Comparable<BQBehandling> {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -52,7 +52,9 @@ data class BQBehandling(
         // Bug i SAF i mars.
         if (mottattTid.isAfter(LocalDate.of(2025, 4, 1).atStartOfDay())) {
             if (!mottattTid.isBeforeOrEqual(registrertTid)) {
-                logger.warn("Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID")
+                logger.warn(
+                    "Mottatt tid $mottattTid må være mindre eller lik registrert tid $registrertTid. Saksnr: $saksnummer. BehandlingUUID: $behandlingUUID",
+                )
             }
         }
     }
@@ -60,23 +62,27 @@ data class BQBehandling(
     val sakUtland: String
         get() = if (ansvarligEnhetKode in setOf("0393", "4402")) "UTLAND" else "NASJONAL"
 
-    fun ansesSomDuplikat(other: BQBehandling): Boolean {
-        return this == other.copy(
-            sekvensNummer = sekvensNummer,
-            erResending = erResending,
-            tekniskTid = tekniskTid,
-            endretTid = endretTid,
-            versjon = versjon
-        )
-    }
+    fun ansesSomDuplikat(other: BQBehandling): Boolean = this == other.copy(
+        sekvensNummer = sekvensNummer,
+        erResending = erResending,
+        tekniskTid = tekniskTid,
+        endretTid = endretTid,
+        versjon = versjon,
+    )
 
-    override fun compareTo(other: BQBehandling): Int {
-        return if (endretTid == other.endretTid) tekniskTid.compareTo(other.tekniskTid) else endretTid.compareTo(
-            other.endretTid
+    override fun compareTo(other: BQBehandling): Int =
+        if (endretTid == other.endretTid) {
+            tekniskTid.compareTo(other.tekniskTid)
+        } else {
+            endretTid.compareTo(
+            other.endretTid,
         )
-    }
+        }
 }
 
 enum class BehandlingMetode {
-    MANUELL, AUTOMATISK, KVALITETSSIKRING, FATTE_VEDTAK
+    MANUELL,
+    AUTOMATISK,
+    KVALITETSSIKRING,
+    FATTE_VEDTAK,
 }

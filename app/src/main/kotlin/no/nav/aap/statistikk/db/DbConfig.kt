@@ -5,12 +5,7 @@ import no.nav.aap.statistikk.AppConfig
 import no.nav.aap.statistikk.PrometheusProvider
 import javax.sql.DataSource
 
-data class DbConfig(
-    val jdbcUrl: String,
-    val userName: String,
-    val password: String,
-    val poolSize: Int
-) {
+data class DbConfig(val jdbcUrl: String, val userName: String, val password: String, val poolSize: Int) {
     companion object {
         fun fraMiljøVariabler(appConfig: AppConfig): DbConfig {
             val userName: String = System.getenv("NAIS_DATABASE_STATISTIKK_HENDELSER_USERNAME")

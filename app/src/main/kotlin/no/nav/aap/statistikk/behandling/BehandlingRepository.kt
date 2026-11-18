@@ -16,13 +16,12 @@ import java.time.LocalDateTime
 import java.util.*
 
 class BehandlingRepository(
-    private val dbConnection: DBConnection, private val clock: Clock = Clock.systemDefaultZone()
+    private val dbConnection: DBConnection,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : IBehandlingRepository {
 
     companion object : RepositoryFactory<IBehandlingRepository> {
-        override fun konstruer(connection: DBConnection): IBehandlingRepository {
-            return BehandlingRepository(connection)
-        }
+        override fun konstruer(connection: DBConnection): IBehandlingRepository = BehandlingRepository(connection)
     }
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -49,12 +48,15 @@ SELECT COALESCE(
         val behandlingId = dbConnection.executeReturnKey(
             """INSERT INTO behandling (sak_id, referanse_id, type, opprettet_tid, forrige_behandling_id,
                         aarsaker_til_behandling, opprettet_av, aarsak_til_opprettelse)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams {
                 setLong(
                     1,
-                    requireNotNull(behandling.sak.id) { "Sak må ha ID før behandling kan lagres. Behandlingsreferanse: ${behandling.referanse}" })
+                    requireNotNull(
+                        behandling.sak.id,
+                    ) { "Sak må ha ID før behandling kan lagres. Behandlingsreferanse: ${behandling.referanse}" },
+                )
                 setLong(2, id)
                 setString(3, behandling.typeBehandling.toString())
                 setLocalDateTime(4, behandling.opprettetTid)
@@ -143,7 +145,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                   ORDER BY hendelsestidspunkt DESC, oppdatert_tid DESC, id DESC
                   LIMIT 1
               )
-            """.trimIndent()
+            """.trimIndent(),
         ) {
             setParams {
                 setLong(1, behandlingId.id)
@@ -163,7 +165,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 ORDER BY hendelsestidspunkt DESC, oppdatert_tid DESC, id DESC
                 LIMIT 1
             )
-            """.trimIndent()
+            """.trimIndent(),
         ) {
             setParams {
                 setLong(1, behandlingId.id)
@@ -175,7 +177,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
     private fun oppdaterÅrsakTilOpprettelse(behandling: Behandling) {
         val behandlingId = behandling.id()
         val oppdaterte =
-            dbConnection.executeReturnUpdated("UPDATE behandling SET aarsak_til_opprettelse = ? WHERE id = ? AND aarsak_til_opprettelse IS NULL") {
+            dbConnection.executeReturnUpdated(
+                "UPDATE behandling SET aarsak_til_opprettelse = ? WHERE id = ? AND aarsak_til_opprettelse IS NULL",
+            ) {
                 setParams {
                     setString(1, behandling.årsakTilOpprettelse)
                     setLong(2, behandlingId.id)
@@ -184,9 +188,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         log.info("Oppdaterte $oppdaterte rader med årsak til opprettelse.")
     }
 
-    private fun oppdaterÅrsakerTilBehandling(
-        behandling: Behandling,
-    ) {
+    private fun oppdaterÅrsakerTilBehandling(behandling: Behandling) {
         val behandlingId = behandling.id()
         dbConnection.execute("UPDATE behandling SET aarsaker_til_behandling = ? WHERE id = ?") {
             setParams {
@@ -196,14 +198,11 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         }
     }
 
-    private fun oppdaterRelaterteIdenter(
-        behandling: Behandling,
-        historikkId: Long
-    ) {
+    private fun oppdaterRelaterteIdenter(behandling: Behandling, historikkId: Long) {
         dbConnection.executeBatch(
             """INSERT INTO relaterte_personer (behandling_id, person_id, ident)
     VALUES ($historikkId, (SELECT person_id FROM person_ident WHERE ident = ?), ?)""",
-            behandling.relaterteIdenter
+            behandling.relaterteIdenter,
         ) {
             setParams {
                 setString(1, it.ident)
@@ -224,7 +223,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                    (SELECT id FROM ny_versjon),
                    (SELECT id FROM versjon WHERE versjon.versjon = ?)
            ) AS id;
-    """
+    """,
         ) {
             setParams {
                 setString(1, versjon.verdi)
@@ -263,7 +262,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                                   sist_loste_avklaringsbehov, sist_loste_avklaringsbehov_saksbehandler,
                                   sist_loste_avklaringsbehov_tidspunkt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) }
+            """,
+            oppdateringer.mapIndexed { index, hendelse -> Pair(hendelse, index) },
         ) {
             setParams { (hendelse, idx) ->
                 var c = 1
@@ -300,7 +300,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 WHERE bh.behandling_id = ?
                   AND bh.slettet = false
                 ORDER BY bh.hendelsestidspunkt, bh.oppdatert_tid, bh.id
-            """.trimIndent()
+            """.trimIndent(),
         ) {
             setParams { setLong(1, behandling.id().id) }
             setRowMapper { it.getLong("id") }
@@ -313,7 +313,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 snapshot.returÅrsakkoblinger.flatMap { kobling ->
                     kobling.returÅrsaker.map { Triple(historikkId, kobling.avklaringsbehov, it) }
                 }
-            }
+            },
         )
         log.info("Satte inn ${oppdateringer.size} hendelser for behandling ${behandling.id()} med versjon $versjonId.")
     }
@@ -438,7 +438,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
        where bh.behandling_id = ?
          and slettet = false
        order by bh.hendelsestidspunkt, bh.oppdatert_tid, bh.id
-                """.trimIndent()
+        """.trimIndent()
 
         dbConnection.queryList(historikkSpørring) {
             setParams { setLong(1, behandling.id().id) }
@@ -451,7 +451,9 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")
                         ?.let(Definisjon::forKode),
                     sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler"),
-                    sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
+                    sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull(
+                        "bh_sist_loste_avklaringsbehov_tidspunkt",
+                    ),
                     steggruppe = it.getEnumOrNull("bh_steggruppe"),
                     venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
                     returÅrsak = it.getStringOrNull("bh_retur_aarsak"),
@@ -460,7 +462,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     saksbehandler = it.getStringOrNull("bh_siste_saksbehandler")
                         ?.let { saksbehandler ->
                             Saksbehandler(
-                                ident = saksbehandler
+                                ident = saksbehandler,
                             )
                         },
                     ansvarligBeslutter = it.getStringOrNull("bh_ansvarlig_beslutter"),
@@ -469,22 +471,20 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
                     søknadsformat = it.getEnum("bh_soknadsformat"),
                     versjon = Versjon(
-                        verdi = it.getString("bh_versjon")
+                        verdi = it.getString("bh_versjon"),
                     ),
-                    relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")
+                    relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse"),
                 )
             }
         }
     }
 
-    override fun hentEllerNull(id: BehandlingId): Behandling? {
-        return dbConnection.queryFirstOrNull(hentMedId) {
-            setParams {
-                setLong(1, id.id)
-            }
-            setRowMapper {
-                mapBehandling(it)
-            }
+    override fun hentEllerNull(id: BehandlingId): Behandling? = dbConnection.queryFirstOrNull(hentMedId) {
+        setParams {
+            setLong(1, id.id)
+        }
+        setRowMapper {
+            mapBehandling(it)
         }
     }
 
@@ -527,7 +527,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             ),
             sistOppdatert = it.getLocalDateTime("sh_oppdatert_tid"),
             snapShotId = it.getLong("sh_id"),
-            sakStatus = it.getEnum("sh_sak_status")
+            sakStatus = it.getEnum("sh_sak_status"),
         ),
         typeBehandling = it.getString("b_type").let { TypeBehandling.valueOf(it) },
         status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
@@ -558,23 +558,18 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             .map { Vurderingsbehov.valueOf(it) },
         årsakTilOpprettelse = it.getStringOrNull("b_aarsak_til_opprettelse"),
         resultat = it.getEnumOrNull("bh_resultat"),
-        oppdatertTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt")
+        oppdatertTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt"),
     )
 
-    private fun lagreReturÅrsakkoblinger(
-        behandlingHistorikkId: Long,
-        koblinger: List<ReturÅrsakkobling>
-    ) {
+    private fun lagreReturÅrsakkoblinger(behandlingHistorikkId: Long, koblinger: List<ReturÅrsakkobling>) {
         lagreReturÅrsakkoblinger(
             koblinger.flatMap { kobling ->
                 kobling.returÅrsaker.map { Triple(behandlingHistorikkId, kobling.avklaringsbehov, it) }
-            }
+            },
         )
     }
 
-    private fun lagreReturÅrsakkoblinger(
-        koblinger: List<Triple<Long, Definisjon, String>>
-    ) {
+    private fun lagreReturÅrsakkoblinger(koblinger: List<Triple<Long, Definisjon, String>>) {
         if (koblinger.isEmpty()) return
 
         dbConnection.executeBatch(
@@ -582,7 +577,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 INSERT INTO behandling_historikk_retur_aarsak (behandling_historikk_id, avklaringsbehov_kode, retur_aarsak)
                 VALUES (?, ?, ?)
                 ON CONFLICT DO NOTHING
-            """.trimIndent(), koblinger
+            """.trimIndent(),
+            koblinger,
         ) {
             setParams { (historikkId, avklaringsbehov, returÅrsak) ->
                 setLong(1, historikkId)
@@ -599,13 +595,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 FROM behandling_historikk_retur_aarsak
                 WHERE behandling_historikk_id = ?
                 ORDER BY avklaringsbehov_kode, retur_aarsak
-            """.trimIndent()
+            """.trimIndent(),
         ) {
             setParams { setLong(1, behandlingHistorikkId) }
             setRowMapper {
                 Pair(
                     Definisjon.forKode(it.getString("avklaringsbehov_kode")),
-                    it.getString("retur_aarsak")
+                    it.getString("retur_aarsak"),
                 )
             }
         }
@@ -614,7 +610,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             .map { (avklaringsbehov, returÅrsaker) ->
                 ReturÅrsakkobling(
                     avklaringsbehov = avklaringsbehov,
-                    returÅrsaker = returÅrsaker
+                    returÅrsaker = returÅrsaker,
                 )
             }
     }

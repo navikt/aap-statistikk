@@ -49,11 +49,7 @@ enum class Avslagsårsak {
     ANNEN_FULL_YTELSE_AVSLAG,
 }
 
-data class StansEllerOpphør(
-    val type: StansType,
-    val fom: LocalDate,
-    val årsaker: Set<Avslagsårsak>
-)
+data class StansEllerOpphør(val type: StansType, val fom: LocalDate, val årsaker: Set<Avslagsårsak>)
 
 private val log = LoggerFactory.getLogger("no.nav.aap.statistikk.avsluttetbehandling")
 
@@ -92,18 +88,13 @@ enum class ResultatKode {
     KLAGE_DELVIS_OMGJØRES,
     KLAGE_AVSLÅTT,
     KLAGE_TRUKKET,
-    AVBRUTT;
+    AVBRUTT,
+    ;
 
-    fun sendesTilKA(): Boolean {
-        return this == KLAGE_OPPRETTHOLDES || this == KLAGE_DELVIS_OMGJØRES
-    }
+    fun sendesTilKA(): Boolean = this == KLAGE_OPPRETTHOLDES || this == KLAGE_DELVIS_OMGJØRES
 }
 
-data class RettighetstypePeriode(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val rettighetstype: RettighetsType
-)
+data class RettighetstypePeriode(val fraDato: LocalDate, val tilDato: LocalDate, val rettighetstype: RettighetsType)
 
 /**
  * Ved oppdateringer her må tabellen `kodeverk_rettighetstype` oppdateres. Lag migrering!
@@ -116,23 +107,19 @@ enum class RettighetsType(@Suppress("unused") val hjemmel: String) {
     VURDERES_FOR_UFØRETRYGD(hjemmel = "§ 11-18"),
 }
 
-
-data class Diagnoser(
-    val kodeverk: String,
-    val diagnosekode: String,
-    val bidiagnoser: List<String>
-)
+data class Diagnoser(val kodeverk: String, val diagnosekode: String, val bidiagnoser: List<String>)
 
 data class DiagnoseMedPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
     val kodeverk: String,
     val diagnosekode: String,
-    val bidiagnoser: List<String>
+    val bidiagnoser: List<String>,
 )
 
 enum class UføreType {
-    STANDARD, YTTERLIGERE_NEDSATT
+    STANDARD,
+    YTTERLIGERE_NEDSATT,
 }
 
 data class MedBehandlingsreferanse<out V>(val behandlingsReferanse: UUID, val value: V)
@@ -147,7 +134,7 @@ enum class GrunnlagType {
     },
     GrunnlagYrkesskade {
         override fun toString() = "yrkesskade"
-    }
+    },
 }
 
 sealed interface IBeregningsGrunnlag {
@@ -173,23 +160,15 @@ sealed interface IBeregningsGrunnlag {
         val nedsattArbeidsevneEllerStudieevneDato: LocalDate,
         val ytterligereNedsattArbeidsevneDato: LocalDate? = null,
     ) : IBeregningsGrunnlag {
-        override fun grunnlaget(): Double {
-            return grunnlag
-        }
+        override fun grunnlaget(): Double = grunnlag
 
-        override fun type(): GrunnlagType {
-            return GrunnlagType.Grunnlag11_19
-        }
+        override fun type(): GrunnlagType = GrunnlagType.Grunnlag11_19
 
-        override fun beregningsår(): Year {
-            return Year.of(inntekter.keys.max() + 1)
-        }
+        override fun beregningsår(): Year = Year.of(inntekter.keys.max() + 1)
 
-        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate =
-            nedsattArbeidsevneEllerStudieevneDato
+        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate = nedsattArbeidsevneEllerStudieevneDato
 
-        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? =
-            ytterligereNedsattArbeidsevneDato
+        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? = ytterligereNedsattArbeidsevneDato
     }
 
     data class GrunnlagUføre(
@@ -202,26 +181,18 @@ sealed interface IBeregningsGrunnlag {
         val nedsattArbeidsevneEllerStudieevneDato: LocalDate,
         val ytterligereNedsattArbeidsevneDato: LocalDate? = null,
     ) : IBeregningsGrunnlag {
-        override fun grunnlaget(): Double {
-            return grunnlag
+        override fun grunnlaget(): Double = grunnlag
+
+        override fun type(): GrunnlagType = GrunnlagType.Grunnlag_Ufore
+
+        override fun beregningsår(): Year = when (type) {
+            UføreType.STANDARD -> grunnlag11_19.beregningsår()
+            UføreType.YTTERLIGERE_NEDSATT -> Year.of(uføreInntekterFraForegåendeÅr.keys.max() + 1)
         }
 
-        override fun type(): GrunnlagType {
-            return GrunnlagType.Grunnlag_Ufore
-        }
+        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate = nedsattArbeidsevneEllerStudieevneDato
 
-        override fun beregningsår(): Year {
-            return when (type) {
-                UføreType.STANDARD -> grunnlag11_19.beregningsår()
-                UføreType.YTTERLIGERE_NEDSATT -> Year.of(uføreInntekterFraForegåendeÅr.keys.max() + 1)
-            }
-        }
-
-        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate =
-            nedsattArbeidsevneEllerStudieevneDato
-
-        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? =
-            ytterligereNedsattArbeidsevneDato
+        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? = ytterligereNedsattArbeidsevneDato
     }
 
     data class GrunnlagYrkesskade(
@@ -240,23 +211,18 @@ sealed interface IBeregningsGrunnlag {
         val nedsattArbeidsevneEllerStudieevneDato: LocalDate,
         val ytterligereNedsattArbeidsevneDato: LocalDate? = null,
     ) : IBeregningsGrunnlag {
-        override fun grunnlaget(): Double {
-            return grunnlaget
+        override fun grunnlaget(): Double = grunnlaget
+
+        override fun type(): GrunnlagType = GrunnlagType.GrunnlagYrkesskade
+
+        override fun beregningsår(): Year = if (benyttetAndelForYrkesskade == 100) {
+            yrkesskadeTidspunkt
+        } else {
+            beregningsgrunnlag.beregningsår()
         }
 
-        override fun type(): GrunnlagType {
-            return GrunnlagType.GrunnlagYrkesskade
-        }
+        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate = nedsattArbeidsevneEllerStudieevneDato
 
-        override fun beregningsår(): Year {
-            return if (benyttetAndelForYrkesskade == 100) yrkesskadeTidspunkt else
-                beregningsgrunnlag.beregningsår()
-        }
-
-        override fun nedsattArbeidsevneEllerStudieevneDato(): LocalDate =
-            nedsattArbeidsevneEllerStudieevneDato
-
-        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? =
-            ytterligereNedsattArbeidsevneDato
+        override fun ytterligereNedsattArbeidsevneDato(): LocalDate? = ytterligereNedsattArbeidsevneDato
     }
 }

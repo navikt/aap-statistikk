@@ -10,21 +10,20 @@ import java.util.*
 
 object SakstatistikkEventSourcing {
 
-    fun byggSakstatistikkHendelser(
-        behandling: Behandling,
-        oppgaver: List<Oppgave>
-    ): List<SakstatistikkSnapshot> {
+    fun byggSakstatistikkHendelser(behandling: Behandling, oppgaver: List<Oppgave>): List<SakstatistikkSnapshot> {
         val alleSakstatistikkHendelser =
             konverterBehandlingHendelser(behandling) +
-                    konverterOppgaveHendelser(oppgaver)
+                konverterOppgaveHendelser(oppgaver)
 
         val sorterteHendelser = alleSakstatistikkHendelser.sorted()
 
         return byggSnapshots(sorterteHendelser)
     }
 
-    private fun konverterBehandlingHendelser(behandling: Behandling): List<SakstatistikkHendelse> {
-        return behandling.hendelser.map { hendelse ->
+    private fun konverterBehandlingHendelser(behandling: Behandling): List<SakstatistikkHendelse> =
+        behandling.hendelser.map {
+                hendelse,
+            ->
             val rolleEndret = rolleEndretMellom(hendelse.sisteLøsteAvklaringsbehov, hendelse.avklaringsBehov)
             BehandlingsflytHendelse(
                 behandlingReferanse = behandling.referanse,
@@ -32,10 +31,9 @@ object SakstatistikkEventSourcing {
                 status = hendelse.status.name,
                 avklaringsbehov = hendelse.avklaringsBehov,
                 sisteLøsteAvklaringsbehov = hendelse.sisteLøsteAvklaringsbehov,
-                sisteSaksbehandlerPåBehandling = if (rolleEndret) null else hendelse.sisteSaksbehandlerSomLøstebehov
+                sisteSaksbehandlerPåBehandling = if (rolleEndret) null else hendelse.sisteSaksbehandlerSomLøstebehov,
             )
         }
-    }
 
     /**
      * Returnerer true dersom avklaringsbehovene løses av ulike roller, slik at saksbehandler-fallback
@@ -48,127 +46,108 @@ object SakstatistikkEventSourcing {
         return forrigeRoller.intersect(nyeRoller).isEmpty()
     }
 
-    private fun konverterOppgaveHendelser(oppgaver: List<Oppgave>): List<SakstatistikkHendelse> {
-        return oppgaver.flatMap { oppgave ->
-            oppgave.hendelser.mapNotNull { hendelse ->
-                konverterOppgaveHendelse(oppgave, hendelse)
-            }
+    private fun konverterOppgaveHendelser(oppgaver: List<Oppgave>): List<SakstatistikkHendelse> = oppgaver.flatMap {
+            oppgave,
+        ->
+        oppgave.hendelser.mapNotNull { hendelse ->
+            konverterOppgaveHendelse(oppgave, hendelse)
         }
     }
 
-    private fun konverterOppgaveHendelse(
-        oppgave: Oppgave,
-        hendelse: OppgaveHendelse
-    ): SakstatistikkHendelse? {
+    private fun konverterOppgaveHendelse(oppgave: Oppgave, hendelse: OppgaveHendelse): SakstatistikkHendelse? {
         val behandlingReferanse = oppgave.behandlingReferanse ?: return null
 
         return when (hendelse.hendelse) {
             HendelseType.OPPRETTET -> opprettetHendelse(
                 behandlingReferanse.referanse,
                 hendelse,
-                oppgave
+                oppgave,
             )
 
             HendelseType.RESERVERT -> reservertHendelse(
                 behandlingReferanse.referanse,
                 hendelse,
-                oppgave
+                oppgave,
             )
 
             HendelseType.LUKKET -> lukketHendelse(behandlingReferanse.referanse, hendelse, oppgave)
+
             HendelseType.AVRESERVERT -> avreservertHendelse(
                 behandlingReferanse.referanse,
                 hendelse,
-                oppgave
+                oppgave,
             )
 
             HendelseType.OPPDATERT -> oppdatertHendelse(
                 behandlingReferanse.referanse,
                 hendelse,
-                oppgave
+                oppgave,
             )
         }
     }
 
-    private fun opprettetHendelse(
-        behandlingReferanse: UUID,
-        hendelse: OppgaveHendelse,
-        oppgave: Oppgave
-    ) = OppgaveOpprettetHendelse(
-        behandlingReferanse = behandlingReferanse,
-        tidspunkt = hendelse.sendtTid,
-        mottattTidspunkt = hendelse.mottattTidspunkt,
-        avklaringsbehovKode = oppgave.avklaringsbehov,
-        enhet = hendelse.enhet,
-        reservertAv = hendelse.reservertAv
-    )
+    private fun opprettetHendelse(behandlingReferanse: UUID, hendelse: OppgaveHendelse, oppgave: Oppgave) =
+        OppgaveOpprettetHendelse(
+            behandlingReferanse = behandlingReferanse,
+            tidspunkt = hendelse.sendtTid,
+            mottattTidspunkt = hendelse.mottattTidspunkt,
+            avklaringsbehovKode = oppgave.avklaringsbehov,
+            enhet = hendelse.enhet,
+            reservertAv = hendelse.reservertAv,
+        )
 
-    private fun reservertHendelse(
-        behandlingReferanse: UUID,
-        hendelse: OppgaveHendelse,
-        oppgave: Oppgave
-    ) = OppgaveReservertHendelse(
-        behandlingReferanse = behandlingReferanse,
-        tidspunkt = hendelse.sendtTid,
-        mottattTidspunkt = hendelse.mottattTidspunkt,
-        avklaringsbehovKode = oppgave.avklaringsbehov,
-        reservertAv = hendelse.reservertAv.orEmpty(),
-        enhet = hendelse.enhet
-    )
+    private fun reservertHendelse(behandlingReferanse: UUID, hendelse: OppgaveHendelse, oppgave: Oppgave) =
+        OppgaveReservertHendelse(
+            behandlingReferanse = behandlingReferanse,
+            tidspunkt = hendelse.sendtTid,
+            mottattTidspunkt = hendelse.mottattTidspunkt,
+            avklaringsbehovKode = oppgave.avklaringsbehov,
+            reservertAv = hendelse.reservertAv.orEmpty(),
+            enhet = hendelse.enhet,
+        )
 
-    private fun lukketHendelse(
-        behandlingReferanse: UUID,
-        hendelse: OppgaveHendelse,
-        oppgave: Oppgave
-    ) = OppgaveLukketHendelse(
-        behandlingReferanse = behandlingReferanse,
-        tidspunkt = hendelse.sendtTid,
-        mottattTidspunkt = hendelse.mottattTidspunkt,
-        avklaringsbehovKode = oppgave.avklaringsbehov
-    )
+    private fun lukketHendelse(behandlingReferanse: UUID, hendelse: OppgaveHendelse, oppgave: Oppgave) =
+        OppgaveLukketHendelse(
+            behandlingReferanse = behandlingReferanse,
+            tidspunkt = hendelse.sendtTid,
+            mottattTidspunkt = hendelse.mottattTidspunkt,
+            avklaringsbehovKode = oppgave.avklaringsbehov,
+        )
 
-    private fun avreservertHendelse(
-        behandlingReferanse: UUID,
-        hendelse: OppgaveHendelse,
-        oppgave: Oppgave
-    ) = OppgaveAvreservertHendelse(
-        behandlingReferanse = behandlingReferanse,
-        tidspunkt = hendelse.sendtTid,
-        mottattTidspunkt = hendelse.mottattTidspunkt,
-        avklaringsbehovKode = oppgave.avklaringsbehov,
-    )
+    private fun avreservertHendelse(behandlingReferanse: UUID, hendelse: OppgaveHendelse, oppgave: Oppgave) =
+        OppgaveAvreservertHendelse(
+            behandlingReferanse = behandlingReferanse,
+            tidspunkt = hendelse.sendtTid,
+            mottattTidspunkt = hendelse.mottattTidspunkt,
+            avklaringsbehovKode = oppgave.avklaringsbehov,
+        )
 
-    private fun oppdatertHendelse(
-        behandlingReferanse: UUID,
-        hendelse: OppgaveHendelse,
-        oppgave: Oppgave
-    ) = OppgaveOppdatertHendelse(
-        behandlingReferanse = behandlingReferanse,
-        tidspunkt = hendelse.sendtTid,
-        mottattTidspunkt = hendelse.mottattTidspunkt,
-        avklaringsbehovKode = oppgave.avklaringsbehov,
-        reservertAv = hendelse.reservertAv,
-        enhet = hendelse.enhet
-    )
+    private fun oppdatertHendelse(behandlingReferanse: UUID, hendelse: OppgaveHendelse, oppgave: Oppgave) =
+        OppgaveOppdatertHendelse(
+            behandlingReferanse = behandlingReferanse,
+            tidspunkt = hendelse.sendtTid,
+            mottattTidspunkt = hendelse.mottattTidspunkt,
+            avklaringsbehovKode = oppgave.avklaringsbehov,
+            reservertAv = hendelse.reservertAv,
+            enhet = hendelse.enhet,
+        )
 
-    private fun byggSnapshots(hendelser: List<SakstatistikkHendelse>): List<SakstatistikkSnapshot> {
-        return hendelser
-            .runningFold(SakstatistikkState()) { state, hendelse ->
-                state.applyHendelse(hendelse)
-            }
-            .drop(1)
-            .zip(hendelser) { state, hendelse ->
-                SakstatistikkSnapshot(
-                    tidspunkt = hendelse.tidspunkt,
-                    behandlingReferanse = hendelse.behandlingReferanse,
-                    status = state.status,
-                    avklaringsbehov = state.avklaringsbehov?.kode?.name,
-                    saksbehandler = state.saksbehandler,
-                    enhet = state.enhet,
-                    kilde = hendelse.kilde
-                )
-            }
-    }
+    private fun byggSnapshots(hendelser: List<SakstatistikkHendelse>): List<SakstatistikkSnapshot> = hendelser
+        .runningFold(SakstatistikkState()) { state, hendelse ->
+            state.applyHendelse(hendelse)
+        }
+        .drop(1)
+        .zip(hendelser) { state, hendelse ->
+            SakstatistikkSnapshot(
+                tidspunkt = hendelse.tidspunkt,
+                behandlingReferanse = hendelse.behandlingReferanse,
+                status = state.status,
+                avklaringsbehov = state.avklaringsbehov?.kode?.name,
+                saksbehandler = state.saksbehandler,
+                enhet = state.enhet,
+                kilde = hendelse.kilde,
+            )
+        }
 }
 
 data class SakstatistikkSnapshot(
@@ -180,4 +159,3 @@ data class SakstatistikkSnapshot(
     val enhet: String?,
     val kilde: Kilde,
 )
-

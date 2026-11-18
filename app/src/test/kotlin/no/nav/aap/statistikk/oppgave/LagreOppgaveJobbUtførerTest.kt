@@ -1,7 +1,5 @@
 package no.nav.aap.statistikk.oppgave
 
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
-
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.*
@@ -15,8 +13,9 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
-import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.Postgres
+import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
+import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -49,8 +48,8 @@ class LagreOppgaveJobbUtførerTest {
                     endretAv = "SaksbehandlerEndret123",
                     endretTidspunkt = LocalDateTime.now(),
                     sendtTid = LocalDateTime.now().minusSeconds(1),
-                    versjon = 12L
-                )
+                    versjon = 12L,
+                ),
             )
         }
 
@@ -63,11 +62,11 @@ class LagreOppgaveJobbUtførerTest {
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
-                /// TODO
+                // / TODO
                 behandlingRepository = FakeBehandlingRepository(),
-                repositoryProvider = postgresRepositoryRegistry.provider(it)
+                repositoryProvider = postgresRepositoryRegistry.provider(it),
             ).utfør(
-                JobbInput(LagreOppgaveJobb()).medPayload(oppgaveId.toString())
+                JobbInput(LagreOppgaveJobb()).medPayload(oppgaveId.toString()),
             )
         }
 
@@ -90,7 +89,8 @@ class LagreOppgaveJobbUtførerTest {
         val oppgaveId = 123L
 
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -105,8 +105,8 @@ class LagreOppgaveJobbUtførerTest {
                 endretAv = "SaksbehandlerEndret123",
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
-                versjon = 11L
-            )
+                versjon = 11L,
+            ),
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
@@ -117,7 +117,8 @@ class LagreOppgaveJobbUtførerTest {
 
         // Reservere
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -131,13 +132,14 @@ class LagreOppgaveJobbUtførerTest {
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
-                versjon = 12L
-            )
+                versjon = 12L,
+            ),
         )
 
         // Avreservere
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -150,7 +152,7 @@ class LagreOppgaveJobbUtførerTest {
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
                 versjon = 13L,
-            )
+            ),
         )
 
         val oppgaverPåBehandling2 = dataSource.transaction {
@@ -166,7 +168,8 @@ class LagreOppgaveJobbUtførerTest {
         val oppgaveId = 12345L
 
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -181,8 +184,8 @@ class LagreOppgaveJobbUtførerTest {
                 endretAv = "SaksbehandlerEndret123",
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
-                versjon = 123L
-            )
+                versjon = 123L,
+            ),
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
@@ -194,7 +197,8 @@ class LagreOppgaveJobbUtførerTest {
 
         // Legg på hastemarkering
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -210,8 +214,8 @@ class LagreOppgaveJobbUtførerTest {
                 harHasteMarkering = true,
                 harAvslagSykdomMarkering = true,
                 sendtTid = LocalDateTime.now().minusSeconds(1),
-                versjon = 124L
-            )
+                versjon = 124L,
+            ),
         )
 
         val oppgaveMedMarkering = dataSource.transaction {
@@ -222,7 +226,8 @@ class LagreOppgaveJobbUtførerTest {
 
         // Fjerner hastemarkering
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -237,7 +242,7 @@ class LagreOppgaveJobbUtførerTest {
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
                 versjon = 125L,
-            )
+            ),
         )
 
         val oppgaveUtenMarkering = dataSource.transaction {
@@ -253,7 +258,8 @@ class LagreOppgaveJobbUtførerTest {
         val oppgaveId = 123L
 
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -271,7 +277,7 @@ class LagreOppgaveJobbUtførerTest {
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
                 versjon = 314L,
-            )
+            ),
         )
 
         val oppgaverPåBehandling = dataSource.transaction {
@@ -282,7 +288,8 @@ class LagreOppgaveJobbUtførerTest {
 
         // Reservere
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -297,7 +304,7 @@ class LagreOppgaveJobbUtførerTest {
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
                 versjon = 315L,
-            )
+            ),
         )
 
         val oppgaverPåBehandling2 = dataSource.transaction {
@@ -307,13 +314,13 @@ class LagreOppgaveJobbUtførerTest {
         assertThat(oppgaverPåBehandling2.size).isEqualTo(1)
     }
 
-
     @Test
     fun `oppgave urelatert til person og behandling`(@Postgres dataSource: DataSource) {
         val enhet = "NAVKontor456"
         val oppgaveId = 124L
         settInnOppgaveHendelseOgUtførerJobb(
-            dataSource, oppgaveHendelse = OppgaveHendelse(
+            dataSource,
+            oppgaveHendelse = OppgaveHendelse(
                 hendelse = HendelseType.OPPRETTET,
                 oppgaveId = oppgaveId,
                 mottattTidspunkt = LocalDateTime.now(),
@@ -325,8 +332,8 @@ class LagreOppgaveJobbUtførerTest {
                 endretAv = "SaksbehandlerEndret4232",
                 endretTidspunkt = LocalDateTime.now(),
                 sendtTid = LocalDateTime.now().minusSeconds(1),
-                versjon = 123L
-            )
+                versjon = 123L,
+            ),
         )
 
         val oppgaverForEnhet = dataSource.transaction {
@@ -336,16 +343,12 @@ class LagreOppgaveJobbUtførerTest {
 
         assertThat(oppgaverForEnhet).isNotEmpty
         assertThat(oppgaverForEnhet.first().enhet.kode).isEqualTo("NAVKontor456")
-
     }
 
-    private fun settInnOppgaveHendelseOgUtførerJobb(
-        dataSource: DataSource,
-        oppgaveHendelse: OppgaveHendelse,
-    ) {
+    private fun settInnOppgaveHendelseOgUtførerJobb(dataSource: DataSource, oppgaveHendelse: OppgaveHendelse) {
         dataSource.transaction {
             OppgaveHendelseRepositoryImpl(it).lagreHendelse(
-                oppgaveHendelse
+                oppgaveHendelse,
             )
         }
 
@@ -358,43 +361,39 @@ class LagreOppgaveJobbUtførerTest {
                     enhetRepository = EnhetRepositoryImpl(it),
                     saksbehandlerRepository = SaksbehandlerRepositoryImpl(it),
                 ),
-                /// TODO
+                // / TODO
                 behandlingRepository = FakeBehandlingRepository(),
-                repositoryProvider = postgresRepositoryRegistry.provider(it)
+                repositoryProvider = postgresRepositoryRegistry.provider(it),
             ).utfør(
                 JobbInput(
-                    LagreOppgaveJobb(
-                    )
-                ).medPayload(oppgaveHendelse.oppgaveId.toString())
+                    LagreOppgaveJobb(),
+                ).medPayload(oppgaveHendelse.oppgaveId.toString()),
             )
         }
     }
 
-
-    private fun settOppEksisterendeBehandling(dataSource: DataSource): Behandling {
-        return dataSource.transaction {
-            val personUtenId = Person(ident = no.nav.aap.statistikk.person.Ident("123"))
-            val id = PersonRepository(it).lagrePerson(personUtenId, setOf(personUtenId.ident))
-            val sak = Sak(
-                saksnummer = Saksnummer("123"),
-                person = personUtenId.medId(id),
-                sakStatus = SakStatus.OPPRETTET,
-                sistOppdatert = LocalDateTime.now()
-            )
-            val sakId = SakRepositoryImpl(it).settInnSak(sak)
-            val behandling = Behandling(
-                referanse = UUID.randomUUID(),
-                sak = sak.copy(id = sakId),
-                typeBehandling = TypeBehandling.Klage,
-                status = BehandlingStatus.UTREDES,
-                opprettetTid = LocalDateTime.now().minusSeconds(10),
-                mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-                versjon = Versjon(verdi = "..."),
-                søknadsformat = SøknadsFormat.DIGITAL,
-                oppdatertTidspunkt = LocalDateTime.now().minusSeconds(10)
-            )
-            val behandlingId = BehandlingRepository(it).opprettBehandling(behandling)
-            behandling.copy(id = behandlingId)
-        }
+    private fun settOppEksisterendeBehandling(dataSource: DataSource): Behandling = dataSource.transaction {
+        val personUtenId = Person(ident = no.nav.aap.statistikk.person.Ident("123"))
+        val id = PersonRepository(it).lagrePerson(personUtenId, setOf(personUtenId.ident))
+        val sak = Sak(
+            saksnummer = Saksnummer("123"),
+            person = personUtenId.medId(id),
+            sakStatus = SakStatus.OPPRETTET,
+            sistOppdatert = LocalDateTime.now(),
+        )
+        val sakId = SakRepositoryImpl(it).settInnSak(sak)
+        val behandling = Behandling(
+            referanse = UUID.randomUUID(),
+            sak = sak.copy(id = sakId),
+            typeBehandling = TypeBehandling.Klage,
+            status = BehandlingStatus.UTREDES,
+            opprettetTid = LocalDateTime.now().minusSeconds(10),
+            mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+            versjon = Versjon(verdi = "..."),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            oppdatertTidspunkt = LocalDateTime.now().minusSeconds(10),
+        )
+        val behandlingId = BehandlingRepository(it).opprettBehandling(behandling)
+        behandling.copy(id = behandlingId)
     }
 }

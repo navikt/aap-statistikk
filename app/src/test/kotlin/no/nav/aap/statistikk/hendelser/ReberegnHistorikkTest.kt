@@ -44,7 +44,7 @@ class ReberegnHistorikkTest {
             årsaker = listOf(),
             resultat = null,
             oppdatertTidspunkt = null,
-            hendelser = listOf()
+            hendelser = listOf(),
         )
 
         val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
@@ -85,7 +85,7 @@ class ReberegnHistorikkTest {
             årsaker = listOf(),
             resultat = null,
             oppdatertTidspunkt = null,
-            hendelser = listOf()
+            hendelser = listOf(),
         )
 
         val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
@@ -128,7 +128,7 @@ class ReberegnHistorikkTest {
             årsaker = listOf(),
             resultat = null,
             oppdatertTidspunkt = null,
-            hendelser = listOf()
+            hendelser = listOf(),
         )
 
         val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
@@ -175,7 +175,7 @@ class ReberegnHistorikkTest {
             årsaker = listOf(),
             resultat = null,
             oppdatertTidspunkt = null,
-            hendelser = listOf()
+            hendelser = listOf(),
         )
 
         val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)

@@ -21,15 +21,14 @@ class BeregningsgrunnlagRepository(
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : IBeregningsgrunnlagRepository {
     companion object : RepositoryFactory<IBeregningsgrunnlagRepository> {
-        override fun konstruer(connection: DBConnection): IBeregningsgrunnlagRepository {
-            return BeregningsgrunnlagRepository(connection)
-        }
+        override fun konstruer(connection: DBConnection): IBeregningsgrunnlagRepository =
+            BeregningsgrunnlagRepository(connection)
     }
 
     override fun lagreBeregningsGrunnlag(beregningsGrunnlag: MedBehandlingsreferanse<IBeregningsGrunnlag>): Long {
         val behandlingsReferanseId = hentBehandlingsReferanseId(
             dbConnection,
-            beregningsGrunnlag.behandlingsReferanse
+            beregningsGrunnlag.behandlingsReferanse,
         )
 
         slettEksisterendeRader(behandlingsReferanseId)
@@ -40,7 +39,7 @@ class BeregningsgrunnlagRepository(
             lagreBaseGrunnlag(
                 dbConnection,
                 beregningsGrunnlagVerdi,
-                behandlingsReferanseId
+                behandlingsReferanseId,
             )
 
         return when (beregningsGrunnlagVerdi) {
@@ -55,31 +54,32 @@ class BeregningsgrunnlagRepository(
             is IBeregningsGrunnlag.GrunnlagUføre ->
                 lagreGrunnlagUføre(dbConnection, baseGrunnlagId, beregningsGrunnlagVerdi)
         }
-
     }
 
     private fun slettEksisterendeRader(behandlingsReferanseId: BehandlingId) {
         val deleteGrunnlagYrkesskadeSql = """
                 DELETE FROM GRUNNLAG_YRKESSKADE WHERE 
                     beregningsgrunnlag_id IN (SELECT id FROM GRUNNLAG WHERE behandling_id = ?)
-            """.trimIndent()
+        """.trimIndent()
         val deleteGrunnlagUforegraderSql = """
                 DELETE FROM GRUNNLAG_UFOREGRADER WHERE grunnlag_ufore_id IN (
                     SELECT id FROM GRUNNLAG_UFORE WHERE grunnlag_id IN (
                         SELECT id FROM GRUNNLAG WHERE behandling_id = ?
                     )
                 )
-            """.trimIndent()
+        """.trimIndent()
         val deleteGrunnlagUforeSql = """
                 DELETE FROM GRUNNLAG_UFORE WHERE grunnlag_id IN (
                     SELECT id FROM GRUNNLAG WHERE behandling_id = ?
                 )
-            """.trimIndent()
-        @Suppress("LocalVariableName") val deleteGrunnlag11_19Sql = """
+        """.trimIndent()
+
+        @Suppress("LocalVariableName")
+        val deleteGrunnlag11_19Sql = """
                 DELETE FROM GRUNNLAG_11_19 WHERE grunnlag_id IN (
                     SELECT id FROM GRUNNLAG WHERE behandling_id = ?
                 )
-            """.trimIndent()
+        """.trimIndent()
         val deleteGrunnlagSql = "DELETE FROM GRUNNLAG WHERE behandling_id = ?"
 
         dbConnection.execute(deleteGrunnlagYrkesskadeSql) {
@@ -91,7 +91,7 @@ class BeregningsgrunnlagRepository(
             setParams {
                 setLong(
                     1,
-                    behandlingsReferanseId.id
+                    behandlingsReferanseId.id,
                 )
             }
         }
@@ -99,7 +99,7 @@ class BeregningsgrunnlagRepository(
             setParams {
                 setLong(
                     1,
-                    behandlingsReferanseId.id
+                    behandlingsReferanseId.id,
                 )
             }
         }
@@ -107,7 +107,7 @@ class BeregningsgrunnlagRepository(
             setParams {
                 setLong(
                     1,
-                    behandlingsReferanseId.id
+                    behandlingsReferanseId.id,
                 )
             }
         }
@@ -115,16 +115,13 @@ class BeregningsgrunnlagRepository(
             setParams {
                 setLong(
                     1,
-                    behandlingsReferanseId.id
+                    behandlingsReferanseId.id,
                 )
             }
         }
     }
 
-    private fun hentBehandlingsReferanseId(
-        dbConnection: DBConnection,
-        referanse: UUID
-    ): BehandlingId {
+    private fun hentBehandlingsReferanseId(dbConnection: DBConnection, referanse: UUID): BehandlingId {
         val sql = """SELECT b.id
 FROM behandling b
          JOIN behandling_referanse br
@@ -144,7 +141,7 @@ WHERE br.referanse = ?"""
     private fun lagreBaseGrunnlag(
         connection: DBConnection,
         grunnlag: IBeregningsGrunnlag,
-        behandlingId: BehandlingId
+        behandlingId: BehandlingId,
     ): Long {
         val sql =
             "INSERT INTO GRUNNLAG(type, behandling_id, opprettet_tidspunkt, beregningsaar, nedsatt_arbeidsevne_dato, ytterligere_nedsatt_arbeidsevne_dato, oppdatert_tid) VALUES (?, ?, ?, ?, ?, ?, ?) "
@@ -166,7 +163,7 @@ WHERE br.referanse = ?"""
     private fun lagreGrunnlagYrkesskade(
         connection: DBConnection,
         baseGrunnlagId: Long,
-        beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagYrkesskade
+        beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagYrkesskade,
     ): Long {
         val grunnlagType: String
         when (val bg = beregningsGrunnlag.beregningsgrunnlag) {
@@ -175,15 +172,16 @@ WHERE br.referanse = ?"""
                 lagre11_19(
                     connection,
                     baseGrunnlagId,
-                    bg
+                    bg,
                 )
             }
 
             is IBeregningsGrunnlag.GrunnlagUføre -> {
                 grunnlagType = "ufore"
                 lagreGrunnlagUføre(
-                    connection, baseGrunnlagId,
-                    bg
+                    connection,
+                    baseGrunnlagId,
+                    bg,
                 )
             }
 
@@ -215,12 +213,12 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 setBigDecimal(c++, beregningsGrunnlag.andelSomIkkeSkyldesYrkesskade)
                 setBigDecimal(
                     c++,
-                    beregningsGrunnlag.antattÅrligInntektYrkesskadeTidspunktet
+                    beregningsGrunnlag.antattÅrligInntektYrkesskadeTidspunktet,
                 )
                 setInt(c++, beregningsGrunnlag.yrkesskadeTidspunkt.value)
                 setBigDecimal(
                     c++,
-                    beregningsGrunnlag.grunnlagForBeregningAvYrkesskadeandel
+                    beregningsGrunnlag.grunnlagForBeregningAvYrkesskadeandel,
                 )
                 setBigDecimal(c++, beregningsGrunnlag.yrkesskadeinntektIG)
                 setBigDecimal(c, beregningsGrunnlag.grunnlagEtterYrkesskadeFordel)
@@ -233,7 +231,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     private fun lagreGrunnlagUføre(
         connection: DBConnection,
         baseGrunnlagId: Long,
-        beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagUføre
+        beregningsGrunnlag: IBeregningsGrunnlag.GrunnlagUføre,
     ): Long {
         val id = lagre11_19(connection, baseGrunnlagId, beregningsGrunnlag.grunnlag11_19)
         val insertQuery =
@@ -251,21 +249,23 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                 setString(c++, beregningsGrunnlag.type.name)
                 setInt(
                     c++,
-                    beregningsGrunnlag.uføregrader.entries.maxByOrNull { it.key }?.value ?: 0
+                    beregningsGrunnlag.uføregrader.entries.maxByOrNull { it.key }?.value ?: 0,
                 )
                 setString(
                     c++,
-                    ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr)
+                    ObjectMapper().writeValueAsString(beregningsGrunnlag.uføreInntekterFraForegåendeÅr),
                 )
                 setInt(c++, beregningsGrunnlag.uføreYtterligereNedsattArbeidsevneÅr)
                 setString(
                     c,
-                    DefaultJsonMapper.toJson(beregningsGrunnlag.uføreInntekterFraForegåendeÅr.entries.map {
+                    DefaultJsonMapper.toJson(
+                        beregningsGrunnlag.uføreInntekterFraForegåendeÅr.entries.map {
                         ÅrOgInntekt(
                             it.key,
-                            it.value
+                            it.value,
                         )
-                    })
+                    }
+                    ),
                 )
             }
         }
@@ -274,7 +274,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
             """
             insert into grunnlag_uforegrader(grunnlag_ufore_id, uforegrad, virkningstidspunkt)
             values (?, ?, ?)
-        """.trimIndent(), beregningsGrunnlag.uføregrader.entries
+            """.trimIndent(),
+            beregningsGrunnlag.uføregrader.entries,
         ) {
             setParams { (virkningstidspunkt, grad) ->
                 setLong(1, executeReturnKey)
@@ -361,7 +362,7 @@ where br.referanse = ?
 
                 MedBehandlingsreferanse(
                     behandlingsReferanse = ref,
-                    value = grunnlagsType
+                    value = grunnlagsType,
                 )
             }
         }
@@ -382,11 +383,11 @@ where br.referanse = ?
             benyttetAndelForYrkesskade = resultSet.getInt("gy_benyttet_andel_for_yrkesskade"),
             andelSomIkkeSkyldesYrkesskade = resultSet.getBigDecimal("gy_andel_som_ikke_skyldes_yrkesskade"),
             antattÅrligInntektYrkesskadeTidspunktet = resultSet.getBigDecimal(
-                "gy_antatt_arlig_inntekt_yrkesskade_tidspunktet"
+                "gy_antatt_arlig_inntekt_yrkesskade_tidspunktet",
             ),
             yrkesskadeTidspunkt = Year.of(resultSet.getInt("gy_yrkesskade_tidspunkt")),
             grunnlagForBeregningAvYrkesskadeandel = resultSet.getBigDecimal(
-                "gy_grunnlag_for_beregning_av_yrkesskadeandel"
+                "gy_grunnlag_for_beregning_av_yrkesskadeandel",
             ),
             yrkesskadeinntektIG = resultSet.getBigDecimal("gy_yrkesskadeinntekt_ig"),
             grunnlagEtterYrkesskadeFordel = resultSet.getBigDecimal("gy_grunnlag_etter_yrkesskade_fordel"),
@@ -400,8 +401,8 @@ where br.referanse = ?
     private fun hentUtGrunnlagUføre(resultSet: Row): IBeregningsGrunnlag.GrunnlagUføre {
         val uføreInntekterFraForegåendeÅr = DefaultJsonMapper.fromJson<List<ÅrOgInntekt>>(
             resultSet.getString(
-                "gu_ufore_inntekter"
-            )
+                "gu_ufore_inntekter",
+            ),
         ).associateBy { it.aar }.mapValues { it.value.inntekt }
 
         val hentUføregraderKompatibel: () -> Map<LocalDate, Int> = hentUføregraderGammel@{
@@ -435,7 +436,8 @@ where br.referanse = ?
         val inntekter =
             DefaultJsonMapper.fromJson<List<ÅrOgInntekt>>(row.getString("g_inntekter_foregaaende_aar"))
 
-        @Suppress("LocalVariableName", "VariableNaming") val grunnlag11_19 =
+        @Suppress("LocalVariableName", "VariableNaming")
+        val grunnlag11_19 =
             IBeregningsGrunnlag.Grunnlag_11_19(
                 grunnlag = row.getDouble("g_grunnlag"),
                 er6GBegrenset = row.getBoolean("g_er6g_begrenset"),
@@ -451,7 +453,7 @@ where br.referanse = ?
     private fun lagre11_19(
         connection: DBConnection,
         baseGrunnlagId: Long,
-        beregningsGrunnlag: IBeregningsGrunnlag.Grunnlag_11_19
+        beregningsGrunnlag: IBeregningsGrunnlag.Grunnlag_11_19,
     ): Long {
         val sqlStatement =
             """INSERT INTO GRUNNLAG_11_19(grunnlag_id, grunnlag, er6g_begrenset, er_gjennomsnitt, inntekter, inntekter_foregaaende_aar)
@@ -466,12 +468,14 @@ where br.referanse = ?
                 setString(5, ObjectMapper().writeValueAsString(beregningsGrunnlag.inntekter))
                 setString(
                     6,
-                    DefaultJsonMapper.toJson(beregningsGrunnlag.inntekter.map {
+                    DefaultJsonMapper.toJson(
+                        beregningsGrunnlag.inntekter.map {
                         ÅrOgInntekt(
                             it.key,
-                            it.value
+                            it.value,
                         )
-                    })
+                    }
+                    ),
                 )
             }
         }

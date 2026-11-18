@@ -7,25 +7,22 @@ import no.nav.aap.statistikk.tilkjentytelse.TilkjentYtelsePeriode
 import java.time.LocalDate
 import java.util.*
 
-
 data class TilkjentYtelseEntity(
     val id: Int? = null,
     val saksnummer: Saksnummer,
     val behandlingsReferanse: UUID,
-    val perioder: List<TilkjentYtelsePeriodeEntity>
+    val perioder: List<TilkjentYtelsePeriodeEntity>,
 ) {
     companion object {
-        fun fraDomene(tilkjentYtelse: TilkjentYtelse): TilkjentYtelseEntity {
-            return TilkjentYtelseEntity(
-                saksnummer = tilkjentYtelse.saksnummer,
-                behandlingsReferanse = tilkjentYtelse.behandlingsReferanse,
-                perioder = tilkjentYtelse.perioder.map {
-                    TilkjentYtelsePeriodeEntity.fraDomene(
-                        it
-                    )
-                }
-            )
-        }
+        fun fraDomene(tilkjentYtelse: TilkjentYtelse): TilkjentYtelseEntity = TilkjentYtelseEntity(
+            saksnummer = tilkjentYtelse.saksnummer,
+            behandlingsReferanse = tilkjentYtelse.behandlingsReferanse,
+            perioder = tilkjentYtelse.perioder.map {
+                TilkjentYtelsePeriodeEntity.fraDomene(
+                    it,
+                )
+            },
+        )
     }
 }
 
@@ -50,8 +47,8 @@ data class TilkjentYtelsePeriodeEntity(
     val meldepliktGradering: Double?,
 ) {
     companion object {
-        fun fraDomene(tilkjentYtelsePeriode: TilkjentYtelsePeriode): TilkjentYtelsePeriodeEntity {
-            return TilkjentYtelsePeriodeEntity(
+        fun fraDomene(tilkjentYtelsePeriode: TilkjentYtelsePeriode): TilkjentYtelsePeriodeEntity =
+            TilkjentYtelsePeriodeEntity(
                 fraDato = tilkjentYtelsePeriode.fraDato,
                 tilDato = tilkjentYtelsePeriode.tilDato,
                 dagsats = tilkjentYtelsePeriode.dagsats,
@@ -70,6 +67,5 @@ data class TilkjentYtelsePeriodeEntity(
                 samordningArbeidsgiverGradering = tilkjentYtelsePeriode.samordningArbeidsgiverGradering,
                 meldepliktGradering = tilkjentYtelsePeriode.meldepliktGradering,
             )
-        }
     }
 }

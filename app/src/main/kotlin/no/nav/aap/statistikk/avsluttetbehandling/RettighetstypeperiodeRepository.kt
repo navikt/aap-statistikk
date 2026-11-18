@@ -9,19 +9,14 @@ import java.util.*
 class RettighetstypeperiodeRepository(
     private val dbConnection: DBConnection,
     private val clock: Clock = Clock.systemDefaultZone(),
-) :
-    IRettighetstypeperiodeRepository {
+) : IRettighetstypeperiodeRepository {
 
     companion object : RepositoryFactory<IRettighetstypeperiodeRepository> {
-        override fun konstruer(connection: DBConnection): IRettighetstypeperiodeRepository {
-            return RettighetstypeperiodeRepository(connection)
-        }
+        override fun konstruer(connection: DBConnection): IRettighetstypeperiodeRepository =
+            RettighetstypeperiodeRepository(connection)
     }
 
-    override fun lagre(
-        behandlingReferanse: UUID,
-        rettighetstypePeriode: List<RettighetstypePeriode>
-    ) {
+    override fun lagre(behandlingReferanse: UUID, rettighetstypePeriode: List<RettighetstypePeriode>) {
         val oppdatertTid = LocalDateTime.now(clock)
         val deletePerioderSql = """
             DELETE FROM rettighetstypeperioder WHERE rettighetstype_id IN (
@@ -44,7 +39,7 @@ class RettighetstypeperiodeRepository(
             setParams {
                 setUUID(
                     1,
-                    behandlingReferanse
+                    behandlingReferanse,
                 )
             }
         }
@@ -75,7 +70,6 @@ VALUES ((SELECT b.id
                 setLocalDate(3, it.tilDato)
                 setString(4, it.rettighetstype.name)
             }
-
         }
     }
 
@@ -97,7 +91,7 @@ VALUES ((SELECT b.id
                 RettighetstypePeriode(
                     fraDato = it.getLocalDate("fra_dato"),
                     tilDato = it.getLocalDate("til_dato"),
-                    rettighetstype = it.getEnum("rettighetstype")
+                    rettighetstype = it.getEnum("rettighetstype"),
                 )
             }
         }
