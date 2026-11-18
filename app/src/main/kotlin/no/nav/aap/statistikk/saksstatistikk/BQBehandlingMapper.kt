@@ -5,6 +5,7 @@ import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.returnert
@@ -232,38 +233,11 @@ class BQBehandlingMapper(
             val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
             val resultat = behandling.resultat()
 
-            when (resultat) {
-                ResultatKode.INNVILGET -> if (rettighetstyper.isEmpty()) {
-                    // Hva med avslag?
-                    "AAP"
-                } else {
-                    if (rettighetstyper.size > 1) {
-                        log.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
-                    }
-                    // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
-                    val førsteRettighetstype =
-                        rettighetstyper.first().rettighetstype.name.uppercase()
-                    "AAP_$førsteRettighetstype"
-                }
-
-                ResultatKode.AVSLAG -> "AVSLAG"
-
-                ResultatKode.TRUKKET -> "TRUKKET"
-
-                ResultatKode.KLAGE_OPPRETTHOLDES -> "KLAGE_OPPRETTHOLDES"
-
-                ResultatKode.KLAGE_OMGJØRES -> "KLAGE_OMGJØRES"
-
-                ResultatKode.KLAGE_DELVIS_OMGJØRES -> "KLAGE_DELVIS_OMGJØRES"
-
-                ResultatKode.KLAGE_AVSLÅTT -> "KLAGE_AVSLÅTT"
-
-                ResultatKode.KLAGE_TRUKKET -> "KLAGE_TRUKKET"
-
-                ResultatKode.AVBRUTT -> "AVBRUTT"
-
-                null -> "UDEFINERT"
+            if (resultat == ResultatKode.INNVILGET && rettighetstyper.size > 1) {
+                log.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
             }
+
+            behandlingResultat(resultat, rettighetstyper)
         }
     }
 
@@ -341,6 +315,37 @@ class BQBehandlingMapper(
     }
 
     companion object {
+        internal fun behandlingResultat(
+            resultat: ResultatKode?,
+            rettighetstyper: List<RettighetstypePeriode>,
+        ): String = when (resultat) {
+            ResultatKode.INNVILGET -> if (rettighetstyper.isEmpty()) {
+                "AAP"
+            } else {
+                // TODO: her må vi sikkert heller klippe på dato. Denne vil jo vokse over tid?
+                val førsteRettighetstype = rettighetstyper.first().rettighetstype.name.uppercase()
+                "AAP_$førsteRettighetstype"
+            }
+
+            ResultatKode.AVSLAG -> "AVSLAG"
+
+            ResultatKode.TRUKKET -> "TRUKKET"
+
+            ResultatKode.KLAGE_OPPRETTHOLDES -> "KLAGE_OPPRETTHOLDES"
+
+            ResultatKode.KLAGE_OMGJØRES -> "KLAGE_OMGJØRES"
+
+            ResultatKode.KLAGE_DELVIS_OMGJØRES -> "KLAGE_DELVIS_OMGJØRES"
+
+            ResultatKode.KLAGE_AVSLÅTT -> "KLAGE_AVSLÅTT"
+
+            ResultatKode.KLAGE_TRUKKET -> "KLAGE_TRUKKET"
+
+            ResultatKode.AVBRUTT -> "AVBRUTT"
+
+            null -> "UDEFINERT"
+        }
+
         internal fun behandlingStatus(behandling: Behandling): String {
             val venteÅrsak =
                 behandling.venteÅrsak?.let { "_${ÅrsakTilSattPåVent.kortKodeFor(it).uppercase()}" }.orEmpty()

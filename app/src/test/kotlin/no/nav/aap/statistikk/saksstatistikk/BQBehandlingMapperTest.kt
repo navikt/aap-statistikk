@@ -1,6 +1,9 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.hendelser.BehandlingService
@@ -26,8 +29,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.Clock
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
@@ -120,6 +125,60 @@ class BQBehandlingMapperTest {
         vedtakstidspunkt = null,
         resultat = null,
     )
+
+    @Test
+    fun `innvilget resultat uten rettighetsperioder gir generell AAP-kode`() {
+        assertThat(BQBehandlingMapper.behandlingResultat(ResultatKode.INNVILGET, emptyList()))
+            .isEqualTo("AAP")
+    }
+
+    @Test
+    fun `innvilget resultat bruker første periode i innsendt rekkefølge`() {
+        val februar = RettighetstypePeriode(
+            LocalDate.of(2024, 2, 1),
+            LocalDate.of(2024, 2, 29),
+            RettighetsType.STUDENT,
+        )
+        val januar = RettighetstypePeriode(
+            LocalDate.of(2024, 1, 1),
+            LocalDate.of(2024, 1, 31),
+            RettighetsType.BISTANDSBEHOV,
+        )
+
+        assertThat(BQBehandlingMapper.behandlingResultat(ResultatKode.INNVILGET, listOf(februar, januar)))
+            .isEqualTo("AAP_STUDENT")
+        assertThat(BQBehandlingMapper.behandlingResultat(ResultatKode.INNVILGET, listOf(januar, februar)))
+            .isEqualTo("AAP_BISTANDSBEHOV")
+    }
+
+    @Test
+    fun `rettighetsperioder erstatter ikke manglende resultat`() {
+        val periode = RettighetstypePeriode(
+            LocalDate.of(2024, 1, 1),
+            LocalDate.of(2024, 1, 31),
+            RettighetsType.BISTANDSBEHOV,
+        )
+
+        assertThat(BQBehandlingMapper.behandlingResultat(null, listOf(periode)))
+            .isEqualTo("UDEFINERT")
+    }
+
+    @ParameterizedTest
+    @CsvSource("OPPRETTET,", "UTREDES,", "IVERKSETTES,AAP", "AVSLUTTET,AAP")
+    fun `behandlingsstatus avgjør om resultatet publiseres`(status: BehandlingStatus, forventetResultat: String?) {
+        val behandling = lagBehandling(
+            hendelser = listOf(lagBehandlingHendelse().copy(status = status, resultat = ResultatKode.INNVILGET)),
+        )
+        val mapper = BQBehandlingMapper(
+            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
+            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+            oppgaveRepository = FakeOppgaveRepository(),
+            clock = fixedClock,
+        )
+
+        assertThat(mapper.bqBehandlingForBehandling(behandling, erSkjermet = false).behandlingResultat)
+            .isEqualTo(forventetResultat)
+    }
 
     @Test
     fun `saksbehandler skal være null når oppgave ikke er reservert ennå`() {
