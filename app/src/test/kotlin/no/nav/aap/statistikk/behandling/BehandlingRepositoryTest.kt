@@ -17,6 +17,7 @@ import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.opprettTestPerson
 import no.nav.aap.statistikk.testutils.builders.opprettTestSak
+import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.*
@@ -387,7 +388,7 @@ class BehandlingRepositoryTest {
 
         val referanse = UUID.randomUUID()
 
-        val clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Oslo"))
+        val clock = Clock.fixed(Instant.parse("2026-11-18T10:00:00Z"), ZoneId.of("Europe/Oslo"))
 
         val behandlingId = dataSource.transaction {
             BehandlingRepository(it, clock).opprettBehandling(
@@ -396,8 +397,8 @@ class BehandlingRepositoryTest {
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
                     status = BehandlingStatus.OPPRETTET,
-                    opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                    opprettetTid = LocalDateTime.now(clock),
+                    mottattTid = LocalDateTime.now(clock).minusDays(1),
                     versjon = Versjon("xxx"),
                     søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
@@ -414,12 +415,28 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
-                    opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                    status = BehandlingStatus.AVSLUTTET,
+                    opprettetTid = LocalDateTime.now(clock),
+                    mottattTid = LocalDateTime.now(littSenereClock).minusHours(1),
                     versjon = Versjon("xxx2"),
                     søknadsformat = SøknadsFormat.DIGITAL,
-                    oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
+                    vedtakstidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(2),
+                    ansvarligBeslutter = "Z123456",
+                    sisteSaksbehandler = "Z654321",
+                    gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
+                    gjeldendeAvklaringsbehovStatus = Status.AVSLUTTET,
+                    gjeldendeStegGruppe = StegGruppe.BREV,
+                    venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
+                    returÅrsak = "MANGELFULL_BEGRUNNELSE",
+                    returÅrsakkoblinger = listOf(
+                        ReturÅrsakkobling(Definisjon.AVKLAR_SYKDOM, listOf("MANGELFULL_BEGRUNNELSE")),
+                    ),
+                    resultat = ResultatKode.INNVILGET,
+                    relatertBehandlingReferanse = "REFERANSE",
+                    sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
+                    sisteSaksbehandlerSomLøstebehov = "Z111111",
+                    sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(3),
+                    oppdatertTidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(1),
                 ),
             )
         }
@@ -427,8 +444,9 @@ class BehandlingRepositoryTest {
         val uthentet =
             dataSource.transaction { BehandlingRepository(it, littSenereClock).hent(behandlingId) }
 
+        val gjenoppbyggingsClock = Clock.offset(littSenereClock, Duration.ofDays(1))
         dataSource.transaction {
-            BehandlingRepository(it, littSenereClock).invaliderOgLagreNyHistorikk(uthentet)
+            BehandlingRepository(it, gjenoppbyggingsClock).invaliderOgLagreNyHistorikk(uthentet)
         }
 
         val uthentet2 =
@@ -438,5 +456,23 @@ class BehandlingRepositoryTest {
             .usingRecursiveComparison()
             .ignoringFields("hendelser.versjon", "snapShotId", "hendelser.tidspunkt")
             .isEqualTo(uthentet)
+        assertThat(uthentet2.hendelser.map { it.versjon }).containsExactly(Versjon("xxx2"), Versjon("xxx2"))
+        assertThat(uthentet2.hendelser.map { it.tidspunkt })
+            .containsOnly(LocalDateTime.now(gjenoppbyggingsClock))
+
+        val aktiveRader = dataSource.transaction {
+            it.queryList(
+                """
+                SELECT utbetaling_id, gjeldende
+                FROM behandling_historikk
+                WHERE behandling_id = ? AND slettet = FALSE
+                ORDER BY hendelsestidspunkt, oppdatert_tid, id
+                """.trimIndent(),
+            ) {
+                setParams { setLong(1, behandlingId.id) }
+                setRowMapper { row -> row.getStringOrNull("utbetaling_id") to row.getBoolean("gjeldende") }
+            }
+        }
+        assertThat(aktiveRader).containsExactly(null to false, referanse.toBase64() to true)
     }
 }
