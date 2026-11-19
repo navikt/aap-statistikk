@@ -181,6 +181,23 @@ class BQBehandlingMapperTest {
     }
 
     @Test
+    fun `teknisk tid bruker klokkens tidssone og beholder presisjon`() {
+        val behandling = lagBehandling(hendelser = listOf(lagBehandlingHendelse()))
+        val tekniskTid = LocalDateTime.of(2024, 1, 15, 12, 0, 0, 123456789)
+        val tidssone = ZoneId.of("America/New_York")
+        val mapper = BQBehandlingMapper(
+            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
+            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
+            oppgaveRepository = FakeOppgaveRepository(),
+            clock = Clock.fixed(tekniskTid.atZone(tidssone).toInstant(), tidssone),
+        )
+
+        val resultat = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+
+        assertThat(resultat.tekniskTid).isEqualTo(tekniskTid)
+    }
+
+    @Test
     fun `saksbehandler skal være null når oppgave ikke er reservert ennå`() {
         val behandlingRef = UUID.randomUUID()
         val hendelse = lagBehandlingHendelse(
