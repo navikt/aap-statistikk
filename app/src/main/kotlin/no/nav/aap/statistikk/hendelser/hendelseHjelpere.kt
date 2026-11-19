@@ -125,7 +125,7 @@ fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? = this.
     }
     .maxByOrNull { it.tidsstempel }?.endretAv
 
-private fun List<AvklaringsbehovHendelseDto>.gjeldendeBehov(): AvklaringsbehovHendelseDto? =
+internal fun List<AvklaringsbehovHendelseDto>.gjeldendeBehov(): AvklaringsbehovHendelseDto? =
     filter { it.status.erÅpent() }
         .filterNot { behov ->
             behov.endringer
