@@ -15,8 +15,8 @@ import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.bigquery.IBQYtelsesstatistikkRepository
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
-import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.RebyggBehandlingshistorikkJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
@@ -62,7 +62,7 @@ fun konstruerManuellMotor(
     jobbAppender: MotorJobbAppender,
     bqYtelseRepository: IBQYtelsesstatistikkRepository,
     resendSakstatistikkJobb: ResendSakstatistikkJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+    rebyggBehandlingshistorikkJobb: RebyggBehandlingshistorikkJobb,
     lagrePostmottakHendelseJobb: LagrePostmottakHendelseJobb,
     lagreSakinfoTilBigQueryJobb: LagreSakinfoTilBigQueryJobb,
 ): ManuellMotorImpl {
@@ -75,7 +75,7 @@ fun konstruerManuellMotor(
             lagreAvsluttetBehandlingTilBigQueryJobb,
             lagreOppgaveJobb,
             resendSakstatistikkJobb,
-            lagreAvklaringsbehovHendelseJobb,
+            rebyggBehandlingshistorikkJobb,
             lagrePostmottakHendelseJobb,
             LagreOppgaveHendelseJobb(),
             lagreSakinfoTilBigQueryJobb,

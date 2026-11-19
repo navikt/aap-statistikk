@@ -8,42 +8,42 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.ProvidersJobbSpesifikasjon
-import no.nav.aap.statistikk.hendelser.ResendHendelseService
+import no.nav.aap.statistikk.hendelser.RebyggBehandlingshistorikkService
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorHendelsePublisher
 import org.slf4j.LoggerFactory
 
-class LagreAvklaringsbehovHendelseJobb(private val jobbAppender: JobbAppender) : ProvidersJobbSpesifikasjon {
+class RebyggBehandlingshistorikkJobb(private val jobbAppender: JobbAppender) : ProvidersJobbSpesifikasjon {
 
     override fun konstruer(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): JobbUtfører {
         val hendelsePublisher = MotorHendelsePublisher.utenYtelseJobb(
             jobbAppender = jobbAppender,
             repositoryProvider = repositoryProvider,
         )
-        return LagreAvklaringsbehovHendelseJobbUtfører(
-            ResendHendelseService.konstruer(repositoryProvider, gatewayProvider, hendelsePublisher),
+        return RebyggBehandlingshistorikkJobbUtfører(
+            RebyggBehandlingshistorikkService.konstruer(repositoryProvider, gatewayProvider, hendelsePublisher),
         )
     }
 
     override val type = "statistikk.lagreAvklaringsbehovHendelseJobb"
-    override val navn = "LagreAvklaringsbehovHendelseJobb"
-    override val beskrivelse = "Jobb for å regenerere behandlinghistorikk fra behandlingsflyt."
+    override val navn = "RebyggBehandlingshistorikkJobb"
+    override val beskrivelse = "Bygger behandlingshistorikk på nytt fra opplysninger sendt av Behandlingsflyt."
 }
 
-private class LagreAvklaringsbehovHendelseJobbUtfører(private val resendHendelseService: ResendHendelseService) :
+private class RebyggBehandlingshistorikkJobbUtfører(private val historikkService: RebyggBehandlingshistorikkService) :
     JobbUtfører {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun utfør(input: JobbInput) {
         val dto = DefaultJsonMapper.fromJson<StoppetBehandling>(input.payload())
-        logger.info("StoppetBehandling mottatt Regenerer statistikk. Behandlingsreferanse: ${dto.behandlingReferanse}.")
+        logger.info("Bygger behandlingshistorikk for behandling ${dto.behandlingReferanse}.")
 
         if (!Miljø.erProd()) {
             val hendelseJSON = DefaultJsonMapper.toJson(dto)
-            logger.info("Regenerer statistikk for behandling ${dto.behandlingReferanse}. Hendelse: $hendelseJSON")
+            logger.info("Behandlingsreferanse: ${dto.behandlingReferanse}. Historikkgrunnlag: $hendelseJSON")
         }
-        resendHendelseService.prosesserNyHistorikkHendelse(dto)
-        logger.info("Ferdig å regenerere statistikk for behandling ${dto.behandlingReferanse}.")
+        historikkService.rebyggHistorikk(dto)
+        logger.info("Ferdig med å bygge behandlingshistorikk for behandling ${dto.behandlingReferanse}.")
     }
 }

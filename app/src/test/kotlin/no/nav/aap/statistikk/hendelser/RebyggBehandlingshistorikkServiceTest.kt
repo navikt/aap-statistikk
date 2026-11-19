@@ -29,7 +29,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class ResendHendelseServiceTest {
+class RebyggBehandlingshistorikkServiceTest {
     @Test
     fun `rekjøring erstatter feil historikk og gir samme aktive historikk ved gjentakelse`(
         @Postgres dataSource: DataSource,
@@ -90,13 +90,13 @@ class ResendHendelseServiceTest {
         fun spillAv() = dataSource.transaction { connection ->
             val repository = BehandlingRepository(connection)
             val pdl = FakePdlGateway()
-            ResendHendelseService(
+            RebyggBehandlingshistorikkService(
                 SakService(SakRepositoryImpl(connection)),
                 PersonService(PersonRepository(connection), pdl),
                 repository,
                 BehandlingService(repository, SkjermingService(pdl)),
                 publisher,
-            ).prosesserNyHistorikkHendelse(hendelse)
+            ).rebyggHistorikk(hendelse)
             repository.hent(behandlingId)
         }
 
@@ -110,14 +110,14 @@ class ResendHendelseServiceTest {
     }
 
     @Test
-    fun `beregn historikk, enkelt test`() {
+    fun `bygger historikk og bestiller resending av saksstatistikk`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
         val behandlingRepository = FakeBehandlingRepository()
         val sakRepository = FakeSakRepository()
 
         val hendelsePublisher = FakeHendelsePublisher()
-        val hendelsesService = ResendHendelseService(
+        val historikkService = RebyggBehandlingshistorikkService(
             SakService(sakRepository),
             PersonService(FakePersonRepository(), FakePdlGateway()),
             behandlingRepository,
@@ -125,7 +125,7 @@ class ResendHendelseServiceTest {
             hendelsePublisher,
         )
 
-        hendelsesService.prosesserNyHistorikkHendelse(hendelse)
+        historikkService.rebyggHistorikk(hendelse)
 
         val behandling = behandlingRepository.hent(hendelse.behandlingReferanse)!!
 

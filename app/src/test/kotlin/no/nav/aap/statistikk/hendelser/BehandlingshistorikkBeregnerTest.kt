@@ -7,7 +7,9 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilRetur
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
 import no.nav.aap.statistikk.behandling.SøknadsFormat
@@ -16,16 +18,112 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.builders.opprettTestStoppetBehandling
 import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDateTime
 import java.util.*
 
-class ReberegnHistorikkTest {
+class BehandlingshistorikkBeregnerTest {
     private val start = LocalDateTime.of(2026, 11, 19, 10, 0)
+
+    @ParameterizedTest
+    @CsvSource("8, 9, 8, 8", ", 9, 9, 9", ", , 0, ")
+    fun `avslutning uten behov beholder egne tidsfallbacks`(
+        vedtakMinutter: Long?,
+        endringMinutter: Long?,
+        forventetHendelseMinutter: Long,
+        forventetVedtakMinutter: Long?,
+    ) {
+        val dto = hendelseMedReturOgVent().copy(
+            avklaringsbehov = emptyList(),
+            behandlingStatus = no.nav.aap.behandlingsflyt.kontrakt.behandling.Status.AVSLUTTET,
+            avsluttetBehandling = avsluttetBehandlingDTO().copy(
+                vedtakstidspunkt = vedtakMinutter?.let(start::plusMinutes),
+            ),
+            tidspunktSisteEndring = endringMinutter?.let(start::plusMinutes),
+        )
+        val behandling = utgangspunkt(dto).copy(vedtakstidspunkt = start.minusDays(1))
+
+        val historikk = BehandlingshistorikkBeregner().beregn(dto, behandling).hendelser
+
+        assertThat(historikk).hasSize(2)
+        assertThat(historikk.first().hendelsesTidspunkt).isEqualTo(start)
+        assertThat(historikk.first().vedtakstidspunkt).isNull()
+        val avslutning = historikk.last()
+        assertThat(avslutning.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(avslutning.tidspunkt).isEqualTo(endringMinutter?.let(start::plusMinutes))
+        assertThat(avslutning.hendelsesTidspunkt).isEqualTo(start.plusMinutes(forventetHendelseMinutter))
+        assertThat(avslutning.vedtakstidspunkt).isEqualTo(forventetVedtakMinutter?.let(start::plusMinutes))
+        assertThat(avslutning.ansvarligBeslutter).isNull()
+    }
+
+    @Test
+    fun `avslutning etter behovshistorikk bruker vedtak og beslutter fra utgangspunktet`() {
+        val dto = hendelseMedReturOgVent().copy(
+            behandlingStatus = no.nav.aap.behandlingsflyt.kontrakt.behandling.Status.AVSLUTTET,
+            avsluttetBehandling = avsluttetBehandlingDTO().copy(vedtakstidspunkt = start.plusMinutes(8)),
+            tidspunktSisteEndring = start.plusMinutes(9),
+        )
+        val inngang = BehandlingHendelse(
+            tidspunkt = start.minusMinutes(2),
+            hendelsesTidspunkt = start.minusMinutes(2),
+            avklaringsbehovStatus = null,
+            versjon = Versjon(dto.versjon),
+            status = BehandlingStatus.OPPRETTET,
+            mottattTid = start,
+            søknadsformat = SøknadsFormat.DIGITAL,
+            relatertBehandlingReferanse = null,
+        )
+        val behandling = utgangspunkt(dto)
+            .leggTilHendelse(inngang)
+            .leggTilHendelse(
+                inngang.copy(
+                    hendelsesTidspunkt = start.minusMinutes(1),
+                    status = BehandlingStatus.AVSLUTTET,
+                    vedtakstidspunkt = start.plusMinutes(7),
+                    ansvarligBeslutter = "Lagret beslutter",
+                ),
+            )
+
+        val historikk = BehandlingshistorikkBeregner().beregn(dto, behandling).hendelser
+
+        assertThat(historikk).hasSize(8)
+        assertThat(historikk.take(2)).isEqualTo(behandling.hendelser)
+        val vedtak = historikk.single { it.hendelsesTidspunkt == start.plusMinutes(3) }
+        assertThat(vedtak.vedtakstidspunkt).isEqualTo(start.plusMinutes(7))
+        assertThat(vedtak.ansvarligBeslutter).isEqualTo("Beslutter")
+        val avslutning = historikk.last()
+        assertThat(avslutning.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(avslutning.tidspunkt).isNull()
+        assertThat(avslutning.hendelsesTidspunkt).isEqualTo(start.plusMinutes(8))
+        assertThat(avslutning.vedtakstidspunkt).isEqualTo(start.plusMinutes(7))
+        assertThat(avslutning.ansvarligBeslutter).isEqualTo("Lagret beslutter")
+        assertThat(avslutning.sisteLøsteAvklaringsbehov).isEqualTo(Definisjon.FATTE_VEDTAK)
+        assertThat(avslutning.sisteSaksbehandlerSomLøstebehov).isEqualTo("Beslutter")
+        assertThat(avslutning.sistLøsteAvklaringsbehovTidspunkt).isNull()
+    }
+
+    private fun utgangspunkt(dto: StoppetBehandling) = Behandling(
+        referanse = dto.behandlingReferanse,
+        sak = Sak(
+            saksnummer = Saksnummer(dto.saksnummer),
+            person = Person(ident = no.nav.aap.statistikk.person.Ident(dto.ident)),
+            sakStatus = dto.sakStatus.tilDomene(),
+            sistOppdatert = start,
+        ),
+        typeBehandling = dto.behandlingType.tilDomene(),
+        status = dto.behandlingStatus.tilDomene(),
+        opprettetTid = dto.behandlingOpprettetTidspunkt,
+        mottattTid = dto.mottattTid,
+        versjon = Versjon(dto.versjon),
+        søknadsformat = SøknadsFormat.DIGITAL,
+    )
 
     @Test
     fun `historikken bruker behovstilstanden på hvert tidspunkt`() {
@@ -39,7 +137,7 @@ class ReberegnHistorikkTest {
         val behandling = BehandlingService(FakeBehandlingRepository(), SkjermingService(FakePdlGateway()))
             .konstruerBehandling(dto, sak, eksisterendeBehandlingKanskje = null)
 
-        val historikk = ReberegnHistorikk().avklaringsbehovTilHistorikk(dto, behandling).hendelser
+        val historikk = BehandlingshistorikkBeregner().beregn(dto, behandling).hendelser
 
         assertThat(historikk.map { it.hendelsesTidspunkt })
             .containsExactlyElementsOf(listOf(0L, 1L, 3L, 4L, 5L, 6L).map { start.plusMinutes(it) })
@@ -125,7 +223,7 @@ class ReberegnHistorikkTest {
     )
 
     @Test
-    fun `begynne på test på reberegne historikk`() {
+    fun `beregner historikk for fullført førstegangsbehandling`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
 
@@ -159,14 +257,14 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.gjeldendeAvklaringsBehov).isNull()
     }
 
     @Test
-    fun `reberegne historikk for tom behandling`() {
+    fun `beregner historikk for behandling uten avklaringsbehov`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/resendt_revurdering_automatisk.json")
 
@@ -200,7 +298,7 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
@@ -210,7 +308,7 @@ class ReberegnHistorikkTest {
     }
 
     @Test
-    fun `reberegn historikk for avbrutt revurdering`() {
+    fun `beregner historikk for avbrutt revurdering`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/avbrutt_revurdering.json")
         val behandling = Behandling(
@@ -243,7 +341,7 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.hendelser).hasSize(7)
@@ -257,7 +355,7 @@ class ReberegnHistorikkTest {
     }
 
     @Test
-    fun `meldekort-behandling`() {
+    fun `beregner historikk for meldekortbehandling`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/meldekort_behandling.json")
         val behandling = Behandling(
@@ -290,7 +388,7 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.hendelser).hasSize(2)

@@ -44,7 +44,7 @@ fun main() {
             jobbAppender = MockJobbAppender(),
             motorApiCallback = { },
             lagreStoppetHendelseJobb = mockk(),
-            lagreAvklaringsbehovHendelseJobb = mockk(),
+            rebyggBehandlingshistorikkJobb = mockk(),
         )
     }.start()
 
