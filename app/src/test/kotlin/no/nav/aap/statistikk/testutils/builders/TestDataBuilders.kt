@@ -27,7 +27,6 @@ import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
-import no.nav.aap.statistikk.saksstatistikk.BQBehandlingMapper
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
 import no.nav.aap.statistikk.saksstatistikk.SakstatistikkRepositoryImpl
 import no.nav.aap.statistikk.skjerming.SkjermingService
@@ -187,11 +186,8 @@ fun konstruerSakstatistikkService(
     return SaksStatistikkService(
         behandlingService = behandlingService,
         sakstatistikkRepository = SakstatistikkRepositoryImpl(connection),
-        bqBehandlingMapper = BQBehandlingMapper(
-            behandlingService,
-            RettighetstypeperiodeRepository(connection),
-            OppgaveRepositoryImpl(connection),
-            clock = clock,
-        ),
+        oppgaveRepository = OppgaveRepositoryImpl(connection),
+        rettighetstypeperiodeRepository = RettighetstypeperiodeRepository(connection),
+        clock = clock,
     )
 }

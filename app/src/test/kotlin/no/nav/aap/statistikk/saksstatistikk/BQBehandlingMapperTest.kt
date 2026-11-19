@@ -6,13 +6,10 @@ import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.behandling.*
 import no.nav.aap.statistikk.enhet.Enhet
-import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.oppgave.BehandlingReferanse
-import no.nav.aap.statistikk.oppgave.EnhetReservasjonOgTidspunkt
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
-import no.nav.aap.statistikk.oppgave.OppgaveRepository
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.oppgave.tilOppgave
@@ -20,48 +17,30 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
-import no.nav.aap.statistikk.skjerming.SkjermingService
-import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
-import no.nav.aap.statistikk.testutils.fakes.FakeOppgaveHendelseRepository
-import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
-import no.nav.aap.statistikk.testutils.fakes.FakeRettighetsTypeRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
-import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 
 class BQBehandlingMapperTest {
 
-    private val fixedClock = Clock.fixed(
-        LocalDateTime.of(2024, 1, 15, 12, 0).atZone(ZoneId.systemDefault()).toInstant(),
-        ZoneId.systemDefault(),
-    )
+    private val mapper = BQBehandlingMapper
 
-    private val skjermingService = SkjermingService(FakePdlGateway())
-
-    private class FakeOppgaveRepository : OppgaveRepository {
-        private val oppgaver =
-            mutableMapOf<BehandlingId, MutableList<Oppgave>>()
-
-        fun addOppgave(behandlingId: BehandlingId, oppgave: Oppgave) {
-            oppgaver.getOrPut(behandlingId) { mutableListOf() }.add(oppgave)
-        }
-
-        override fun lagreOppgave(oppgave: Oppgave) = 0L
-        override fun oppdaterOppgave(oppgave: Oppgave) = Unit
-        override fun hentOppgaverForEnhet(enhet: Enhet) = emptyList<Oppgave>()
-
-        override fun hentOppgave(identifikator: Long) = null
-        override fun hentOppgaverForBehandling(behandlingId: BehandlingId) = oppgaver[behandlingId] ?: emptyList()
-    }
+    private fun grunnlag(behandling: Behandling, oppgaver: List<Oppgave> = emptyList(), erSkjermet: Boolean = false) =
+        SaksstatistikkGrunnlag(
+            behandling = behandling,
+            erSkjermet = erSkjermet,
+            relatertBehandlingUUID = null,
+            oppgaver = oppgaver,
+            rettighetstyper = emptyList(),
+            tekniskTid = LocalDateTime.of(2024, 1, 15, 12, 0),
+        )
 
     private fun lagBehandling(
         referanse: UUID = UUID.randomUUID(),
@@ -169,32 +148,24 @@ class BQBehandlingMapperTest {
         val behandling = lagBehandling(
             hendelser = listOf(lagBehandlingHendelse().copy(status = status, resultat = ResultatKode.INNVILGET)),
         )
-        val mapper = BQBehandlingMapper(
-            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = FakeOppgaveRepository(),
-            clock = fixedClock,
-        )
-
-        assertThat(mapper.bqBehandlingForBehandling(behandling, erSkjermet = false).behandlingResultat)
+        assertThat(mapper.bqBehandlingForBehandling(grunnlag(behandling)).behandlingResultat)
             .isEqualTo(forventetResultat)
     }
 
     @Test
-    fun `teknisk tid bruker klokkens tidssone og beholder presisjon`() {
-        val behandling = lagBehandling(hendelser = listOf(lagBehandlingHendelse()))
-        val tekniskTid = LocalDateTime.of(2024, 1, 15, 12, 0, 0, 123456789)
-        val tidssone = ZoneId.of("America/New_York")
-        val mapper = BQBehandlingMapper(
-            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = FakeOppgaveRepository(),
-            clock = Clock.fixed(tekniskTid.atZone(tidssone).toInstant(), tidssone),
+    fun `skjermet behandling skjuler enhet saksbehandler og beslutter`() {
+        val behandling = lagBehandling(
+            hendelser = listOf(
+                lagBehandlingHendelse(avklaringsBehov = Definisjon.FATTE_VEDTAK)
+                    .copy(ansvarligBeslutter = "Beslutter"),
+            ),
         )
 
-        val resultat = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+        val resultat = mapper.bqBehandlingForBehandling(grunnlag(behandling, erSkjermet = true))
 
-        assertThat(resultat.tekniskTid).isEqualTo(tekniskTid)
+        assertThat(resultat.ansvarligEnhetKode).isEqualTo("-5")
+        assertThat(resultat.saksbehandler).isEqualTo("-5")
+        assertThat(resultat.ansvarligBeslutter).isEqualTo("-5")
     }
 
     @Test
@@ -214,20 +185,8 @@ class BQBehandlingMapperTest {
             hendelser = listOf(hendelse),
         )
 
-        val behandlingService = BehandlingService(
-            behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService,
-        )
-
-        val mapper = BQBehandlingMapper(
-            behandlingService = behandlingService,
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = FakeOppgaveRepository(),
-            clock = fixedClock,
-        )
-
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+            mapper.bqBehandlingForBehandling(grunnlag(behandling))
 
         assertThat(result.saksbehandler)
             .describedAs("Saksbehandler should be null when no oppgave is reserved yet")
@@ -256,22 +215,7 @@ class BQBehandlingMapperTest {
             hendelser = listOf(hendelse),
         )
 
-        val oppgaveRepo = FakeOppgaveHendelseRepository()
-        oppgaveRepo.addEnhetReservasjon(
-            behandlingRef,
-            Definisjon.KVALITETSSIKRING.kode.name,
-            listOf(
-                EnhetReservasjonOgTidspunkt(
-                    enhet = "0400",
-                    reservertAv = "Kvaliguy",
-                    tidspunkt = tidspunkt,
-                ),
-            ),
-        )
-
-        val oppgaveRepository = FakeOppgaveRepository()
-        oppgaveRepository.addOppgave(
-            behandling.id(),
+        val oppgaver = listOf(
             Oppgave(
                 identifikator = 123L,
                 avklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
@@ -303,20 +247,8 @@ class BQBehandlingMapperTest {
             ),
         )
 
-        val behandlingService = BehandlingService(
-            behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService,
-        )
-
-        val mapper = BQBehandlingMapper(
-            behandlingService = behandlingService,
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = oppgaveRepository,
-            clock = fixedClock,
-        )
-
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+            mapper.bqBehandlingForBehandling(grunnlag(behandling, oppgaver))
 
         assertThat(result.saksbehandler).isEqualTo("Kvaliguy")
         assertThat(result.ansvarligEnhetKode).isEqualTo("0400")
@@ -349,33 +281,8 @@ class BQBehandlingMapperTest {
             hendelser = listOf(hendelse1, hendelse2),
         )
 
-        val oppgaveRepo = FakeOppgaveHendelseRepository()
-        oppgaveRepo.addEnhetReservasjon(
-            behandlingRef,
-            Definisjon.AVKLAR_SYKDOM.kode.name,
-            listOf(
-                EnhetReservasjonOgTidspunkt(
-                    enhet = "0401",
-                    reservertAv = "Kompanjong Korrodheid",
-                    tidspunkt = tidspunkt.minusHours(2),
-                ),
-            ),
-        )
-
-        val behandlingService = BehandlingService(
-            behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService,
-        )
-
-        val mapper = BQBehandlingMapper(
-            behandlingService = behandlingService,
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = FakeOppgaveRepository(),
-            clock = fixedClock,
-        )
-
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+            mapper.bqBehandlingForBehandling(grunnlag(behandling))
 
         assertThat(result.saksbehandler)
             .describedAs("Should not use saksbehandler from previous avklaringsbehov")
@@ -469,24 +376,14 @@ class BQBehandlingMapperTest {
             reservertAv = "Ny beslutter",
             reservertTidspunkt = tidspunkt.plusMinutes(2),
         )
-        val oppgaveRepository = FakeOppgaveRepository()
-        oppgaveRepository.addOppgave(
-            behandling.id(),
+        val oppgaver = listOf(
             listOf(opprettet, reservert).tilOppgave().copy(
                 behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse),
             ),
         )
-        val mapper = BQBehandlingMapper(
-            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = oppgaveRepository,
-            clock = fixedClock,
-        )
-
-        val resultat = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+        val resultat = mapper.bqBehandlingForBehandling(grunnlag(behandling, oppgaver))
         val historisk = mapper.bqBehandlingForBehandling(
-            behandling,
-            erSkjermet = false,
+            grunnlag = grunnlag(behandling, oppgaver),
             cutoffTidspunkt = tidspunkt,
         )
 
@@ -532,21 +429,19 @@ class BQBehandlingMapperTest {
                     sisteSaksbehandlerSomLøstebehov = "Beslutter",
                 ),
             )
-        val oppgaveRepository = FakeOppgaveRepository()
-        if (oppgavehendelser.isNotEmpty()) {
-            oppgaveRepository.addOppgave(
-                behandling.id(),
+        val oppgaver = if (oppgavehendelser.isNotEmpty()) {
+            listOf(
                 oppgavehendelser.tilOppgave().copy(
                     behandlingReferanse = BehandlingReferanse(referanse = behandling.referanse),
                 ),
             )
+        } else {
+            emptyList()
         }
-        return BQBehandlingMapper(
-            behandlingService = BehandlingService(FakeBehandlingRepository(), skjermingService),
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = oppgaveRepository,
-            clock = fixedClock,
-        ).bqBehandlingForBehandling(behandling, erSkjermet = false, cutoffTidspunkt = cutoffTidspunkt)
+        return mapper.bqBehandlingForBehandling(
+            grunnlag = grunnlag(behandling, oppgaver),
+            cutoffTidspunkt = cutoffTidspunkt,
+        )
     }
 
     @Test
@@ -570,9 +465,7 @@ class BQBehandlingMapperTest {
             hendelser = listOf(hendelse),
         )
 
-        val oppgaveRepository = FakeOppgaveRepository()
-        oppgaveRepository.addOppgave(
-            behandling.id(),
+        val oppgaver = listOf(
             Oppgave(
                 identifikator = 1L,
                 avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
@@ -613,17 +506,7 @@ class BQBehandlingMapperTest {
             ),
         )
 
-        val mapper = BQBehandlingMapper(
-            behandlingService = BehandlingService(
-                behandlingRepository = FakeBehandlingRepository(),
-                skjermingService = skjermingService,
-            ),
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = oppgaveRepository,
-            clock = fixedClock,
-        )
-
-        val result = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+        val result = mapper.bqBehandlingForBehandling(grunnlag(behandling, oppgaver))
 
         assertThat(result.ansvarligEnhetKode)
             .describedAs("Enhet skal ikke være null selv om oppgaven ble lukket etter cutoff-tidspunktet")
@@ -668,9 +551,7 @@ class BQBehandlingMapperTest {
             hendelser = listOf(hendelse1, hendelse2),
         )
 
-        val oppgaveRepository = FakeOppgaveRepository()
-        oppgaveRepository.addOppgave(
-            behandling.id(),
+        val oppgaver = listOf(
             Oppgave(
                 identifikator = 999L,
                 avklaringsbehov = Definisjon.KVALITETSSIKRING.kode.name,
@@ -702,19 +583,7 @@ class BQBehandlingMapperTest {
             ),
         )
 
-        val behandlingService = BehandlingService(
-            behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService,
-        )
-
-        val mapper = BQBehandlingMapper(
-            behandlingService = behandlingService,
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = oppgaveRepository,
-            clock = fixedClock,
-        )
-
-        val result = mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+        val result = mapper.bqBehandlingForBehandling(grunnlag(behandling, oppgaver))
 
         // Dette er selve "bugen": saksbehandler gjenbrukes fra forrige behandlingmetode
         // fordi Oppgave-systemet (kortvarig) selv-reserverte den nye KS-oppgaven til samme person.
@@ -749,21 +618,9 @@ class BQBehandlingMapperTest {
             hendelser = listOf(hendelse),
         )
 
-        val behandlingService = BehandlingService(
-            behandlingRepository = FakeBehandlingRepository(),
-            skjermingService = skjermingService,
-        )
-
-        val mapper = BQBehandlingMapper(
-            behandlingService = behandlingService,
-            rettighetstypeperiodeRepository = FakeRettighetsTypeRepository(),
-            oppgaveRepository = FakeOppgaveRepository(),
-            clock = fixedClock,
-        )
-
         // Execute
         val result =
-            mapper.bqBehandlingForBehandling(behandling, erSkjermet = false)
+            mapper.bqBehandlingForBehandling(grunnlag(behandling))
 
         // Assert: Saksbehandler skal være null når det ikke finnes oppgave-data
         assertThat(result.saksbehandler)

@@ -3,18 +3,13 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
-import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.hendelser.BehandlingService
 import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.oppgave.Oppgave
-import no.nav.aap.statistikk.oppgave.OppgaveRepository
 import no.nav.aap.statistikk.årsakTilOpprettelseIkkeSatt
 import org.slf4j.LoggerFactory
-import java.time.Clock
-import java.time.Clock.systemDefaultZone
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -26,25 +21,28 @@ private const val AUTOMATISK_ENHET = "KELVIN_AUTOMATISK"
 // (behandling_status, behandling_type, behandling_resultat, behandlingmetode, behandling_aarsak).
 private const val MAKS_LENGDE_KODEVERKSFELT = 100
 
-class BQBehandlingMapper(
-    private val behandlingService: BehandlingService,
-    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
-    private val oppgaveRepository: OppgaveRepository,
-    private val clock: Clock = systemDefaultZone(),
-) {
+data class SaksstatistikkGrunnlag(
+    val behandling: Behandling,
+    val erSkjermet: Boolean,
+    val relatertBehandlingUUID: String?,
+    val oppgaver: List<Oppgave>,
+    val rettighetstyper: List<RettighetstypePeriode>,
+    val tekniskTid: LocalDateTime,
+)
+
+object BQBehandlingMapper {
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun bqBehandlingForBehandling(
-        behandling: Behandling,
-        erSkjermet: Boolean,
+        grunnlag: SaksstatistikkGrunnlag,
         cutoffTidspunkt: LocalDateTime? = null,
     ): BQBehandling {
+        val behandling = grunnlag.behandling
+        val erSkjermet = grunnlag.erSkjermet
         val sak = behandling.sak
-        val relatertBehandlingUUID =
-            behandlingService.hentRelatertBehandlingUUID(behandling)
         val behandlingReferanse = behandling.referanse
 
-        val oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id())
+        val oppgaver = grunnlag.oppgaver
         val snapshots = SakstatistikkEventSourcing.byggSakstatistikkHendelser(behandling, oppgaver)
             .filter { cutoffTidspunkt == null || it.tidspunkt <= cutoffTidspunkt }
 
@@ -116,15 +114,15 @@ class BQBehandlingMapper(
 
         val bqBehandling = byggBQBehandling(
             behandling = behandling,
-            relatertBehandlingUUID = relatertBehandlingUUID,
+            relatertBehandlingUUID = grunnlag.relatertBehandlingUUID,
             erSkjermet = erSkjermet,
             ansvarligEnhet = ansvarligEnhet,
             saksbehandler = saksbehandler,
             endretTid = snapshots.last().tidspunkt,
             behandlingStatus = behandlingStatus(behandling),
             behandlingMetode = behandlingMetode,
-            behandlingResultat = regnUtBehandlingResultat(behandling),
-            tekniskTid = LocalDateTime.now(clock),
+            behandlingResultat = regnUtBehandlingResultat(behandling, grunnlag.rettighetstyper),
+            tekniskTid = grunnlag.tekniskTid,
         )
 
         if (behandlingMetode == BehandlingMetode.AUTOMATISK) {
@@ -226,7 +224,10 @@ class BQBehandlingMapper(
     /**
      * For en avsluttet behandling, tolkes dette som rettighetstype.
      */
-    private fun regnUtBehandlingResultat(behandling: Behandling): String? = when (behandling.behandlingStatus()) {
+    private fun regnUtBehandlingResultat(
+        behandling: Behandling,
+        rettighetstyper: List<RettighetstypePeriode>,
+    ): String? = when (behandling.behandlingStatus()) {
         BehandlingStatus.OPPRETTET,
         BehandlingStatus.UTREDES,
         -> null
@@ -235,7 +236,6 @@ class BQBehandlingMapper(
         BehandlingStatus.AVSLUTTET,
         -> {
             val behandlingReferanse = behandling.referanse
-            val rettighetstyper = rettighetstypeperiodeRepository.hent(behandlingReferanse)
             val resultat = behandling.resultat()
 
             if (resultat == ResultatKode.INNVILGET && rettighetstyper.size > 1) {
@@ -319,11 +319,8 @@ class BQBehandlingMapper(
             ?.enhet
     }
 
-    companion object {
-        internal fun behandlingResultat(
-            resultat: ResultatKode?,
-            rettighetstyper: List<RettighetstypePeriode>,
-        ): String = when (resultat) {
+    internal fun behandlingResultat(resultat: ResultatKode?, rettighetstyper: List<RettighetstypePeriode>): String =
+        when (resultat) {
             ResultatKode.INNVILGET -> if (rettighetstyper.isEmpty()) {
                 "AAP"
             } else {
@@ -351,29 +348,28 @@ class BQBehandlingMapper(
             null -> "UDEFINERT"
         }
 
-        internal fun behandlingStatus(behandling: Behandling): String {
-            val venteÅrsak =
-                behandling.venteÅrsak?.let { "_${ÅrsakTilSattPåVent.kortKodeFor(it).uppercase()}" }.orEmpty()
-            val returStatus = behandling.gjeldendeAvklaringsbehovStatus
-                ?.takeIf { it.returnert() }
-                ?.let { "_${it.name.uppercase()}" }.orEmpty()
+    internal fun behandlingStatus(behandling: Behandling): String {
+        val venteÅrsak =
+            behandling.venteÅrsak?.let { "_${ÅrsakTilSattPåVent.kortKodeFor(it).uppercase()}" }.orEmpty()
+        val returStatus = behandling.gjeldendeAvklaringsbehovStatus
+            ?.takeIf { it.returnert() }
+            ?.let { "_${it.name.uppercase()}" }.orEmpty()
 
-            val behandlingStatus = behandling.behandlingStatus()
-            return when (behandlingStatus) {
-                BehandlingStatus.OPPRETTET -> "OPPRETTET"
+        val behandlingStatus = behandling.behandlingStatus()
+        return when (behandlingStatus) {
+            BehandlingStatus.OPPRETTET -> "OPPRETTET"
 
-                BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
+            BehandlingStatus.UTREDES -> "UNDER_BEHANDLING$venteÅrsak$returStatus"
 
-                BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
+            BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
 
-                BehandlingStatus.AVSLUTTET -> {
-                    if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()
-                            ?.sendesTilKA() == true
-                    ) {
-                        "OVERSENDT_KA"
-                    } else {
-                        "AVSLUTTET"
-                    }
+            BehandlingStatus.AVSLUTTET -> {
+                if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()
+                        ?.sendesTilKA() == true
+                ) {
+                    "OVERSENDT_KA"
+                } else {
+                    "AVSLUTTET"
                 }
             }
         }
