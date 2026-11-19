@@ -84,3 +84,64 @@ internal fun StegGruppe.tilDomene(): Behandlingssteggruppe = when (this) {
 
 internal fun ReturÅrsakkobling.tilTilstand(): ReturÅrsakTilstand =
     ReturÅrsakTilstand(avklaringsbehov.tilAvklaringsbehovKode(), returÅrsaker)
+
+// Fjernes sammen med de kontraktavhengige feltene når leserne er migrert.
+internal fun AvklaringsbehovKode.tilDefinisjon(): Definisjon = Definisjon.forKode(verdi)
+
+internal fun ReturÅrsakTilstand.tilReturÅrsakkobling(): ReturÅrsakkobling =
+    ReturÅrsakkobling(avklaringsbehov.tilDefinisjon(), returÅrsaker)
+
+internal fun AvklaringsbehovStatus.tilKontrakt(): Status = when (this) {
+    AvklaringsbehovStatus.OPPRETTET -> Status.OPPRETTET
+    AvklaringsbehovStatus.AVSLUTTET -> Status.AVSLUTTET
+    AvklaringsbehovStatus.TOTRINNS_VURDERT -> Status.TOTRINNS_VURDERT
+    AvklaringsbehovStatus.SENDT_TILBAKE_FRA_BESLUTTER -> Status.SENDT_TILBAKE_FRA_BESLUTTER
+    AvklaringsbehovStatus.KVALITETSSIKRET -> Status.KVALITETSSIKRET
+    AvklaringsbehovStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER -> Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER
+    AvklaringsbehovStatus.AVBRUTT -> Status.AVBRUTT
+}
+
+@Suppress("CyclomaticComplexMethod")
+internal fun Behandlingssteggruppe.tilKontrakt(): StegGruppe = when (this) {
+    Behandlingssteggruppe.START_BEHANDLING -> StegGruppe.START_BEHANDLING
+    Behandlingssteggruppe.MIGRERING -> StegGruppe.MIGRERING
+    Behandlingssteggruppe.KRAV -> StegGruppe.KRAV
+    Behandlingssteggruppe.SEND_FORVALTNINGSMELDING -> StegGruppe.SEND_FORVALTNINGSMELDING
+    Behandlingssteggruppe.RETTIGHETSPERIODE -> StegGruppe.RETTIGHETSPERIODE
+    Behandlingssteggruppe.SØKNAD -> StegGruppe.SØKNAD
+    Behandlingssteggruppe.AVBRYT_REVURDERING -> StegGruppe.AVBRYT_REVURDERING
+    Behandlingssteggruppe.ALDER -> StegGruppe.ALDER
+    Behandlingssteggruppe.LOVVALG -> StegGruppe.LOVVALG
+    Behandlingssteggruppe.MEDLEMSKAP -> StegGruppe.MEDLEMSKAP
+    Behandlingssteggruppe.OPPHOLDSKRAV -> StegGruppe.OPPHOLDSKRAV
+    Behandlingssteggruppe.BARNETILLEGG -> StegGruppe.BARNETILLEGG
+    Behandlingssteggruppe.SYKDOM -> StegGruppe.SYKDOM
+    Behandlingssteggruppe.GRUNNLAG -> StegGruppe.GRUNNLAG
+    Behandlingssteggruppe.ET_ANNET_STED -> StegGruppe.ET_ANNET_STED
+    Behandlingssteggruppe.SAMORDNING -> StegGruppe.SAMORDNING
+    Behandlingssteggruppe.VEDTAKSLENGDE -> StegGruppe.VEDTAKSLENGDE
+    Behandlingssteggruppe.UNDERVEIS -> StegGruppe.UNDERVEIS
+    Behandlingssteggruppe.TILKJENT_YTELSE -> StegGruppe.TILKJENT_YTELSE
+    Behandlingssteggruppe.SIMULERING -> StegGruppe.SIMULERING
+    Behandlingssteggruppe.VEDTAK -> StegGruppe.VEDTAK
+    Behandlingssteggruppe.FATTE_VEDTAK -> StegGruppe.FATTE_VEDTAK
+    Behandlingssteggruppe.KVALITETSSIKRING -> StegGruppe.KVALITETSSIKRING
+    Behandlingssteggruppe.IVERKSETT_VEDTAK -> StegGruppe.IVERKSETT_VEDTAK
+    Behandlingssteggruppe.BREV -> StegGruppe.BREV
+    Behandlingssteggruppe.AVSLAG_11_27 -> StegGruppe.AVSLAG_11_27
+    Behandlingssteggruppe.UDEFINERT -> StegGruppe.UDEFINERT
+    Behandlingssteggruppe.FORMKRAV -> StegGruppe.FORMKRAV
+    Behandlingssteggruppe.KLAGEBEHANDLING_KONTOR -> StegGruppe.KLAGEBEHANDLING_KONTOR
+    Behandlingssteggruppe.KLAGEBEHANDLING_NAY -> StegGruppe.KLAGEBEHANDLING_NAY
+    Behandlingssteggruppe.OMGJØRING -> StegGruppe.OMGJØRING
+    Behandlingssteggruppe.TREKK_KLAGE -> StegGruppe.TREKK_KLAGE
+    Behandlingssteggruppe.OPPRETTHOLDELSE -> StegGruppe.OPPRETTHOLDELSE
+    Behandlingssteggruppe.SVAR_FRA_ANDREINSTANS -> StegGruppe.SVAR_FRA_ANDREINSTANS
+    Behandlingssteggruppe.IVERKSETT_KONSEKVENS -> StegGruppe.IVERKSETT_KONSEKVENS
+    Behandlingssteggruppe.START_OPPFØLGINGSBEHANDLING -> StegGruppe.START_OPPFØLGINGSBEHANDLING
+    Behandlingssteggruppe.AVKLAR_OPPPFØLGING -> StegGruppe.AVKLAR_OPPPFØLGING
+    Behandlingssteggruppe.AKTIVITETSPLIKT_11_7 -> StegGruppe.AKTIVITETSPLIKT_11_7
+    Behandlingssteggruppe.AKTIVITETSPLIKT_11_9 -> StegGruppe.AKTIVITETSPLIKT_11_9
+    Behandlingssteggruppe.AVBRYT_AKTIVITETSPLIKTBEHANDLING -> StegGruppe.AVBRYT_AKTIVITETSPLIKTBEHANDLING
+    Behandlingssteggruppe.STUDENT -> StegGruppe.STUDENT
+}

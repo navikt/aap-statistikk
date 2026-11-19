@@ -178,6 +178,56 @@ data class Behandling(
         returÅrsakkoblinger = returÅrsakkoblinger.map { it.tilTilstand() },
         relatertBehandlingReferanse = relatertBehandlingReferanse,
     )
+
+    // Overgang til felles tilstand; gamle lesere bruker fortsatt de enkelte feltene.
+    constructor(
+        referanse: UUID,
+        sak: Sak,
+        typeBehandling: TypeBehandling,
+        opprettetTid: LocalDateTime,
+        tilstand: BehandlingTilstand,
+        id: BehandlingId? = null,
+        relaterteIdenter: List<Ident> = emptyList(),
+        relatertBehandlingId: BehandlingId? = null,
+        snapShotId: Long? = null,
+        årsaker: List<Vurderingsbehov> = emptyList(),
+        årsakTilOpprettelse: String? = null,
+        oppdatertTidspunkt: LocalDateTime? = null,
+        hendelser: List<BehandlingHendelse> = emptyList(),
+        opprettetAv: String? = null,
+    ) : this(
+        id = id,
+        referanse = referanse,
+        sak = sak,
+        typeBehandling = typeBehandling,
+        opprettetTid = opprettetTid,
+        relaterteIdenter = relaterteIdenter,
+        relatertBehandlingId = relatertBehandlingId,
+        snapShotId = snapShotId,
+        årsaker = årsaker,
+        årsakTilOpprettelse = årsakTilOpprettelse,
+        oppdatertTidspunkt = oppdatertTidspunkt,
+        hendelser = hendelser,
+        opprettetAv = opprettetAv,
+        status = tilstand.status,
+        versjon = tilstand.versjon,
+        mottattTid = tilstand.mottattTid,
+        søknadsformat = tilstand.søknadsformat,
+        ansvarligBeslutter = tilstand.ansvarligBeslutter,
+        vedtakstidspunkt = tilstand.vedtakstidspunkt,
+        sisteSaksbehandler = tilstand.sisteSaksbehandler,
+        resultat = tilstand.resultat,
+        gjeldendeAvklaringsBehov = tilstand.gjeldendeAvklaringsBehov?.tilDefinisjon(),
+        gjeldendeAvklaringsbehovStatus = tilstand.gjeldendeAvklaringsbehovStatus?.tilKontrakt(),
+        sisteLøsteAvklaringsbehov = tilstand.sisteLøsteAvklaringsbehov?.tilDefinisjon(),
+        sisteSaksbehandlerSomLøstebehov = tilstand.sisteSaksbehandlerSomLøstebehov,
+        sistLøsteAvklaringsbehovTidspunkt = tilstand.sistLøsteAvklaringsbehovTidspunkt,
+        gjeldendeStegGruppe = tilstand.gjeldendeStegGruppe?.tilKontrakt(),
+        venteÅrsak = tilstand.venteÅrsak,
+        returÅrsak = tilstand.returÅrsak,
+        returÅrsakkoblinger = tilstand.returÅrsakkoblinger.map { it.tilReturÅrsakkobling() },
+        relatertBehandlingReferanse = tilstand.relatertBehandlingReferanse,
+    )
 }
 
 @JvmName("erAutomatisk")
@@ -217,7 +267,34 @@ data class BehandlingHendelse(
     val mottattTid: LocalDateTime,
     val søknadsformat: SøknadsFormat,
     val relatertBehandlingReferanse: String?,
-)
+) {
+    constructor(
+        tidspunkt: LocalDateTime?,
+        hendelsesTidspunkt: LocalDateTime,
+        tilstand: BehandlingTilstand,
+    ) : this(
+        tidspunkt = tidspunkt,
+        hendelsesTidspunkt = hendelsesTidspunkt,
+        status = tilstand.status,
+        versjon = tilstand.versjon,
+        mottattTid = tilstand.mottattTid,
+        søknadsformat = tilstand.søknadsformat,
+        ansvarligBeslutter = tilstand.ansvarligBeslutter,
+        vedtakstidspunkt = tilstand.vedtakstidspunkt,
+        saksbehandler = tilstand.sisteSaksbehandler?.let(::Saksbehandler),
+        resultat = tilstand.resultat,
+        avklaringsBehov = tilstand.gjeldendeAvklaringsBehov?.tilDefinisjon(),
+        avklaringsbehovStatus = tilstand.gjeldendeAvklaringsbehovStatus?.tilKontrakt(),
+        sisteLøsteAvklaringsbehov = tilstand.sisteLøsteAvklaringsbehov?.tilDefinisjon(),
+        sisteSaksbehandlerSomLøstebehov = tilstand.sisteSaksbehandlerSomLøstebehov,
+        sistLøsteAvklaringsbehovTidspunkt = tilstand.sistLøsteAvklaringsbehovTidspunkt,
+        steggruppe = tilstand.gjeldendeStegGruppe?.tilKontrakt(),
+        venteÅrsak = tilstand.venteÅrsak,
+        returÅrsak = tilstand.returÅrsak,
+        returÅrsakkoblinger = tilstand.returÅrsakkoblinger.map { it.tilReturÅrsakkobling() },
+        relatertBehandlingReferanse = tilstand.relatertBehandlingReferanse,
+    )
+}
 
 data class ReturÅrsakkobling(val avklaringsbehov: Definisjon, val returÅrsaker: List<String>)
 

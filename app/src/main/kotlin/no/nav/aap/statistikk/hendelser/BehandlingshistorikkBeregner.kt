@@ -5,8 +5,11 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.behandling.Versjon
-import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
+import no.nav.aap.statistikk.behandling.tilDomene
+import no.nav.aap.statistikk.behandling.tilTilstand
 
 class BehandlingshistorikkBeregner {
     fun beregn(dto: StoppetBehandling, behandling: Behandling): Behandling {
@@ -68,23 +71,17 @@ class BehandlingshistorikkBeregner {
         BehandlingHendelse(
             tidspunkt = dto.mottattTid,
             hendelsesTidspunkt = dto.mottattTid,
-            avklaringsBehov = null,
-            steggruppe = null,
-            avklaringsbehovStatus = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            saksbehandler = null,
-            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-            versjon = dto.versjon.let(::Versjon),
-            status = BehandlingStatus.OPPRETTET,
-            ansvarligBeslutter = null,
-            vedtakstidspunkt = null,
-            mottattTid = dto.mottattTid,
-            søknadsformat = dto.soknadsFormat.tilDomene(),
-            relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-            sisteLøsteAvklaringsbehov = sisteLøsteBehov?.definisjon,
-            sisteSaksbehandlerSomLøstebehov = sisteLøsteBehov?.løstAv,
-            sistLøsteAvklaringsbehovTidspunkt = sisteLøsteBehov?.tidspunkt,
+            tilstand = BehandlingTilstand(
+                resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+                versjon = dto.versjon.let(::Versjon),
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = dto.mottattTid,
+                søknadsformat = dto.soknadsFormat.tilDomene(),
+                relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+                sisteLøsteAvklaringsbehov = sisteLøsteBehov?.definisjon?.tilAvklaringsbehovKode(),
+                sisteSaksbehandlerSomLøstebehov = sisteLøsteBehov?.løstAv,
+                sistLøsteAvklaringsbehovTidspunkt = sisteLøsteBehov?.tidspunkt,
+            ),
         )
 
     private fun avslutningshendelseUtenAvklaringsbehov(
@@ -94,24 +91,19 @@ class BehandlingshistorikkBeregner {
         tidspunkt = dto.tidspunktSisteEndring,
         hendelsesTidspunkt = dto.avsluttetBehandling?.vedtakstidspunkt
             ?: dto.tidspunktSisteEndring ?: dto.behandlingOpprettetTidspunkt,
-        avklaringsBehov = null,
-        steggruppe = null,
-        avklaringsbehovStatus = null,
-        venteÅrsak = null,
-        returÅrsak = null,
-        saksbehandler = null,
-        resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-        versjon = dto.versjon.let(::Versjon),
-        status = dto.behandlingStatus.tilDomene(),
-        ansvarligBeslutter = null,
-        vedtakstidspunkt = dto.avsluttetBehandling?.vedtakstidspunkt
-            ?: dto.tidspunktSisteEndring,
-        mottattTid = dto.mottattTid,
-        søknadsformat = dto.soknadsFormat.tilDomene(),
-        relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-        sisteLøsteAvklaringsbehov = sisteLøsteBehov?.definisjon,
-        sisteSaksbehandlerSomLøstebehov = sisteLøsteBehov?.løstAv,
-        sistLøsteAvklaringsbehovTidspunkt = sisteLøsteBehov?.tidspunkt,
+        tilstand = BehandlingTilstand(
+            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+            versjon = dto.versjon.let(::Versjon),
+            status = dto.behandlingStatus.tilDomene(),
+            vedtakstidspunkt = dto.avsluttetBehandling?.vedtakstidspunkt
+                ?: dto.tidspunktSisteEndring,
+            mottattTid = dto.mottattTid,
+            søknadsformat = dto.soknadsFormat.tilDomene(),
+            relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+            sisteLøsteAvklaringsbehov = sisteLøsteBehov?.definisjon?.tilAvklaringsbehovKode(),
+            sisteSaksbehandlerSomLøstebehov = sisteLøsteBehov?.løstAv,
+            sistLøsteAvklaringsbehovTidspunkt = sisteLøsteBehov?.tidspunkt,
+        ),
     )
 
     private fun hendelseFraAvklaringsbehov(
@@ -123,28 +115,30 @@ class BehandlingshistorikkBeregner {
         return BehandlingHendelse(
             tidspunkt = null, // Vil etterfylles
             hendelsesTidspunkt = requireNotNull(avklaringsbehov.tidspunktSisteEndring()),
-            avklaringsBehov = behovstilstand.gjeldendeBehov?.definisjon,
-            avklaringsbehovStatus = behovstilstand.gjeldendeBehov?.status,
-            steggruppe = behovstilstand.gjeldendeBehov?.steggruppe,
-            venteÅrsak = behovstilstand.venteÅrsak,
-            returÅrsak = behovstilstand.returÅrsak,
-            returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger,
-            saksbehandler = behovstilstand.saksbehandler?.let(::Saksbehandler),
-            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-            versjon = dto.versjon.let(::Versjon),
-            status = avklaringsbehov.utledBehandlingStatus(),
-            ansvarligBeslutter = behovstilstand.ansvarligBeslutter,
-            vedtakstidspunkt = if (behandlingVedStart.behandlingStatus() == BehandlingStatus.AVSLUTTET) {
-                behandlingVedStart.vedtakstidspunkt ?: avklaringsbehov.utledVedtakTid()
-            } else {
-                null
-            },
-            mottattTid = dto.mottattTid,
-            søknadsformat = dto.soknadsFormat.tilDomene(),
-            relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-            sisteLøsteAvklaringsbehov = behovstilstand.sisteLøsteBehov?.definisjon,
-            sisteSaksbehandlerSomLøstebehov = behovstilstand.sisteLøsteBehov?.løstAv,
-            sistLøsteAvklaringsbehovTidspunkt = behovstilstand.sisteLøsteBehov?.tidspunkt,
+            tilstand = BehandlingTilstand(
+                gjeldendeAvklaringsBehov = behovstilstand.gjeldendeBehov?.definisjon?.tilAvklaringsbehovKode(),
+                gjeldendeAvklaringsbehovStatus = behovstilstand.gjeldendeBehov?.status?.tilDomene(),
+                gjeldendeStegGruppe = behovstilstand.gjeldendeBehov?.steggruppe?.tilDomene(),
+                venteÅrsak = behovstilstand.venteÅrsak,
+                returÅrsak = behovstilstand.returÅrsak,
+                returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger.map { it.tilTilstand() },
+                sisteSaksbehandler = behovstilstand.saksbehandler,
+                resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+                versjon = dto.versjon.let(::Versjon),
+                status = avklaringsbehov.utledBehandlingStatus(),
+                ansvarligBeslutter = behovstilstand.ansvarligBeslutter,
+                vedtakstidspunkt = if (behandlingVedStart.behandlingStatus() == BehandlingStatus.AVSLUTTET) {
+                    behandlingVedStart.vedtakstidspunkt ?: avklaringsbehov.utledVedtakTid()
+                } else {
+                    null
+                },
+                mottattTid = dto.mottattTid,
+                søknadsformat = dto.soknadsFormat.tilDomene(),
+                relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+                sisteLøsteAvklaringsbehov = behovstilstand.sisteLøsteBehov?.definisjon?.tilAvklaringsbehovKode(),
+                sisteSaksbehandlerSomLøstebehov = behovstilstand.sisteLøsteBehov?.løstAv,
+                sistLøsteAvklaringsbehovTidspunkt = behovstilstand.sisteLøsteBehov?.tidspunkt,
+            ),
         )
     }
 
@@ -157,21 +151,17 @@ class BehandlingshistorikkBeregner {
         hendelsesTidspunkt = requireNotNull(
             dto.avsluttetBehandling?.vedtakstidspunkt ?: dto.tidspunktSisteEndring,
         ),
-        avklaringsBehov = null,
-        avklaringsbehovStatus = null,
-        steggruppe = null,
-        venteÅrsak = null,
-        returÅrsak = null,
-        saksbehandler = null,
-        resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
-        versjon = dto.versjon.let(::Versjon),
-        status = BehandlingStatus.AVSLUTTET,
-        ansvarligBeslutter = behandlingVedStart.hendelsesHistorikk().lastOrNull()?.ansvarligBeslutter,
-        vedtakstidspunkt = behandlingVedStart.vedtakstidspunkt,
-        mottattTid = dto.mottattTid,
-        søknadsformat = dto.soknadsFormat.tilDomene(),
-        relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-        sisteLøsteAvklaringsbehov = sisteLøsteBehov?.definisjon,
-        sisteSaksbehandlerSomLøstebehov = sisteLøsteBehov?.løstAv,
+        tilstand = BehandlingTilstand(
+            resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
+            versjon = dto.versjon.let(::Versjon),
+            status = BehandlingStatus.AVSLUTTET,
+            ansvarligBeslutter = behandlingVedStart.hendelsesHistorikk().lastOrNull()?.ansvarligBeslutter,
+            vedtakstidspunkt = behandlingVedStart.vedtakstidspunkt,
+            mottattTid = dto.mottattTid,
+            søknadsformat = dto.soknadsFormat.tilDomene(),
+            relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
+            sisteLøsteAvklaringsbehov = sisteLøsteBehov?.definisjon?.tilAvklaringsbehovKode(),
+            sisteSaksbehandlerSomLøstebehov = sisteLøsteBehov?.løstAv,
+        ),
     )
 }
