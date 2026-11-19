@@ -157,6 +157,27 @@ data class Behandling(
             else -> if (this.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
         }
     }
+
+    fun nåværendeTilstand(): BehandlingTilstand = BehandlingTilstand(
+        status = status,
+        versjon = versjon,
+        mottattTid = mottattTid,
+        søknadsformat = søknadsformat,
+        ansvarligBeslutter = ansvarligBeslutter,
+        vedtakstidspunkt = vedtakstidspunkt,
+        sisteSaksbehandler = sisteSaksbehandler,
+        resultat = resultat,
+        gjeldendeAvklaringsBehov = gjeldendeAvklaringsBehov?.tilAvklaringsbehovKode(),
+        gjeldendeAvklaringsbehovStatus = gjeldendeAvklaringsbehovStatus?.tilDomene(),
+        sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov?.tilAvklaringsbehovKode(),
+        sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
+        sistLøsteAvklaringsbehovTidspunkt = sistLøsteAvklaringsbehovTidspunkt,
+        gjeldendeStegGruppe = gjeldendeStegGruppe?.tilDomene(),
+        venteÅrsak = venteÅrsak,
+        returÅrsak = returÅrsak,
+        returÅrsakkoblinger = returÅrsakkoblinger.map { it.tilTilstand() },
+        relatertBehandlingReferanse = relatertBehandlingReferanse,
+    )
 }
 
 @JvmName("erAutomatisk")
