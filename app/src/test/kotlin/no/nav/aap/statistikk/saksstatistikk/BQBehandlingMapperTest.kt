@@ -152,6 +152,30 @@ class BQBehandlingMapperTest {
             .isEqualTo(forventetResultat)
     }
 
+    @ParameterizedTest
+    @CsvSource("AVSLAG,AVSLAG", ",UDEFINERT")
+    fun `publisert resultat kommer fra siste hendelse uten fallback`(
+        sisteResultat: ResultatKode?,
+        forventetResultat: String,
+    ) {
+        val innvilget = lagBehandlingHendelse().copy(
+            status = BehandlingStatus.AVSLUTTET,
+            resultat = ResultatKode.INNVILGET,
+        )
+        val behandling = lagBehandling(
+            hendelser = listOf(
+                innvilget,
+                innvilget.copy(
+                    hendelsesTidspunkt = innvilget.hendelsesTidspunkt.plusMinutes(1),
+                    resultat = sisteResultat,
+                ),
+            ),
+        ).copy(resultat = ResultatKode.INNVILGET)
+
+        assertThat(mapper.bqBehandlingForBehandling(grunnlag(behandling)).behandlingResultat)
+            .isEqualTo(forventetResultat)
+    }
+
     @Test
     fun `skjermet behandling skjuler enhet saksbehandler og beslutter`() {
         val behandling = lagBehandling(

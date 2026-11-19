@@ -55,7 +55,8 @@ class AvsluttetBehandlingService(
 
         if (!skalLagre) {
             logger.info(
-                "Resultat var ${uthentetBehandling.resultat()} for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer ikke.",
+                "Resultat var ${uthentetBehandling.resultatFraSisteHendelse()} " +
+                    "for behandling ${avsluttetBehandling.behandlingsReferanse}. Lagrer ikke.",
             )
             return
         }
@@ -118,7 +119,7 @@ class AvsluttetBehandlingService(
     }
 
     private fun skalLagre(uthentetBehandling: Behandling, avsluttetBehandling: AvsluttetBehandling): Boolean {
-        val resultat = uthentetBehandling.resultat()
+        val resultat = uthentetBehandling.resultatFraSisteHendelse()
 
         return when (resultat) {
             ResultatKode.AVBRUTT,

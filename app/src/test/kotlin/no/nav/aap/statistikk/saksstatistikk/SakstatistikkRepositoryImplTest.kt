@@ -7,18 +7,12 @@ import no.nav.aap.statistikk.testutils.Postgres
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.Collections.synchronizedList
 import java.util.concurrent.CountDownLatch
-import java.util.function.BiPredicate
 import javax.sql.DataSource
 
 class SakstatistikkRepositoryImplTest {
-
-    private val datoSammenligner: BiPredicate<LocalDateTime, LocalDateTime> = BiPredicate { t, u ->
-        t.truncatedTo(ChronoUnit.MILLIS).equals(u.truncatedTo(ChronoUnit.MILLIS))
-    }
 
     private fun opprettTestHendelse(
         referanse: UUID,
@@ -33,7 +27,7 @@ class SakstatistikkRepositoryImplTest {
         behandlingUUID = referanse,
         relatertBehandlingUUID = relatertBehandlingUUID,
         relatertFagsystem = "Kelvin",
-        ferdigbehandletTid = LocalDateTime.now(),
+        ferdigbehandletTid = tekniskTid.minusMinutes(1),
         behandlingType = "REVURDERING",
         aktorId = "123456",
         saksnummer = "123",
@@ -45,7 +39,7 @@ class SakstatistikkRepositoryImplTest {
         mottattTid = mottattTid,
         opprettetAv = KELVIN,
         ansvarligBeslutter = "Z1234",
-        vedtakTid = LocalDateTime.now().minusMinutes(20),
+        vedtakTid = tekniskTid.minusMinutes(2),
         søknadsFormat = SøknadsFormat.DIGITAL,
         saksbehandler = "1234",
         behandlingMetode = BehandlingMetode.MANUELL,
@@ -61,10 +55,10 @@ class SakstatistikkRepositoryImplTest {
     @Test
     fun `lagre og hente ut igjen`(@Postgres dataSource: DataSource) {
         val referanse = UUID.randomUUID()
-        val tekniskTid = LocalDateTime.now()
-        val registrertTid = LocalDateTime.now().minusMinutes(10)
-        val mottattTid = LocalDateTime.now().minusMinutes(20)
-        val endretTid = LocalDateTime.now().plusSeconds(1)
+        val tekniskTid = LocalDateTime.of(2026, 11, 19, 9, 22, 34, 70_999_000)
+        val registrertTid = tekniskTid.minusMinutes(10)
+        val mottattTid = tekniskTid.minusMinutes(20)
+        val endretTid = tekniskTid.plusSeconds(1)
 
         val hendelse =
             opprettTestHendelse(referanse, tekniskTid, registrertTid, mottattTid, endretTid)
@@ -82,7 +76,6 @@ class SakstatistikkRepositoryImplTest {
 
         assertThat(uthentet.first())
             .usingRecursiveComparison()
-            .withEqualsForType(datoSammenligner, LocalDateTime::class.java)
             .isEqualTo(hendelse)
     }
 
@@ -116,7 +109,6 @@ class SakstatistikkRepositoryImplTest {
         }
 
         assertThat(res).usingRecursiveComparison()
-            .withEqualsForType(datoSammenligner, LocalDateTime::class.java)
             .ignoringFields("sekvensNummer")
             .isEqualTo(
                 hendelse.copy(tekniskTid = tekniskTid.plusHours(1)),

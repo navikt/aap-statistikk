@@ -115,7 +115,7 @@ data class Behandling(
         if (!this.typeBehandling.erYtelsesBehandling) return null
 
         return when {
-            this.resultat() in listOf(
+            this.resultatFraSisteHendelse() in listOf(
                 ResultatKode.TRUKKET,
                 ResultatKode.AVSLAG,
                 ResultatKode.AVBRUTT,
@@ -144,7 +144,7 @@ data class Behandling(
     fun oppdatertTidspunkt(): LocalDateTime = hendelser.maxOfOrNull { it.hendelsesTidspunkt }
         ?: requireNotNull(this.oppdatertTidspunkt) { "oppdatertTidspunkt er ikke satt på behandling $referanse." }
 
-    fun resultat(): ResultatKode? = hendelser.lastOrNull()?.resultat
+    fun resultatFraSisteHendelse(): ResultatKode? = hendelser.lastOrNull()?.resultat
 
     fun identerPåBehandling(): List<Ident> = listOf(this.sak.person.ident) + this.relaterteIdenter
 

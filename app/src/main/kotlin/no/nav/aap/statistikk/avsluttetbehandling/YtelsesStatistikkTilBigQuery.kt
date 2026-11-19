@@ -30,7 +30,7 @@ class YtelsesStatistikkTilBigQuery(
                 referanse = behandling.referanse,
                 utbetalingId = behandling.utbetalingId(),
                 brukerFnr = behandling.sak.person.ident.ident,
-                resultat = behandling.resultat(),
+                resultat = behandling.resultatFraSisteHendelse(),
                 behandlingsType = behandling.typeBehandling,
                 datoOpprettet = behandling.opprettetTid,
                 datoAvsluttet = behandling.avsluttetTid(),
