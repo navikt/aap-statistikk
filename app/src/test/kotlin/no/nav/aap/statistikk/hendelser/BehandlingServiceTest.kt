@@ -6,7 +6,9 @@ import no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.ÅrsakTilOpprettelse
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
+import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
@@ -19,18 +21,112 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
+import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
 import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.sql.SQLException
 import java.time.LocalDateTime
 import java.util.UUID
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as BehovStatus
+import no.nav.aap.behandlingsflyt.kontrakt.statistikk.ResultatKode as KontraktResultatKode
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov as KontraktVurderingsbehov
 import no.nav.aap.statistikk.behandling.TypeBehandling as DomeneTypeBehandling
 
 class BehandlingServiceTest {
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `ny og eksisterende behandling får samme vedtaksdata men beholder egne historikktidspunkter`(
+        finnesFraFør: Boolean,
+    ) {
+        val tidspunkt = LocalDateTime.of(2026, 11, 18, 12, 0)
+        val referanse = UUID.randomUUID()
+        val sak = testSak()
+        val behovTid = tidspunkt.minusMinutes(2)
+        val vedtakTid = tidspunkt.minusMinutes(3)
+        val dto = testHendelse(referanse).copy(
+            behandlingStatus = Status.AVSLUTTET,
+            hendelsesTidspunkt = tidspunkt,
+            tidspunktSisteEndring = tidspunkt.minusMinutes(1),
+            avklaringsbehov = listOf(
+                AvklaringsbehovHendelseDto(
+                    avklaringsbehovDefinisjon = Definisjon.FATTE_VEDTAK,
+                    status = BehovStatus.AVSLUTTET,
+                    endringer = listOf(
+                        EndringDTO(
+                            status = BehovStatus.AVSLUTTET,
+                            tidsstempel = behovTid,
+                            endretAv = "Z111111",
+                        ),
+                    ),
+                ),
+            ),
+            avsluttetBehandling = avsluttetBehandlingDTO().copy(
+                resultat = KontraktResultatKode.INNVILGET,
+                vedtakstidspunkt = vedtakTid,
+            ),
+        )
+        val eksisterende = if (finnesFraFør) eksisterendeBehandling(sak, referanse) else null
+        val service = BehandlingService(FakeBehandlingRepository(), SkjermingService(FakePdlGateway(emptyMap())))
+
+        val resultat = service.konstruerBehandling(dto, sak, eksisterende)
+
+        assertThat(resultat.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(resultat.resultat).isEqualTo(ResultatKode.INNVILGET)
+        assertThat(resultat.sisteSaksbehandler).isEqualTo("Z111111")
+        assertThat(resultat.ansvarligBeslutter).isEqualTo("Z111111")
+        assertThat(resultat.vedtakstidspunkt).isEqualTo(vedtakTid)
+        assertThat(resultat.gjeldendeAvklaringsBehov).isNull()
+        assertThat(resultat.gjeldendeAvklaringsbehovStatus).isNull()
+        assertThat(resultat.venteÅrsak).isNull()
+        assertThat(resultat.returÅrsak).isNull()
+        assertThat(resultat.oppdatertTidspunkt()).isEqualTo(if (finnesFraFør) tidspunkt else behovTid)
+        assertThat(resultat.hendelser).hasSize(if (finnesFraFør) 1 else 0)
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `ny og eksisterende behandling får samme returdata og venteårsak`(finnesFraFør: Boolean) {
+        val tidspunkt = LocalDateTime.of(2026, 11, 18, 12, 0)
+        val referanse = UUID.randomUUID()
+        val sak = testSak()
+        val dto = testHendelse(referanse).copy(
+            behandlingStatus = Status.UTREDES,
+            hendelsesTidspunkt = tidspunkt,
+            avklaringsbehov = returHendelser + AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = Definisjon.MANUELT_SATT_PÅ_VENT,
+                status = BehovStatus.OPPRETTET,
+                endringer = listOf(
+                    EndringDTO(
+                        status = BehovStatus.OPPRETTET,
+                        tidsstempel = tidspunkt.minusMinutes(1),
+                        endretAv = "Z222222",
+                        årsakTilSattPåVent = ÅrsakTilSettPåVent.VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER,
+                    ),
+                ),
+            ),
+        )
+        val eksisterende = if (finnesFraFør) eksisterendeBehandling(sak, referanse) else null
+        val service = BehandlingService(FakeBehandlingRepository(), SkjermingService(FakePdlGateway(emptyMap())))
+
+        val resultat = service.konstruerBehandling(dto, sak, eksisterende)
+
+        assertThat(resultat.behandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
+        assertThat(resultat.gjeldendeAvklaringsBehov).isEqualTo(Definisjon.AVKLAR_SYKDOM)
+        assertThat(resultat.gjeldendeAvklaringsbehovStatus).isEqualTo(BehovStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER)
+        assertThat(resultat.gjeldendeStegGruppe).isEqualTo(Definisjon.AVKLAR_SYKDOM.løsesISteg.gruppe)
+        assertThat(resultat.sisteSaksbehandler).isEqualTo("Z222222")
+        assertThat(resultat.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
+        assertThat(resultat.returÅrsak).isEqualTo("MANGLENDE_UTREDNING")
+        assertThat(resultat.ansvarligBeslutter).isNull()
+        assertThat(resultat.resultat).isNull()
+        assertThat(resultat.vedtakstidspunkt).isNull()
+    }
+
     @Test
     fun `hentEllerLagreBehandling bruker lock-varianten ved oppdatering av eksisterende behandling`() {
         val referanse = UUID.randomUUID()
