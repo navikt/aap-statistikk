@@ -9,16 +9,45 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class BehandlingTest {
+
+    @ParameterizedTest
+    @MethodSource("historikkOgBehandlingsmetode")
+    fun `behandlingsmetode følger siste behov og tidligere manuell behandling`(
+        behov: List<Definisjon?>,
+        forventet: BehandlingMetode,
+    ) {
+        val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
+        val hendelse = behandlingHendelse(
+            Definisjon.AVKLAR_SYKDOM,
+            tidspunkt,
+            Versjon("1"),
+            BehandlingStatus.UTREDES,
+        )
+        val behandling = behandlingMedHendelser().copy(
+            gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
+            hendelser = behov.mapIndexed { indeks, definisjon ->
+                hendelse.copy(
+                    avklaringsBehov = definisjon,
+                    hendelsesTidspunkt = tidspunkt.minusMinutes(indeks.toLong()),
+                )
+            },
+        )
+
+        assertThat(behandling.behandlingMetode()).isEqualTo(forventet)
+    }
 
     @ParameterizedTest
     @ValueSource(booleans = [false, true])
@@ -313,4 +342,33 @@ class BehandlingTest {
         søknadsformat = SøknadsFormat.DIGITAL,
         relatertBehandlingReferanse = null,
     )
+
+    companion object {
+        @JvmStatic
+        fun historikkOgBehandlingsmetode(): List<Arguments> = listOf(
+            Arguments.of(emptyList<Definisjon>(), BehandlingMetode.AUTOMATISK),
+            Arguments.of(listOf(null, null), BehandlingMetode.AUTOMATISK),
+            Arguments.of(listOf(Definisjon.BESTILL_BREV, null), BehandlingMetode.AUTOMATISK),
+            Arguments.of(
+                listOf(Definisjon.AVKLAR_SYKDOM, Definisjon.BESTILL_BREV, null),
+                BehandlingMetode.MANUELL,
+            ),
+            Arguments.of(
+                listOf(Definisjon.BESTILL_BREV, Definisjon.AVKLAR_SYKDOM, null),
+                BehandlingMetode.MANUELL,
+            ),
+            Arguments.of(
+                listOf(Definisjon.FATTE_VEDTAK, Definisjon.KVALITETSSIKRING, null, null),
+                BehandlingMetode.KVALITETSSIKRING,
+            ),
+            Arguments.of(
+                listOf(Definisjon.KVALITETSSIKRING, Definisjon.FATTE_VEDTAK, null),
+                BehandlingMetode.FATTE_VEDTAK,
+            ),
+            Arguments.of(
+                listOf(Definisjon.KVALITETSSIKRING, Definisjon.BESTILL_BREV, null),
+                BehandlingMetode.MANUELL,
+            ),
+        )
+    }
 }
