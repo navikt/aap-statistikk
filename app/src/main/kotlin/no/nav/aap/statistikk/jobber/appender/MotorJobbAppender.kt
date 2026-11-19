@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.jobber.appender
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.FlytJobbRepository
@@ -29,13 +28,10 @@ class MotorJobbAppender : JobbAppender {
 
     override fun leggTilLagreSakTilBigQueryJobb(
         repositoryProvider: RepositoryProvider,
-        behandlingId: BehandlingId,
+        payload: LagreSakinfoPayload,
         delayInSeconds: Long,
-        enhetRetryCount: Int,
-        triggerKilde: String,
-        avklaringsbehovKode: Definisjon?,
-        cutoffTidspunkt: LocalDateTime?,
     ) {
+        val behandlingId = payload.behandlingId
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
                 .hent(behandlingId)
@@ -46,13 +42,6 @@ class MotorJobbAppender : JobbAppender {
             return
         }
 
-        val payload = LagreSakinfoPayload(
-            behandlingId = behandlingId,
-            avklaringsbehovKode = avklaringsbehovKode?.kode?.name,
-            retryCount = enhetRetryCount,
-            triggerKilde = triggerKilde,
-            cutoffTidspunkt = cutoffTidspunkt,
-        )
         val jobbInput = JobbInput(LagreSakinfoTilBigQueryJobb())
             .medPayload(payload)
             .medNesteKjøring(LocalDateTime.now().plusSeconds(delayInSeconds))

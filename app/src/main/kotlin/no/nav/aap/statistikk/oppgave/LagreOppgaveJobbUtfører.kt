@@ -11,6 +11,7 @@ import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.saksstatistikk.Konstanter
+import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoPayload
 
 class LagreOppgaveJobbUtfører(
     private val oppgaveHendelseRepository: OppgaveHendelseRepository,
@@ -42,9 +43,11 @@ class LagreOppgaveJobbUtfører(
                         )
                         MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
                             repositoryProvider,
-                            behandling.id(),
-                            triggerKilde = "oppgave",
-                            cutoffTidspunkt = cutoffAnchor?.sendtTid,
+                            LagreSakinfoPayload(
+                                behandlingId = behandling.id(),
+                                triggerKilde = "oppgave",
+                                cutoffTidspunkt = cutoffAnchor?.sendtTid,
+                            ),
                         )
                     }
                 }

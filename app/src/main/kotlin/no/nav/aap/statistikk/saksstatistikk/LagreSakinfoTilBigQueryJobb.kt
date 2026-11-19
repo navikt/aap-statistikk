@@ -1,6 +1,5 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.gateway.GatewayProvider
 import no.nav.aap.komponenter.json.DeserializationException
@@ -112,12 +111,8 @@ class LagreSakinfoTilBigQueryJobb : ProvidersJobbSpesifikasjon {
             leggTilRetry = { payload, delay ->
                 MotorJobbAppender().leggTilLagreSakTilBigQueryJobb(
                     repositoryProvider,
-                    payload.behandlingId,
+                    payload,
                     delayInSeconds = delay,
-                    avklaringsbehovKode = payload.avklaringsbehovKode?.let(Definisjon::forKode),
-                    enhetRetryCount = payload.retryCount,
-                    triggerKilde = payload.triggerKilde,
-                    cutoffTidspunkt = payload.cutoffTidspunkt,
                 )
             },
         )
