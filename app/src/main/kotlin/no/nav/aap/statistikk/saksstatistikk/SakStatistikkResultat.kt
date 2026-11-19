@@ -1,10 +1,10 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.statistikk.behandling.AvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.BehandlingId
 
 sealed class SakStatistikkResultat {
     data object OK : SakStatistikkResultat()
-    data class ManglerEnhet(val behandlingId: BehandlingId, val avklaringsbehovKode: Definisjon?) :
+    data class ManglerEnhet(val behandlingId: BehandlingId, val avklaringsbehovKode: AvklaringsbehovKode?) :
         SakStatistikkResultat()
 }

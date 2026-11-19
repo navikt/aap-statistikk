@@ -1,6 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.statistikk.behandling.AvklaringsbehovKode
 import java.time.LocalDateTime
 import java.util.*
 
@@ -20,8 +20,8 @@ data class BehandlingsflytHendelse(
     override val tidspunkt: LocalDateTime,
     override val kilde: Kilde = Kilde.Behandling,
     val status: String,
-    val avklaringsbehov: Definisjon?,
-    val sisteLøsteAvklaringsbehov: Definisjon?,
+    val avklaringsbehov: AvklaringsbehovKode?,
+    val sisteLøsteAvklaringsbehov: AvklaringsbehovKode?,
     val sisteSaksbehandlerPåBehandling: String?,
 ) : SakstatistikkHendelse {
     override fun compareTo(other: SakstatistikkHendelse): Int = tidspunkt.compareTo(other.tidspunkt)

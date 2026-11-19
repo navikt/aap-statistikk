@@ -8,6 +8,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
+import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.isBeforeOrEqual
 import no.nav.aap.statistikk.onlyOrNull
 import java.time.LocalDateTime
@@ -113,10 +114,7 @@ fun List<AvklaringsbehovHendelseDto>.utledBehandlingStatus(): BehandlingStatus {
     }
 }
 
-fun Status.returnert(): Boolean = when (this) {
-    Status.SENDT_TILBAKE_FRA_BESLUTTER, Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER -> true
-    else -> false
-}
+fun Status.returnert(): Boolean = tilDomene().returnert()
 
 fun List<AvklaringsbehovHendelseDto>.sistePersonPåBehandling(): String? = this.flatMap { it.endringer }
     .filter {

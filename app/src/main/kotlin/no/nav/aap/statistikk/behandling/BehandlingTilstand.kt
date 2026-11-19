@@ -37,6 +37,12 @@ enum class AvklaringsbehovStatus {
     KVALITETSSIKRET,
     SENDT_TILBAKE_FRA_KVALITETSSIKRER,
     AVBRUTT,
+    ;
+
+    fun returnert(): Boolean = when (this) {
+        SENDT_TILBAKE_FRA_BESLUTTER, SENDT_TILBAKE_FRA_KVALITETSSIKRER -> true
+        OPPRETTET, AVSLUTTET, TOTRINNS_VURDERT, KVALITETSSIKRET, AVBRUTT -> false
+    }
 }
 
 enum class Behandlingssteggruppe {

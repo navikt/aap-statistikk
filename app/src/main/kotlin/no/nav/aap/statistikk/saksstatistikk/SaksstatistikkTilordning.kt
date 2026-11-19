@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.oppgave.Oppgave
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -29,7 +30,8 @@ private fun utledSaksbehandler(
     val saksbehandler = snapshots.lastOrNull()?.saksbehandler
 
     if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && saksbehandler == null) {
-        return behandling.sisteSaksbehandler ?: behandling.sisteSaksbehandlerSomLøstebehov
+        val tilstand = behandling.nåværendeTilstand()
+        return tilstand.sisteSaksbehandler ?: tilstand.sisteSaksbehandlerSomLøstebehov
             ?: oppgaver.maxByOrNull { it.sistEndret() }?.reservasjon?.reservertAv?.ident
     }
 
@@ -43,6 +45,7 @@ private fun ansvarligEnhet(
     cutoffTidspunkt: LocalDateTime,
 ): String? {
     val enhet = snapshots.lastOrNull()?.enhet
+    val tilstand = behandling.nåværendeTilstand()
 
     return when {
         behandling.behandlingMetode() == BehandlingMetode.AUTOMATISK -> AUTOMATISK_ENHET
@@ -59,18 +62,18 @@ private fun ansvarligEnhet(
         behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET ->
             oppgaver.maxByOrNull { it.sistEndret() }?.enhet?.kode
 
-        behandling.venteÅrsak != null -> {
+        tilstand.venteÅrsak != null -> {
             val enhetSistLøsteAvklaringsbehov = oppgaver
-                .filter { it.avklaringsbehov == behandling.sisteLøsteAvklaringsbehov?.kode?.name }
+                .filter { it.avklaringsbehov == tilstand.sisteLøsteAvklaringsbehov?.verdi }
                 .maxByOrNull { it.sistEndret() }?.enhet?.kode
 
             enhetSistLøsteAvklaringsbehov ?: oppgaver.maxByOrNull { it.sistEndret() }?.enhet?.kode
         }
 
         behandling.behandlingStatus() == BehandlingStatus.UTREDES -> {
-            val kode = behandling.gjeldendeAvklaringsBehov?.kode?.name
+            val kode = tilstand.gjeldendeAvklaringsBehov?.verdi
             if (kode == null) {
-                historiskEnhetForSistLøsteBehov(behandling, oppgaver, cutoffTidspunkt)
+                historiskEnhetForSistLøsteBehov(tilstand, oppgaver, cutoffTidspunkt)
             } else {
                 oppgaver
                     .filter { it.avklaringsbehov == kode }
@@ -83,11 +86,11 @@ private fun ansvarligEnhet(
 }
 
 private fun historiskEnhetForSistLøsteBehov(
-    behandling: Behandling,
+    tilstand: BehandlingTilstand,
     oppgaver: List<Oppgave>,
     cutoffTidspunkt: LocalDateTime,
 ): String? {
-    val kode = behandling.sisteLøsteAvklaringsbehov?.kode?.name ?: return null
+    val kode = tilstand.sisteLøsteAvklaringsbehov?.verdi ?: return null
     return oppgaver.flatMap { it.hendelser }
         .filter { it.avklaringsbehovKode == kode && it.sendtTid <= cutoffTidspunkt }
         .maxWithOrNull(compareBy({ it.sendtTid }, { it.mottattTidspunkt }))

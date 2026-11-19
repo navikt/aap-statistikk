@@ -1,10 +1,11 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.statistikk.behandling.AvklaringsbehovKode
+import no.nav.aap.statistikk.behandling.erVentebehov
 
 data class SakstatistikkState(
     val status: String? = null,
-    val avklaringsbehov: Definisjon? = null,
+    val avklaringsbehov: AvklaringsbehovKode? = null,
     val saksbehandler: String? = null,
     val enhet: String? = null,
 ) {
@@ -49,35 +50,35 @@ data class SakstatistikkState(
     }
 
     private fun applyOppgaveOpprettetHendelse(hendelse: OppgaveOpprettetHendelse): SakstatistikkState =
-        if (hendelse.avklaringsbehovKode == avklaringsbehov?.kode?.name) {
+        if (hendelse.avklaringsbehovKode == avklaringsbehov?.verdi) {
             copy(enhet = hendelse.enhet, saksbehandler = hendelse.reservertAv)
         } else {
             this
         }
 
     private fun applyOppgaveReservertHendelse(hendelse: OppgaveReservertHendelse): SakstatistikkState =
-        if (hendelse.avklaringsbehovKode == avklaringsbehov?.kode?.name) {
+        if (hendelse.avklaringsbehovKode == avklaringsbehov?.verdi) {
             copy(saksbehandler = hendelse.reservertAv, enhet = hendelse.enhet)
         } else {
             this
         }
 
     private fun applyOppgaveLukketHendelse(hendelse: OppgaveLukketHendelse): SakstatistikkState =
-        if (hendelse.avklaringsbehovKode == avklaringsbehov?.kode?.name) {
+        if (hendelse.avklaringsbehovKode == avklaringsbehov?.verdi) {
             copy(saksbehandler = null, enhet = null)
         } else {
             this
         }
 
     private fun applyOppgaveAvreservertHendelse(hendelse: OppgaveAvreservertHendelse): SakstatistikkState =
-        if (hendelse.avklaringsbehovKode == avklaringsbehov?.kode?.name) {
+        if (hendelse.avklaringsbehovKode == avklaringsbehov?.verdi) {
             copy(saksbehandler = null)
         } else {
             this
         }
 
     private fun applyOppgaveOppdatertHendelse(hendelse: OppgaveOppdatertHendelse): SakstatistikkState =
-        if (hendelse.avklaringsbehovKode == avklaringsbehov?.kode?.name) {
+        if (hendelse.avklaringsbehovKode == avklaringsbehov?.verdi) {
             copy(saksbehandler = hendelse.reservertAv, enhet = hendelse.enhet)
         } else {
             this

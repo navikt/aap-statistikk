@@ -1,12 +1,10 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.KELVIN
 import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
 import no.nav.aap.statistikk.behandling.*
-import no.nav.aap.statistikk.hendelser.returnert
 import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.årsakTilOpprettelseIkkeSatt
 import org.slf4j.LoggerFactory
@@ -103,9 +101,10 @@ object BQBehandlingMapper {
             PrometheusProvider.prometheus.årsakTilOpprettelseIkkeSatt().increment()
         }
 
-        if (behandling.mottattTid.isAfter(behandling.opprettetTid)) {
+        val mottattTid = behandling.nåværendeTilstand().mottattTid
+        if (mottattTid.isAfter(behandling.opprettetTid)) {
             log.warn(
-                "Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: ${behandling.mottattTid}, opprettet: ${behandling.opprettetTid}.",
+                "Mottatt-tid er større enn opprettet-tid. Behandling: $behandlingReferanse. Mottatt: $mottattTid, opprettet: ${behandling.opprettetTid}.",
             )
         }
 
@@ -147,6 +146,7 @@ object BQBehandlingMapper {
         val sak = behandling.sak
 
         val hendelser = behandling.hendelser
+        val tilstand = behandling.nåværendeTilstand()
         val ansvarligBeslutter = behandling.ansvarligBeslutter()
         val behandlingReferanse = behandling.referanse
 
@@ -173,11 +173,11 @@ object BQBehandlingMapper {
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             endretTid = endretTid,
             versjon = behandling.versjon(),
-            mottattTid = behandling.mottattTid.truncatedTo(ChronoUnit.SECONDS),
+            mottattTid = tilstand.mottattTid.truncatedTo(ChronoUnit.SECONDS),
             opprettetAv = behandling.opprettetAv ?: KELVIN,
             ansvarligBeslutter = if (erSkjermet && ansvarligBeslutter != null) SKJERMET_ENHET else ansvarligBeslutter,
             vedtakTid = behandling.vedtakstidspunkt(),
-            søknadsFormat = behandling.søknadsformat,
+            søknadsFormat = tilstand.søknadsformat,
             saksbehandler = saksbehandler,
             behandlingMetode = behandlingMetode,
             behandlingStatus = behandlingStatus,
@@ -196,8 +196,9 @@ object BQBehandlingMapper {
      * TODO: begrunnelse ved avslag/innvilgelse
      */
     private fun resultatBegrunnelse(behandlingHendelser: List<BehandlingHendelse>): String? {
-        if (behandlingHendelser.last().avklaringsbehovStatus?.returnert() == true) {
-            return behandlingHendelser.last().returÅrsak
+        val tilstand = behandlingHendelser.last().tilTilstand()
+        if (tilstand.gjeldendeAvklaringsbehovStatus?.returnert() == true) {
+            return tilstand.returÅrsak
         }
         return null
     }
@@ -235,7 +236,7 @@ object BQBehandlingMapper {
     }
 
     private fun avklaringsbehovTilBehandlingMetode(avklaringsbehov: String): BehandlingMetode =
-        Definisjon.forKode(avklaringsbehov).tilBehandlingMetode()
+        AvklaringsbehovKode(avklaringsbehov).tilBehandlingMetode()
 
     internal fun behandlingResultat(resultat: ResultatKode?, rettighetstyper: List<RettighetstypePeriode>): String =
         when (resultat) {
@@ -267,9 +268,10 @@ object BQBehandlingMapper {
         }
 
     internal fun behandlingStatus(behandling: Behandling): String {
+        val tilstand = behandling.nåværendeTilstand()
         val venteÅrsak =
-            behandling.venteÅrsak?.let { "_${ÅrsakTilSattPåVent.kortKodeFor(it).uppercase()}" }.orEmpty()
-        val returStatus = behandling.gjeldendeAvklaringsbehovStatus
+            tilstand.venteÅrsak?.let { "_${ÅrsakTilSattPåVent.kortKodeFor(it).uppercase()}" }.orEmpty()
+        val returStatus = tilstand.gjeldendeAvklaringsbehovStatus
             ?.takeIf { it.returnert() }
             ?.let { "_${it.name.uppercase()}" }.orEmpty()
 

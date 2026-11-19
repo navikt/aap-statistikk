@@ -1,5 +1,6 @@
 package no.nav.aap.statistikk.saksstatistikk
 
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
@@ -13,6 +14,7 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDateTime
@@ -21,6 +23,63 @@ import java.util.UUID
 class BQBehandlingTilstandsvalgTest {
     private val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
     private val referanse = UUID.randomUUID()
+
+    @Test
+    fun `returstatus leses fra behandlingen mens returbegrunnelsen leses fra siste hendelse`() {
+        val behandling = behandling().copy(
+            gjeldendeAvklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER,
+            returÅrsak = "Behandlingens returårsak",
+            hendelser = listOf(
+                BehandlingHendelse(
+                    tidspunkt = tidspunkt,
+                    hendelsesTidspunkt = tidspunkt.plusMinutes(1),
+                    avklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
+                    returÅrsak = "Historikkens returårsak",
+                    versjon = Versjon("historikk"),
+                    status = BehandlingStatus.UTREDES,
+                    mottattTid = tidspunkt,
+                    søknadsformat = SøknadsFormat.DIGITAL,
+                    relatertBehandlingReferanse = null,
+                ),
+            ),
+        )
+        val grunnlag = SaksstatistikkGrunnlag(
+            behandling = behandling,
+            erSkjermet = false,
+            relatertBehandlingUUID = null,
+            oppgaver = emptyList(),
+            rettighetstyper = emptyList(),
+            tekniskTid = tidspunkt.plusDays(1),
+        )
+
+        assertThat(BQBehandlingMapper.bqBehandlingForBehandling(grunnlag)).isEqualTo(
+            BQBehandling(
+                behandlingUUID = referanse,
+                ferdigbehandletTid = null,
+                behandlingType = "FØRSTEGANGSBEHANDLING",
+                aktorId = "0",
+                saksnummer = "SAK123",
+                tekniskTid = tidspunkt.plusDays(1),
+                registrertTid = tidspunkt,
+                endretTid = tidspunkt.plusMinutes(1),
+                versjon = "historikk",
+                mottattTid = tidspunkt.minusDays(1),
+                opprettetAv = "Oppretter",
+                ansvarligBeslutter = "Ytre beslutter",
+                vedtakTid = tidspunkt.minusMinutes(5),
+                søknadsFormat = SøknadsFormat.PAPIR,
+                saksbehandler = null,
+                behandlingMetode = BehandlingMetode.AUTOMATISK,
+                behandlingStatus = "UNDER_BEHANDLING_SENDT_TILBAKE_FRA_BESLUTTER",
+                behandlingÅrsak = "SØKNAD",
+                behandlingResultat = null,
+                resultatBegrunnelse = "Historikkens returårsak",
+                ansvarligEnhetKode = "KELVIN_AUTOMATISK",
+                sakYtelse = "AAP",
+                erResending = false,
+            ),
+        )
+    }
 
     @ParameterizedTest
     @ValueSource(booleans = [false, true])

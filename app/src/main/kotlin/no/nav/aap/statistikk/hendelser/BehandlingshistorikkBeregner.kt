@@ -128,7 +128,7 @@ class BehandlingshistorikkBeregner {
                 status = avklaringsbehov.utledBehandlingStatus(),
                 ansvarligBeslutter = behovstilstand.ansvarligBeslutter,
                 vedtakstidspunkt = if (behandlingVedStart.behandlingStatus() == BehandlingStatus.AVSLUTTET) {
-                    behandlingVedStart.vedtakstidspunkt ?: avklaringsbehov.utledVedtakTid()
+                    behandlingVedStart.nåværendeTilstand().vedtakstidspunkt ?: avklaringsbehov.utledVedtakTid()
                 } else {
                     null
                 },
@@ -155,8 +155,9 @@ class BehandlingshistorikkBeregner {
             resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
             versjon = dto.versjon.let(::Versjon),
             status = BehandlingStatus.AVSLUTTET,
-            ansvarligBeslutter = behandlingVedStart.hendelsesHistorikk().lastOrNull()?.ansvarligBeslutter,
-            vedtakstidspunkt = behandlingVedStart.vedtakstidspunkt,
+            ansvarligBeslutter = behandlingVedStart.hendelsesHistorikk().lastOrNull()
+                ?.nåværendeTilstand()?.ansvarligBeslutter,
+            vedtakstidspunkt = behandlingVedStart.nåværendeTilstand().vedtakstidspunkt,
             mottattTid = dto.mottattTid,
             søknadsformat = dto.soknadsFormat.tilDomene(),
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
