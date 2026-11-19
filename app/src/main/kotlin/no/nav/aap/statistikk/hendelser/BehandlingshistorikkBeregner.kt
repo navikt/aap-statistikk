@@ -8,8 +8,8 @@ import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 
 // TODO; oppdater dette
-class ReberegnHistorikk {
-    fun avklaringsbehovTilHistorikk(dto: StoppetBehandling, behandling: Behandling): Behandling {
+class BehandlingshistorikkBeregner {
+    fun beregn(dto: StoppetBehandling, behandling: Behandling): Behandling {
         val avklaringsbehov = dto.avklaringsbehov
         val (forrigeLøste, forrigeLøsteAvHvem, forrigeLøsteTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
             ?: Triple(null, null, null)

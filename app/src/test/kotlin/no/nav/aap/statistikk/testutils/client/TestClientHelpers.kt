@@ -33,8 +33,8 @@ import no.nav.aap.statistikk.bigquery.schemaRegistryYtelseStatistikk
 import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
-import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.RebyggBehandlingshistorikkJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.module
 import no.nav.aap.statistikk.postgresRepositoryRegistry
@@ -74,7 +74,7 @@ fun <E> testKlient(
     )
     motor.start()
 
-    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(jobbAppender)
+    val rebyggBehandlingshistorikkJobb = RebyggBehandlingshistorikkJobb(jobbAppender)
 
     val server = embeddedServer(Netty, port = 0) {
         commonKtorModule(
@@ -87,7 +87,7 @@ fun <E> testKlient(
             jobbAppender,
             {},
             lagreStoppetHendelseJobb,
-            lagreAvklaringsbehovHendelseJobb,
+            rebyggBehandlingshistorikkJobb,
         )
     }.start()
 

@@ -34,8 +34,8 @@ import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.hendelseLagret
 import no.nav.aap.statistikk.hendelser.tilDomene
-import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.RebyggBehandlingshistorikkJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.lagretPostmottakHendelse
@@ -236,15 +236,15 @@ class MottaStatistikkTest {
         val testJobber = konstruerTestJobber()
 
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
-        val lagreAvklaringsbehovHendelseJobb =
-            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
+        val rebyggBehandlingshistorikkJobb =
+            RebyggBehandlingshistorikkJobb(testJobber.motorJobbAppender)
 
         val motor = konstruerManuellMotor(
             dataSource,
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
             testJobber.resendSakstatistikkJobb,
-            lagreAvklaringsbehovHendelseJobb,
+            rebyggBehandlingshistorikkJobb,
             lagrePostmottakHendelseJobb,
             testJobber.lagreSakinfoTilBigQueryJobb,
         )
@@ -313,15 +313,15 @@ class MottaStatistikkTest {
         val testJobber = konstruerTestJobber()
 
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
-        val lagreAvklaringsbehovHendelseJobb =
-            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
+        val rebyggBehandlingshistorikkJobb =
+            RebyggBehandlingshistorikkJobb(testJobber.motorJobbAppender)
 
         val motor = konstruerManuellMotor(
             dataSource,
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
             testJobber.resendSakstatistikkJobb,
-            lagreAvklaringsbehovHendelseJobb,
+            rebyggBehandlingshistorikkJobb,
             lagrePostmottakHendelseJobb,
             testJobber.lagreSakinfoTilBigQueryJobb,
         )
@@ -369,15 +369,15 @@ class MottaStatistikkTest {
         val testJobber = konstruerTestJobber()
 
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
-        val lagreAvklaringsbehovHendelseJobb =
-            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
+        val rebyggBehandlingshistorikkJobb =
+            RebyggBehandlingshistorikkJobb(testJobber.motorJobbAppender)
 
         val motor = konstruerManuellMotor(
             dataSource,
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
             testJobber.resendSakstatistikkJobb,
-            lagreAvklaringsbehovHendelseJobb,
+            rebyggBehandlingshistorikkJobb,
             lagrePostmottakHendelseJobb,
             testJobber.lagreSakinfoTilBigQueryJobb,
         )
@@ -456,7 +456,7 @@ class MottaStatistikkTest {
                 resendSakstatistikkJobb,
                 lagreAvsluttetBehandlingTilBigQueryJobb,
                 lagreSakinfoTilBigQueryJobb,
-                LagreAvklaringsbehovHendelseJobb(jobbAppender),
+                RebyggBehandlingshistorikkJobb(jobbAppender),
                 lagrePostmottakHendelseJobb,
                 lagreOppgaveHendelseJobb,
                 lagreOppgaveJobb,
@@ -510,8 +510,8 @@ class MottaStatistikkTest {
         val transactionExecutor = FellesKomponentTransactionalExecutor(dataSource)
         val testJobber = konstruerTestJobber()
         val lagrePostmottakHendelseJobb = LagrePostmottakHendelseJobb()
-        val lagreAvklaringsbehovHendelseJobb =
-            LagreAvklaringsbehovHendelseJobb(testJobber.motorJobbAppender)
+        val rebyggBehandlingshistorikkJobb =
+            RebyggBehandlingshistorikkJobb(testJobber.motorJobbAppender)
         val lagreStoppetHendelseJobb =
             LagreStoppetHendelseJobb(testJobber.motorJobbAppender, testJobber.lagreAvsluttetBehandlingTilBigQueryJobb)
 
@@ -520,7 +520,7 @@ class MottaStatistikkTest {
             testJobber.motorJobbAppender,
             FakeBQYtelseRepository(),
             testJobber.resendSakstatistikkJobb,
-            lagreAvklaringsbehovHendelseJobb,
+            rebyggBehandlingshistorikkJobb,
             lagrePostmottakHendelseJobb,
             testJobber.lagreSakinfoTilBigQueryJobb,
         )

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
-class ReberegnHistorikkTest {
+class BehandlingshistorikkBeregnerTest {
     private val start = LocalDateTime.of(2026, 11, 19, 10, 0)
 
     @Test
@@ -39,7 +39,7 @@ class ReberegnHistorikkTest {
         val behandling = BehandlingService(FakeBehandlingRepository(), SkjermingService(FakePdlGateway()))
             .konstruerBehandling(dto, sak, eksisterendeBehandlingKanskje = null)
 
-        val historikk = ReberegnHistorikk().avklaringsbehovTilHistorikk(dto, behandling).hendelser
+        val historikk = BehandlingshistorikkBeregner().beregn(dto, behandling).hendelser
 
         assertThat(historikk.map { it.hendelsesTidspunkt })
             .containsExactlyElementsOf(listOf(0L, 1L, 3L, 4L, 5L, 6L).map { start.plusMinutes(it) })
@@ -125,7 +125,7 @@ class ReberegnHistorikkTest {
     )
 
     @Test
-    fun `begynne på test på reberegne historikk`() {
+    fun `beregner historikk for fullført førstegangsbehandling`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/fullfort_forstegangsbehandling.json")
 
@@ -159,14 +159,14 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.gjeldendeAvklaringsBehov).isNull()
     }
 
     @Test
-    fun `reberegne historikk for tom behandling`() {
+    fun `beregner historikk for behandling uten avklaringsbehov`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/resendt_revurdering_automatisk.json")
 
@@ -200,7 +200,7 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
@@ -210,7 +210,7 @@ class ReberegnHistorikkTest {
     }
 
     @Test
-    fun `reberegn historikk for avbrutt revurdering`() {
+    fun `beregner historikk for avbrutt revurdering`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/avbrutt_revurdering.json")
         val behandling = Behandling(
@@ -243,7 +243,7 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.hendelser).hasSize(7)
@@ -257,7 +257,7 @@ class ReberegnHistorikkTest {
     }
 
     @Test
-    fun `meldekort-behandling`() {
+    fun `beregner historikk for meldekortbehandling`() {
         val hendelse =
             hendelseFraFil("avklaringsbehovhendelser/meldekort_behandling.json")
         val behandling = Behandling(
@@ -290,7 +290,7 @@ class ReberegnHistorikkTest {
             hendelser = listOf(),
         )
 
-        val res = ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+        val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.hendelser).hasSize(2)

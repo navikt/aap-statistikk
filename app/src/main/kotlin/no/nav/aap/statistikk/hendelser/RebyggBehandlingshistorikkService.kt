@@ -12,7 +12,7 @@ import no.nav.aap.statistikk.sak.SakService
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.slf4j.LoggerFactory
 
-class ResendHendelseService(
+class RebyggBehandlingshistorikkService(
     private val sakService: SakService,
     private val personService: PersonService,
     private val behandlingRepository: IBehandlingRepository,
@@ -26,7 +26,7 @@ class ResendHendelseService(
             repositoryProvider: RepositoryProvider,
             gatewayProvider: GatewayProvider,
             hendelsePublisher: HendelsePublisher,
-        ): ResendHendelseService = ResendHendelseService(
+        ): RebyggBehandlingshistorikkService = RebyggBehandlingshistorikkService(
             sakService = SakService(repositoryProvider),
             personService = PersonService(repositoryProvider, gatewayProvider),
             behandlingRepository = repositoryProvider.provide(),
@@ -35,7 +35,7 @@ class ResendHendelseService(
         )
     }
 
-    fun prosesserNyHistorikkHendelse(hendelse: StoppetBehandling) {
+    fun rebyggHistorikk(hendelse: StoppetBehandling) {
         val person = personService.hentEllerLagrePerson(Ident(hendelse.ident))
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
 
@@ -44,7 +44,7 @@ class ResendHendelseService(
         val behandling = behandlingService.konstruerBehandling(hendelse, sak, eksisterendeBehandlingKanskje = null)
 
         val behandlingMedHistorikk =
-            ReberegnHistorikk().avklaringsbehovTilHistorikk(hendelse, behandling)
+            BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         check(behandling.behandlingStatus() == behandlingMedHistorikk.behandlingStatus())
         {

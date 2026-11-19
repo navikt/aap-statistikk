@@ -38,8 +38,8 @@ import no.nav.aap.statistikk.db.DbConfig
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.db.TransactionExecutor
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGraphQLGateway
-import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.RebyggBehandlingshistorikkJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.jobber.appender.MotorJobbAppender
 import no.nav.aap.statistikk.kodeverk.kodeverk
@@ -125,7 +125,7 @@ fun Application.startUp(
 
     val lagreStoppetHendelseJobb =
         LagreStoppetHendelseJobb(motorJobbAppender, lagreAvsluttetBehandlingTilBigQueryJobb)
-    val lagreAvklaringsbehovHendelseJobb = LagreAvklaringsbehovHendelseJobb(motorJobbAppender)
+    val rebyggBehandlingshistorikkJobb = RebyggBehandlingshistorikkJobb(motorJobbAppender)
 
     val lagreOppgaveJobb = LagreOppgaveJobb()
     val lagreOppgaveHendelseJobb = LagreOppgaveHendelseJobb()
@@ -134,7 +134,7 @@ fun Application.startUp(
 
     val jobberListe = listOf(
         lagreStoppetHendelseJobb,
-        lagreAvklaringsbehovHendelseJobb,
+        rebyggBehandlingshistorikkJobb,
         lagreOppgaveHendelseJobb,
         lagrePostmottakHendelseJobb,
         lagreSakinfoTilBigQueryJobb,
@@ -183,7 +183,7 @@ fun Application.startUp(
         motorJobbAppender,
         motorApiCallback,
         lagreStoppetHendelseJobb,
-        lagreAvklaringsbehovHendelseJobb,
+        rebyggBehandlingshistorikkJobb,
     )
 }
 
@@ -207,7 +207,7 @@ fun Application.module(
     jobbAppender: JobbAppender,
     motorApiCallback: NormalOpenAPIRoute.() -> Unit,
     lagreStoppetHendelseJobb: LagreStoppetHendelseJobb,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+    rebyggBehandlingshistorikkJobb: RebyggBehandlingshistorikkJobb,
 ) {
     transactionExecutor.withinTransaction {
         RetryService(it).enable()
@@ -226,7 +226,7 @@ fun Application.module(
                 mottaOppdatertBehandling(
                     transactionExecutor,
                     jobbAppender,
-                    lagreAvklaringsbehovHendelseJobb,
+                    rebyggBehandlingshistorikkJobb,
                 )
                 mottaOppgaveOppdatering(transactionExecutor, jobbAppender)
                 mottaPostmottakOppdatering(

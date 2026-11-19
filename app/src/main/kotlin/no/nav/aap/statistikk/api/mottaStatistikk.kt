@@ -17,8 +17,8 @@ import no.nav.aap.oppgave.statistikk.HendelseType
 import no.nav.aap.oppgave.statistikk.OppgaveHendelse
 import no.nav.aap.postmottak.kontrakt.hendelse.DokumentflytStoppetHendelse
 import no.nav.aap.statistikk.db.TransactionExecutor
-import no.nav.aap.statistikk.jobber.LagreAvklaringsbehovHendelseJobb
 import no.nav.aap.statistikk.jobber.LagreStoppetHendelseJobb
+import no.nav.aap.statistikk.jobber.RebyggBehandlingshistorikkJobb
 import no.nav.aap.statistikk.jobber.appender.JobbAppender
 import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.Oppgavestatus
@@ -100,14 +100,14 @@ fun NormalOpenAPIRoute.mottaTilbakekrevingshendelse(
 fun NormalOpenAPIRoute.mottaOppdatertBehandling(
     transactionExecutor: TransactionExecutor,
     jobbAppender: JobbAppender,
-    lagreAvklaringsbehovHendelseJobb: LagreAvklaringsbehovHendelseJobb,
+    rebyggBehandlingshistorikkJobb: RebyggBehandlingshistorikkJobb,
 ) {
     mottaHendelse<StoppetBehandling>(
         path = "/oppdatertBehandling",
         authorizedAzps = listOf(Azp.Behandlingsflyt.uuid),
         transactionExecutor = transactionExecutor,
         jobbAppender = jobbAppender,
-        jobbSpesifikasjon = lagreAvklaringsbehovHendelseJobb,
+        jobbSpesifikasjon = rebyggBehandlingshistorikkJobb,
         saksnummer = { stringToNumber(it.saksnummer) },
     )
 }
