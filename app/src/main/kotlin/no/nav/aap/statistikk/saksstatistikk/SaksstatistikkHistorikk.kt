@@ -14,48 +14,20 @@ internal fun flettSaksstatistikkHistorikk(
     var forrigeNye: BQBehandling? = null
     val originaleMedNyData = originaleHendelser
         .sorted()
-        .map {
-            if (nyeQueue.isEmpty()) {
-                val last = sorterteNye.last()
-                forrigeNye = last
-                last.copy(endretTid = it.endretTid)
-            } else if (nærNokITid(it.endretTid, nyeQueue.peek().endretTid)) {
-                val ny = nyeQueue.poll()
-                forrigeNye = ny
-                ny.copy(endretTid = it.endretTid)
-            } else if (it.endretTid.isBefore(nyeQueue.peek().endretTid) && forrigeNye != null) {
-                /*
-                GAMMEL: -------   X ---------
-                NY    : -- Z ------- Y ------ (Z = forrigeNye)
-                 */
-                forrigeNye.copy(endretTid = it.endretTid)
-            } else if (it.endretTid.isBefore(nyeQueue.peek().endretTid) && forrigeNye == null) {
-                /*
-                GAMMEL: ---- X ---------
-                NY    : ---------- Y ---
-                 */
-                val ny = nyeQueue.poll()
-                forrigeNye = ny
-                ny.copy(endretTid = it.endretTid)
-            } else if (it.endretTid.isAfter(nyeQueue.peek().endretTid) && forrigeNye != null) {
-                /*
-                GAMMEL: ------------ X --
-                NY    : -- Z --- Y ------
-                 */
-                val ny = nyeQueue.poll()
-                forrigeNye = ny
-                ny.copy(endretTid = it.endretTid)
-            } else if (it.endretTid.isAfter(nyeQueue.peek().endretTid) && forrigeNye == null) {
-                /*
-                GAMMEL: ------------ X --
-                NY    : ------ Y ------
-                 */
-                val ny = nyeQueue.poll()
-                forrigeNye = ny
-                ny.copy(endretTid = it.endretTid)
-            } else {
-                error("Ukjent situasjon")
+        .map { original ->
+            val neste = nyeQueue.peek()
+            val forrige = forrigeNye
+            val valgt = when {
+                neste == null -> sorterteNye.last()
+
+                !nærNokITid(original.endretTid, neste.endretTid) &&
+                    original.endretTid.isBefore(neste.endretTid) &&
+                    forrige != null -> forrige
+
+                else -> nyeQueue.poll()
             }
+            forrigeNye = valgt
+            valgt.copy(endretTid = original.endretTid)
         }
 
     // Gamle tidspunkter bevares før påfølgende duplikater fjernes.
