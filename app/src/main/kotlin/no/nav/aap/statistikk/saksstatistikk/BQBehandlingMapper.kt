@@ -114,7 +114,7 @@ class BQBehandlingMapper(
             )
         }
 
-        return byggBQBehandling(
+        val bqBehandling = byggBQBehandling(
             behandling = behandling,
             relatertBehandlingUUID = relatertBehandlingUUID,
             erSkjermet = erSkjermet,
@@ -123,7 +123,17 @@ class BQBehandlingMapper(
             endretTid = snapshots.last().tidspunkt,
             behandlingStatus = behandlingStatus(behandling),
             behandlingMetode = behandlingMetode,
+            behandlingResultat = regnUtBehandlingResultat(behandling),
+            tekniskTid = LocalDateTime.now(clock),
         )
+
+        if (behandlingMetode == BehandlingMetode.AUTOMATISK) {
+            log.info(
+                "Behandling $behandlingReferanse er automatisk behandlet. Behandlingtype ${behandling.typeBehandling}",
+            )
+        }
+
+        return bqBehandling
     }
 
     private fun byggBQBehandling(
@@ -135,6 +145,8 @@ class BQBehandlingMapper(
         endretTid: LocalDateTime,
         behandlingStatus: String,
         behandlingMetode: BehandlingMetode,
+        behandlingResultat: String?,
+        tekniskTid: LocalDateTime,
     ): BQBehandling {
         val årsakTilOpprettelse = behandling.årsakTilOpprettelse
         val sak = behandling.sak
@@ -145,7 +157,6 @@ class BQBehandlingMapper(
 
         val behandlingType = behandling.typeBehandling.toString().uppercase()
         val behandlingÅrsak = årsakTilOpprettelse ?: behandling.årsaker.prioriterÅrsaker().name
-        val behandlingResultat = regnUtBehandlingResultat(behandling)
 
         // behandlingStatus er allerede sikret å holde seg innenfor grensen, jf. ÅrsakTilSattPåVent.kortKode.
         // De øvrige feltene har foreløpig ingen tilsvarende kortkode-løsning, så vi sikrer i det minste
@@ -163,7 +174,7 @@ class BQBehandlingMapper(
             behandlingType = behandlingType,
             aktorId = sak.person.ident.ident,
             saksnummer = sak.saksnummer.value,
-            tekniskTid = LocalDateTime.now(clock),
+            tekniskTid = tekniskTid,
             registrertTid = behandling.opprettetTid.truncatedTo(ChronoUnit.SECONDS),
             endretTid = endretTid,
             versjon = behandling.versjon(),
@@ -173,13 +184,7 @@ class BQBehandlingMapper(
             vedtakTid = behandling.vedtakstidspunkt(),
             søknadsFormat = behandling.søknadsformat,
             saksbehandler = saksbehandler,
-            behandlingMetode = behandlingMetode.also {
-                if (it == BehandlingMetode.AUTOMATISK) {
-                    log.info(
-                    "Behandling $behandlingReferanse er automatisk behandlet. Behandlingtype ${behandling.typeBehandling}",
-                )
-                }
-            },
+            behandlingMetode = behandlingMetode,
             behandlingStatus = behandlingStatus,
             behandlingÅrsak = behandlingÅrsak,
             behandlingResultat = behandlingResultat,
