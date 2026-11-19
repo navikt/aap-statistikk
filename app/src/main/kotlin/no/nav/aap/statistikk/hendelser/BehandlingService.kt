@@ -160,7 +160,7 @@ class BehandlingService(
     fun hentRelatertBehandlingUUID(behandling: Behandling): String? {
         val eksisterendeBehandling =
             behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
-        return eksisterendeBehandling?.toString() ?: behandling.relatertBehandlingReferanse
+        return eksisterendeBehandling?.toString() ?: behandling.nåværendeTilstand().relatertBehandlingReferanse
     }
 
     fun hentBehandling(behandlingId: BehandlingId) = behandlingRepository.hent(behandlingId)

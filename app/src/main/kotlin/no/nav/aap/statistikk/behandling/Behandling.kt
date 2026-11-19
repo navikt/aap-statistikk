@@ -120,7 +120,7 @@ data class Behandling(
                 ResultatKode.AVBRUTT,
             ) -> null
 
-            this.status in listOf(
+            nåværendeTilstand().status in listOf(
                 BehandlingStatus.IVERKSETTES,
                 BehandlingStatus.AVSLUTTET,
             ) -> this.referanse.toBase64()
@@ -129,32 +129,34 @@ data class Behandling(
         }
     }
 
-    fun versjon(): String = this.hendelser.lastOrNull()?.versjon?.verdi ?: versjon.verdi
+    fun versjon(): String = (hendelser.lastOrNull()?.tilTilstand() ?: nåværendeTilstand()).versjon.verdi
 
-    fun ansvarligBeslutter(): String? = this.hendelser.lastOrNull()?.ansvarligBeslutter ?: ansvarligBeslutter
+    fun ansvarligBeslutter(): String? =
+        hendelser.lastOrNull()?.tilTilstand()?.ansvarligBeslutter ?: nåværendeTilstand().ansvarligBeslutter
 
-    fun vedtakstidspunkt(): LocalDateTime? = this.hendelser.lastOrNull()?.vedtakstidspunkt ?: vedtakstidspunkt
+    fun vedtakstidspunkt(): LocalDateTime? =
+        hendelser.lastOrNull()?.tilTilstand()?.vedtakstidspunkt ?: nåværendeTilstand().vedtakstidspunkt
 
-    fun behandlingStatus(): BehandlingStatus = hendelser.lastOrNull()?.status ?: this.status
+    fun behandlingStatus(): BehandlingStatus = (hendelser.lastOrNull()?.tilTilstand() ?: nåværendeTilstand()).status
 
-    fun avsluttetTid(): LocalDateTime = hendelser.filter { it.status == BehandlingStatus.AVSLUTTET }
+    fun avsluttetTid(): LocalDateTime = hendelser.filter { it.tilTilstand().status == BehandlingStatus.AVSLUTTET }
         .maxOf { it.hendelsesTidspunkt }
 
     fun oppdatertTidspunkt(): LocalDateTime = hendelser.maxOfOrNull { it.hendelsesTidspunkt }
         ?: requireNotNull(this.oppdatertTidspunkt) { "oppdatertTidspunkt er ikke satt på behandling $referanse." }
 
-    fun resultatFraSisteHendelse(): ResultatKode? = hendelser.lastOrNull()?.resultat
+    fun resultatFraSisteHendelse(): ResultatKode? = hendelser.lastOrNull()?.tilTilstand()?.resultat
 
     fun identerPåBehandling(): List<Ident> = listOf(this.sak.person.ident) + this.relaterteIdenter
 
     fun behandlingMetode(): BehandlingMetode {
-        val sisteDefinisjon = hendelser.lastOrNull { it.avklaringsBehov != null }?.avklaringsBehov
-            ?: return BehandlingMetode.AUTOMATISK
+        val behov = hendelser.mapNotNull { it.tilTilstand().gjeldendeAvklaringsBehov }
+        val sisteBehov = behov.lastOrNull() ?: return BehandlingMetode.AUTOMATISK
 
-        return when (sisteDefinisjon.tilBehandlingMetode()) {
+        return when (sisteBehov.tilBehandlingMetode()) {
             BehandlingMetode.KVALITETSSIKRING -> BehandlingMetode.KVALITETSSIKRING
             BehandlingMetode.FATTE_VEDTAK -> BehandlingMetode.FATTE_VEDTAK
-            else -> if (this.hendelser.erManuell()) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
+            else -> if (behov.any { !it.erAutomatisk() }) BehandlingMetode.MANUELL else BehandlingMetode.AUTOMATISK
         }
     }
 
@@ -228,18 +230,6 @@ data class Behandling(
         returÅrsakkoblinger = tilstand.returÅrsakkoblinger.map { it.tilReturÅrsakkobling() },
         relatertBehandlingReferanse = tilstand.relatertBehandlingReferanse,
     )
-}
-
-@JvmName("erAutomatisk")
-private fun List<BehandlingHendelse>.erManuell(): Boolean = this.filterNot { it.avklaringsBehov == null }.any {
-    !requireNotNull(it.avklaringsBehov).erAutomatisk()
-}
-
-fun Definisjon.tilBehandlingMetode(): BehandlingMetode = when {
-    this == Definisjon.KVALITETSSIKRING -> BehandlingMetode.KVALITETSSIKRING
-    this == Definisjon.FATTE_VEDTAK -> BehandlingMetode.FATTE_VEDTAK
-    this.erAutomatisk() -> BehandlingMetode.AUTOMATISK
-    else -> BehandlingMetode.MANUELL
 }
 
 /**
@@ -342,5 +332,5 @@ enum class TypeBehandling(val kildeSystem: KildeSystem, val erYtelsesBehandling:
 fun List<Vurderingsbehov>.prioriterÅrsaker(): Vurderingsbehov = this.sortedBy { it.name }.minBy { it.sortering }
 
 fun List<BehandlingHendelse>.ferdigBehandletTid(): LocalDateTime? = this.firstOrNull {
-    it.status == BehandlingStatus.AVSLUTTET
+    it.tilTilstand().status == BehandlingStatus.AVSLUTTET
 }?.hendelsesTidspunkt

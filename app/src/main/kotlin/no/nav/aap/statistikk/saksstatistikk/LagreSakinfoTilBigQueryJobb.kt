@@ -77,13 +77,13 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                     val delay = enhetRetryConfig.delaySeconds * (1L shl retryCount)
                     log.info(
                         "Enhet mangler for behandling ${resultat.behandlingId}, " +
-                            "avklaringsbehov=${resultat.avklaringsbehovKode}. " +
+                            "avklaringsbehov=${resultat.avklaringsbehovKode?.verdi}. " +
                             "Reschedulerer om ${delay}s " +
                             "(forsøk ${retryCount + 1}/${enhetRetryConfig.maxRetries}).",
                     )
                     leggTilRetry(
                         payload.copy(
-                            avklaringsbehovKode = resultat.avklaringsbehovKode?.kode?.name,
+                            avklaringsbehovKode = resultat.avklaringsbehovKode?.verdi,
                             retryCount = retryCount + 1,
                             triggerKilde = "retry($triggerKilde)",
                         ),
@@ -94,7 +94,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                     error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                             "for behandling ${resultat.behandlingId}, " +
-                            "avklaringsbehov=${resultat.avklaringsbehovKode}. Saksnummer: ${behandling.sak.saksnummer}.",
+                            "avklaringsbehov=${resultat.avklaringsbehovKode?.verdi}. Saksnummer: ${behandling.sak.saksnummer}.",
                     )
                 }
             }

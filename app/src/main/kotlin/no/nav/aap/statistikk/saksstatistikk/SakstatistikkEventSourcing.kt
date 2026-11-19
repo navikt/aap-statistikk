@@ -1,7 +1,9 @@
 package no.nav.aap.statistikk.saksstatistikk
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.statistikk.behandling.AvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.løsesAv
+import no.nav.aap.statistikk.behandling.tilTilstand
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
@@ -24,14 +26,15 @@ object SakstatistikkEventSourcing {
         behandling.hendelser.map {
                 hendelse,
             ->
-            val rolleEndret = rolleEndretMellom(hendelse.sisteLøsteAvklaringsbehov, hendelse.avklaringsBehov)
+            val tilstand = hendelse.tilTilstand()
+            val rolleEndret = rolleEndretMellom(tilstand.sisteLøsteAvklaringsbehov, tilstand.gjeldendeAvklaringsBehov)
             BehandlingsflytHendelse(
                 behandlingReferanse = behandling.referanse,
                 tidspunkt = hendelse.hendelsesTidspunkt,
-                status = hendelse.status.name,
-                avklaringsbehov = hendelse.avklaringsBehov,
-                sisteLøsteAvklaringsbehov = hendelse.sisteLøsteAvklaringsbehov,
-                sisteSaksbehandlerPåBehandling = if (rolleEndret) null else hendelse.sisteSaksbehandlerSomLøstebehov,
+                status = tilstand.status.name,
+                avklaringsbehov = tilstand.gjeldendeAvklaringsBehov,
+                sisteLøsteAvklaringsbehov = tilstand.sisteLøsteAvklaringsbehov,
+                sisteSaksbehandlerPåBehandling = if (rolleEndret) null else tilstand.sisteSaksbehandlerSomLøstebehov,
             )
         }
 
@@ -39,10 +42,13 @@ object SakstatistikkEventSourcing {
      * Returnerer true dersom avklaringsbehovene løses av ulike roller, slik at saksbehandler-fallback
      * ikke skal bæres over fra ett steg til et annet.
      */
-    private fun rolleEndretMellom(forrigeAvklaringsbehov: Definisjon?, nyttAvklaringsbehov: Definisjon?): Boolean {
+    private fun rolleEndretMellom(
+        forrigeAvklaringsbehov: AvklaringsbehovKode?,
+        nyttAvklaringsbehov: AvklaringsbehovKode?,
+    ): Boolean {
         if (forrigeAvklaringsbehov == null || nyttAvklaringsbehov == null) return false
-        val forrigeRoller = forrigeAvklaringsbehov.løsesAv.toSet()
-        val nyeRoller = nyttAvklaringsbehov.løsesAv.toSet()
+        val forrigeRoller = forrigeAvklaringsbehov.løsesAv()
+        val nyeRoller = nyttAvklaringsbehov.løsesAv()
         return forrigeRoller.intersect(nyeRoller).isEmpty()
     }
 
@@ -142,7 +148,7 @@ object SakstatistikkEventSourcing {
                 tidspunkt = hendelse.tidspunkt,
                 behandlingReferanse = hendelse.behandlingReferanse,
                 status = state.status,
-                avklaringsbehov = state.avklaringsbehov?.kode?.name,
+                avklaringsbehov = state.avklaringsbehov?.verdi,
                 saksbehandler = state.saksbehandler,
                 enhet = state.enhet,
                 kilde = hendelse.kilde,
