@@ -93,10 +93,9 @@ data class Behandling(
         relatertBehandlingReferanse = hendelse.relatertBehandlingReferanse,
     )
 
-    fun hendelsesHistorikk(): List<Behandling> = (1..<this.hendelser.size + 1)
-        .map { this.hendelser.subList(0, it) }
-        .scan(this.copy(hendelser = emptyList())) { acc, hendelser ->
-            acc.leggTilHendelse(hendelser.last())
+    fun hendelsesHistorikk(): List<Behandling> = hendelser
+        .scan(copy(hendelser = emptyList())) { acc, hendelse ->
+            acc.leggTilHendelse(hendelse)
         }.drop(1)
 
     /**

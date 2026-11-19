@@ -98,6 +98,74 @@ class BehandlingTest {
     }
 
     @Test
+    fun `tom hendelsesliste gir ingen historiske tilstander`() {
+        assertThat(behandlingMedHendelser().hendelsesHistorikk()).isEmpty()
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = [0, -1])
+    fun `historikken beholder oppgitt rekkefølge også ved like eller synkende tidspunkter`(minutter: Long) {
+        val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
+        val første = behandlingHendelse(
+            Definisjon.AVKLAR_SYKDOM,
+            tidspunkt,
+            Versjon("1"),
+            BehandlingStatus.OPPRETTET,
+        )
+        val andre = første.copy(hendelsesTidspunkt = tidspunkt.plusMinutes(minutter), versjon = Versjon("2"))
+        val behandling = behandlingMedHendelser(første, andre)
+
+        val historikk = behandling.hendelsesHistorikk()
+
+        assertThat(historikk.map { it.hendelser }).containsExactly(listOf(første), listOf(første, andre))
+        assertThat(historikk.map { it.versjon }).containsExactly(Versjon("1"), Versjon("2"))
+        assertThat(behandling.hendelser).containsExactly(første, andre)
+    }
+
+    @Test
+    fun `nullverdier erstatter tidligere tilstand uten å endre tidligere historikk`() {
+        val første = behandlingHendelse(
+            Definisjon.AVKLAR_SYKDOM,
+            LocalDateTime.of(2026, 11, 19, 10, 0),
+            Versjon("1"),
+            BehandlingStatus.UTREDES,
+        ).copy(resultat = ResultatKode.INNVILGET)
+        val andre = første.copy(
+            hendelsesTidspunkt = første.hendelsesTidspunkt.plusMinutes(1),
+            avklaringsBehov = null,
+            avklaringsbehovStatus = null,
+            saksbehandler = null,
+            ansvarligBeslutter = null,
+            resultat = null,
+        )
+
+        val behandling = behandlingMedHendelser(første, andre)
+        val forventetFørste = behandling.copy(
+            hendelser = listOf(første),
+            status = BehandlingStatus.UTREDES,
+            oppdatertTidspunkt = første.hendelsesTidspunkt,
+            gjeldendeAvklaringsBehov = Definisjon.AVKLAR_SYKDOM,
+            gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
+            sisteSaksbehandler = "Albert",
+            ansvarligBeslutter = "Åberg",
+            resultat = ResultatKode.INNVILGET,
+        )
+        val forventetAndre = forventetFørste.copy(
+            hendelser = listOf(første, andre),
+            oppdatertTidspunkt = andre.hendelsesTidspunkt,
+            gjeldendeAvklaringsBehov = null,
+            gjeldendeAvklaringsbehovStatus = null,
+            sisteSaksbehandler = null,
+            ansvarligBeslutter = null,
+            resultat = null,
+        )
+
+        val historikk = behandling.hendelsesHistorikk()
+
+        assertThat(historikk).usingRecursiveComparison().isEqualTo(listOf(forventetFørste, forventetAndre))
+    }
+
+    @Test
     fun `påTidspunkt filtrerer hendelser til og med gitt tidspunkt`() {
         val t1 = LocalDateTime.of(2024, 1, 1, 10, 0)
         val t2 = LocalDateTime.of(2024, 1, 1, 11, 0)
@@ -189,6 +257,26 @@ class BehandlingTest {
 
         assertThat(snapshot.hendelser).hasSize(2)
         assertThat(snapshot.oppdatertTidspunkt()).isEqualTo(t2)
+    }
+
+    private fun behandlingMedHendelser(vararg hendelser: BehandlingHendelse): Behandling {
+        val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
+        return Behandling(
+            referanse = UUID.randomUUID(),
+            sak = Sak(
+                saksnummer = Saksnummer("SAK123"),
+                person = Person(ident = Ident("0")),
+                sakStatus = SakStatus.OPPRETTET,
+                sistOppdatert = tidspunkt,
+            ),
+            typeBehandling = TypeBehandling.Førstegangsbehandling,
+            status = BehandlingStatus.OPPRETTET,
+            opprettetTid = tidspunkt,
+            mottattTid = tidspunkt,
+            versjon = Versjon("1"),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            hendelser = hendelser.toList(),
+        )
     }
 
     private fun behandlingHendelse(
