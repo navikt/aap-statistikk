@@ -35,10 +35,12 @@ Commit genererte endringer og push.
 Når datamodellen endres (f.eks. nye obligatoriske felter legges til), kan testdataene bli utdaterte. Bruk `UpdateHendelserPublicJobbJson.kt` for å automatisk oppdatere testdata-filene:
 
 ```bash
-./gradlew test --tests "no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJson.update_hendelser_public_jobb_fixture_with_utbetalingsdato"
+./gradlew :app:oppdaterHendelsesfixtures
 ```
 
-Dette scriptet oppdaterer følgende testfiler:
+Kjør oppgaven fra repo-roten. Tasken feiler hvis en fil i den eksplisitte fillisten mangler.
+
+Oppgaven oppdaterer følgende testfiler:
 
 - `app/src/test/resources/hendelser_public_jobb.json`
 - `app/src/test/resources/hendelser_klage.json`

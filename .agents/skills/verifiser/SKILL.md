@@ -36,8 +36,8 @@ argument-hint: "[basis-ref, for eksempel origin/main]"
 
 4. Kjør `./gradlew test` til slutt. Testene kan bruke Testcontainers for Postgres og BigQuery-emulatoren;
    Docker må være tilgjengelig. Ikke anta at en grønn enhetstest verifiserer SQL eller migrasjoner.
-   [UpdateHendelserPublicJobbJson.kt](../../../app/src/test/kotlin/no/nav/aap/statistikk/testutils/UpdateHendelserPublicJobbJson.kt#L38)
-   kan skrive fixture-filer under testkjøringen: kontroller diffen etterpå, og ikke forkast brukerens endringer.
+   Vanlig `test` skal ikke skrive fixture-filene. Kjør `:app:oppdaterHendelsesfixtures` eksplisitt
+   hvis de trenger vedlikehold. Kontroller diffen etterpå, og ikke forkast brukerens endringer.
 5. Ved vesentlige Kotlin-endringer: kjør `./gradlew detektMain`. Appen setter `ignoreFailures = true`
    i [build.gradle.kts](../../../app/build.gradle.kts#L11), så les rapporten selv om kommandoen lykkes.
    Rett nye funn som endringen introduserer; ikke utvid oppgaven med urelaterte funn.

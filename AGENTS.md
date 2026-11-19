@@ -103,10 +103,12 @@ For rene enum-utvidelser med identisk mapping (kontrakt -> domene), ikke legg ti
 When the data model changes (e.g. new fields added to `AvsluttetBehandlingDTO` or `StoppetBehandling`), the JSON test fixture files need updating. Use the helper class `UpdateHendelserPublicJobbJson` in `app/src/test/kotlin/no/nav/aap/statistikk/testutils/`:
 
 ```bash
-./gradlew test --tests "no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJson.update_hendelser_public_jobb_fixture_with_utbetalingsdato"
+./gradlew :app:oppdaterHendelsesfixtures
 ```
 
-This script processes all JSON fixtures (e.g. `hendelser_public_jobb.json`, `hendelser_klage.json`, avklaringsbehovhendelser) and:
+Run this maintenance task explicitly from the repository root. It uses the test classpath and runs in the `app` directory; normal `test`, `check`, and `build` do not invoke it. Missing files in its explicit fixture list cause the task to fail.
+
+This script processes the listed JSON fixtures (e.g. `hendelser_public_jobb.json`, `hendelser_klage.json`, avklaringsbehovhendelser) and:
 
 - Adds missing required fields with sensible defaults
 - Fixes date/time format issues

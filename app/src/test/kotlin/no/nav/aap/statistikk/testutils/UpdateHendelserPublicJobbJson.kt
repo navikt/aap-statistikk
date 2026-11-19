@@ -4,24 +4,30 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-/**
- * Test-only helper that updates test fixture files to ensure they have all required fields.
- * 
- * Run this test to update test data files when the data model changes:
- * ./gradlew test --tests "no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJson.update_hendelser_public_jobb_fixture_with_utbetalingsdato"
- * 
- * The script automatically:
- * - Adds missing required fields with default values
- * - Fixes date/time format issues
- * - Adds calculated fields (e.g., utbetalingsdato from tilDato)
- */
+fun main() {
+    val testDataFiles = listOf(
+        "src/test/resources/hendelser_public_jobb.json",
+        "src/test/resources/hendelser_klage.json",
+        "src/test/resources/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json",
+        "src/test/resources/avklaringsbehovhendelser/grunnlag_steg.json",
+        "src/test/resources/avklaringsbehovhendelser/er_pa_brev_steget.json",
+        "src/test/resources/avklaringsbehovhendelser/meldekort_behandling.json",
+        "src/test/resources/avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json",
+        "src/test/resources/avklaringsbehovhendelser/skal_være_iverksettes.json",
+        "src/test/resources/avklaringsbehovhendelser/avbrutt_revurdering.json",
+        "src/test/resources/avklaringsbehovhendelser/resendt_hendelse.json",
+        "src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json",
+    ).map { Path.of(it) }
+
+    UpdateHendelserPublicJobbJson().oppdater(testDataFiles)
+}
+
 class UpdateHendelserPublicJobbJson {
     private val mapper: ObjectMapper = jacksonObjectMapper()
     private val opprettetTidFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
@@ -35,23 +41,8 @@ class UpdateHendelserPublicJobbJson {
         TilkjentYtelseTransform(),
     )
 
-    @Test
-    fun update_hendelser_public_jobb_fixture_with_utbetalingsdato() {
-        val testDataFiles = listOf(
-            "src/test/resources/hendelser_public_jobb.json",
-            "src/test/resources/hendelser_klage.json",
-            "src/test/resources/avklaringsbehovhendelser/fullfort_forstegangsbehandling.json",
-            "src/test/resources/avklaringsbehovhendelser/grunnlag_steg.json",
-            "src/test/resources/avklaringsbehovhendelser/er_pa_brev_steget.json",
-            "src/test/resources/avklaringsbehovhendelser/meldekort_behandling.json",
-            "src/test/resources/avklaringsbehovhendelser/sendt_tilbake_11_5_fra_beslutter.json",
-            "src/test/resources/avklaringsbehovhendelser/skal_være_iverksettes.json",
-            "src/test/resources/avklaringsbehovhendelser/avbrutt_revurdering.json",
-            "src/test/resources/avklaringsbehovhendelser/resendt_hendelse.json",
-            "src/test/resources/avklaringsbehovhendelser/resendt_revurdering_automatisk.json",
-        ).map { Path.of(it) }
-
-        testDataFiles.filter { Files.exists(it) }.forEach { filePath ->
+    fun oppdater(testDataFiles: List<Path>) {
+        testDataFiles.forEach { filePath ->
             val jsonNode = mapper.readTree(Files.readString(filePath))
             var modified = false
 

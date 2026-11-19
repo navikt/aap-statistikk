@@ -12,19 +12,21 @@ Velg mellom å tilpasse eksisterende payloads og å hente et nytt generert hende
 
 1. Les deserialiseringsfeilen og den aktuelle kontrakten. Skriv eller finn testen som viser hvilket felt
    som mangler. Ikke legg inn tilfeldige standardverdier for å få parseren til å godta dataene.
-2. Bruk [UpdateHendelserPublicJobbJson.kt](../../../app/src/test/kotlin/no/nav/aap/statistikk/testutils/UpdateHendelserPublicJobbJson.kt#L25).
+2. Bruk [UpdateHendelserPublicJobbJson.kt](../../../app/src/test/kotlin/no/nav/aap/statistikk/testutils/UpdateHendelserPublicJobbJson.kt#L13).
    Hjelperen håndterer både direkte `StoppetBehandling`-objekter og Motor-rader der `payload`
-   selv er en JSON-streng. Den skriver til kildefilene og kjører også som del av vanlig `test`.
+   selv er en JSON-streng. Den skriver til kildefilene bare når du kjører vedlikeholdsoppgaven,
+   ikke som del av vanlig `test`, `check` eller `build`.
 3. For nye transformasjoner: implementer `NodeTransform` og legg transformasjonen i `behandlingTransforms`.
    Bevar eksisterende verdier, og bruk bare standardverdier som er riktige for testscenarioet.
 4. Ta vare på oversikten over eksisterende endringer før kjøring. Kjør fra repo-roten:
 
     ```bash
-    ./gradlew :app:test --tests "no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJson.update_hendelser_public_jobb_fixture_with_utbetalingsdato"
+    ./gradlew :app:oppdaterHendelsesfixtures
     ```
 
 5. Hjelperen behandler en eksplisitt filliste. Legg nye fixture-filer til der hvis de også skal transformeres.
-   Kontroller diffen for utilsiktede endringer av historikk, tidspunkt og verdier.
+   Oppgaven feiler hvis en fil i listen mangler. Kontroller diffen for utilsiktede endringer av historikk,
+   tidspunkt og verdier.
 
 ## Hent et nytt hendelsesforløp fra behandlingsflyt
 
