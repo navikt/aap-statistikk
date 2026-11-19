@@ -14,7 +14,6 @@ import no.nav.aap.statistikk.behandling.IBehandlingRepository
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.tilDomene
-import no.nav.aap.statistikk.behandling.tilTilstand
 import no.nav.aap.statistikk.nyBehandlingOpprettet
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.sak.Sak
@@ -139,7 +138,7 @@ class BehandlingService(
             gjeldendeStegGruppe = behovstilstand.gjeldendeBehov?.steggruppe?.tilDomene(),
             venteÅrsak = behovstilstand.venteÅrsak,
             returÅrsak = behovstilstand.returÅrsak,
-            returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger.map { it.tilTilstand() },
+            returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger,
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
         )
     }

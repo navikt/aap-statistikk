@@ -22,6 +22,7 @@ import no.nav.aap.statistikk.behandling.BQYtelseBehandling
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.behandling.DiagnoseEntity
 import no.nav.aap.statistikk.behandling.DiagnosePerioderRepository
 import no.nav.aap.statistikk.behandling.DiagnoseRepository
@@ -139,16 +140,19 @@ class FakeBehandlingRepository : IBehandlingRepository {
     private var nextId = 0L
     override fun opprettBehandling(behandling: Behandling): BehandlingId {
         val id = nextId
+        val tilstand = behandling.nåværendeTilstand()
         behandlinger[id] = behandling.copy(id = BehandlingId(id)).leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
                 hendelsesTidspunkt = LocalDateTime.now(),
-                status = behandling.behandlingStatus(),
-                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
-                versjon = behandling.versjon,
-                mottattTid = behandling.mottattTid,
-                søknadsformat = behandling.søknadsformat,
-                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse,
+                tilstand = BehandlingTilstand(
+                    status = behandling.behandlingStatus(),
+                    gjeldendeAvklaringsbehovStatus = tilstand.gjeldendeAvklaringsbehovStatus,
+                    versjon = tilstand.versjon,
+                    mottattTid = tilstand.mottattTid,
+                    søknadsformat = tilstand.søknadsformat,
+                    relatertBehandlingReferanse = tilstand.relatertBehandlingReferanse,
+                ),
             ),
         )
         nextId++
@@ -159,16 +163,19 @@ class FakeBehandlingRepository : IBehandlingRepository {
 
     override fun oppdaterBehandling(behandling: Behandling) {
         logger.info("Oppdaterte behandling med ID ${behandling.id}")
+        val tilstand = behandling.nåværendeTilstand()
         behandlinger[behandling.id?.id!!] = behandling.leggTilHendelse(
             BehandlingHendelse(
                 tidspunkt = LocalDateTime.now(),
                 hendelsesTidspunkt = LocalDateTime.now(),
-                status = behandling.behandlingStatus(),
-                avklaringsbehovStatus = behandling.gjeldendeAvklaringsbehovStatus,
-                versjon = behandling.versjon,
-                mottattTid = behandling.mottattTid,
-                søknadsformat = behandling.søknadsformat,
-                relatertBehandlingReferanse = behandling.relatertBehandlingReferanse,
+                tilstand = BehandlingTilstand(
+                    status = behandling.behandlingStatus(),
+                    gjeldendeAvklaringsbehovStatus = tilstand.gjeldendeAvklaringsbehovStatus,
+                    versjon = tilstand.versjon,
+                    mottattTid = tilstand.mottattTid,
+                    søknadsformat = tilstand.søknadsformat,
+                    relatertBehandlingReferanse = tilstand.relatertBehandlingReferanse,
+                ),
             ),
         )
     }

@@ -63,16 +63,18 @@ class BQBehandlingMapperTest {
             referanse = referanse,
             sak = sak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.UTREDES,
             opprettetTid = LocalDateTime.of(2024, 1, 1, 10, 0),
-            mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
-            versjon = Versjon("1.0"),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            gjeldendeAvklaringsBehov = gjeldendeAvklaringsbehov,
-            sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
-            sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
             hendelser = hendelser,
             årsaker = listOf(Vurderingsbehov.SØKNAD),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.UTREDES,
+                mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
+                versjon = Versjon("1.0"),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                gjeldendeAvklaringsBehov = gjeldendeAvklaringsbehov?.tilAvklaringsbehovKode(),
+                sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov?.tilAvklaringsbehovKode(),
+                sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
+            ),
         )
     }
 
@@ -87,22 +89,24 @@ class BQBehandlingMapperTest {
     ): BehandlingHendelse = BehandlingHendelse(
         tidspunkt = tidspunkt,
         hendelsesTidspunkt = hendelsesTidspunkt,
-        avklaringsBehov = avklaringsBehov,
-        sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
-        sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
-        saksbehandler = saksbehandler,
-        avklaringsbehovStatus = avklaringsbehovStatus,
-        versjon = Versjon("1.0"),
-        status = BehandlingStatus.UTREDES,
-        mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
-        søknadsformat = SøknadsFormat.DIGITAL,
-        relatertBehandlingReferanse = null,
-        steggruppe = null,
-        venteÅrsak = null,
-        returÅrsak = null,
-        ansvarligBeslutter = null,
-        vedtakstidspunkt = null,
-        resultat = null,
+        tilstand = BehandlingTilstand(
+            gjeldendeAvklaringsBehov = avklaringsBehov?.tilAvklaringsbehovKode(),
+            sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov?.tilAvklaringsbehovKode(),
+            sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerSomLøstebehov,
+            sisteSaksbehandler = (saksbehandler)?.ident,
+            gjeldendeAvklaringsbehovStatus = avklaringsbehovStatus?.tilDomene(),
+            versjon = Versjon("1.0"),
+            status = BehandlingStatus.UTREDES,
+            mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            relatertBehandlingReferanse = null,
+            gjeldendeStegGruppe = null,
+            venteÅrsak = null,
+            returÅrsak = null,
+            ansvarligBeslutter = null,
+            vedtakstidspunkt = null,
+            resultat = null,
+        ),
     )
 
     @Test
@@ -145,8 +149,11 @@ class BQBehandlingMapperTest {
     @ParameterizedTest
     @CsvSource("OPPRETTET,", "UTREDES,", "IVERKSETTES,AAP", "AVSLUTTET,AAP")
     fun `behandlingsstatus avgjør om resultatet publiseres`(status: BehandlingStatus, forventetResultat: String?) {
+        val hendelse = lagBehandlingHendelse()
         val behandling = lagBehandling(
-            hendelser = listOf(lagBehandlingHendelse().copy(status = status, resultat = ResultatKode.INNVILGET)),
+            hendelser = listOf(
+                hendelse.copy(tilstand = hendelse.tilstand.copy(status = status, resultat = ResultatKode.INNVILGET)),
+            ),
         )
         assertThat(mapper.bqBehandlingForBehandling(grunnlag(behandling)).behandlingResultat)
             .isEqualTo(forventetResultat)
@@ -158,19 +165,25 @@ class BQBehandlingMapperTest {
         sisteResultat: ResultatKode?,
         forventetResultat: String,
     ) {
-        val innvilget = lagBehandlingHendelse().copy(
-            status = BehandlingStatus.AVSLUTTET,
-            resultat = ResultatKode.INNVILGET,
+        val grunnlagInnvilget = lagBehandlingHendelse()
+        val innvilget = grunnlagInnvilget.copy(
+            tilstand = grunnlagInnvilget.tilstand.copy(
+                status = BehandlingStatus.AVSLUTTET,
+                resultat = ResultatKode.INNVILGET,
+            ),
         )
-        val behandling = lagBehandling(
+        val grunnlagBehandling = lagBehandling(
             hendelser = listOf(
                 innvilget,
                 innvilget.copy(
                     hendelsesTidspunkt = innvilget.hendelsesTidspunkt.plusMinutes(1),
-                    resultat = sisteResultat,
+                    tilstand = innvilget.tilstand.copy(resultat = sisteResultat),
                 ),
             ),
-        ).copy(resultat = ResultatKode.INNVILGET)
+        )
+        val behandling = grunnlagBehandling.copy(
+            tilstand = grunnlagBehandling.nåværendeTilstand().copy(resultat = ResultatKode.INNVILGET),
+        )
 
         assertThat(mapper.bqBehandlingForBehandling(grunnlag(behandling)).behandlingResultat)
             .isEqualTo(forventetResultat)
@@ -178,10 +191,10 @@ class BQBehandlingMapperTest {
 
     @Test
     fun `skjermet behandling skjuler enhet saksbehandler og beslutter`() {
+        val hendelse = lagBehandlingHendelse(avklaringsBehov = Definisjon.FATTE_VEDTAK)
         val behandling = lagBehandling(
             hendelser = listOf(
-                lagBehandlingHendelse(avklaringsBehov = Definisjon.FATTE_VEDTAK)
-                    .copy(ansvarligBeslutter = "Beslutter"),
+                hendelse.copy(tilstand = hendelse.tilstand.copy(ansvarligBeslutter = "Beslutter")),
             ),
         )
 
@@ -660,8 +673,13 @@ class BQBehandlingMapperTest {
         returStatus: AvklaringsbehovStatus?,
     ) {
         // BigQuery-mottaket tåler ikke mer enn 100 tegn for dimensjons-/kodeverksfelt som behandling_status.
-        val behandling = lagBehandling(hendelser = emptyList())
-            .copy(venteÅrsak = venteÅrsak.name, gjeldendeAvklaringsbehovStatus = returStatus)
+        val grunnlagBehandling = lagBehandling(hendelser = emptyList())
+        val behandling = grunnlagBehandling.copy(
+            tilstand = grunnlagBehandling.nåværendeTilstand().copy(
+                venteÅrsak = venteÅrsak.name,
+                gjeldendeAvklaringsbehovStatus = returStatus?.tilDomene(),
+            ),
+        )
 
         val resultat = BQBehandlingMapper.behandlingStatus(behandling)
 

@@ -386,12 +386,14 @@ class LagreOppgaveJobbUtførerTest {
             referanse = UUID.randomUUID(),
             sak = sak.copy(id = sakId),
             typeBehandling = TypeBehandling.Klage,
-            status = BehandlingStatus.UTREDES,
             opprettetTid = LocalDateTime.now().minusSeconds(10),
-            mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-            versjon = Versjon(verdi = "..."),
-            søknadsformat = SøknadsFormat.DIGITAL,
             oppdatertTidspunkt = LocalDateTime.now().minusSeconds(10),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.UTREDES,
+                mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+                versjon = Versjon(verdi = "..."),
+                søknadsformat = SøknadsFormat.DIGITAL,
+            ),
         )
         val behandlingId = BehandlingRepository(it).opprettBehandling(behandling)
         behandling.copy(id = behandlingId)

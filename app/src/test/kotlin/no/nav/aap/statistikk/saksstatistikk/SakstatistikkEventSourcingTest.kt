@@ -374,12 +374,14 @@ class SakstatistikkEventSourcingTest {
             sistOppdatert = LocalDateTime.now(),
         ),
         typeBehandling = TypeBehandling.Førstegangsbehandling,
-        status = BehandlingStatus.UTREDES,
         opprettetTid = LocalDateTime.now(),
-        mottattTid = LocalDateTime.now(),
-        versjon = Versjon("1"),
-        søknadsformat = SøknadsFormat.PAPIR,
         hendelser = hendelser,
+        tilstand = BehandlingTilstand(
+            status = BehandlingStatus.UTREDES,
+            mottattTid = LocalDateTime.now(),
+            versjon = Versjon("1"),
+            søknadsformat = SøknadsFormat.PAPIR,
+        ),
     )
 
     private fun lagBehandlingHendelse(
@@ -390,16 +392,18 @@ class SakstatistikkEventSourcingTest {
     ) = BehandlingHendelse(
         tidspunkt = tidspunkt,
         hendelsesTidspunkt = tidspunkt,
-        status = status,
-        saksbehandler = null,
-        avklaringsBehov = avklaringsbehov,
-        sisteLøsteAvklaringsbehov = null,
-        sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerPåBehandling,
-        avklaringsbehovStatus = Status.OPPRETTET,
-        versjon = Versjon("1"),
-        mottattTid = tidspunkt,
-        søknadsformat = SøknadsFormat.PAPIR,
-        relatertBehandlingReferanse = null,
+        tilstand = BehandlingTilstand(
+            status = status,
+            sisteSaksbehandler = null,
+            gjeldendeAvklaringsBehov = avklaringsbehov?.tilAvklaringsbehovKode(),
+            sisteLøsteAvklaringsbehov = null,
+            sisteSaksbehandlerSomLøstebehov = sisteSaksbehandlerPåBehandling,
+            gjeldendeAvklaringsbehovStatus = Status.OPPRETTET.tilDomene(),
+            versjon = Versjon("1"),
+            mottattTid = tidspunkt,
+            søknadsformat = SøknadsFormat.PAPIR,
+            relatertBehandlingReferanse = null,
+        ),
     )
 
     private fun lagOppgave(avklaringsbehov: String, hendelser: List<no.nav.aap.statistikk.oppgave.OppgaveHendelse>) =

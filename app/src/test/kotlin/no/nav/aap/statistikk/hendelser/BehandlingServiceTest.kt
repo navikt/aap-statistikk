@@ -9,14 +9,19 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.behandling.AvklaringsbehovStatus
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
+import no.nav.aap.statistikk.behandling.Behandlingssteggruppe
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
-import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
+import no.nav.aap.statistikk.behandling.ReturÅrsakTilstand
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.behandling.Vurderingsbehov
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
+import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
@@ -77,17 +82,21 @@ class BehandlingServiceTest {
         val resultat = service.konstruerBehandling(dto, sak, eksisterende)
 
         assertThat(resultat.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
-        assertThat(resultat.resultat).isEqualTo(ResultatKode.INNVILGET)
-        assertThat(resultat.sisteSaksbehandler).isEqualTo("Z111111")
-        assertThat(resultat.sisteLøsteAvklaringsbehov).isEqualTo(Definisjon.FATTE_VEDTAK)
-        assertThat(resultat.sisteSaksbehandlerSomLøstebehov).isEqualTo("Z111111")
-        assertThat(resultat.sistLøsteAvklaringsbehovTidspunkt).isEqualTo(if (finnesFraFør) behovTid else null)
-        assertThat(resultat.ansvarligBeslutter).isEqualTo("Z111111")
-        assertThat(resultat.vedtakstidspunkt).isEqualTo(vedtakTid)
-        assertThat(resultat.gjeldendeAvklaringsBehov).isNull()
-        assertThat(resultat.gjeldendeAvklaringsbehovStatus).isNull()
-        assertThat(resultat.venteÅrsak).isNull()
-        assertThat(resultat.returÅrsak).isNull()
+        assertThat(resultat.nåværendeTilstand().resultat).isEqualTo(ResultatKode.INNVILGET)
+        assertThat(resultat.nåværendeTilstand().sisteSaksbehandler).isEqualTo("Z111111")
+        assertThat(
+            resultat.nåværendeTilstand().sisteLøsteAvklaringsbehov,
+        ).isEqualTo(Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode())
+        assertThat(resultat.nåværendeTilstand().sisteSaksbehandlerSomLøstebehov).isEqualTo("Z111111")
+        assertThat(
+            resultat.nåværendeTilstand().sistLøsteAvklaringsbehovTidspunkt,
+        ).isEqualTo(if (finnesFraFør) behovTid else null)
+        assertThat(resultat.nåværendeTilstand().ansvarligBeslutter).isEqualTo("Z111111")
+        assertThat(resultat.nåværendeTilstand().vedtakstidspunkt).isEqualTo(vedtakTid)
+        assertThat(resultat.nåværendeTilstand().gjeldendeAvklaringsBehov).isNull()
+        assertThat(resultat.nåværendeTilstand().gjeldendeAvklaringsbehovStatus).isNull()
+        assertThat(resultat.nåværendeTilstand().venteÅrsak).isNull()
+        assertThat(resultat.nåværendeTilstand().returÅrsak).isNull()
         assertThat(resultat.oppdatertTidspunkt()).isEqualTo(if (finnesFraFør) tidspunkt else behovTid)
         assertThat(resultat.hendelser).hasSize(if (finnesFraFør) 1 else 0)
     }
@@ -120,17 +129,25 @@ class BehandlingServiceTest {
         val resultat = service.konstruerBehandling(dto, sak, eksisterende)
 
         assertThat(resultat.behandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
-        assertThat(resultat.gjeldendeAvklaringsBehov).isEqualTo(Definisjon.AVKLAR_SYKDOM)
-        assertThat(resultat.gjeldendeAvklaringsbehovStatus).isEqualTo(BehovStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER)
-        assertThat(resultat.gjeldendeStegGruppe).isEqualTo(Definisjon.AVKLAR_SYKDOM.løsesISteg.gruppe)
-        assertThat(resultat.sisteSaksbehandler).isEqualTo("Z222222")
-        assertThat(resultat.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
-        assertThat(resultat.returÅrsak).isEqualTo("MANGLENDE_UTREDNING")
-        assertThat(resultat.returÅrsakkoblinger)
-            .containsExactly(ReturÅrsakkobling(Definisjon.AVKLAR_SYKDOM, listOf("MANGLENDE_UTREDNING")))
-        assertThat(resultat.ansvarligBeslutter).isNull()
-        assertThat(resultat.resultat).isNull()
-        assertThat(resultat.vedtakstidspunkt).isNull()
+        assertThat(
+            resultat.nåværendeTilstand().gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode())
+        assertThat(
+            resultat.nåværendeTilstand().gjeldendeAvklaringsbehovStatus,
+        ).isEqualTo(AvklaringsbehovStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER)
+        assertThat(resultat.nåværendeTilstand().gjeldendeStegGruppe).isEqualTo(Behandlingssteggruppe.SYKDOM)
+        assertThat(resultat.nåværendeTilstand().sisteSaksbehandler).isEqualTo("Z222222")
+        assertThat(
+            resultat.nåværendeTilstand().venteÅrsak,
+        ).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
+        assertThat(resultat.nåværendeTilstand().returÅrsak).isEqualTo("MANGLENDE_UTREDNING")
+        assertThat(resultat.nåværendeTilstand().returÅrsakkoblinger)
+            .containsExactly(
+                ReturÅrsakTilstand(Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(), listOf("MANGLENDE_UTREDNING")),
+            )
+        assertThat(resultat.nåværendeTilstand().ansvarligBeslutter).isNull()
+        assertThat(resultat.nåværendeTilstand().resultat).isNull()
+        assertThat(resultat.nåværendeTilstand().vedtakstidspunkt).isNull()
     }
 
     @ParameterizedTest
@@ -140,19 +157,25 @@ class BehandlingServiceTest {
         val sak = testSak()
         val dto = testHendelse(referanse).copy(avklaringsbehov = emptyList())
         val eksisterende = if (finnesFraFør) {
-            eksisterendeBehandling(sak, referanse).copy(
-                gjeldendeAvklaringsBehov = Definisjon.AVKLAR_SYKDOM,
-                gjeldendeAvklaringsbehovStatus = BehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
-                gjeldendeStegGruppe = Definisjon.AVKLAR_SYKDOM.løsesISteg.gruppe,
-                sisteLøsteAvklaringsbehov = Definisjon.FATTE_VEDTAK,
-                sisteSaksbehandlerSomLøstebehov = "Beslutter",
-                sistLøsteAvklaringsbehovTidspunkt = dto.hendelsesTidspunkt.minusMinutes(1),
-                sisteSaksbehandler = "Saksbehandler",
-                ansvarligBeslutter = "Beslutter",
-                venteÅrsak = "VENTER_PÅ_MASKINELL_AVKLARING",
-                returÅrsak = "MANGLENDE_UTREDNING",
-                returÅrsakkoblinger = listOf(
-                    ReturÅrsakkobling(Definisjon.AVKLAR_SYKDOM, listOf("MANGLENDE_UTREDNING")),
+            val grunnlag = eksisterendeBehandling(sak, referanse)
+            grunnlag.copy(
+                tilstand = grunnlag.nåværendeTilstand().copy(
+                    gjeldendeAvklaringsBehov = Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                    gjeldendeAvklaringsbehovStatus = BehovStatus.SENDT_TILBAKE_FRA_BESLUTTER.tilDomene(),
+                    gjeldendeStegGruppe = Definisjon.AVKLAR_SYKDOM.løsesISteg.gruppe.tilDomene(),
+                    sisteLøsteAvklaringsbehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
+                    sisteSaksbehandlerSomLøstebehov = "Beslutter",
+                    sistLøsteAvklaringsbehovTidspunkt = dto.hendelsesTidspunkt.minusMinutes(1),
+                    sisteSaksbehandler = "Saksbehandler",
+                    ansvarligBeslutter = "Beslutter",
+                    venteÅrsak = "VENTER_PÅ_MASKINELL_AVKLARING",
+                    returÅrsak = "MANGLENDE_UTREDNING",
+                    returÅrsakkoblinger = listOf(
+                        ReturÅrsakTilstand(
+                            Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                            listOf("MANGLENDE_UTREDNING"),
+                        ),
+                    ),
                 ),
             )
         } else {
@@ -162,17 +185,17 @@ class BehandlingServiceTest {
 
         val resultat = service.konstruerBehandling(dto, sak, eksisterende)
 
-        assertThat(resultat.gjeldendeAvklaringsBehov).isNull()
-        assertThat(resultat.gjeldendeAvklaringsbehovStatus).isNull()
-        assertThat(resultat.gjeldendeStegGruppe).isNull()
-        assertThat(resultat.sisteLøsteAvklaringsbehov).isNull()
-        assertThat(resultat.sisteSaksbehandlerSomLøstebehov).isNull()
-        assertThat(resultat.sistLøsteAvklaringsbehovTidspunkt).isNull()
-        assertThat(resultat.sisteSaksbehandler).isNull()
-        assertThat(resultat.ansvarligBeslutter).isNull()
-        assertThat(resultat.venteÅrsak).isNull()
-        assertThat(resultat.returÅrsak).isNull()
-        assertThat(resultat.returÅrsakkoblinger).isEmpty()
+        assertThat(resultat.nåværendeTilstand().gjeldendeAvklaringsBehov).isNull()
+        assertThat(resultat.nåværendeTilstand().gjeldendeAvklaringsbehovStatus).isNull()
+        assertThat(resultat.nåværendeTilstand().gjeldendeStegGruppe).isNull()
+        assertThat(resultat.nåværendeTilstand().sisteLøsteAvklaringsbehov).isNull()
+        assertThat(resultat.nåværendeTilstand().sisteSaksbehandlerSomLøstebehov).isNull()
+        assertThat(resultat.nåværendeTilstand().sistLøsteAvklaringsbehovTidspunkt).isNull()
+        assertThat(resultat.nåværendeTilstand().sisteSaksbehandler).isNull()
+        assertThat(resultat.nåværendeTilstand().ansvarligBeslutter).isNull()
+        assertThat(resultat.nåværendeTilstand().venteÅrsak).isNull()
+        assertThat(resultat.nåværendeTilstand().returÅrsak).isNull()
+        assertThat(resultat.nåværendeTilstand().returÅrsakkoblinger).isEmpty()
     }
 
     @Test
@@ -331,12 +354,14 @@ private fun eksisterendeBehandling(sak: Sak, referanse: UUID): Behandling = Beha
     referanse = referanse,
     sak = sak,
     typeBehandling = DomeneTypeBehandling.Førstegangsbehandling,
-    status = BehandlingStatus.OPPRETTET,
     opprettetTid = LocalDateTime.now(),
-    mottattTid = LocalDateTime.now().minusDays(1),
-    versjon = Versjon("versjon"),
-    søknadsformat = SøknadsFormat.PAPIR,
     årsaker = listOf(Vurderingsbehov.SØKNAD),
     oppdatertTidspunkt = LocalDateTime.now(),
     relaterteIdenter = emptyList(),
+    tilstand = BehandlingTilstand(
+        status = BehandlingStatus.OPPRETTET,
+        mottattTid = LocalDateTime.now().minusDays(1),
+        versjon = Versjon("versjon"),
+        søknadsformat = SøknadsFormat.PAPIR,
+    ),
 )

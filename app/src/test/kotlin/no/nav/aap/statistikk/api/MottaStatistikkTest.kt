@@ -30,6 +30,7 @@ import no.nav.aap.statistikk.PrometheusProvider
 import no.nav.aap.statistikk.avsluttetBehandlingLagret
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
 import no.nav.aap.statistikk.behandling.BehandlingRepository
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.db.FellesKomponentTransactionalExecutor
 import no.nav.aap.statistikk.defaultGatewayProvider
 import no.nav.aap.statistikk.hendelseLagret
@@ -403,7 +404,8 @@ class MottaStatistikkTest {
         }
 
         assertThat(uthentetBehandling?.referanse).isEqualTo(hendelse.behandlingReferanse)
-        assertThat(uthentetBehandling?.gjeldendeAvklaringsBehov).isEqualTo(SKRIV_VEDTAKSBREV)
+        assertThat(uthentetBehandling?.nåværendeTilstand()?.gjeldendeAvklaringsBehov)
+            .isEqualTo(SKRIV_VEDTAKSBREV.tilAvklaringsbehovKode())
         assertThat(uthentetSak.saksnummer.value).isEqualTo(hendelse.saksnummer)
         assertThat(uthentetBehandling?.sak?.saksnummer!!.value).isEqualTo(hendelse.saksnummer)
         assertThat(uthentetBehandling.opprettetTid).isEqualTo(

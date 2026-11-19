@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -32,9 +31,11 @@ class BehandlingTest {
     fun `tilstandslesing bruker siste listeelement men største hendelsestidspunkt`(harVedtaksdata: Boolean) {
         val grunnlag = behandlingMedMotstridendeTilstand()
         val siste = grunnlag.hendelser.last().copy(
-            ansvarligBeslutter = if (harVedtaksdata) "Siste beslutter" else null,
-            vedtakstidspunkt = if (harVedtaksdata) tilstandstid.plusMinutes(1) else null,
-            resultat = if (harVedtaksdata) ResultatKode.AVSLAG else null,
+            tilstand = grunnlag.hendelser.last().tilstand.copy(
+                ansvarligBeslutter = if (harVedtaksdata) "Siste beslutter" else null,
+                vedtakstidspunkt = if (harVedtaksdata) tilstandstid.plusMinutes(1) else null,
+                resultat = if (harVedtaksdata) ResultatKode.AVSLAG else null,
+            ),
         )
         val behandling = grunnlag.copy(hendelser = listOf(grunnlag.hendelser.first(), siste))
 
@@ -98,8 +99,12 @@ class BehandlingTest {
     ) {
         val grunnlag = behandlingMedMotstridendeTilstand()
         val behandling = grunnlag.copy(
-            status = ytreStatus,
-            hendelser = listOf(grunnlag.hendelser.last().copy(status = historikkStatus)),
+            hendelser = listOf(
+                grunnlag.hendelser.last().copy(
+                    tilstand = grunnlag.hendelser.last().tilstand.copy(status = historikkStatus),
+                ),
+            ),
+            tilstand = grunnlag.nåværendeTilstand().copy(status = ytreStatus),
         )
 
         assertThat(behandling.utbetalingId())
@@ -126,14 +131,17 @@ class BehandlingTest {
             Versjon("1"),
             BehandlingStatus.UTREDES,
         )
-        val behandling = behandlingMedHendelser().copy(
-            gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
+        val grunnlagBehandling = behandlingMedHendelser()
+        val behandling = grunnlagBehandling.copy(
             hendelser = behov.mapIndexed { indeks, definisjon ->
                 hendelse.copy(
-                    avklaringsBehov = definisjon,
                     hendelsesTidspunkt = tidspunkt.minusMinutes(indeks.toLong()),
+                    tilstand = hendelse.tilstand.copy(gjeldendeAvklaringsBehov = definisjon?.tilAvklaringsbehovKode()),
                 )
             },
+            tilstand = grunnlagBehandling.nåværendeTilstand().copy(
+                gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
+            ),
         )
 
         assertThat(behandling.behandlingMetode()).isEqualTo(forventet)
@@ -143,12 +151,13 @@ class BehandlingTest {
     @ValueSource(booleans = [false, true])
     fun `manglende historikkresultat stopper ikke utbetalingsid`(harTidligereAvslag: Boolean) {
         val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
-        val avslått = behandlingHendelse(
+        val grunnlagAvslått = behandlingHendelse(
             Definisjon.FATTE_VEDTAK,
             tidspunkt,
             Versjon("1"),
             BehandlingStatus.AVSLUTTET,
-        ).copy(resultat = ResultatKode.AVSLAG)
+        )
+        val avslått = grunnlagAvslått.copy(tilstand = grunnlagAvslått.tilstand.copy(resultat = ResultatKode.AVSLAG))
         val behandling = Behandling(
             referanse = UUID.randomUUID(),
             sak = Sak(
@@ -158,17 +167,25 @@ class BehandlingTest {
                 sistOppdatert = tidspunkt,
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.AVSLUTTET,
             opprettetTid = tidspunkt,
-            mottattTid = tidspunkt,
-            versjon = Versjon("1"),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            resultat = ResultatKode.AVSLAG,
             hendelser = if (harTidligereAvslag) {
-                listOf(avslått, avslått.copy(hendelsesTidspunkt = tidspunkt.plusMinutes(1), resultat = null))
+                listOf(
+                    avslått,
+                    avslått.copy(
+                        hendelsesTidspunkt = tidspunkt.plusMinutes(1),
+                        tilstand = avslått.tilstand.copy(resultat = null),
+                    ),
+                )
             } else {
                 emptyList()
             },
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.AVSLUTTET,
+                mottattTid = tidspunkt,
+                versjon = Versjon("1"),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                resultat = ResultatKode.AVSLAG,
+            ),
         )
 
         assertThat(behandling.utbetalingId()).isEqualTo(behandling.referanse.toBase64())
@@ -192,15 +209,17 @@ class BehandlingTest {
                 sistOppdatert = LocalDateTime.now(),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.OPPRETTET,
             opprettetTid = LocalDateTime.now(),
             oppdatertTidspunkt = LocalDateTime.now(),
-            mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-            versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.PAPIR,
             hendelser = listOf(
                 behandlingHendelse(Definisjon.AVKLAR_SYKDOM),
                 behandlingHendelse(Definisjon.AVKLAR_HELSEINSTITUSJON),
+            ),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+                versjon = Versjon(UUID.randomUUID().toString()),
+                søknadsformat = SøknadsFormat.PAPIR,
             ),
         )
 
@@ -209,11 +228,21 @@ class BehandlingTest {
         assertThat(res.size).isEqualTo(2)
         assertThat(res.first().hendelser.size).isEqualTo(1)
         assertThat(res[1].hendelser.size).isEqualTo(2)
-        assertThat(res[0].gjeldendeAvklaringsBehov).isEqualTo(Definisjon.AVKLAR_SYKDOM)
-        assertThat(res[1].gjeldendeAvklaringsBehov).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON)
-        assertThat(res[0].hendelser.first().avklaringsBehov).isEqualTo(Definisjon.AVKLAR_SYKDOM)
-        assertThat(res[1].hendelser.first().avklaringsBehov).isEqualTo(Definisjon.AVKLAR_SYKDOM)
-        assertThat(res[1].hendelser[1].avklaringsBehov).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON)
+        assertThat(
+            res[0].nåværendeTilstand().gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode())
+        assertThat(
+            res[1].nåværendeTilstand().gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON.tilAvklaringsbehovKode())
+        assertThat(
+            res[0].hendelser.first().tilstand.gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode())
+        assertThat(
+            res[1].hendelser.first().tilstand.gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode())
+        assertThat(
+            res[1].hendelser[1].tilstand.gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON.tilAvklaringsbehovKode())
     }
 
     @Test
@@ -231,52 +260,62 @@ class BehandlingTest {
             Versjon("1"),
             BehandlingStatus.OPPRETTET,
         )
-        val andre = første.copy(hendelsesTidspunkt = tidspunkt.plusMinutes(minutter), versjon = Versjon("2"))
+        val andre = første.copy(
+            hendelsesTidspunkt = tidspunkt.plusMinutes(minutter),
+            tilstand = første.tilstand.copy(versjon = Versjon("2")),
+        )
         val behandling = behandlingMedHendelser(første, andre)
 
         val historikk = behandling.hendelsesHistorikk()
 
         assertThat(historikk.map { it.hendelser }).containsExactly(listOf(første), listOf(første, andre))
-        assertThat(historikk.map { it.versjon }).containsExactly(Versjon("1"), Versjon("2"))
+        assertThat(historikk.map { it.nåværendeTilstand().versjon }).containsExactly(Versjon("1"), Versjon("2"))
         assertThat(behandling.hendelser).containsExactly(første, andre)
     }
 
     @Test
     fun `nullverdier erstatter tidligere tilstand uten å endre tidligere historikk`() {
-        val første = behandlingHendelse(
+        val grunnlagFørste = behandlingHendelse(
             Definisjon.AVKLAR_SYKDOM,
             LocalDateTime.of(2026, 11, 19, 10, 0),
             Versjon("1"),
             BehandlingStatus.UTREDES,
-        ).copy(resultat = ResultatKode.INNVILGET)
+        )
+        val første = grunnlagFørste.copy(tilstand = grunnlagFørste.tilstand.copy(resultat = ResultatKode.INNVILGET))
         val andre = første.copy(
             hendelsesTidspunkt = første.hendelsesTidspunkt.plusMinutes(1),
-            avklaringsBehov = null,
-            avklaringsbehovStatus = null,
-            saksbehandler = null,
-            ansvarligBeslutter = null,
-            resultat = null,
+            tilstand = første.tilstand.copy(
+                gjeldendeAvklaringsBehov = null,
+                gjeldendeAvklaringsbehovStatus = null,
+                sisteSaksbehandler = null,
+                ansvarligBeslutter = null,
+                resultat = null,
+            ),
         )
 
         val behandling = behandlingMedHendelser(første, andre)
         val forventetFørste = behandling.copy(
             hendelser = listOf(første),
-            status = BehandlingStatus.UTREDES,
             oppdatertTidspunkt = første.hendelsesTidspunkt,
-            gjeldendeAvklaringsBehov = Definisjon.AVKLAR_SYKDOM,
-            gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
-            sisteSaksbehandler = "Albert",
-            ansvarligBeslutter = "Åberg",
-            resultat = ResultatKode.INNVILGET,
+            tilstand = behandling.nåværendeTilstand().copy(
+                status = BehandlingStatus.UTREDES,
+                gjeldendeAvklaringsBehov = Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                gjeldendeAvklaringsbehovStatus = Status.OPPRETTET.tilDomene(),
+                sisteSaksbehandler = "Albert",
+                ansvarligBeslutter = "Åberg",
+                resultat = ResultatKode.INNVILGET,
+            ),
         )
         val forventetAndre = forventetFørste.copy(
             hendelser = listOf(første, andre),
             oppdatertTidspunkt = andre.hendelsesTidspunkt,
-            gjeldendeAvklaringsBehov = null,
-            gjeldendeAvklaringsbehovStatus = null,
-            sisteSaksbehandler = null,
-            ansvarligBeslutter = null,
-            resultat = null,
+            tilstand = forventetFørste.nåværendeTilstand().copy(
+                gjeldendeAvklaringsBehov = null,
+                gjeldendeAvklaringsbehovStatus = null,
+                sisteSaksbehandler = null,
+                ansvarligBeslutter = null,
+                resultat = null,
+            ),
         )
 
         val historikk = behandling.hendelsesHistorikk()
@@ -299,12 +338,8 @@ class BehandlingTest {
                 sistOppdatert = LocalDateTime.now(),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.OPPRETTET,
             opprettetTid = t1,
             oppdatertTidspunkt = t1,
-            mottattTid = t1,
-            versjon = Versjon("v1"),
-            søknadsformat = SøknadsFormat.DIGITAL,
             hendelser = listOf(
                 behandlingHendelse(
                     Definisjon.AVKLAR_SYKDOM,
@@ -325,6 +360,12 @@ class BehandlingTest {
                     BehandlingStatus.IVERKSETTES,
                 ),
             ),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = t1,
+                versjon = Versjon("v1"),
+                søknadsformat = SøknadsFormat.DIGITAL,
+            ),
         )
 
         val snapshot = behandling.påTidspunkt(t2)
@@ -333,7 +374,9 @@ class BehandlingTest {
         assertThat(snapshot.oppdatertTidspunkt()).isEqualTo(t2)
         assertThat(snapshot.versjon()).isEqualTo("v2")
         assertThat(snapshot.behandlingStatus()).isEqualTo(BehandlingStatus.UTREDES)
-        assertThat(snapshot.gjeldendeAvklaringsBehov).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON)
+        assertThat(
+            snapshot.nåværendeTilstand().gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.AVKLAR_HELSEINSTITUSJON.tilAvklaringsbehovKode())
     }
 
     @Test
@@ -350,12 +393,8 @@ class BehandlingTest {
                 sistOppdatert = LocalDateTime.now(),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.OPPRETTET,
             opprettetTid = t1,
             oppdatertTidspunkt = t1,
-            mottattTid = t1,
-            versjon = Versjon("v1"),
-            søknadsformat = SøknadsFormat.DIGITAL,
             hendelser = listOf(
                 behandlingHendelse(
                     Definisjon.AVKLAR_SYKDOM,
@@ -370,6 +409,12 @@ class BehandlingTest {
                     BehandlingStatus.UTREDES,
                 ),
             ),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = t1,
+                versjon = Versjon("v1"),
+                søknadsformat = SøknadsFormat.DIGITAL,
+            ),
         )
 
         val snapshot = behandling.påTidspunkt(t2.plusHours(1))
@@ -379,31 +424,39 @@ class BehandlingTest {
     }
 
     private fun behandlingMedMotstridendeTilstand(): Behandling {
-        val første = behandlingHendelse(
+        val grunnlagFørste = behandlingHendelse(
             Definisjon.AVKLAR_SYKDOM,
             tilstandstid.plusMinutes(2),
             Versjon("første"),
             BehandlingStatus.AVSLUTTET,
-        ).copy(
-            ansvarligBeslutter = "Tidligere beslutter",
-            vedtakstidspunkt = tilstandstid.minusMinutes(1),
-            resultat = ResultatKode.INNVILGET,
+        )
+        val første = grunnlagFørste.copy(
+            tilstand = grunnlagFørste.tilstand.copy(
+                ansvarligBeslutter = "Tidligere beslutter",
+                vedtakstidspunkt = tilstandstid.minusMinutes(1),
+                resultat = ResultatKode.INNVILGET,
+            ),
         )
         val siste = første.copy(
             hendelsesTidspunkt = tilstandstid.plusMinutes(1),
-            versjon = Versjon("siste"),
-            status = BehandlingStatus.UTREDES,
-            ansvarligBeslutter = null,
-            vedtakstidspunkt = null,
-            resultat = null,
+            tilstand = første.tilstand.copy(
+                versjon = Versjon("siste"),
+                status = BehandlingStatus.UTREDES,
+                ansvarligBeslutter = null,
+                vedtakstidspunkt = null,
+                resultat = null,
+            ),
         )
-        return behandlingMedHendelser(første, siste).copy(
-            status = BehandlingStatus.IVERKSETTES,
-            versjon = Versjon("ytre"),
-            ansvarligBeslutter = "Ytre beslutter",
-            vedtakstidspunkt = tilstandstid,
-            resultat = ResultatKode.AVSLAG,
+        val grunnlag = behandlingMedHendelser(første, siste)
+        return grunnlag.copy(
             oppdatertTidspunkt = tilstandstid.plusMinutes(3),
+            tilstand = grunnlag.nåværendeTilstand().copy(
+                status = BehandlingStatus.IVERKSETTES,
+                versjon = Versjon("ytre"),
+                ansvarligBeslutter = "Ytre beslutter",
+                vedtakstidspunkt = tilstandstid,
+                resultat = ResultatKode.AVSLAG,
+            ),
         )
     }
 
@@ -436,12 +489,14 @@ class BehandlingTest {
                 sistOppdatert = tidspunkt,
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.OPPRETTET,
             opprettetTid = tidspunkt,
-            mottattTid = tidspunkt,
-            versjon = Versjon("1"),
-            søknadsformat = SøknadsFormat.DIGITAL,
             hendelser = hendelser.toList(),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = tidspunkt,
+                versjon = Versjon("1"),
+                søknadsformat = SøknadsFormat.DIGITAL,
+            ),
         )
     }
 
@@ -453,31 +508,35 @@ class BehandlingTest {
     ): BehandlingHendelse = BehandlingHendelse(
         tidspunkt = hendelsesTidspunkt,
         hendelsesTidspunkt = hendelsesTidspunkt,
-        avklaringsBehov = avklaringsbehov,
-        avklaringsbehovStatus = Status.OPPRETTET,
-        saksbehandler = Saksbehandler(ident = "Albert"),
-        versjon = versjon,
-        status = status,
-        ansvarligBeslutter = "Åberg",
-        vedtakstidspunkt = null,
-        mottattTid = hendelsesTidspunkt,
-        søknadsformat = SøknadsFormat.DIGITAL,
-        relatertBehandlingReferanse = null,
+        tilstand = BehandlingTilstand(
+            gjeldendeAvklaringsBehov = avklaringsbehov.tilAvklaringsbehovKode(),
+            gjeldendeAvklaringsbehovStatus = Status.OPPRETTET.tilDomene(),
+            sisteSaksbehandler = "Albert",
+            versjon = versjon,
+            status = status,
+            ansvarligBeslutter = "Åberg",
+            vedtakstidspunkt = null,
+            mottattTid = hendelsesTidspunkt,
+            søknadsformat = SøknadsFormat.DIGITAL,
+            relatertBehandlingReferanse = null,
+        ),
     )
 
     private fun behandlingHendelse(avklaringsbehov: Definisjon): BehandlingHendelse = BehandlingHendelse(
         tidspunkt = LocalDateTime.now(),
         hendelsesTidspunkt = LocalDateTime.now(),
-        avklaringsBehov = avklaringsbehov,
-        avklaringsbehovStatus = Status.OPPRETTET,
-        saksbehandler = Saksbehandler(ident = "Albert"),
-        versjon = Versjon("323"),
-        status = BehandlingStatus.OPPRETTET,
-        ansvarligBeslutter = "Åberg",
-        vedtakstidspunkt = LocalDateTime.now(),
-        mottattTid = LocalDateTime.now(),
-        søknadsformat = SøknadsFormat.DIGITAL,
-        relatertBehandlingReferanse = null,
+        tilstand = BehandlingTilstand(
+            gjeldendeAvklaringsBehov = avklaringsbehov.tilAvklaringsbehovKode(),
+            gjeldendeAvklaringsbehovStatus = Status.OPPRETTET.tilDomene(),
+            sisteSaksbehandler = "Albert",
+            versjon = Versjon("323"),
+            status = BehandlingStatus.OPPRETTET,
+            ansvarligBeslutter = "Åberg",
+            vedtakstidspunkt = LocalDateTime.now(),
+            mottattTid = LocalDateTime.now(),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            relatertBehandlingReferanse = null,
+        ),
     )
 
     companion object {

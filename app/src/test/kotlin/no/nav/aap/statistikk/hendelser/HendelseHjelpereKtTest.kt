@@ -8,7 +8,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.*
 import no.nav.aap.behandlingsflyt.kontrakt.steg.StegType
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
+import no.nav.aap.statistikk.behandling.ReturÅrsakTilstand
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension
@@ -366,12 +367,12 @@ class HendelseHjelpereKtTest {
         )
 
         assertThat(hendelser.returÅrsakkoblinger()).containsExactlyInAnyOrder(
-            ReturÅrsakkobling(
-                avklaringsbehov = AVKLAR_SYKDOM,
+            ReturÅrsakTilstand(
+                avklaringsbehov = AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
                 returÅrsaker = listOf("MANGLENDE_UTREDNING", "MANGELFULL_BEGRUNNELSE"),
             ),
-            ReturÅrsakkobling(
-                avklaringsbehov = AVKLAR_BISTANDSBEHOV,
+            ReturÅrsakTilstand(
+                avklaringsbehov = AVKLAR_BISTANDSBEHOV.tilAvklaringsbehovKode(),
                 returÅrsaker = listOf("ANNET"),
             ),
         )

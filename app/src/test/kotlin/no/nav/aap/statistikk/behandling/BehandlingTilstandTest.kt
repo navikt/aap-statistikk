@@ -1,11 +1,7 @@
 package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon.AVKLAR_SYKDOM
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
-import no.nav.aap.behandlingsflyt.kontrakt.steg.StegGruppe
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -13,8 +9,7 @@ import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -28,387 +23,89 @@ class BehandlingTilstandTest {
     )
 
     @Test
-    fun `behandling konstrueres fra tilstand uten å opprette historikk`() {
-        val referanse = UUID.randomUUID()
-        val behandling = Behandling(
-            referanse = referanse,
-            sak = sak,
-            typeBehandling = TypeBehandling.Førstegangsbehandling,
-            opprettetTid = tidspunkt.minusDays(2),
-            oppdatertTidspunkt = tidspunkt,
-            tilstand = BehandlingTilstand(
-                status = BehandlingStatus.IVERKSETTES,
-                versjon = Versjon("1.0"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                ansvarligBeslutter = "Beslutter",
-                vedtakstidspunkt = tidspunkt,
-                sisteSaksbehandler = "Saksbehandler",
-                resultat = ResultatKode.INNVILGET,
-                gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
-                gjeldendeAvklaringsbehovStatus = AvklaringsbehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
-                sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-                sistLøsteAvklaringsbehovTidspunkt = tidspunkt.minusHours(1),
-                gjeldendeStegGruppe = Behandlingssteggruppe.BREV,
-                venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
-                returÅrsak = "ANNET",
-                returÅrsakkoblinger = listOf(
-                    ReturÅrsakTilstand(AVKLAR_SYKDOM.tilAvklaringsbehovKode(), listOf("ANNET")),
-                ),
-                relatertBehandlingReferanse = "RELATERT",
-            ),
-        )
-
-        assertThat(behandling).isEqualTo(
-            Behandling(
-                referanse = referanse,
-                sak = sak,
-                typeBehandling = TypeBehandling.Førstegangsbehandling,
-                opprettetTid = tidspunkt.minusDays(2),
-                oppdatertTidspunkt = tidspunkt,
-                status = BehandlingStatus.IVERKSETTES,
-                versjon = Versjon("1.0"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                ansvarligBeslutter = "Beslutter",
-                vedtakstidspunkt = tidspunkt,
-                sisteSaksbehandler = "Saksbehandler",
-                resultat = ResultatKode.INNVILGET,
-                gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
-                gjeldendeAvklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-                sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-                sistLøsteAvklaringsbehovTidspunkt = tidspunkt.minusHours(1),
-                gjeldendeStegGruppe = StegGruppe.BREV,
-                venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
-                returÅrsak = "ANNET",
-                returÅrsakkoblinger = listOf(ReturÅrsakkobling(AVKLAR_SYKDOM, listOf("ANNET"))),
-                relatertBehandlingReferanse = "RELATERT",
-                hendelser = emptyList(),
-            ),
-        )
-    }
-
-    @Test
-    fun `hendelse konstrueres med egne tidspunkter og beholder uavhengige behovsfelt`() {
-        val hendelse = BehandlingHendelse(
-            tidspunkt = tidspunkt.plusDays(1),
-            hendelsesTidspunkt = tidspunkt,
-            tilstand = BehandlingTilstand(
-                status = BehandlingStatus.UTREDES,
-                versjon = Versjon("1.0"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                gjeldendeAvklaringsbehovStatus = AvklaringsbehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
-                sisteSaksbehandlerSomLøstebehov = null,
-                sistLøsteAvklaringsbehovTidspunkt = null,
-                sisteSaksbehandler = " ",
-                relatertBehandlingReferanse = "",
-            ),
-        )
-
-        assertThat(hendelse).isEqualTo(
-            BehandlingHendelse(
-                tidspunkt = tidspunkt.plusDays(1),
-                hendelsesTidspunkt = tidspunkt,
-                status = BehandlingStatus.UTREDES,
-                versjon = Versjon("1.0"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                avklaringsBehov = null,
-                avklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-                sisteSaksbehandlerSomLøstebehov = null,
-                sistLøsteAvklaringsbehovTidspunkt = null,
-                saksbehandler = Saksbehandler(" "),
-                relatertBehandlingReferanse = "",
-            ),
-        )
-    }
-
-    @Test
-    fun `behandling uten historikk bruker sine egne felt som tilstand`() {
-        val behandling = Behandling(
-            referanse = UUID.randomUUID(),
-            sak = sak,
-            typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.IVERKSETTES,
-            opprettetTid = tidspunkt.minusDays(1),
-            mottattTid = tidspunkt.minusDays(1),
-            versjon = Versjon("1.0"),
-            søknadsformat = SøknadsFormat.PAPIR,
-            ansvarligBeslutter = "Beslutter",
-            vedtakstidspunkt = tidspunkt,
-            sisteSaksbehandler = "Saksbehandler",
-            resultat = ResultatKode.INNVILGET,
-            gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
-            gjeldendeAvklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-            sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-            sistLøsteAvklaringsbehovTidspunkt = tidspunkt.minusHours(1),
-            gjeldendeStegGruppe = StegGruppe.BREV,
-            venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
-            returÅrsak = "ANNET",
-            returÅrsakkoblinger = listOf(ReturÅrsakkobling(AVKLAR_SYKDOM, listOf("ANNET"))),
-            relatertBehandlingReferanse = "RELATERT",
-            hendelser = emptyList(),
-        )
-
-        assertThat(behandling.nåværendeTilstand()).isEqualTo(
-            BehandlingTilstand(
-                status = BehandlingStatus.IVERKSETTES,
-                versjon = Versjon("1.0"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                ansvarligBeslutter = "Beslutter",
-                vedtakstidspunkt = tidspunkt,
-                sisteSaksbehandler = "Saksbehandler",
-                resultat = ResultatKode.INNVILGET,
-                gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
-                gjeldendeAvklaringsbehovStatus = AvklaringsbehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
-                sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-                sistLøsteAvklaringsbehovTidspunkt = tidspunkt.minusHours(1),
-                gjeldendeStegGruppe = Behandlingssteggruppe.BREV,
-                venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
-                returÅrsak = "ANNET",
-                returÅrsakkoblinger = listOf(
-                    ReturÅrsakTilstand(AVKLAR_SYKDOM.tilAvklaringsbehovKode(), listOf("ANNET")),
-                ),
-                relatertBehandlingReferanse = "RELATERT",
-            ),
-        )
-    }
-
-    @Test
-    fun `nåværende tilstand hentes fra behandlingen og ikke fra historikken`() {
-        val hendelse = BehandlingHendelse(
-            tidspunkt = tidspunkt,
-            hendelsesTidspunkt = tidspunkt,
+    fun `ny hendelse erstatter hele tilstanden og beholder tidligere historikk`() {
+        val nyTilstand = BehandlingTilstand(
             status = BehandlingStatus.UTREDES,
-            versjon = Versjon("historikk"),
-            mottattTid = tidspunkt.plusDays(1),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            ansvarligBeslutter = "Historikkbeslutter",
-            vedtakstidspunkt = tidspunkt.plusMinutes(1),
-            resultat = null,
-            avklaringsbehovStatus = null,
-            relatertBehandlingReferanse = null,
-        )
-        val behandling = Behandling(
-            referanse = UUID.randomUUID(),
-            sak = sak,
-            typeBehandling = TypeBehandling.Førstegangsbehandling,
-            opprettetTid = tidspunkt.minusDays(1),
-            status = BehandlingStatus.IVERKSETTES,
-            versjon = Versjon("behandling"),
-            mottattTid = tidspunkt.minusDays(1),
-            søknadsformat = SøknadsFormat.PAPIR,
-            ansvarligBeslutter = "Behandlingens beslutter",
-            vedtakstidspunkt = tidspunkt,
-            resultat = ResultatKode.INNVILGET,
-            hendelser = listOf(hendelse),
-        )
-
-        assertThat(behandling.nåværendeTilstand()).isEqualTo(
-            BehandlingTilstand(
-                status = BehandlingStatus.IVERKSETTES,
-                versjon = Versjon("behandling"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                ansvarligBeslutter = "Behandlingens beslutter",
-                vedtakstidspunkt = tidspunkt,
-                resultat = ResultatKode.INNVILGET,
-            ),
-        )
-    }
-
-    @Test
-    fun `hendelsen konverteres til behandlingstilstand`() {
-        val hendelse = BehandlingHendelse(
-            tidspunkt = null,
-            hendelsesTidspunkt = tidspunkt.plusDays(2),
-            status = BehandlingStatus.UTREDES,
-            versjon = Versjon("historikk"),
-            mottattTid = tidspunkt.plusDays(1),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            ansvarligBeslutter = "Beslutter",
-            vedtakstidspunkt = tidspunkt,
-            saksbehandler = Saksbehandler(id = 123, ident = "Saksbehandler"),
-            resultat = ResultatKode.INNVILGET,
-            avklaringsBehov = Definisjon.FATTE_VEDTAK,
-            avklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-            sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-            sistLøsteAvklaringsbehovTidspunkt = tidspunkt.minusHours(1),
-            steggruppe = StegGruppe.BREV,
-            venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
-            returÅrsak = "ANNET",
-            returÅrsakkoblinger = listOf(
-                ReturÅrsakkobling(AVKLAR_SYKDOM, listOf("ANNET", "MANGLENDE_UTREDNING")),
-                ReturÅrsakkobling(Definisjon.KVALITETSSIKRING, listOf("ANNET")),
-            ),
-            relatertBehandlingReferanse = "RELATERT",
-        )
-
-        assertThat(hendelse.tilTilstand()).isEqualTo(
-            BehandlingTilstand(
-                status = BehandlingStatus.UTREDES,
-                versjon = Versjon("historikk"),
-                mottattTid = tidspunkt.plusDays(1),
-                søknadsformat = SøknadsFormat.DIGITAL,
-                ansvarligBeslutter = "Beslutter",
-                vedtakstidspunkt = tidspunkt,
-                sisteSaksbehandler = "Saksbehandler",
-                resultat = ResultatKode.INNVILGET,
-                gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
-                gjeldendeAvklaringsbehovStatus = AvklaringsbehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
-                sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-                sistLøsteAvklaringsbehovTidspunkt = tidspunkt.minusHours(1),
-                gjeldendeStegGruppe = Behandlingssteggruppe.BREV,
-                venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
-                returÅrsak = "ANNET",
-                returÅrsakkoblinger = listOf(
-                    ReturÅrsakTilstand(AVKLAR_SYKDOM.tilAvklaringsbehovKode(), listOf("ANNET", "MANGLENDE_UTREDNING")),
-                    ReturÅrsakTilstand(Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(), listOf("ANNET")),
-                ),
-                relatertBehandlingReferanse = "RELATERT",
-            ),
-        )
-    }
-
-    @Test
-    fun `løst behov beholder saksbehandler selv om løsningstidspunkt mangler`() {
-        val hendelse = BehandlingHendelse(
-            tidspunkt = tidspunkt,
-            hendelsesTidspunkt = tidspunkt,
-            status = BehandlingStatus.UTREDES,
-            versjon = Versjon("1.0"),
-            mottattTid = tidspunkt.minusDays(1),
-            søknadsformat = SøknadsFormat.PAPIR,
-            avklaringsbehovStatus = null,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-            sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-            sistLøsteAvklaringsbehovTidspunkt = null,
-            relatertBehandlingReferanse = null,
-        )
-
-        assertThat(hendelse.tilTilstand()).isEqualTo(
-            BehandlingTilstand(
-                status = BehandlingStatus.UTREDES,
-                versjon = Versjon("1.0"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
-                sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
-                sistLøsteAvklaringsbehovTidspunkt = null,
-            ),
-        )
-    }
-
-    @Test
-    fun `manglende hendelsesverdier fylles ikke ut og uavhengige behovsfelt beholdes`() {
-        val hendelse = BehandlingHendelse(
-            tidspunkt = tidspunkt,
-            hendelsesTidspunkt = tidspunkt,
-            status = BehandlingStatus.UTREDES,
-            versjon = Versjon("1.0"),
+            versjon = Versjon("ny"),
             mottattTid = tidspunkt.minusDays(1),
             søknadsformat = SøknadsFormat.PAPIR,
             ansvarligBeslutter = null,
             vedtakstidspunkt = null,
-            resultat = null,
-            saksbehandler = null,
-            avklaringsBehov = null,
-            avklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-            sisteSaksbehandlerSomLøstebehov = null,
-            sistLøsteAvklaringsbehovTidspunkt = null,
-            steggruppe = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            returÅrsakkoblinger = emptyList(),
-            relatertBehandlingReferanse = null,
+            sisteSaksbehandler = "Saksbehandler",
+            resultat = ResultatKode.INNVILGET,
+            gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
+            gjeldendeAvklaringsbehovStatus = AvklaringsbehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
+            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
+            sisteSaksbehandlerSomLøstebehov = "Kvalitetssikrer",
+            sistLøsteAvklaringsbehovTidspunkt = tidspunkt.minusHours(1),
+            gjeldendeStegGruppe = Behandlingssteggruppe.BREV,
+            venteÅrsak = " ",
+            returÅrsak = "ANNET",
+            returÅrsakkoblinger = listOf(
+                ReturÅrsakTilstand(Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(), listOf("ANNET")),
+            ),
+            relatertBehandlingReferanse = "RELATERT",
         )
-
-        assertThat(hendelse.tilTilstand()).isEqualTo(
-            BehandlingTilstand(
-                status = BehandlingStatus.UTREDES,
-                versjon = Versjon("1.0"),
-                mottattTid = tidspunkt.minusDays(1),
-                søknadsformat = SøknadsFormat.PAPIR,
-                ansvarligBeslutter = null,
-                vedtakstidspunkt = null,
-                resultat = null,
-                sisteSaksbehandler = null,
-                gjeldendeAvklaringsBehov = null,
-                gjeldendeAvklaringsbehovStatus = AvklaringsbehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
-                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
-                sisteSaksbehandlerSomLøstebehov = null,
-                sistLøsteAvklaringsbehovTidspunkt = null,
-                gjeldendeStegGruppe = null,
-                venteÅrsak = null,
-                returÅrsak = null,
-                returÅrsakkoblinger = emptyList(),
-                relatertBehandlingReferanse = null,
+        val første = BehandlingHendelse(
+            tidspunkt = tidspunkt,
+            hendelsesTidspunkt = tidspunkt,
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.OPPRETTET,
+                versjon = Versjon("første"),
+                mottattTid = tidspunkt.minusDays(2),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                ansvarligBeslutter = "Beslutter",
+                vedtakstidspunkt = tidspunkt,
             ),
         )
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = ["", " "])
-    fun `konvertering beholder blanke verdier fra begge representasjoner`(blank: String) {
         val behandling = Behandling(
             referanse = UUID.randomUUID(),
             sak = sak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            opprettetTid = tidspunkt.minusDays(1),
+            opprettetTid = tidspunkt,
+            tilstand = første.tilstand,
+            hendelser = listOf(første),
+        )
+        val nyHendelse = BehandlingHendelse(null, tidspunkt.plusMinutes(1), nyTilstand)
+
+        assertThat(behandling.leggTilHendelse(nyHendelse)).isEqualTo(
+            Behandling(
+                referanse = behandling.referanse,
+                sak = sak,
+                typeBehandling = TypeBehandling.Førstegangsbehandling,
+                opprettetTid = tidspunkt,
+                oppdatertTidspunkt = tidspunkt.plusMinutes(1),
+                tilstand = nyTilstand,
+                hendelser = listOf(første, nyHendelse),
+            ),
+        )
+        assertThat(behandling.hendelser).containsExactly(første)
+    }
+
+    @Test
+    fun `historikk kan ha løst behov uten saksbehandler men behandlingen krever begge`() {
+        val tilstand = BehandlingTilstand(
             status = BehandlingStatus.UTREDES,
             versjon = Versjon("1.0"),
-            mottattTid = tidspunkt.minusDays(1),
-            søknadsformat = SøknadsFormat.PAPIR,
-            ansvarligBeslutter = blank,
-            sisteSaksbehandler = blank,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-            sisteSaksbehandlerSomLøstebehov = blank,
-            venteÅrsak = blank,
-            returÅrsak = blank,
-            relatertBehandlingReferanse = blank,
+            mottattTid = tidspunkt,
+            søknadsformat = SøknadsFormat.DIGITAL,
+        )
+        val behandling = Behandling(
+            referanse = UUID.randomUUID(),
+            sak = sak,
+            typeBehandling = TypeBehandling.Førstegangsbehandling,
+            opprettetTid = tidspunkt,
+            tilstand = tilstand,
         )
         val hendelse = BehandlingHendelse(
-            tidspunkt = tidspunkt,
+            tidspunkt = null,
             hendelsesTidspunkt = tidspunkt,
-            status = BehandlingStatus.UTREDES,
-            versjon = Versjon("1.0"),
-            mottattTid = tidspunkt.minusDays(1),
-            søknadsformat = SøknadsFormat.PAPIR,
-            avklaringsbehovStatus = null,
-            ansvarligBeslutter = blank,
-            saksbehandler = Saksbehandler(blank),
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-            sisteSaksbehandlerSomLøstebehov = blank,
-            venteÅrsak = blank,
-            returÅrsak = blank,
-            relatertBehandlingReferanse = blank,
-        )
-        val forventet = BehandlingTilstand(
-            status = BehandlingStatus.UTREDES,
-            versjon = Versjon("1.0"),
-            mottattTid = tidspunkt.minusDays(1),
-            søknadsformat = SøknadsFormat.PAPIR,
-            ansvarligBeslutter = blank,
-            sisteSaksbehandler = blank,
-            sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
-            sisteSaksbehandlerSomLøstebehov = blank,
-            venteÅrsak = blank,
-            returÅrsak = blank,
-            relatertBehandlingReferanse = blank,
+            tilstand = tilstand.copy(
+                sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
+                sisteSaksbehandlerSomLøstebehov = null,
+            ),
         )
 
-        assertThat(listOf(behandling.nåværendeTilstand(), hendelse.tilTilstand()))
-            .containsExactly(forventet, forventet)
+        assertThrows<IllegalStateException> { behandling.leggTilHendelse(hendelse) }
     }
 }

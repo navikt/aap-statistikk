@@ -2,7 +2,6 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
-import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
@@ -31,43 +30,54 @@ class BehandlingTilstandsvalgRepositoryTest {
     fun `lagring kombinerer ytre verdier med historikkens status og største tidspunkt`(
         @Postgres dataSource: DataSource,
     ) {
-        val siste = hendelse().copy(
+        val grunnlagSiste = hendelse()
+        val siste = grunnlagSiste.copy(
             hendelsesTidspunkt = tidspunkt.minusMinutes(1),
-            status = BehandlingStatus.AVSLUTTET,
-            versjon = Versjon("historikk"),
-            mottattTid = tidspunkt.minusHours(1),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            ansvarligBeslutter = "Historikkbeslutter",
-            vedtakstidspunkt = tidspunkt.minusMinutes(2),
-            saksbehandler = Saksbehandler("Historikksaksbehandler"),
-            resultat = ResultatKode.INNVILGET,
+            tilstand = grunnlagSiste.tilstand.copy(
+                status = BehandlingStatus.AVSLUTTET,
+                versjon = Versjon("historikk"),
+                mottattTid = tidspunkt.minusHours(1),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                ansvarligBeslutter = "Historikkbeslutter",
+                vedtakstidspunkt = tidspunkt.minusMinutes(2),
+                sisteSaksbehandler = "Historikksaksbehandler",
+                resultat = ResultatKode.INNVILGET,
+            ),
         )
-        val behandling = behandling(dataSource).copy(
-            status = BehandlingStatus.IVERKSETTES,
+        val grunnlagBehandling = behandling(dataSource)
+        val behandling = grunnlagBehandling.copy(
             oppdatertTidspunkt = tidspunkt.plusMinutes(1),
-            ansvarligBeslutter = "Ytre beslutter",
-            vedtakstidspunkt = tidspunkt.minusHours(2),
-            sisteSaksbehandler = "Ytre saksbehandler",
-            resultat = ResultatKode.AVSLAG,
             hendelser = listOf(
-                siste.copy(hendelsesTidspunkt = tidspunkt, status = BehandlingStatus.UTREDES),
+                siste.copy(
+                    hendelsesTidspunkt = tidspunkt,
+                    tilstand = siste.tilstand.copy(status = BehandlingStatus.UTREDES),
+                ),
                 siste,
+            ),
+            tilstand = grunnlagBehandling.nåværendeTilstand().copy(
+                status = BehandlingStatus.IVERKSETTES,
+                ansvarligBeslutter = "Ytre beslutter",
+                vedtakstidspunkt = tidspunkt.minusHours(2),
+                sisteSaksbehandler = "Ytre saksbehandler",
+                resultat = ResultatKode.AVSLAG,
             ),
         )
         val id = dataSource.transaction { BehandlingRepository(it, clock).opprettBehandling(behandling) }
         val forventet = behandling.copy(
             id = id,
-            status = BehandlingStatus.AVSLUTTET,
             oppdatertTidspunkt = tidspunkt,
             hendelser = listOf(
-                hendelse().copy(
-                    status = BehandlingStatus.AVSLUTTET,
-                    ansvarligBeslutter = "Ytre beslutter",
-                    vedtakstidspunkt = tidspunkt.minusHours(2),
-                    saksbehandler = Saksbehandler("Ytre saksbehandler"),
-                    resultat = ResultatKode.AVSLAG,
+                grunnlagSiste.copy(
+                    tilstand = grunnlagSiste.tilstand.copy(
+                        status = BehandlingStatus.AVSLUTTET,
+                        ansvarligBeslutter = "Ytre beslutter",
+                        vedtakstidspunkt = tidspunkt.minusHours(2),
+                        sisteSaksbehandler = "Ytre saksbehandler",
+                        resultat = ResultatKode.AVSLAG,
+                    ),
                 ),
             ),
+            tilstand = behandling.nåværendeTilstand().copy(status = BehandlingStatus.AVSLUTTET),
         )
 
         assertThat(dataSource.transaction { BehandlingRepository(it).hent(id) })
@@ -83,30 +93,38 @@ class BehandlingTilstandsvalgRepositoryTest {
 
     @Test
     fun `gjeldende rad normaliserer blanke verdier mens historikken beholder dem`(@Postgres dataSource: DataSource) {
-        val behandling = behandling(dataSource).copy(
-            ansvarligBeslutter = " ",
-            sisteSaksbehandler = " ",
-            venteÅrsak = " ",
-            returÅrsak = " ",
-            relatertBehandlingReferanse = " ",
-            resultat = ResultatKode.INNVILGET,
+        val grunnlagBehandling = behandling(dataSource)
+        val behandling = grunnlagBehandling.copy(
+            tilstand = grunnlagBehandling.nåværendeTilstand().copy(
+                ansvarligBeslutter = " ",
+                sisteSaksbehandler = " ",
+                venteÅrsak = " ",
+                returÅrsak = " ",
+                relatertBehandlingReferanse = " ",
+                resultat = ResultatKode.INNVILGET,
+            ),
         )
         val id = dataSource.transaction { BehandlingRepository(it, clock).opprettBehandling(behandling) }
         val forventet = behandling.copy(
             id = id,
-            ansvarligBeslutter = null,
-            sisteSaksbehandler = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            relatertBehandlingReferanse = null,
+            tilstand = behandling.nåværendeTilstand().copy(
+                ansvarligBeslutter = null,
+                sisteSaksbehandler = null,
+                venteÅrsak = null,
+                returÅrsak = null,
+                relatertBehandlingReferanse = null,
+            ),
         )
-        val forventetHendelse = hendelse().copy(
-            ansvarligBeslutter = " ",
-            saksbehandler = Saksbehandler(" "),
-            venteÅrsak = " ",
-            returÅrsak = " ",
-            relatertBehandlingReferanse = " ",
-            resultat = ResultatKode.INNVILGET,
+        val grunnlagForventetHendelse = hendelse()
+        val forventetHendelse = grunnlagForventetHendelse.copy(
+            tilstand = grunnlagForventetHendelse.tilstand.copy(
+                ansvarligBeslutter = " ",
+                sisteSaksbehandler = " ",
+                venteÅrsak = " ",
+                returÅrsak = " ",
+                relatertBehandlingReferanse = " ",
+                resultat = ResultatKode.INNVILGET,
+            ),
         )
 
         val gjeldendeOgHistorikk = dataSource.transaction {
@@ -126,14 +144,20 @@ class BehandlingTilstandsvalgRepositoryTest {
     ) {
         val første = behandling(dataSource)
         val id = dataSource.transaction { BehandlingRepository(it, clock).opprettBehandling(første) }
-        val andre = første.copy(id = id, status = BehandlingStatus.UTREDES, versjon = Versjon("andre"))
+        val andre = første.copy(
+            id = id,
+            tilstand = første.nåværendeTilstand().copy(status = BehandlingStatus.UTREDES, versjon = Versjon("andre")),
+        )
         val andreClock = Clock.offset(clock, Duration.ofMinutes(lagringsforskyvning))
         dataSource.transaction { BehandlingRepository(it, andreClock).oppdaterBehandling(andre) }
         val førsteHendelse = hendelse()
-        val andreHendelse = hendelse().copy(
+        val grunnlagAndreHendelse = hendelse()
+        val andreHendelse = grunnlagAndreHendelse.copy(
             tidspunkt = tidspunkt.plusMinutes(lagringsforskyvning),
-            status = BehandlingStatus.UTREDES,
-            versjon = Versjon("andre"),
+            tilstand = grunnlagAndreHendelse.tilstand.copy(
+                status = BehandlingStatus.UTREDES,
+                versjon = Versjon("andre"),
+            ),
         )
         val forventet = if (lagringsforskyvning < 0) {
             første.copy(id = id, hendelser = listOf(andreHendelse, førsteHendelse))
@@ -153,28 +177,31 @@ class BehandlingTilstandsvalgRepositoryTest {
     ) {
         val behandling = behandling(dataSource)
         val id = dataSource.transaction { BehandlingRepository(it, clock).opprettBehandling(behandling) }
-        val første = hendelse().copy(status = BehandlingStatus.UTREDES, versjon = Versjon("første"))
+        val grunnlagFørste = hendelse()
+        val første = grunnlagFørste.copy(
+            tilstand = grunnlagFørste.tilstand.copy(status = BehandlingStatus.UTREDES, versjon = Versjon("første")),
+        )
         val siste = første.copy(
             hendelsesTidspunkt = tidspunkt.plusMinutes(tidsforskyvning),
-            status = BehandlingStatus.AVSLUTTET,
-            versjon = Versjon("siste"),
+            tilstand = første.tilstand.copy(status = BehandlingStatus.AVSLUTTET, versjon = Versjon("siste")),
         )
         val rekonstruksjonsClock = Clock.offset(clock, Duration.ofDays(1))
         dataSource.transaction {
             BehandlingRepository(it, rekonstruksjonsClock)
                 .invaliderOgLagreNyHistorikk(behandling.copy(id = id, hendelser = listOf(første, siste)))
         }
-        val forventetHendelse = hendelse().copy(
+        val grunnlagForventetHendelse = hendelse()
+        val forventetHendelse = grunnlagForventetHendelse.copy(
             tidspunkt = tidspunkt.plusDays(1),
-            status = BehandlingStatus.UTREDES,
+            tilstand = grunnlagForventetHendelse.tilstand.copy(status = BehandlingStatus.UTREDES),
         )
         val forventet = behandling.copy(
             id = id,
-            status = BehandlingStatus.AVSLUTTET,
             hendelser = listOf(
                 forventetHendelse,
-                forventetHendelse.copy(status = BehandlingStatus.AVSLUTTET),
+                forventetHendelse.copy(tilstand = forventetHendelse.tilstand.copy(status = BehandlingStatus.AVSLUTTET)),
             ),
+            tilstand = behandling.nåværendeTilstand().copy(status = BehandlingStatus.AVSLUTTET),
         )
 
         assertThat(dataSource.transaction { BehandlingRepository(it).hent(id) })
@@ -197,23 +224,27 @@ class BehandlingTilstandsvalgRepositoryTest {
             referanse = UUID.randomUUID(),
             sak = lagretSak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.OPPRETTET,
             opprettetTid = tidspunkt,
-            mottattTid = tidspunkt.minusDays(1),
-            versjon = Versjon("ytre"),
-            søknadsformat = SøknadsFormat.PAPIR,
             oppdatertTidspunkt = tidspunkt,
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = tidspunkt.minusDays(1),
+                versjon = Versjon("ytre"),
+                søknadsformat = SøknadsFormat.PAPIR,
+            ),
         )
     }
 
     private fun hendelse(): BehandlingHendelse = BehandlingHendelse(
         tidspunkt = tidspunkt,
         hendelsesTidspunkt = tidspunkt,
-        avklaringsbehovStatus = null,
-        versjon = Versjon("ytre"),
-        status = BehandlingStatus.OPPRETTET,
-        mottattTid = tidspunkt.minusDays(1),
-        søknadsformat = SøknadsFormat.PAPIR,
-        relatertBehandlingReferanse = null,
+        tilstand = BehandlingTilstand(
+            gjeldendeAvklaringsbehovStatus = null,
+            versjon = Versjon("ytre"),
+            status = BehandlingStatus.OPPRETTET,
+            mottattTid = tidspunkt.minusDays(1),
+            søknadsformat = SøknadsFormat.PAPIR,
+            relatertBehandlingReferanse = null,
+        ),
     )
 }

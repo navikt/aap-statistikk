@@ -109,10 +109,12 @@ class SaksStatistikkServiceTest {
                 repository.oppdaterBehandling(
                     behandling.copy(
                         hendelser = emptyList(),
-                        status = status,
                         oppdatertTidspunkt = start.plusSeconds(index + 1L),
-                        resultat = ResultatKode.INNVILGET,
-                        relatertBehandlingReferanse = relaterteReferanser[index],
+                        tilstand = behandling.nåværendeTilstand().copy(
+                            status = status,
+                            resultat = ResultatKode.INNVILGET,
+                            relatertBehandlingReferanse = relaterteReferanser[index],
+                        ),
                     ),
                 )
             }

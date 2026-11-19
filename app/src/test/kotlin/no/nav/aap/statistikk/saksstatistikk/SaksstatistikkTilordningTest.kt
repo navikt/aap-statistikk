@@ -4,9 +4,11 @@ import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.ÅrsakTilSattPåVent
 import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.oppgave.Oppgave
@@ -29,13 +31,15 @@ class SaksstatistikkTilordningTest {
     private val hendelse = BehandlingHendelse(
         tidspunkt = tidspunkt,
         hendelsesTidspunkt = tidspunkt,
-        avklaringsBehov = Definisjon.FATTE_VEDTAK,
-        avklaringsbehovStatus = null,
-        versjon = Versjon("1"),
-        status = BehandlingStatus.UTREDES,
-        mottattTid = tidspunkt,
-        søknadsformat = SøknadsFormat.DIGITAL,
-        relatertBehandlingReferanse = null,
+        tilstand = BehandlingTilstand(
+            gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
+            gjeldendeAvklaringsbehovStatus = null,
+            versjon = Versjon("1"),
+            status = BehandlingStatus.UTREDES,
+            mottattTid = tidspunkt,
+            søknadsformat = SøknadsFormat.DIGITAL,
+            relatertBehandlingReferanse = null,
+        ),
     )
     private val grunnbehandling = Behandling(
         referanse = UUID.randomUUID(),
@@ -46,17 +50,19 @@ class SaksstatistikkTilordningTest {
             sistOppdatert = tidspunkt,
         ),
         typeBehandling = TypeBehandling.Førstegangsbehandling,
-        status = BehandlingStatus.UTREDES,
         opprettetTid = tidspunkt,
-        mottattTid = tidspunkt,
-        versjon = Versjon("1"),
-        søknadsformat = SøknadsFormat.DIGITAL,
-        gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
-        sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
-        sisteSaksbehandlerSomLøstebehov = "Løste",
-        sisteSaksbehandler = "Siste",
-        venteÅrsak = ÅrsakTilSattPåVent.entries.first().name,
         hendelser = listOf(hendelse),
+        tilstand = BehandlingTilstand(
+            status = BehandlingStatus.UTREDES,
+            mottattTid = tidspunkt,
+            versjon = Versjon("1"),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
+            sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+            sisteSaksbehandlerSomLøstebehov = "Løste",
+            sisteSaksbehandler = "Siste",
+            venteÅrsak = ÅrsakTilSattPåVent.entries.first().name,
+        ),
     )
     private val snapshot = SakstatistikkSnapshot(
         tidspunkt = tidspunkt,
@@ -106,10 +112,14 @@ class SaksstatistikkTilordningTest {
         forventetSaksbehandler: String?,
     ) {
         val behandling = grunnbehandling.copy(
-            hendelser = listOf(hendelse.copy(status = status)),
-            sisteSaksbehandler = sisteSaksbehandler,
-            sisteLøsteAvklaringsbehov = sisteSomLøsteBehov?.let { Definisjon.AVKLAR_SYKDOM },
-            sisteSaksbehandlerSomLøstebehov = sisteSomLøsteBehov,
+            hendelser = listOf(hendelse.copy(tilstand = hendelse.tilstand.copy(status = status))),
+            tilstand = grunnbehandling.nåværendeTilstand().copy(
+                sisteSaksbehandler = sisteSaksbehandler,
+                sisteLøsteAvklaringsbehov = sisteSomLøsteBehov?.let {
+                    Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode()
+                },
+                sisteSaksbehandlerSomLøstebehov = sisteSomLøsteBehov,
+            ),
         )
 
         val resultat = utledSaksstatistikkTilordning(
@@ -134,8 +144,10 @@ class SaksstatistikkTilordningTest {
         forventetEnhet: String,
     ) {
         val behandling = grunnbehandling.copy(
-            sisteLøsteAvklaringsbehov = sistLøsteBehov,
-            venteÅrsak = if (venter) grunnbehandling.venteÅrsak else null,
+            tilstand = grunnbehandling.nåværendeTilstand().copy(
+                sisteLøsteAvklaringsbehov = sistLøsteBehov.tilAvklaringsbehovKode(),
+                venteÅrsak = if (venter) grunnbehandling.nåværendeTilstand().venteÅrsak else null,
+            ),
         )
 
         val resultat = utledSaksstatistikkTilordning(behandling, listOf(snapshot), oppgaver, tidspunkt)
@@ -150,8 +162,17 @@ class SaksstatistikkTilordningTest {
         forventetEnhet: String,
     ) {
         val behandling = grunnbehandling.copy(
-            gjeldendeAvklaringsBehov = behov,
-            hendelser = listOf(hendelse.copy(status = BehandlingStatus.AVSLUTTET, avklaringsBehov = behov)),
+            hendelser = listOf(
+                hendelse.copy(
+                    tilstand = hendelse.tilstand.copy(
+                        status = BehandlingStatus.AVSLUTTET,
+                        gjeldendeAvklaringsBehov = behov.tilAvklaringsbehovKode(),
+                    ),
+                ),
+            ),
+            tilstand = grunnbehandling.nåværendeTilstand().copy(
+                gjeldendeAvklaringsBehov = behov.tilAvklaringsbehovKode(),
+            ),
         )
         val valgtSnapshot = snapshot.copy(
             status = BehandlingStatus.AVSLUTTET.name,

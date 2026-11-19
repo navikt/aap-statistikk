@@ -12,6 +12,7 @@ import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.behandling.Vurderingsbehov
@@ -125,13 +126,15 @@ fun opprettTestBehandling(
         referanse = referanse,
         sak = sak,
         typeBehandling = no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling,
-        status = status,
         opprettetTid = opprettetTidspunkt,
         oppdatertTidspunkt = opprettetTidspunkt,
-        mottattTid = opprettetTidspunkt.truncatedTo(ChronoUnit.SECONDS),
-        versjon = Versjon(UUID.randomUUID().toString()),
         årsaker = vurderingsbehov,
-        søknadsformat = SøknadsFormat.PAPIR,
+        tilstand = BehandlingTilstand(
+            status = status,
+            mottattTid = opprettetTidspunkt.truncatedTo(ChronoUnit.SECONDS),
+            versjon = Versjon(UUID.randomUUID().toString()),
+            søknadsformat = SøknadsFormat.PAPIR,
+        ),
     )
     return dataSource.transaction {
         val repo = BehandlingRepository(it, clock = clock)
@@ -165,12 +168,14 @@ fun forberedDatabase(it: DBConnection, behandlingReferanse: UUID): BehandlingId 
             referanse = behandlingReferanse,
             sak = sak.copy(id = sakId),
             typeBehandling = no.nav.aap.statistikk.behandling.TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.OPPRETTET,
             opprettetTid = LocalDateTime.now(),
-            mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-            versjon = Versjon("xxx"),
-            søknadsformat = SøknadsFormat.DIGITAL,
             oppdatertTidspunkt = LocalDateTime.now(),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                versjon = Versjon("xxx"),
+                søknadsformat = SøknadsFormat.DIGITAL,
+            ),
         ),
     )
 }

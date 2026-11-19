@@ -43,13 +43,15 @@ class BehandlingPessimisticLockTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("v1"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("v1"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -75,13 +77,15 @@ class BehandlingPessimisticLockTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("v1"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("v1"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -117,13 +121,15 @@ class BehandlingPessimisticLockTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("v1"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("v1"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -149,8 +155,8 @@ class BehandlingPessimisticLockTest {
 
                     BehandlingRepository(it).oppdaterBehandling(
                         locked.copy(
-                            sisteSaksbehandler = "handler1",
                             oppdatertTidspunkt = LocalDateTime.now(),
+                            tilstand = locked.nåværendeTilstand().copy(sisteSaksbehandler = "handler1"),
                         ),
                     )
                     executionOrder.add("task1-updated")
@@ -171,8 +177,8 @@ class BehandlingPessimisticLockTest {
 
                     BehandlingRepository(it).oppdaterBehandling(
                         locked.copy(
-                            sisteSaksbehandler = "handler2",
                             oppdatertTidspunkt = LocalDateTime.now(),
+                            tilstand = locked.nåværendeTilstand().copy(sisteSaksbehandler = "handler2"),
                         ),
                     )
                     executionOrder.add("task2-updated")
@@ -203,13 +209,15 @@ class BehandlingPessimisticLockTest {
                     referanse = UUID.randomUUID(),
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("v1"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("v1"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -220,13 +228,15 @@ class BehandlingPessimisticLockTest {
                     referanse = UUID.randomUUID(),
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("v1"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("v1"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -287,13 +297,15 @@ class BehandlingPessimisticLockTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("v1"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("v1"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -334,13 +346,15 @@ class BehandlingPessimisticLockTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("v1"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("v1"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -360,8 +374,8 @@ class BehandlingPessimisticLockTest {
                     // Update saksbehandler
                     BehandlingRepository(it).oppdaterBehandling(
                         locked!!.copy(
-                            sisteSaksbehandler = "s001",
                             oppdatertTidspunkt = LocalDateTime.now(),
+                            tilstand = locked.nåværendeTilstand().copy(sisteSaksbehandler = "s001"),
                         ),
                     )
                 }
@@ -381,8 +395,8 @@ class BehandlingPessimisticLockTest {
                     // Same saksbehandler update (idempotent)
                     BehandlingRepository(it).oppdaterBehandling(
                         locked!!.copy(
-                            sisteSaksbehandler = "s001",
                             oppdatertTidspunkt = LocalDateTime.now(),
+                            tilstand = locked.nåværendeTilstand().copy(sisteSaksbehandler = "s001"),
                         ),
                     )
                 }
@@ -413,14 +427,16 @@ class BehandlingPessimisticLockTest {
             referanse = referanse,
             sak = sak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.UTREDES,
             opprettetTid = LocalDateTime.now(),
-            mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-            versjon = Versjon("v1"),
-            søknadsformat = SøknadsFormat.PAPIR,
-            sisteSaksbehandler = "s001",
             relaterteIdenter = listOf(),
             oppdatertTidspunkt = LocalDateTime.now(),
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.UTREDES,
+                mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                versjon = Versjon("v1"),
+                søknadsformat = SøknadsFormat.PAPIR,
+                sisteSaksbehandler = "s001",
+            ),
         )
 
         val behandlingId = dataSource.transaction {
@@ -431,8 +447,8 @@ class BehandlingPessimisticLockTest {
         val updated = dataSource.transaction {
             val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
             val modified = locked.copy(
-                sisteSaksbehandler = "s002",
                 oppdatertTidspunkt = LocalDateTime.now(),
+                tilstand = locked.nåværendeTilstand().copy(sisteSaksbehandler = "s002"),
             )
             BehandlingRepository(it).oppdaterBehandling(modified)
             modified
@@ -443,6 +459,6 @@ class BehandlingPessimisticLockTest {
             BehandlingRepository(it).hent(referanse)
         }
 
-        assertThat(fetched!!.sisteSaksbehandler).isEqualTo("s002")
+        assertThat(fetched!!.nåværendeTilstand().sisteSaksbehandler).isEqualTo("s002")
     }
 }
