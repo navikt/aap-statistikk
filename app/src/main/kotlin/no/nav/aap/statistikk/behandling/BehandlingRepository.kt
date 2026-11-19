@@ -1,11 +1,9 @@
 package no.nav.aap.statistikk.behandling
 
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Params
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
-import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -74,8 +72,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
 
     override fun oppdaterBehandling(behandling: Behandling) {
         val behandlingId = behandling.id()
-
-        val versjonId = lagreOgHentVersjonId(behandling.versjon)
+        val tilstand = behandling.nåværendeTilstand()
+        val versjonId = lagreOgHentVersjonId(tilstand.versjon)
 
         oppdaterÅrsakerTilBehandling(behandling)
         oppdaterÅrsakTilOpprettelse(behandling)
@@ -94,7 +92,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         oppdaterGjeldendeHistorikk(behandlingId)
 
         oppdaterRelaterteIdenter(behandling, historikkId)
-        lagreReturÅrsakkoblinger(historikkId, behandling.returÅrsakkoblinger)
+        lagreReturÅrsakkoblinger(historikkId, tilstand.returÅrsakkoblinger)
     }
 
     @Language("PostgreSQL")
@@ -118,29 +116,31 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         gjeldende: Boolean,
         oppdatertTid: LocalDateTime,
     ) {
+        val tilstand = behandling.nåværendeTilstand()
         setLong(1, behandling.id().id)
         setLong(2, versjonId)
         setBoolean(3, gjeldende)
         setLocalDateTime(4, oppdatertTid)
-        setLocalDateTime(5, behandling.mottattTid)
-        setLocalDateTime(6, behandling.vedtakstidspunkt)
-        setString(7, behandling.ansvarligBeslutter)
+        setLocalDateTime(5, tilstand.mottattTid)
+        setLocalDateTime(6, tilstand.vedtakstidspunkt)
+        setString(7, tilstand.ansvarligBeslutter)
+        // Status hentes fortsatt fra historikken, mens de øvrige tilstandsfeltene kommer fra behandlingen.
         setString(8, behandling.behandlingStatus().name)
-        setString(9, behandling.sisteSaksbehandler)
-        setString(10, behandling.gjeldendeAvklaringsBehov?.kode?.name)
-        setString(11, behandling.gjeldendeAvklaringsbehovStatus?.name)
-        setEnumName(12, behandling.søknadsformat)
-        setString(13, behandling.venteÅrsak)
-        setEnumName(14, behandling.gjeldendeStegGruppe)
-        setString(15, behandling.returÅrsak)
-        setEnumName(16, behandling.resultat)
+        setString(9, tilstand.sisteSaksbehandler)
+        setString(10, tilstand.gjeldendeAvklaringsBehov?.verdi)
+        setString(11, tilstand.gjeldendeAvklaringsbehovStatus?.name)
+        setEnumName(12, tilstand.søknadsformat)
+        setString(13, tilstand.venteÅrsak)
+        setEnumName(14, tilstand.gjeldendeStegGruppe)
+        setString(15, tilstand.returÅrsak)
+        setEnumName(16, tilstand.resultat)
         setLocalDateTime(17, behandling.oppdatertTidspunkt())
         setBoolean(18, false)
         setString(19, behandling.utbetalingId())
-        setString(20, behandling.relatertBehandlingReferanse)
-        setString(21, behandling.sisteLøsteAvklaringsbehov?.kode?.name)
-        setString(22, behandling.sisteSaksbehandlerSomLøstebehov)
-        setLocalDateTime(23, behandling.sistLøsteAvklaringsbehovTidspunkt)
+        setString(20, tilstand.relatertBehandlingReferanse)
+        setString(21, tilstand.sisteLøsteAvklaringsbehov?.verdi)
+        setString(22, tilstand.sisteSaksbehandlerSomLøstebehov)
+        setLocalDateTime(23, tilstand.sistLøsteAvklaringsbehovTidspunkt)
     }
 
     /**
@@ -266,7 +266,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             }
         }
 
-        val versjonId = lagreOgHentVersjonId(behandling.versjon)
+        val versjonId = lagreOgHentVersjonId(behandling.nåværendeTilstand().versjon)
         val oppdateringer = behandling.hendelsesHistorikk()
 
         dbConnection.executeBatch(
@@ -300,7 +300,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         }
         lagreReturÅrsakkoblinger(
             oppdateringer.zip(historikkIds).flatMap { (snapshot, historikkId) ->
-                snapshot.returÅrsakkoblinger.flatMap { kobling ->
+                snapshot.nåværendeTilstand().returÅrsakkoblinger.flatMap { kobling ->
                     kobling.returÅrsaker.map { Triple(historikkId, kobling.avklaringsbehov, it) }
                 }
             },
@@ -422,7 +422,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
               bh.sist_loste_avklaringsbehov               as bh_sist_loste_avklaringsbehov,
               bh.sist_loste_avklaringsbehov_saksbehandler as bh_sist_loste_avklaringsbehov_saksbehandler,
               bh.sist_loste_avklaringsbehov_tidspunkt     as bh_sist_loste_avklaringsbehov_tidspunkt,
-              v.versjon                                   as bh_versjon
+              v.versjon                                   as v_versjon
        from behandling_historikk bh
                 join versjon v on bh.versjon_id = v.id
        where bh.behandling_id = ?
@@ -436,34 +436,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                 BehandlingHendelse(
                     tidspunkt = it.getLocalDateTime("bh_opprettet_tidspunkt"),
                     hendelsesTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt"),
-                    avklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")?.let(Definisjon::forKode),
-                    avklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
-                    sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")
-                        ?.let(Definisjon::forKode),
-                    sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler"),
-                    sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull(
-                        "bh_sist_loste_avklaringsbehov_tidspunkt",
-                    ),
-                    steggruppe = it.getEnumOrNull("bh_steggruppe"),
-                    venteÅrsak = it.getStringOrNull("bh_venteaarsak"),
-                    returÅrsak = it.getStringOrNull("bh_retur_aarsak"),
-                    returÅrsakkoblinger = hentReturÅrsakkoblinger(it.getLong("bh_id")),
-                    resultat = it.getEnumOrNull("bh_resultat"),
-                    saksbehandler = it.getStringOrNull("bh_siste_saksbehandler")
-                        ?.let { saksbehandler ->
-                            Saksbehandler(
-                                ident = saksbehandler,
-                            )
-                        },
-                    ansvarligBeslutter = it.getStringOrNull("bh_ansvarlig_beslutter"),
-                    vedtakstidspunkt = it.getLocalDateTimeOrNull("bh_vedtak_tidspunkt"),
-                    status = it.getEnum("bh_status"),
-                    mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
-                    søknadsformat = it.getEnum("bh_soknadsformat"),
-                    versjon = Versjon(
-                        verdi = it.getString("bh_versjon"),
-                    ),
-                    relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse"),
+                    tilstand = mapTilstand(it),
                 )
             }
         }
@@ -520,38 +493,52 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             sakStatus = it.getEnum("sh_sak_status"),
         ),
         typeBehandling = it.getString("b_type").let { TypeBehandling.valueOf(it) },
-        status = it.getString("bh_status").let { BehandlingStatus.valueOf(it) },
         opprettetTid = it.getLocalDateTime("b_opprettet_tid"),
         opprettetAv = it.getStringOrNull("b_opprettet_av"),
-        mottattTid = it.getLocalDateTime("bh_mottatt_tid"),
-        vedtakstidspunkt = it.getLocalDateTimeOrNull("bh_vedtak_tidspunkt"),
-        ansvarligBeslutter = it.getStringOrNull("bh_ansvarlig_beslutter")?.ifBlank { null },
-        versjon = Versjon(verdi = it.getString("v_versjon")),
-        søknadsformat = it.getEnum("bh_soknadsformat"),
-        sisteSaksbehandler = it.getStringOrNull("bh_siste_saksbehandler")?.ifBlank { null },
+        tilstand = mapGjeldendeTilstand(it),
         relaterteIdenter = it.getArray("rp_ident", String::class).map(::Ident),
         relatertBehandlingId = it.getLongOrNull("b_forrige_behandling_id")?.let(::BehandlingId),
-        relatertBehandlingReferanse = it.getStringOrNull("bh_relatert_behandling_referanse")
-            ?.ifBlank { null },
         snapShotId = it.getLong("bh_id"),
-        gjeldendeAvklaringsBehov = it.getStringOrNull("bh_gjeldende_avklaringsbehov")?.let(Definisjon::forKode),
-        gjeldendeAvklaringsbehovStatus = it.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
-        sisteLøsteAvklaringsbehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov")?.let(Definisjon::forKode),
-        sisteSaksbehandlerSomLøstebehov = it.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler")
-            ?.ifBlank { null },
-        sistLøsteAvklaringsbehovTidspunkt = it.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
-        venteÅrsak = it.getStringOrNull("bh_venteaarsak")?.ifBlank { null },
-        returÅrsak = it.getStringOrNull("bh_retur_aarsak")?.ifBlank { null },
-        returÅrsakkoblinger = hentReturÅrsakkoblinger(it.getLong("bh_id")),
-        gjeldendeStegGruppe = it.getEnumOrNull("bh_steggruppe"),
         årsaker = it.getArray("b_aarsaker_til_behandling", String::class)
             .map { Vurderingsbehov.valueOf(it) },
         årsakTilOpprettelse = it.getStringOrNull("b_aarsak_til_opprettelse"),
-        resultat = it.getEnumOrNull("bh_resultat"),
         oppdatertTidspunkt = it.getLocalDateTime("bh_hendelsestidspunkt"),
     )
 
-    private fun lagreReturÅrsakkoblinger(behandlingHistorikkId: Long, koblinger: List<ReturÅrsakkobling>) {
+    private fun mapTilstand(row: Row): BehandlingTilstand = BehandlingTilstand(
+        status = row.getEnum("bh_status"),
+        versjon = Versjon(row.getString("v_versjon")),
+        mottattTid = row.getLocalDateTime("bh_mottatt_tid"),
+        søknadsformat = row.getEnum("bh_soknadsformat"),
+        ansvarligBeslutter = row.getStringOrNull("bh_ansvarlig_beslutter"),
+        vedtakstidspunkt = row.getLocalDateTimeOrNull("bh_vedtak_tidspunkt"),
+        sisteSaksbehandler = row.getStringOrNull("bh_siste_saksbehandler"),
+        resultat = row.getEnumOrNull("bh_resultat"),
+        gjeldendeAvklaringsBehov = row.getStringOrNull("bh_gjeldende_avklaringsbehov")?.let(::AvklaringsbehovKode),
+        gjeldendeAvklaringsbehovStatus = row.getEnumOrNull("bh_gjeldende_avklaringsbehov_status"),
+        sisteLøsteAvklaringsbehov = row.getStringOrNull("bh_sist_loste_avklaringsbehov")?.let(::AvklaringsbehovKode),
+        sisteSaksbehandlerSomLøstebehov = row.getStringOrNull("bh_sist_loste_avklaringsbehov_saksbehandler"),
+        sistLøsteAvklaringsbehovTidspunkt = row.getLocalDateTimeOrNull("bh_sist_loste_avklaringsbehov_tidspunkt"),
+        gjeldendeStegGruppe = row.getEnumOrNull("bh_steggruppe"),
+        venteÅrsak = row.getStringOrNull("bh_venteaarsak"),
+        returÅrsak = row.getStringOrNull("bh_retur_aarsak"),
+        returÅrsakkoblinger = hentReturÅrsakkoblinger(row.getLong("bh_id")),
+        relatertBehandlingReferanse = row.getStringOrNull("bh_relatert_behandling_referanse"),
+    )
+
+    private fun mapGjeldendeTilstand(row: Row): BehandlingTilstand {
+        val tilstand = mapTilstand(row)
+        return tilstand.copy(
+            ansvarligBeslutter = tilstand.ansvarligBeslutter?.ifBlank { null },
+            sisteSaksbehandler = tilstand.sisteSaksbehandler?.ifBlank { null },
+            sisteSaksbehandlerSomLøstebehov = tilstand.sisteSaksbehandlerSomLøstebehov?.ifBlank { null },
+            venteÅrsak = tilstand.venteÅrsak?.ifBlank { null },
+            returÅrsak = tilstand.returÅrsak?.ifBlank { null },
+            relatertBehandlingReferanse = tilstand.relatertBehandlingReferanse?.ifBlank { null },
+        )
+    }
+
+    private fun lagreReturÅrsakkoblinger(behandlingHistorikkId: Long, koblinger: List<ReturÅrsakTilstand>) {
         lagreReturÅrsakkoblinger(
             koblinger.flatMap { kobling ->
                 kobling.returÅrsaker.map { Triple(behandlingHistorikkId, kobling.avklaringsbehov, it) }
@@ -559,7 +546,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         )
     }
 
-    private fun lagreReturÅrsakkoblinger(koblinger: List<Triple<Long, Definisjon, String>>) {
+    private fun lagreReturÅrsakkoblinger(koblinger: List<Triple<Long, AvklaringsbehovKode, String>>) {
         if (koblinger.isEmpty()) return
 
         dbConnection.executeBatch(
@@ -572,13 +559,13 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         ) {
             setParams { (historikkId, avklaringsbehov, returÅrsak) ->
                 setLong(1, historikkId)
-                setString(2, avklaringsbehov.kode.name)
+                setString(2, avklaringsbehov.verdi)
                 setString(3, returÅrsak)
             }
         }
     }
 
-    private fun hentReturÅrsakkoblinger(behandlingHistorikkId: Long): List<ReturÅrsakkobling> {
+    private fun hentReturÅrsakkoblinger(behandlingHistorikkId: Long): List<ReturÅrsakTilstand> {
         val koblinger = dbConnection.queryList(
             """
                 SELECT avklaringsbehov_kode, retur_aarsak
@@ -590,7 +577,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             setParams { setLong(1, behandlingHistorikkId) }
             setRowMapper {
                 Pair(
-                    Definisjon.forKode(it.getString("avklaringsbehov_kode")),
+                    AvklaringsbehovKode(it.getString("avklaringsbehov_kode")),
                     it.getString("retur_aarsak"),
                 )
             }
@@ -598,7 +585,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
 
         return koblinger.groupBy({ it.first }, { it.second })
             .map { (avklaringsbehov, returÅrsaker) ->
-                ReturÅrsakkobling(
+                ReturÅrsakTilstand(
                     avklaringsbehov = avklaringsbehov,
                     returÅrsaker = returÅrsaker,
                 )
