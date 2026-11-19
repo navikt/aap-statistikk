@@ -38,6 +38,14 @@ tasks.register<JavaExec>("genererOpenApi") {
     workingDir = rootDir
 }
 
+tasks.register<JavaExec>("oppdaterHendelsesfixtures") {
+    group = "vedlikehold"
+    description = "Oppdater hendelsesfixtures i app/src/test/resources."
+    classpath(sourceSets.named("test").map { it.runtimeClasspath })
+    mainClass.set("no.nav.aap.statistikk.testutils.UpdateHendelserPublicJobbJsonKt")
+    workingDir(layout.projectDirectory)
+}
+
 
 dependencies {
     detektPlugins(libs.detektKtlintWrapper)
