@@ -12,9 +12,11 @@ import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.saksstatistikk.BehandlingMetode
 import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDateTime
@@ -22,6 +24,94 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class BehandlingTest {
+
+    private val tilstandstid = LocalDateTime.of(2026, 11, 19, 10, 0)
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `tilstandslesing bruker siste listeelement men største hendelsestidspunkt`(harVedtaksdata: Boolean) {
+        val grunnlag = behandlingMedMotstridendeTilstand()
+        val siste = grunnlag.hendelser.last().copy(
+            ansvarligBeslutter = if (harVedtaksdata) "Siste beslutter" else null,
+            vedtakstidspunkt = if (harVedtaksdata) tilstandstid.plusMinutes(1) else null,
+            resultat = if (harVedtaksdata) ResultatKode.AVSLAG else null,
+        )
+        val behandling = grunnlag.copy(hendelser = listOf(grunnlag.hendelser.first(), siste))
+
+        assertThat(lesTilstand(behandling)).isEqualTo(
+            Tilstandslesing(
+                status = BehandlingStatus.UTREDES,
+                versjon = "siste",
+                beslutter = if (harVedtaksdata) "Siste beslutter" else "Ytre beslutter",
+                vedtakstidspunkt = if (harVedtaksdata) tilstandstid.plusMinutes(1) else tilstandstid,
+                resultat = if (harVedtaksdata) ResultatKode.AVSLAG else null,
+                oppdatertTidspunkt = tilstandstid.plusMinutes(2),
+            ),
+        )
+    }
+
+    @Test
+    fun `å legge til en hendelse fjerner ytre vedtaksverdier som ellers ville blitt brukt`() {
+        val grunnlag = behandlingMedMotstridendeTilstand()
+        val behandling = grunnlag.copy(hendelser = listOf(grunnlag.hendelser.first()))
+            .leggTilHendelse(grunnlag.hendelser.last())
+
+        assertThat(lesTilstand(behandling)).isEqualTo(
+            Tilstandslesing(
+                status = BehandlingStatus.UTREDES,
+                versjon = "siste",
+                beslutter = null,
+                vedtakstidspunkt = null,
+                resultat = null,
+                oppdatertTidspunkt = tilstandstid.plusMinutes(2),
+            ),
+        )
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `cutoff uten tidligere hendelser beholder ytre tilstand men ikke historikkresultat`(harHistorikk: Boolean) {
+        val grunnlag = behandlingMedMotstridendeTilstand()
+        val behandling = if (harHistorikk) grunnlag else grunnlag.copy(hendelser = emptyList())
+
+        val snapshot = behandling.påTidspunkt(tilstandstid.minusMinutes(1))
+
+        assertThat(snapshot).isEqualTo(grunnlag.copy(hendelser = emptyList()))
+        assertThat(lesTilstand(snapshot)).isEqualTo(
+            Tilstandslesing(
+                status = BehandlingStatus.IVERKSETTES,
+                versjon = "ytre",
+                beslutter = "Ytre beslutter",
+                vedtakstidspunkt = tilstandstid,
+                resultat = null,
+                oppdatertTidspunkt = tilstandstid.plusMinutes(3),
+            ),
+        )
+    }
+
+    @ParameterizedTest
+    @CsvSource("UTREDES,AVSLUTTET,false", "AVSLUTTET,UTREDES,true")
+    fun `utbetalingsid bruker ytre status selv når historikken har en annen status`(
+        ytreStatus: BehandlingStatus,
+        historikkStatus: BehandlingStatus,
+        harUtbetalingsid: Boolean,
+    ) {
+        val grunnlag = behandlingMedMotstridendeTilstand()
+        val behandling = grunnlag.copy(
+            status = ytreStatus,
+            hendelser = listOf(grunnlag.hendelser.last().copy(status = historikkStatus)),
+        )
+
+        assertThat(behandling.utbetalingId())
+            .isEqualTo(if (harUtbetalingsid) behandling.referanse.toBase64() else null)
+    }
+
+    @Test
+    fun `manglende historikk og ytre tidspunkt gir feil fremfor å bruke opprettet tid`() {
+        assertThatIllegalArgumentException()
+            .isThrownBy { behandlingMedHendelser().oppdatertTidspunkt() }
+            .withMessageContaining("oppdatertTidspunkt er ikke satt")
+    }
 
     @ParameterizedTest
     @MethodSource("historikkOgBehandlingsmetode")
@@ -287,6 +377,53 @@ class BehandlingTest {
         assertThat(snapshot.hendelser).hasSize(2)
         assertThat(snapshot.oppdatertTidspunkt()).isEqualTo(t2)
     }
+
+    private fun behandlingMedMotstridendeTilstand(): Behandling {
+        val første = behandlingHendelse(
+            Definisjon.AVKLAR_SYKDOM,
+            tilstandstid.plusMinutes(2),
+            Versjon("første"),
+            BehandlingStatus.AVSLUTTET,
+        ).copy(
+            ansvarligBeslutter = "Tidligere beslutter",
+            vedtakstidspunkt = tilstandstid.minusMinutes(1),
+            resultat = ResultatKode.INNVILGET,
+        )
+        val siste = første.copy(
+            hendelsesTidspunkt = tilstandstid.plusMinutes(1),
+            versjon = Versjon("siste"),
+            status = BehandlingStatus.UTREDES,
+            ansvarligBeslutter = null,
+            vedtakstidspunkt = null,
+            resultat = null,
+        )
+        return behandlingMedHendelser(første, siste).copy(
+            status = BehandlingStatus.IVERKSETTES,
+            versjon = Versjon("ytre"),
+            ansvarligBeslutter = "Ytre beslutter",
+            vedtakstidspunkt = tilstandstid,
+            resultat = ResultatKode.AVSLAG,
+            oppdatertTidspunkt = tilstandstid.plusMinutes(3),
+        )
+    }
+
+    private fun lesTilstand(behandling: Behandling): Tilstandslesing = Tilstandslesing(
+        status = behandling.behandlingStatus(),
+        versjon = behandling.versjon(),
+        beslutter = behandling.ansvarligBeslutter(),
+        vedtakstidspunkt = behandling.vedtakstidspunkt(),
+        resultat = behandling.resultatFraSisteHendelse(),
+        oppdatertTidspunkt = behandling.oppdatertTidspunkt(),
+    )
+
+    private data class Tilstandslesing(
+        val status: BehandlingStatus,
+        val versjon: String,
+        val beslutter: String?,
+        val vedtakstidspunkt: LocalDateTime?,
+        val resultat: ResultatKode?,
+        val oppdatertTidspunkt: LocalDateTime,
+    )
 
     private fun behandlingMedHendelser(vararg hendelser: BehandlingHendelse): Behandling {
         val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
