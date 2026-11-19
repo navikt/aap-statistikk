@@ -2,19 +2,58 @@ package no.nav.aap.statistikk.behandling
 
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
+import no.nav.aap.utbetaling.helved.toBase64
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class BehandlingTest {
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `manglende historikkresultat stopper ikke utbetalingsid`(harTidligereAvslag: Boolean) {
+        val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
+        val avslått = behandlingHendelse(
+            Definisjon.FATTE_VEDTAK,
+            tidspunkt,
+            Versjon("1"),
+            BehandlingStatus.AVSLUTTET,
+        ).copy(resultat = ResultatKode.AVSLAG)
+        val behandling = Behandling(
+            referanse = UUID.randomUUID(),
+            sak = Sak(
+                saksnummer = Saksnummer("SAK123"),
+                person = Person(ident = Ident("0")),
+                sakStatus = SakStatus.OPPRETTET,
+                sistOppdatert = tidspunkt,
+            ),
+            typeBehandling = TypeBehandling.Førstegangsbehandling,
+            status = BehandlingStatus.AVSLUTTET,
+            opprettetTid = tidspunkt,
+            mottattTid = tidspunkt,
+            versjon = Versjon("1"),
+            søknadsformat = SøknadsFormat.DIGITAL,
+            resultat = ResultatKode.AVSLAG,
+            hendelser = if (harTidligereAvslag) {
+                listOf(avslått, avslått.copy(hendelsesTidspunkt = tidspunkt.plusMinutes(1), resultat = null))
+            } else {
+                emptyList()
+            },
+        )
+
+        assertThat(behandling.utbetalingId()).isEqualTo(behandling.referanse.toBase64())
+    }
 
     @Test
     fun `prioriter årsaker til behandling`() {

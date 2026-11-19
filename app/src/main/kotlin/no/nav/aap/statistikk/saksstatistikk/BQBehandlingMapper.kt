@@ -236,7 +236,7 @@ object BQBehandlingMapper {
         BehandlingStatus.AVSLUTTET,
         -> {
             val behandlingReferanse = behandling.referanse
-            val resultat = behandling.resultat()
+            val resultat = behandling.resultatFraSisteHendelse()
 
             if (resultat == ResultatKode.INNVILGET && rettighetstyper.size > 1) {
                 log.info("Mer enn én rettighetstype for behandling $behandlingReferanse. Velger første.")
@@ -364,7 +364,7 @@ object BQBehandlingMapper {
             BehandlingStatus.IVERKSETTES -> "IVERKSETTES"
 
             BehandlingStatus.AVSLUTTET -> {
-                if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultat()
+                if (behandling.typeBehandling == TypeBehandling.Klage && behandling.resultatFraSisteHendelse()
                         ?.sendesTilKA() == true
                 ) {
                     "OVERSENDT_KA"
