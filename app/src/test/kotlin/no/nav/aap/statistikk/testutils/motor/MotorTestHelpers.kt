@@ -4,7 +4,6 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.motor.JobbInput
@@ -23,13 +22,13 @@ import no.nav.aap.statistikk.oppgave.LagreOppgaveHendelseJobb
 import no.nav.aap.statistikk.oppgave.LagreOppgaveJobb
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.postmottak.LagrePostmottakHendelseJobb
+import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoPayload
 import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobb
 import no.nav.aap.statistikk.saksstatistikk.ResendSakstatistikkJobb
 import no.nav.aap.statistikk.testutils.fakes.FakeBQYtelseRepository
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.statistikk.tilbakekreving.LagreTilbakekrevingHendelseJobb
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import javax.sql.DataSource
 
 private val logger = LoggerFactory.getLogger("MotorTestHelpers")
@@ -100,9 +99,8 @@ fun motorMock(): Motor {
 
 class MockJobbAppender : JobbAppender {
     var jobber = mutableListOf<JobbInput>()
-    var sisteEnhetRetryCount: Int = 0
+    var sisteSakinfoPayload: LagreSakinfoPayload? = null
     var sisteDelayInSeconds: Long = 0
-    var sisteAvklaringsbehovKode: Definisjon? = null
 
     override fun leggTil(connection: DBConnection, jobb: JobbInput) {
         jobber.add(jobb)
@@ -114,19 +112,15 @@ class MockJobbAppender : JobbAppender {
 
     override fun leggTilLagreSakTilBigQueryJobb(
         repositoryProvider: RepositoryProvider,
-        behandlingId: BehandlingId,
+        payload: LagreSakinfoPayload,
         delayInSeconds: Long,
-        enhetRetryCount: Int,
-        triggerKilde: String,
-        avklaringsbehovKode: Definisjon?,
-        cutoffTidspunkt: LocalDateTime?,
     ) {
         logger.info(
-            "NO-OP: skal lagre til BigQuery for behandling $behandlingId. enhetRetryCount=$enhetRetryCount, delay=$delayInSeconds.",
+            "NO-OP: skal lagre til BigQuery for behandling ${payload.behandlingId}. " +
+                "enhetRetryCount=${payload.retryCount}, delay=$delayInSeconds.",
         )
-        sisteEnhetRetryCount = enhetRetryCount
+        sisteSakinfoPayload = payload
         sisteDelayInSeconds = delayInSeconds
-        sisteAvklaringsbehovKode = avklaringsbehovKode
     }
 
     override fun leggTilLagreAvsluttetBehandlingTilBigQueryJobb(

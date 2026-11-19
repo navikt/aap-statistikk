@@ -2,6 +2,7 @@ package no.nav.aap.statistikk.jobber.appender
 
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.statistikk.avsluttetbehandling.LagreAvsluttetBehandlingTilBigQueryJobb
+import no.nav.aap.statistikk.saksstatistikk.LagreSakinfoPayload
 import org.slf4j.LoggerFactory
 
 class MotorHendelsePublisher private constructor(
@@ -29,11 +30,10 @@ class MotorHendelsePublisher private constructor(
                 log.info("Legger til lagretilsaksstatistikkjobb. BehandlingId: ${hendelse.behandlingId}")
                 jobbAppender.leggTilLagreSakTilBigQueryJobb(
                     repositoryProvider,
-                    hendelse.behandlingId,
+                    LagreSakinfoPayload(hendelse.behandlingId, triggerKilde = "behandling"),
                     // Veldig hacky! Dette er for at jobben som kjører etter melding fra
                     // oppgave-appen skal få tid til å oppdatere enhet-tabellen før denne kjører.
                     delayInSeconds = System.getenv("HACKY_DELAY")?.toLong() ?: 0L,
-                    triggerKilde = "behandling",
                 )
             }
 
