@@ -148,15 +148,8 @@ data class Behandling(
     fun identerPåBehandling(): List<Ident> = listOf(this.sak.person.ident) + this.relaterteIdenter
 
     fun behandlingMetode(): BehandlingMetode {
-        if (this.hendelser.isEmpty()) {
-            return BehandlingMetode.AUTOMATISK
-        }
-        val sisteHendelse = this.hendelser.last()
-        if (sisteHendelse.avklaringsBehov == null) {
-            return this.copy(hendelser = this.hendelser.dropLast(1)).behandlingMetode()
-        }
-
-        val sisteDefinisjon = sisteHendelse.avklaringsBehov
+        val sisteDefinisjon = hendelser.lastOrNull { it.avklaringsBehov != null }?.avklaringsBehov
+            ?: return BehandlingMetode.AUTOMATISK
 
         return when (sisteDefinisjon.tilBehandlingMetode()) {
             BehandlingMetode.KVALITETSSIKRING -> BehandlingMetode.KVALITETSSIKRING
