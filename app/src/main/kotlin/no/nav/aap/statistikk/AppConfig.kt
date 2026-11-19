@@ -12,7 +12,7 @@ object AppConfig {
     // Tid appen får til å fullføre påbegynte requests, jobber etc. Må være mindre enn `endeligShutdownTimeout`.
     val shutdownGracePeriod = shutdownTimeout - 3.seconds
 
-    // Tid appen får til å avslutte Motor, Kafka, etc
+    // Tid appen får til å avslutte Motor, etc
     val stansArbeidTimeout = shutdownGracePeriod - 1.seconds
 
     // Vi skrur opp ktor sin default-verdi, som er "antall CPUer", fordi vi har en del venting på IO (db, kafka, http):
