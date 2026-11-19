@@ -81,16 +81,7 @@ class BehandlingService(
                 }
             }
 
-        val (sisteLøsteAvklaringsbehov, sisteSaksbehandler, sistLøsteAvklaringsbehovTidspunkt) = dto.avklaringsbehov.utledForrigeLøsteAvklaringsbehov()
-            ?: Triple(null, null, null)
-        val gjeldendeAvklaringsbehov = dto.avklaringsbehov.utledGjeldendeAvklaringsbehov()
-        val gjeldendeAvklaringsbehovStatus = dto.avklaringsbehov.sisteAvklaringsbehovStatus()
-        val steggruppe = gjeldendeAvklaringsbehov?.løsesISteg?.gruppe
-        val saksbehandler = dto.avklaringsbehov.sistePersonPåBehandling()
-        val ansvarligBeslutter = dto.avklaringsbehov.utledAnsvarligBeslutter()
-        val venteÅrsak = dto.avklaringsbehov.utledÅrsakTilSattPåVent()
-        val returÅrsak = dto.avklaringsbehov.årsakTilRetur()?.name
-        val returÅrsakkoblinger = dto.avklaringsbehov.returÅrsakkoblinger()
+        val behovstilstand = dto.avklaringsbehov.utledAvklaringsbehovTilstand()
         val resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene()
         val versjon = Versjon(verdi = dto.versjon)
         val søknadsformat = dto.soknadsFormat.tilDomene()
@@ -99,20 +90,20 @@ class BehandlingService(
             BehandlingHendelse(
                 tidspunkt = null,
                 hendelsesTidspunkt = dto.hendelsesTidspunkt,
-                avklaringsBehov = gjeldendeAvklaringsbehov,
-                sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
-                sisteSaksbehandlerSomLøstebehov = sisteSaksbehandler,
-                sistLøsteAvklaringsbehovTidspunkt = sistLøsteAvklaringsbehovTidspunkt,
-                steggruppe = steggruppe,
-                avklaringsbehovStatus = gjeldendeAvklaringsbehovStatus,
-                venteÅrsak = venteÅrsak,
-                returÅrsak = returÅrsak,
-                returÅrsakkoblinger = returÅrsakkoblinger,
-                saksbehandler = saksbehandler?.let(::Saksbehandler),
+                avklaringsBehov = behovstilstand.gjeldendeBehov?.definisjon,
+                sisteLøsteAvklaringsbehov = behovstilstand.sisteLøsteBehov?.definisjon,
+                sisteSaksbehandlerSomLøstebehov = behovstilstand.sisteLøsteBehov?.løstAv,
+                sistLøsteAvklaringsbehovTidspunkt = behovstilstand.sisteLøsteBehov?.tidspunkt,
+                steggruppe = behovstilstand.gjeldendeBehov?.steggruppe,
+                avklaringsbehovStatus = behovstilstand.gjeldendeBehov?.status,
+                venteÅrsak = behovstilstand.venteÅrsak,
+                returÅrsak = behovstilstand.returÅrsak,
+                returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger,
+                saksbehandler = behovstilstand.saksbehandler?.let(::Saksbehandler),
                 resultat = resultat,
                 versjon = versjon,
                 status = behandlingStatus,
-                ansvarligBeslutter = ansvarligBeslutter,
+                ansvarligBeslutter = behovstilstand.ansvarligBeslutter,
                 vedtakstidspunkt = vedtakstidspunkt,
                 mottattTid = dto.mottattTid,
                 søknadsformat = søknadsformat,
@@ -136,23 +127,23 @@ class BehandlingService(
             typeBehandling = dto.behandlingType.tilDomene(),
             opprettetTid = dto.behandlingOpprettetTidspunkt,
             vedtakstidspunkt = vedtakstidspunkt,
-            ansvarligBeslutter = ansvarligBeslutter,
+            ansvarligBeslutter = behovstilstand.ansvarligBeslutter,
             mottattTid = dto.mottattTid,
             status = behandlingStatus,
             versjon = versjon,
             relaterteIdenter = dto.identerForSak.map(::Ident),
             relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-            sisteSaksbehandler = saksbehandler,
-            sisteLøsteAvklaringsbehov = sisteLøsteAvklaringsbehov,
-            sisteSaksbehandlerSomLøstebehov = sisteSaksbehandler,
-            gjeldendeAvklaringsBehov = gjeldendeAvklaringsbehov,
-            gjeldendeAvklaringsbehovStatus = gjeldendeAvklaringsbehovStatus,
+            sisteSaksbehandler = behovstilstand.saksbehandler,
+            sisteLøsteAvklaringsbehov = behovstilstand.sisteLøsteBehov?.definisjon,
+            sisteSaksbehandlerSomLøstebehov = behovstilstand.sisteLøsteBehov?.løstAv,
+            gjeldendeAvklaringsBehov = behovstilstand.gjeldendeBehov?.definisjon,
+            gjeldendeAvklaringsbehovStatus = behovstilstand.gjeldendeBehov?.status,
             søknadsformat = søknadsformat,
-            venteÅrsak = venteÅrsak,
-            returÅrsak = returÅrsak,
-            returÅrsakkoblinger = returÅrsakkoblinger,
+            venteÅrsak = behovstilstand.venteÅrsak,
+            returÅrsak = behovstilstand.returÅrsak,
+            returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger,
             resultat = resultat,
-            gjeldendeStegGruppe = steggruppe,
+            gjeldendeStegGruppe = behovstilstand.gjeldendeBehov?.steggruppe,
             årsaker = dto.vurderingsbehov.map { it.tilDomene() },
             opprettetAv = dto.opprettetAv,
             årsakTilOpprettelse = dto.årsakTilOpprettelse.name,

@@ -92,27 +92,22 @@ class ReberegnHistorikk {
             }
 
         return avklaringsbehovHistorikk.fold(behandlingMedEllerUtenInngangshendelse) { acc, curr ->
-            val (forrigeLøste, forrigeløstAvHvem, forrigeLøsteTidspunkt) = curr.utledForrigeLøsteAvklaringsbehov()
-                ?: Triple(
-                    null,
-                    null,
-                    null,
-                )
+            val behovstilstand = curr.utledAvklaringsbehovTilstand()
             acc.leggTilHendelse(
                 BehandlingHendelse(
                     tidspunkt = null, // Vil etterfylles
                     hendelsesTidspunkt = requireNotNull(curr.tidspunktSisteEndring()),
-                    avklaringsBehov = curr.utledGjeldendeAvklaringsbehov(),
-                    avklaringsbehovStatus = curr.sisteAvklaringsbehovStatus(),
-                    steggruppe = curr.utledGjeldendeAvklaringsbehov()?.løsesISteg?.gruppe,
-                    venteÅrsak = curr.utledÅrsakTilSattPåVent(),
-                    returÅrsak = curr.årsakTilRetur()?.name,
-                    returÅrsakkoblinger = curr.returÅrsakkoblinger(),
-                    saksbehandler = curr.sistePersonPåBehandling()?.let(::Saksbehandler),
+                    avklaringsBehov = behovstilstand.gjeldendeBehov?.definisjon,
+                    avklaringsbehovStatus = behovstilstand.gjeldendeBehov?.status,
+                    steggruppe = behovstilstand.gjeldendeBehov?.steggruppe,
+                    venteÅrsak = behovstilstand.venteÅrsak,
+                    returÅrsak = behovstilstand.returÅrsak,
+                    returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger,
+                    saksbehandler = behovstilstand.saksbehandler?.let(::Saksbehandler),
                     resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
                     versjon = dto.versjon.let(::Versjon),
                     status = curr.utledBehandlingStatus(),
-                    ansvarligBeslutter = curr.utledAnsvarligBeslutter(),
+                    ansvarligBeslutter = behovstilstand.ansvarligBeslutter,
                     vedtakstidspunkt = if (behandlingMedEllerUtenInngangshendelse.behandlingStatus() ==
                         BehandlingStatus.AVSLUTTET
                     ) {
@@ -124,9 +119,9 @@ class ReberegnHistorikk {
                     mottattTid = dto.mottattTid,
                     søknadsformat = dto.soknadsFormat.tilDomene(),
                     relatertBehandlingReferanse = dto.relatertBehandling?.toString(),
-                    sisteLøsteAvklaringsbehov = forrigeLøste,
-                    sisteSaksbehandlerSomLøstebehov = forrigeløstAvHvem,
-                    sistLøsteAvklaringsbehovTidspunkt = forrigeLøsteTidspunkt,
+                    sisteLøsteAvklaringsbehov = behovstilstand.sisteLøsteBehov?.definisjon,
+                    sisteSaksbehandlerSomLøstebehov = behovstilstand.sisteLøsteBehov?.løstAv,
+                    sistLøsteAvklaringsbehovTidspunkt = behovstilstand.sisteLøsteBehov?.tidspunkt,
 
                 ),
             )

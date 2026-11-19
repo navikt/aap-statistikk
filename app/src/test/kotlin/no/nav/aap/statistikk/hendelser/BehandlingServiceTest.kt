@@ -13,6 +13,7 @@ import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.IBehandlingRepository
+import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.behandling.Vurderingsbehov
@@ -78,6 +79,9 @@ class BehandlingServiceTest {
         assertThat(resultat.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(resultat.resultat).isEqualTo(ResultatKode.INNVILGET)
         assertThat(resultat.sisteSaksbehandler).isEqualTo("Z111111")
+        assertThat(resultat.sisteLøsteAvklaringsbehov).isEqualTo(Definisjon.FATTE_VEDTAK)
+        assertThat(resultat.sisteSaksbehandlerSomLøstebehov).isEqualTo("Z111111")
+        assertThat(resultat.sistLøsteAvklaringsbehovTidspunkt).isEqualTo(if (finnesFraFør) behovTid else null)
         assertThat(resultat.ansvarligBeslutter).isEqualTo("Z111111")
         assertThat(resultat.vedtakstidspunkt).isEqualTo(vedtakTid)
         assertThat(resultat.gjeldendeAvklaringsBehov).isNull()
@@ -122,9 +126,53 @@ class BehandlingServiceTest {
         assertThat(resultat.sisteSaksbehandler).isEqualTo("Z222222")
         assertThat(resultat.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
         assertThat(resultat.returÅrsak).isEqualTo("MANGLENDE_UTREDNING")
+        assertThat(resultat.returÅrsakkoblinger)
+            .containsExactly(ReturÅrsakkobling(Definisjon.AVKLAR_SYKDOM, listOf("MANGLENDE_UTREDNING")))
         assertThat(resultat.ansvarligBeslutter).isNull()
         assertThat(resultat.resultat).isNull()
         assertThat(resultat.vedtakstidspunkt).isNull()
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `tomme behov gir ingen behovsdata og fjerner tidligere verdier`(finnesFraFør: Boolean) {
+        val referanse = UUID.randomUUID()
+        val sak = testSak()
+        val dto = testHendelse(referanse).copy(avklaringsbehov = emptyList())
+        val eksisterende = if (finnesFraFør) {
+            eksisterendeBehandling(sak, referanse).copy(
+                gjeldendeAvklaringsBehov = Definisjon.AVKLAR_SYKDOM,
+                gjeldendeAvklaringsbehovStatus = BehovStatus.SENDT_TILBAKE_FRA_BESLUTTER,
+                gjeldendeStegGruppe = Definisjon.AVKLAR_SYKDOM.løsesISteg.gruppe,
+                sisteLøsteAvklaringsbehov = Definisjon.FATTE_VEDTAK,
+                sisteSaksbehandlerSomLøstebehov = "Beslutter",
+                sistLøsteAvklaringsbehovTidspunkt = dto.hendelsesTidspunkt.minusMinutes(1),
+                sisteSaksbehandler = "Saksbehandler",
+                ansvarligBeslutter = "Beslutter",
+                venteÅrsak = "VENTER_PÅ_MASKINELL_AVKLARING",
+                returÅrsak = "MANGLENDE_UTREDNING",
+                returÅrsakkoblinger = listOf(
+                    ReturÅrsakkobling(Definisjon.AVKLAR_SYKDOM, listOf("MANGLENDE_UTREDNING")),
+                ),
+            )
+        } else {
+            null
+        }
+        val service = BehandlingService(FakeBehandlingRepository(), SkjermingService(FakePdlGateway(emptyMap())))
+
+        val resultat = service.konstruerBehandling(dto, sak, eksisterende)
+
+        assertThat(resultat.gjeldendeAvklaringsBehov).isNull()
+        assertThat(resultat.gjeldendeAvklaringsbehovStatus).isNull()
+        assertThat(resultat.gjeldendeStegGruppe).isNull()
+        assertThat(resultat.sisteLøsteAvklaringsbehov).isNull()
+        assertThat(resultat.sisteSaksbehandlerSomLøstebehov).isNull()
+        assertThat(resultat.sistLøsteAvklaringsbehovTidspunkt).isNull()
+        assertThat(resultat.sisteSaksbehandler).isNull()
+        assertThat(resultat.ansvarligBeslutter).isNull()
+        assertThat(resultat.venteÅrsak).isNull()
+        assertThat(resultat.returÅrsak).isNull()
+        assertThat(resultat.returÅrsakkoblinger).isEmpty()
     }
 
     @Test
