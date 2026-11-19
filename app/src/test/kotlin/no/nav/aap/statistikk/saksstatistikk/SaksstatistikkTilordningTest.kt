@@ -1,0 +1,167 @@
+package no.nav.aap.statistikk.saksstatistikk
+
+import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
+import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingHendelse
+import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.behandling.TypeBehandling
+import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.ÅrsakTilSattPåVent
+import no.nav.aap.statistikk.enhet.Enhet
+import no.nav.aap.statistikk.oppgave.Oppgave
+import no.nav.aap.statistikk.oppgave.Oppgavestatus
+import no.nav.aap.statistikk.oppgave.Reservasjon
+import no.nav.aap.statistikk.oppgave.Saksbehandler
+import no.nav.aap.statistikk.person.Ident
+import no.nav.aap.statistikk.person.Person
+import no.nav.aap.statistikk.sak.Sak
+import no.nav.aap.statistikk.sak.SakStatus
+import no.nav.aap.statistikk.sak.Saksnummer
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import java.time.LocalDateTime
+import java.util.UUID
+
+class SaksstatistikkTilordningTest {
+    private val tidspunkt = LocalDateTime.of(2024, 1, 10, 12, 0)
+    private val hendelse = BehandlingHendelse(
+        tidspunkt = tidspunkt,
+        hendelsesTidspunkt = tidspunkt,
+        avklaringsBehov = Definisjon.FATTE_VEDTAK,
+        avklaringsbehovStatus = null,
+        versjon = Versjon("1"),
+        status = BehandlingStatus.UTREDES,
+        mottattTid = tidspunkt,
+        søknadsformat = SøknadsFormat.DIGITAL,
+        relatertBehandlingReferanse = null,
+    )
+    private val grunnbehandling = Behandling(
+        referanse = UUID.randomUUID(),
+        sak = Sak(
+            saksnummer = Saksnummer("SAK123"),
+            person = Person(Ident("0")),
+            sakStatus = SakStatus.UTREDES,
+            sistOppdatert = tidspunkt,
+        ),
+        typeBehandling = TypeBehandling.Førstegangsbehandling,
+        status = BehandlingStatus.UTREDES,
+        opprettetTid = tidspunkt,
+        mottattTid = tidspunkt,
+        versjon = Versjon("1"),
+        søknadsformat = SøknadsFormat.DIGITAL,
+        gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
+        sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM,
+        sisteSaksbehandlerSomLøstebehov = "Løste",
+        sisteSaksbehandler = "Siste",
+        venteÅrsak = ÅrsakTilSattPåVent.entries.first().name,
+        hendelser = listOf(hendelse),
+    )
+    private val snapshot = SakstatistikkSnapshot(
+        tidspunkt = tidspunkt,
+        behandlingReferanse = grunnbehandling.referanse,
+        status = BehandlingStatus.UTREDES.name,
+        avklaringsbehov = Definisjon.FATTE_VEDTAK.kode.name,
+        saksbehandler = null,
+        enhet = null,
+        kilde = Kilde.Behandling,
+    )
+    private val eldreOppgave = Oppgave(
+        identifikator = 1L,
+        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+        enhet = Enhet(kode = "4500"),
+        person = null,
+        status = Oppgavestatus.OPPRETTET,
+        opprettetTidspunkt = tidspunkt.plusMinutes(1),
+        reservasjon = Reservasjon(
+            reservertAv = Saksbehandler("Tidligere"),
+            reservasjonOpprettet = tidspunkt.plusMinutes(1),
+        ),
+        hendelser = emptyList(),
+    )
+    private val nyereOppgave = eldreOppgave.copy(
+        identifikator = 2L,
+        avklaringsbehov = Definisjon.FATTE_VEDTAK.kode.name,
+        enhet = Enhet(kode = "9999"),
+        opprettetTidspunkt = tidspunkt.plusMinutes(2),
+        reservasjon = Reservasjon(
+            reservertAv = Saksbehandler("Oppgave"),
+            reservasjonOpprettet = tidspunkt.plusMinutes(2),
+        ),
+    )
+    private val oppgaver = listOf(nyereOppgave, eldreOppgave)
+
+    @ParameterizedTest
+    @CsvSource(
+        "IVERKSETTES,Siste,Løste,",
+        "AVSLUTTET,Siste,Løste,Siste",
+        "AVSLUTTET,,Løste,Løste",
+        "AVSLUTTET,,,Oppgave",
+    )
+    fun `avsluttende statuser bruker nyeste oppgaveenhet og prioritert saksbehandler selv med cutoff`(
+        status: BehandlingStatus,
+        sisteSaksbehandler: String?,
+        sisteSomLøsteBehov: String?,
+        forventetSaksbehandler: String?,
+    ) {
+        val behandling = grunnbehandling.copy(
+            hendelser = listOf(hendelse.copy(status = status)),
+            sisteSaksbehandler = sisteSaksbehandler,
+            sisteLøsteAvklaringsbehov = sisteSomLøsteBehov?.let { Definisjon.AVKLAR_SYKDOM },
+            sisteSaksbehandlerSomLøstebehov = sisteSomLøsteBehov,
+        )
+
+        val resultat = utledSaksstatistikkTilordning(
+            behandling,
+            listOf(snapshot.copy(status = status.name)),
+            oppgaver,
+            tidspunkt,
+        )
+
+        assertThat(resultat).isEqualTo(SaksstatistikkTilordning("9999", forventetSaksbehandler))
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "true,AVKLAR_SYKDOM,4500",
+        "true,AVKLAR_HELSEINSTITUSJON,9999",
+        "false,AVKLAR_SYKDOM,9999",
+    )
+    fun `ventende behandling prioriterer sist løste behov foran gjeldende behov og nyeste oppgave`(
+        venter: Boolean,
+        sistLøsteBehov: Definisjon,
+        forventetEnhet: String,
+    ) {
+        val behandling = grunnbehandling.copy(
+            sisteLøsteAvklaringsbehov = sistLøsteBehov,
+            venteÅrsak = if (venter) grunnbehandling.venteÅrsak else null,
+        )
+
+        val resultat = utledSaksstatistikkTilordning(behandling, listOf(snapshot), oppgaver, tidspunkt)
+
+        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(forventetEnhet, null))
+    }
+
+    @ParameterizedTest
+    @CsvSource("AVKLAR_SYKDOM,4500", "BESTILL_BREV,KELVIN_AUTOMATISK")
+    fun `snapshot prioriteres foran avslutningsfallback men automatisk enhet går foran snapshot`(
+        behov: Definisjon,
+        forventetEnhet: String,
+    ) {
+        val behandling = grunnbehandling.copy(
+            gjeldendeAvklaringsBehov = behov,
+            hendelser = listOf(hendelse.copy(status = BehandlingStatus.AVSLUTTET, avklaringsBehov = behov)),
+        )
+        val valgtSnapshot = snapshot.copy(
+            status = BehandlingStatus.AVSLUTTET.name,
+            avklaringsbehov = behov.kode.name,
+            enhet = "4500",
+            saksbehandler = "Oppgave",
+        )
+
+        val resultat = utledSaksstatistikkTilordning(behandling, listOf(valgtSnapshot), oppgaver, tidspunkt)
+
+        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(forventetEnhet, "Oppgave"))
+    }
+}

@@ -15,8 +15,6 @@ import java.time.temporal.ChronoUnit
 
 private const val SKJERMET_ENHET = "-5"
 
-private const val AUTOMATISK_ENHET = "KELVIN_AUTOMATISK"
-
 // Team Sak tåler maks 100 tegn for dimensjons-/kodeverksfeltene
 // (behandling_status, behandling_type, behandling_resultat, behandlingmetode, behandling_aarsak).
 private const val MAKS_LENGDE_KODEVERKSFELT = 100
@@ -60,11 +58,11 @@ object BQBehandlingMapper {
             log.info("Oppgave driver endretTid. Alle snapshots: $alleSnapshots")
         }
 
-        val ansvarligEnhet =
+        val tilordning =
             if (erSkjermet) {
-                SKJERMET_ENHET
+                SaksstatistikkTilordning(ansvarligEnhetKode = SKJERMET_ENHET, saksbehandler = SKJERMET_ENHET)
             } else {
-                ansvarligEnhet(
+                utledSaksstatistikkTilordning(
                     behandling,
                     snapshots,
                     oppgaver,
@@ -72,8 +70,7 @@ object BQBehandlingMapper {
                 )
             }
 
-        val saksbehandler =
-            if (erSkjermet) SKJERMET_ENHET else utledSaksbehandler(behandling, snapshots, oppgaver)
+        val saksbehandler = tilordning.saksbehandler
 
         // Advarsel: samme saksbehandler har hatt en annen behandlingmetode tidligere i denne behandlingen
         val behandlingMetode = behandling.behandlingMetode()
@@ -116,7 +113,7 @@ object BQBehandlingMapper {
             behandling = behandling,
             relatertBehandlingUUID = grunnlag.relatertBehandlingUUID,
             erSkjermet = erSkjermet,
-            ansvarligEnhet = ansvarligEnhet,
+            ansvarligEnhet = tilordning.ansvarligEnhetKode,
             saksbehandler = saksbehandler,
             endretTid = snapshots.last().tidspunkt,
             behandlingStatus = behandlingStatus(behandling),
@@ -193,22 +190,6 @@ object BQBehandlingMapper {
         )
     }
 
-    private fun utledSaksbehandler(
-        behandling: Behandling,
-        snapshots: List<SakstatistikkSnapshot>,
-        oppgaver: List<Oppgave>,
-    ): String? {
-        val saksbehandler = snapshots.lastOrNull()?.saksbehandler
-
-        // For avsluttede behandlinger: bruk sisteSaksbehandler som fallback
-        if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && saksbehandler == null) {
-            return behandling.sisteSaksbehandler ?: behandling.sisteSaksbehandlerSomLøstebehov
-                ?: oppgaver.maxByOrNull { it.sistEndret() }?.reservasjon?.reservertAv?.ident
-        }
-
-        return saksbehandler
-    }
-
     /**
      * Om behandlingen er returnert fra kvalitetssikrer, skal dette være returårsaken.
      *
@@ -255,69 +236,6 @@ object BQBehandlingMapper {
 
     private fun avklaringsbehovTilBehandlingMetode(avklaringsbehov: String): BehandlingMetode =
         Definisjon.forKode(avklaringsbehov).tilBehandlingMetode()
-
-    private fun ansvarligEnhet(
-        behandling: Behandling,
-        snapshots: List<SakstatistikkSnapshot>,
-        oppgaver: List<Oppgave>,
-        cutoffTidspunkt: LocalDateTime,
-    ): String? {
-        if (behandling.behandlingMetode() == BehandlingMetode.AUTOMATISK) {
-            return AUTOMATISK_ENHET
-        }
-
-        val enhet = snapshots.lastOrNull()?.enhet
-
-        if (behandling.behandlingStatus() == BehandlingStatus.IVERKSETTES && enhet == null) {
-            log.info(
-                "Fant ikke oppgave for iverksettes-steg. Behandling: ${behandling.referanse}. Sak: ${behandling.sak.saksnummer}.",
-            )
-            // Fallback til siste enhet
-            return oppgaver.maxByOrNull { it.sistEndret() }?.enhet?.kode
-        }
-
-        if (behandling.behandlingStatus() == BehandlingStatus.AVSLUTTET && enhet == null) {
-            return oppgaver.maxByOrNull { it.sistEndret() }?.enhet?.kode
-        }
-
-        if (behandling.venteÅrsak != null && enhet == null) {
-            // Hvis ingen åpne, velg enheten som hadde forrige avklaringsbehov
-            val enhetSistLøsteAvklaringsbehov =
-                oppgaver
-                    .filter { it.avklaringsbehov == behandling.sisteLøsteAvklaringsbehov?.kode?.name }
-                    .maxByOrNull { it.sistEndret() }?.enhet?.kode
-
-            // Fallback til siste enhet
-            return enhetSistLøsteAvklaringsbehov ?: oppgaver.maxByOrNull { it.sistEndret() }?.enhet?.kode
-        }
-
-        // Fallback for UTREDES: enhet kan være null dersom siste oppgavehendelse var LUKKET
-        // (f.eks. ved historisk cutoff-jobb der oppgaven er lukket etter cutoff-tidspunktet).
-        if (behandling.behandlingStatus() == BehandlingStatus.UTREDES && enhet == null) {
-            val kode = behandling.gjeldendeAvklaringsBehov?.kode?.name
-            return if (kode == null) {
-                historiskEnhetForSistLøsteBehov(behandling, oppgaver, cutoffTidspunkt)
-            } else {
-                oppgaver
-                    .filter { it.avklaringsbehov == kode }
-                    .maxByOrNull { it.sistEndret() }?.enhet?.kode
-            }
-        }
-
-        return enhet
-    }
-
-    private fun historiskEnhetForSistLøsteBehov(
-        behandling: Behandling,
-        oppgaver: List<Oppgave>,
-        cutoffTidspunkt: LocalDateTime,
-    ): String? {
-        val kode = behandling.sisteLøsteAvklaringsbehov?.kode?.name ?: return null
-        return oppgaver.flatMap { it.hendelser }
-            .filter { it.avklaringsbehovKode == kode && it.sendtTid <= cutoffTidspunkt }
-            .maxWithOrNull(compareBy({ it.sendtTid }, { it.mottattTidspunkt }))
-            ?.enhet
-    }
 
     internal fun behandlingResultat(resultat: ResultatKode?, rettighetstyper: List<RettighetstypePeriode>): String =
         when (resultat) {
