@@ -91,14 +91,16 @@ class HendelsesServiceTest {
                 referanse = relatertUUID,
                 sak = sak,
                 typeBehandling = TypeBehandling.Førstegangsbehandling,
-                status = BehandlingStatus.AVSLUTTET,
                 opprettetTid = LocalDateTime.now().minusWeeks(4),
-                mottattTid = LocalDateTime.now().minusWeeks(4).truncatedTo(ChronoUnit.SECONDS),
-                versjon = Versjon(
-                    verdi = "1111",
-                ),
-                søknadsformat = SøknadsFormat.PAPIR,
                 årsakTilOpprettelse = "SØKNAD",
+                tilstand = BehandlingTilstand(
+                    status = BehandlingStatus.AVSLUTTET,
+                    mottattTid = LocalDateTime.now().minusWeeks(4).truncatedTo(ChronoUnit.SECONDS),
+                    versjon = Versjon(
+                        verdi = "1111",
+                    ),
+                    søknadsformat = SøknadsFormat.PAPIR,
+                ),
             ),
         )
 

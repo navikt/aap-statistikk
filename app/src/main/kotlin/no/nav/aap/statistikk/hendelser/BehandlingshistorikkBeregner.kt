@@ -9,7 +9,6 @@ import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.tilDomene
-import no.nav.aap.statistikk.behandling.tilTilstand
 
 class BehandlingshistorikkBeregner {
     fun beregn(dto: StoppetBehandling, behandling: Behandling): Behandling {
@@ -121,7 +120,7 @@ class BehandlingshistorikkBeregner {
                 gjeldendeStegGruppe = behovstilstand.gjeldendeBehov?.steggruppe?.tilDomene(),
                 venteÅrsak = behovstilstand.venteÅrsak,
                 returÅrsak = behovstilstand.returÅrsak,
-                returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger.map { it.tilTilstand() },
+                returÅrsakkoblinger = behovstilstand.returÅrsakkoblinger,
                 sisteSaksbehandler = behovstilstand.saksbehandler,
                 resultat = dto.avsluttetBehandling?.resultat.resultatTilDomene(),
                 versjon = dto.versjon.let(::Versjon),

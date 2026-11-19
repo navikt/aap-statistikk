@@ -196,7 +196,7 @@ object BQBehandlingMapper {
      * TODO: begrunnelse ved avslag/innvilgelse
      */
     private fun resultatBegrunnelse(behandlingHendelser: List<BehandlingHendelse>): String? {
-        val tilstand = behandlingHendelser.last().tilTilstand()
+        val tilstand = behandlingHendelser.last().tilstand
         if (tilstand.gjeldendeAvklaringsbehovStatus?.returnert() == true) {
             return tilstand.returÅrsak
         }

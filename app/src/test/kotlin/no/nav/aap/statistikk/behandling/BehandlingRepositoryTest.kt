@@ -60,36 +60,38 @@ class BehandlingRepositoryTest {
             referanse = referanse,
             sak = sak,
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.UTREDES,
             opprettetTid = LocalDateTime.now(),
-            mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-            vedtakstidspunkt = vedtakstidspunkt,
-            relatertBehandlingReferanse = "REFERANSE",
-            ansvarligBeslutter = "Josgeir Dalføre",
-            versjon = Versjon("xxx"),
-            søknadsformat = SøknadsFormat.PAPIR,
-            sisteSaksbehandler = "Joark Jorgensen",
             relaterteIdenter = relaterteIdenter,
-            gjeldendeAvklaringsBehov = Definisjon.AVKLAR_OVERGANG_ARBEID,
-            gjeldendeAvklaringsbehovStatus = Status.OPPRETTET,
-            sisteLøsteAvklaringsbehov = Definisjon.ARBEIDSOPPTRAPPING,
-            sisteSaksbehandlerSomLøstebehov = "Z123354",
-            sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-            venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
-            returÅrsak = "MANGELFULL_BEGRUNNELSE",
-            returÅrsakkoblinger = listOf(
-                ReturÅrsakkobling(
-                    Definisjon.AVKLAR_SYKDOM,
-                    listOf("MANGELFULL_BEGRUNNELSE", "MANGLENDE_UTREDNING"),
-                ),
-                ReturÅrsakkobling(Definisjon.AVKLAR_BISTANDSBEHOV, listOf("ANNET")),
-            ),
-            gjeldendeStegGruppe = StegGruppe.BREV,
-            resultat = ResultatKode.INNVILGET,
             årsaker = listOf(Vurderingsbehov.SØKNAD, Vurderingsbehov.G_REGULERING),
             årsakTilOpprettelse = "SØKNAD",
             oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
             opprettetAv = "Saksbehandler",
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.UTREDES,
+                mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                vedtakstidspunkt = vedtakstidspunkt,
+                relatertBehandlingReferanse = "REFERANSE",
+                ansvarligBeslutter = "Josgeir Dalføre",
+                versjon = Versjon("xxx"),
+                søknadsformat = SøknadsFormat.PAPIR,
+                sisteSaksbehandler = "Joark Jorgensen",
+                gjeldendeAvklaringsBehov = Definisjon.AVKLAR_OVERGANG_ARBEID.tilAvklaringsbehovKode(),
+                gjeldendeAvklaringsbehovStatus = Status.OPPRETTET.tilDomene(),
+                sisteLøsteAvklaringsbehov = Definisjon.ARBEIDSOPPTRAPPING.tilAvklaringsbehovKode(),
+                sisteSaksbehandlerSomLøstebehov = "Z123354",
+                sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                venteÅrsak = "VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER",
+                returÅrsak = "MANGELFULL_BEGRUNNELSE",
+                returÅrsakkoblinger = listOf(
+                    ReturÅrsakTilstand(
+                        Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                        listOf("MANGELFULL_BEGRUNNELSE", "MANGLENDE_UTREDNING"),
+                    ),
+                    ReturÅrsakTilstand(Definisjon.AVKLAR_BISTANDSBEHOV.tilAvklaringsbehovKode(), listOf("ANNET")),
+                ),
+                gjeldendeStegGruppe = StegGruppe.BREV.tilDomene(),
+                resultat = ResultatKode.INNVILGET,
+            ),
         )
         dataSource.transaction {
             BehandlingRepository(it, clock = clock).opprettBehandling(behandling)
@@ -108,15 +110,11 @@ class BehandlingRepositoryTest {
 
         dataSource.transaction {
             BehandlingRepository(it).oppdaterBehandling(
-                uthentet!!.copy(
-                    venteÅrsak = "XXX",
-                ),
+                uthentet!!.copy(tilstand = uthentet.nåværendeTilstand().copy(venteÅrsak = "XXX")),
             )
 
             BehandlingRepository(it).oppdaterBehandling(
-                uthentet.copy(
-                    venteÅrsak = "ABC",
-                ),
+                uthentet.copy(tilstand = uthentet.nåværendeTilstand().copy(venteÅrsak = "ABC")),
             )
         }
 
@@ -143,13 +141,15 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -161,13 +161,15 @@ class BehandlingRepositoryTest {
                     referanse = referanse2,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     relaterteIdenter = listOf(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -177,7 +179,9 @@ class BehandlingRepositoryTest {
             assertThat(førsteUthentet).isNotNull()
             val andreUthentet = BehandlingRepository(it).hent(referanse2)
             assertThat(andreUthentet).isNotNull()
-            assertThat(førsteUthentet?.versjon).isEqualTo(andreUthentet?.versjon)
+            assertThat(
+                førsteUthentet?.nåværendeTilstand()?.versjon,
+            ).isEqualTo(andreUthentet?.nåværendeTilstand()?.versjon)
         }
     }
 
@@ -194,12 +198,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.OPPRETTET,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -210,13 +216,15 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx2"),
-                    søknadsformat = SøknadsFormat.DIGITAL,
-                    sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(),
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx2"),
+                        søknadsformat = SøknadsFormat.DIGITAL,
+                        sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(),
+                    ),
                 ),
             )
         }
@@ -245,12 +253,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = t0,
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = t0,
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.OPPRETTET,
+                        mottattTid = t0,
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -263,12 +273,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.UTREDES,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = t2,
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = t2,
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = t2,
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -281,12 +293,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.AVSLUTTET,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = t1,
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = t1,
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.AVSLUTTET,
+                        mottattTid = t1,
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -322,12 +336,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.OPPRETTET,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -338,12 +354,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.AVSLUTTET,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx2"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.AVSLUTTET,
+                        mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx2"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -354,12 +372,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse2,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.DIGITAL,
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.OPPRETTET,
+                        mottattTid = LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.DIGITAL,
+                    ),
                 ),
             )
         }
@@ -370,12 +390,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse2,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.AVSLUTTET,
                     opprettetTid = LocalDateTime.now(),
-                    mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
-                    versjon = Versjon("xxx2"),
-                    søknadsformat = SøknadsFormat.DIGITAL,
                     oppdatertTidspunkt = LocalDateTime.now(),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.AVSLUTTET,
+                        mottattTid = LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                        versjon = Versjon("xxx2"),
+                        søknadsformat = SøknadsFormat.DIGITAL,
+                    ),
                 ),
             )
         }
@@ -396,12 +418,14 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.OPPRETTET,
                     opprettetTid = LocalDateTime.now(clock),
-                    mottattTid = LocalDateTime.now(clock).minusDays(1),
-                    versjon = Versjon("xxx"),
-                    søknadsformat = SøknadsFormat.PAPIR,
                     oppdatertTidspunkt = LocalDateTime.now(clock).minusMinutes(1),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.OPPRETTET,
+                        mottattTid = LocalDateTime.now(clock).minusDays(1),
+                        versjon = Versjon("xxx"),
+                        søknadsformat = SøknadsFormat.PAPIR,
+                    ),
                 ),
             )
         }
@@ -415,28 +439,33 @@ class BehandlingRepositoryTest {
                     referanse = referanse,
                     sak = sak,
                     typeBehandling = TypeBehandling.Førstegangsbehandling,
-                    status = BehandlingStatus.AVSLUTTET,
                     opprettetTid = LocalDateTime.now(clock),
-                    mottattTid = LocalDateTime.now(littSenereClock).minusHours(1),
-                    versjon = Versjon("xxx2"),
-                    søknadsformat = SøknadsFormat.DIGITAL,
-                    vedtakstidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(2),
-                    ansvarligBeslutter = "Z123456",
-                    sisteSaksbehandler = "Z654321",
-                    gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK,
-                    gjeldendeAvklaringsbehovStatus = Status.AVSLUTTET,
-                    gjeldendeStegGruppe = StegGruppe.BREV,
-                    venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
-                    returÅrsak = "MANGELFULL_BEGRUNNELSE",
-                    returÅrsakkoblinger = listOf(
-                        ReturÅrsakkobling(Definisjon.AVKLAR_SYKDOM, listOf("MANGELFULL_BEGRUNNELSE")),
-                    ),
-                    resultat = ResultatKode.INNVILGET,
-                    relatertBehandlingReferanse = "REFERANSE",
-                    sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING,
-                    sisteSaksbehandlerSomLøstebehov = "Z111111",
-                    sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(3),
                     oppdatertTidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(1),
+                    tilstand = BehandlingTilstand(
+                        status = BehandlingStatus.AVSLUTTET,
+                        mottattTid = LocalDateTime.now(littSenereClock).minusHours(1),
+                        versjon = Versjon("xxx2"),
+                        søknadsformat = SøknadsFormat.DIGITAL,
+                        vedtakstidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(2),
+                        ansvarligBeslutter = "Z123456",
+                        sisteSaksbehandler = "Z654321",
+                        gjeldendeAvklaringsBehov = Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode(),
+                        gjeldendeAvklaringsbehovStatus = Status.AVSLUTTET.tilDomene(),
+                        gjeldendeStegGruppe = StegGruppe.BREV.tilDomene(),
+                        venteÅrsak = "VENTER_PÅ_OPPLYSNINGER",
+                        returÅrsak = "MANGELFULL_BEGRUNNELSE",
+                        returÅrsakkoblinger = listOf(
+                            ReturÅrsakTilstand(
+                                Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                                listOf("MANGELFULL_BEGRUNNELSE"),
+                            ),
+                        ),
+                        resultat = ResultatKode.INNVILGET,
+                        relatertBehandlingReferanse = "REFERANSE",
+                        sisteLøsteAvklaringsbehov = Definisjon.KVALITETSSIKRING.tilAvklaringsbehovKode(),
+                        sisteSaksbehandlerSomLøstebehov = "Z111111",
+                        sistLøsteAvklaringsbehovTidspunkt = LocalDateTime.now(littSenereClock).minusMinutes(3),
+                    ),
                 ),
             )
         }
@@ -454,9 +483,9 @@ class BehandlingRepositoryTest {
 
         assertThat(uthentet2)
             .usingRecursiveComparison()
-            .ignoringFields("hendelser.versjon", "snapShotId", "hendelser.tidspunkt")
+            .ignoringFields("hendelser.tilstand.versjon", "snapShotId", "hendelser.tidspunkt")
             .isEqualTo(uthentet)
-        assertThat(uthentet2.hendelser.map { it.versjon }).containsExactly(Versjon("xxx2"), Versjon("xxx2"))
+        assertThat(uthentet2.hendelser.map { it.tilstand.versjon }).containsExactly(Versjon("xxx2"), Versjon("xxx2"))
         assertThat(uthentet2.hendelser.map { it.tidspunkt })
             .containsOnly(LocalDateTime.now(gjenoppbyggingsClock))
 

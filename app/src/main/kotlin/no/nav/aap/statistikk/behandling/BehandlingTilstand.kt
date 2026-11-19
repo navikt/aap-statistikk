@@ -3,6 +3,10 @@ package no.nav.aap.statistikk.behandling
 import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import java.time.LocalDateTime
 
+/**
+ * @param versjon Applikasjonsversjon fra behandlingsflyt på denne behandlingen.
+ * @param relatertBehandlingReferanse Referanse til en relatert behandling som ikke nødvendigvis er en Kelvin-behandling.
+ */
 data class BehandlingTilstand(
     val status: BehandlingStatus,
     val versjon: Versjon,

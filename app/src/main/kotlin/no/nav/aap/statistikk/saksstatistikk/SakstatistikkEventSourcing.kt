@@ -3,7 +3,6 @@ package no.nav.aap.statistikk.saksstatistikk
 import no.nav.aap.statistikk.behandling.AvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.løsesAv
-import no.nav.aap.statistikk.behandling.tilTilstand
 import no.nav.aap.statistikk.oppgave.HendelseType
 import no.nav.aap.statistikk.oppgave.Oppgave
 import no.nav.aap.statistikk.oppgave.OppgaveHendelse
@@ -23,10 +22,8 @@ object SakstatistikkEventSourcing {
     }
 
     private fun konverterBehandlingHendelser(behandling: Behandling): List<SakstatistikkHendelse> =
-        behandling.hendelser.map {
-                hendelse,
-            ->
-            val tilstand = hendelse.tilTilstand()
+        behandling.hendelser.map { hendelse ->
+            val tilstand = hendelse.tilstand
             val rolleEndret = rolleEndretMellom(tilstand.sisteLøsteAvklaringsbehov, tilstand.gjeldendeAvklaringsBehov)
             BehandlingsflytHendelse(
                 behandlingReferanse = behandling.referanse,

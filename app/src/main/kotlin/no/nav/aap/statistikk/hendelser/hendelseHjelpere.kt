@@ -7,7 +7,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
+import no.nav.aap.statistikk.behandling.ReturÅrsakTilstand
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.isBeforeOrEqual
 import no.nav.aap.statistikk.onlyOrNull
@@ -71,7 +72,7 @@ fun List<AvklaringsbehovHendelseDto>.årsakerTilRetur(): List<ÅrsakTilReturKode
     return årsaker.map { it.årsak }
 }
 
-fun List<AvklaringsbehovHendelseDto>.returÅrsakkoblinger(): List<ReturÅrsakkobling> = this.filter {
+fun List<AvklaringsbehovHendelseDto>.returÅrsakkoblinger(): List<ReturÅrsakTilstand> = this.filter {
     it.status.returnert()
 }
     .mapNotNull { avklaringsbehov ->
@@ -83,7 +84,7 @@ fun List<AvklaringsbehovHendelseDto>.returÅrsakkoblinger(): List<ReturÅrsakkob
         if (årsaker.isEmpty()) {
             null
         } else {
-            ReturÅrsakkobling(avklaringsbehov.avklaringsbehovDefinisjon, årsaker)
+            ReturÅrsakTilstand(avklaringsbehov.avklaringsbehovDefinisjon.tilAvklaringsbehovKode(), årsaker)
         }
     }
 

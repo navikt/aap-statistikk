@@ -8,12 +8,16 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilRetur
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilReturKode
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.ÅrsakTilSettPåVent
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
+import no.nav.aap.statistikk.behandling.AvklaringsbehovStatus
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
-import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
+import no.nav.aap.statistikk.behandling.Behandlingssteggruppe
+import no.nav.aap.statistikk.behandling.ReturÅrsakTilstand
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.Saksnummer
@@ -48,19 +52,22 @@ class BehandlingshistorikkBeregnerTest {
             ),
             tidspunktSisteEndring = endringMinutter?.let(start::plusMinutes),
         )
-        val behandling = utgangspunkt(dto).copy(vedtakstidspunkt = start.minusDays(1))
+        val grunnlagBehandling = utgangspunkt(dto)
+        val behandling = grunnlagBehandling.copy(
+            tilstand = grunnlagBehandling.nåværendeTilstand().copy(vedtakstidspunkt = start.minusDays(1)),
+        )
 
         val historikk = BehandlingshistorikkBeregner().beregn(dto, behandling).hendelser
 
         assertThat(historikk).hasSize(2)
         assertThat(historikk.first().hendelsesTidspunkt).isEqualTo(start)
-        assertThat(historikk.first().vedtakstidspunkt).isNull()
+        assertThat(historikk.first().tilstand.vedtakstidspunkt).isNull()
         val avslutning = historikk.last()
-        assertThat(avslutning.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(avslutning.tilstand.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(avslutning.tidspunkt).isEqualTo(endringMinutter?.let(start::plusMinutes))
         assertThat(avslutning.hendelsesTidspunkt).isEqualTo(start.plusMinutes(forventetHendelseMinutter))
-        assertThat(avslutning.vedtakstidspunkt).isEqualTo(forventetVedtakMinutter?.let(start::plusMinutes))
-        assertThat(avslutning.ansvarligBeslutter).isNull()
+        assertThat(avslutning.tilstand.vedtakstidspunkt).isEqualTo(forventetVedtakMinutter?.let(start::plusMinutes))
+        assertThat(avslutning.tilstand.ansvarligBeslutter).isNull()
     }
 
     @Test
@@ -73,21 +80,25 @@ class BehandlingshistorikkBeregnerTest {
         val inngang = BehandlingHendelse(
             tidspunkt = start.minusMinutes(2),
             hendelsesTidspunkt = start.minusMinutes(2),
-            avklaringsbehovStatus = null,
-            versjon = Versjon(dto.versjon),
-            status = BehandlingStatus.OPPRETTET,
-            mottattTid = start,
-            søknadsformat = SøknadsFormat.DIGITAL,
-            relatertBehandlingReferanse = null,
+            tilstand = BehandlingTilstand(
+                gjeldendeAvklaringsbehovStatus = null,
+                versjon = Versjon(dto.versjon),
+                status = BehandlingStatus.OPPRETTET,
+                mottattTid = start,
+                søknadsformat = SøknadsFormat.DIGITAL,
+                relatertBehandlingReferanse = null,
+            ),
         )
         val behandling = utgangspunkt(dto)
             .leggTilHendelse(inngang)
             .leggTilHendelse(
                 inngang.copy(
                     hendelsesTidspunkt = start.minusMinutes(1),
-                    status = BehandlingStatus.AVSLUTTET,
-                    vedtakstidspunkt = start.plusMinutes(7),
-                    ansvarligBeslutter = "Lagret beslutter",
+                    tilstand = inngang.tilstand.copy(
+                        status = BehandlingStatus.AVSLUTTET,
+                        vedtakstidspunkt = start.plusMinutes(7),
+                        ansvarligBeslutter = "Lagret beslutter",
+                    ),
                 ),
             )
 
@@ -96,17 +107,19 @@ class BehandlingshistorikkBeregnerTest {
         assertThat(historikk).hasSize(8)
         assertThat(historikk.take(2)).isEqualTo(behandling.hendelser)
         val vedtak = historikk.single { it.hendelsesTidspunkt == start.plusMinutes(3) }
-        assertThat(vedtak.vedtakstidspunkt).isEqualTo(start.plusMinutes(7))
-        assertThat(vedtak.ansvarligBeslutter).isEqualTo("Beslutter")
+        assertThat(vedtak.tilstand.vedtakstidspunkt).isEqualTo(start.plusMinutes(7))
+        assertThat(vedtak.tilstand.ansvarligBeslutter).isEqualTo("Beslutter")
         val avslutning = historikk.last()
-        assertThat(avslutning.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(avslutning.tilstand.status).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(avslutning.tidspunkt).isNull()
         assertThat(avslutning.hendelsesTidspunkt).isEqualTo(start.plusMinutes(8))
-        assertThat(avslutning.vedtakstidspunkt).isEqualTo(start.plusMinutes(7))
-        assertThat(avslutning.ansvarligBeslutter).isEqualTo("Lagret beslutter")
-        assertThat(avslutning.sisteLøsteAvklaringsbehov).isEqualTo(Definisjon.FATTE_VEDTAK)
-        assertThat(avslutning.sisteSaksbehandlerSomLøstebehov).isEqualTo("Beslutter")
-        assertThat(avslutning.sistLøsteAvklaringsbehovTidspunkt).isNull()
+        assertThat(avslutning.tilstand.vedtakstidspunkt).isEqualTo(start.plusMinutes(7))
+        assertThat(avslutning.tilstand.ansvarligBeslutter).isEqualTo("Lagret beslutter")
+        assertThat(
+            avslutning.tilstand.sisteLøsteAvklaringsbehov,
+        ).isEqualTo(Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode())
+        assertThat(avslutning.tilstand.sisteSaksbehandlerSomLøstebehov).isEqualTo("Beslutter")
+        assertThat(avslutning.tilstand.sistLøsteAvklaringsbehovTidspunkt).isNull()
     }
 
     private fun utgangspunkt(dto: StoppetBehandling) = Behandling(
@@ -118,11 +131,13 @@ class BehandlingshistorikkBeregnerTest {
             sistOppdatert = start,
         ),
         typeBehandling = dto.behandlingType.tilDomene(),
-        status = dto.behandlingStatus.tilDomene(),
         opprettetTid = dto.behandlingOpprettetTidspunkt,
-        mottattTid = dto.mottattTid,
-        versjon = Versjon(dto.versjon),
-        søknadsformat = SøknadsFormat.DIGITAL,
+        tilstand = BehandlingTilstand(
+            status = dto.behandlingStatus.tilDomene(),
+            mottattTid = dto.mottattTid,
+            versjon = Versjon(dto.versjon),
+            søknadsformat = SøknadsFormat.DIGITAL,
+        ),
     )
 
     @Test
@@ -141,19 +156,19 @@ class BehandlingshistorikkBeregnerTest {
 
         assertThat(historikk.map { it.hendelsesTidspunkt })
             .containsExactlyElementsOf(listOf(0L, 1L, 3L, 4L, 5L, 6L).map { start.plusMinutes(it) })
-        assertThat(historikk.map { it.avklaringsBehov }).containsExactly(
+        assertThat(historikk.map { it.tilstand.gjeldendeAvklaringsBehov }).containsExactly(
             null,
-            Definisjon.AVKLAR_SYKDOM,
+            Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
             null,
-            Definisjon.AVKLAR_SYKDOM,
-            Definisjon.AVKLAR_SYKDOM,
-            Definisjon.AVKLAR_SYKDOM,
+            Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+            Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+            Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
         )
-        assertThat(historikk.map { it.saksbehandler?.ident })
+        assertThat(historikk.map { it.tilstand.sisteSaksbehandler })
             .containsExactly(null, null, "Beslutter", "Kvalitetssikrer", "Ventebehandler", "Ventebehandler")
-        assertThat(historikk.map { it.ansvarligBeslutter })
+        assertThat(historikk.map { it.tilstand.ansvarligBeslutter })
             .containsExactly(null, null, "Beslutter", null, null, null)
-        assertThat(historikk.map { it.returÅrsak }).containsExactly(
+        assertThat(historikk.map { it.tilstand.returÅrsak }).containsExactly(
             null,
             null,
             null,
@@ -161,21 +176,28 @@ class BehandlingshistorikkBeregnerTest {
             "MANGELFULL_BEGRUNNELSE",
             "MANGELFULL_BEGRUNNELSE",
         )
-        assertThat(historikk.map { it.vedtakstidspunkt }).containsOnlyNulls()
+        assertThat(historikk.map { it.tilstand.vedtakstidspunkt }).containsOnlyNulls()
 
         val påVent = historikk.single { it.hendelsesTidspunkt == start.plusMinutes(5) }
-        assertThat(påVent.avklaringsbehovStatus).isEqualTo(Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER)
-        assertThat(påVent.steggruppe).isEqualTo(Definisjon.AVKLAR_SYKDOM.løsesISteg.gruppe)
-        assertThat(påVent.sisteLøsteAvklaringsbehov).isEqualTo(Definisjon.FATTE_VEDTAK)
-        assertThat(påVent.sisteSaksbehandlerSomLøstebehov).isEqualTo("Beslutter")
-        assertThat(påVent.sistLøsteAvklaringsbehovTidspunkt).isEqualTo(start.plusMinutes(3))
-        assertThat(påVent.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
-        assertThat(påVent.returÅrsakkoblinger).containsExactly(
-            ReturÅrsakkobling(Definisjon.AVKLAR_SYKDOM, listOf("MANGLENDE_UTREDNING", "MANGELFULL_BEGRUNNELSE")),
+        assertThat(
+            påVent.tilstand.gjeldendeAvklaringsbehovStatus,
+        ).isEqualTo(AvklaringsbehovStatus.SENDT_TILBAKE_FRA_KVALITETSSIKRER)
+        assertThat(påVent.tilstand.gjeldendeStegGruppe).isEqualTo(Behandlingssteggruppe.SYKDOM)
+        assertThat(
+            påVent.tilstand.sisteLøsteAvklaringsbehov,
+        ).isEqualTo(Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode())
+        assertThat(påVent.tilstand.sisteSaksbehandlerSomLøstebehov).isEqualTo("Beslutter")
+        assertThat(påVent.tilstand.sistLøsteAvklaringsbehovTidspunkt).isEqualTo(start.plusMinutes(3))
+        assertThat(påVent.tilstand.venteÅrsak).isEqualTo("VENTER_PÅ_OPPLYSNINGER_FRA_UTENLANDSKE_MYNDIGHETER")
+        assertThat(påVent.tilstand.returÅrsakkoblinger).containsExactly(
+            ReturÅrsakTilstand(
+                Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                listOf("MANGLENDE_UTREDNING", "MANGELFULL_BEGRUNNELSE"),
+            ),
         )
-        assertThat(historikk.last().venteÅrsak).isNull()
-        assertThat(historikk.first().status).isEqualTo(BehandlingStatus.OPPRETTET)
-        assertThat(historikk.last().status).isEqualTo(BehandlingStatus.UTREDES)
+        assertThat(historikk.last().tilstand.venteÅrsak).isNull()
+        assertThat(historikk.first().tilstand.status).isEqualTo(BehandlingStatus.OPPRETTET)
+        assertThat(historikk.last().tilstand.status).isEqualTo(BehandlingStatus.UTREDES)
     }
 
     private fun hendelseMedReturOgVent() = opprettTestStoppetBehandling(
@@ -236,31 +258,33 @@ class BehandlingshistorikkBeregnerTest {
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
-            status = hendelse.behandlingStatus.tilDomene(),
             opprettetTid = hendelse.behandlingOpprettetTidspunkt,
-            mottattTid = hendelse.mottattTid,
-            vedtakstidspunkt = null,
-            ansvarligBeslutter = null,
-            versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            sisteSaksbehandler = null,
             relaterteIdenter = listOf(),
             relatertBehandlingId = null,
-            gjeldendeAvklaringsBehov = null,
-            gjeldendeAvklaringsbehovStatus = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            gjeldendeStegGruppe = null,
             årsaker = listOf(),
-            resultat = null,
             oppdatertTidspunkt = null,
             hendelser = listOf(),
+            tilstand = BehandlingTilstand(
+                status = hendelse.behandlingStatus.tilDomene(),
+                mottattTid = hendelse.mottattTid,
+                vedtakstidspunkt = null,
+                ansvarligBeslutter = null,
+                versjon = Versjon(UUID.randomUUID().toString()),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                sisteSaksbehandler = null,
+                gjeldendeAvklaringsBehov = null,
+                gjeldendeAvklaringsbehovStatus = null,
+                venteÅrsak = null,
+                returÅrsak = null,
+                gjeldendeStegGruppe = null,
+                resultat = null,
+            ),
         )
 
         val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
 
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
-        assertThat(res.gjeldendeAvklaringsBehov).isNull()
+        assertThat(res.nåværendeTilstand().gjeldendeAvklaringsBehov).isNull()
     }
 
     @Test
@@ -277,25 +301,27 @@ class BehandlingshistorikkBeregnerTest {
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
-            status = hendelse.behandlingStatus.tilDomene(),
             opprettetTid = hendelse.behandlingOpprettetTidspunkt,
-            mottattTid = hendelse.mottattTid,
-            vedtakstidspunkt = null,
-            ansvarligBeslutter = null,
-            versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            sisteSaksbehandler = null,
             relaterteIdenter = listOf(),
             relatertBehandlingId = null,
-            gjeldendeAvklaringsBehov = null,
-            gjeldendeAvklaringsbehovStatus = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            gjeldendeStegGruppe = null,
             årsaker = listOf(),
-            resultat = null,
             oppdatertTidspunkt = null,
             hendelser = listOf(),
+            tilstand = BehandlingTilstand(
+                status = hendelse.behandlingStatus.tilDomene(),
+                mottattTid = hendelse.mottattTid,
+                vedtakstidspunkt = null,
+                ansvarligBeslutter = null,
+                versjon = Versjon(UUID.randomUUID().toString()),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                sisteSaksbehandler = null,
+                gjeldendeAvklaringsBehov = null,
+                gjeldendeAvklaringsbehovStatus = null,
+                venteÅrsak = null,
+                returÅrsak = null,
+                gjeldendeStegGruppe = null,
+                resultat = null,
+            ),
         )
 
         val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
@@ -304,7 +330,7 @@ class BehandlingshistorikkBeregnerTest {
         assertThat(res.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(res.hendelser).hasSize(2)
 
-        assertThat(res.hendelser.last().status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(res.hendelser.last().tilstand.status).isEqualTo(BehandlingStatus.AVSLUTTET)
     }
 
     @Test
@@ -320,25 +346,27 @@ class BehandlingshistorikkBeregnerTest {
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
-            status = hendelse.behandlingStatus.tilDomene(),
             opprettetTid = hendelse.behandlingOpprettetTidspunkt,
-            mottattTid = hendelse.mottattTid,
-            vedtakstidspunkt = null,
-            ansvarligBeslutter = null,
-            versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            sisteSaksbehandler = null,
             relaterteIdenter = listOf(),
             relatertBehandlingId = null,
-            gjeldendeAvklaringsBehov = null,
-            gjeldendeAvklaringsbehovStatus = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            gjeldendeStegGruppe = null,
             årsaker = listOf(),
-            resultat = null,
             oppdatertTidspunkt = null,
             hendelser = listOf(),
+            tilstand = BehandlingTilstand(
+                status = hendelse.behandlingStatus.tilDomene(),
+                mottattTid = hendelse.mottattTid,
+                vedtakstidspunkt = null,
+                ansvarligBeslutter = null,
+                versjon = Versjon(UUID.randomUUID().toString()),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                sisteSaksbehandler = null,
+                gjeldendeAvklaringsBehov = null,
+                gjeldendeAvklaringsbehovStatus = null,
+                venteÅrsak = null,
+                returÅrsak = null,
+                gjeldendeStegGruppe = null,
+                resultat = null,
+            ),
         )
 
         val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
@@ -348,8 +376,8 @@ class BehandlingshistorikkBeregnerTest {
 
         val førsteHendelse = res.hendelser.first()
         val sisteHendelse = res.hendelser.last()
-        assertThat(førsteHendelse.status).isEqualTo(BehandlingStatus.OPPRETTET)
-        assertThat(sisteHendelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(førsteHendelse.tilstand.status).isEqualTo(BehandlingStatus.OPPRETTET)
+        assertThat(sisteHendelse.tilstand.status).isEqualTo(BehandlingStatus.AVSLUTTET)
 
         assertThat(førsteHendelse.hendelsesTidspunkt).isNotEqualTo(sisteHendelse.hendelsesTidspunkt)
     }
@@ -367,25 +395,27 @@ class BehandlingshistorikkBeregnerTest {
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
-            status = hendelse.behandlingStatus.tilDomene(),
             opprettetTid = hendelse.behandlingOpprettetTidspunkt,
-            mottattTid = hendelse.mottattTid,
-            vedtakstidspunkt = null,
-            ansvarligBeslutter = null,
-            versjon = Versjon(UUID.randomUUID().toString()),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            sisteSaksbehandler = null,
             relaterteIdenter = listOf(),
             relatertBehandlingId = null,
-            gjeldendeAvklaringsBehov = null,
-            gjeldendeAvklaringsbehovStatus = null,
-            venteÅrsak = null,
-            returÅrsak = null,
-            gjeldendeStegGruppe = null,
             årsaker = listOf(),
-            resultat = null,
             oppdatertTidspunkt = null,
             hendelser = listOf(),
+            tilstand = BehandlingTilstand(
+                status = hendelse.behandlingStatus.tilDomene(),
+                mottattTid = hendelse.mottattTid,
+                vedtakstidspunkt = null,
+                ansvarligBeslutter = null,
+                versjon = Versjon(UUID.randomUUID().toString()),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                sisteSaksbehandler = null,
+                gjeldendeAvklaringsBehov = null,
+                gjeldendeAvklaringsbehovStatus = null,
+                venteÅrsak = null,
+                returÅrsak = null,
+                gjeldendeStegGruppe = null,
+                resultat = null,
+            ),
         )
 
         val res = BehandlingshistorikkBeregner().beregn(hendelse, behandling)
@@ -395,8 +425,8 @@ class BehandlingshistorikkBeregnerTest {
 
         val førsteHendelse = res.hendelser.first()
         val sisteHendelse = res.hendelser.last()
-        assertThat(førsteHendelse.status).isEqualTo(BehandlingStatus.OPPRETTET)
-        assertThat(sisteHendelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(førsteHendelse.tilstand.status).isEqualTo(BehandlingStatus.OPPRETTET)
+        assertThat(sisteHendelse.tilstand.status).isEqualTo(BehandlingStatus.AVSLUTTET)
 
         assertThat(førsteHendelse.hendelsesTidspunkt).isNotEqualTo(sisteHendelse.hendelsesTidspunkt)
     }

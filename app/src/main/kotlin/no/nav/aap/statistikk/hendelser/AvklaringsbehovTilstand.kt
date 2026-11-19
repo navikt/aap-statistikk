@@ -3,7 +3,7 @@ package no.nav.aap.statistikk.hendelser
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Definisjon
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.AvklaringsbehovHendelseDto
-import no.nav.aap.statistikk.behandling.ReturÅrsakkobling
+import no.nav.aap.statistikk.behandling.ReturÅrsakTilstand
 import java.time.LocalDateTime
 
 internal data class AvklaringsbehovTilstand(
@@ -13,7 +13,7 @@ internal data class AvklaringsbehovTilstand(
     val ansvarligBeslutter: String?,
     val venteÅrsak: String?,
     val returÅrsak: String?,
-    val returÅrsakkoblinger: List<ReturÅrsakkobling>,
+    val returÅrsakkoblinger: List<ReturÅrsakTilstand>,
 )
 
 internal data class GjeldendeBehov(val definisjon: Definisjon, val status: Status) {

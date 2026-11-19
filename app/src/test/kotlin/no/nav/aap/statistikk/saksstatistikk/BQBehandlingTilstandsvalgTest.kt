@@ -5,9 +5,11 @@ import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingHendelse
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Versjon
+import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
@@ -26,21 +28,26 @@ class BQBehandlingTilstandsvalgTest {
 
     @Test
     fun `returstatus leses fra behandlingen mens returbegrunnelsen leses fra siste hendelse`() {
-        val behandling = behandling().copy(
-            gjeldendeAvklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER,
-            returÅrsak = "Behandlingens returårsak",
+        val grunnlagBehandling = behandling()
+        val behandling = grunnlagBehandling.copy(
             hendelser = listOf(
                 BehandlingHendelse(
                     tidspunkt = tidspunkt,
                     hendelsesTidspunkt = tidspunkt.plusMinutes(1),
-                    avklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER,
-                    returÅrsak = "Historikkens returårsak",
-                    versjon = Versjon("historikk"),
-                    status = BehandlingStatus.UTREDES,
-                    mottattTid = tidspunkt,
-                    søknadsformat = SøknadsFormat.DIGITAL,
-                    relatertBehandlingReferanse = null,
+                    tilstand = BehandlingTilstand(
+                        gjeldendeAvklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_KVALITETSSIKRER.tilDomene(),
+                        returÅrsak = "Historikkens returårsak",
+                        versjon = Versjon("historikk"),
+                        status = BehandlingStatus.UTREDES,
+                        mottattTid = tidspunkt,
+                        søknadsformat = SøknadsFormat.DIGITAL,
+                        relatertBehandlingReferanse = null,
+                    ),
                 ),
+            ),
+            tilstand = grunnlagBehandling.nåværendeTilstand().copy(
+                gjeldendeAvklaringsbehovStatus = Status.SENDT_TILBAKE_FRA_BESLUTTER.tilDomene(),
+                returÅrsak = "Behandlingens returårsak",
             ),
         )
         val grunnlag = SaksstatistikkGrunnlag(
@@ -87,24 +94,31 @@ class BQBehandlingTilstandsvalgTest {
         val første = BehandlingHendelse(
             tidspunkt = tidspunkt,
             hendelsesTidspunkt = tidspunkt.plusMinutes(2),
-            avklaringsbehovStatus = null,
-            versjon = Versjon("første"),
-            status = BehandlingStatus.AVSLUTTET,
-            mottattTid = tidspunkt.minusHours(1),
-            søknadsformat = SøknadsFormat.DIGITAL,
-            ansvarligBeslutter = "Tidligere beslutter",
-            vedtakstidspunkt = tidspunkt.minusMinutes(3),
-            resultat = ResultatKode.INNVILGET,
-            relatertBehandlingReferanse = null,
+            tilstand = BehandlingTilstand(
+                gjeldendeAvklaringsbehovStatus = null,
+                versjon = Versjon("første"),
+                status = BehandlingStatus.AVSLUTTET,
+                mottattTid = tidspunkt.minusHours(1),
+                søknadsformat = SøknadsFormat.DIGITAL,
+                ansvarligBeslutter = "Tidligere beslutter",
+                vedtakstidspunkt = tidspunkt.minusMinutes(3),
+                resultat = ResultatKode.INNVILGET,
+                relatertBehandlingReferanse = null,
+            ),
         )
         val siste = første.copy(
             hendelsesTidspunkt = tidspunkt.plusMinutes(1),
-            versjon = Versjon("siste"),
-            ansvarligBeslutter = if (harVedtaksdata) "Siste beslutter" else null,
-            vedtakstidspunkt = if (harVedtaksdata) tidspunkt.minusMinutes(1) else null,
-            resultat = if (harVedtaksdata) ResultatKode.AVSLAG else null,
+            tilstand = første.tilstand.copy(
+                versjon = Versjon("siste"),
+                ansvarligBeslutter = if (harVedtaksdata) "Siste beslutter" else null,
+                vedtakstidspunkt = if (harVedtaksdata) tidspunkt.minusMinutes(1) else null,
+                resultat = if (harVedtaksdata) ResultatKode.AVSLAG else null,
+            ),
         )
-        val nyeste = første.copy(hendelsesTidspunkt = tidspunkt.plusMinutes(4), versjon = Versjon("nyeste"))
+        val nyeste = første.copy(
+            hendelsesTidspunkt = tidspunkt.plusMinutes(4),
+            tilstand = første.tilstand.copy(versjon = Versjon("nyeste")),
+        )
         val grunnlag = SaksstatistikkGrunnlag(
             behandling = behandling().copy(hendelser = listOf(første, nyeste, siste)),
             erSkjermet = false,
@@ -153,17 +167,19 @@ class BQBehandlingTilstandsvalgTest {
             sistOppdatert = tidspunkt,
         ),
         typeBehandling = TypeBehandling.Førstegangsbehandling,
-        status = BehandlingStatus.UTREDES,
         opprettetTid = tidspunkt,
-        mottattTid = tidspunkt.minusDays(1),
-        versjon = Versjon("ytre"),
-        søknadsformat = SøknadsFormat.PAPIR,
-        ansvarligBeslutter = "Ytre beslutter",
-        vedtakstidspunkt = tidspunkt.minusMinutes(5),
-        sisteSaksbehandler = "Ytre saksbehandler",
-        resultat = ResultatKode.INNVILGET,
         oppdatertTidspunkt = tidspunkt.plusMinutes(3),
         opprettetAv = "Oppretter",
         årsakTilOpprettelse = "SØKNAD",
+        tilstand = BehandlingTilstand(
+            status = BehandlingStatus.UTREDES,
+            mottattTid = tidspunkt.minusDays(1),
+            versjon = Versjon("ytre"),
+            søknadsformat = SøknadsFormat.PAPIR,
+            ansvarligBeslutter = "Ytre beslutter",
+            vedtakstidspunkt = tidspunkt.minusMinutes(5),
+            sisteSaksbehandler = "Ytre saksbehandler",
+            resultat = ResultatKode.INNVILGET,
+        ),
     )
 }

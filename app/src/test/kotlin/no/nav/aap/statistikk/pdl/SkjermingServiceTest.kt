@@ -31,13 +31,15 @@ class SkjermingServiceTest {
             sistOppdatert = LocalDateTime.now(),
         ),
         typeBehandling = TypeBehandling.Førstegangsbehandling,
-        status = BehandlingStatus.UTREDES,
         opprettetTid = LocalDateTime.now(),
-        mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-        versjon = Versjon(
-            verdi = "xxx",
+        tilstand = BehandlingTilstand(
+            status = BehandlingStatus.UTREDES,
+            mottattTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+            versjon = Versjon(
+                verdi = "xxx",
+            ),
+            søknadsformat = SøknadsFormat.PAPIR,
         ),
-        søknadsformat = SøknadsFormat.PAPIR,
     )
 
     @Test

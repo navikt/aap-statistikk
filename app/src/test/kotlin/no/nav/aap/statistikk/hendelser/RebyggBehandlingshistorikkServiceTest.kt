@@ -8,6 +8,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.jobber.appender.StatistikkHendelse
 import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
@@ -102,11 +103,18 @@ class RebyggBehandlingshistorikkServiceTest {
 
         val gjenoppbygd = spillAv()
         assertThat(gjenoppbygd.id()).isEqualTo(behandlingId)
-        assertThat(gjenoppbygd.gjeldendeAvklaringsBehov).isEqualTo(Definisjon.FATTE_VEDTAK)
+        assertThat(
+            gjenoppbygd.nåværendeTilstand().gjeldendeAvklaringsBehov,
+        ).isEqualTo(Definisjon.FATTE_VEDTAK.tilAvklaringsbehovKode())
         assertThat(gjenoppbygd.hendelser)
-            .noneMatch { it.avklaringsBehov == Definisjon.AVKLAR_SAMORDNING_SYKESTIPEND }
-        assertThat(spillAv().hendelser.map { it.hendelsesTidspunkt to it.avklaringsBehov })
-            .containsExactlyElementsOf(gjenoppbygd.hendelser.map { it.hendelsesTidspunkt to it.avklaringsBehov })
+            .noneMatch {
+                it.tilstand.gjeldendeAvklaringsBehov ==
+                    Definisjon.AVKLAR_SAMORDNING_SYKESTIPEND.tilAvklaringsbehovKode()
+            }
+        assertThat(spillAv().hendelser.map { it.hendelsesTidspunkt to it.tilstand.gjeldendeAvklaringsBehov })
+            .containsExactlyElementsOf(
+                gjenoppbygd.hendelser.map { it.hendelsesTidspunkt to it.tilstand.gjeldendeAvklaringsBehov },
+            )
     }
 
     @Test

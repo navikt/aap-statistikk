@@ -5,6 +5,7 @@ import no.nav.aap.motor.JobbInput
 import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling
 import no.nav.aap.statistikk.behandling.Versjon
@@ -37,11 +38,13 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
                 sistOppdatert = LocalDateTime.of(2024, 1, 1, 10, 0),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,
-            status = BehandlingStatus.UTREDES,
             opprettetTid = LocalDateTime.of(2024, 1, 1, 10, 0),
-            mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
-            versjon = Versjon("1.0"),
-            søknadsformat = SøknadsFormat.DIGITAL,
+            tilstand = BehandlingTilstand(
+                status = BehandlingStatus.UTREDES,
+                mottattTid = LocalDateTime.of(2024, 1, 1, 9, 0),
+                versjon = Versjon("1.0"),
+                søknadsformat = SøknadsFormat.DIGITAL,
+            ),
         ),
     )
 
