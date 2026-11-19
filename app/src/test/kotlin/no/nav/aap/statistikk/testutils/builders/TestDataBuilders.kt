@@ -176,7 +176,10 @@ fun forberedDatabase(it: DBConnection, behandlingReferanse: UUID): BehandlingId 
     )
 }
 
-fun konstruerSakstatistikkService(connection: DBConnection): SaksStatistikkService {
+fun konstruerSakstatistikkService(
+    connection: DBConnection,
+    clock: Clock = Clock.systemDefaultZone(),
+): SaksStatistikkService {
     val behandlingService = BehandlingService(
         BehandlingRepository(connection),
         SkjermingService(FakePdlGateway()),
@@ -188,6 +191,7 @@ fun konstruerSakstatistikkService(connection: DBConnection): SaksStatistikkServi
             behandlingService,
             RettighetstypeperiodeRepository(connection),
             OppgaveRepositoryImpl(connection),
+            clock = clock,
         ),
     )
 }
