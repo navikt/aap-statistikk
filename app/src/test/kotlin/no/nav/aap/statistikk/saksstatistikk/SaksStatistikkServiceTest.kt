@@ -9,6 +9,11 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.EndringDTO
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.StoppetBehandling
 import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetsType
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypePeriode
+import no.nav.aap.statistikk.avsluttetbehandling.RettighetstypeperiodeRepository
+import no.nav.aap.statistikk.behandling.BehandlingId
 import no.nav.aap.statistikk.behandling.BehandlingRepository
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.enhet.Enhet
@@ -27,10 +32,12 @@ import no.nav.aap.statistikk.person.PersonRepository
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
 import no.nav.aap.statistikk.sak.SakService
+import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.konstruerSakstatistikkService
+import no.nav.aap.statistikk.testutils.builders.opprettTestHendelse
 import no.nav.aap.statistikk.testutils.builders.opprettTestStoppetBehandling
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.verdityper.dokument.Kanal
@@ -38,14 +45,90 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 import javax.sql.DataSource
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as BehandlingStatus
 import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
+import no.nav.aap.statistikk.behandling.BehandlingStatus as DomeneBehandlingStatus
 
 class SaksStatistikkServiceTest {
+    @Test
+    fun `resultat og relatert behandling følger hvert historiske tidspunkt`(@Postgres dataSource: DataSource) {
+        val start = LocalDateTime.of(2024, 1, 1, 10, 0)
+        val referanse = UUID.randomUUID()
+        val relaterteReferanser = List(3) { UUID.randomUUID().toString() }
+        val (behandlingId, _) = opprettTestHendelse(
+            dataSource,
+            referanse,
+            Saksnummer("HISTORIKK"),
+            status = DomeneBehandlingStatus.OPPRETTET,
+            opprettetTidspunkt = start,
+            vurderingsbehov = listOf(no.nav.aap.statistikk.behandling.Vurderingsbehov.SØKNAD),
+        )
+        lagreResultathistorikk(dataSource, behandlingId, start, relaterteReferanser)
+        val tekniskTid = start.plusDays(1).withNano(123456000)
+        val tidssone = ZoneId.of("America/New_York")
+        val clock = Clock.fixed(tekniskTid.atZone(tidssone).toInstant(), tidssone)
+
+        dataSource.transaction { conn ->
+            val service = konstruerSakstatistikkService(conn, clock)
+            val tidspunkter = (0L..3L).map { start.plusSeconds(it) }
+            tidspunkter.forEach { tidspunkt ->
+                assertThat(service.lagreSaksstatistikk(behandlingId, tidspunkt)).isEqualTo(SakStatistikkResultat.OK)
+            }
+            val publiserte = SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(referanse)
+            assertThat(publiserte.map { it.endretTid }).isEqualTo(tidspunkter)
+            assertThat(publiserte.map { it.behandlingStatus })
+                .containsExactly("OPPRETTET", "UNDER_BEHANDLING", "IVERKSETTES", "AVSLUTTET")
+            assertThat(publiserte.map { it.behandlingResultat })
+                .containsExactly(null, null, "AAP_STUDENT", "AAP_STUDENT")
+            assertThat(publiserte.map { it.relatertBehandlingUUID }).isEqualTo(listOf(null) + relaterteReferanser)
+            assertThat(publiserte.map { it.tekniskTid }).containsOnly(tekniskTid)
+            assertThat(service.alleHendelserPåBehandling(behandlingId))
+                .isEqualTo(publiserte.map { it.copy(sekvensNummer = null) })
+        }
+    }
+
+    private fun lagreResultathistorikk(
+        dataSource: DataSource,
+        behandlingId: BehandlingId,
+        start: LocalDateTime,
+        relaterteReferanser: List<String>,
+    ) {
+        dataSource.transaction { conn ->
+            val repository = BehandlingRepository(conn)
+            val behandling = repository.hent(behandlingId)
+            listOf(
+                DomeneBehandlingStatus.UTREDES,
+                DomeneBehandlingStatus.IVERKSETTES,
+                DomeneBehandlingStatus.AVSLUTTET,
+            ).forEachIndexed { index, status ->
+                repository.oppdaterBehandling(
+                    behandling.copy(
+                        hendelser = emptyList(),
+                        status = status,
+                        oppdatertTidspunkt = start.plusSeconds(index + 1L),
+                        resultat = ResultatKode.INNVILGET,
+                        relatertBehandlingReferanse = relaterteReferanser[index],
+                    ),
+                )
+            }
+            RettighetstypeperiodeRepository(conn).lagre(
+                behandling.referanse,
+                listOf(
+                    RettighetstypePeriode(
+                        start.toLocalDate(),
+                        start.toLocalDate().plusMonths(1),
+                        RettighetsType.STUDENT,
+                    ),
+                ),
+            )
+        }
+    }
+
     @Test
     fun `historikk bevarer publiserte tidspunkter og oppgavetildeling uten påfølgende duplikater`(
         @Postgres dataSource: DataSource,

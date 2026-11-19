@@ -1,17 +1,24 @@
 package no.nav.aap.statistikk.saksstatistikk
 
 import no.nav.aap.statistikk.PrometheusProvider
+import no.nav.aap.statistikk.avsluttetbehandling.IRettighetstypeperiodeRepository
+import no.nav.aap.statistikk.behandling.Behandling
 import no.nav.aap.statistikk.behandling.BehandlingId
+import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.hendelser.BehandlingService
+import no.nav.aap.statistikk.oppgave.OppgaveRepository
 import no.nav.aap.statistikk.sakDuplikat
 import no.nav.aap.statistikk.sammeEndretTid
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.time.LocalDateTime
 
 class SaksStatistikkService(
     private val behandlingService: BehandlingService,
     private val sakstatistikkRepository: SakstatistikkRepository,
-    private val bqBehandlingMapper: BQBehandlingMapper,
+    private val oppgaveRepository: OppgaveRepository,
+    private val rettighetstypeperiodeRepository: IRettighetstypeperiodeRepository,
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : ISaksStatistikkService {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -30,9 +37,8 @@ class SaksStatistikkService(
         val erSkjermet = behandlingService.erSkjermet(behandlingPåTidspunkt)
 
         val bqSak =
-            bqBehandlingMapper.bqBehandlingForBehandling(
-                behandlingPåTidspunkt,
-                erSkjermet,
+            BQBehandlingMapper.bqBehandlingForBehandling(
+                hentGrunnlag(behandlingPåTidspunkt, erSkjermet),
                 cutoffTidspunkt,
             )
 
@@ -57,6 +63,21 @@ class SaksStatistikkService(
 
         return SakStatistikkResultat.OK
     }
+
+    private fun hentGrunnlag(behandling: Behandling, erSkjermet: Boolean): SaksstatistikkGrunnlag =
+        SaksstatistikkGrunnlag(
+            behandling = behandling,
+            erSkjermet = erSkjermet,
+            relatertBehandlingUUID = behandlingService.hentRelatertBehandlingUUID(behandling),
+            oppgaver = oppgaveRepository.hentOppgaverForBehandling(behandling.id()),
+            rettighetstyper = when (behandling.behandlingStatus()) {
+                BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES -> emptyList()
+
+                BehandlingStatus.IVERKSETTES, BehandlingStatus.AVSLUTTET ->
+                    rettighetstypeperiodeRepository.hent(behandling.referanse)
+            },
+            tekniskTid = LocalDateTime.now(clock),
+        )
 
     fun lagreBQBehandling(nyBQBehandling: BQBehandling) {
         sakstatistikkRepository.acquireBehandlingLock(nyBQBehandling.behandlingUUID)
@@ -156,9 +177,8 @@ class SaksStatistikkService(
 
         val alleHendelser = behandling.hendelsesHistorikk()
             .map { behandling ->
-                bqBehandlingMapper.bqBehandlingForBehandling(
-                    behandling = behandling,
-                    erSkjermet = erSkjermet,
+                BQBehandlingMapper.bqBehandlingForBehandling(
+                    grunnlag = hentGrunnlag(behandling, erSkjermet),
                 )
             }
 

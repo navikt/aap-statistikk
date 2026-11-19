@@ -12,10 +12,7 @@ internal fun lagSaksStatistikkService(
     return SaksStatistikkService(
         behandlingService = behandlingService,
         sakstatistikkRepository = repositoryProvider.provide(),
-        bqBehandlingMapper = BQBehandlingMapper(
-            behandlingService = behandlingService,
-            rettighetstypeperiodeRepository = repositoryProvider.provide(),
-            oppgaveRepository = repositoryProvider.provide(),
-        ),
+        oppgaveRepository = repositoryProvider.provide(),
+        rettighetstypeperiodeRepository = repositoryProvider.provide(),
     )
 }
