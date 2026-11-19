@@ -31,15 +31,15 @@ import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.FakeHendelsePublisher
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.konstruerSakstatistikkService
+import no.nav.aap.statistikk.testutils.builders.opprettTestStoppetBehandling
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
 import no.nav.aap.verdityper.dokument.Kanal
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.Duration
+import java.time.Clock
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
-import java.util.function.BiPredicate
 import javax.sql.DataSource
 import no.nav.aap.behandlingsflyt.kontrakt.avklaringsbehov.Status as AvklaringsbehovStatus
 import no.nav.aap.behandlingsflyt.kontrakt.behandling.Status as BehandlingStatus
@@ -47,44 +47,50 @@ import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
 
 class SaksStatistikkServiceTest {
     @Test
-    @Disabled
-    fun `hente ut historikk`(@Postgres dataSource: DataSource) {
-        val referanse = lagreHendelser(dataSource)
+    fun `historikk bevarer publiserte tidspunkter og oppgavetildeling uten påfølgende duplikater`(
+        @Postgres dataSource: DataSource,
+    ) {
+        val start = LocalDateTime.of(2024, 1, 1, 10, 0)
+        val tekniskTid = start.plusDays(1)
+        val clock = Clock.fixed(tekniskTid.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
+        val referanse = lagreHendelser(dataSource, start)
         val behandlingId =
-            dataSource.transaction { BehandlingRepository(it).hent(referanse)!!.id!! }
-
-        val alleHendelser = dataSource.transaction {
-            val sakStatikkService = konstruerSakstatistikkService(it)
-
-            sakStatikkService.alleHendelserPåBehandling(behandlingId)
-        }
+            dataSource.transaction { requireNotNull(BehandlingRepository(it).hent(referanse)).id() }
 
         dataSource.transaction {
-            konstruerSakstatistikkService(
-                it,
-            ).lagreSaksstatistikk(behandlingId)
+            val resultat = konstruerSakstatistikkService(it, clock).lagreSaksstatistikk(behandlingId)
+            assertThat(resultat).isEqualTo(SakStatistikkResultat.OK)
         }
 
-        val nedlagrete = dataSource.transaction {
+        val publiserte = dataSource.transaction {
             SakstatistikkRepositoryImpl(it).hentAlleHendelserPåBehandling(referanse)
         }
-        assertThat(nedlagrete).hasSize(2)
+        assertThat(publiserte.map { it.endretTid }).containsExactly(start, start.plusSeconds(4))
+
+        // Simulerer en tidligere publisert duplikat som skal filtreres bort ved resending.
+        dataSource.transaction {
+            SakstatistikkRepositoryImpl(it).lagre(publiserte.last().copy(endretTid = start.plusSeconds(5)))
+        }
+
+        val alleHendelser = dataSource.transaction {
+            konstruerSakstatistikkService(it, clock).alleHendelserPåBehandling(behandlingId)
+        }
+
+        assertThat(alleHendelser.map { it.endretTid }).containsExactly(start, start.plusSeconds(4))
+        assertThat(alleHendelser.map { it.ansvarligEnhetKode }).containsExactly(null, "0220")
+        assertThat(alleHendelser.map { it.saksbehandler }).containsExactly(null, "Z123456")
+        assertThat(alleHendelser.map { it.tekniskTid }).containsOnly(tekniskTid)
         assertThat(alleHendelser.last())
             .usingRecursiveComparison()
             .ignoringFields("sekvensNummer")
-            .withEqualsForFieldsMatchingRegexes(
-                BiPredicate { a: LocalDateTime, b: LocalDateTime ->
-                    Duration.between(a, b).abs() < Duration.ofSeconds(1)
-                },
-                "(endret|teknisk)Tid",
-            )
-            .isEqualTo(nedlagrete.last())
+            .isEqualTo(publiserte.last())
 
-        assertThat(alleHendelser.last().ansvarligEnhetKode).describedAs(
-            "Ansvarlig enhet should be set from oppgave. Last event: ${alleHendelser.last()}",
-        ).isEqualTo("0220")
-        assertThat(alleHendelser.map { it.endretTid }).doesNotHaveDuplicates()
-        assertThat(alleHendelser.size).isEqualTo(2)
+        dataSource.transaction { conn ->
+            assertThat(konstruerSakstatistikkService(conn, clock).alleHendelserPåBehandling(behandlingId))
+                .isEqualTo(alleHendelser)
+            assertThat(SakstatistikkRepositoryImpl(conn).hentAlleHendelserPåBehandling(referanse).map { it.endretTid })
+                .containsExactly(start, start.plusSeconds(4), start.plusSeconds(5))
+        }
     }
 
     @Test
@@ -562,12 +568,32 @@ class SaksStatistikkServiceTest {
 
     companion object {
 
-        fun lagreHendelser(dataSource: DataSource): UUID {
+        fun lagreHendelser(
+            dataSource: DataSource,
+            baseTid: LocalDateTime = LocalDateTime.of(2024, 1, 1, 10, 0),
+        ): UUID {
             val behandlingReferanse = UUID.randomUUID()
-            val baseTid = LocalDateTime.now()
-            val mottattTid = baseTid
-
-            println(baseTid)
+            val førsteBehov = AvklaringsbehovHendelseDto(
+                avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                status = AvklaringsbehovStatus.OPPRETTET,
+                endringer = listOf(
+                    EndringDTO(
+                        status = AvklaringsbehovStatus.OPPRETTET,
+                        tidsstempel = baseTid.plusSeconds(1),
+                        endretAv = "Bork",
+                    ),
+                ),
+            )
+            val førsteHendelse = opprettTestStoppetBehandling(
+                behandlingReferanse = behandlingReferanse,
+                behandlingOpprettetTidspunkt = baseTid,
+                hendelsesTidspunkt = baseTid.plusSeconds(1),
+                mottattTid = baseTid,
+                saksnummer = "AAAA",
+                behandlingStatus = BehandlingStatus.UTREDES,
+                ident = "1233456",
+                avklaringsbehov = listOf(førsteBehov),
+            )
 
             dataSource.transaction {
                 val hendelsesService = HendelsesService(
@@ -583,70 +609,16 @@ class SaksStatistikkServiceTest {
                     ),
                 )
 
+                hendelsesService.prosesserNyHendelse(førsteHendelse)
                 hendelsesService.prosesserNyHendelse(
-                    StoppetBehandling(
-                        saksnummer = "AAAA",
-                        sakStatus = SakStatus.UTREDES,
-                        behandlingReferanse = behandlingReferanse,
-                        relatertBehandling = null,
-                        behandlingOpprettetTidspunkt = baseTid,
-                        mottattTid = mottattTid,
-                        behandlingStatus = BehandlingStatus.UTREDES,
-                        behandlingType = TypeBehandling.Førstegangsbehandling,
-                        soknadsFormat = Kanal.DIGITAL,
-                        ident = "1233456",
-                        versjon = "1",
-                        vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
-                        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
+                    førsteHendelse.copy(
                         avklaringsbehov = listOf(
-                            AvklaringsbehovHendelseDto(
-                                avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
-                                status = AvklaringsbehovStatus.OPPRETTET,
-                                endringer = listOf(
-                                    EndringDTO(
-                                        status = AvklaringsbehovStatus.OPPRETTET,
-                                        tidsstempel = baseTid.plusSeconds(1),
-                                        endretAv = "Bork",
-                                    ),
-                                ),
-                            ),
-                        ),
-                        hendelsesTidspunkt = baseTid.plusSeconds(1),
-                        avsluttetBehandling = null,
-                        identerForSak = listOf("1233455", "11212"),
-                    ),
-                )
-
-                hendelsesService.prosesserNyHendelse(
-                    StoppetBehandling(
-                        saksnummer = "AAAA",
-                        sakStatus = SakStatus.UTREDES,
-                        behandlingReferanse = behandlingReferanse,
-                        relatertBehandling = null,
-                        behandlingOpprettetTidspunkt = baseTid,
-                        mottattTid = mottattTid,
-                        behandlingStatus = BehandlingStatus.UTREDES,
-                        behandlingType = TypeBehandling.Førstegangsbehandling,
-                        soknadsFormat = Kanal.DIGITAL,
-                        ident = "1233456",
-                        versjon = "1",
-                        vurderingsbehov = listOf(Vurderingsbehov.VURDER_RETTIGHETSPERIODE),
-                        årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
-                        avklaringsbehov = listOf(
-                            AvklaringsbehovHendelseDto(
-                                avklaringsbehovDefinisjon = Definisjon.VURDER_RETTIGHETSPERIODE,
+                            førsteBehov.copy(
                                 status = AvklaringsbehovStatus.AVSLUTTET,
-                                endringer = listOf(
-                                    EndringDTO(
-                                        status = AvklaringsbehovStatus.OPPRETTET,
-                                        tidsstempel = baseTid.plusSeconds(1),
-                                        endretAv = "Bork",
-                                    ),
-                                    EndringDTO(
-                                        status = AvklaringsbehovStatus.AVSLUTTET,
-                                        tidsstempel = baseTid.plusSeconds(3),
-                                        endretAv = "Bork",
-                                    ),
+                                endringer = førsteBehov.endringer + EndringDTO(
+                                    status = AvklaringsbehovStatus.AVSLUTTET,
+                                    tidsstempel = baseTid.plusSeconds(3),
+                                    endretAv = "Bork",
                                 ),
                             ),
                             AvklaringsbehovHendelseDto(
@@ -662,27 +634,40 @@ class SaksStatistikkServiceTest {
                             ),
                         ),
                         hendelsesTidspunkt = baseTid.plusSeconds(3),
-                        avsluttetBehandling = null,
-                        identerForSak = listOf("1233455", "11212"),
                     ),
                 )
 
-                // Oppgave opprettet ETTER at AVKLAR_SYKDOM ble gjeldende
+                val enhet = Enhet(
+                    EnhetRepositoryImpl(it).lagreEnhet(Enhet(null, "0220")),
+                    "0220",
+                )
+                OppgaveRepositoryImpl(it).lagreOppgave(
+                    Oppgave(
+                        identifikator = 1L,
+                        avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
+                        enhet = enhet,
+                        person = requireNotNull(BehandlingRepository(it).hent(behandlingReferanse)).sak.person,
+                        status = Oppgavestatus.OPPRETTET,
+                        opprettetTidspunkt = baseTid.plusSeconds(4),
+                        behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
+                        hendelser = emptyList(),
+                    ),
+                )
                 OppgaveHendelseRepositoryImpl(it).lagreHendelse(
                     OppgaveHendelse(
                         hendelse = HendelseType.OPPRETTET,
                         oppgaveId = 1L,
                         mottattTidspunkt = baseTid.plusSeconds(4),
-                        personIdent = "12345678910",
-                        saksnummer = "123456789",
+                        personIdent = førsteHendelse.ident,
+                        saksnummer = førsteHendelse.saksnummer,
                         behandlingRef = behandlingReferanse,
                         enhet = "0220",
                         avklaringsbehovKode = Definisjon.AVKLAR_SYKDOM.kode.name,
                         status = Oppgavestatus.OPPRETTET,
-                        reservertAv = "123456789",
+                        reservertAv = "Z123456",
                         reservertTidspunkt = baseTid.plusSeconds(4),
                         opprettetTidspunkt = baseTid.plusSeconds(4),
-                        endretAv = "123456789",
+                        endretAv = "Z123456",
                         endretTidspunkt = baseTid.plusSeconds(4),
                         sendtTid = baseTid.plusSeconds(4),
                         versjon = 1L,
