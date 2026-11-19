@@ -64,6 +64,10 @@ For testing, prefer in-memory fakes over mocks. Fakes provide:
 - Clearer test intentions
 - Reduced coupling to implementation details
 
+Prefer comparing complete expected data-class instances, using equality or
+AssertJ's `usingRecursiveComparison()`, instead of many field-by-field
+`assertThat` calls.
+
 ### Gradle Commands
 
 - **Never use --no-daemon** when running Gradle tests or builds - it's slower
