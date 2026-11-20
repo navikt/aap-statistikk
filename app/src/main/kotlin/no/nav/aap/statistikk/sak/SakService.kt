@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 class SakService(private val sakRepository: SakRepository, private val clock: Clock = Clock.systemDefaultZone()) {
     constructor(repositoryProvider: RepositoryProvider) : this(repositoryProvider.provide())
 
-    fun hentEllerSettInnSak(person: Person, saksnummer: Saksnummer, sakStatus: SakStatus): Sak {
+    fun hentEllerSettInnSak(person: Person, saksnummer: Saksnummer): Sak {
         var sak = sakRepository.hentSakEllernull(saksnummer)
         if (sak == null) {
             val sakId = sakRepository.settInnSak(
@@ -16,18 +16,10 @@ class SakService(private val sakRepository: SakRepository, private val clock: Cl
                     id = null,
                     saksnummer = saksnummer,
                     person = person,
-                    sistOppdatert = LocalDateTime.now(clock),
-                    sakStatus = sakStatus,
+                    sistOppdatert = LocalDateTime.now(clock)
                 ),
             )
             sak = sakRepository.hentSak(sakId)
-        } else {
-            sakRepository.oppdaterSak(
-                sak.copy(
-                    sakStatus = sakStatus,
-                    sistOppdatert = LocalDateTime.now(clock),
-                ),
-            )
         }
         return sak
     }

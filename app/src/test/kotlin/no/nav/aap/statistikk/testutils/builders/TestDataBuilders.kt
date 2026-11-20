@@ -25,7 +25,6 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakId
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.sak.tilSaksnummer
 import no.nav.aap.statistikk.saksstatistikk.SaksStatistikkService
@@ -107,7 +106,6 @@ fun opprettTestSak(dataSource: DataSource, saksnummer: Saksnummer, person: Perso
         person = person,
         id = null,
         sistOppdatert = LocalDateTime.now(),
-        sakStatus = SakStatus.UTREDES,
     )
     val id = SakRepositoryImpl(it).settInnSak(sak)
     sak.copy(id = id)
@@ -158,7 +156,6 @@ fun forberedDatabase(it: DBConnection, behandlingReferanse: UUID): BehandlingId 
     val sak = Sak(
         saksnummer = "ABCDE".tilSaksnummer(),
         person = person,
-        sakStatus = SakStatus.LØPENDE,
         sistOppdatert = LocalDateTime.now(),
     )
     val sakId = SakRepositoryImpl(it).settInnSak(sak)

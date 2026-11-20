@@ -40,7 +40,7 @@ class RebyggBehandlingshistorikkService(
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
 
         val sak =
-            sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
+            sakService.hentEllerSettInnSak(person, saksnummer)
         val behandling = behandlingService.konstruerBehandling(hendelse, sak, eksisterendeBehandlingKanskje = null)
 
         val behandlingMedHistorikk =

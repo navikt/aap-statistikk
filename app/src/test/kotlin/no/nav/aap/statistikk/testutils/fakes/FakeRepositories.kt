@@ -88,10 +88,6 @@ class FakeSakRepository : SakRepository {
         saker[id] = sak.copy(id = id)
         return id
     }
-
-    override fun oppdaterSak(sak: Sak) {
-        saker[sak.id!!] = sak.copy(sistOppdatert = LocalDateTime.now())
-    }
 }
 
 class FakePersonRepository : IPersonRepository {

@@ -12,14 +12,6 @@ data class Sak(
     val id: Long? = null,
     val saksnummer: Saksnummer,
     val person: Person,
-    val sakStatus: SakStatus,
     val sistOppdatert: LocalDateTime,
     val snapShotId: Long? = null,
 )
-
-enum class SakStatus {
-    OPPRETTET,
-    UTREDES,
-    LØPENDE,
-    AVSLUTTET,
-}

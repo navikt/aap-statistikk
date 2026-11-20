@@ -24,7 +24,6 @@ import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.avsluttetBehandlingDTO
@@ -230,7 +229,7 @@ class BehandlingServiceTest {
 
             override fun hentMedHistorikkForUpdate(id: BehandlingId): Behandling = eksisterende
 
-            override fun hentMedHistorikkForUpdate(referanse: UUID): Behandling? {
+            override fun hentMedHistorikkForUpdate(referanse: UUID): Behandling {
                 lockHentKalt = true
                 return eksisterende
             }
@@ -335,7 +334,7 @@ private fun testHendelse(
         ),
     ),
     mottattTid = LocalDateTime.now().minusDays(1),
-    sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
+    sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
     hendelsesTidspunkt = LocalDateTime.now(),
     vurderingsbehov = vurderingsbehov,
     årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,
@@ -345,7 +344,6 @@ private fun testSak(): Sak = Sak(
     id = 1L,
     saksnummer = Saksnummer("1234"),
     person = Person(ident = no.nav.aap.statistikk.person.Ident("12345678901"), id = 1L),
-    sakStatus = SakStatus.OPPRETTET,
     sistOppdatert = LocalDateTime.now(),
 )
 

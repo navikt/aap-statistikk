@@ -81,8 +81,7 @@ WHERE sak.id = ?
             id = row.getLong("s_person_id"),
         ),
         sistOppdatert = row.getLocalDateTime("sh_oppdatert_tid"),
-        snapShotId = row.getLong("sh_id"),
-        sakStatus = row.getEnum("sh_sak_status"),
+        snapShotId = row.getLong("sh_id")
     )
 
     override fun settInnSak(sak: Sak): Long {
@@ -117,20 +116,9 @@ WHERE sak.id = ?
         return sakId
     }
 
-    override fun oppdaterSak(sak: Sak) {
+     fun oppdaterSak(sak: Sak) {
         val sakId =
             requireNotNull(sak.id) { "Sak må ha ID før den kan oppdateres. Saksnummer: ${sak.saksnummer}." }
-
-        val gjeldendeStatus = dbConnection.queryFirstOrNull<String>(
-            "SELECT sak_status FROM sak_historikk WHERE sak_id = ? AND gjeldende = TRUE",
-        ) {
-            setParams { setLong(1, sakId) }
-            setRowMapper { row -> row.getString("sak_status") }
-        }
-
-        if (gjeldendeStatus == sak.sakStatus.toString()) {
-            return
-        }
 
         dbConnection.execute("UPDATE sak_historikk SET gjeldende = FALSE where sak_id = ?") {
             setParams { setLong(1, sakId) }
@@ -144,7 +132,7 @@ WHERE sak.id = ?
                 setBoolean(c++, true)
                 setLocalDateTime(c++, sak.sistOppdatert)
                 setLong(c++, sak.id)
-                setString(c, sak.sakStatus.toString())
+                setString(c, "UTREDES")
             }
         }
     }

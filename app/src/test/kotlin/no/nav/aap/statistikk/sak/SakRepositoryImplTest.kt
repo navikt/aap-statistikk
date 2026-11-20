@@ -31,7 +31,6 @@ class SakRepositoryImplTest {
                 Sak(
                     saksnummer = saksnummer,
                     person = person,
-                    sakStatus = SakStatus.UTREDES,
                     sistOppdatert = LocalDateTime.now(
                         Clock.fixed(
                             now,
@@ -48,9 +47,6 @@ class SakRepositoryImplTest {
             sakRepositoryImpl.hentSak(saksnummer)
         }
 
-        assertThat(sak.sakStatus).isEqualTo(
-            SakStatus.UTREDES,
-        )
         assertThat(sak.sistOppdatert).isCloseTo(
             LocalDateTime.ofInstant(
                 now,
@@ -78,7 +74,6 @@ class SakRepositoryImplTest {
             val sak = Sak(
                 saksnummer = saksnummer,
                 person = person,
-                sakStatus = SakStatus.UTREDES,
                 sistOppdatert = LocalDateTime.now(fixed).minusDays(1),
             )
             val id = sakRepositoryImpl.settInnSak(
@@ -93,7 +88,6 @@ class SakRepositoryImplTest {
             val sakRepositoryImpl = SakRepositoryImpl(it)
             sakRepositoryImpl.oppdaterSak(
                 sak.copy(
-                    sakStatus = SakStatus.AVSLUTTET,
                     sistOppdatert = LocalDateTime.now(fixed),
                 ),
             )
@@ -112,9 +106,6 @@ class SakRepositoryImplTest {
                 ZoneId.systemDefault(),
             ).truncatedTo(ChronoUnit.SECONDS),
         )
-        assertThat(uthentet.sakStatus).isEqualTo(
-            SakStatus.AVSLUTTET,
-        )
     }
 
     @Test
@@ -126,14 +117,14 @@ class SakRepositoryImplTest {
         dataSource.transaction {
             val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(Ident("214"))
             val sakService = SakService(SakRepositoryImpl(it), fixed)
-            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
+            sakService.hentEllerSettInnSak(person, saksnummer)
         }
 
         // Kall med samme status
         dataSource.transaction {
             val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(Ident("214"))
             val sakService = SakService(SakRepositoryImpl(it), fixed)
-            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
+            sakService.hentEllerSettInnSak(person, saksnummer)
         }
 
         val antallHistorikkRader = dataSource.transaction {
@@ -144,34 +135,5 @@ class SakRepositoryImplTest {
 
         // settInnSak lager 1 rad. Andre kall med samme status skal IKKE lage ny rad.
         assertThat(antallHistorikkRader).isEqualTo(1)
-    }
-
-    @Test
-    fun `oppdaterSak med endret status skal lage ny sak_historikk-rad`(@Postgres dataSource: DataSource) {
-        val saksnummer = Saksnummer("1234")
-        val now = Instant.now()
-        val fixed = Clock.fixed(now, ZoneId.systemDefault())
-
-        dataSource.transaction {
-            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(Ident("214"))
-            val sakService = SakService(SakRepositoryImpl(it), fixed)
-            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.UTREDES)
-        }
-
-        // Kall med ny status
-        dataSource.transaction {
-            val person = PersonService(PersonRepository(it), FakePdlGateway()).hentEllerLagrePerson(Ident("214"))
-            val sakService = SakService(SakRepositoryImpl(it), fixed)
-            sakService.hentEllerSettInnSak(person, saksnummer, SakStatus.AVSLUTTET)
-        }
-
-        val antallHistorikkRader = dataSource.transaction {
-            it.queryFirst("SELECT COUNT(*) AS total FROM sak_historikk") {
-                setRowMapper { row -> row.getInt("total") }
-            }
-        }
-
-        // settInnSak lager 1 rad, oppdaterSak med ny status lager 1 til.
-        assertThat(antallHistorikkRader).isEqualTo(2)
     }
 }

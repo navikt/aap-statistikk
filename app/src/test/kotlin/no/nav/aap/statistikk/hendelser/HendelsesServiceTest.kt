@@ -21,7 +21,6 @@ import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakService
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.*
@@ -80,7 +79,6 @@ class HendelsesServiceTest {
         val sak = Sak(
             saksnummer = Saksnummer("ABCDE"),
             person = Person(no.nav.aap.statistikk.person.Ident("123")),
-            sakStatus = SakStatus.LØPENDE,
             sistOppdatert = LocalDateTime.now(),
         )
         sakRepository.settInnSak(sak)
@@ -128,7 +126,7 @@ class HendelsesServiceTest {
                     ),
                 ),
                 mottattTid = LocalDateTime.now().minusDays(1),
-                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
+                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 relatertBehandling = relatertUUID,
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
@@ -232,7 +230,7 @@ class HendelsesServiceTest {
                     ),
                 ),
                 mottattTid = LocalDateTime.now().minusDays(1),
-                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.OPPRETTET,
+                sakStatus = no.nav.aap.behandlingsflyt.kontrakt.sak.Status.UTREDES,
                 hendelsesTidspunkt = LocalDateTime.now(),
                 vurderingsbehov = listOf(Vurderingsbehov.SØKNAD),
                 årsakTilOpprettelse = ÅrsakTilOpprettelse.SØKNAD,

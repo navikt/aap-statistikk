@@ -127,7 +127,6 @@ class BehandlingshistorikkBeregnerTest {
         sak = Sak(
             saksnummer = Saksnummer(dto.saksnummer),
             person = Person(ident = no.nav.aap.statistikk.person.Ident(dto.ident)),
-            sakStatus = dto.sakStatus.tilDomene(),
             sistOppdatert = start,
         ),
         typeBehandling = dto.behandlingType.tilDomene(),
@@ -146,7 +145,6 @@ class BehandlingshistorikkBeregnerTest {
         val sak = Sak(
             saksnummer = Saksnummer(dto.saksnummer),
             person = Person(ident = no.nav.aap.statistikk.person.Ident(dto.ident)),
-            sakStatus = dto.sakStatus.tilDomene(),
             sistOppdatert = start,
         )
         val behandling = BehandlingService(FakeBehandlingRepository(), SkjermingService(FakePdlGateway()))
@@ -254,7 +252,6 @@ class BehandlingshistorikkBeregnerTest {
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
                 person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
-                sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
@@ -297,7 +294,6 @@ class BehandlingshistorikkBeregnerTest {
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
                 person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
-                sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
@@ -342,7 +338,6 @@ class BehandlingshistorikkBeregnerTest {
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
                 person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
-                sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
@@ -391,7 +386,6 @@ class BehandlingshistorikkBeregnerTest {
             sak = Sak(
                 saksnummer = hendelse.saksnummer.let(::Saksnummer),
                 person = Person(ident = no.nav.aap.statistikk.person.Ident(hendelse.ident)),
-                sakStatus = hendelse.sakStatus.tilDomene(),
                 sistOppdatert = hendelse.hendelsesTidspunkt,
             ),
             typeBehandling = hendelse.behandlingType.tilDomene(),
