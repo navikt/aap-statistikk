@@ -32,7 +32,7 @@ import javax.sql.DataSource
 class BehandlingPessimisticLockTest {
 
     @Test
-    fun `hentBehandlingForUpdate should acquire lock on behandling`(@Postgres dataSource: DataSource) {
+    fun `hentMedHistorikkForUpdate should acquire lock on behandling`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
@@ -57,7 +57,7 @@ class BehandlingPessimisticLockTest {
         }
 
         val locked = dataSource.transaction {
-            BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
+            BehandlingRepository(it).hentMedHistorikkForUpdate(behandlingId)
         }
 
         assertThat(locked).isNotNull()
@@ -66,7 +66,7 @@ class BehandlingPessimisticLockTest {
     }
 
     @Test
-    fun `hentBehandlingForUpdate by referanse should acquire lock`(@Postgres dataSource: DataSource) {
+    fun `hentMedHistorikkForUpdate by referanse should acquire lock`(@Postgres dataSource: DataSource) {
         val person = opprettTestPerson(dataSource, Ident("123456789"))
         val sak = opprettTestSak(dataSource, "123456789".tilSaksnummer(), person)
         val referanse = UUID.randomUUID()
@@ -91,7 +91,7 @@ class BehandlingPessimisticLockTest {
         }
 
         val locked = dataSource.transaction {
-            BehandlingRepository(it).hentBehandlingForUpdate(referanse)
+            BehandlingRepository(it).hentMedHistorikkForUpdate(referanse)
         }
 
         assertThat(locked).isNotNull()
@@ -99,11 +99,11 @@ class BehandlingPessimisticLockTest {
     }
 
     @Test
-    fun `hentBehandlingForUpdate by referanse returns null if not found`(@Postgres dataSource: DataSource) {
+    fun `hentMedHistorikkForUpdate by referanse returns null if not found`(@Postgres dataSource: DataSource) {
         val nonExistentReferanse = UUID.randomUUID()
 
         val result = dataSource.transaction {
-            BehandlingRepository(it).hentBehandlingForUpdate(nonExistentReferanse)
+            BehandlingRepository(it).hentMedHistorikkForUpdate(nonExistentReferanse)
         }
 
         assertThat(result).isNull()
@@ -146,7 +146,7 @@ class BehandlingPessimisticLockTest {
                 ready.await()
 
                 dataSource.transaction {
-                    val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
+                    val locked = BehandlingRepository(it).hentMedHistorikkForUpdate(behandlingId)
                     lockAcquiredCount.incrementAndGet()
                     executionOrder.add("task1-locked")
 
@@ -171,7 +171,7 @@ class BehandlingPessimisticLockTest {
                 Thread.sleep(100)
 
                 dataSource.transaction {
-                    val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
+                    val locked = BehandlingRepository(it).hentMedHistorikkForUpdate(behandlingId)
                     lockAcquiredCount.incrementAndGet()
                     executionOrder.add("task2-locked")
 
@@ -248,7 +248,7 @@ class BehandlingPessimisticLockTest {
         runBlocking {
             val task1 = async(Dispatchers.IO) {
                 dataSource.transaction {
-                    val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandling1Id)
+                    val locked = BehandlingRepository(it).hentMedHistorikkForUpdate(behandling1Id)
                     results["task1-lock"] = "locked"
 
                     // Hold lock for 500ms
@@ -260,7 +260,7 @@ class BehandlingPessimisticLockTest {
 
             val task2 = async(Dispatchers.IO) {
                 dataSource.transaction {
-                    val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandling2Id)
+                    val locked = BehandlingRepository(it).hentMedHistorikkForUpdate(behandling2Id)
                     results["task2-lock"] = "locked"
 
                     // Hold lock for 500ms
@@ -315,7 +315,7 @@ class BehandlingPessimisticLockTest {
         runBlocking {
             // First transaction: lock and immediately release
             dataSource.transaction {
-                BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
+                BehandlingRepository(it).hentMedHistorikkForUpdate(behandlingId)
                 acquiredLocks.incrementAndGet()
             }
             // Lock released here at transaction end
@@ -323,7 +323,7 @@ class BehandlingPessimisticLockTest {
             // Second transaction: should acquire lock without waiting
             val startTime = System.currentTimeMillis()
             dataSource.transaction {
-                BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
+                BehandlingRepository(it).hentMedHistorikkForUpdate(behandlingId)
                 acquiredLocks.incrementAndGet()
             }
             val elapsedMs = System.currentTimeMillis() - startTime
@@ -368,7 +368,7 @@ class BehandlingPessimisticLockTest {
                 ready.await()
 
                 dataSource.transaction {
-                    val locked = BehandlingRepository(it).hentBehandlingForUpdate(referanse)
+                    val locked = BehandlingRepository(it).hentMedHistorikkForUpdate(referanse)
                     assertThat(locked).isNotNull()
 
                     // Update saksbehandler
@@ -389,7 +389,7 @@ class BehandlingPessimisticLockTest {
                 Thread.sleep(50)
 
                 dataSource.transaction {
-                    val locked = BehandlingRepository(it).hentBehandlingForUpdate(referanse)
+                    val locked = BehandlingRepository(it).hentMedHistorikkForUpdate(referanse)
                     assertThat(locked).isNotNull()
 
                     // Same saksbehandler update (idempotent)
@@ -408,7 +408,7 @@ class BehandlingPessimisticLockTest {
 
         // Verify only ONE behandling row exists
         val final = dataSource.transaction {
-            BehandlingRepository(it).hent(referanse)
+            BehandlingRepository(it).hentMedHistorikk(referanse)
         }
         assertThat(final).isNotNull()
         assertThat(final!!.id()).isEqualTo(behandlingId)
@@ -445,7 +445,7 @@ class BehandlingPessimisticLockTest {
 
         // Lock, modify, and update
         val updated = dataSource.transaction {
-            val locked = BehandlingRepository(it).hentBehandlingForUpdate(behandlingId)
+            val locked = BehandlingRepository(it).hentMedHistorikkForUpdate(behandlingId)
             val modified = locked.copy(
                 oppdatertTidspunkt = LocalDateTime.now(),
                 tilstand = locked.nåværendeTilstand().copy(sisteSaksbehandler = "s002"),
@@ -456,7 +456,7 @@ class BehandlingPessimisticLockTest {
 
         // Verify update was persisted
         val fetched = dataSource.transaction {
-            BehandlingRepository(it).hent(referanse)
+            BehandlingRepository(it).hentMedHistorikk(referanse)
         }
 
         assertThat(fetched!!.nåværendeTilstand().sisteSaksbehandler).isEqualTo("s002")

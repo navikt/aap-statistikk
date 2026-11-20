@@ -98,7 +98,7 @@ class RebyggBehandlingshistorikkServiceTest {
                 BehandlingService(repository, SkjermingService(pdl)),
                 publisher,
             ).rebyggHistorikk(hendelse)
-            repository.hent(behandlingId)
+            repository.hentMedHistorikk(behandlingId)
         }
 
         val gjenoppbygd = spillAv()
@@ -135,7 +135,7 @@ class RebyggBehandlingshistorikkServiceTest {
 
         historikkService.rebyggHistorikk(hendelse)
 
-        val behandling = behandlingRepository.hent(hendelse.behandlingReferanse)!!
+        val behandling = behandlingRepository.hentMedHistorikk(hendelse.behandlingReferanse)!!
 
         assertThat(behandling.behandlingStatus()).isEqualTo(BehandlingStatus.AVSLUTTET)
         assertThat(hendelsePublisher.hendelser).containsExactly(

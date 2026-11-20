@@ -372,7 +372,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
 
     private val hentMedId = hentQuery + " WHERE b.id = ?"
 
-    override fun hent(referanse: UUID): Behandling? {
+    override fun hentMedHistorikk(referanse: UUID): Behandling? {
         val behandling = dbConnection.queryFirstOrNull(hentQuery + " WHERE br.referanse = ?") {
             setParams {
                 setUUID(1, referanse)
@@ -386,7 +386,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         return behandling
     }
 
-    override fun hent(id: BehandlingId): Behandling {
+    override fun hentMedHistorikk(id: BehandlingId): Behandling {
         val behandling = dbConnection.queryFirstOrNull(hentMedId) {
             setParams {
                 setLong(1, id.id)
@@ -442,7 +442,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         }
     }
 
-    override fun hentEllerNull(id: BehandlingId): Behandling? = dbConnection.queryFirstOrNull(hentMedId) {
+    override fun hentUtenHistorikkEllerNull(id: BehandlingId): Behandling? = dbConnection.queryFirstOrNull(hentMedId) {
         setParams {
             setLong(1, id.id)
         }
@@ -451,7 +451,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         }
     }
 
-    override fun hentBehandlingForUpdate(id: BehandlingId): Behandling {
+    override fun hentMedHistorikkForUpdate(id: BehandlingId): Behandling {
         val sql = hentQuery + " WHERE b.id = ? FOR UPDATE OF b"
 
         val behandling = dbConnection.queryFirst(sql) {
@@ -464,7 +464,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
         return behandling
     }
 
-    override fun hentBehandlingForUpdate(referanse: UUID): Behandling? {
+    override fun hentMedHistorikkForUpdate(referanse: UUID): Behandling? {
         val sql = hentQuery + " WHERE br.referanse = ? FOR UPDATE OF b"
 
         val behandling = dbConnection.queryFirstOrNull(sql) {

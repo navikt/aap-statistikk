@@ -184,17 +184,18 @@ class FakeBehandlingRepository : IBehandlingRepository {
         behandlinger[behandling.id?.id!!] = behandling
     }
 
-    override fun hent(referanse: UUID): Behandling? = behandlinger.asIterable().firstOrNull {
+    override fun hentMedHistorikk(referanse: UUID): Behandling? = behandlinger.asIterable().firstOrNull {
         it.value.referanse == referanse
     }?.value
 
-    override fun hent(id: BehandlingId): Behandling = behandlinger[id.id]!!
+    override fun hentMedHistorikk(id: BehandlingId): Behandling = behandlinger[id.id]!!
 
-    override fun hentEllerNull(id: BehandlingId): Behandling? = behandlinger[id.id]
+    override fun hentUtenHistorikkEllerNull(id: BehandlingId): Behandling? =
+        behandlinger[id.id]?.copy(hendelser = emptyList())
 
-    override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = hent(id)
+    override fun hentMedHistorikkForUpdate(id: BehandlingId): Behandling = hentMedHistorikk(id)
 
-    override fun hentBehandlingForUpdate(referanse: UUID): Behandling? = hent(referanse)
+    override fun hentMedHistorikkForUpdate(referanse: UUID): Behandling? = hentMedHistorikk(referanse)
 }
 
 class FakeRettighetsTypeRepository : IRettighetstypeperiodeRepository {

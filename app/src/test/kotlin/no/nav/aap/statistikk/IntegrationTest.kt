@@ -861,7 +861,7 @@ class IntegrationTest {
 
             motor.kjørJobber()
             val behandling = dataSource.transaction {
-                BehandlingRepository(it).hent(behandlingReferanse)
+                BehandlingRepository(it).hentMedHistorikk(behandlingReferanse)
             }
             assertThat(behandling).isNotNull
             val enhet = dataSource.transaction {
@@ -976,7 +976,7 @@ class IntegrationTest {
         }
         motor.kjørJobber()
 
-        val behandling = dataSource.transaction { BehandlingRepository(it).hent(referanse!!) }
+        val behandling = dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(referanse!!) }
 
         assertThat(behandling!!.behandlingStatus()).isEqualTo(expectedStatus)
         return referanse!!

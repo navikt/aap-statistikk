@@ -40,7 +40,7 @@ class BehandlingService(
             logger.info("Hent eller lagrer for sak ${sak.id}. DTO: $dto")
         }
 
-        val eksisterendeBehandling = behandlingRepository.hentBehandlingForUpdate(dto.behandlingReferanse)
+        val eksisterendeBehandling = behandlingRepository.hentMedHistorikkForUpdate(dto.behandlingReferanse)
         val behandling = konstruerBehandling(dto, sak, eksisterendeBehandling)
 
         return behandling.id?.let { eksisterendeBehandlingId ->
@@ -71,7 +71,7 @@ class BehandlingService(
     fun konstruerBehandling(
         dto: StoppetBehandling,
         sak: Sak,
-        eksisterendeBehandlingKanskje: Behandling? = behandlingRepository.hent(dto.behandlingReferanse),
+        eksisterendeBehandlingKanskje: Behandling? = behandlingRepository.hentMedHistorikk(dto.behandlingReferanse),
     ): Behandling {
         val tilstand = utledTilstand(dto)
         val eksisterendeBehandling = eksisterendeBehandlingKanskje?.leggTilHendelse(
@@ -146,7 +146,7 @@ class BehandlingService(
     private fun hentRelatertBehandling(dto: StoppetBehandling): Behandling? {
         val relatertBehandlingUUID = dto.relatertBehandling
         val relatertBehandling =
-            relatertBehandlingUUID?.let { behandlingRepository.hent(relatertBehandlingUUID) }
+            relatertBehandlingUUID?.let { behandlingRepository.hentMedHistorikk(relatertBehandlingUUID) }
 
         if (relatertBehandling == null && relatertBehandlingUUID != null) {
             logger.warn(
@@ -158,13 +158,13 @@ class BehandlingService(
 
     fun hentRelatertBehandlingUUID(behandling: Behandling): String? {
         val eksisterendeBehandling =
-            behandling.relatertBehandlingId?.let { behandlingRepository.hent(it) }?.referanse
+            behandling.relatertBehandlingId?.let { behandlingRepository.hentMedHistorikk(it) }?.referanse
         return eksisterendeBehandling?.toString() ?: behandling.nåværendeTilstand().relatertBehandlingReferanse
     }
 
-    fun hentBehandling(behandlingId: BehandlingId) = behandlingRepository.hent(behandlingId)
+    fun hentBehandling(behandlingId: BehandlingId) = behandlingRepository.hentMedHistorikk(behandlingId)
 
-    fun hentBehandling(behandlingReferanse: UUID) = behandlingRepository.hent(behandlingReferanse)
+    fun hentBehandling(behandlingReferanse: UUID) = behandlingRepository.hentMedHistorikk(behandlingReferanse)
 }
 
 private fun SQLException.erUniqueConstraintViolation(): Boolean = generateSequence<Throwable>(this) { it.cause }

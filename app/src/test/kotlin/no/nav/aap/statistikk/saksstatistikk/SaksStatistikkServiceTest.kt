@@ -100,7 +100,7 @@ class SaksStatistikkServiceTest {
     ) {
         dataSource.transaction { conn ->
             val repository = BehandlingRepository(conn)
-            val behandling = repository.hent(behandlingId)
+            val behandling = repository.hentMedHistorikk(behandlingId)
             listOf(
                 DomeneBehandlingStatus.UTREDES,
                 DomeneBehandlingStatus.IVERKSETTES,
@@ -140,7 +140,7 @@ class SaksStatistikkServiceTest {
         val clock = Clock.fixed(tekniskTid.toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
         val referanse = lagreHendelser(dataSource, start)
         val behandlingId =
-            dataSource.transaction { requireNotNull(BehandlingRepository(it).hent(referanse)).id() }
+            dataSource.transaction { requireNotNull(BehandlingRepository(it).hentMedHistorikk(referanse)).id() }
 
         dataSource.transaction {
             val resultat = konstruerSakstatistikkService(it, clock).lagreSaksstatistikk(behandlingId)
@@ -270,7 +270,7 @@ class SaksStatistikkServiceTest {
                 ),
             )
 
-            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val behandlingId = BehandlingRepository(conn).hentMedHistorikk(behandlingReferanse)!!.id()
             val service = konstruerSakstatistikkService(conn)
 
             // Simuler oppgave-trigget jobb: lagrer UTREDES-tilstand med endretTid = oppgaveSendtTid
@@ -383,7 +383,7 @@ class SaksStatistikkServiceTest {
                 ),
             )
 
-            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val behandlingId = BehandlingRepository(conn).hentMedHistorikk(behandlingReferanse)!!.id()
             val service = konstruerSakstatistikkService(conn)
 
             // Lagre hendelser for behandlingen (OPPRETTET + UNDER_BEHANDLING med endretTid = oppgaveSendtTid)
@@ -632,7 +632,7 @@ class SaksStatistikkServiceTest {
                 ),
             )
 
-            val behandlingId = BehandlingRepository(conn).hent(behandlingReferanse)!!.id()
+            val behandlingId = BehandlingRepository(conn).hentMedHistorikk(behandlingReferanse)!!.id()
             val service = konstruerSakstatistikkService(conn)
 
             // Oppgave-trigget jobb lagrer korrekt tilstand
@@ -731,7 +731,9 @@ class SaksStatistikkServiceTest {
                         identifikator = 1L,
                         avklaringsbehov = Definisjon.AVKLAR_SYKDOM.kode.name,
                         enhet = enhet,
-                        person = requireNotNull(BehandlingRepository(it).hent(behandlingReferanse)).sak.person,
+                        person = requireNotNull(
+                            BehandlingRepository(it).hentMedHistorikk(behandlingReferanse),
+                        ).sak.person,
                         status = Oppgavestatus.OPPRETTET,
                         opprettetTidspunkt = baseTid.plusSeconds(4),
                         behandlingReferanse = BehandlingReferanse(referanse = behandlingReferanse),
