@@ -31,12 +31,6 @@ data class Behandling(
     val opprettetAv: String? = null,
 ) {
     init {
-        require(
-            hendelser.sortedBy { it.hendelsesTidspunkt }
-                .zipWithNext { a, b -> a.hendelsesTidspunkt <= b.hendelsesTidspunkt }
-                .all { it },
-        ) { "Hendelser må være sortert." }
-
         val sisteLøsteAvklaringsbehov = tilstand.sisteLøsteAvklaringsbehov
         val sisteSaksbehandlerSomLøstebehov = tilstand.sisteSaksbehandlerSomLøstebehov
         check(

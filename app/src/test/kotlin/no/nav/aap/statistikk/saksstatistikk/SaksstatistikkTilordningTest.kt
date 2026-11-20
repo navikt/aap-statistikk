@@ -21,6 +21,7 @@ import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDateTime
@@ -132,35 +133,51 @@ class SaksstatistikkTilordningTest {
         assertThat(resultat).isEqualTo(SaksstatistikkTilordning("9999", forventetSaksbehandler))
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        "true,AVKLAR_SYKDOM,4500",
-        "true,AVKLAR_HELSEINSTITUSJON,9999",
-        "false,AVKLAR_SYKDOM,9999",
-    )
-    fun `ventende behandling prioriterer sist løste behov foran gjeldende behov og nyeste oppgave`(
-        venter: Boolean,
-        sistLøsteBehov: Definisjon,
-        forventetEnhet: String,
-    ) {
+    @Test
+    fun `ventende behandling bruker enheten for sist løste behov foran gjeldende behov`() {
         val behandling = grunnbehandling.copy(
             tilstand = grunnbehandling.nåværendeTilstand().copy(
-                sisteLøsteAvklaringsbehov = sistLøsteBehov.tilAvklaringsbehovKode(),
-                venteÅrsak = if (venter) grunnbehandling.nåværendeTilstand().venteÅrsak else null,
+                sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                venteÅrsak = grunnbehandling.nåværendeTilstand().venteÅrsak,
             ),
         )
 
         val resultat = utledSaksstatistikkTilordning(behandling, listOf(snapshot), oppgaver, tidspunkt)
 
-        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(forventetEnhet, null))
+        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(ansvarligEnhetKode = "4500", saksbehandler = null))
     }
 
-    @ParameterizedTest
-    @CsvSource("AVKLAR_SYKDOM,4500", "BESTILL_BREV,KELVIN_AUTOMATISK")
-    fun `snapshot prioriteres foran avslutningsfallback men automatisk enhet går foran snapshot`(
-        behov: Definisjon,
-        forventetEnhet: String,
-    ) {
+    @Test
+    fun `ventende behandling bruker nyeste oppgaveenhet når sist løste behov ikke har en oppgave`() {
+        val behandling = grunnbehandling.copy(
+            tilstand = grunnbehandling.nåværendeTilstand().copy(
+                sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_HELSEINSTITUSJON.tilAvklaringsbehovKode(),
+                venteÅrsak = grunnbehandling.nåværendeTilstand().venteÅrsak,
+            ),
+        )
+
+        val resultat = utledSaksstatistikkTilordning(behandling, listOf(snapshot), oppgaver, tidspunkt)
+
+        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(ansvarligEnhetKode = "9999", saksbehandler = null))
+    }
+
+    @Test
+    fun `behandling som ikke venter bruker enheten for gjeldende behov foran sist løste behov`() {
+        val behandling = grunnbehandling.copy(
+            tilstand = grunnbehandling.nåværendeTilstand().copy(
+                sisteLøsteAvklaringsbehov = Definisjon.AVKLAR_SYKDOM.tilAvklaringsbehovKode(),
+                venteÅrsak = null,
+            ),
+        )
+
+        val resultat = utledSaksstatistikkTilordning(behandling, listOf(snapshot), oppgaver, tidspunkt)
+
+        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(ansvarligEnhetKode = "9999", saksbehandler = null))
+    }
+
+    @Test
+    fun `manuell behandling bruker snapshotenhet foran nyeste oppgaveenhet`() {
+        val behov = Definisjon.AVKLAR_SYKDOM
         val behandling = grunnbehandling.copy(
             hendelser = listOf(
                 hendelse.copy(
@@ -183,6 +200,36 @@ class SaksstatistikkTilordningTest {
 
         val resultat = utledSaksstatistikkTilordning(behandling, listOf(valgtSnapshot), oppgaver, tidspunkt)
 
-        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(forventetEnhet, "Oppgave"))
+        assertThat(resultat).isEqualTo(SaksstatistikkTilordning(ansvarligEnhetKode = "4500", saksbehandler = "Oppgave"))
+    }
+
+    @Test
+    fun `automatisk behandling bruker automatisk enhet selv om snapshot har enhet`() {
+        val behov = Definisjon.BESTILL_BREV
+        val behandling = grunnbehandling.copy(
+            hendelser = listOf(
+                hendelse.copy(
+                    tilstand = hendelse.tilstand.copy(
+                        status = BehandlingStatus.AVSLUTTET,
+                        gjeldendeAvklaringsBehov = behov.tilAvklaringsbehovKode(),
+                    ),
+                ),
+            ),
+            tilstand = grunnbehandling.nåværendeTilstand().copy(
+                gjeldendeAvklaringsBehov = behov.tilAvklaringsbehovKode(),
+            ),
+        )
+        val valgtSnapshot = snapshot.copy(
+            status = BehandlingStatus.AVSLUTTET.name,
+            avklaringsbehov = behov.kode.name,
+            enhet = "4500",
+            saksbehandler = "Oppgave",
+        )
+
+        val resultat = utledSaksstatistikkTilordning(behandling, listOf(valgtSnapshot), oppgaver, tidspunkt)
+
+        assertThat(resultat).isEqualTo(
+            SaksstatistikkTilordning(ansvarligEnhetKode = "KELVIN_AUTOMATISK", saksbehandler = "Oppgave"),
+        )
     }
 }
