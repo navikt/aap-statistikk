@@ -159,6 +159,7 @@ enum class TypeBehandling(val kildeSystem: KildeSystem, val erYtelsesBehandling:
         kildeSystem = KildeSystem.Postmottak,
     ),
     Journalføring(kildeSystem = KildeSystem.Postmottak),
+    Under18(kildeSystem = KildeSystem.Postmottak),
     Oppfølgingsbehandling(kildeSystem = KildeSystem.Behandlingsflyt),
     Aktivitetsplikt(
         kildeSystem = KildeSystem.Behandlingsflyt,

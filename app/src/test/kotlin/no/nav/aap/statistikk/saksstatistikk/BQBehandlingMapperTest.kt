@@ -15,7 +15,6 @@ import no.nav.aap.statistikk.oppgave.Saksbehandler
 import no.nav.aap.statistikk.oppgave.tilOppgave
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -54,7 +53,6 @@ class BQBehandlingMapperTest {
             id = 1L,
             person = person,
             saksnummer = Saksnummer("SAK123"),
-            sakStatus = SakStatus.UTREDES,
             sistOppdatert = LocalDateTime.of(2024, 1, 1, 10, 0),
         )
 

@@ -31,7 +31,7 @@ class HendelsesService(
         val saksnummer = hendelse.saksnummer.let(::Saksnummer)
 
         val sak =
-            sakService.hentEllerSettInnSak(person, saksnummer, hendelse.sakStatus.tilDomene())
+            sakService.hentEllerSettInnSak(person, saksnummer)
 
         val behandlingId = behandlingService.hentEllerLagreBehandling(hendelse, sak).id()
 

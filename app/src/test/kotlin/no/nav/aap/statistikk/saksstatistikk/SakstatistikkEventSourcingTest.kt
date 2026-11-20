@@ -7,7 +7,6 @@ import no.nav.aap.statistikk.enhet.Enhet
 import no.nav.aap.statistikk.oppgave.*
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -370,7 +369,6 @@ class SakstatistikkEventSourcingTest {
             id = 0L,
             saksnummer = Saksnummer("123456"),
             person = Person(no.nav.aap.statistikk.person.Ident("234")),
-            sakStatus = SakStatus.UTREDES,
             sistOppdatert = LocalDateTime.now(),
         ),
         typeBehandling = TypeBehandling.Førstegangsbehandling,

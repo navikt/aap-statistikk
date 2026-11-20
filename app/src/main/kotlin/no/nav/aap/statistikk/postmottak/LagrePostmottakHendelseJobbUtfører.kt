@@ -74,6 +74,7 @@ fun TypeBehandling.tilDomene(): no.nav.aap.statistikk.behandling.TypeBehandling 
     TypeBehandling.Fordeling -> no.nav.aap.statistikk.behandling.TypeBehandling.Fordeling
     TypeBehandling.DokumentHåndtering -> no.nav.aap.statistikk.behandling.TypeBehandling.Dokumenthåndtering
     TypeBehandling.Journalføring -> no.nav.aap.statistikk.behandling.TypeBehandling.Journalføring
+    TypeBehandling.Under18 -> no.nav.aap.statistikk.behandling.TypeBehandling.Under18
 }
 
 /**

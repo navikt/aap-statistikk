@@ -13,7 +13,6 @@ import no.nav.aap.statistikk.behandling.tilAvklaringsbehovKode
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -34,7 +33,6 @@ class LagreSakinfoTilBigQueryJobbUtførerTest {
                 id = 1L,
                 saksnummer = testSaksnummer,
                 person = Person(Ident("12345678901"), id = 1L),
-                sakStatus = SakStatus.UTREDES,
                 sistOppdatert = LocalDateTime.of(2024, 1, 1, 10, 0),
             ),
             typeBehandling = TypeBehandling.Førstegangsbehandling,

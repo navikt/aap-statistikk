@@ -1,10 +1,10 @@
 [versions]
-komponenter = "2.0.185"
-tilgang = "1.0.243"
-behandlingsflyt = "0.0.669"
-oppgave = "0.0.215"
-utbetaling = "0.0.136"
-postmottak = "6.0.10"
+komponenter = "3.0.3"
+tilgang = "1.0.245"
+behandlingsflyt = "0.0.680"
+oppgave = "0.0.222"
+utbetaling = "0.0.143"
+postmottak = "6.0.15"
 
 detekt = "2.0.0-alpha.6"
 googleCloudBigquery = "2.71.0"

@@ -13,12 +13,11 @@ import no.nav.aap.statistikk.behandling.tilDomene
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class BQBehandlingTilstandsvalgTest {
     private val tidspunkt = LocalDateTime.of(2026, 11, 19, 10, 0)
@@ -211,7 +210,6 @@ class BQBehandlingTilstandsvalgTest {
         sak = Sak(
             saksnummer = Saksnummer("SAK123"),
             person = Person(ident = Ident("0")),
-            sakStatus = SakStatus.UTREDES,
             sistOppdatert = tidspunkt,
         ),
         typeBehandling = TypeBehandling.Førstegangsbehandling,

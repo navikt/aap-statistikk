@@ -11,7 +11,6 @@ import no.nav.aap.statistikk.person.PersonService
 import no.nav.aap.statistikk.postgresRepositoryRegistry
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.fakes.FakeBehandlingRepository
@@ -378,7 +377,6 @@ class LagreOppgaveJobbUtførerTest {
         val sak = Sak(
             saksnummer = Saksnummer("123"),
             person = personUtenId.medId(id),
-            sakStatus = SakStatus.OPPRETTET,
             sistOppdatert = LocalDateTime.now(),
         )
         val sakId = SakRepositoryImpl(it).settInnSak(sak)

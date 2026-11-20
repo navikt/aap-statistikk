@@ -5,7 +5,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.sak.Sak
 import no.nav.aap.statistikk.sak.SakRepositoryImpl
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.testutils.Postgres
 import no.nav.aap.statistikk.testutils.builders.opprettTestPerson
@@ -213,7 +212,6 @@ class BehandlingTilstandsvalgRepositoryTest {
         val sak = Sak(
             saksnummer = Saksnummer("SAK123"),
             person = person,
-            sakStatus = SakStatus.UTREDES,
             sistOppdatert = tidspunkt,
         )
         val lagretSak = dataSource.transaction {

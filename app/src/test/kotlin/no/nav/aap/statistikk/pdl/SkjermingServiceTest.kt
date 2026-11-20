@@ -1,12 +1,16 @@
 package no.nav.aap.statistikk.pdl
 
-import no.nav.aap.statistikk.behandling.*
+import no.nav.aap.statistikk.behandling.Behandling
+import no.nav.aap.statistikk.behandling.BehandlingStatus
+import no.nav.aap.statistikk.behandling.BehandlingTilstand
+import no.nav.aap.statistikk.behandling.SøknadsFormat
+import no.nav.aap.statistikk.behandling.TypeBehandling
+import no.nav.aap.statistikk.behandling.Versjon
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlGateway
 import no.nav.aap.statistikk.integrasjoner.pdl.PdlIdent
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import no.nav.aap.statistikk.skjerming.SkjermingService
 import no.nav.aap.statistikk.testutils.fakes.FakePdlGateway
@@ -24,10 +28,7 @@ class SkjermingServiceTest {
         referanse = UUID.randomUUID(),
         sak = Sak(
             saksnummer = Saksnummer("234"),
-            person = Person(
-                ident = Ident("130289"),
-            ),
-            sakStatus = SakStatus.LØPENDE,
+            person = Person(ident = Ident("130289")),
             sistOppdatert = LocalDateTime.now(),
         ),
         typeBehandling = TypeBehandling.Førstegangsbehandling,

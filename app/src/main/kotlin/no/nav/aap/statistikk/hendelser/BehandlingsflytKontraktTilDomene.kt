@@ -7,18 +7,77 @@ import no.nav.aap.behandlingsflyt.kontrakt.statistikk.Vurderingsbehov
 import no.nav.aap.statistikk.behandling.BehandlingStatus
 import no.nav.aap.statistikk.behandling.SøknadsFormat
 import no.nav.aap.statistikk.behandling.TypeBehandling
-import no.nav.aap.statistikk.behandling.Vurderingsbehov.*
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.AKTIVITETSMELDING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.AKTIVITETSPLIKTBEHANDLING_AVBRUTT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.AKTIVITETSPLIKT_11_7
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.AKTIVITETSPLIKT_11_9
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.AVVIST_LEGEERKLÆRING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.AVVIST_SOKNAD_OM_AAP_UNDER_OPPHOLD_I_UTLANDET
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.BARNETILLEGG
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.BARNETILLEGG_SATS_REGULERING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.BRUKER_TILBAKE_I_ARBEID
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.DIALOGMELDING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.DØDSFALL_BARN
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.DØDSFALL_BRUKER
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.EFFEKTUER_AKTIVITETSPLIKT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.EFFEKTUER_AKTIVITETSPLIKT_11_9
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.ETABLERING_EGEN_VIRKSOMHET
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.FASTSETT_ARBEIDSEVNE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.FERIE_I_SYKEPENGEPERIODE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.FORUTGAENDE_MEDLEMSKAP
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.FRITAK_MELDEPLIKT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.G_REGULERING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.HELHETLIG_VURDERING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.INSTITUSJONSOPPHOLD
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.INSTITUSJONSOPPHOLD_HELSEINSTITUSJON
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.INSTITUSJONSOPPHOLD_SONING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.KLAGE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.KLAGE_TRUKKET
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.LEGEERKLÆRING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.LOVVALG_OG_MEDLEMSKAP
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.MELDEKORT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.MIGRERING_FRA_ARENA
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.MIGRER_RETTIGHETSPERIODE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.MOTTATT_KABAL_HENDELSE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.OPPFØLGINGSOPPGAVE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.OPPHOLDSKRAV
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.OVERGANG_ARBEID
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.OVERGANG_UFORE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.OVERGANG_UFORE_AUTOMATISK_STANS
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REFUSJONSKRAV
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDERING_AVBRUTT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_BEREGNING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_INNTEKTSBORTFALL
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_LOVVALG
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_MANUELL_INNTEKT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_MEDLEMSSKAP
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_MELDEPLIKT_RIMELIG_GRUNN
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SAMORDNING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SAMORDNING_ANDRE_FOLKETRYGDYTELSER
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SAMORDNING_ANDRE_STATLIGE_YTELSER
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SAMORDNING_ARBEIDSGIVER
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SAMORDNING_BARNEPENSJON
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SAMORDNING_TJENESTEPENSJON
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SAMORDNING_UFØRE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_STUDENT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SYKEPENGEERSTATNING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_SYKESTIPEND
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.REVURDER_YRKESSKADE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.SAMORDNING_OG_AVREGNING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.SYKDOM_ARBEVNE_BEHOV_FOR_BISTAND
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.SØKNAD
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.SØKNAD_TRUKKET
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.UTENLANDSOPPHOLD_FOR_SOKNADSTIDSPUNKT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.UTVID_VEDTAKSLENGDE
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.VEDTAKSLENGDE_MANUELT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.VURDER_ARBEIDSOPPTRAPPING
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.VURDER_AVSLAG_11_27
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.VURDER_FRITAK_MELDEPLIKT
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.VURDER_KRAV
+import no.nav.aap.statistikk.behandling.Vurderingsbehov.VURDER_RETTIGHETSPERIODE
 import no.nav.aap.statistikk.meldekort.ArbeidIPerioder
 import no.nav.aap.statistikk.meldekort.Meldekort
 import no.nav.aap.verdityper.dokument.Kanal
-import no.nav.aap.behandlingsflyt.kontrakt.sak.Status as SakStatus
-
-internal fun SakStatus.tilDomene(): no.nav.aap.statistikk.sak.SakStatus = when (this) {
-    SakStatus.OPPRETTET -> no.nav.aap.statistikk.sak.SakStatus.OPPRETTET
-    SakStatus.UTREDES -> no.nav.aap.statistikk.sak.SakStatus.UTREDES
-    SakStatus.LØPENDE -> no.nav.aap.statistikk.sak.SakStatus.LØPENDE
-    SakStatus.AVSLUTTET -> no.nav.aap.statistikk.sak.SakStatus.AVSLUTTET
-}
 
 fun no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.tilDomene(): TypeBehandling = when (this) {
     no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Førstegangsbehandling -> TypeBehandling.Førstegangsbehandling

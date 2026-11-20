@@ -5,7 +5,6 @@ import no.nav.aap.statistikk.avsluttetbehandling.ResultatKode
 import no.nav.aap.statistikk.person.Ident
 import no.nav.aap.statistikk.person.Person
 import no.nav.aap.statistikk.sak.Sak
-import no.nav.aap.statistikk.sak.SakStatus
 import no.nav.aap.statistikk.sak.Saksnummer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -18,7 +17,6 @@ class BehandlingTilstandTest {
     private val sak = Sak(
         saksnummer = Saksnummer("SAK123"),
         person = Person(ident = Ident("0")),
-        sakStatus = SakStatus.UTREDES,
         sistOppdatert = tidspunkt,
     )
 

@@ -28,7 +28,7 @@ class ApplicationTest {
             @Language("JSON")
             val body = """{
   "saksnummer": "123456789",
-  "sakStatus": "OPPRETTET",
+  "sakStatus": "UTREDES",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
   "behandlingOpprettetTidspunkt": [
     2024,
@@ -78,7 +78,7 @@ class ApplicationTest {
         @Language("JSON")
         val payload = """{
   "saksnummer": "123456789",
-  "sakStatus": "OPPRETTET",
+  "sakStatus": "UTREDES",
   "behandlingReferanse": "f14dfc5a-9536-4050-a10b-ebe554ecfdd2",
   "behandlingOpprettetTidspunkt": [
     2024,
