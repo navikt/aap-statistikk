@@ -136,7 +136,7 @@ class HendelsesServiceTest {
             ),
         )
 
-        val uthentet = behandlingRepository.hent(behandlingReferanse)
+        val uthentet = behandlingRepository.hentMedHistorikk(behandlingReferanse)
         assertThat(uthentet).isNotNull()
         assertThat(uthentet?.årsakTilOpprettelse).isEqualTo("SØKNAD")
         assertThat(uthentet!!.relatertBehandlingId).isNotNull()

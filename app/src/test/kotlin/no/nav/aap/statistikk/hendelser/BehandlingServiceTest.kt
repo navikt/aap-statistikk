@@ -220,17 +220,17 @@ class BehandlingServiceTest {
 
             override fun invaliderOgLagreNyHistorikk(behandling: Behandling) = Unit
 
-            override fun hent(referanse: UUID): Behandling? {
-                error("Skal ikke bruke ulåst hent(referanse)")
+            override fun hentMedHistorikk(referanse: UUID): Behandling? {
+                error("Skal ikke bruke ulåst hentMedHistorikk(referanse)")
             }
 
-            override fun hentEllerNull(id: BehandlingId): Behandling? = null
+            override fun hentUtenHistorikkEllerNull(id: BehandlingId): Behandling? = null
 
-            override fun hent(id: BehandlingId): Behandling = eksisterende
+            override fun hentMedHistorikk(id: BehandlingId): Behandling = eksisterende
 
-            override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = eksisterende
+            override fun hentMedHistorikkForUpdate(id: BehandlingId): Behandling = eksisterende
 
-            override fun hentBehandlingForUpdate(referanse: UUID): Behandling? {
+            override fun hentMedHistorikkForUpdate(referanse: UUID): Behandling? {
                 lockHentKalt = true
                 return eksisterende
             }
@@ -262,7 +262,7 @@ class BehandlingServiceTest {
             sak,
         )
 
-        assertThat(repository.hent(referanse)?.årsaker)
+        assertThat(repository.hentMedHistorikk(referanse)?.årsaker)
             .containsExactly(Vurderingsbehov.SØKNAD, Vurderingsbehov.MELDEKORT)
     }
 
@@ -286,17 +286,17 @@ class BehandlingServiceTest {
 
             override fun invaliderOgLagreNyHistorikk(behandling: Behandling) = Unit
 
-            override fun hent(referanse: UUID): Behandling? = null
+            override fun hentMedHistorikk(referanse: UUID): Behandling? = null
 
-            override fun hentEllerNull(id: BehandlingId): Behandling? = null
+            override fun hentUtenHistorikkEllerNull(id: BehandlingId): Behandling? = null
 
-            override fun hent(id: BehandlingId): Behandling = error("Skal ikke hente behandling")
+            override fun hentMedHistorikk(id: BehandlingId): Behandling = error("Skal ikke hente behandling")
 
-            override fun hentBehandlingForUpdate(id: BehandlingId): Behandling = error(
+            override fun hentMedHistorikkForUpdate(id: BehandlingId): Behandling = error(
                 "Skal ikke hente behandling med id-lock",
             )
 
-            override fun hentBehandlingForUpdate(referanse: UUID): Behandling? = null
+            override fun hentMedHistorikkForUpdate(referanse: UUID): Behandling? = null
         }
 
         val behandlingService = BehandlingService(repository, SkjermingService(FakePdlGateway(emptyMap())))

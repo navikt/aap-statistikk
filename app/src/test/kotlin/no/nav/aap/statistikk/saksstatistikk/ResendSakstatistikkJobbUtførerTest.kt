@@ -14,7 +14,7 @@ class ResendSakstatistikkJobbUtførerTest {
     @Test
     fun `start jobb`(@Postgres dataSource: DataSource) {
         val ref = SaksStatistikkServiceTest.lagreHendelser(dataSource)
-        val behandlingId = dataSource.transaction { BehandlingRepository(it).hent(ref) }?.id!!
+        val behandlingId = dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(ref) }?.id!!
 
         val input = JobbInput(
             jobb = ResendSakstatistikkJobb(),

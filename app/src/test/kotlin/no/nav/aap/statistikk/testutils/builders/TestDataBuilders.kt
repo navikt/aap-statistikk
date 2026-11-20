@@ -138,7 +138,7 @@ fun opprettTestBehandling(
     )
     return dataSource.transaction {
         val repo = BehandlingRepository(it, clock = clock)
-        val uthentet = repo.hent(referanse)
+        val uthentet = repo.hentMedHistorikk(referanse)
         val id = if (uthentet != null) {
             repo.oppdaterBehandling(behandling.copy(id = uthentet.id))
             uthentet.id

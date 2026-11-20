@@ -10,21 +10,35 @@ interface IBehandlingRepository : Repository {
 
     fun invaliderOgLagreNyHistorikk(behandling: Behandling)
 
-    fun hent(referanse: UUID): Behandling?
-
-    fun hentEllerNull(id: BehandlingId): Behandling?
-
-    fun hent(id: BehandlingId): Behandling
-
     /**
-     * Henter behandling med pessimistisk lås (FOR UPDATE).
-     * Blokkerer andre transaksjoner fra å endre raden før transaksjonen er ferdig.
+     * Henter gjeldende behandling med alle aktive historikkhendelser.
+     * Returnerer null hvis behandlingen ikke finnes.
      */
-    fun hentBehandlingForUpdate(id: BehandlingId): Behandling
+    fun hentMedHistorikk(referanse: UUID): Behandling?
 
     /**
-     * Henter behandling på referanse med pessimistisk lås (FOR UPDATE).
+     * Henter gjeldende behandling uten å laste historikken.
+     * Tom hendelsesliste betyr her at historikken ikke er lastet, ikke at den mangler.
+     * Returnerer null hvis behandlingen ikke finnes.
+     */
+    fun hentUtenHistorikkEllerNull(id: BehandlingId): Behandling?
+
+    /**
+     * Henter gjeldende behandling med alle aktive historikkhendelser.
+     * Feiler hvis behandlingen ikke finnes.
+     */
+    fun hentMedHistorikk(id: BehandlingId): Behandling
+
+    /**
+     * Henter gjeldende behandling med alle aktive historikkhendelser og pessimistisk lås (FOR UPDATE).
+     * Blokkerer andre transaksjoner fra å endre raden før transaksjonen er ferdig.
+     * Feiler hvis behandlingen ikke finnes.
+     */
+    fun hentMedHistorikkForUpdate(id: BehandlingId): Behandling
+
+    /**
+     * Henter gjeldende behandling på referanse med alle aktive historikkhendelser og pessimistisk lås (FOR UPDATE).
      * Returnerer null hvis behandling ikke finnes.
      */
-    fun hentBehandlingForUpdate(referanse: UUID): Behandling?
+    fun hentMedHistorikkForUpdate(referanse: UUID): Behandling?
 }

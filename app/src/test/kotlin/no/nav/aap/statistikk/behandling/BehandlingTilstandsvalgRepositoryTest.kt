@@ -80,7 +80,7 @@ class BehandlingTilstandsvalgRepositoryTest {
             tilstand = behandling.nåværendeTilstand().copy(status = BehandlingStatus.AVSLUTTET),
         )
 
-        assertThat(dataSource.transaction { BehandlingRepository(it).hent(id) })
+        assertThat(dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(id) })
             .usingRecursiveComparison().ignoringFields("snapShotId").isEqualTo(forventet)
         val lagretUtbetalingsid = dataSource.transaction {
             it.queryFirst("SELECT utbetaling_id FROM behandling_historikk WHERE behandling_id = ?") {
@@ -129,7 +129,7 @@ class BehandlingTilstandsvalgRepositoryTest {
 
         val gjeldendeOgHistorikk = dataSource.transaction {
             val repository = BehandlingRepository(it)
-            listOf(repository.hentEllerNull(id), repository.hent(id))
+            listOf(repository.hentUtenHistorikkEllerNull(id), repository.hentMedHistorikk(id))
         }
 
         assertThat(gjeldendeOgHistorikk).usingRecursiveComparison().ignoringFields("snapShotId")
@@ -165,7 +165,7 @@ class BehandlingTilstandsvalgRepositoryTest {
             andre.copy(hendelser = listOf(førsteHendelse, andreHendelse))
         }
 
-        assertThat(dataSource.transaction { BehandlingRepository(it).hent(id) })
+        assertThat(dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(id) })
             .usingRecursiveComparison().ignoringFields("snapShotId").isEqualTo(forventet)
     }
 
@@ -204,7 +204,7 @@ class BehandlingTilstandsvalgRepositoryTest {
             tilstand = behandling.nåværendeTilstand().copy(status = BehandlingStatus.AVSLUTTET),
         )
 
-        assertThat(dataSource.transaction { BehandlingRepository(it).hent(id) })
+        assertThat(dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(id) })
             .usingRecursiveComparison().ignoringFields("snapShotId").isEqualTo(forventet)
     }
 

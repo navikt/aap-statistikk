@@ -31,7 +31,7 @@ class LagreOppgaveJobbUtfører(
             oppgaveHistorikkLagrer.lagre(oppgave)
 
             if (oppgave.behandlingReferanse != null) {
-                behandlingRepository.hent(oppgave.behandlingReferanse.referanse)?.let { behandling ->
+                behandlingRepository.hentMedHistorikk(oppgave.behandlingReferanse.referanse)?.let { behandling ->
                     if (behandling.typeBehandling in Konstanter.interessanteBehandlingstyper) {
                         val referanseTidspunkt = oppgave.hendelser.maxOfOrNull { it.sendtTid }
                             ?: behandling.oppdatertTidspunkt()

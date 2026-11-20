@@ -261,7 +261,7 @@ class MottaStatistikkTest {
             motor.kjørJobber()
 
             val (behandling, bqBehandlinger) = dataSource.transaction {
-                val behandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)!!
+                val behandling = BehandlingRepository(it).hentMedHistorikk(hendelse.behandlingReferanse)!!
                 Pair(
                     behandling,
                     it.provider().provide<SakstatistikkRepository>()
@@ -343,7 +343,7 @@ class MottaStatistikkTest {
 
             val bqBehandlinger = dataSource.transaction {
                 val behandling =
-                    BehandlingRepository(it).hent(meldekorthendelse.behandlingReferanse)!!
+                    BehandlingRepository(it).hentMedHistorikk(meldekorthendelse.behandlingReferanse)!!
 
                 it.provider().provide<SakstatistikkRepository>()
                     .hentAlleHendelserPåBehandling(behandling.referanse)
@@ -399,7 +399,7 @@ class MottaStatistikkTest {
                 it,
             )
             val uthentetSak = hendelsesRepository.hentSak(hendelse.saksnummer.let(::Saksnummer))
-            val uthentetBehandling = BehandlingRepository(it).hent(hendelse.behandlingReferanse)
+            val uthentetBehandling = BehandlingRepository(it).hentMedHistorikk(hendelse.behandlingReferanse)
             Pair(uthentetSak, uthentetBehandling)
         }
 

@@ -40,7 +40,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
         val payload = lesPayload(input)
         val behandlingId = payload.behandlingId
 
-        val behandling = behandlingRepository.hent(behandlingId)
+        val behandling = behandlingRepository.hentMedHistorikk(behandlingId)
 
         LoggingKontekst(behandling.referanse).use {
             utførJobb(payload)
@@ -90,7 +90,7 @@ class LagreSakinfoTilBigQueryJobbUtfører(
                         delay,
                     )
                 } else {
-                    val behandling = behandlingRepository.hent(behandlingId)
+                    val behandling = behandlingRepository.hentMedHistorikk(behandlingId)
                     error(
                         "Enhet mangler fortsatt etter ${enhetRetryConfig.maxRetries} forsøk " +
                             "for behandling ${resultat.behandlingId}, " +

@@ -34,7 +34,7 @@ class MotorJobbAppender : JobbAppender {
         val behandlingId = payload.behandlingId
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
-                .hent(behandlingId)
+                .hentMedHistorikk(behandlingId)
         if (behandling.typeBehandling !in Konstanter.interessanteBehandlingstyper) {
             log.info(
                 "Prøver å legge til uinteressant behandling til saksstatikk. Ignorerer. Behandling: $behandlingId. Referanse: ${behandling.referanse}",
@@ -57,7 +57,7 @@ class MotorJobbAppender : JobbAppender {
     ) {
         val behandling =
             provider.provide<IBehandlingRepository>()
-                .hent(behandlingId)
+                .hentMedHistorikk(behandlingId)
         leggTil(
             provider,
             JobbInput(lagreAvsluttetBehandlingTilBigQueryJobb).medPayload(
@@ -72,7 +72,7 @@ class MotorJobbAppender : JobbAppender {
         log.info("Starter resending-jobb. BehandlingId: $behandlingId")
         val behandling =
             repositoryProvider.provide<IBehandlingRepository>()
-                .hent(behandlingId)
+                .hentMedHistorikk(behandlingId)
         leggTil(
             repositoryProvider,
             JobbInput(ResendSakstatistikkJobb()).medPayload(behandlingId)

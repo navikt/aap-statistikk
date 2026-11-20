@@ -97,7 +97,7 @@ class BehandlingRepositoryTest {
             BehandlingRepository(it, clock = clock).opprettBehandling(behandling)
         }
 
-        val uthentet = dataSource.transaction { BehandlingRepository(it).hent(referanse) }
+        val uthentet = dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(referanse) }
 
         assertThat(uthentet)
             .usingRecursiveComparison()
@@ -118,7 +118,7 @@ class BehandlingRepositoryTest {
             )
         }
 
-        val uthentet2 = dataSource.transaction { BehandlingRepository(it).hent(uthentet!!.referanse) }
+        val uthentet2 = dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(uthentet!!.referanse) }
 
         assertThat(uthentet2!!.hendelser).isSortedAccordingTo { c1, c2 ->
             c1.hendelsesTidspunkt.compareTo(
@@ -175,9 +175,9 @@ class BehandlingRepositoryTest {
         }
 
         dataSource.transaction {
-            val førsteUthentet = BehandlingRepository(it).hent(referanse)
+            val førsteUthentet = BehandlingRepository(it).hentMedHistorikk(referanse)
             assertThat(førsteUthentet).isNotNull()
-            val andreUthentet = BehandlingRepository(it).hent(referanse2)
+            val andreUthentet = BehandlingRepository(it).hentMedHistorikk(referanse2)
             assertThat(andreUthentet).isNotNull()
             assertThat(
                 førsteUthentet?.nåværendeTilstand()?.versjon,
@@ -230,7 +230,7 @@ class BehandlingRepositoryTest {
         }
 
         dataSource.transaction {
-            assertThat(BehandlingRepository(it).hent(referanse)).isNotNull()
+            assertThat(BehandlingRepository(it).hentMedHistorikk(referanse)).isNotNull()
         }
     }
 
@@ -318,7 +318,7 @@ class BehandlingRepositoryTest {
         // (t2 -> UTREDES), selv om raden med t1 (AVSLUTTET) ble skrevet sist.
         assertThat(gjeldendeStatuser).containsExactly(BehandlingStatus.UTREDES.name)
 
-        val uthentet = dataSource.transaction { BehandlingRepository(it).hent(referanse) }
+        val uthentet = dataSource.transaction { BehandlingRepository(it).hentMedHistorikk(referanse) }
         assertThat(uthentet!!.hendelser).hasSize(3)
     }
 
@@ -471,7 +471,7 @@ class BehandlingRepositoryTest {
         }
 
         val uthentet =
-            dataSource.transaction { BehandlingRepository(it, littSenereClock).hent(behandlingId) }
+            dataSource.transaction { BehandlingRepository(it, littSenereClock).hentMedHistorikk(behandlingId) }
 
         val gjenoppbyggingsClock = Clock.offset(littSenereClock, Duration.ofDays(1))
         dataSource.transaction {
@@ -479,7 +479,7 @@ class BehandlingRepositoryTest {
         }
 
         val uthentet2 =
-            dataSource.transaction { BehandlingRepository(it, littSenereClock).hent(behandlingId) }
+            dataSource.transaction { BehandlingRepository(it, littSenereClock).hentMedHistorikk(behandlingId) }
 
         assertThat(uthentet2)
             .usingRecursiveComparison()
