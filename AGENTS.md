@@ -120,6 +120,10 @@ This script processes the listed JSON fixtures (e.g. `hendelser_public_jobb.json
 
 To add a new field transformation, implement the `NodeTransform` interface and add it to the `behandlingTransforms` list. See existing transforms (`ÅrsakTilOpprettelseTransform`, `PerioderMedArbeidsopptrappingTransform`, `TilkjentYtelseTransform`) for examples.
 
+### Personal Identifiers in BigQuery
+
+Writing personal identifiers (`pid`) to this application's BigQuery datasets is intentional and part of its statistics purpose. Do not flag this data flow as a security issue solely because it contains `pid`, or remove, mask, or hash these identifiers for that reason. This does not permit exposing identifiers in logs or sending them to unrelated destinations; access controls and other privacy requirements still apply.
+
 ### BigQuery Views
 
 When adding a new BigQuery view under `.nais/bigquery/`:
