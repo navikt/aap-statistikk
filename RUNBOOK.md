@@ -4,9 +4,11 @@
 
 Kontekst: https://nav-it.slack.com/archives/C07NKPFFELT/p1772445387956509
 
-I saker som hadde blitt stoppet eller hadde perioder uten rett, ble det noen ganger ikke sendt diagnose til statistikk. I tillegg lagret vi ikke diagnose for studenter.
+I saker som hadde blitt stoppet eller hadde perioder uten rett, ble det noen ganger ikke sendt diagnose til statistikk.
+I tillegg lagret vi ikke diagnose for studenter.
 
-For å unngå hull i ble det i de tilfellene vi hadde data etterfylt manuelt (siden det var snakk om kun ca 12 saker). Her er en insert som ble brukt:
+For å unngå hull i ble det i de tilfellene vi hadde data etterfylt manuelt (siden det var snakk om kun ca 12 saker). Her
+er en insert som ble brukt:
 
 ```sql
 insert
@@ -73,7 +75,8 @@ from (with per_sak as (select sak_id,
 
 ## Krasj pga manglende enhet
 
-Jobber til saksstatistikk krasjer om den ikke klarer å utlede enhet. Noen ganger skjer dette pga treghet i oppgave, og rekjøring burde fikse problemet.
+Jobber til saksstatistikk krasjer om den ikke klarer å utlede enhet. Noen ganger skjer dette pga treghet i oppgave, og
+rekjøring burde fikse problemet.
 
 Andre ganger klarer den ikke utlede faktisk enhet, og da burde det debugges.
 
@@ -84,8 +87,8 @@ java.lang.IllegalStateException: Enhet mangler fortsatt etter 3 forsøk for beha
 	at no.nav.aap.statistikk.saksstatistikk.LagreSakinfoTilBigQueryJobbUtfører.utførJobb(LagreSakinfoTilBigQueryJobb.kt:122)
 ```
 
-
-Nå vil jeg undersøke `oppgave_hendelser`-tabellen i statistikk-appen for å se om vi har noen oppgaver med dette avklaringsbehovet.
+Nå vil jeg undersøke `oppgave_hendelser`-tabellen i statistikk-appen for å se om vi har noen oppgaver med dette
+avklaringsbehovet.
 
 Først finne behandlingsreferanse og saksnummer:
 
@@ -93,7 +96,7 @@ Først finne behandlingsreferanse og saksnummer:
 select *
 from behandling b
          join behandling_referanse br on b.referanse_id = br.id
-join sak s on b.sak_id = s.id
+         join sak s on b.sak_id = s.id
 where b.id = 79911;
 ```
 
@@ -104,31 +107,31 @@ from oppgave_hendelser
 where behandling_referanse = 'd3c342c9-8952-4490-bbb7-c637dd4d773b'
 ```
 
-Her var det ingen! Så da åpnet jeg Paw Patrol og fant ut at det var endel jobber på denne som krasjet i behandlingsflyt. Jeg rekjørte dem, og rekjørte deretter i statistikk. Da løste dette seg. 
+Her var det ingen! Så da åpnet jeg Paw Patrol og fant ut at det var endel jobber på denne som krasjet i behandlingsflyt.
+Jeg rekjørte dem, og rekjørte deretter i statistikk. Da løste dette seg.
 
 ## Finne eldste åpne behandlinger
 
 BigQuery-spørring for å finne de `n` elste behandlingene.
 
 ```sql
-WITH
-  siste_melding AS (
-    SELECT
-      *,
-      row_number()
-        OVER (PARTITION BY behandling_uuid ORDER BY endretTid DESC) AS siste
-    FROM `aap-prod-9adc.saksstatistikk.view_gjeldende_hendelser_saksstatistikk`
-  )
+WITH siste_melding AS (SELECT *,
+                              row_number()
+                              OVER (PARTITION BY behandling_uuid ORDER BY endretTid DESC) AS siste
+                       FROM ` aap-prod-9 adc.saksstatistikk.view_gjeldende_hendelser_saksstatistikk `)
 SELECT *
 FROM siste_melding
-WHERE siste = 1 AND behandling_status != 'AVSLUTTET' and behandling_status != 'IVERKSETTES'
+WHERE siste = 1
+  AND behandling_status != 'AVSLUTTET'
+  and behandling_status != 'IVERKSETTES'
 ORDER BY endretTid ASC
 limit 50
 ```
 
 ## Fikse feil i `aarsaker_til_behandling`
 
-Pga feil mapping (se [commit](https://github.com/navikt/aap-statistikk/commit/381cd9c6ec9219da0b4819c0416cb5621545c40f)) ble det lagret feil vurderingsbehov på behandlinger.
+Pga feil mapping (se [commit](https://github.com/navikt/aap-statistikk/commit/381cd9c6ec9219da0b4819c0416cb5621545c40f))
+ble det lagret feil vurderingsbehov på behandlinger.
 
 Disse ble identifisert og fikset slik
 
@@ -140,6 +143,30 @@ where aarsak_til_opprettelse = 'FRITAK_MELDEPLIKT'
   and aarsaker_til_behandling && ARRAY ['MELDEKORT']::varchar[];
 ```
 
-Konsekvensen var forvirring hos Team Spenn vedr. hvilke behandlinger man kan forvente at skal ha meldekort koblet til seg.
+Konsekvensen var forvirring hos Team Spenn vedr. hvilke behandlinger man kan forvente at skal ha meldekort koblet til
+seg.
 
 I tillegg ble det gitt en liste med saksnumre som var mappet feil, disse ble manuelt fikset ved å sjekke i Paw Patrol.
+
+## Etterfylle null-verdier på utenlandssaker
+
+Den 27/11-26 fikk vi vite at før Team Sak skulle gjøre sin last, kunne vi gjøre oppdateringer uten å resende på
+vanligvis, altså gjøre rene updates. Dette etterfyller tidligere sendinger slik at alle behandlinger har `sak_utland`
+-feltet.
+
+```sql
+select sak_utland, count(*)
+from saksstatistikk
+group by sak_utland
+
+select ansvarlig_enhet_kode, count(*)
+from saksstatistikk
+where sak_utland = 'UTLAND'
+group by ansvarlig_enhet_kode
+
+update saksstatistikk
+set sak_utland = case
+                     when ansvarlig_enhet_kode in ('0393', '4402') then 'UTLAND'
+                     else 'NASJONAL' end
+where sak_utland is null;
+```
