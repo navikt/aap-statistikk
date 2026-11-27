@@ -88,6 +88,7 @@ fun no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.tilDomene(): T
     no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.OppfølgingsBehandling -> TypeBehandling.Oppfølgingsbehandling
     no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Aktivitetsplikt -> TypeBehandling.Aktivitetsplikt
     no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Aktivitetsplikt11_9 -> TypeBehandling.Aktivitetsplikt11_9
+    no.nav.aap.behandlingsflyt.kontrakt.behandling.TypeBehandling.Utenlandsopphold -> TypeBehandling.Utenlandsopphold
 }
 
 fun Status.tilDomene(): BehandlingStatus = when (this) {
@@ -194,4 +195,5 @@ fun Vurderingsbehov.tilDomene(): no.nav.aap.statistikk.behandling.Vurderingsbeho
     Vurderingsbehov.FERIE_I_SYKEPENGEPERIODE -> FERIE_I_SYKEPENGEPERIODE
     Vurderingsbehov.MIGRERING_FRA_ARENA -> MIGRERING_FRA_ARENA
     Vurderingsbehov.AVVIST_SOKNAD_OM_AAP_UNDER_OPPHOLD_I_UTLANDET -> AVVIST_SOKNAD_OM_AAP_UNDER_OPPHOLD_I_UTLANDET
+    Vurderingsbehov.SØKNAD_UTENLANDSOPPHOLD -> SØKNAD_UTENLANDSOPPHOLD
 }

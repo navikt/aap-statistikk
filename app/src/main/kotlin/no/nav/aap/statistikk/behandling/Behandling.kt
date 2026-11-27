@@ -168,6 +168,8 @@ enum class TypeBehandling(val kildeSystem: KildeSystem, val erYtelsesBehandling:
 
     @Suppress("EnumEntryName")
     Aktivitetsplikt11_9(kildeSystem = KildeSystem.Behandlingsflyt),
+
+    Utenlandsopphold(kildeSystem = KildeSystem.Behandlingsflyt),
 }
 
 @Deprecated("Når aarsak_til_opprettelse finnes for alle nye behandlinger, slett denne.")

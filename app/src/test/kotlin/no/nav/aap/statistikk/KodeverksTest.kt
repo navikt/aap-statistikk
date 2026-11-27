@@ -78,6 +78,7 @@ class KodeverksTest {
             "SvarFraAndreinstans",
             "Aktivitetsplikt",
             "Aktivitetsplikt11_9",
+            "Utenlandsopphold",
         )
     }
 
